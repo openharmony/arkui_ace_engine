@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 config("container_scope_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "$ace_root/frameworks" ]
+  include_dirs = [
+    "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
+  ]
 }
 
 ohos_shared_library("ace_container_scope") {
@@ -56,7 +59,7 @@ template("ace_core_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     platform = invoker.platform
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
 
     if (ace_engine_feature_enable_split_mode &&
         defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
@@ -452,6 +455,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
     deps += [
@@ -880,7 +884,7 @@ template("ace_core_ng_source_set") {
       # text
       "text/text_emoji_processor.cpp",
     ]
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
     if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
@@ -954,6 +958,7 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
     if (defined(config.use_components_lib) && config.use_components_lib) {

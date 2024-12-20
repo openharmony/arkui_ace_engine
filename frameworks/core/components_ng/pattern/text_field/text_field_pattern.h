@@ -161,7 +161,8 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
-    SYSTEM
+    SYSTEM,
+    DRAG_ENTER
 };
 
 
@@ -191,6 +192,12 @@ struct TouchAndMoveCaretState {
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
     int32_t touchFingerId = -1;
+};
+
+struct FloatingCaretState {
+    bool FloatingCursorVisible = false;
+    bool ShowOriginCursor = false;
+    Color OriginCursorColor = Color(0x4D000000);
 };
 
 struct ContentScroller {
@@ -460,6 +467,41 @@ public:
         return cursorVisible_;
     }
 
+    bool GetFloatingCursorVisible() const
+    {
+        return floatCaretState_.FloatingCursorVisible;
+    }
+
+    void SetFloatingCursorVisible(bool floatingCursorVisible)
+    {
+        floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
+    }
+
+    bool GetShowOriginCursor() const
+    {
+        return floatCaretState_.ShowOriginCursor;
+    }
+
+    void SetShowOriginCursor(bool showOriginCursor)
+    {
+        floatCaretState_.ShowOriginCursor = showOriginCursor;
+    }
+
+    Color GetOriginCursorColor() const
+    {
+        return floatCaretState_.OriginCursorColor;
+    }
+
+    void SetOriginCursorColor(Color originCursorColor)
+    {
+        floatCaretState_.OriginCursorColor = originCursorColor;
+    }
+
+    virtual void AdjustFloatingCaretInfo(const Offset& localOffset,
+        const HandleInfoNG& caretInfo, HandleInfoNG& floatingCaretInfo);
+
+    void FloatingCaretLand();
+
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool GetImeAttached() const
     {
@@ -699,6 +741,11 @@ public:
         return selectController_->GetCaretRect();
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return selectController_->GetFloatingCaretRect();
+    }
+
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
@@ -740,7 +787,7 @@ public:
         return mouseStatus_;
     }
 
-    void UpdateEditingValueToRecord();
+    void UpdateEditingValueToRecord(int32_t beforeCaretPosition = -1);
 
     void UpdateScrollBarOffset() override;
 
@@ -937,6 +984,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     bool CanUndo();
+    bool HasOperationRecords();
     bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
@@ -946,6 +994,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1815,6 +1864,7 @@ private:
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
     void ResetFirstClickAfterGetFocus();
+    void ProcessAutoFillOnFocus();
 
     RectF frameRect_;
     RectF textRect_;
@@ -1959,10 +2009,10 @@ private:
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
-    bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
     bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;
@@ -2007,6 +2057,7 @@ private:
     std::optional<float> maxFontSizeScale_;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
+    RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
 };
 } // namespace OHOS::Ace::NG
 

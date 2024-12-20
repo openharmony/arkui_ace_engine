@@ -496,6 +496,20 @@ public:
         }
     }
 
+    ShadowStyle GetMenuDefaultShadowStyle()
+    {
+        auto shadowStyle = ShadowStyle::OuterDefaultMD;
+
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, shadowStyle);
+        auto pipeline = host->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, shadowStyle);
+        auto menuTheme = pipeline->GetTheme<MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, shadowStyle);
+        shadowStyle = menuTheme->GetMenuShadowStyle();
+        return shadowStyle;
+    }
+
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     bool UseContentModifier()
@@ -613,7 +627,7 @@ private:
     void CopyMenuAttr(const RefPtr<FrameNode>& menuNode) const;
 
     void RegisterOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    bool OnKeyEvent(const KeyEvent& event) const;
+    bool OnKeyEvent(const KeyEvent& event);
 
     void DisableTabInMenu();
 

@@ -67,6 +67,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = true;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 
@@ -98,6 +99,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = false;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 
@@ -122,6 +124,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = false;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 

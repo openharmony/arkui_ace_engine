@@ -77,7 +77,6 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(isShow ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
 
     auto renderContext = containerNode->GetRenderContext();

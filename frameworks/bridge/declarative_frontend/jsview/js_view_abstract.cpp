@@ -834,6 +834,18 @@ bool IsPopupCreated()
     return true;
 }
 
+ShadowStyle GetPopupDefaultShadowStyle()
+{
+    auto shadowStyle = ShadowStyle::OuterDefaultMD;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, shadowStyle);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadowStyle);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadowStyle);
+    return popupTheme->GetPopupShadowStyle();
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -1027,15 +1039,16 @@ void ParsePopupCommonParam(
         popupParam->SetErrorRadius(setError);
     }
 
+    auto defaultShadowStyle = GetPopupDefaultShadowStyle();
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
         }
     } else {
-        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+        JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
     }
     popupParam->SetShadow(shadow);
 
@@ -2440,7 +2453,7 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
         }
         const auto* vm = nodePtr->GetEcmaVM();
         auto localHandle = nodePtr->GetLocalHandle();
-        if (localHandle.IsEmpty()) {
+        if (!localHandle->IsNativePointer(vm)) {
             return;
         }
         auto* node = localHandle->ToNativePointer(vm)->Value();
@@ -4869,8 +4882,8 @@ void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
             if (effectType < EffectType::DEFAULT || effectType > EffectType::WINDOW_EFFECT) {
                 effectType = EffectType::DEFAULT;
             }
-        } 
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);  
+        }
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);
     }
 }
 
@@ -5372,6 +5385,12 @@ bool JSViewAbstract::ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, 
 bool JSViewAbstract::ParseLengthMetricsToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
+}
+
+bool JSViewAbstract::ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result)
+{
+    return ParseLengthMetricsToDimension(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) :
+        ParseJsDimensionVp(jsValue, result) ? GreatOrEqual(result.Value(), 0.0f) : false;
 }
 
 bool JSViewAbstract::ParseResourceToDouble(const JSRef<JSVal>& jsValue, double& result)
@@ -7617,6 +7636,16 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
+void JSViewAbstract::JsAccessibilityNextFocusId(const JSCallbackInfo& info)
+{
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string nextFocusId;
+    if (!ParseJsString(jsValue, nextFocusId)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusId(nextFocusId);
+}
+
 void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
     const JSRef<JSVal>& jsValue = info[0];
@@ -7794,11 +7823,14 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_THIRD && info[2]->IsObject()) {
         ParseBindContentOptionParam(info, info[2], menuParam, previewBuildFunc);
     }
-
     if (responseType != ResponseType::LONG_PRESS) {
         menuParam.previewMode = MenuPreviewMode::NONE;
         menuParam.isShowHoverImage = false;
         menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    // arrow is disabled for contextMenu with preview
+    if (menuParam.previewMode != MenuPreviewMode::NONE) {
+        menuParam.enableArrow = false;
     }
     menuParam.type = NG::MenuType::CONTEXT_MENU;
     ViewAbstractModel::GetInstance()->BindContextMenu(responseType, buildFunc, menuParam, previewBuildFunc);
@@ -8843,6 +8875,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityNextFocusId", &JSViewAbstract::JsAccessibilityNextFocusId);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
@@ -10206,7 +10239,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
     }
     EcmaVM* vm = args.GetVm();
     CHECK_NULL_VOID(vm);
-    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(args[0]);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(arg);
     if (jsOnFocusAxisEventFunc->IsEmpty()) {
         return;
     }

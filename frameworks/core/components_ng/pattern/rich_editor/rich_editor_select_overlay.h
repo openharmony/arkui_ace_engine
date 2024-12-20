@@ -46,7 +46,6 @@ public:
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
     void OnOverlayTouchDown(const TouchEventInfo& event) override;
     void OnHandleMove(const RectF& rect, bool isFirst) override;
-    void GetLocalPointWithTransform(OffsetF& localPoint);
     void OnHandleMoveDone(const RectF& rect, bool isFirst) override;
     void OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info = nullptr) override;
     void OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside = true) override;
@@ -70,6 +69,7 @@ public:
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;
     void OnAfterSelectOverlayShow(bool isCreate) override;
+    bool IsRightButtonCustomMenuShow();
     bool IsRegisterTouchCallback() override
     {
         return true;
@@ -82,6 +82,7 @@ private:
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
+    void SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect);
     void ResumeTwinkling();
     RectF GetVisibleRect();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;

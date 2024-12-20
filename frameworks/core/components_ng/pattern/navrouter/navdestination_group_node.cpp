@@ -35,6 +35,22 @@ constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
 constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
+namespace {
+const char* TransitionTypeToString(NavigationSystemTransitionType type)
+{
+    switch (type) {
+        case NavigationSystemTransitionType::NONE:
+            return "NavigationSystemTransitionType.NONE";
+        case NavigationSystemTransitionType::TITLE:
+            return "NavigationSystemTransitionType.TITLE";
+        case NavigationSystemTransitionType::CONTENT:
+            return "NavigationSystemTransitionType.CONTENT";
+        default:
+            return "NavigationSystemTransitionType.DEFAULT";
+    }
+}
+}
+
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
     if (contentNode_) {
@@ -191,6 +207,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
+    json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
 }
 
 void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)

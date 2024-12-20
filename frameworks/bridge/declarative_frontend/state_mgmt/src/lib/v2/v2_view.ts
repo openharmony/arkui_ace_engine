@@ -409,7 +409,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         if(this.monitorIdsDelayedUpdate.size) {
           // exec monitor functions
-          ObserveV2.getObserve().runDirtyMonitors(this.monitorIdsDelayedUpdate);
+          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active

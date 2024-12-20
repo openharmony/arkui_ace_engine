@@ -67,7 +67,7 @@ RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
     const auto& windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
 
-    bool isMoving = windowManager->GetWindowStartMoveFlag();
+    bool isMoving = windowManager->WindowIsStartMoving();
     if (isMoving) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "window is moving, button click event is not supported");
         return nullptr;
@@ -196,7 +196,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth((isFloatingWindow && isShow) ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

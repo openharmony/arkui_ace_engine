@@ -30,6 +30,7 @@ namespace OHOS::Ace {
 namespace ResDefine {
 constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
+constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
 }
 
@@ -75,6 +76,7 @@ private:
 
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
+    bool loadPageRequestFrameOn_ = false;
     TouchEvent curTouchEvent_;
     TouchEvent lastTouchEvent_;
     AxisEvent curAxisEvent_;

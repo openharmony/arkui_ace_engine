@@ -590,6 +590,10 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
 const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
 
+// DynamicComponent
+const char DYNAMIC_COMPONENT_TAG[] = "DynamicComponent";
+const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
+
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
 const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";

@@ -703,11 +703,12 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+    auto isContextMenu = menuPattern->IsContextMenu();
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
@@ -983,7 +984,6 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
     CHECK_NULL_RETURN(frameNode, size);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, size);
-    bool isShowHoverImage = false;
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -995,7 +995,6 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize();
-            isShowHoverImage = menuPattern->GetIsShowHoverImage();
         }
     }
     return size;
@@ -2339,10 +2338,6 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetTag_.c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        expandDisplay = true;
-    }
     if (canExpandCurrentWindow_ && targetTag_ != V2::SELECT_ETS_TAG) {
         ModifyTargetOffset();
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);

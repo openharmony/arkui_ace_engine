@@ -73,7 +73,8 @@ public:
         int32_t height, UIEnvCallback callback);
 #endif
 
-    static UIContentErrorCode RunPage(int32_t instanceId, const std::string& url, const std::string& params);
+    static UIContentErrorCode RunPage(
+        int32_t instanceId, const std::string& url, const std::string& params, bool isNamedRouter = false);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
@@ -184,7 +185,7 @@ public:
         return type_;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }

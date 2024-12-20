@@ -325,12 +325,10 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem001, TestSize.Level1)
     CreateDone();
     const auto& info = pattern_->info_;
 
-    pattern_->ScrollToIndex(88, false);
-    FlushUITasks();
+    ScrollToIndex(88, false, ScrollAlign::AUTO);
     EXPECT_EQ(info.startIndex_, 85);
     EXPECT_EQ(info.endIndex_, 90);
-    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::CENTER);
     EXPECT_EQ(info.startIndex_, 2);
     EXPECT_EQ(info.endIndex_, 2);
 }
@@ -357,8 +355,7 @@ HWTEST_F(GridLayoutRangeTest, ScrollItem002, TestSize.Level1)
     CreateDone();
     const auto& info = pattern_->info_;
 
-    pattern_->ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
-    FlushUITasks();
+    ScrollToIndex(22, false, ScrollAlign::CENTER, 0.0f);
     EXPECT_EQ(info.startIndex_, 22);
     EXPECT_EQ(info.endIndex_, 26);
     for (int i = info.startIndex_; i <= info.endIndex_; ++i) {
@@ -439,8 +436,7 @@ HWTEST_F(GridLayoutRangeTest, ChangeTemplate001, TestSize.Level1)
     CreateFixedHeightItems(1, 100);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 29);
@@ -484,14 +480,12 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
     CreateDone();
-    pattern_->ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
-    FlushUITasks();
+    ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
     const auto& info = pattern_->info_;
     EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
     EXPECT_EQ(info.startIndex_, 22);
 
-    pattern_->ScrollToIndex(88, false, ScrollAlign::AUTO, itemHeight);
-    FlushUITasks();
+    ScrollToIndex(88, false, ScrollAlign::AUTO, itemHeight);
     EXPECT_EQ(info.startIndex_, 85);
     EXPECT_EQ(info.endIndex_, 93);
     for (int i = 85; i <= 93; ++i) {
@@ -553,8 +547,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     CreateFixedHeightItems(1, (itemHeight + 20.0f) * 6);
     CreateFixedHeightItems(77, itemHeight);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 91);
 
@@ -562,8 +555,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
 
-    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushUITasks();
+    ScrollToIndex(22, true, ScrollAlign::AUTO);
     EXPECT_TRUE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
     const float offset = info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f);
     UpdateCurrentOffset(pattern_->GetTotalOffset() - offset);
@@ -571,8 +563,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
     EXPECT_TRUE(NearEqual(GetChildY(frameNode_, 22), 0.0f));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 22)->IsActive());
 
-    pattern_->ScrollToIndex(22, true, ScrollAlign::AUTO);
-    FlushUITasks();
+    ScrollToIndex(22, true, ScrollAlign::AUTO);
     EXPECT_EQ(info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
     pattern_->extraOffset_ = 0.0f;
     EXPECT_FALSE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
@@ -626,8 +617,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 15), 550.0f);
     EXPECT_EQ(GetChildY(frameNode_, 16), 550.0f);
     EXPECT_EQ(GetChildY(frameNode_, 17), 550.0f);
-    pattern_->ScrollToIndex(49);
-    FlushUITasks();
+    ScrollToIndex(49, false, ScrollAlign::AUTO);
     EXPECT_EQ(info.startIndex_, 39);
     const std::list<int32_t> preloadList2 = { 38, 37, 36, 35, 34, 33 };
     CheckPreloadListEqual(preloadList2);
@@ -659,8 +649,7 @@ HWTEST_F(GridLayoutRangeTest, Cache002, TestSize.Level1)
     model.SetLayoutOptions(GetOptionDemo14());
     model.SetCachedCount(3); // 2 lines
     CreateDone();
-    pattern_->ScrollToIndex(20, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(20, false, ScrollAlign::END);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.currentOffset_, -30.0f);
     EXPECT_EQ(info.startIndex_, 9);
@@ -703,8 +692,7 @@ HWTEST_F(GridLayoutRangeTest, Drag001, TestSize.Level1)
     CreateFixedHeightItems(77, itemHeight);
     CreateDone();
 
-    pattern_->ScrollToIndex(21, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(21, false, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 2)->IsActive());
     EXPECT_EQ(GetChildY(frameNode_, 2), 340.0f);
     EXPECT_EQ(GetChildY(frameNode_, 24), 340.0f);

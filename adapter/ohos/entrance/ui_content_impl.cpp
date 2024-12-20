@@ -29,6 +29,10 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+#include "res_sched_client.h"
+#include "res_type.h"
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "service_extension_context.h"
 #include "system_ability_definition.h"
 #include "wm_common.h"
@@ -93,6 +97,7 @@
 #include "core/common/resource/resource_manager.h"
 #include "core/common/xcollie/xcollieInterface.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
@@ -121,6 +126,8 @@ const std::string ABS_BUNDLE_CODE_PATH = "/data/app/el1/bundle/public/";
 const std::string LOCAL_BUNDLE_CODE_PATH = "/data/storage/el1/bundle/";
 const std::string FILE_SEPARATOR = "/";
 const std::string START_PARAMS_KEY = "__startParams";
+const std::string PARAM_QUERY_KEY = "query";
+const std::string ACTION_SEARCH = "ohos.want.action.search";
 const std::string ACTION_VIEWDATA = "ohos.want.action.viewData";
 constexpr char IS_PREFERRED_LANGUAGE[] = "1";
 constexpr uint64_t DISPLAY_ID_INVALID = -1ULL;
@@ -880,6 +887,7 @@ UIContentErrorCode UIContentImpl::Initialize(OHOS::Rosen::Window* window, const 
     auto errorCode = InitializeInner(window, url, storage, false);
     AddWatchSystemParameter();
     UpdateWindowBlur();
+    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -919,6 +927,7 @@ UIContentErrorCode UIContentImpl::InitializeByName(
 {
     auto errorCode = InitializeInner(window, name, storage, true);
     AddWatchSystemParameter();
+    RegisterLinkJumpCallback();
     return errorCode;
 }
 
@@ -1903,6 +1912,19 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
             });
     }
 
+    container->SetAbilityOnSearch([context = context_](const std::string& queryWord) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.AddEntity(Want::ENTITY_BROWSER);
+        want.SetAction(ACTION_SEARCH);
+        want.SetParam(PARAM_QUERY_KEY, queryWord);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+
     if (window_->IsDecorEnable()) {
         container->SetWindowModal(WindowModal::CONTAINER_MODAL);
     }
@@ -2252,6 +2274,44 @@ void UIContentImpl::UnregisterDisplayManagerCallback()
         manager.UnregisterAvailableAreaListener(availableAreaChangedListener_, listenedDisplayId_);
         availableAreaChangedListener_ = nullptr;
     }
+}
+
+void UIContentImpl::RegisterLinkJumpCallback()
+{
+#ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto pipeLineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContextBase);
+    CHECK_NULL_VOID(pipeLineContext);
+    auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+    LOGI("[%{public}s]: UIContentImpl::RegisterLinkJumpCallback", bundleName.c_str());
+    // check 1 : for efficiency, if not in whiteList, no need to call RSS interface and go IPC
+    bool isAllowedLinkJump = false;
+    // call RSS's inner api
+    auto errorNo = OHOS::ResourceSchedule::ResSchedClient::GetInstance().IsAllowedLinkJump(isAllowedLinkJump);
+    if (errorNo != NO_ERROR) {
+        LOGW("UIContentImpl::RegisterLinkJumpCallback, errorNo: %{public}i", errorNo);
+        return;
+    }
+    if (!isAllowedLinkJump) { // check 1
+        return;
+    }
+    LOGI("UIContentImpl::RegisterLinkJumpCallback, LinkJump is Open");
+    pipeLineContext->SetLinkJumpCallback([context = context_] (const std::string& link) {
+        auto sharedContext = context.lock();
+        CHECK_NULL_VOID(sharedContext);
+        auto abilityContext =
+            OHOS::AbilityRuntime::Context::ConvertTo<OHOS::AbilityRuntime::AbilityContext>(sharedContext);
+        CHECK_NULL_VOID(abilityContext);
+        AAFwk::Want want;
+        want.AddEntity(Want::ENTITY_BROWSER);
+        want.SetUri(link);
+        want.SetAction(ACTION_VIEWDATA);
+        abilityContext->StartAbility(want, REQUEST_CODE);
+    });
+#endif // RESOURCE_SCHEDULE_SERVICE_ENABLE
 }
 
 void UIContentImpl::OnNewWant(const OHOS::AAFwk::Want& want)
@@ -3439,6 +3499,35 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
         TaskExecutor::TaskType::UI, "ArkUICloseModalUIExtension");
 }
 
+void UIContentImpl::UpdateModalUIExtensionConfig(
+    int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: UpdateModalUIExtensionConfig with "
+        "sessionId: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId);
+    if (sessionId == 0) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtension refuse to UpdateModalUIExtensionConfig");
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, sessionId, config]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto overlay = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlay);
+            overlay->UpdateModalUIExtensionConfig(sessionId, config);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUpdateModalUIExtensionConfig");
+}
+
 void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)
 {
     parentToken_ = token;
@@ -3675,7 +3764,10 @@ Shadow UIContentImpl::GetPopupShadow()
     CHECK_NULL_RETURN(pipelineContext, shadow);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
     CHECK_NULL_RETURN(shadowTheme, shadow);
-    return shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadow);
+    auto popupShadowStyle = popupTheme->GetPopupShadowStyle();
+    return shadowTheme->GetShadow(popupShadowStyle, colorMode);
 }
 
 void UIContentImpl::OnPopupStateChange(

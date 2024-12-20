@@ -2063,6 +2063,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get SEARCH() {
+    return new TextMenuItemId('OH_DEFAULT_SEARCH');
+  }
+
   static get COLLABORATION_SERVICE() {
     return new TextMenuItemId('OH_DEFAULT_COLLABORATION_SERVICE');
   }
@@ -3001,6 +3005,7 @@ let SaveDescription;
   SaveDescription[SaveDescription.EXPORT_TO_GALLERY = 9] = 'EXPORT_TO_GALLERY';
   SaveDescription[SaveDescription.QUICK_SAVE_TO_GALLERY = 10] = 'QUICK_SAVE_TO_GALLERY';
   SaveDescription[SaveDescription.RESAVE_TO_GALLERY = 11] = 'RESAVE_TO_GALLERY';
+  SaveDescription[SaveDescription.SAVE_ALL = 12] = 'SAVE_ALL';
 })(SaveDescription || (SaveDescription = {}));
 
 let SaveButtonOnClickResult;

@@ -418,6 +418,11 @@ public:
         stopIndicatorAnimationFunc_ = std::move(stopCallback);
     }
 
+    void SetUpdateOverlongForceStopPageRateCb(const std::function<void(float)>& updateCallback)
+    {
+        updateOverlongForceStopPageRateFunc_ = std::move(updateCallback);
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -631,6 +636,9 @@ public:
     {
         return static_cast<int32_t>(pageFlipMode_);
     }
+
+    float CalcCurrentTurnPageRate() const;
+    int32_t GetFirstIndexInVisibleArea() const;
 
 private:
     void OnModifyDone() override;
@@ -999,6 +1007,7 @@ private:
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
     void CheckAndFireCustomAnimation();
+    void UpdateOverlongForceStopPageRate(float forceStopPageRate);
 
     friend class SwiperHelper;
 
@@ -1025,6 +1034,7 @@ private:
 
     // stop indicator animation callback
     std::function<void(bool)> stopIndicatorAnimationFunc_;
+    std::function<void(float)> updateOverlongForceStopPageRateFunc_;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;

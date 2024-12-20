@@ -80,8 +80,8 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            auto popupBorderRadius = pattern->GetAttr<Dimension>("popup_border_radius", BORDER_RADIUS_POPUP);
-            theme->radius_ = Radius(popupBorderRadius, popupBorderRadius);
+            auto popupBorderRadius = pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, BORDER_RADIUS_POPUP);
+            theme->radius_ = Radius(popupBorderRadius);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
@@ -95,6 +95,8 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
         }
     };
 
@@ -328,6 +330,11 @@ public:
         return fontSecondaryColor_;
     }
 
+    ShadowStyle GetPopupShadowStyle() const
+    {
+        return popupShadowStyle_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -379,6 +386,7 @@ private:
     Color buttonFontColor_;
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
+    ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
 };
 
 } // namespace OHOS::Ace

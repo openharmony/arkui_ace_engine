@@ -22,6 +22,7 @@ import { SelectBootcamp } from './SelectBootcamp';
 import { MenuBootcamp } from './MenuBootcamp';
 import { BindSheetBootcamp } from './BindSheetBootcamp';
 import { MenuItemGroupBootcamp } from './MenuItemGroupBootcamp';
+import { ActionDialogBootcamp } from './ActionDialogBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
@@ -35,6 +36,7 @@ export const operatesRoute: RouteGroup = {
     { name: 'menu', label: '菜单/menu' },
     { name: 'bindsheet', label: '半模态/BindSheet' },
     { name: 'MenuItemGroup', label: '菜单分组/MenuItemGroup' },
+    { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet' },
   ]
 };
 
@@ -56,6 +58,8 @@ export function OperatesDestination(name: string, route: Route) {
     BindSheetBootcamp({ title: route.label })
   } else if (name === 'operates/MenuItemGroup') {
     MenuItemGroupBootcamp({ title: route.label })
+  } else if (name === 'operates/ActionSheet') {
+    ActionDialogBootcamp({ title: route.label })
   }
 }
 

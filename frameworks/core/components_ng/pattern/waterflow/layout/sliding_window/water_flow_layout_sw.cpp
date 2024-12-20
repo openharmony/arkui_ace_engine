@@ -85,7 +85,6 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
     auto padding = props_->CreatePaddingAndBorder();
     OffsetF paddingOffset { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
-
     const bool reverse = props_->IsReverse();
     for (size_t idx = 0; idx < info_->lanes_.size(); ++idx) {
         LayoutSection(idx, paddingOffset, wrapper->GetGeometryNode()->GetContentSize().CrossSize(axis_), reverse,
@@ -714,8 +713,7 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            const bool isCache = !props_->GetShowCachedItemsValue(false) &&
-                                 (item.idx < info_->startIndex_ || item.idx > info_->endIndex_);
+            const bool isCache = IsCache(info_, item.idx);
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 mainPos += item.mainSize + mainGaps_[idx];
@@ -729,10 +727,7 @@ void WaterFlowLayoutSW::LayoutSection(
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
             mainPos += item.mainSize + mainGaps_[idx];
-            if (isCache) {
-                continue;
-            }
-            if (child->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();

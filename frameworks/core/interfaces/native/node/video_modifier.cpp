@@ -110,6 +110,39 @@ void ResetVideoOpacity(ArkUINodeHandle node)
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
+void SetVideoSurfaceBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color(color);
+    if (backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
+}
+
+void ResetVideoSurfaceBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, Color::BLACK);
+}
+
+void SetVideoShortcutKeyEnabled(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, static_cast<ArkUI_Bool>(value));
+}
+
+void ResetVideoShortcutKeyEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier()
 {
@@ -125,7 +158,11 @@ const ArkUIVideoModifier* GetVideoModifier()
         SetVideoMuted,
         ResetVideoMuted,
         SetVideoOpacity,
-        ResetVideoOpacity
+        ResetVideoOpacity,
+        SetVideoSurfaceBackgroundColor,
+        ResetVideoSurfaceBackgroundColor,
+        SetVideoShortcutKeyEnabled,
+        ResetVideoShortcutKeyEnabled
     };
 
     return &modifier;

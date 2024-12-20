@@ -265,7 +265,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
-    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_) {
+    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_ && isAnalyzerPlaying_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isEnableAnalyzer_ return.");
         return;
     }

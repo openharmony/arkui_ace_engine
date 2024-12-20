@@ -57,6 +57,9 @@ void TextFieldModelNG::CreateNode(
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
     }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
+    }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -72,13 +75,13 @@ void TextFieldModelNG::CreateNode(
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->InitTheme();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
@@ -109,6 +112,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+    }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {

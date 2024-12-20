@@ -856,7 +856,7 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest002, TestSize.Level1)
     EXPECT_EQ(json->GetInt("year"), currentMonth.year);
     EXPECT_EQ(json->GetInt("month"), currentMonth.month);
     EXPECT_EQ(json->GetInt("MonthState"), 0);
-
+    swiperEventHub->FireChangeEvent(1, 2, false);
     swiperEventHub->FireChangeDoneEvent(true);
     json = JsonUtil::ParseJsonString(infoDetail);
     EXPECT_EQ(json->GetInt("MonthState"), 2);
@@ -865,7 +865,7 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest002, TestSize.Level1)
     EXPECT_EQ(json->GetInt("currentYear"), currentMonth.year);
     EXPECT_EQ(json->GetInt("currentMonth"), currentMonth.month);
     EXPECT_EQ(calendarPattern->GetMoveDirection(), NG::Direction::NEXT);
-
+    swiperEventHub->FireChangeEvent(2, 1, false);
     swiperEventHub->FireChangeDoneEvent(false);
     json = JsonUtil::ParseJsonString(infoDetail);
     EXPECT_EQ(json->GetInt("MonthState"), 1);

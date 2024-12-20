@@ -45,6 +45,7 @@ ohos_shared_library("ace_ndk") {
   include_dirs = [
     "//foundation/arkui/ace_engine",
     "//foundation/arkui/ace_engine/frameworks",
+    "//foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include",
     "//foundation/arkui/ace_engine/interfaces/native",
   ]
 
@@ -126,6 +127,7 @@ if (is_arkui_x) {
       "$ace_root",
       "$ace_root/frameworks",
       "$ace_root/interfaces/native",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
     ]
 
     sources = [

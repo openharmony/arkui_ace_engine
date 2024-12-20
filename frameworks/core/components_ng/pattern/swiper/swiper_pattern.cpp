@@ -2363,6 +2363,23 @@ void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 void SwiperPattern::HandleFocusInternal()
 {
     currentFocusIndex_ = currentIndex_;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(lastFocusNode);
+    for (const auto& item : itemPosition_) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
+            continue;
+        }
+        if (itemNode->GetFirstFocusHubChild() == lastFocusNode) {
+            currentFocusIndex_ = item.first;
+            return;
+        }
+    }
 }
 
 void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -2738,6 +2755,12 @@ bool SwiperPattern::InsideIndicatorRegion(const TouchLocationInfo& locationInfo)
     return hotRegion.IsInRegion(touchPoint);
 }
 
+void SwiperPattern::UpdateOverlongForceStopPageRate(float forceStopPageRate)
+{
+    CHECK_NULL_VOID(updateOverlongForceStopPageRateFunc_);
+    updateOverlongForceStopPageRateFunc_(forceStopPageRate);
+}
+
 void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
@@ -2754,9 +2777,18 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
-    StopIndicatorAnimation(true);
+    auto isOverlongIndicator = GetMaxDisplayCount() > 0;
+    if (!isOverlongIndicator) {
+        StopIndicatorAnimation(true);
+    }
+
     if (propertyAnimationIsRunning_) {
         StopPropertyTranslateAnimation(isFinishAnimation_);
+    }
+
+    if (isOverlongIndicator) {
+        UpdateOverlongForceStopPageRate(CalcCurrentTurnPageRate());
+        StopIndicatorAnimation(true);
     }
 
     indicatorDoingAnimation_ = false;
@@ -2803,6 +2835,10 @@ void SwiperPattern::HandleTouchUp()
 
     if (!isDragging_) {
         StartAutoPlay();
+    }
+
+    if (GetMaxDisplayCount() > 0) {
+        UpdateOverlongForceStopPageRate(FLT_MAX);
     }
 }
 
@@ -4258,6 +4294,22 @@ std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea(
     }
     return std::make_pair(itemPosition_.begin()->first,
         SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
+}
+
+int32_t SwiperPattern::GetFirstIndexInVisibleArea() const
+{
+    if (itemPosition_.empty()) {
+        return 0;
+    }
+    for (const auto& item : itemPosition_) {
+        if (Negative(item.second.startPos) && Negative(item.second.endPos)) {
+            continue;
+        }
+        if (Positive(item.second.endPos)) {
+            return item.first;
+        }
+    }
+    return itemPosition_.begin()->first;
 }
 
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetLastItemInfoInVisibleArea() const
@@ -5844,6 +5896,15 @@ std::pair<float, float> SwiperPattern::CalcCurrentPageStatusOnRTL(float addition
     }
 
     return std::make_pair(currentTurnPageRate, firstIndex);
+}
+
+float SwiperPattern::CalcCurrentTurnPageRate() const
+{
+    if (IsHorizontalAndRightToLeft()) {
+        return CalcCurrentPageStatusOnRTL(0.0f).first;
+    }
+
+    return CalcCurrentPageStatus(0.0f).first;
 }
 
 std::pair<float, float> SwiperPattern::CalcCurrentPageStatus(float additionalOffset) const

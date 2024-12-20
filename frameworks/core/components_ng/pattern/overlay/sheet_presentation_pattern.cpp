@@ -48,6 +48,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -511,6 +512,30 @@ void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
     });
 }
 
+void SheetPresentationPattern::SetShadowStyle(bool isFocused)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.shadow.has_value()) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+    if (!isFocused) {
+        style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfigS());
+    }
+    auto shadow = GetShadowFromTheme(style);
+    renderContext->UpdateBackShadow(shadow);
+}
+
 void SheetPresentationPattern::HandleFocusEvent()
 {
     auto host = GetHost();
@@ -518,12 +543,14 @@ void SheetPresentationPattern::HandleFocusEvent()
     auto sheetId = host->GetId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
     SheetManager::GetInstance().SetFocusSheetId(sheetId);
+    SetShadowStyle(true);
 }
 
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
+    SetShadowStyle(false);
 }
 
 void SheetPresentationPattern::HandleDragStart()
@@ -1528,8 +1555,9 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+            } else {
+                overlayManager->PlaySheetTransition(host, true, false);
             }
-            overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
             if (maskNode) {
                 UpdateMaskBackgroundColorRender();
@@ -1591,7 +1619,9 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() <= 0) {
                 height = InitialSingleGearHeight(sheetStyle);
@@ -2977,6 +3007,22 @@ Rect SheetPresentationPattern::GetFoldScreenRect() const
         return Rect();
     }
     return currentFoldCreaseRegion_.front();
+}
+
+Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return Shadow();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Shadow());
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, Shadow());
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, Shadow());
+    auto shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return shadow;
 }
 
 void SheetPresentationPattern::FireHoverModeChangeCallback()

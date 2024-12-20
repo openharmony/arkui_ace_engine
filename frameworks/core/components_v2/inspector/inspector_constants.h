@@ -595,9 +595,13 @@ ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
 
-// DynamicComponent
+// IsolatedComponent
 ACE_EXPORT extern const char ISOLATED_COMPONENT_TAG[];
 ACE_EXPORT extern const char ISOLATED_COMPONENT_ETS_TAG[];
+
+// DynamicComponent
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_TAG[];
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_ETS_TAG[];
 
 // ContainerSpan
 ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];

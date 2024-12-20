@@ -35,6 +35,7 @@ public:
     void SetObjectFit(ImageFit objectFit) override;
     void SetLoop(bool loop) override;
     void SetSurfaceBackgroundColor(Color color) override;
+    void SetShortcutKeyEnabled(bool isEnableShortcutKey) override;
 
     void SetOnStart(VideoEventFunc&& onStart) override;
     void SetOnPause(VideoEventFunc&& onPause) override;
@@ -54,6 +55,9 @@ public:
     static void SetObjectFit(FrameNode* frameNode, ImageFit objectFit);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetMuted(FrameNode* frameNode, bool muted);
+    static void SetSurfaceBackgroundColor(FrameNode* frameNode, Color color);
+    static void SetShortcutKeyEnabled(FrameNode* frameNode, bool isEnableShortcutKey);
+
 private:
     void AddDragFrameNodeToManager() const;
 };

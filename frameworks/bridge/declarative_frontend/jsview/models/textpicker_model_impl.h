@@ -75,6 +75,9 @@ public:
     {
         return true;
     }
+
+    void SetDisableTextStyleAnimation(const bool value) override {};
+    void SetDefaultTextStyle(const NG::PickerTextStyle& value) override {};
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {

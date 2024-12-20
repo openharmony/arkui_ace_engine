@@ -76,6 +76,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto textShowSearch = pattern->GetAttr<std::string>("text_menu_search_is_support", "0");
+            theme->isShowSearch_ = StringUtils::StringToInt(textShowSearch);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
             theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
             theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
@@ -116,6 +118,11 @@ public:
         return isShowHandle_;
     }
 
+    bool IsShowSearch() const
+    {
+        return isShowSearch_;
+    }
+
     const Color& GetDragBackgroundColor() const
     {
         return dragBackgroundColor_;
@@ -151,6 +158,7 @@ private:
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    bool isShowSearch_ = false;
     Color urlDisabledColor_;
     Color urlDefaultColor_;
     Color urlHoverColor_;

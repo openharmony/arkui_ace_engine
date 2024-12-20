@@ -514,6 +514,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
     static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
         bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 

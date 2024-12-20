@@ -241,6 +241,7 @@ public:
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
     void PostEnabledTask();
+    void FireEnabledTask();
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
     void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
@@ -275,6 +276,21 @@ public:
         const RectF& currFrameRect, const OffsetF& currParentOffsetToWindow);
     void FireUntriggeredInnerOnAreaChanged(
         const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin);
+    void FireDrawCompletedNDKCallback(PipelineContext* pipeline);
+    void FireLayoutNDKCallback(PipelineContext* pipeline);
+    void SetNDKDrawCompletedCallback(std::function<void()>&& callback)
+    {
+        ndkDrawCompletedCallback_ = std::move(callback);
+    }
+    void SetNDKLayoutCallback(std::function<void()>&& callback)
+    {
+        ndkLayoutCallback_ = std::move(callback);
+    }
+    bool HasNDKDrawCompletedCallback()
+    {
+        return !!ndkDrawCompletedCallback_;
+    }
+    
 
 protected:
     virtual void OnModifyDone() {}
@@ -325,6 +341,9 @@ private:
     VisibleCallbackInfo visibleAreaInnerCallback_;
     std::vector<double> throttledVisibleAreaRatios_;
     VisibleCallbackInfo throttledVisibleAreaCallback_;
+    std::function<void()> ndkDrawCompletedCallback_;
+    std::function<void()> ndkLayoutCallback_;
+    std::function<void()> enabledFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };
