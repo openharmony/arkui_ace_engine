@@ -16,7 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 COMMON_SRC = [
   "water_flow_test_ng.cpp",
   "water_flow_scroller_test_ng.cpp",
-  "water_flow_cache_test.cpp"
+  "water_flow_cache_test.cpp",
 ]
 
 # Test original top-down WaterFlow
