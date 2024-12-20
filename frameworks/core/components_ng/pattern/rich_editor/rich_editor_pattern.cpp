@@ -815,14 +815,11 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     HandleImageDrag(imageNode);
     AddOprationWhenAddImage(options.offset.value_or(static_cast<int32_t>(GetTextContentLength())));
     int32_t spanIndex = TextSpanSplit(insertIndex);
-    if (spanIndex == -1) {
-        spanIndex = static_cast<int32_t>(host->GetChildren().size());
-    }
+    IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
+
     imageNode->MountToParent(host, spanIndex);
     auto renderContext = imageNode->GetRenderContext();
-    if (renderContext) {
-        renderContext->SetNeedAnimateFlag(false);
-    }
+    IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
     SetImageLayoutProperty(imageNode, options);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -834,8 +831,10 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     AddSpanItem(spanItem, spanIndex);
     SetGestureOptions(options.userGestureOption, spanItem);
     auto userMouseOption = options.userMouseOption;
-    IF_TRUE(userMouseOption.onHover, spanItem->onHover_ = std::move(userMouseOption.onHover));
-    
+    if (userMouseOption.onHover) {
+        spanItem->onHover_ = std::move(userMouseOption.onHover);
+        hoverableNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
+    }
     placeholderCount_++;
     if (updateCaret) {
         SetCaretPosition(insertIndex + spanItem->content.length());
@@ -846,7 +845,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
 }
-
 
 HoverInfo RichEditorPattern::CreateHoverInfo(const MouseInfo& info)
 {
@@ -870,36 +868,45 @@ HoverInfo RichEditorPattern::CreateHoverInfo(const MouseInfo& info)
     return hoverInfo;
 }
 
-void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& info)
+void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& mouseInfo)
 {
     static RefPtr<ImageSpanItem> lastHoverSpanItem = nullptr;
-    CHECK_NULL_VOID(info.GetAction() == MouseAction::MOVE && !isMousePressed_);
-    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    PointF mouseOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-    HoverInfo hoverInfo = CreateHoverInfo(info);
-    for (const auto& spanItem : spans_) {
-        CHECK_NULL_CONTINUE(spanItem && spanItem->spanItemType == SpanItemType::IMAGE);
-        auto imageSpanItem = DynamicCast<ImageSpanItem>(spanItem);
-        CHECK_NULL_CONTINUE(imageSpanItem && imageSpanItem->onHover_);
-        const auto& rects = paragraphs_.GetRects(spanItem->rangeStart, spanItem->position);
-        CHECK_NULL_CONTINUE(rects.size() == 1);
-        auto& rect = rects[0];
-        if (rect.IsInRegion(mouseOffset)) {
-            if (!lastHoverSpanItem) {
-                imageSpanItem->onHover_(true, hoverInfo);
-                lastHoverSpanItem = imageSpanItem;
-                return;
-            }
-            CHECK_NULL_VOID(lastHoverSpanItem.GetRawPtr() != imageSpanItem.GetRawPtr());
-            imageSpanItem->onHover_(true, hoverInfo);
-            lastHoverSpanItem->onHover_(false, hoverInfo);
+    CHECK_NULL_VOID(mouseInfo.GetAction() == MouseAction::MOVE && !isMousePressed_);
+    ACE_SCOPED_TRACE("RichEditorHandleImageHoverEvent");
+    PointF mouseOffset = { mouseInfo.GetLocalLocation().GetX(), mouseInfo.GetLocalLocation().GetY() };
+    HoverInfo info = CreateHoverInfo(mouseInfo);
+    for (auto it = hoverableNodes.begin(); it != hoverableNodes.end();) {
+        auto spanNode = it->Upgrade();
+        if (!spanNode) {
+            it = hoverableNodes.erase(it);
+            continue;
+        }
+        const auto& imageSpanItem = spanNode->GetSpanItem();
+        if (!imageSpanItem || !imageSpanItem->onHover_) {
+            it = hoverableNodes.erase(it);
+            continue;
+        }
+        const auto& geoNode = spanNode->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geoNode);
+        const auto& imageRect = geoNode->GetFrameRect();
+        if (!imageRect.IsInRegion(mouseOffset)) {
+            ++it;
+            continue;
+        }
+        if (!lastHoverSpanItem) {
+            imageSpanItem->onHover_(true, info);
             lastHoverSpanItem = imageSpanItem;
             return;
         }
+        CHECK_NULL_VOID(lastHoverSpanItem.GetRawPtr() != imageSpanItem.GetRawPtr());
+        imageSpanItem->onHover_(true, info);
+        lastHoverSpanItem->onHover_(false, info);
+        lastHoverSpanItem = imageSpanItem;
+        return;
     }
+
     if (lastHoverSpanItem) {
-        lastHoverSpanItem->onHover_(false, hoverInfo);
+        lastHoverSpanItem->onHover_(false, info);
         lastHoverSpanItem.Reset();
     }   
 }
