@@ -22,14 +22,25 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
 class CanvasRenderingContext2DPeerImpl : public Referenced {
 public:
+    enum class CanvasCallbackType {
+        ON_ATTACH = 0,
+        ON_DETACH,
+        UNKNOWN
+    };
+    using CanvasCallbackList = std::list<CallbackHelper<Callback_Void>>;
+    using CanvasCallbackIterator = CanvasCallbackList::const_iterator;
     CanvasRenderingContext2DPeerImpl() = default;
     ~CanvasRenderingContext2DPeerImpl() override = default;
+
+    void OnAttachToCanvas();
+    void OnDetachFromCanvas();
 
     Ark_NativePointer TriggerStartImageAnalyzer(const std::vector<ImageAnalyzerType> vector);
     void TriggerStopImageAnalyzer();
@@ -53,16 +64,10 @@ public:
         pattern_->SetAntiAlias(antialias_);
     }
 
-    void SetCanvasPattern(const RefPtr<AceType>& pattern)
-    {
-        CHECK_NULL_VOID(pattern);
-        auto canvasPattern = AceType::DynamicCast<CanvasPattern>(pattern);
-        CHECK_NULL_VOID(canvasPattern);
-        if (pattern_ == canvasPattern) {
-            return;
-        }
-        pattern_ = canvasPattern;
-    }
+    void SetCanvasPattern(const RefPtr<AceType>& pattern);
+
+    void On(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+    void Off(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
 
     void SetInstanceId(int32_t instanceId)
     {
@@ -80,8 +85,15 @@ protected:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
 private:
+    CanvasCallbackList::const_iterator FindCallbackInList(const CanvasCallbackList& callbackFuncPairList,
+    const CallbackHelper<Callback_Void>& callback) const;
+    void DeleteCallbackFromList(const CallbackHelper<Callback_Void>& callback, const CanvasCallbackType& type);
+    void AddCallbackToList(CallbackHelper<Callback_Void> &&callback, const CanvasCallbackType& type);
+
     bool isImageAnalyzing_ = false;
     std::vector<ImageAnalyzerType> vector_;
+    CanvasCallbackList attachCallback_;
+    CanvasCallbackList detachCallback_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

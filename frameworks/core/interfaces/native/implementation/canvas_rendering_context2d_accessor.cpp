@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <utility>
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 
 #include "canvas_rendering_context2d_peer_impl.h"
 #include "drawing_rendering_context_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 #include "arkoala_api_generated.h"
 
@@ -120,18 +122,38 @@ void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
 void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
                     const Callback_Void* callback)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(callback);
+    auto arkCallback = CallbackHelper(*callback);
+    peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
                      const Opt_Callback_Void* callback)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+    peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
                     const Callback_Void* callback)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(callback);
+    auto arkCallback = CallbackHelper(*callback);
+    peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
                      const Opt_Callback_Void* callback)
 {
+    auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+    peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)
 {
