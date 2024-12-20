@@ -818,6 +818,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
+{
+    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+        return;
+    }
+    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+}
+
 void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
 {
     if (text == accessibilityText_.value_or("")) {

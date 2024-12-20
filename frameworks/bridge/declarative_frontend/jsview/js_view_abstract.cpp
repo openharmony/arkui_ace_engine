@@ -4869,8 +4869,8 @@ void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
             if (effectType < EffectType::DEFAULT || effectType > EffectType::WINDOW_EFFECT) {
                 effectType = EffectType::DEFAULT;
             }
-        } 
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);  
+        }
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);
     }
 }
 
@@ -7623,6 +7623,16 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
+void JSViewAbstract::JsAccessibilityNextFocusId(const JSCallbackInfo& info)
+{
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string nextFocusId;
+    if (!ParseJsString(jsValue, nextFocusId)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusId(nextFocusId);
+}
+
 void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
     const JSRef<JSVal>& jsValue = info[0];
@@ -8852,6 +8862,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityNextFocusId", &JSViewAbstract::JsAccessibilityNextFocusId);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
