@@ -412,7 +412,11 @@ void DragEventActuator::GetThumbnailPixelMapForCustomNode()
 
 void DragEventActuator::TryTriggerThumbnailCallback()
 {
-    if (isThumbnailCallbackTriggered_) {
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG) {
         return;
     }
     GetThumbnailPixelMap(true);
