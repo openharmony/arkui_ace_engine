@@ -1428,6 +1428,11 @@ const __creatorMap__ = new Map([
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
+    ['SymbolGlyph', (context)=> {
+            return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
+                return new ArkSymbolGlyphComponent(node, type);
+            });
+        }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
                 return new ArkFlowItemComponent(node, type);
