@@ -434,8 +434,6 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         return;
     }
 
-    patternType_ = param->patternType;
-
     // create proper RSNode base on input
     switch (param->type) {
         case ContextType::CANVAS:
@@ -6103,17 +6101,6 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
     rsSurfaceNode->MarkUiFrameAvailable(true);
 #endif
 #if defined(IOS_PLATFORM)
-#if defined(PLATFORM_VIEW_SUPPORTED)
-    if (patternType_ == PatternType::PLATFORM_VIEW) {
-        RSSurfaceExtConfig config = {
-            .type = RSSurfaceExtType::SURFACE_PLATFORM_TEXTURE,
-            .additionalData = nativeWindow,
-        };
-        rsSurfaceNode->SetSurfaceTexture(config);
-        rsSurfaceNode->MarkUiFrameAvailable(true);
-        return;
-    }
-#endif
     RSSurfaceExtConfig config = {
         .type = RSSurfaceExtType::SURFACE_TEXTURE,
         .additionalData = nativeWindow,

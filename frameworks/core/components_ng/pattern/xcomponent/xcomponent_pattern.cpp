@@ -481,12 +481,12 @@ void XComponentPattern::OnDetachFromFrameNode(FrameNode* frameNode)
                 ACE_LAYOUT_SCOPED_TRACE("XComponent[%s] FireControllerDestroyedEvent", GetId().c_str());
                 eventHub->FireControllerDestroyedEvent(surfaceId_);
             }
-#ifdef RENDER_EXTRACT_SUPPORTED
-            if (renderContextForSurface_) {
-                renderContextForSurface_->RemoveSurfaceChangedCallBack();
-            }
-#endif
         }
+#ifdef RENDER_EXTRACT_SUPPORTED
+        if (renderContextForSurface_) {
+            renderContextForSurface_->RemoveSurfaceChangedCallBack();
+        }
+#endif
     }
     auto id = frameNode->GetId();
     auto pipeline = frameNode->GetContextRefPtr();
@@ -600,7 +600,7 @@ void XComponentPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& conf
         NativeXComponentOffset(offset.GetX(), offset.GetY());
         hasXComponentInit_ = true;
     }
-#ifndef RENDER_EXTRACT_SUPPORTED
+#if !(defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED))
     if (SystemProperties::GetExtSurfaceEnabled()) {
         auto transformRelativeOffset = host->GetTransformRelativeOffset();
         renderSurface_->SetExtSurfaceBounds(
@@ -681,7 +681,7 @@ void XComponentPattern::XComponentSizeInit()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     InitNativeWindow(initSize_.Width(), initSize_.Height());
-#ifdef RENDER_EXTRACT_SUPPORTED
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     if (xcomponentController_ && renderSurface_) {
         xcomponentController_->SetSurfaceId(renderSurface_->GetUniqueId());
     }
@@ -938,7 +938,7 @@ void XComponentPattern::InitEvent()
 
 void XComponentPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
-#ifdef RENDER_EXTRACT_SUPPORTED
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     focusHub->SetFocusable(true);
 #endif
 
@@ -1107,6 +1107,18 @@ void XComponentPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     NativeXComponentDispatchTouchEvent(touchEventPoint_, nativeXComponentTouchPoints_);
 #ifdef RENDER_EXTRACT_SUPPORTED
+    if (touchType == TouchType::DOWN) {
+        RequestFocus();
+    }
+#endif
+#ifdef PLATFORM_VIEW_SUPPORTED
+    if (type_ == XComponentType::PLATFORM_VIEW) {
+        const auto& changedPoint = touchInfoList.front();
+        PlatformViewDispatchTouchEvent(changedPoint);
+    }
+#endif
+
+#if defined(VIDEO_TEXTURE_SUPPORTED) && defined(XCOMPONENT_SUPPORTED)
     if (touchType == TouchType::DOWN) {
         RequestFocus();
     }

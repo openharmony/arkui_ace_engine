@@ -49,8 +49,7 @@ public:
     }
     std::string GetContentInfo(ContentInfoType type) override;
     // JSFrontend delegate NG functions.
-    void RunPage(const std::string& url, const std::string& params,
-        const std::string& profile, bool isNamedRouter = false);
+    void RunPage(const std::string& url, const std::string& params, const std::string& profile);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::string& params, const std::string& profile);
     void OnConfigurationUpdated(const std::string& data);

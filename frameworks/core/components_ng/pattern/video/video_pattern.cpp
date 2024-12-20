@@ -880,11 +880,6 @@ void VideoPattern::OnAttachToFrameNode()
                                                  RenderContext::PatternType::VIDEO };
 #endif
     renderContextForMediaPlayer_->InitContext(false, param);
-
-    if (SystemProperties::GetExtSurfaceEnabled()) {
-        RegisterRenderContextCallBack();
-    }
-
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -907,30 +902,6 @@ void VideoPattern::OnDetachFromMainTree()
     }
 }
 
-void VideoPattern::RegisterRenderContextCallBack()
-{
-#ifdef RENDER_EXTRACT_SUPPORTED
-    renderSurfaceWeakPtr_ = renderSurface_;
-    renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
-    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->AttachToGLContext(textureId, isAttach);
-        }
-    };
-    renderContextForMediaPlayer_->AddAttachCallBack(OnAttachCallBack);
-    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
-        auto videoPattern = weak.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
-            renderSurface->UpdateTextureImage(matrix);
-        }
-    };
-    renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
-#endif
-}
-
 void VideoPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -941,12 +912,8 @@ void VideoPattern::OnModifyDone()
 
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
-#else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
         (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
-#endif
         ResetStatus();
     }
 
@@ -1846,11 +1813,6 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
-#ifdef RENDER_EXTRACT_SUPPORTED
-    if (renderContextForMediaPlayer_) {
-        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
-    }
-#endif
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
