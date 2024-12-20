@@ -454,8 +454,8 @@ HWTEST_F(NavigationAnimationTest, ReleaseTextNodeList001, TestSize.Level1)
 }
 
 /**
- * @tc.name: BackButtonOpacityAnimation
- * @tc.desc: Test NavDestinationGroupNode::BackButtonAnimation
+ * @tc.name: TitleOpacityAnimation
+ * @tc.desc: Test NavDestinationGroupNode::TitleOpacityAnimation
  * @tc.type: FUNC
  */
 HWTEST_F(NavigationAnimationTest, OpacityAnimation001, TestSize.Level1)

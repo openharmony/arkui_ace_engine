@@ -22,10 +22,10 @@
 #include "core/animation/curve_animation.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_engine.h"
-#include "core/components_ng/base/view_stack_model.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::NG::ViewAnimate {
 namespace {

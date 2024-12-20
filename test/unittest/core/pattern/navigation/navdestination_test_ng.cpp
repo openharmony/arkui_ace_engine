@@ -819,7 +819,7 @@ HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
     EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
 }
 
-/*
+/**
  * @tc.name: SetSystemTransitionType001
  * @tc.desc: Test SetTitlebarOptions function with specific node.
  * @tc.type: FUNC
