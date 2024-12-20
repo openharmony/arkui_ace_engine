@@ -29,6 +29,7 @@ namespace  {
     const auto ATTRIBUTE_SET_FLEX_DIRECTION_DEFAULT_VALUE = "FlexDirection.Row";
     const auto ATTRIBUTE_SET_FLEX_WRAP_NAME = "wrap";
     const auto ATTRIBUTE_SET_FLEX_WRAP_DEFAULT_VALUE = "FlexWrap.NoWrap";
+    const auto ATTRIBUTE_SET_FLEX_WRAP_VALUE = "FlexWrap.Wrap";
     const auto ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_NAME = "justifyContent";
     const auto ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_DEFAULT_VALUE = "FlexAlign.Start";
     const auto ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_NAME = "alignItems";
@@ -39,7 +40,6 @@ namespace  {
     const auto ATTRIBUTE_SET_FLEX_SPACE_DEFAULT_VALUE = "0.00px";
     const auto ATTRIBUTE_SET_FLEX_DIRECTION_VALID_VALUE = "FlexDirection.Column";
     const auto ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_VALID_VALUE = "FlexAlign.Center";
-    const auto ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_WRAP_VALUE = "ItemAlign.Start";
     const auto ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_VALID_VALUE = "ItemAlign.Center";
     const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
     const auto ATTRIBUTE_POINT_LIGHT_LIGHT_SOURCE_NAME = "lightSource";
@@ -179,13 +179,13 @@ HWTEST_F(FlexModifierTest, SetFlexOptionsTestWrapValues, TestSize.Level1)
     auto flexConstructorAttrs = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SET_FLEX_CONSTRUCTOR_NAME);
 
     auto wrapAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_WRAP_NAME);
-    EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_DEFAULT_VALUE);
+    EXPECT_EQ(wrapAttr, ATTRIBUTE_SET_FLEX_WRAP_VALUE);
 
     auto alignItemAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_NAME);
-    EXPECT_EQ(alignItemAttr, ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_WRAP_VALUE);
+    EXPECT_EQ(alignItemAttr, ATTRIBUTE_SET_FLEX_ALIGN_ITEMS_VALID_VALUE);
 
     auto justifyContentAttr = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_NAME);
-    EXPECT_EQ(justifyContentAttr, ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_DEFAULT_VALUE);
+    EXPECT_EQ(justifyContentAttr, ATTRIBUTE_SET_FLEX_JUSTIFY_CONTENT_VALID_VALUE);
 
     auto flexDirection = flexConstructorAttrs->GetString(ATTRIBUTE_SET_FLEX_DIRECTION_NAME);
     EXPECT_EQ(flexDirection, ATTRIBUTE_SET_FLEX_DIRECTION_VALID_VALUE);

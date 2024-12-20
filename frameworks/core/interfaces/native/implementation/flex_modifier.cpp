@@ -61,9 +61,9 @@ void AssignCast(std::optional<WrapAlignment>& dst, const Ark_FlexAlign& src)
         case ARK_FLEX_ALIGN_START: dst = WrapAlignment::START; break;
         case ARK_FLEX_ALIGN_CENTER: dst = WrapAlignment::CENTER; break;
         case ARK_FLEX_ALIGN_END: dst = WrapAlignment::END; break;
-        case ARK_FLEX_ALIGN_SPACE_BETWEEN: dst = WrapAlignment::SPACE_AROUND; break;
-        case ARK_FLEX_ALIGN_SPACE_AROUND: dst = WrapAlignment::SPACE_BETWEEN; break;
-        case ARK_FLEX_ALIGN_SPACE_EVENLY: dst = WrapAlignment::STRETCH; break;
+        case ARK_FLEX_ALIGN_SPACE_BETWEEN: dst = WrapAlignment::SPACE_BETWEEN; break;
+        case ARK_FLEX_ALIGN_SPACE_AROUND: dst = WrapAlignment::SPACE_AROUND; break;
+        case ARK_FLEX_ALIGN_SPACE_EVENLY: dst = WrapAlignment::SPACE_EVENLY; break;
         default: LOGE("Unexpected enum value in Ark_FlexAlign: %{public}d", src);
     }
 }
@@ -73,10 +73,10 @@ void AssignCast(std::optional<WrapAlignment>& dst, const Ark_ItemAlign& src)
 {
     switch (src) {
         case ARK_ITEM_ALIGN_AUTO: dst = WrapAlignment::START; break;
-        case ARK_ITEM_ALIGN_START: dst = WrapAlignment::CENTER; break;
-        case ARK_ITEM_ALIGN_CENTER: dst = WrapAlignment::END; break;
-        case ARK_ITEM_ALIGN_END: dst = WrapAlignment::SPACE_AROUND; break;
-        case ARK_ITEM_ALIGN_BASELINE: dst = WrapAlignment::SPACE_BETWEEN; break;
+        case ARK_ITEM_ALIGN_START: dst = WrapAlignment::START; break;
+        case ARK_ITEM_ALIGN_CENTER: dst = WrapAlignment::CENTER; break;
+        case ARK_ITEM_ALIGN_END: dst = WrapAlignment::END; break;
+        case ARK_ITEM_ALIGN_BASELINE: dst = WrapAlignment::BASELINE; break;
         case ARK_ITEM_ALIGN_STRETCH: dst = WrapAlignment::STRETCH; break;
         default: LOGE("Unexpected enum value in Ark_ItemAlign: %{public}d", src);
     }
@@ -137,6 +137,7 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
         FlexModelNG::SetMainAxisAlign(frameNode, options->align);
         FlexModelNG::SetCrossAxisAlign(frameNode, options->alignItems);
     } else if (options->wrap == FlexWrap::WRAP or options->wrap == FlexWrap::WRAP_REVERSE) {
+        FlexModelNG::SetFlexWrap(frameNode);
         if (options->direction != std::nullopt) {
             FlexModelNG::SetFlexDirection(frameNode, options->direction);
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
