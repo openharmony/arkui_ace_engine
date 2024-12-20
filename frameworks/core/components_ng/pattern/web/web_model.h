@@ -170,6 +170,10 @@ public:
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
+    virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
+    virtual void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};

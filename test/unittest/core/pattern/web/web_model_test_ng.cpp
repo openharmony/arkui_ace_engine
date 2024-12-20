@@ -1395,6 +1395,40 @@ HWTEST_F(WebModelTestNg, SetNativeVideoPlayerConfig029, TestSize.Level1)
 }
 
 /**
+ * @tc.name: JavaScriptOnDocumentStart030
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, JavaScriptOnDocumentStart030, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    webModelNG.JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentStartScriptItems_, std::nullopt);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentEnd031
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd031, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    ScriptItems scriptItemsEnd;
+    ScriptItemsByOrder scriptItemsByOrder;
+    webModelNG.JavaScriptOnDocumentEndByOrder(scriptItemsEnd, scriptItemsByOrder);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentEndScriptItems_, std::nullopt);
+#endif
+}
+
+/**
  * @tc.name: SetFirstMeaningfulPaintId001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC

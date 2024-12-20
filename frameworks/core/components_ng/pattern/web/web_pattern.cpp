@@ -3156,8 +3156,14 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
-        UpdateJavaScriptOnDocumentStart();
-        UpdateJavaScriptOnDocumentEnd();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            UpdateJavaScriptOnDocumentStartByOrder();
+            UpdateJavaScriptOnDocumentEndByOrder();
+        } else {
+            UpdateJavaScriptOnDocumentStart();
+            UpdateJavaScriptOnDocumentEnd();
+        }
+
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
@@ -6596,6 +6602,27 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     }
 }
 
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        delegate_->JavaScriptOnDocumentStartByOrder();
+    }
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentEndByOrder();
+        delegate_->JavaScriptOnDocumentEndByOrder();
+    }
+}
+
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
@@ -6611,6 +6638,26 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
     if (delegate_ && onDocumentStartScriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
         onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStartByOrder()
+{
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START,
+            onDocumentStartScriptItemsByOrder_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
+{
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END,
+            onDocumentEndScriptItemsByOrder_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
 
