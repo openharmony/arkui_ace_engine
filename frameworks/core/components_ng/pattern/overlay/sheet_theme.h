@@ -219,12 +219,12 @@ public:
         return closeIconSource_;
     }
 
-    const int& GetSheetShadowConfig() const
+    const uint32_t GetSheetShadowConfig() const
     {
         return sheetShadowConfig_;
     }
 
-    const int& GetSheetShadowConfigS() const
+    const uint32_t GetSheetShadowConfigS() const
     {
         return sheetShadowConfigS_;
     }
@@ -292,8 +292,8 @@ private:
     double sheetNormalScale_;
     double sheetMaxAgingScale_;
     uint32_t closeIconSource_ = 0;
-    int sheetShadowConfig_;
-    int sheetShadowConfigS_;
+    uint32_t sheetShadowConfig_;
+    uint32_t sheetShadowConfigS_;
     Dimension sheetOuterBorderWidth_;
     Dimension sheetInnerBorderWidth_;
     bool isOuterBorderEnable_;
