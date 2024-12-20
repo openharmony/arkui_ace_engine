@@ -220,9 +220,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetOnChange(frameNode, convValue);
-    LOGE("TextInputInterfaceModifier::OnChangeImpl not implemented");
+    auto onChange = [arkCallback = CallbackHelper(*value)](const std::string& value, PreviewText& previewText) {
+        arkCallback.Invoke(Converter::ArkValue<Ark_String>(value), Converter::ArkValue<Opt_PreviewText>(previewText));
+    };
+    TextFieldModelNG::SetOnChange(frameNode, onChange);
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
                                const OnTextSelectionChangeCallback* value)
@@ -332,9 +333,13 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetOnPaste(frameNode, convValue);
-    LOGE("TextInputInterfaceModifier::OnPasteImpl not implemented");
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::string& content) {
+        auto arkContent = Converter::ArkValue<Ark_String>(content);
+        Ark_PasteEvent arkEvent;
+        arkEvent.preventDefault = {};
+        arkCallback.Invoke(arkContent, arkEvent);
+    };
+    TextFieldModelNG::SetOnPaste(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)

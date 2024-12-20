@@ -288,6 +288,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static RefPtr<TextFieldControllerBase> GetController(FrameNode* frameNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value);
+    static void SetOnPaste(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
 
 private:
     void AddDragFrameNodeToManager() const;
