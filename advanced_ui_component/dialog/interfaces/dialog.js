@@ -3545,6 +3545,19 @@ class CustomDialogContentComponent extends ViewPU {
     }
 }
 function __Button__setButtonProperties(u3, v3, w3) {
+    Button.onKeyEvent((event) => {
+        if (!event) {
+            return;
+        }
+        if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER)
+            && event.type === KeyType.Down) {
+            if (buttonOptions.action) {
+                buttonOptions.action();
+            }
+            controller?.close();
+        }
+        event.stopPropagation();
+    });
     Button.onClick(() => {
         if (u3.action) {
             u3.action();
