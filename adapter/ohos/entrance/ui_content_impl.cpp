@@ -458,8 +458,6 @@ private:
     {
         auto container = Platform::AceContainer::GetContainer(instanceId_);
         CHECK_NULL_RETURN(container, false);
-        auto taskExecutor = container->GetTaskExecutor();
-        CHECK_NULL_RETURN(taskExecutor, false);
         auto context = container->GetPipelineContext();
         CHECK_NULL_RETURN(context, false);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(context);
@@ -484,12 +482,17 @@ private:
         } else {
             lastRotation = -1;
         }
-        if (textFieldManager->GetLaterAvoid()) {
-            auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
-            if (NearEqual(laterRect.Height(), keyboardRect.Height())) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "will trigger avoid later, ignore this notify");
-                return true;
-            }
+        auto alreadyTriggerCallback = textFieldManager->GetFocusFieldAlreadyTriggerWsCallback();
+        textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(false);
+        if (alreadyTriggerCallback && lastRotation == textFieldManager->GetFocusFieldOrientation()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "input already trigger OnWindowSizeChange, go avoid");
+            textFieldManager->SetLaterAvoid(false);
+            return false;
+        }
+        auto laterRect = textFieldManager->GetLaterAvoidKeyboardRect();
+        if (textFieldManager->GetLaterAvoid() && NearEqual(laterRect.Height(), keyboardRect.Height())) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "will trigger avoid later, ignore this notify");
+            return true;
         }
         // do not avoid immediately when device is in rotation, trigger it after context trigger root rect update
         if (isRotate && !NearZero(lastKeyboardHeight) && !NearZero(keyboardRect.Height())) {

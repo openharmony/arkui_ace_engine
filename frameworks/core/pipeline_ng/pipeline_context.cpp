@@ -1428,7 +1428,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-            safeAreaManager_->UpdateKeyboardSafeArea(0.0f);
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
@@ -1490,10 +1489,11 @@ void PipelineContext::PostKeyboardAvoidTask()
             weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
-            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
             manager->SetLaterAvoid(false);
+            manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
         TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
