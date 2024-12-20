@@ -264,7 +264,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
                 tabBarNode->ReplaceChild(oldColumnNode, columnNode);
             }
         }
-        auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
+        auto tabBarItemPadding = Dimension(0);
         auto layoutProperty = columnNode->GetLayoutProperty();
         layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
             CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
