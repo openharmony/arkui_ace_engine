@@ -14,13 +14,11 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/styled_string.h"
 #include "core/interfaces/native/implementation/styled_string_peer.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/text/html_utils.h"
-#include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG {
 using StyleValueOptions = std::variant<
@@ -368,6 +366,167 @@ RefPtr<SpanBase> Convert(const StyleOptions& src)
     }
     return nullptr;
 }
+
+template<typename T>
+struct StyleOptionsTypes {};
+template<>
+struct StyleOptionsTypes<Ark_TextStyle_styled_string> {
+    using Style = Font;
+    using Span = FontSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_FONT;
+};
+template<>
+struct StyleOptionsTypes<Ark_BaselineOffsetStyle> {
+    using Style = Dimension;
+    using Span = BaselineOffsetSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_BASELINE_OFFSET;
+};
+template<>
+struct StyleOptionsTypes<Ark_LetterSpacingStyle> {
+    using Style = Dimension;
+    using Span = LetterSpacingSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_LETTER_SPACING;
+};
+template<>
+struct StyleOptionsTypes<Ark_TextShadowStyle> {
+    using Style = std::vector<Shadow>;
+    using Span = TextShadowSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_TEXT_SHADOW;
+};
+template<>
+struct StyleOptionsTypes<Ark_GestureStyle> {
+    using Style = GestureStyle;
+    using Span = GestureSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_GESTURE;
+};
+template<>
+struct StyleOptionsTypes<Ark_ParagraphStyle> {
+    using Style = SpanParagraphStyle;
+    using Span = ParagraphStyleSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_PARAGRAPH_STYLE;
+};
+template<>
+struct StyleOptionsTypes<Ark_LineHeightStyle> {
+    using Style = Dimension;
+    using Span = LineHeightSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_LINE_HEIGHT;
+};
+template<>
+struct StyleOptionsTypes<Ark_UrlStyle> {
+    using Style = std::string;
+    using Span = UrlSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_URL;
+};
+template<>
+struct StyleOptionsTypes<Ark_BackgroundColorStyle> {
+    using Style = std::optional<TextBackgroundStyle>;
+    using Span = BackgroundColorSpan;
+    static constexpr Ark_StyledStringKey KEY = ARK_STYLED_STRING_KEY_BACKGROUND_COLOR;
+};
+
+struct StyleOptionsData {
+    explicit StyleOptionsData(const Ark_StyleOptions& src)
+        : start(Converter::OptConvert<int32_t>(src.start).value_or(0)),
+        end(Converter::OptConvert<int32_t>(src.length).value_or(0) + start),
+        key(src.styledKey) {}
+
+    int32_t start;
+    int32_t end;
+    Ark_StyledStringKey key;
+    RefPtr<SpanBase> result;
+};
+
+template<typename T>
+RefPtr<SpanBase> CreateSpan(const T& value, const StyleOptionsData& data)
+{
+    CHECK_NULL_RETURN(StyleOptionsTypes<T>::KEY == data.key, nullptr);
+    auto convValue = OptConvert<typename StyleOptionsTypes<T>::Style>(value);
+    if (!convValue.has_value()) {
+        convValue = typename StyleOptionsTypes<T>::Style();
+    }
+    return AceType::MakeRefPtr<typename StyleOptionsTypes<T>::Span>(convValue.value(), data.start, data.end);
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_DecorationStyle& value, const StyleOptionsData& data)
+{
+    CHECK_NULL_RETURN(ARK_STYLED_STRING_KEY_DECORATION == data.key, nullptr);
+    auto convValue = Convert<DecorationSpanOptions>(value);
+    return AceType::MakeRefPtr<DecorationSpan>(convValue.type, convValue.color, convValue.style, data.start, data.end);
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_UserDataSpan&, const StyleOptionsData& data)
+{
+    CHECK_NULL_RETURN(ARK_STYLED_STRING_KEY_USER_DATA == data.key, nullptr);
+    return AceType::MakeRefPtr<ExtSpan>(data.start, data.end);
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_ImageAttachment&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_ImageAttachment is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_CustomSpan&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_CustomSpan is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_BaselineOffsetStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_BaselineOffsetStyle is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_LetterSpacingStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_LetterSpacingStyle is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_TextShadowStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_TextShadowStyle is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_GestureStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_GestureStyle> is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_LineHeightStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_LineHeightStyle> is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_UrlStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_UrlStyle> is not implemented.");
+    return nullptr;
+}
+template<>
+RefPtr<SpanBase> CreateSpan(const Ark_BackgroundColorStyle&, const StyleOptionsData& data)
+{
+    LOGE("Converter::Convert the Ark_BackgroundColorStyle> is not implemented.");
+    return nullptr;
+}
+
+template<>
+RefPtr<SpanBase> Convert(const Ark_StyleOptions& src)
+{
+    StyleOptionsData data(src);
+    Converter::VisitUnion(src.styledValue,
+        [&data](const auto& style) {
+            data.result = CreateSpan(style, data);
+        },
+        []() {}
+    );
+    return data.result;
+}
+
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
