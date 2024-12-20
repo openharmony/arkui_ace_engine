@@ -568,7 +568,10 @@ public:
     }
     void InitScrollBarGestureEvent();
 
-    void ScrollPage(
+    virtual void InitScrollBarClickEvent();
+    void HandleClickEvent();
+    void InitScrollBarMouseEvent();
+    virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
 
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
@@ -629,6 +632,10 @@ public:
     {
         hotZoneScrollCallback_ = func;
     }
+
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
 
@@ -934,6 +941,8 @@ private:
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

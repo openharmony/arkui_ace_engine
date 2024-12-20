@@ -1294,17 +1294,23 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    StopAnimate();
-    if (!isConfigScrollable_) {
-        return;
-    }
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    if (smooth) {
+        float position = -gridLayoutInfo_.currentHeight_ + distance;
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        return;
+    } else {
+        if (!isConfigScrollable_) {
+            return;
+        }
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 

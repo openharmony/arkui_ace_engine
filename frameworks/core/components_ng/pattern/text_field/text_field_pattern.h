@@ -861,6 +861,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckMousePressedOverScrollBar(GestureEvent& info);
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
@@ -1362,6 +1363,10 @@ public:
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
 
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    void InitScrollBarClickEvent() override {}
+
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -1628,6 +1633,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
@@ -1886,6 +1892,7 @@ private:
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> maxFontSizeScale_;
     float lastCaretPos_ = 0.0f;
+    bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

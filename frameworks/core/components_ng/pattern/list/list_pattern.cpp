@@ -1559,7 +1559,7 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
@@ -1572,17 +1572,20 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     return true;
 }
 
-bool ListPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    LOGI("ScrollPage:%{public}d", reverse);
-    StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-    isScrollEnd_ = true;
-    return true;
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+        isScrollEnd_ = true;
+    }
 }
 
 void ListPattern::ScrollBy(float offset)

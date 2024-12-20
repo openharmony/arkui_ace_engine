@@ -2312,7 +2312,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
-
+    if (CheckMousePressedOverScrollBar(info)) {
+        return;
+    }
     selectOverlay_->SetLastSourceType(info.GetSourceDevice());
     selectOverlay_->SetUsingMouse(info.GetSourceDevice() == SourceType::MOUSE);
     lastClickTimeStamp_ = info.GetTimeStamp();
@@ -2330,6 +2332,23 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+}
+
+bool TextFieldPattern::CheckMousePressedOverScrollBar(GestureEvent& info)
+{
+    if (IsMouseOverScrollBar(info) && hasMousePressed_) {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, false);
+        if (layoutProperty->GetDisplayModeValue(DisplayMode::AUTO) != DisplayMode::OFF) {
+            Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+            bool reverse = false;
+            if (GetScrollBar()->AnalysisUpOrDown(point, reverse)) {
+                ScrollPage(reverse);
+            }
+            return true;
+        }
+    }
+    return false;
 }
 
 bool TextFieldPattern::HandleBetweenSelectedPosition(const GestureEvent& info)
@@ -3296,6 +3315,13 @@ bool TextFieldPattern::IsOnUnitByPosition(const Offset& globalOffset)
     return frameNode->GetGeometryNode()->GetFrameRect().IsInRegion({ localOffset.GetX(), localOffset.GetY() });
 }
 
+bool TextFieldPattern::IsMouseOverScrollBar(const GestureEvent& info)
+{
+    CHECK_NULL_RETURN(GetScrollBar(), false);
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    return GetScrollBar()->InBarRectRegion(point);
+}
+
 void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 {
     selectController_->UpdateCaretIndex(
@@ -3423,6 +3449,11 @@ void TextFieldPattern::InitMouseEvent()
         auto pattern = weak.Upgrade();
         if (pattern) {
             pattern->HandleMouseEvent(info);
+            if (info.GetButton() == MouseButton::LEFT_BUTTON && info.GetAction() == MouseAction::PRESS) {
+                pattern->hasMousePressed_ = true;
+            } else {
+                pattern->hasMousePressed_ = false;
+            }
         }
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
@@ -3561,7 +3592,8 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
 #ifdef WINDOW_SCENE_SUPPORTED
     windowId = static_cast<int32_t>(GetSCBSystemWindowId());
 #endif
-    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover())) {
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    if (scrollBar && (scrollBar->IsPressed() || scrollBar->IsHover() || scrollBar->InBarRectRegion(point))) {
         pipeline->SetMouseStyleHoldNode(frameId);
         pipeline->ChangeMouseStyle(frameId, MouseFormat::DEFAULT, windowId);
         return;
@@ -8822,6 +8854,16 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
 }
+
+void TextFieldPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
+{
+    auto border = GetBorderWidthProperty();
+    float maxFrameHeight =
+        frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
+    float distance = reverse ? maxFrameHeight : -maxFrameHeight;
+    OnScrollCallback(distance, SCROLL_FROM_JUMP);
+}
+
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const
 {
     auto border = GetBorderWidthProperty();

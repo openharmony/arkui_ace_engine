@@ -276,6 +276,21 @@ public:
         return false;
     }
 
+    void InitClickEvent();
+    void HandleClickEvent();
+    void InitLongPressEvent();
+    void HandleLongPress(bool smooth);
+    void InitMouseEvent();
+    bool IsInScrollBar();
+    void ScheduleCaretLongPress();
+    void StartLongPressEventTimer();
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+
     void AddScrollBarLayoutInfo();
 
     void GetAxisDumpInfo();
@@ -301,6 +316,8 @@ public:
 
 private:
     void OnModifyDone() override;
+    void SetBarCollectClickAndLongPressTargetCallback();
+    void SetInBarRectRegionCallback();
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void ValidateOffset();
@@ -345,6 +362,15 @@ private:
 
     // dump info
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
+    bool isMousePressed_ = false;
+    RefPtr<ClickEvent> clickListener_;
+    RefPtr<ClickRecognizer> clickRecognizer_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    RefPtr<InputEvent> mouseEvent_;
+    Offset locationInfo_;
+    //Determine whether the current scroll direction is scrolling upwards or downwards
+    bool scrollingUp_ = false;
+    bool scrollingDown_ = false;
 };
 
 } // namespace OHOS::Ace::NG

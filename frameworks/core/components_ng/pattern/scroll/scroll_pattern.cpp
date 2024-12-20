@@ -581,25 +581,23 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true);
+        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
     }
     JumpToPosition(position);
 }
 
-bool ScrollPattern::ScrollPage(
-    bool reverse, bool smooth, AccessibilityScrollType scrollType, const std::function<void()>& onFinish)
+void ScrollPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
+    CHECK_NULL_VOID(host);
     float distance = reverse ? viewPortLength_ : -viewPortLength_;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
     ACE_SCOPED_TRACE(
         "Scroll ScrollPage distance:%f, id:%d", distance, static_cast<int32_t>(host->GetAccessibilityId()));
-    ScrollBy(distance, distance, smooth, onFinish);
-    return true;
+    ScrollBy(distance, distance, smooth);
 }
 
 void ScrollPattern::JumpToPosition(float position, int32_t source)
