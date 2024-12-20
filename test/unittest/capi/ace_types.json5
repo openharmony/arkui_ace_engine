@@ -2450,6 +2450,11 @@
             "disable":[
                 "setDragPreviewTestDragPreviewDragItemInfoExtraInfoInvalidValues",
                 "setDragPreviewTestDragPreviewDragItemInfoExtraInfoValidValues",
+                "setChainWeightTestDefaultValues",
+                "setChainWeightTestChainWeightHorizontalValidValues",
+                "setChainWeightTestChainWeightHorizontalInvalidValues",
+                "setChainWeightTestChainWeightVerticalValidValues",
+                "setChainWeightTestChainWeightVerticalInvalidValues",
             ],
             "remove":[
                 "setUseSizeTypeTestUseSizeTypeXsLiteral_Number_offset_spanSpanValidValues",
@@ -2519,11 +2524,6 @@
                 "setAlignRules0TestDefaultValues",
                 "setAlignRules1TestDefaultValues",
                 "setMarkAnchorTestValidValues", //above tests replaced by manual UT
-                "setChainWeightTestDefaultValues",
-                "setChainWeightTestChainWeightHorizontalValidValues",
-                "setChainWeightTestChainWeightHorizontalInvalidValues",
-                "setChainWeightTestChainWeightVerticalValidValues",
-                "setChainWeightTestChainWeightVerticalInvalidValues",
                 "setSafeAreaPaddingTestDefaultValues",
                 "setSafeAreaPaddingTestValidValues",
                 "setTabStopTestDefaultValues",
@@ -3137,6 +3137,19 @@
                     "name": "focusScopePriority",
                     "default": "FocusPriority.AUTO",
                     "arguments": ["^focusScopePriority", "^"],
+                },
+                {
+                    "name": "chainWeight",
+                    "attributes": [
+                        {
+                            "name": "horizontal",
+                            "default": "",
+                        },
+                        {
+                            "name": "vertical",
+                            "default": "",
+                        }
+                    ]
                 },
                 {
                     "name": "alignRules",
