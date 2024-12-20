@@ -48,42 +48,7 @@ void AddPathImpl(Path2DPeer* peer,
     CHECK_NULL_VOID(opt);
     auto matrix = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
     CHECK_NULL_VOID(matrix);
-   
-    
-//     peer->path2d->AddPath(peer2->path2d);
-//     auto transform = matrix->transform;
-//     peer->path2d->SetTransform(transform.scaleX, transform.skewX, transform.)
-
-
-//  // one parameter
-//     auto* jsPath2d = args.UnwrapArg<JSPath2D>(0);
-//     CHECK_NULL_VOID(jsPath2d);
-//     auto canvasPath2D = jsPath2d->GetCanvasPath2d();
-//     path2d_->AddPath(canvasPath2D);  // добавить из аргументов path2D
-//     SetPathSize(args);
-
-
-//     // two parameters
-//     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TEN)) {
-//         auto* jsMatrix2d = args.UnwrapArg<JSMatrix2d>(1);
-//         if (jsMatrix2d) {
-//             path2d_->SetTransform(jsMatrix2d->JsGetScaleX(), jsMatrix2d->JsGetRotateX(), jsMatrix2d->JsGetRotateY(),
-//                 jsMatrix2d->JsGetScaleY(), jsMatrix2d->JsGetTranslateX(), jsMatrix2d->JsGetTranslateY());
-//             SetPathSize(args);
-//         }
-//         return;
-//     }
-//     if (args[1]->IsObject()) {
-//         JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[1]);
-//         TransformParam param = JSMatrix2d::GetTransformInfo(jsObj);
-//         double density = GetDensity();
-//         param.translateX *= density;
-//         param.translateY *= density;
-//         path2d_->SetTransform(param.scaleX, param.skewX, param.skewY, param.scaleY, param.translateX, param.translateY);
-//         SetPathSize(args);
-//     }
-    
-}
+ }
 } // Path2DAccessor
 const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
 {
