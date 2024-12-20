@@ -3897,4 +3897,23 @@ void ScrollablePattern::StopScrollableAndAnimate()
         animator_->Stop();
     }
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ScrollablePattern::SetDigitalCrownEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollableEvent = GetScrollableEvent();
+    CHECK_NULL_VOID(scrollableEvent);
+    auto scrollableControler = scrollableEvent->GetScrollable();
+    CHECK_NULL_VOID(scrollableControler);
+    scrollableControler->ListenDigitalCrownEvent(host);
+    scrollableControler->SetDigitalCrownSensitivity(crownSensitivity_);
+}
+
+void ScrollablePattern::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    crownSensitivity_ = sensitivity;
+}
+#endif
 } // namespace OHOS::Ace::NG
