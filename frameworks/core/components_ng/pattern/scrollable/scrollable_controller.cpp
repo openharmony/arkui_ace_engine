@@ -175,4 +175,11 @@ Rect ScrollableController::GetItemRect(int32_t index) const
                 Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
                 Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
 }
+
+int32_t ScrollableController::GetItemIndex(double x, double y) const
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, -1);
+    return pattern->GetItemIndex(x, y);
+}
 } // namespace OHOS::Ace::NG

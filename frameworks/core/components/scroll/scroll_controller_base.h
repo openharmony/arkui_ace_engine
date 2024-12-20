@@ -60,6 +60,12 @@ enum class ScrollAlign {
     NONE,
 };
 
+struct ListItemGroupIndex {
+    int32_t index = -1;
+    int32_t area = -1;
+    int32_t indexInGroup = -1;
+};
+
 using OnFinishFunc = std::function<void()>;
 class ACE_EXPORT ScrollControllerBase : public AceType {
     DECLARE_ACE_TYPE(ScrollControllerBase, AceType);
@@ -102,10 +108,22 @@ public:
     {
         return Rect();
     }
+
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
     {
         return Rect();
     }
+
+    virtual ListItemGroupIndex GetItemIndexInGroup(double x, double y) const
+    {
+        return ListItemGroupIndex();
+    }
+
     virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 
     virtual void SetObserver(const ScrollerObserver& observer) {}

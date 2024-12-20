@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -445,6 +446,17 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
 }
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const

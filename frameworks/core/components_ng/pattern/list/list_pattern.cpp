@@ -46,6 +46,8 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr int DEFAULT_HEADER_VALUE = 2;
+constexpr int DEFAULT_FOOTER_VALUE = 3;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -1647,6 +1649,145 @@ Rect ListPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+int32_t ListPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
+ListItemIndex ListPattern::GetItemIndexInGroup(double x, double y) const
+{
+    ListItemIndex itemIndex = { -1, -1, -1 };
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemIndex);
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto groupItemPattern  = itemFrameNode->GetPattern<ListItemGroupPattern>();
+        if (groupItemPattern) {
+            if (GetGroupItemIndex(x, y, itemFrameNode, index, itemIndex)) {
+                return itemIndex;
+            }
+        } else {
+            Rect rect = GetItemRect(index);
+            if (rect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                return itemIndex;
+            }
+        }
+    }
+    return itemIndex;
+}
+
+bool ListPattern::GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode,
+    int32_t& index, ListItemIndex& itemIndex) const
+{
+    auto groupItemPattern = itemFrameNode->GetPattern<ListItemGroupPattern>();
+    Rect rect = GetItemRect(index);
+    if (groupItemPattern && rect.IsInRegion({x, y})) {
+        itemIndex.index = index;
+        for (int32_t groupIndex = groupItemPattern->GetDisplayStartIndexInGroup();
+            groupIndex <= groupItemPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            Rect groupRect = GetItemRectInGroup(index, groupIndex);
+            if (groupRect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                itemIndex.area = 1; // item area
+                itemIndex.indexInGroup = groupIndex;
+                return true;
+            }
+        }
+
+        int32_t areaValue = 0;
+        if (GetAxis() == Axis::VERTICAL) {
+            areaValue = ProcessAreaVertical(x, y, rect, index, groupItemPattern);
+        } else {
+            areaValue = ProcessAreaHorizontal(x, y, rect, index, groupItemPattern);
+        }
+        if (areaValue != -1) {
+            itemIndex.index = index;
+            itemIndex.area = areaValue;
+            itemIndex.indexInGroup = -1;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int32_t ListPattern::ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(y, firstRect.Top()) && GreatOrEqual(y, groupRect.Top())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(y, endRect.Bottom()) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float topPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->top.value_or(0.0f);
+        float bottomPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->bottom.value_or(0.0f);
+        if (LessOrEqual(y, groupRect.Top() + headerHeight + topPaddng)  && GreatOrEqual(y, groupRect.Top())) { //header
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(y, groupRect.Bottom() - footerHeight - bottomPaddng) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(y, groupRect.Top())  && LessOrEqual(y, groupRect.Bottom())) {
+        return  0;
+    }
+
+    return -1;
+}
+
+int32_t ListPattern::ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(x, firstRect.Left()) && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(x, endRect.Right()) && LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float leftPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->left.value_or(0.0f);
+        float rightPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->right.value_or(0.0f);
+        if (LessOrEqual(x, groupRect.Left() + headerHeight + leftPaddng)  && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(x, groupRect.Right() - footerHeight - rightPaddng) &&
+            LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(x, groupRect.Left())  && LessOrEqual(x, groupRect.Right())) {
+        return  0;
+    }
+
+    return -1;
 }
 
 Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const

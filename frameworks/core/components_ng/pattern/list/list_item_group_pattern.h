@@ -162,6 +162,18 @@ public:
         }
     }
 
+    bool IsHasHeader()
+    {
+        auto headerNode = DynamicCast<FrameNode>(header_.Upgrade());
+        return headerNode ? true : false;
+    }
+
+    bool IsHasFooter()
+    {
+        auto footerGroup = DynamicCast<FrameNode>(footer_.Upgrade());
+        return footerGroup ? true : false;
+    }
+
     const ListItemGroupLayoutAlgorithm::PositionMap& GetItemPosition()
     {
         return itemPosition_;
