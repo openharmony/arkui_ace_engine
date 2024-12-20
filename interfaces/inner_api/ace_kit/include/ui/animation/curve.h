@@ -24,7 +24,6 @@
 #include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
-
 class NativeCurveHelper;
 
 constexpr double SQUARE = 2.0;
@@ -415,6 +414,6 @@ private:
     float damping_ = 0.0f;
     float minimumAmplitudeRatio_ = DEFAULT_INTERPOLATING_SPRING_AMPLITUDE_RATIO;
 };
-} // OHOS::Ace
+} // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_ANIMATION_CURVE_H

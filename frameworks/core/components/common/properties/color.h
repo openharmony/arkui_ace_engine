@@ -21,13 +21,11 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/string_utils.h"
-#include "interfaces/inner_api/ace_kit/include/ui/properties/color.h"
 
 #include "ui/properties/color.h"
 #include "ui/properties/linear_color.h"
 
 namespace OHOS::Ace {
-
 
 enum class ForegroundColorStrategy : char {
     NONE,

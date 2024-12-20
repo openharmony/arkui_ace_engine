@@ -47,7 +47,6 @@ public:
     NG::LayoutWrapper* GetLayoutWrapper();
     RefPtr<UIContext> GetUIContext() const override;
     AceNode* GetAceNodePtr();
-    NG::LayoutWrapper* GetLayoutWrapper();
     RefPtr<Property> GetProperty() override;
     void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
 

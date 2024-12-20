@@ -13,19 +13,35 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H
-
-#include "ui/base/ace_type.h"
 #include "ui/view/draw/content_modifier.h"
 
+#include <memory>
+
+#include "interfaces/inner_api/ace_kit/src/view/draw/modifier_adapter.h"
+
 namespace OHOS::Ace::Kit {
-class NodePaintMethod : public AceType {
-    DECLARE_ACE_TYPE(NodePaintMethod, AceType);
 
-public:
-    virtual RefPtr<ContentModifier> GetContentModifier() = 0;
-};
+ContentModifier::ContentModifier() {}
+
+ContentModifier::~ContentModifier() {}
+
+void ContentModifier::AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property)
+{
+    if (modifierAdapter_) {
+        modifierAdapter_->AttachRSProperty(property);
+    }
+}
+
+void ContentModifier::InitAdapter()
+{
+    if (!modifierAdapter_) {
+        modifierAdapter_ = std::make_shared<ContentModifierAdapter>(Claim(this));
+    }
+}
+
+std::shared_ptr<ContentModifierAdapter> ContentModifier::GetRSModifier()
+{
+    return modifierAdapter_;
+}
+
 } // namespace OHOS::Ace::Kit
-
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_DRAW_NODE_PAINT_METHOD_H

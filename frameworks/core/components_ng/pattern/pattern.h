@@ -18,7 +18,7 @@
 
 #include <optional>
 
-#include "ui/base/dirty_flag.h"
+#include "ui/properties/dirty_flag.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
