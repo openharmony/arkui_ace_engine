@@ -1014,6 +1014,11 @@ public:
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
     }
 
+    bool IsDirtyPropertyNodesEmpty() const override
+    {
+        return dirtyPropertyNodes_.empty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
 

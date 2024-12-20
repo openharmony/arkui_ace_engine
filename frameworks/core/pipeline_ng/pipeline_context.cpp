@@ -837,7 +837,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
     if (AnimationUtils::IsImplicitAnimationOpen()) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        TAG_LOGD(AceLogTag::ACE_ANIMATION,
             "Can not flush implicit animation task after layout because implicit animation is open.");
         return;
     }
