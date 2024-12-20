@@ -658,14 +658,21 @@ void WaterFlowPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prevFooter = footer_.Upgrade();
-    if (!prevFooter) {
-        host->AddChild(footer);
-        layoutInfo_->footerIndex_ = 0;
-    } else {
-        host->ReplaceChild(prevFooter, footer);
+    if (prevFooter != footer) {
+        if (!prevFooter) {
+            host->AddChild(footer, 0);
+            layoutInfo_->footerIndex_ = 0;
+        } else if (!footer) {
+            host->RemoveChild(prevFooter);
+        } else {
+            host->ReplaceChild(prevFooter, footer);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     footer_ = footer;
-    footer->SetActive(false);
+    if (footer) {
+        footer->SetActive(false);
+    }
 }
 
 void WaterFlowPattern::SetLayoutMode(LayoutMode mode)
