@@ -134,6 +134,23 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
     dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
+RefPtr<FrameNode> UIExtensionModelNG::CreateEmbeddedFrameNode(int32_t nodeId)
+{
+    return FrameNode::GetOrCreateFrameNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, DEFAULT_EMBEDDED_SESSION_TYPE); });
+}
+
+void UIExtensionModelNG::UpdateEmbeddedFrameNode(FrameNode* frameNode,
+    const AAFwk::Want& wantWrap, SessionType sessionType)
+{
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
+        pattern->UpdateWant(wantWrap);
+    }
+    pattern->UpdateSessionType(sessionType);
+}
+
 // for DynamicComponent
 void UIExtensionModelNG::Create()
 {
