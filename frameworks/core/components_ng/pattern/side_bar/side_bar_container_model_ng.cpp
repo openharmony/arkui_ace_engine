@@ -41,7 +41,7 @@ ImageSourceInfo CreateSourceInfo(const std::string& src, bool isPixelMap, RefPtr
 
 void SideBarContainerModelNG::Create()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;

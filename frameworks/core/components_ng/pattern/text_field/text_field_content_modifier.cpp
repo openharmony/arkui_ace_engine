@@ -203,7 +203,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
         fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
         if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {

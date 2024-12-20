@@ -112,7 +112,7 @@ void SlidingPanelPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 }
@@ -154,7 +154,7 @@ void SlidingPanelPattern::OnWindowSizeChanged(int32_t width, int32_t height, Win
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
@@ -952,7 +952,7 @@ void SlidingPanelPattern::AddOrRemoveCloseIconNode(const RefPtr<SlidingPanelLayo
         auto closeIcon = FrameNode::GetOrCreateFrameNode(V2::PANEL_CLOSE_ICON_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<CloseIconPattern>(); });
         auto closeIconLayoutProperty = closeIcon->GetLayoutProperty<CloseIconLayoutProperty>();
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto closeIconTheme = pipeline->GetTheme<CloseIconTheme>();
         closeIconLayoutProperty->UpdateCloseIconWidth(closeIconTheme->GetCloseIconWidth());

@@ -506,7 +506,7 @@ void SliderPattern::CancelExceptionValue(float& min, float& max, float& step)
     if (value_ < min || value_ > max) {
         value_ = std::clamp(value_, min, max);
         sliderPaintProperty->UpdateValue(value_);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->AddAfterRenderTask([weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
@@ -866,7 +866,7 @@ OffsetF SliderPattern::CalculateGlobalSafeOffset()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, OffsetF());
     auto overlayGlobalOffset = host->GetPaintRectOffset();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto safeAreaManger = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManger, OffsetF());
@@ -1863,14 +1863,14 @@ void SliderPattern::AddIsFocusActiveUpdateEvent()
         };
     }
 
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
 
 void SliderPattern::RemoveIsFocusActiveUpdateEvent()
 {
-    auto pipline = PipelineContext::GetCurrentContext();
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
 }

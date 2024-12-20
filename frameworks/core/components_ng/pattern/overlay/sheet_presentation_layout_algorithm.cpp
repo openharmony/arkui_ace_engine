@@ -41,7 +41,7 @@ std::map<Placement, std::vector<Placement>> PLACEMENT_STATES = {
 
 void SheetPresentationLayoutAlgorithm::InitParameter()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -162,7 +162,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 operatorGeometryNode->GetFrameSize().Height() + builderGeometryNode->GetFrameSize().Height();
             float sheetMaxHeight = sheetMaxHeight_;
             if (SheetInSplitWindow()) {
-                auto pipelineContext = PipelineContext::GetCurrentContext();
+                auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
                 auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
                 sheetMaxHeight = windowGlobalRect.Height() - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
                     SHEET_SPLIT_AI_BAR.ConvertToPx();
@@ -189,7 +189,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    const auto& pipeline = PipelineContext::GetCurrentContext();
+    const auto& pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     sheetOffsetX_ = (sheetMaxWidth_ - sheetWidth_) / SHEET_HALF_SIZE;
     if (sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE) {
@@ -304,7 +304,7 @@ bool SheetPresentationLayoutAlgorithm::CheckDirectionBottom(const SizeF& targetS
 
 bool SheetPresentationLayoutAlgorithm::CheckPlacementBottom(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     return GreatOrEqual(
         windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(),
@@ -316,7 +316,7 @@ bool SheetPresentationLayoutAlgorithm::CheckPlacementBottom(const SizeF& targetS
 
 bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     return LessOrEqual(WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX()) &&
            GreatOrEqual(windowGlobalRect.Width() - WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX() + sheetWidth_);
@@ -324,7 +324,7 @@ bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft(const SizeF& tar
 
 bool SheetPresentationLayoutAlgorithm::CheckPlacementBottomRight(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     return LessOrEqual(WINDOW_EDGE_SPACE.ConvertToPx(), targetOffset.GetX() + targetSize.Width() - sheetWidth_) &&
            GreatOrEqual(
@@ -361,7 +361,7 @@ OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft(const SizeF& t
 
 OffsetF SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight(const SizeF& targetSize, const OffsetF& targetOffset)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     arrowOffsetX_ = sheetWidth_ - targetSize.Width() / SHEET_HALF_SIZE;
     auto sheetOffset = OffsetF(targetOffset.GetX() + targetSize.Width() - sheetWidth_,
@@ -475,7 +475,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     RefPtr<SheetPresentationProperty> layoutprop)
 {
     auto childConstraint = layoutprop->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, childConstraint);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, childConstraint);
@@ -495,7 +495,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
 bool SheetPresentationLayoutAlgorithm::SheetInSplitWindow() const
 {
     //whether window in up and down split mode
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto windowManager = pipelineContext->GetWindowManager();
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     int32_t deviceHeight = SystemProperties::GetDeviceHeight();

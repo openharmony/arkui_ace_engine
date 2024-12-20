@@ -94,7 +94,7 @@ bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
 
 void TextPickerColumnPattern::OnModifyDone()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
@@ -340,7 +340,7 @@ void TextPickerColumnPattern::PlayPressAnimation(const Color& pressColor)
 
 uint32_t TextPickerColumnPattern::GetShowOptionCount() const
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, 0);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, 0);

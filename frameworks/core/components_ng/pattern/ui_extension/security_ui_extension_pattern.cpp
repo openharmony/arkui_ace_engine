@@ -63,7 +63,7 @@ constexpr char UI_EXTENSION_TYPE_KEY[] = "ability.want.params.uiExtensionType";
 SecurityUIExtensionPattern::SecurityUIExtensionPattern()
     : PlatformPattern::PlatformPattern(AceLogTag::ACE_SECURITYUIEXTENSION, 0)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -82,7 +82,7 @@ SecurityUIExtensionPattern::~SecurityUIExtensionPattern()
 void SecurityUIExtensionPattern::UnregisterResources()
 {
     PLATFORM_LOGI("UnregisterResources.");
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -269,7 +269,7 @@ void SecurityUIExtensionPattern::OnConnect()
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     DispatchFollowHostDensity(GetDensityDpi());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
@@ -354,7 +354,7 @@ void SecurityUIExtensionPattern::NotifyDestroy()
 void SecurityUIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -385,7 +385,7 @@ void SecurityUIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
@@ -422,7 +422,7 @@ bool SecurityUIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 
 void SecurityUIExtensionPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetIsFocusActive()) {
         DispatchFocusActiveEvent(true);
@@ -438,7 +438,7 @@ void SecurityUIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -619,7 +619,7 @@ void SecurityUIExtensionPattern::OnMountToParentDone()
 
 void SecurityUIExtensionPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto uiExtension = weak.Upgrade();

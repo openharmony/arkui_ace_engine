@@ -113,7 +113,7 @@ void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const
     ACE_OFFSET_API_TEN_TO_JSON(Position);
     json->PutExtAttr("position", jsonPosition, filter);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     // add version protection, null as default start from API 10 or higher
     if (context && context->GetMinPlatformVersion() > static_cast<int32_t>(PlatformVersion::VERSION_NINE)) {
         if (propOffsetEdges.has_value()) {

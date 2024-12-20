@@ -294,7 +294,7 @@ void AnimatedSkImage::CacheFrame(const std::string& key)
 void AnimatedRSImage::CacheFrame(const std::string& key)
 #endif
 {
-    auto ctx = PipelineContext::GetCurrentContext();
+    auto ctx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -371,7 +371,7 @@ void AnimatedPixmap::DecodeImpl(uint32_t idx)
 
 void AnimatedPixmap::CacheFrame(const std::string& key)
 {
-    auto ctx = PipelineContext::GetCurrentContext();
+    auto ctx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ctx);
     auto cache = ctx->GetImageCache();
     CHECK_NULL_VOID(cache);

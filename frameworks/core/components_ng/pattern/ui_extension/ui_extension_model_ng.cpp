@@ -53,7 +53,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetDensityDpi(config.isDensityFollowHost);
     pattern->UpdateWant(want);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, frameNode);
     pipeline->AddWindowStateChangedCallback(nodeId);
     pattern->SetOnReleaseCallback(std::move(callbacks.onRelease));
@@ -104,7 +104,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     pattern->SetDensityDpi(densityDpi);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -126,7 +126,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
         pattern->UpdateWant(wantWrap);
     }
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -161,7 +161,7 @@ void UIExtensionModelNG::Create()
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
     CHECK_NULL_VOID(pattern);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
 }
@@ -191,7 +191,7 @@ void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& conf
     pattern->UpdateWant(config.wantWrap);
     pattern->SetDensityDpi(config.densityDpi);
     stack->Push(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     auto dragDropManager = pipeline->GetDragDropManager();

@@ -169,7 +169,7 @@ void PagePattern::ProcessShowState()
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto manager = context->GetSafeAreaManager();
     if (manager) {
@@ -241,7 +241,7 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
     CHECK_NULL_VOID(!isOnShow_);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
@@ -293,7 +293,7 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::GetInstance().FlushRecord();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
@@ -411,7 +411,7 @@ void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Fram
     CHECK_NULL_VOID(animatorInfo);
     auto animator = animatorInfo->GetAnimator();
     CHECK_NULL_VOID(animator);
-    animator->AttachScheduler(PipelineContext::GetCurrentContext());
+    animator->AttachScheduler(PipelineContext::GetCurrentContextSafelyWithCheck());
     jsAnimatorMap_[animatorId] = animatorInfo;
 }
 
@@ -446,7 +446,7 @@ void PagePattern::FirePageTransitionFinish()
 
 void PagePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
@@ -466,7 +466,7 @@ void PagePattern::BeforeCreateLayoutWrapper()
 
 bool PagePattern::AvoidKeyboard() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
 }
@@ -475,7 +475,7 @@ bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
     CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
@@ -536,7 +536,7 @@ RefPtr<PageTransitionEffect> PagePattern::GetDefaultPageTransition(PageTransitio
     auto resultEffect = AceType::MakeRefPtr<PageTransitionEffect>(type, PageTransitionOption());
     resultEffect->SetScaleEffect(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct));
     TranslateOptions translate;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto statusHeight = static_cast<float>(safeAreaInsets.top_.Length());
@@ -692,7 +692,7 @@ RefPtr<PageTransitionEffect> PagePattern::GetPageTransitionEffect(const RefPtr<P
         transition->GetScaleEffect().value_or(ScaleOptions(1.0f, 1.0f, 1.0f, 0.5_pct, 0.5_pct)));
     TranslateOptions translate;
     auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
     auto statusHeight = static_cast<float>(safeAreaInsets.top_.Length());
@@ -775,7 +775,7 @@ void PagePattern::FinishOutPage(const int32_t animationId)
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
     FocusViewHide();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (type_ == PageTransitionType::EXIT_POP) {
         auto stageNode = outPage->GetParent();
@@ -810,7 +810,7 @@ void PagePattern::FinishInPage(const int32_t animationId)
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
     FocusViewShow();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
     ResetPageTransitionEffect();

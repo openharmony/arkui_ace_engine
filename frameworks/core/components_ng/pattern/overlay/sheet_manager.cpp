@@ -81,7 +81,7 @@ int32_t GetOverlayAndTargetNode(int32_t targetId, const SheetStyle& sheetStyle, 
             instanceId = sheetStyle.instanceId.value_or(Container::CurrentId()), sheetContentNodeId]() {
             ContainerScope scope(instanceId);
             SheetManager::GetInstance().CleanBindSheetMap(instanceId, sheetContentNodeId);
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+            auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipelineContext);
             auto overlayManager = pipelineContext->GetOverlayManager();
             if (showInPage) {

@@ -49,7 +49,7 @@ void RichTextModelNG::Create(const std::string& webData)
 #endif
     webPattern->SetWebData(webData);
     isDataEmpty_ = webData.empty();
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(nodeId);
     pipeline->AddWindowSizeChangeCallback(nodeId);

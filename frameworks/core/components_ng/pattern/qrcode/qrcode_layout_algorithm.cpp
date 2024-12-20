@@ -30,7 +30,7 @@ std::optional<SizeF> QRCodeLayoutAlgorithm::MeasureContent(
     auto layoutProperty = AceType::DynamicCast<LayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, std::nullopt);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_11) {
         auto topPadding = 0.0f;

@@ -32,7 +32,7 @@ void ContentRootPattern::BeforeCreateLayoutWrapper()
 
 SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, {});
 
     auto manager = pipeline->GetSafeAreaManager();

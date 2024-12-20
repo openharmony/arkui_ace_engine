@@ -83,7 +83,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t ta
         CHECK_NULL_RETURN(childContainer, false);
         pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
     } else {
-        pipeline = NG::PipelineContext::GetCurrentContext();
+        pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     }
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -136,7 +136,7 @@ void ViewAbstractModelNG::BindMenu(
     if (!expandDisplay) {
         auto destructor = [id = targetNode->GetId(), params]() mutable {
             params.clear();
-            auto pipeline = NG::PipelineContext::GetCurrentContext();
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
@@ -292,7 +292,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                             NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() +
                                                            menuParam.positionOffset.GetX(),
                                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                            auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
                             CHECK_NULL_VOID(pipelineContext);
                             auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
                             menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
@@ -323,7 +323,7 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
-                        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                        auto pipelineContext = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
                         CHECK_NULL_VOID(pipelineContext);
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
@@ -442,14 +442,14 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
         auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         return customNode;
     };
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
 
     // delete full screen modal when target node destroy
     auto destructor = [id = targetNode->GetId()]() {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
@@ -499,7 +499,7 @@ RefPtr<PipelineContext> ViewAbstractModelNG::GetSheetContext(NG::SheetStyle& she
         CHECK_NULL_RETURN(contextBase, nullptr);
         context = AceType::DynamicCast<PipelineContext>(contextBase);
     } else {
-        context = PipelineContext::GetCurrentContext();
+        context = PipelineContext::GetCurrentContextSafelyWithCheck();
     }
     return context;
 }
@@ -541,7 +541,7 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
                           rootNodeType = targetNode->GetRootNodeType(),
                           showInPage = sheetStyle.showInPage.value_or(false), instanceId]() {
         ContainerScope scope(instanceId);
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         if (showInPage) {
@@ -573,7 +573,7 @@ void ViewAbstractModelNG::DismissSheet()
 
 void ViewAbstractModelNG::DismissContentCover()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

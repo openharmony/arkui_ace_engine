@@ -405,7 +405,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionCon
         isNotifyOccupiedAreaChange_, realHostWindowId, parentWindowType);
     auto callerToken = container->GetToken();
     auto parentToken = container->GetParentToken();
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);

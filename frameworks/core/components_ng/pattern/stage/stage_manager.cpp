@@ -43,7 +43,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
         page->GetEventHub<EventHub>()->SetEnabled(false);
     }
     pagePattern->SetPageInTransition(true);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -77,7 +77,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
 
 void StageManager::StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sharedManager = pipeline->GetSharedOverlayManager();
     CHECK_NULL_VOID(sharedManager);
@@ -269,7 +269,7 @@ void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t v
 
 bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, bool needTransition)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
     const auto& children = stageNode_->GetChildren();
@@ -309,7 +309,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
 
 bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTransition)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
     const auto& children = stageNode_->GetChildren();
@@ -373,7 +373,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
 
 bool StageManager::CleanPageStack()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
     const auto& children = stageNode_->GetChildren();
@@ -394,7 +394,7 @@ bool StageManager::CleanPageStack()
 
 bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     CHECK_NULL_RETURN(stageNode_, false);
     const auto& children = stageNode_->GetChildren();
@@ -446,7 +446,7 @@ void StageManager::FirePageHide(const RefPtr<UINode>& node, PageTransitionType t
         pagePattern->ProcessHideState();
     }
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
 }
@@ -466,7 +466,7 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
     // With or without a page transition, we need to make the coming page visible first
     pagePattern->ProcessShowState();
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->MarkNeedFlushMouseEvent();
 #ifdef UICAST_COMPONENT_SUPPORTED

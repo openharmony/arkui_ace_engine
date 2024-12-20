@@ -434,7 +434,7 @@ void CalendarPickerModelNG::InitCalendarPicker(FrameNode* pickerNode, const Cale
     CHECK_NULL_VOID(pickerNode);
     auto pickerPattern = pickerNode->GetPattern<CalendarPickerPattern>();
     CHECK_NULL_VOID(pickerPattern);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);

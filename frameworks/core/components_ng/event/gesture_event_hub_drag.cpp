@@ -127,7 +127,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -146,7 +146,7 @@ void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
 void GestureEventHub::CancelDragForWeb()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop cancel drag for web");
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -171,7 +171,7 @@ void GestureEventHub::ResetDragActionForWeb()
 
     // fix drag failed when long press drag after 500ms and before 800ms
     // need to reset the state of the drag manager
-    auto pipeLine = PipelineContext::GetCurrentContext();
+    auto pipeLine = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeLine);
     auto dragDropManager = pipeLine->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -187,7 +187,7 @@ void GestureEventHub::StartDragTaskForWeb()
     }
 
     isReceivedDragGestureInfo_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);

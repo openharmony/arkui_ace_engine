@@ -241,7 +241,7 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
 float TitleBarLayoutAlgorithm::WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width)
 {
     float afterAvoidWidth = width;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, afterAvoidWidth);
     if (!pipeline->GetInstallationFree()) {
         return afterAvoidWidth;
@@ -1046,7 +1046,7 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void TitleBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline && pipeline->GetInstallationFree()) {
         //TitleBar run measure again during Layout in atomic service for avoiding menuBar
         Measure(layoutWrapper);

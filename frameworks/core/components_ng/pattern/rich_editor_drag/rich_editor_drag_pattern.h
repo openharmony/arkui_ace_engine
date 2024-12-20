@@ -67,7 +67,7 @@ public:
 
     Dimension GetDragCornerRadius() override
     {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, TEXT_DRAG_RADIUS);
         auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
         CHECK_NULL_RETURN(richEditorTheme, TEXT_DRAG_RADIUS);
