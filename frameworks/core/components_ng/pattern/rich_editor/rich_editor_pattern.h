@@ -1466,6 +1466,7 @@ private:
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 };
 } // namespace OHOS::Ace::NG
 
