@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -232,6 +233,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     if (contentReadyCallback) {
         contentReadyCallback();
     }
+    InitializeDynamicAccessibility();
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
 }
 
@@ -661,5 +663,44 @@ RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetHostTaskExecutor()
 void DynamicComponentRendererImpl::Dump(RendererDumpInfo &rendererDumpInfo)
 {
     rendererDumpInfo = rendererDumpInfo_;
+}
+
+void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->DumpInfo(params, info);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->DeregisterAccessibilityChildTree();
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->AccessibilityDumpChildInfo(params, info);
+}
+
+void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
+{
+    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
+        return;
+    }
+    auto dynamicHost = host_.Upgrade();
+    CHECK_NULL_VOID(dynamicHost);
+    auto pattern = AceType::DynamicCast<DynamicPattern>(dynamicHost->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeAccessibility();
 }
 } // namespace OHOS::Ace::NG

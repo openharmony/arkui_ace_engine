@@ -2571,7 +2571,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(uiExtensionManager, false);
     auto container = Container::GetContainer(ngPipeline->GetInstanceId());
-    bool isDynamicRender = container && container->IsDynamicRender();
+    bool isDynamicRender = container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT;
     if (!IsRegister() && !isDynamicRender) {
         return false;
     }
@@ -2709,7 +2710,8 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInner(
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
     auto container = Container::GetContainer(context->GetInstanceId());
-    if (container && container->IsDynamicRender()) {
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_UNKNOW_ID);
     } else {
         context->GetTaskExecutor()->PostTask(
@@ -2794,7 +2796,8 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInner(const Accessibilit
     GenerateAccessibilityEventInfo(accessibilityEvent, eventInfo);
 
     auto container = Container::GetContainer(context->GetInstanceId());
-    if (container && container->IsDynamicRender()) {
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         SendExtensionAccessibilityEvent(eventInfo, NG::UI_EXTENSION_OFFSET_MAX);
     } else {
         context->GetTaskExecutor()->PostTask(
