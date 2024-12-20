@@ -58,7 +58,8 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::INCREMENTAL_CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::INCREMENTAL_CANVAS,
+            .surfaceName = std::nullopt };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
