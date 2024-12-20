@@ -295,6 +295,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     onItemDragLeave(event: (event: ItemDragInfo, itemIndex: number) => void): this;
     onItemDrop(event: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     nestedScroll(value: NestedScrollOptions): this;
     enableScrollInteraction(value: boolean): this;
     friction(value: number | Resource): this;
@@ -897,6 +898,7 @@ declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute
     scrollBarColor(color: ResourceColor): this;
     scrollBarWidth(value: string | number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     onScrollFrameBegin(event: (offset: number, state: ScrollState) => {
         offsetRemain: number;
     }): this;
@@ -1746,6 +1748,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     scrollBarColor(value: string | number | Color): this;
     flingSpeedLimit(value: number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     contentStartOffset(value: number): this;
     contentEndOffset(value: number): this;
     divider(value: {
@@ -1891,6 +1894,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     scrollBarWidth(value: string | number): this;
     scrollBarColor(value: string | number | Color): this;
     scrollBar(value: BarState): this;

@@ -41,6 +41,7 @@ constexpr int32_t DEFAULT_DIVIDER_VALUES_COUNT = 3;
 constexpr float DEFAULT_OFFSET = 0.0f;
 
 constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
 
 constexpr int32_t ERROR_INT_CODE = -1;
 constexpr int32_t CALL_STROKE_WIDTH = 0;
@@ -658,6 +659,23 @@ void ResetListMaintainVisibleContentPosition(ArkUINodeHandle node)
     ListModelNG::SetListMaintainVisibleContentPosition(frameNode, false);
 }
 
+void SetListFadingEdge(
+    ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fadingEdgeLengthDimension =
+        Dimension(fadingEdgeLengthValue, static_cast<OHOS::Ace::DimensionUnit>(fadingEdgeLengthUnit));
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLengthDimension);
+}
+
+void ResetListFadingEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
+
 void SetShowCached(ArkUINodeHandle node, ArkUI_Bool show)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -687,18 +705,18 @@ const ArkUIListModifier* GetListModifier()
         SetMultiSelectable, ResetMultiSelectable, SetChainAnimation, ResetChainAnimation, SetCachedCount,
         ResetCachedCount, GetEnableScrollInteraction, SetEnableScrollInteraction, ResetEnableScrollInteraction,
         GetSticky, SetSticky, ResetSticky, GetListEdgeEffect, SetListEdgeEffect, ResetListEdgeEffect, GetListDirection,
-        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction,
-        GetListNestedScroll, SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar,
-        ResetListScrollBar, GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth,
-        GetListScrollBarColor, SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem,
-        ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset,
-        SetContentEndOffset, ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions,
-        ResetChainAnimationOptions, GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter,
-        GetNodeAdapter, GetCachedCount, SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex,
-        SetListChildrenMainSize, ResetListChildrenMainSize, SetListCloseAllSwipeActions,
-        SetListFlingSpeedLimit, ResetListFlingSpeedLimit, GetInitialIndex, GetlistDivider,
-        SetInitialScroller, ResetInitialScroller, SetListMaintainVisibleContentPosition,
-        ResetListMaintainVisibleContentPosition, SetShowCached, ResetShowCached, GetShowCached };
+        SetListDirection, ResetListDirection, GetListFriction, SetListFriction, ResetListFriction, GetListNestedScroll,
+        SetListNestedScroll, ResetListNestedScroll, GetListScrollBar, SetListScrollBar, ResetListScrollBar,
+        GetListScrollBarWidth, SetListScrollBarWidth, ResetListScrollBarWidth, GetListScrollBarColor,
+        SetListScrollBarColor, ResetListScrollBarColor, GetAlignListItem, SetAlignListItem, ResetAlignListItem,
+        SetScrollSnapAlign, ResetScrollSnapAlign, SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset,
+        ResetContentEndOffset, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        GetListSpace, SetListSpace, ResetListSpace, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, GetCachedCount,
+        SetScrollToIndex, SetScrollBy, SetInitialIndex, ResetInitialIndex, SetListChildrenMainSize,
+        ResetListChildrenMainSize, SetListCloseAllSwipeActions, SetListFlingSpeedLimit, ResetListFlingSpeedLimit,
+        GetInitialIndex, GetlistDivider, SetInitialScroller, ResetInitialScroller,
+        SetListMaintainVisibleContentPosition, ResetListMaintainVisibleContentPosition, SetListFadingEdge,
+        ResetListFadingEdge, SetShowCached, ResetShowCached, GetShowCached };
     return &modifier;
 }
 

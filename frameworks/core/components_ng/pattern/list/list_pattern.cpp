@@ -93,6 +93,10 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
@@ -309,16 +313,17 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         divider = listLayoutProperty->GetDivider().value();
     }
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto layoutDirection = listLayoutProperty->GetNonAutoLayoutDirection();
     auto drawVertical = (axis == Axis::HORIZONTAL);
-    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    auto drawDirection = (layoutDirection == TextDirection::RTL);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, drawDirection, lanes_, spaceWidth_);
+    if (drawDirection) {
+        paint->SetDirection(true);
+    }
     paint->SetScrollBar(GetScrollBar());
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
-    auto layoutDirection = listLayoutProperty->GetNonAutoLayoutDirection();
-    if (layoutDirection == TextDirection::RTL) {
-        paint->SetDirection(true);
-    }
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -340,6 +345,7 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetLaneGutter(laneGutter_);
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -691,6 +697,10 @@ bool ListPattern::IsAtBottom() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    auto res = GetOutBoundaryOffset(false);
+    if (Positive(res.start)) {
+        return false;
+    }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }

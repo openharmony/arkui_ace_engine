@@ -324,6 +324,7 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
 
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
     void LayoutForward(LayoutWrapper* layoutWrapper, int32_t startIndex, float startPos);
     void LayoutBackward(LayoutWrapper* layoutWrapper, int32_t endIndex, float endPos);

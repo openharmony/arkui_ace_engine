@@ -95,6 +95,14 @@ bool WaterFlowPattern::IsReverse() const
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->IsReverse();
 }
+bool WaterFlowPattern::IsVerticalReverse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->IsVerticalReverse();
+}
 OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
 {
     return layoutInfo_->GetOverScrolledDelta(static_cast<float>(delta));
@@ -167,7 +175,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), IsVerticalReverse());
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
@@ -181,6 +189,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -205,6 +214,12 @@ void WaterFlowPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     Register2DragDropManager();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void WaterFlowPattern::TriggerModifyDone()
@@ -621,6 +636,9 @@ bool WaterFlowPattern::NeedRender()
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, needRender);
+    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
     return needRender;
 }
 
