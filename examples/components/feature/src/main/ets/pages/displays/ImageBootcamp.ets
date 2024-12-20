@@ -66,6 +66,8 @@ import { CompMotionBlurBlocks } from '../../components/CompMotionBlurBlocks';
 import { CompClickEffectBlocks } from '../../components/CompClickEffectBlocks';
 import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlocks';
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
+import { CompDragAndDropControlBlocks } from '../../components/CompDragAndDropControlBlocks';
+
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
@@ -3171,6 +3173,30 @@ export struct ImageboxGroupBootcamp {
             { label: 'false', value: false },
           ]
         })
+
+        CompDragAndDropControlBlocks({
+          enableCompDraggable: $enableCompDraggable,
+          compDraggable: $compDraggable,
+          enableCompDragPreview: $enableCompDragPreview,
+          compDragPreview: $compDragPreview,
+          enableCompDragPreviewOptionsValueMode:
+          $enableCompDragPreviewOptionsValueMode,
+          compDragPreviewOptionsValueMode:
+          $compDragPreviewOptionsValueMode,
+          enableCompDragPreviewOptionsValueNumberBadge:
+          $enableCompDragPreviewOptionsValueNumberBadge,
+          compDragPreviewOptionsValueNumberBadge:
+          $compDragPreviewOptionsValueNumberBadge,
+          enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled:
+          $enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+          compDragPreviewOptionsOptionsIsMultiSelectionEnabled:
+          $compDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+          enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
+          $enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
+          compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting:
+          $compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting
+        })
+
       }
     }
   }
