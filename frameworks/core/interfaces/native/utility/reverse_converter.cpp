@@ -15,6 +15,10 @@
 
 #include "reverse_converter.h"
 
+namespace {
+    constexpr int32_t STD_TM_START_YEAR = 1900;
+} // namespace
+
 namespace OHOS::Ace::NG::Converter {
 void *ConvContext::Allocate(std::size_t size)
 {
@@ -182,5 +186,50 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
 {
     auto value = static_cast<float>(src.ConvertToVp());
     AssignArkValue(dst, value);
+}
+
+void AssignArkValue(Ark_Date& dst, const PickerDate& src)
+{
+    const auto start = PickerDate(1970, 1, 1);
+    const auto end = PickerDate(2100, 12, 31);
+    const int64_t secToMillisec = 1000;
+    auto date = src;
+    if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
+        date = start;
+    } else if (src.GetMonth() < start.GetMonth() || src.GetMonth() > end.GetMonth()) {
+        date = start;
+    } else if (src.GetDay() < start.GetDay() || src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
+        date = start;
+    }
+    std::tm tm {};
+    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
+    tm.tm_mday = date.GetDay();
+    time_t time = std::mktime(&tm);
+    dst = reinterpret_cast<Ark_Date>(time * secToMillisec);
+}
+
+void AssignArkValue(Ark_Date& dst, const std::string& src)
+{
+    auto json = JsonUtil::ParseJsonString(src);
+    if (json && !json->IsNull()) {
+        uint32_t year = 0;
+        auto yearJson = json->GetValue("year");
+        if (yearJson && yearJson->IsNumber()) {
+            year = yearJson->GetUInt();
+        }
+        uint32_t month = 0;
+        auto monthJson = json->GetValue("month");
+        if (monthJson && monthJson->IsNumber()) {
+            month = monthJson->GetUInt();
+        }
+        uint32_t day = 0;
+        auto dayJson = json->GetValue("day");
+        if (dayJson && dayJson->IsNumber()) {
+            day = dayJson->GetUInt();
+        }
+        auto pickerDate = PickerDate(year, month, day);
+        dst = ArkValue<Ark_Date>(pickerDate);
+    }
 }
 } // namespace OHOS::Ace::NG::Converter

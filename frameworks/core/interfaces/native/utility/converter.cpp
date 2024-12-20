@@ -248,27 +248,6 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
     };
 }
 
-void AssignArkValue(Ark_Date& dst, const PickerDate& src)
-{
-    const auto start = PickerDate(1970, 1, 1);
-    const auto end = PickerDate(2100, 12, 31);
-    const int64_t SEC_TO_MILLISEC = 1000;
-    auto date = src;
-    if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
-        date = start;
-    } else if (src.GetMonth() < start.GetMonth() || src.GetMonth() > end.GetMonth()) {
-        date = start;
-    } else if (src.GetDay() < start.GetDay() || src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
-        date = start;
-    }
-    std::tm tm {};
-    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
-    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
-    tm.tm_mday = date.GetDay();
-    time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
-}
-
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {
     dst.componentWidth = Converter::ArkValue<Ark_Number>(src.GetComponentWidth());
