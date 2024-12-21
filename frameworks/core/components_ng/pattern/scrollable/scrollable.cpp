@@ -457,14 +457,15 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto currentVsyncTime = context->GetVsyncTime();
-    CHECK_NULL_VOID(lastVsyncTime_ != currentVsyncTime);
-    lastVsyncTime_ = currentVsyncTime;
+    CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
+    lastAxisVsyncTime_ = currentVsyncTime;
     auto snapType = GetSnapType();
     if (snapType != SnapType::NONE_SNAP && startSnapAnimationCallback_) {
         auto snapDelta = 0.f;
         auto snapDirection = SnapDirection::NONE;
-        if ((snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
-            (snapType == SnapType::SCROLL_SNAP && state_ == AnimationState::IDLE)) {
+        auto isInitScroll = (snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
+                            (snapType == SnapType::SCROLL_SNAP && state_ == AnimationState::IDLE);
+        if (isInitScroll) {
             snapDelta = 0.f;
             snapDirection = Positive(mainDelta) ? SnapDirection::FORWARD : SnapDirection::BACKWARD;
         } else {
@@ -488,7 +489,12 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
             .snapDirection = snapDirection,
         };
         startSnapAnimationCallback_(snapAnimationOptions);
-        snapDirection_ = snapDirection;
+        auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
+        if (isNeedAdjustDirection) {
+            snapDirection_ = Positive(mainDelta) ? SnapDirection::FORWARD : SnapDirection::BACKWARD;
+        } else {
+            snapDirection_ = snapDirection;
+        }
         return;
     }
     if (axisAnimator_) {
