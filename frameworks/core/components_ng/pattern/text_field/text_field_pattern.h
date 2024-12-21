@@ -163,7 +163,8 @@ enum class RequestFocusReason {
     CLEAN_NODE,
     MOUSE,
     SYSTEM,
-    DRAG_ENTER
+    DRAG_ENTER,
+    DRAG_SELECT
 };
 
 
@@ -1866,6 +1867,7 @@ private:
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
+    void UpdateSelectionAndHandleVisibility();
     void ResetFirstClickAfterGetFocus();
     void ProcessAutoFillOnFocus();
 

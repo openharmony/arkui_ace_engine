@@ -194,7 +194,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus001, TestSize.Level0)
     pattern_->TextFieldRequestFocus(RequestFocusReason::DRAG_ENTER);
     EXPECT_EQ(pattern_->HasFocus(), true);
     pattern_->ProcessAutoFillOnFocus();
-    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::UNKNOWN);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::DRAG_ENTER);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -212,7 +212,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus002, TestSize.Level0)
     pattern_->TextFieldRequestFocus(RequestFocusReason::DRAG_ENTER);
     EXPECT_EQ(pattern_->HasFocus(), true);
     pattern_->ProcessAutoFillOnFocus();
-    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::UNKNOWN);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::DRAG_ENTER);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
 }
 
@@ -238,7 +238,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus003, TestSize.Level0)
     ASSERT_NE(pagePattern, nullptr);
     pagePattern->SetIsModalCovered(true);
     pattern_->ProcessAutoFillOnFocus();
-    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::UNKNOWN);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::LONG_PRESS);
     auto stateHolder = pageFrameNode->GetPattern<AutoFillTriggerStateHolder>();
     ASSERT_NE(stateHolder, nullptr);
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), false);
@@ -281,7 +281,7 @@ HWTEST_F(TextFieldPatternTestSix, ProcessAutoFillOnFocus004, TestSize.Level0)
     textFieldInfoMap[pageFrameNode->GetId()] = nameAndPasswordInfoMap;
     textFieldManager->textFieldInfoMap_ = textFieldInfoMap;
     pattern_->ProcessAutoFillOnFocus();
-    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::UNKNOWN);
+    EXPECT_EQ(pattern_->requestFocusReason_, RequestFocusReason::LONG_PRESS);
     auto stateHolder = pageFrameNode->GetPattern<AutoFillTriggerStateHolder>();
     ASSERT_NE(stateHolder, nullptr);
     EXPECT_EQ(stateHolder->IsAutoFillPasswordTriggered(), false);
