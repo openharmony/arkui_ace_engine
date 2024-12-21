@@ -375,6 +375,10 @@ public:
 
     void OnContainerModalEvent(const std::string& name, const std::string& value) override;
     void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+
+    int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback) override;
+    void RemoveFocusActiveChangeCallback(int32_t handler) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
