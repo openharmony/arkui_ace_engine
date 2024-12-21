@@ -48,10 +48,13 @@ public:
     RefPtr<UIContext> GetUIContext() const override;
     AceNode* GetAceNodePtr();
     RefPtr<Property> GetProperty() override;
+
+    void AddChild(const RefPtr<FrameNode>& child) override;
     void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
 
     void MeasureChildren() override;
     void LayoutChildren() override;
+    NodeHandle GetHandle() override;
 
 private:
     AceNode* frameNode_;

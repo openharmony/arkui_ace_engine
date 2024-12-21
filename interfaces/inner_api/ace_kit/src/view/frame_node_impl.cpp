@@ -141,6 +141,21 @@ RefPtr<UIContext> FrameNodeImpl::GetUIContext() const
     return pipeline->GetUIContext();
 }
 
+NodeHandle FrameNodeImpl::GetHandle()
+{
+    return reinterpret_cast<NodeHandle>(frameNode_);
+}
+
+void FrameNodeImpl::AddChild(const RefPtr<FrameNode>& child)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto childNode = AceType::DynamicCast<FrameNodeImpl>(child);
+    CHECK_NULL_VOID(childNode);
+    auto* childNodePtr = childNode->GetAceNodePtr();
+    CHECK_NULL_VOID(childNodePtr);
+    frameNode_->AddChild(AceType::Claim(childNodePtr));
+}
+
 void FrameNodeImpl::MarkDirtyNode(NG::PropertyChangeFlag flag)
 {
     CHECK_NULL_VOID(frameNode_);

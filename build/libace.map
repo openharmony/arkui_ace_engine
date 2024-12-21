@@ -432,6 +432,9 @@
       OHOS::Ace::Kit::ParseColor*;
       OHOS::Ace::Kit::ParseDimension*;
       OHOS::Ace::Kit::AnimationUtils::*;
+      OHOS::Ace::Kit::View::*;
+      OHOS::Ace::Kit::Column::*;
+      OHOS::Ace::Kit::Text::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
