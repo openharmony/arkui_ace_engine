@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/indexer/indexer_event_hub.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1319,9 +1320,39 @@ HWTEST_F(IndexerModifierTest, setOnSelect, TestSize.Level1)
  * @tc.desc: Check the functionality of AlphabetIndexerModifier.OnRequestPopupDataImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndexerModifierTest, DISABLED_setOnRequestPopupData, TestSize.Level1)
+HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
 {
-    // blocked Arkoala
+    static const int32_t expectedResourceId = 123;
+    static const int32_t expectedIndex = 321;
+    static const std::vector<std::string> expectedResults {
+        "smth with text",
+        "any text",
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<IndexerEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    static bool wasInvoke = false;
+    auto callback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_Number index,
+        Callback_Array_String_Void cbReturn) {
+        wasInvoke = true;
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        EXPECT_EQ(Converter::Convert<int32_t>(index), expectedIndex);
+        Converter::ArkArrayHolder<Array_String> arkArrStr(expectedResults);
+        CallbackHelper(cbReturn).Invoke(arkArrStr.ArkValue());
+    };
+
+    auto arkCallback = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(nullptr, expectedResourceId,
+        callback);
+    modifier_->setOnRequestPopupData(node_, &arkCallback);
+
+    auto onRequestPopupData = eventHub->GetOnRequestPopupData();
+    ASSERT_NE(onRequestPopupData, nullptr);
+    auto results = onRequestPopupData(expectedIndex);
+    EXPECT_TRUE(wasInvoke);
+    EXPECT_EQ(results, expectedResults);
 }
 
 /**

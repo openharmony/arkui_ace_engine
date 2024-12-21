@@ -564,7 +564,7 @@ namespace OHOS::Ace::NG::Converter {
     template <typename T, typename F,
         std::enable_if_t<std::is_same_v<decltype(T().resource), Ark_CallbackResource>, bool> = true
     >
-    T ArkValue(F callbackFunc, Ark_Int32 resId = 0)
+    T ArkValue(F callbackFunc, Ark_Int32 resId = 0, decltype(T().callSync) callbackSyncFunc = nullptr)
     {
         return T {
             .resource = {
@@ -572,7 +572,8 @@ namespace OHOS::Ace::NG::Converter {
                 .hold = nullptr,
                 .release = nullptr
             },
-            .call = callbackFunc
+            .call = callbackFunc,
+            .callSync = callbackSyncFunc
         };
     }
 } // namespace OHOS::Ace::NG::Converter
