@@ -267,6 +267,8 @@ public:
         return gridLayoutInfo_.defCachedCount_;
     }
 
+    SizeF GetChildrenExpandedSize() override;
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.

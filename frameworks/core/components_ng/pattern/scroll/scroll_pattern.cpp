@@ -1261,4 +1261,15 @@ bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
 }
+
+SizeF ScrollPattern::GetChildrenExpandedSize()
+{
+    auto axis = GetAxis();
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewPort_.Width(), viewPortExtent_.Height());
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    }
+    return SizeF();
+}
 } // namespace OHOS::Ace::NG

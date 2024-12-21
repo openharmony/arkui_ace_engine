@@ -4195,6 +4195,34 @@ typedef enum {
      *
      */
     NODE_SCROLL_FLING,
+    
+    /**
+    * @brief Sets the fading effect for the edges of scrollable components.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:
+    * .value[0].i32: whether to enable the fading effect on edges. The value 0 means to disable the fading effect, and 1 means to enable it.
+    * .value[1]?.f32: length of the fading effect on edges, in vp. Default value: 32. 
+    *
+    * Format of the return value {@link ArkUI_AttributeItem}:
+    * .value[0].i32: whether the fading effect on edges is enabled. The value 0 means that the fading effect is disabled, and 1 means that it is enabled. 
+    * .value[1].f32: length of the fading effect on edges, in vp. 
+    *
+    * @since 14
+    */
+    NODE_SCROLL_FADING_EDGE,
+
+    /**
+     * @brief Obtains the total size of all child components when fully expanded in the scrollable component.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: total width of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     * .value[1].f32: total height of all child components when fully expanded in the scrollable component.
+     *                The default unit is vp. \n
+     *
+     * @since 14
+     */
+    NODE_SCROLL_SIZE,
 
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and

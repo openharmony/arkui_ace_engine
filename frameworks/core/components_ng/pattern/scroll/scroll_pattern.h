@@ -369,6 +369,8 @@ public:
 
     bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
+    SizeF GetChildrenExpandedSize() override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
