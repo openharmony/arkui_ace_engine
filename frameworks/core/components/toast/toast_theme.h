@@ -119,7 +119,6 @@ public:
                 return;
             }
 
-            theme->defaultBGColor_ = toastPattern->GetAttr<Color>("toast_default_bg_color", Color::TRANSPARENT);
             theme->bgThemeColorMode_ =
                 static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
             theme->toastShadowStyle_ = static_cast<ShadowStyle>(toastPattern->GetAttr<int>(
@@ -154,11 +153,6 @@ public:
     const Color& GetBackgroundColor() const
     {
         return backgroundColor_;
-    }
-
-    Color GetDefaultBGColor() const
-    {
-        return defaultBGColor_;
     }
 
     const TextStyle& GetTextStyle() const
@@ -246,7 +240,7 @@ public:
         return multiLineTextAlign_;
     }
 
-    double GetTToastLimitHeightRatio() const
+    double GetToastLimitHeightRatio() const
     {
         return toastLimitHeightRatio_;
     }
@@ -265,7 +259,6 @@ private:
     Dimension bottom_;
     Dimension minFontSize_;
     uint32_t textMaxLines_ = 1;
-    uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
     Color blurStyleTextColor_;
     int32_t toastDoubleBorderEnable_ = 0;
@@ -274,11 +267,11 @@ private:
     double toastInnerBorderWidth_ = 0.0f;
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
     ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
-    int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
-    Color defaultBGColor_ = Color::TRANSPARENT;
+    uint32_t bgThemeColorMode_ = 0;
     TextAlign multiLineTextAlign_ = TextAlign::START;
     int32_t toastAlign_ = 0;
-    double toastLimitHeightRatio_ = 0.0;
+    double toastLimitHeightRatio_ = 0.65;
+    int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace
