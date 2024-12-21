@@ -22,9 +22,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextAreaControllerAccessor {
 void DestroyPeerImpl(TextAreaControllerPeer* peer)
 {
-    if (peer) {
-        delete peer;
-    }
+    CHECK_NULL_VOID(peer);
+    peer->controller_ = nullptr;
+    delete peer;
 }
 Ark_NativePointer CtorImpl()
 {
@@ -37,34 +37,25 @@ Ark_NativePointer GetFinalizerImpl()
 void CaretPositionImpl(TextAreaControllerPeer* peer,
                        const Ark_Number* value)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->GetController());
-    CHECK_NULL_VOID(value);
-    peer->GetController()->CaretPosition(Converter::Convert<int32_t>(*value));
+    CHECK_NULL_VOID(peer && value && peer->controller_);
+    peer->controller_->CaretPosition(std::max(Converter::Convert<int32_t>(*value), 0));
 }
 void SetTextSelectionImpl(TextAreaControllerPeer* peer,
                           const Ark_Number* selectionStart,
                           const Ark_Number* selectionEnd,
                           const Opt_SelectionOptions* options)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->GetController());
-    CHECK_NULL_VOID(selectionStart);
-    CHECK_NULL_VOID(selectionEnd);
-    std::optional<SelectionOptions> selectionOptions = std::nullopt;
-    if (options) {
-        selectionOptions = Converter::OptConvert<SelectionOptions>(*options);
-    }
-    peer->GetController()->SetTextSelection(
+    CHECK_NULL_VOID(peer && selectionStart && selectionEnd && peer->controller_);
+    auto selectionOptions = options ? Converter::OptConvert<SelectionOptions>(*options) : std::nullopt;
+    peer->controller_->SetTextSelection(
         Converter::Convert<int32_t>(*selectionStart),
         Converter::Convert<int32_t>(*selectionEnd),
         selectionOptions);
 }
 void StopEditingImpl(TextAreaControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->GetController());
-    peer->GetController()->StopEditing();
+    CHECK_NULL_VOID(peer && peer->controller_);
+    peer->controller_->StopEditing();
 }
 } // TextAreaControllerAccessor
 const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()

@@ -12,13 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_AREA_CONTROLLER_PEER_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_AREA_CONTROLLER_PEER_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_H
 
+#include <optional>
+
+#include "core/interfaces/native/utility/converter.h"
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/interfaces/native/implementation/text_content_controller_base_peer.h"
 
-struct TextAreaControllerPeer : public TextContentControllerBasePeer {
+struct SearchControllerPeer : public TextContentControllerBasePeer {
+public:
     const TextFieldController& GetController() const
     {
         return controller_;
@@ -29,4 +35,4 @@ struct TextAreaControllerPeer : public TextContentControllerBasePeer {
         controller_ = controller;
     }
 };
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_TEXT_AREA_CONTROLLER_PEER_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_SEARCH_CONTROLLER_PEER_H

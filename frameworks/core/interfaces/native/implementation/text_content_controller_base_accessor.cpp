@@ -22,7 +22,7 @@ namespace TextContentControllerBaseAccessor {
 void DestroyPeerImpl(TextContentControllerBasePeer* peer)
 {
     CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
+    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()
@@ -36,21 +36,21 @@ Ark_NativePointer GetFinalizerImpl()
 Ark_NativePointer GetCaretOffsetImpl(TextContentControllerBasePeer* peer)
 {
     // fix a return value
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    peer->handler->GetCaretPosition();
+    CHECK_NULL_RETURN(peer && peer->controller_, 0);
+    peer->controller_->GetCaretPosition();
     return nullptr;
 }
 Ark_NativePointer GetTextContentRectImpl(TextContentControllerBasePeer* peer)
 {
     // fix a return value
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    peer->handler->GetTextContentRect();
+    CHECK_NULL_RETURN(peer && peer->controller_, 0);
+    peer->controller_->GetTextContentRect();
     return nullptr;
 }
 Ark_Int32 GetTextContentLineCountImpl(TextContentControllerBasePeer* peer)
 {
-    CHECK_NULL_RETURN(peer && peer->handler, 0);
-    return Converter::ArkValue<Ark_Int32>(peer->handler->GetTextContentLinesNum());
+    CHECK_NULL_RETURN(peer && peer->controller_, 0);
+    return Converter::ArkValue<Ark_Int32>(peer->controller_->GetTextContentLinesNum());
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()
