@@ -5765,6 +5765,10 @@ void OverlayManager::RemoveDragPixelMap()
         hasDragPixelMap_ = false;
         return;
     }
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdateOpacity(0.0f);
+    }
     auto rootNode = columnNode->GetParent();
     CHECK_NULL_VOID(rootNode);
     rootNode->RemoveChild(columnNode);

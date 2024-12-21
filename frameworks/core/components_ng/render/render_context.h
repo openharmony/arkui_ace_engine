@@ -730,6 +730,7 @@ public:
     {
         return 0;
     }
+    virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
 protected:
     RenderContext() = default;

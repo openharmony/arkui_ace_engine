@@ -6251,6 +6251,12 @@ void RosenRenderContext::UpdateWindowBlur()
     AnimationUtils::CloseImplicitAnimation();
 }
 
+void RosenRenderContext::MarkUiFirstNode(bool isUiFirstNode)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkUifirstNode(isUiFirstNode);
+}
+
 void RosenRenderContext::BuildShadowInfo(std::unique_ptr<JsonValue>& json)
 {
     if (!NearZero(rsNode_->GetStagingProperties().GetShadowOffsetY())) {
