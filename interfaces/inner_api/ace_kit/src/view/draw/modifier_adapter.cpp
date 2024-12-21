@@ -37,7 +37,6 @@ void ContentModifierAdapter::Draw(Rosen::RSDrawingContext& context) const
 
 void ContentModifierAdapter::AttachRSProperty(const std::shared_ptr<Rosen::RSPropertyBase>& property)
 {
-    LOGE("Custimize ContentModifierAdapter::AttachRSProperty %{public}lld %{public}p", property->GetId(), this);
     AttachProperty(property);
 }
 
