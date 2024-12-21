@@ -2914,6 +2914,8 @@ interfaces/native/node/node_transition.cpp @arkui_superman
 interfaces/native/node/node_transition.h @arkui_superman
 interfaces/native/node/node_transition_imp.cpp @arkui_superman
 interfaces/native/node/node_utils.cpp @arkuiframework
+interfaces/native/node/progress_option.cpp @arkui_image
+interfaces/native/node/progress_option.h @arkui_image
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
