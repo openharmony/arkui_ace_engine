@@ -846,6 +846,16 @@ ShadowStyle GetPopupDefaultShadowStyle()
     return popupTheme->GetPopupShadowStyle();
 }
 
+static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
+    auto blurStyle = static_cast<BlurStyle>(theme->GetPopupBackgroundBlurStyle());
+    popupParam->SetBlurStyle(blurStyle);
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -1058,7 +1068,11 @@ void ParsePopupCommonParam(
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
+        } else {
+            GetBlurStyleFromTheme(popupParam);
         }
+    } else {
+       GetBlurStyleFromTheme(popupParam);
     }
 
     auto popupTransition = popupObj->GetProperty("transition");

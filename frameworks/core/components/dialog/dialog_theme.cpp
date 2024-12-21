@@ -205,5 +205,7 @@ void DialogTheme::Builder::ParseNewPattern(
     theme->dialogInnerBorderWidth_ = dialogPattern->GetAttr<double>("dialog_inner_border_width", 0.0f);
     theme->buttonBottomTopMargin_ = dialogPattern->GetAttr<Dimension>("button_bottom_top_margin", 10.0_vp);
     theme->titlePaddingHorizontal_ = dialogPattern->GetAttr<Dimension>("title_padding_horizontal", 16.0_vp);
+    theme->dialogBackgroundBlurStyle_ =
+        dialogPattern->GetAttr<int>("dialog_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
 }
 } // namespace OHOS::Ace
