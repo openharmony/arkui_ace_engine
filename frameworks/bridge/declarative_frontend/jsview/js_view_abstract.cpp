@@ -436,21 +436,7 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
     return useEdges;
 }
 
-bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
-{
-    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
-    if (!value->IsNumber()) {
-        return false;
-    }
-    auto unit = DimensionUnit::VP;
-    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
-    if (jsUnit->IsNumber()) {
-        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
-    }
-    CalcDimension dimension(value->ToNumber<double>(), unit);
-    result = dimension;
-    return true;
-}
+decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
@@ -5318,6 +5304,22 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
 {
     // 'vp' -> the value varies with pixel density of device.
     return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result)
+{
+    auto value = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
