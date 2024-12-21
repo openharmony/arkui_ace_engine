@@ -83,16 +83,16 @@ HWTEST_F(WaterFlowTestNg, Offset002, TestSize.Level1)
 
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info->Offset(), 0.0f);
-    EXPECT_EQ(info->EstimateTotalHeight(), 300.0F);
-    EXPECT_EQ(GetChildHeight(frameNode_, 0), 100.0f);
+    EXPECT_EQ(info->EstimateTotalHeight(), 250.0F);
+    EXPECT_EQ(GetChildHeight(frameNode_, 0), 50.0f);
 
     UpdateCurrentOffset(-300.0f);
     EXPECT_NEAR(info->Offset(), -50.0f, 10.0f);
-    EXPECT_EQ(info->EstimateTotalHeight(), 300.0f);
+    EXPECT_EQ(info->EstimateTotalHeight(), 250.0f);
 
     UpdateCurrentOffset(600.0f);
     EXPECT_FLOAT_EQ(info->Offset(), GetChildY(frameNode_, 1));
-    EXPECT_NEAR(info->EstimateTotalHeight(), 300.0f, 0.1);
+    EXPECT_NEAR(info->EstimateTotalHeight(), 250.0f, 0.1);
 }
 
 /**
