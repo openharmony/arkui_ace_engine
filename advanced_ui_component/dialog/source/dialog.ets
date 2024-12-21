@@ -23,6 +23,7 @@ import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
+import { KeyCode } from '@kit.InputKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -1495,6 +1496,19 @@ struct CustomDialogContentComponent {
 @Extend(Button)
 function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
   controller?: CustomDialogController) {
+  .onKeyEvent((event: KeyEvent) => {
+    if (!event) {
+      return;
+    }
+    if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) && 
+      event.type === KeyType.Down) {
+      if (buttonOptions.action) {
+        buttonOptions.action();
+      }
+      controller?.close();
+      event.stopPropagation();
+    }
+  })
   .onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();

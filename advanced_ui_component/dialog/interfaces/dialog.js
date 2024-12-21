@@ -20,6 +20,7 @@ const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const accessibility = requireNapi('accessibility');
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
@@ -3545,6 +3546,19 @@ class CustomDialogContentComponent extends ViewPU {
     }
 }
 function __Button__setButtonProperties(u3, v3, w3) {
+    Button.onKeyEvent((event) => {
+        if (!event) {
+            return;
+        }
+        if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) && 
+            event.type === KeyType.Down) {
+            if (u3.action) {
+                u3.action();
+            }
+            w3?.close();
+            event.stopPropagation();
+        }
+    });
     Button.onClick(() => {
         if (u3.action) {
             u3.action();
