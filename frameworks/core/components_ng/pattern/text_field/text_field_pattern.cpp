@@ -7966,7 +7966,7 @@ bool TextFieldPattern::UpdateFocusForward()
     }
     if (focusIndex_ == FocuseIndex::CANCEL && HasFocus()) {
         FocusForwardStopTwinkling();
-        if (responseArea_ == nullptr) {
+        if (responseArea_ == nullptr || (!IsShowUnit() && !IsShowPasswordIcon())) {
             return false;
         }
         focusIndex_ = FocuseIndex::UNIT;
