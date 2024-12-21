@@ -1089,7 +1089,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         UpdateBorderRadius();
         scrollBar_->SetReverse(IsReverse());
         scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
-        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, GetScrollSource());
         scrollBar_->MarkNeedRender();
     }
 
@@ -1099,7 +1099,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         auto estimatedHeightItem = estimatedHeight - height;
         estimatedHeight_ = (estimatedHeightItem < 0 ? 0 : estimatedHeightItem);
         barOffset_ = -offset;
-        scrollBarProxy_->NotifyScrollBar();
+        scrollBarProxy_->NotifyScrollBar(scrollSource_);
     }
 
     for (auto nestbar : nestScrollBarProxy_) {
@@ -1107,7 +1107,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         if (!scrollBarProxy) {
             continue;
         }
-        scrollBarProxy->NotifyScrollBar();
+        scrollBarProxy->NotifyScrollBar(scrollSource_);
     }
 }
 
