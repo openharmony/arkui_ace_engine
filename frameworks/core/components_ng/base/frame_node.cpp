@@ -4285,11 +4285,19 @@ void FrameNode::ProcessAccessibilityVirtualNode()
 
 void FrameNode::UpdateAccessibilityNodeRect()
 {
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
     if (isFocus && !IsAccessibilityVirtualNode()) {
-        renderContext_->UpdateAccessibilityRoundRect();
+        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
+            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
+            renderContext_->UpdateAccessibilityFocusRect(rectInt);
+        } else {
+            renderContext_->UpdateAccessibilityRoundRect();
+        }
     }
 }
 
