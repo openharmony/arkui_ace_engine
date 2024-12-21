@@ -403,6 +403,10 @@ bool NavigationModelNG::ParseCommonTitle(
         }
     }
     navBarNode->UpdatePrevTitleIsCustom(false);
+    if (titleBarPattern->IsFirstTimeSetSystemTitle()) {
+        titleBarPattern->SetIsFirstTimeSetSystemTitle(false);
+        titleBarPattern->MarkIsInitialTitle(true);
+    }
 
     // create or update main title
     do {
@@ -1629,6 +1633,10 @@ void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::Navigat
         }
     }
     navBarNode->UpdatePrevTitleIsCustom(false);
+    if (titleBarPattern->IsFirstTimeSetSystemTitle()) {
+        titleBarPattern->SetIsFirstTimeSetSystemTitle(false);
+        titleBarPattern->MarkIsInitialTitle(true);
+    }
 
     // create or update main title
     NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, titleInfo, ignoreMainTitle);
