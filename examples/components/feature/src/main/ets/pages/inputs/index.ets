@@ -21,7 +21,6 @@ import { RichEditorSpanUrlBootcamp } from './RichEditorSpanUrlBootcamp';
 import { SelectionMenuBootcamp } from './SelectionMenuBootcamp';
 import { SearchBootcamp } from './SearchBootcamp';
 
-
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
   label: '输入类',
