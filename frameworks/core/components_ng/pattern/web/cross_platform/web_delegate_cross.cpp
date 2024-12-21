@@ -122,6 +122,7 @@ constexpr char NTC_PARAM_Y[] = "y";
 
 constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
+constexpr char NTC_INCOGNITO_MODE[] = "incognitoMode";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char WEB_ATTRIBUTE_MIN_FONT_SIZE[] = "minFontSize";
@@ -702,8 +703,9 @@ void WebDelegateCross::CreatePluginResource(
                     << WEB_PARAM_EQUALS << position.GetX() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_TOP
                     << WEB_PARAM_EQUALS << position.GetY() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_SRC
                     << WEB_PARAM_EQUALS << webPattern->GetWebSrc().value_or("") << WEB_PARAM_AND << NTC_PARAM_PAGE_URL
-                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT << WEB_PARAM_EQUALS
-                    << webPattern->GetRichTextInit();
+                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT
+                    << WEB_PARAM_EQUALS << webPattern->GetRichTextInit() << WEB_PARAM_AND << NTC_INCOGNITO_MODE
+                    << WEB_PARAM_EQUALS << webPattern->GetIncognitoMode();
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
