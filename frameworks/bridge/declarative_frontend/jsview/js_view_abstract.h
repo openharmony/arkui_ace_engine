@@ -497,7 +497,18 @@ public:
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
-        return themeManager->GetTheme<T>();
+        auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        return node ? themeManager->GetTheme<T>(node->GetThemeScopeId()) : themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        auto pipelineContext = GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>(themeScopeId);
     }
 
     /**

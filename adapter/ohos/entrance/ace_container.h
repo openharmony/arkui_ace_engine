@@ -542,6 +542,8 @@ public:
 
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void ProcessColorModeUpdate(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration);
     void UpdateConfigurationSyncForAll(
