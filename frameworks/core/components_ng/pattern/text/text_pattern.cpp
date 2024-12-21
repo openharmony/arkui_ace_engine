@@ -1003,7 +1003,7 @@ bool TextPattern::TryLinkJump(const RefPtr<SpanItem>& span)
     if (isCloudConfOpen) {
         std::string spanContent = UtfUtils::Str16ToStr8(span->GetSpanContent()); // change for u16string
         auto isJumpLink = IsJumpLink(spanContent);
-        LOGI("TextPattern::TryLinkJump, spanContentLen: %{public}zu, isJumpLink: %{public}d",
+        TAG_LOGI(AceLogTag::ACE_TEXT, "TextPattern::TryLinkJump, spanContentLen: %{public}zu, isJumpLink: %{public}d",
             spanContent.size(), isJumpLink);
         if (isJumpLink) {
             pipelineContext->ExecuteLinkJumpCallback(spanContent);

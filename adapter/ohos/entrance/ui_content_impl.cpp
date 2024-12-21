@@ -2286,19 +2286,19 @@ void UIContentImpl::RegisterLinkJumpCallback()
     auto pipeLineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContextBase);
     CHECK_NULL_VOID(pipeLineContext);
     auto bundleName = AceApplicationInfo::GetInstance().GetPackageName();
-    LOGI("[%{public}s]: UIContentImpl::RegisterLinkJumpCallback", bundleName.c_str());
+    TAG_LOGI(AceLogTag::ACE_TEXT, "[%{public}s]: UIContentImpl::RegisterLinkJumpCallback", bundleName.c_str());
     // check 1 : for efficiency, if not in whiteList, no need to call RSS interface and go IPC
     bool isAllowedLinkJump = false;
     // call RSS's inner api
     auto errorNo = OHOS::ResourceSchedule::ResSchedClient::GetInstance().IsAllowedLinkJump(isAllowedLinkJump);
     if (errorNo != NO_ERROR) {
-        LOGW("UIContentImpl::RegisterLinkJumpCallback, errorNo: %{public}i", errorNo);
+        TAG_LOGW(AceLogTag::ACE_TEXT, "UIContentImpl::RegisterLinkJumpCallback, errorNo: %{public}i", errorNo);
         return;
     }
     if (!isAllowedLinkJump) { // check 1
         return;
     }
-    LOGI("UIContentImpl::RegisterLinkJumpCallback, LinkJump is Open");
+    TAG_LOGI(AceLogTag::ACE_TEXT, "UIContentImpl::RegisterLinkJumpCallback, LinkJump is Open");
     pipeLineContext->SetLinkJumpCallback([context = context_] (const std::string& link) {
         auto sharedContext = context.lock();
         CHECK_NULL_VOID(sharedContext);
