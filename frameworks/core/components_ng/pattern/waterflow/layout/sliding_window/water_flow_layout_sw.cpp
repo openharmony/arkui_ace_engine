@@ -43,6 +43,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         FillBack(mainLen_, change, itemCnt_ - 1);
     }
 
+    if (canSkip_) {
+        info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_);
+    }
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
@@ -406,7 +409,7 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
 float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
@@ -422,7 +425,7 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
