@@ -2008,10 +2008,20 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(pattern);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
+        auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
         if (pattern->BetweenSelectedPosition(point)) {
+            auto manager = pattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
+            CHECK_NULL_VOID(manager);
+            auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+            CHECK_NULL_VOID(selectOverlayInfo);
+            auto textFieldTheme = pattern->GetTheme();
+            CHECK_NULL_VOID(textFieldTheme);
+            auto info = pattern->CreateRichEditorDragInfo(*selectOverlayInfo, *paintProperty, *textFieldTheme);
             pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
+                textDragPattern->UpdateHandleAnimationInfo(info);
                 auto option = pattern->GetHost()->GetDragPreviewOption();
                 option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
                 option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
@@ -2025,6 +2035,30 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         gestureHub->SetPixelMap(nullptr);
     };
     return callback;
+}
+
+TextDragInfo TextFieldPattern::CreateRichEditorDragInfo(const SelectOverlayInfo& selectOverlayInfo,
+    const TextFieldPaintProperty& paintProperty, const TextFieldTheme& textFieldTheme) const
+{
+    auto handleColor = paintProperty.GetCursorColorValue(textFieldTheme.GetCursorColor());
+    auto selectedBackgroundColor = textFieldTheme.GetSelectedColor();
+    auto firstIndex = selectController_->GetFirstHandleIndex();
+    auto secondIndex = selectController_->GetSecondHandleIndex();
+    TextDragInfo info;
+    if (firstIndex > secondIndex) {
+        info.secondHandle = selectOverlayInfo.firstHandle.paintRect;
+        info.firstHandle = selectOverlayInfo.secondHandle.paintRect;
+    } else {
+        info.firstHandle = selectOverlayInfo.firstHandle.paintRect;
+        info.secondHandle = selectOverlayInfo.secondHandle.paintRect;
+    }
+    if ((textRect_.Width() > contentRect_.Width()) ||
+        paintProperty.GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+        info.isInline = false;
+    }
+    info.selectedBackgroundColor = selectedBackgroundColor;
+    info.handleColor = handleColor;
+    return info;
 }
 
 std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> TextFieldPattern::OnDragStart()

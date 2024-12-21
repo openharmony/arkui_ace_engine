@@ -7399,7 +7399,7 @@ void RichEditorPattern::CreateDragNode()
             imageChildren.emplace_back(node);
         }
     }
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (!boxes.empty()) {
         float startX = boxes.front().Left();

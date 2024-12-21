@@ -2343,7 +2343,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            RichEditorDragInfo info;
+            TextDragInfo info;
             if (pattern->selectOverlay_->IsHandleVisible(true)) {
                 info.firstHandle = pattern->textSelector_.firstHandle;
             }
