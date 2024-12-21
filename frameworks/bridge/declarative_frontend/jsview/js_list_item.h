@@ -40,6 +40,7 @@ public:
     static void JsOnDragStart(const JSCallbackInfo& info);
     static void JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue,
         bool isStartArea, NG::FrameNode* node);
+    static void ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, RefPtr<NG::FrameNode>& refPtrFrameNode);
 };
 
 } // namespace OHOS::Ace::Framework
