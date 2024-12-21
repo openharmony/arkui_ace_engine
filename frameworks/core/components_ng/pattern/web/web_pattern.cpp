@@ -509,8 +509,10 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = isNewDragStyle_ && IsPreviewImageNodeExist();
-    TAG_LOGI(AceLogTag::ACE_WEB, "IsPreviewMenuNotNeedShowPreview:%{public}d", isNotNeedShowPreview);
+    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
+        isNotNeedShowPreview, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
