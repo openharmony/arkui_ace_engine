@@ -33,9 +33,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -1766,6 +1765,7 @@ void ScrollablePattern::SelectWithScroll()
 void ScrollablePattern::ClearSelectedZone()
 {
     DrawSelectedZone(RectF());
+    selectScrollOffset_ = 0.0f;
 }
 
 RectF ScrollablePattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
@@ -1808,6 +1808,7 @@ void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone)
 void ScrollablePattern::MarkSelectedItems()
 {
     if (multiSelectable_ && mousePressed_) {
+        UpdateMouseStartOffset();
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
@@ -1834,11 +1835,7 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
 
 void ScrollablePattern::UpdateMouseStart(float offset)
 {
-    if (axis_ == Axis::VERTICAL) {
-        mouseStartOffset_.AddY(offset);
-    } else {
-        mouseStartOffset_.AddX(offset);
-    }
+    selectScrollOffset_ += offset;
 }
 
 float ScrollablePattern::GetOutOfScrollableOffset() const
@@ -1915,6 +1912,22 @@ void ScrollablePattern::LimitMouseEndOffset()
         mouseEndOffset_.SetX(LessNotEqual(limitedMainOffset, 0.0f) ? mouseEndOffset_.GetX() : limitedMainOffset);
         mouseEndOffset_.SetY(LessNotEqual(limitedCrossOffset, 0.0f) ? mouseEndOffset_.GetY() : limitedCrossOffset);
     }
+}
+
+void ScrollablePattern::UpdateMouseStartOffset()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context->GetVsyncTime();
+    if (currentVsync > lastVsyncTime_) {
+        if (axis_ == Axis::VERTICAL) {
+            mouseStartOffset_.AddY(selectScrollOffset_);
+        } else {
+            mouseStartOffset_.AddX(selectScrollOffset_);
+        }
+        selectScrollOffset_ = 0.0f;
+    }
+    lastVsyncTime_ = currentVsync;
 }
 
 bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
