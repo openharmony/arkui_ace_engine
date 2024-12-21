@@ -1264,6 +1264,14 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
     parentRectInfo.left = static_cast<int32_t>(rect.Left());
     parentRectInfo.scaleX = finalScale.x;
     parentRectInfo.scaleY = finalScale.y;
+
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        auto windowRect = pipeline->GetDisplayWindowRectInfo();
+        parentRectInfo.top += static_cast<int32_t>(windowRect.Top());
+        parentRectInfo.left += static_cast<int32_t>(windowRect.Left());
+    }
+
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
         host->GetAccessibilityId(), parentRectInfo.top, parentRectInfo.left);
 }
