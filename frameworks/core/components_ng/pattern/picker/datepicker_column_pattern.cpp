@@ -388,7 +388,13 @@ void DatePickerColumnPattern::FlushCurrentOptions(
 
     auto dataPickerLayoutProperty = host->GetLayoutProperty<DataPickerLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdatePadding(PaddingProperty { CalcLength(PADDING_WEIGHT, DimensionUnit::PX) });
+    dataPickerLayoutProperty->UpdatePadding(PaddingProperty {
+        .left = CalcLength(PADDING_WEIGHT, DimensionUnit::PX),
+        .right = CalcLength(),
+        .top = CalcLength(),
+        .bottom = CalcLength(),
+        .start = CalcLength(),
+        .end = CalcLength()});
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
 
     InitTextFontFamily();
