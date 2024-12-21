@@ -1138,44 +1138,44 @@ class ImageMenuItem extends ViewPU {
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
         this.observeComponentCreation((v3, w3) => {
             ViewStackProcessor.StartGetAccessRecordingFor(v3);
-            Row.create();
-            Row.accessibilityText(this.getAccessibilityReadText());
-            Row.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-            Row.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
-            Row.width(ImageMenuItem.imageHotZoneWidth);
-            Row.height(ImageMenuItem.imageHotZoneWidth);
-            Row.borderRadius(ImageMenuItem.buttonBorderRadius);
-            Row.foregroundColor(this.getFgColor());
-            Row.backgroundColor(this.getBgColor());
-            Row.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
-            Row.enabled(this.item.isEnabled ? this.item.isEnabled : false);
+            Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
+            Button.accessibilityText(this.getAccessibilityReadText());
+            Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
+            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+            Button.width(ImageMenuItem.imageHotZoneWidth);
+            Button.height(ImageMenuItem.imageHotZoneWidth);
+            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
+            Button.foregroundColor(this.getFgColor());
+            Button.backgroundColor(this.getBgColor());
+            Button.opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity);
+            Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
             ViewStackProcessor.visualState('focused');
-            Row.border({
+            Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: ImageMenuItem.focusBorderWidth,
                 color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 style: BorderStyle.Solid
             });
             ViewStackProcessor.visualState('normal');
-            Row.border({
+            Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 width: 0
             });
             ViewStackProcessor.visualState();
-            Row.onFocus(() => {
+            Button.onFocus(() => {
                 if (!this.item.isEnabled) {
                     return;
                 }
                 this.isOnFocus = true;
             });
-            Row.onBlur(() => this.isOnFocus = false);
-            Row.onHover((f4) => {
+            Button.onBlur(() => this.isOnFocus = false);
+            Button.onHover((f4) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
                 this.isOnHover = f4;
             });
-            Row.onKeyEvent((e4) => {
+            Button.onKeyEvent((e4) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
@@ -1189,7 +1189,7 @@ class ImageMenuItem extends ViewPU {
                     this.isOnClick = false;
                 }
             });
-            Row.onTouch((d4) => {
+            Button.onTouch((d4) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
@@ -1203,10 +1203,10 @@ class ImageMenuItem extends ViewPU {
                     }
                 }
             });
-            Row.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
-            Row.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
+            Button.onClick(() => this.item.isEnabled && this.item.action && this.item.action());
+            Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
             if (!w3) {
-                Row.pop();
+                Button.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
         });
@@ -1286,7 +1286,7 @@ class ImageMenuItem extends ViewPU {
             ViewStackProcessor.StopGetAccessRecording();
         });
         If.pop();
-        Row.pop();
+        Button.pop();
         PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
     }
     rerender() {

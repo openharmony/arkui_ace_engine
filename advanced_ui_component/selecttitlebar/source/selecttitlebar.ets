@@ -545,7 +545,7 @@ struct ImageMenuItem {
   }
 
   build() {
-    Row() {
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       if (this.item.symbolStyle) {
         SymbolGlyph()
           .fontColor([$r('sys.color.font_primary')])
