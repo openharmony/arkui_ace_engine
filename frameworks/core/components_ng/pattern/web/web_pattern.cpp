@@ -5241,6 +5241,21 @@ void WebPattern::OnPopupShow(bool show)
     pipeline->RequestFrame();
 }
 
+void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    visibleX = visibleInnerRect.GetX() - offset.GetX();
+    visibleY = visibleInnerRect.GetY() - offset.GetY();
+    visibleWidth = visibleInnerRect.Width();
+    visibleHeight = visibleInnerRect.Height();
+}
+
 void WebPattern::AttachCustomKeyboard()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");

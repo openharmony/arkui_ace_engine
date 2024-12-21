@@ -649,6 +649,7 @@ public:
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
