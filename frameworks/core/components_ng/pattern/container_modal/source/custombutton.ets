@@ -133,7 +133,7 @@ class ColorGroup {
 }
 const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
   [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
-  [buttonHoverBackgroundColor, new ColorGroup('#26000000', '#40FFFFFF')],
+  [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
   [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [closeNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [closeHoverBackgroundColor, new ColorGroup('#FA2A2D', '#E64548')],
@@ -586,7 +586,7 @@ struct custombutton {
         })
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
           this.onMenuWidthChange()
-          this.isShowMenu = true
+          this.isShowMenu = !this.hideSplit
         }), TapGesture().onAction(() => {
           this.onMaximizeButtonClick()
         })))
