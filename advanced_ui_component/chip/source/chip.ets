@@ -238,8 +238,8 @@ export const defaultTheme: ChipTheme = {
     activatedBackgroundColor: $r('sys.color.ohos_id_color_emphasize'),
     focusOutlineColor: $r('sys.color.ohos_id_color_focused_outline'),
     focusOutlineMargin: 2,
-    normalBorderRadius: $r('sys.float.chip_border_radius_normal'),
-    smallBorderRadius: $r('sys.float.chip_border_radius_small'),
+    normalBorderRadius: $r('sys.float.ohos_id_corner_radius_tips_instant_tip'),
+    smallBorderRadius: $r('sys.float.ohos_id_corner_radius_piece'),
     borderWidth: 2,
     localizedNormalPadding: {
       start: LengthMetrics.vp(16),

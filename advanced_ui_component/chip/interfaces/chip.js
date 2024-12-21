@@ -201,14 +201,14 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
       a2: {
         id: -1,
         type: 10002,
-        params: ['sys.float.chip_border_radius_normal'],
+        params: ['sys.float.ohos_id_corner_radius_tips_instant_tip'],
         bundleName: '__harDefaultBundleName__',
         moduleName: '__harDefaultModuleName__',
       },
       b2: {
         id: -1,
         type: 10002,
-        params: ['sys.float.chip_border_radius_small'],
+        params: ['sys.float.ohos_id_corner_radius_piece'],
         bundleName: '__harDefaultBundleName__',
         moduleName: '__harDefaultModuleName__',
       },
