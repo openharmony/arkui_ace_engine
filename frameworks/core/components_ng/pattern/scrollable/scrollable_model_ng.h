@@ -62,6 +62,8 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+    static bool GetFadingEdge(FrameNode* frameNode);
+    static float GetFadingEdgeLength(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

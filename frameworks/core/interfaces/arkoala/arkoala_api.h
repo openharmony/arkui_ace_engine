@@ -2756,7 +2756,9 @@ struct ArkUIScrollModifier {
     void (*setScrollFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetScrollFadingEdge)(ArkUINodeHandle node);
+    void (*getScrollFadingEdge)(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2]);
     void (*setScrollFling)(ArkUINodeHandle node, ArkUI_Float64 value);
+    void (*getScrollContentSize)(ArkUINodeHandle node, ArkUI_Float32 (*values)[2]);
 };
 
 struct ArkUIListItemModifier {
