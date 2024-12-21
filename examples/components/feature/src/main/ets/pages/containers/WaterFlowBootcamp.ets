@@ -132,8 +132,14 @@ export struct WaterFlowBootcamp {
           ForEach(this.getElements(), (item: number) => {
             FlowItem() {
             }
-            .width('100%')
-            .height(item % 2 ? 80 : 50)
+            .width(
+              (FlexDirection.Row === this.layoutDirection || FlexDirection.RowReverse === this.layoutDirection)
+                ? (item % 2 ? '50%' : '30%') : '100%'
+            )
+            .height(
+              (FlexDirection.Column === this.layoutDirection || FlexDirection.ColumnReverse === this.layoutDirection)
+                ? (item % 2 ? 80 : 50) : 80
+            )
             .margin({ bottom: 20 })
             .backgroundColor('#510A59F7')
             .borderRadius(12)
@@ -180,7 +186,7 @@ export struct WaterFlowBootcamp {
           })
         )
       }
-      .height(300)
+      .height(400)
 
       ListItem() {
         Text('4').width('90%').textAlign(TextAlign.Center)
@@ -215,11 +221,13 @@ export struct WaterFlowBootcamp {
           value: $layoutDirection,
           dataSource: [
             { label: 'Column', value: FlexDirection.Column },
-            { label: 'Row', value: FlexDirection.Row }
+            { label: 'ColumnReverse', value: FlexDirection.ColumnReverse },
+            { label: 'Row', value: FlexDirection.Row },
+            { label: 'RowReverse', value: FlexDirection.RowReverse }
           ]
         })
 
-        if (FlexDirection.Column === this.layoutDirection) {
+        if (FlexDirection.Column === this.layoutDirection || FlexDirection.ColumnReverse === this.layoutDirection) {
           RadioBlock({
             title: 'columnsTemplate',
             isEnabled: $enableColumnsTemplate,
@@ -233,7 +241,7 @@ export struct WaterFlowBootcamp {
               { label: '1fr 1fr 1fr 1fr 1fr', value: '1fr 1fr 1fr 1fr 1fr' }
             ]
           })
-        } else if (FlexDirection.Row === this.layoutDirection) {
+        } else if (FlexDirection.Row === this.layoutDirection || FlexDirection.RowReverse === this.layoutDirection) {
           RadioBlock({
             title: 'rowsTemplate',
             isEnabled: $enableRowsTemplate,
