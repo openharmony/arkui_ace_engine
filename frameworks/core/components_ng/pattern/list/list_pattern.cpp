@@ -344,7 +344,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     }
     listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
+    bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
