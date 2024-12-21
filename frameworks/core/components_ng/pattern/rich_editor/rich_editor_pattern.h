@@ -993,6 +993,8 @@ public:
     {
         return lastRichTextRect_;
     }
+    HoverInfo CreateHoverInfo(const MouseInfo& info);
+    std::pair<int32_t, int32_t> GetSpanRangeByLocalOffset(Offset localOffset);
 
 protected:
     bool CanStartAITask() override;
@@ -1083,6 +1085,7 @@ private:
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleImageHoverEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
@@ -1453,6 +1456,7 @@ private:
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 };
 } // namespace OHOS::Ace::NG
 
