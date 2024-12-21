@@ -170,6 +170,9 @@ struct ComposeTitleBar {
         CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ })
       }
     }
+    .onAppear(() => {
+      this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+    })
     .width('100%')
     .height(ComposeTitleBar.totalHeight)
     .backgroundColor($r('sys.color.ohos_id_color_background'))

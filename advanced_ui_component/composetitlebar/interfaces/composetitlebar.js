@@ -146,6 +146,9 @@ class ComposeTitleBar extends ViewPU {
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
             });
+            Flex.onAppear(() => {
+                this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+            });
             Flex.width('100%');
             Flex.height(ComposeTitleBar.totalHeight);
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
