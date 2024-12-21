@@ -277,5 +277,24 @@ void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX,
         uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
     });
 }
+
+void FormRendererDispatcherImpl::OnNotifyDumpInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostSyncTask([content = uiContent_, params, &info]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnNotifyDumpInfo");
+        uiContent->DumpInfo(params, info);
+    });
+}
 } // namespace Ace
 } // namespace OHOS
