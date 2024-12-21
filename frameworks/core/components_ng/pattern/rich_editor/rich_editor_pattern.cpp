@@ -649,9 +649,9 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     caretUpdateType_ = CaretUpdateType::NONE;
     IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
     UpdateGestureHotZone(dirty);
-    if (needSelect_) {
+    if (afterDragSelect_) {
         UpdateSelectionAndHandleVisibility();
-        needSelect_ = false;
+        afterDragSelect_ = false;
     }
     releaseInDrop_ = false;
     return ret;
@@ -3807,7 +3807,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     recoverDragResultObjects_.clear();
     auto focusHub = GetFocusHub();
     if (event && focusHub && event->GetResult() != DragRet::DRAG_SUCCESS && focusHub->IsFocusable()) {
-        needSelect_ = true;
+        afterDragSelect_ = true;
         HandleSelectionChange(recoverStart_, recoverEnd_);
         showSelect_ = true;
         CalculateHandleOffsetAndShowOverlay();
@@ -9286,7 +9286,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     if (focusHub->IsCurrentFocus()) {
         StartTwinkling();
     }
-    needSelect_ = isMouseOrTouchPad(sourceTool_);
+    afterDragSelect_ = isMouseOrTouchPad(sourceTool_);
     releaseInDrop_ = true;
 }
 
