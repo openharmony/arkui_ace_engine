@@ -77,6 +77,8 @@ private:
     void LayoutTextField(const LayoutSearchParams& params);
     void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
     double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
+    float CalculateTextFieldWidth(
+        LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };
