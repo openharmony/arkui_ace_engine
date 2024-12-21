@@ -334,6 +334,9 @@ Ark_Int32 MeasureLayoutAndDraw(Ark_VMContext vmContext, Ark_NodeHandle rootPtr)
     Ark_Float32 drawData[] = { 0, 0, 0, 0 };
     DrawNode(vmContext, rootPtr, &drawData[0]);
 
+    if (auto companionNode = GetCompanion(rootPtr); companionNode) {
+        companionNode->SetVMContext(vmContext);
+    }
     return 0;
 }
 

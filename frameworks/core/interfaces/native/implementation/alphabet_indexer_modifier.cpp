@@ -19,8 +19,8 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/interfaces/native/utility/validators.h"
-#include "arkoala_api_generated.h"
-
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/callback_keeper.h"
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace AlphabetIndexerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -200,15 +200,25 @@ void OnSelectImpl(Ark_NativePointer node,
     };
     IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
+
 void OnRequestPopupDataImpl(Ark_NativePointer node,
                             const OnAlphabetIndexerRequestPopupDataCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //AlphabetIndexerModelNG::SetOnRequestPopupData(frameNode, convValue);
-    LOGI("Arkoala method AlphabetIndexerAttributeModifier.setOnRequestPopupData not implemented");
+    auto onEvent = [callback = CallbackHelper(*value, frameNode)](const int32_t selected) ->
+        std::vector<std::string> {
+        auto arkValue = Converter::ArkValue<Ark_Number>(selected);
+        std::vector<std::string> result;
+        auto handler = [&result](const void *rawResultPtr) {
+            auto arkResultPtr = reinterpret_cast<const Array_String*>(rawResultPtr);
+            result = Converter::Convert<std::vector<std::string>>(*arkResultPtr);
+        };
+        CallbackKeeper::InvokeWithResultHandler<Array_String, Callback_Array_String_Void>(handler, callback, arkValue);
+        return result;
+    };
+    IndexerModelNG::SetOnRequestPopupData(frameNode, std::move(onEvent));
 }
 void OnPopupSelectImpl(Ark_NativePointer node,
                        const OnAlphabetIndexerPopupSelectCallback* value)
