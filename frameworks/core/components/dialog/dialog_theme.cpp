@@ -46,6 +46,7 @@ void DialogTheme::Builder::ParsePattern(
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
     theme->dividerBetweenButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
     theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
+    theme->dialogBackgroundBlurStyle_ = dialogPattern->GetAttr<int>("dialog_background_blur_style", 0);
     auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
     theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
     theme->defaultPaddingBottomFixed_ = dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
@@ -123,6 +124,18 @@ void DialogTheme::Builder::ParseNewPattern(
     if (!dialogPattern) {
         return;
     }
+    theme->text_align_content_ = dialogPattern->GetAttr<int>("text_align_content", 0);
+    theme->text_align_title_ = dialogPattern->GetAttr<int>("text_align_title", 0);
+    theme->button_type_ = dialogPattern->GetAttr<int>("button_type", 0);
+    theme->shadowDialog_ = static_cast<uint32_t>(dialogPattern->GetAttr<double>("shadow_dialog", SHADOW_NONE));
+    theme->alignDialog_ = static_cast<int32_t>(dialogPattern->GetAttr<double>("align_dialog", DEFAULT_ALIGN_DIALOG));
+    theme->colorBgWithBlur_ = dialogPattern->GetAttr<Color>("color_bg_with_blur", Color::TRANSPARENT);
+    theme->paddingTopTitle_ = dialogPattern->GetAttr<Dimension>("padding_top_title", 24.0_vp);
+    theme->paddingSingleTitle_ = dialogPattern->GetAttr<Dimension>("padding_single_title", 0.0_vp);
+    theme->backgroundBorderColor_ = dialogPattern->GetAttr<Color>("border_color", Color::TRANSPARENT);
+    theme->backgroundBorderWidth_ = dialogPattern->GetAttr<Dimension>("border_width", 16.0_vp);
+    theme->normalButtonFontSize_ = dialogPattern->GetAttr<Dimension>("normal_button_text_font_size", 16.0_fp);
+    theme->dialogRatioHeight_ = dialogPattern->GetAttr<double>("dialog_ratio_height", 0.9f);
     theme->titleMinFontSize_ = dialogPattern->GetAttr<Dimension>("dialog_title_text_font_size_min", 15.0_fp);
     theme->contentMinFontSize_ = dialogPattern->GetAttr<Dimension>("content_text_font_size_min", 16.0_fp);
     auto titleMaxLines = dialogPattern->GetAttr<int>("dialog_title_text_max_lines", 2);

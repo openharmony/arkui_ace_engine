@@ -23,6 +23,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -508,7 +509,14 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         NapiThrow(env, "The number of parameters must be equal to 1.", ERROR_CODE_PARAM_INVALID);
         return nullptr;
     }
-    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = -1 };
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+    CHECK_NULL_RETURN(toastTheme, nullptr);
+    auto alignment = toastTheme->GetAlign();
+    auto toastInfo = NG::ToastInfo { .duration = -1, .showMode = NG::ToastShowMode::DEFAULT, .alignment = alignment };
     if (!GetToastParams(env, argv, toastInfo)) {
         return nullptr;
     }
