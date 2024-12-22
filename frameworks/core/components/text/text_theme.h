@@ -64,6 +64,9 @@ public:
                                                .BlendOpacity(pattern->GetAttr<double>(PATTERN_TEXT_COLOR_ALPHA, 0.9)));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("text_font_size", 0.0_vp));
             theme->caretColor_ = pattern->GetAttr<Color>("text_caret_color", Color(0xff006cde));
+            theme->textStyle_.SetLineSpacing(pattern->GetAttr<Dimension>("text_line_spacing", 0.0_vp));
+            theme->textStyle_.SetFontWeight(static_cast<FontWeight>(pattern->GetAttr<double>("text_font_weight", 0.0)));
+            theme->textStyle_.SetTextAlign(static_cast<TextAlign>(pattern->GetAttr<double>("text_align", 0.0)));
             theme->selectedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_SELECTED, Color(0x33007dff));
             auto draggable = pattern->GetAttr<std::string>("draggable", "0");
             theme->draggable_ = StringUtils::StringToInt(draggable);

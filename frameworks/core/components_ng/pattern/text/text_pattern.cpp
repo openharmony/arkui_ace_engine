@@ -117,7 +117,9 @@ void TextPattern::OnAttachToFrameNode()
     pipeline->AddWindowStateChangedCallback(host->GetId());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextAlign(TextAlign::START);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    textLayoutProperty->UpdateTextAlign(theme->GetTextStyle().GetTextAlign());
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
 }
 
