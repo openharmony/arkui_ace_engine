@@ -593,7 +593,7 @@ bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)
     } else if (DispatchTabKey(event, curFocusView)) {
         return true;
     }
-    return DispatchKeyEventNG(event, curEntryFocusViewFrame);
+    return DispatchKeyEventNG(event, curEntryFocusViewFrame) || isTabJustTriggerOnKeyEvent_;
 }
 
 bool KeyEventManager::IsSkipShortcutAndFocusMove()
