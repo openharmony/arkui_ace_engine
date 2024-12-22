@@ -56,6 +56,7 @@ constexpr Dimension SHEET_TITLE_AERA_MARGIN = -8.0_vp;
 constexpr int32_t SHEET_TITLE_MAX_LINES = 1;
 constexpr int32_t SHEET_SHADOW_NONE = 6;
 constexpr Dimension SHEET_TITLE_TEXT_HORIZONTAL_MARGIN = 16.0_vp;
+constexpr double SHEET_TITLE_FONT_WEIGHT = 9.0;
 } // namespace
 class SheetTheme : public virtual Theme {
     DECLARE_ACE_TYPE(SheetTheme, Theme);
@@ -120,6 +121,28 @@ public:
             theme->titleTextHorizMargin_ =
                 sheetPattern->GetAttr<Dimension>("title_text_horizontal_margin", SHEET_TITLE_TEXT_HORIZONTAL_MARGIN);
             theme->closeIconRadius_ = sheetPattern->GetAttr<Dimension>("close_icon_radius", SHEET_CLOSE_ICON_RADIUS);
+            ParseAdditionalStylePattern(sheetPattern, theme);
+        }
+
+        void ParseAdditionalStylePattern(
+            const RefPtr<ThemeStyle>& sheetPattern, const RefPtr<SheetTheme>& theme) const
+        {
+            theme->largePercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_large", 1.0f);
+            theme->mediumPercent_ = sheetPattern->GetAttr<double>("sheet_height_percent_medium", 0.6f);
+            theme->operationAreaHeight_ = sheetPattern->GetAttr<Dimension>("sheet_operation_height", 56.0_vp);
+            theme->height_apply_full_screen_ =
+                static_cast<bool>(sheetPattern->GetAttr<int>("sheet_height_apply_full_screen", 0));
+            theme->showCloseIcon_ = static_cast<bool>(sheetPattern->GetAttr<int>("sheet_show_close_icon", 1));
+            theme->sheetTitleFontWeight_ = FontWeight(static_cast<int32_t>(
+                sheetPattern->GetAttr<double>("sheet_title_font_weight", SHEET_TITLE_FONT_WEIGHT)));
+            theme->sheetDragBarHeight_ = sheetPattern->GetAttr<Dimension>("sheet_drag_bar_height",
+                SHEET_DRAG_BAR_HEIGHT);
+            theme->titleTopPadding_ = sheetPattern->GetAttr<Dimension>("sheet_double_title_top_padding",
+                SHEET_DOUBLE_TITLE_TOP_PADDING);
+            theme->titleBottomPadding_ = sheetPattern->GetAttr<Dimension>("sheet_double_title_bottom_padding",
+                SHEET_DOUBLE_TITLE_BOTTON_MARGIN);
+            theme->sheetTitleAeraMargin_ = sheetPattern->GetAttr<Dimension>("sheet_title_aera_margin",
+                SHEET_TITLE_AERA_MARGIN);
         }
     };
     ~SheetTheme() override = default;
@@ -137,6 +160,11 @@ public:
     const Dimension& GetTitleTextMargin() const
     {
         return titleTextMargin_;
+    }
+
+    const Dimension& GetTitleTextHorizMargin() const
+    {
+        return titleTextHorizMargin_;
     }
 
     const Dimension& GetSubtitleTextFontSize() const
@@ -259,16 +287,59 @@ public:
         return closeIconWidth_;
     }
 
-    const Dimension& GetTitleTextHorizMargin() const
-    {
-        return titleTextHorizMargin_;
-    }
-
     const Dimension& GetCloseIconRadius() const
     {
         return closeIconRadius_;
     }
 
+    const Dimension& GetOperationAreaHeight() const
+    {
+        return operationAreaHeight_;
+    }
+
+    double GetLargePercent() const
+    {
+        return largePercent_;
+    }
+
+    double GetMediumPercent() const
+    {
+        return mediumPercent_;
+    }
+
+    bool GetHeightApplyFullScreen() const
+    {
+        return height_apply_full_screen_;
+    }
+
+    bool GetShowCloseIcon() const
+    {
+        return showCloseIcon_;
+    }
+    const FontWeight& GetSheetTitleFontWeight() const
+    {
+        return sheetTitleFontWeight_;
+    }
+
+    const Dimension& GetSheetDragBarHeight() const
+    {
+        return sheetDragBarHeight_;
+    }
+
+    const Dimension& GetTitleTopPadding() const
+    {
+        return titleTopPadding_;
+    }
+
+    const Dimension& GetTitleBottomPadding() const
+    {
+        return titleBottomPadding_;
+    }
+
+    const Dimension& GetSheetTitleAeraMargin() const
+    {
+        return sheetTitleAeraMargin_;
+    }
 protected:
     SheetTheme() = default;
 
@@ -278,6 +349,11 @@ private:
     Dimension titleTextMargin_;
     Dimension subtitleTextFontSize_;
     Dimension subtitleTextMargin_;
+    Dimension sheetDragBarHeight_;
+    Dimension titleTopPadding_;
+    Dimension titleBottomPadding_;
+    Dimension sheetTitleAeraMargin_;
+    FontWeight sheetTitleFontWeight_ = FontWeight::BOLD;
     Color titleTextFontColor_;
     Color subtitleTextFontColor_;
     Color sheetBackgoundColor_;
@@ -302,6 +378,11 @@ private:
     Dimension closeIconWidth_;
     Dimension titleTextHorizMargin_;
     Dimension closeIconRadius_;
+    Dimension operationAreaHeight_;
+    double largePercent_ = 0.0f;
+    double mediumPercent_ = 0.0f;
+    bool height_apply_full_screen_ = false;
+    bool showCloseIcon_ = true;
 };
 } // namespace OHOS::Ace::NG
 
