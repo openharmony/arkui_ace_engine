@@ -1920,8 +1920,7 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
     // if it fails to fill a new line backward, do [currentLine--]
     auto line = info_.gridMatrix_.find(currentLine);
     if (info_.gridMatrix_.find(currentLine) != info_.gridMatrix_.end()) {
-        auto nextMain = info_.gridMatrix_.find(currentLine + 1);
-        if (line->second.size() < crossCount_ && nextMain == info_.gridMatrix_.end()) {
+        if (line->second.size() < crossCount_) {
             bool hasNormalItem = false;
             lastCross_ = 0;
             for (const auto& elem : line->second) {
