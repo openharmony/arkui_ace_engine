@@ -15,9 +15,47 @@
 
 #include "reverse_converter.h"
 
+namespace OHOS::Ace {
 namespace {
-    constexpr int32_t STD_TM_START_YEAR = 1900;
+const std::string YEAR = "year";
+const std::string MONTH = "month";
+const std::string DAY = "day";
+const int32_t STD_TM_START_YEAR = 1900;
+const int32_t SEC_TO_MILLISEC = 1000;
+const auto DATE_MIN = PickerDate(1970, 1, 1);
+const auto DATE_MAX = PickerDate(2100, 12, 31);
+
+bool IsDateValid(uint32_t year, uint32_t month, uint32_t day)
+{
+    auto maxDay = PickerDate::GetMaxDay(year, month);
+    if (year < DATE_MIN.GetYear() || year > DATE_MAX.GetYear()) {
+        return false;
+    } else if (month < DATE_MIN.GetMonth() || month > DATE_MAX.GetMonth()) {
+        return false;
+    } else if (day < DATE_MIN.GetDay() || day > maxDay) {
+        return false;
+    }
+    return true;
+}
+
+bool g_checkValidDateValues(std::unique_ptr<OHOS::Ace::JsonValue>& sourceJson)
+{
+    if (!sourceJson || sourceJson->IsNull()) {
+        return false;
+    }
+    auto year = sourceJson->GetValue(YEAR);
+    auto month = sourceJson->GetValue(MONTH);
+    auto day = sourceJson->GetValue(DAY);
+    if (!year || !year->IsNumber() || !month || !month->IsNumber() || !day || !day->IsNumber()) {
+        return false;
+    }
+    if (!IsDateValid(year->GetInt(), month->GetInt(), day->GetInt())) {
+        return false;
+    }
+    return true;
+}
 } // namespace
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::Converter {
 void *ConvContext::Allocate(std::size_t size)
@@ -190,46 +228,58 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
 {
-    const auto start = PickerDate(1970, 1, 1);
-    const auto end = PickerDate(2100, 12, 31);
-    const int64_t secToMillisec = 1000;
     auto date = src;
-    if (src.GetYear() < start.GetYear() || src.GetYear() > end.GetYear()) {
-        date = start;
-    } else if (src.GetMonth() < start.GetMonth() || src.GetMonth() > end.GetMonth()) {
-        date = start;
-    } else if (src.GetDay() < start.GetDay() || src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
-        date = start;
+    if (src.GetYear() < DATE_MIN.GetYear() || src.GetYear() > DATE_MAX.GetYear()) {
+        date = DATE_MIN;
+    } else if (src.GetMonth() < DATE_MIN.GetMonth() || src.GetMonth() > DATE_MAX.GetMonth()) {
+        date = DATE_MIN;
+    } else if (src.GetDay() < DATE_MIN.GetDay() ||
+        src.GetDay() > PickerDate::GetMaxDay(src.GetYear(), src.GetMonth())) {
+        date = DATE_MIN;
     }
     std::tm tm {};
     tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
     tm.tm_mday = date.GetDay();
     time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * secToMillisec);
+    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
 }
 
 void AssignArkValue(Ark_Date& dst, const std::string& src)
 {
     auto json = JsonUtil::ParseJsonString(src);
-    if (json && !json->IsNull()) {
-        uint32_t year = 0;
-        auto yearJson = json->GetValue("year");
-        if (yearJson && yearJson->IsNumber()) {
-            year = yearJson->GetUInt();
-        }
-        uint32_t month = 0;
-        auto monthJson = json->GetValue("month");
-        if (monthJson && monthJson->IsNumber()) {
-            month = monthJson->GetUInt();
-        }
-        uint32_t day = 0;
-        auto dayJson = json->GetValue("day");
-        if (dayJson && dayJson->IsNumber()) {
-            day = dayJson->GetUInt();
-        }
-        auto pickerDate = PickerDate(year, month, day);
-        dst = ArkValue<Ark_Date>(pickerDate);
+    auto year = DATE_MIN.GetYear();
+    auto month = DATE_MIN.GetMonth();
+    auto day = DATE_MIN.GetDay();
+    if (g_checkValidDateValues(json)) {
+        year = json->GetValue(YEAR)->GetInt();
+        month = json->GetValue(MONTH)->GetInt();
+        day = json->GetValue(DAY)->GetInt();
     }
+    
+    std::tm tm {};
+    tm.tm_year = year - STD_TM_START_YEAR; // tm_year is years since 1900
+    tm.tm_mon = month - 1; // tm_mon from 0 to 11
+    tm.tm_mday = day;
+    time_t time = std::mktime(&tm);
+    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
+}
+
+void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
+{
+    auto json = JsonUtil::ParseJsonString(src);
+    auto year = DATE_MIN.GetYear();
+    auto month = DATE_MIN.GetMonth();
+    auto day = DATE_MIN.GetDay();
+    if (g_checkValidDateValues(json)) {
+        year = json->GetValue(YEAR)->GetInt();
+        month = json->GetValue(MONTH)->GetInt();
+        day = json->GetValue(DAY)->GetInt();
+    }
+    dst = {
+        .year = Converter::ArkValue<Opt_Number>(year),
+        .month = Converter::ArkValue<Opt_Number>(month),
+        .day = Converter::ArkValue<Opt_Number>(day),
+    };
 }
 } // namespace OHOS::Ace::NG::Converter

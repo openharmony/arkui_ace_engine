@@ -923,6 +923,24 @@ CaretStyle Convert(const Ark_CaretStyle& src)
 }
 
 template<>
+CheckboxSettingData Convert(const Ark_LunarSwitchStyle& src)
+{
+    CheckboxSettingData data;
+    data.selectedColor = OptConvert<Color>(src.selectedColor);
+    data.unselectedColor = OptConvert<Color>(src.unselectedColor);
+    data.strokeColor = OptConvert<Color>(src.strokeColor);
+    return data;
+}
+
+template<>
+DateTimeType Convert(const Ark_DateTimeOptions& src)
+{
+    DateTimeType type;
+    LOGE("Convert [Ark_DateTimeOptions] to [DateTimeType] is not implemented yet");
+    return type;
+}
+
+template<>
 TextDecorationOptions Convert(const Ark_TextDecorationOptions& src)
 {
     TextDecorationOptions options;
