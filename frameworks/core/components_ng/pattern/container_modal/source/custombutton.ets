@@ -145,6 +145,10 @@ const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
 @Entry
 @Component
 struct custombutton {
+  // 0 represents move
+  // 1 represents down
+  // 2 represents up
+  @State maxBtnTouchState: number = 0
   @State maximizeResource: Resource = maximizeNormalResource
   @State minimizeResource: Resource = {
     bundleName: '',
@@ -591,6 +595,10 @@ struct custombutton {
           this.onMaximizeButtonClick()
         })))
         .onHover((isHover: boolean, event: HoverEvent) => {
+          if (isHover && this.maxBtnTouchState == 2) {
+            isHover = false
+            this.maxBtnTouchState = 0
+          }
           this.onHoverMaximizeButton(isHover)
           if (isHover) {
             this.onMenuWidthChange()
@@ -605,6 +613,26 @@ struct custombutton {
               this.maximizeScale = 1.0
             }
           })
+        })
+        .onTouch((event?: TouchEvent) => {
+          if(event){
+            if (event.type === TouchType.Move) {
+              this.maxBtnTouchState = 0;
+            }
+            if (event.type === TouchType.Down) {
+              this.maxBtnTouchState = 1;
+            }
+            if (event.type === TouchType.Up) {
+              this.maxBtnTouchState = 2;
+            }
+          }
+        })
+        .onMouse((event?: MouseEvent) => {
+          if (event) {
+            if (this.maxBtnTouchState == 0) {
+              this.onHoverMaximizeButton(true)
+            }
+          }
         })
 
         Button() {
@@ -635,6 +663,10 @@ struct custombutton {
           this.onMinimizeButtonClick()
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
+          if (isHover && this.maxBtnTouchState == 2) {
+            isHover = false
+            this.maxBtnTouchState = 0
+          }
           this.onHoverMinimizeButton(isHover)
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -643,6 +675,13 @@ struct custombutton {
               this.minimizeScale = 1.0
             }
           })
+        })
+        .onMouse((event?: MouseEvent) => {
+          if (event) {
+            if (this.maxBtnTouchState == 0) {
+              this.onHoverMinimizeButton(true)
+            }
+          }
         })
 
         Button() {
@@ -662,6 +701,7 @@ struct custombutton {
         .borderRadius('4vp')
         //右间距在父组件中体现
         // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -673,6 +713,10 @@ struct custombutton {
           this.onCloseButtonClick()
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
+          if (isHover && this.maxBtnTouchState == 2) {
+            isHover = false
+            this.maxBtnTouchState = 0
+          }
           this.onHoverCloseButton(isHover)
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -682,6 +726,14 @@ struct custombutton {
             }
           })
         })
+        .onMouse((event?: MouseEvent) => {
+          if (event) {
+            if (this.maxBtnTouchState == 0) {
+              this.onHoverCloseButton(true)
+            }
+          }
+        })
+
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
