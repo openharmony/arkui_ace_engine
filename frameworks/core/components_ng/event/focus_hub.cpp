@@ -1194,7 +1194,10 @@ bool FocusHub::CalculatePosition()
         return false;
     }
 
-    if (lastFocusNode->IsChild()) {
+    // relative position and width/height need to be calculated.
+    // 1. lastFocusNode is node
+    // 2. lastFocusNode do not have focusing child
+    if (lastFocusNode->IsChild() || !lastFocusNode->IsLastWeakNodeFocused()) {
         auto lastFocusGeometryNode = lastFocusNode->GetGeometryNode();
         CHECK_NULL_RETURN(lastFocusGeometryNode, false);
         RectF rect(childRect.GetOffset(), lastFocusGeometryNode->GetFrameSize());
@@ -2814,5 +2817,12 @@ void FocusHub::DumpFocusUieInJson(std::unique_ptr<JsonValue>& json)
     if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern->DumpInfo(json);
     }
+}
+
+bool FocusHub::IsLastWeakNodeFocused() const
+{
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    CHECK_NULL_RETURN(lastFocusNode, false);
+    return lastFocusNode->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG
