@@ -3200,8 +3200,8 @@ let SwiperNestedScrollMode;
 
 let PageFlipMode;
 (function (PageFlipMode) {
-  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = "CONTINUOUS";
-  PageFlipMode[PageFlipMode.SINGLE = 1] = "SINGLE";
+  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = 'CONTINUOUS';
+  PageFlipMode[PageFlipMode.SINGLE = 1] = 'SINGLE';
 })(PageFlipMode || (PageFlipMode = {}));
 
 let CheckBoxStyle;
