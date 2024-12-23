@@ -238,4 +238,22 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
         .day = Converter::ArkValue<Opt_Number>(date.GetDay())
     };
 }
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
+{
+    dst.windowX = ArkValue<Ark_Number>(src.windowPoint.GetX());
+    dst.windowY = ArkValue<Ark_Number>(src.windowPoint.GetY());
+    dst.parentX = ArkValue<Ark_Number>(src.currentCmpPoint.GetX());
+    dst.parentY = ArkValue<Ark_Number>(src.currentCmpPoint.GetY());
+    dst.x = ArkValue<Ark_Number>(src.subCmpPoint.GetX());
+    dst.y = ArkValue<Ark_Number>(src.subCmpPoint.GetY());
+    dst.rect = ArkValue<Ark_RectResult>(src.subRect);
+    dst.id = ArkValue<Ark_String>(src.id);
+}
 } // namespace OHOS::Ace::NG::Converter

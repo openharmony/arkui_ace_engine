@@ -3183,6 +3183,13 @@ void ViewAbstract::SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode)
     gestureHub->SetHitTestMode(hitTestMode);
 }
 
+void ViewAbstract::SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest)
+{
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
 void ViewAbstract::SetOpacity(FrameNode* frameNode, double opacity)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode);

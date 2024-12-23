@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
+
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -1426,6 +1427,30 @@ void AssignCast(std::optional<Alignment>& dst, const Ark_Literal_Alignment_align
             dst = std::nullopt;
     }
 }
+
+template<>
+void AssignCast(std::optional<TouchTestStrategy>& dst, const Ark_TouchTestStrategy& src)
+{
+    switch (src) {
+        case ARK_TOUCH_TEST_STRATEGY_DEFAULT: dst = TouchTestStrategy::DEFAULT; break;
+        case ARK_TOUCH_TEST_STRATEGY_FORWARD_COMPETITION: dst = TouchTestStrategy::FORWARD_COMPETITION; break;
+        case ARK_TOUCH_TEST_STRATEGY_FORWARD: dst = TouchTestStrategy::FORWARD; break;
+        default: LOGE("Unexpected enum value in Ark_TouchTestStrategy: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
+{
+    if (auto strategy = OptConvert<TouchTestStrategy>(src.strategy); strategy) {
+        dst->strategy = *strategy;
+        if (auto id = OptConvert<std::string>(src.id); id) {
+            dst->id = *id;
+        }
+    } else {
+        dst.reset();
+    }
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -1622,14 +1647,39 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
     NG::HitTestMode hitTestModeNG = static_cast<NG::HitTestMode>(value);
     ViewAbstract::SetHitTestMode(frameNode, hitTestModeNG);
 }
+
 void OnChildTouchTestImpl(Ark_NativePointer node,
                           const Callback_Array_TouchTestInfo_TouchResult* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    LOGE("ARKOALA: CommonMethod::OnChildTouchTestImpl: Callbacks with return values are not supported.");
+    auto onTouchTestFunc = [callback = CallbackHelper(*value, frameNode)](
+        const std::vector<NG::TouchTestInfo>& touchInfo
+    ) -> NG::TouchResult {
+        std::vector<NG::TouchTestInfo> touchInfoUpd = touchInfo;
+        for(auto &item: touchInfoUpd) {
+            item.windowPoint.SetX(PipelineBase::Px2VpWithCurrentDensity(item.windowPoint.GetX()));
+            item.windowPoint.SetY(PipelineBase::Px2VpWithCurrentDensity(item.windowPoint.GetY()));
+            item.currentCmpPoint.SetX(PipelineBase::Px2VpWithCurrentDensity(item.currentCmpPoint.GetX()));
+            item.currentCmpPoint.SetY(PipelineBase::Px2VpWithCurrentDensity(item.currentCmpPoint.GetY()));
+            item.subCmpPoint.SetX(PipelineBase::Px2VpWithCurrentDensity(item.subCmpPoint.GetX()));
+            item.subCmpPoint.SetY(PipelineBase::Px2VpWithCurrentDensity(item.subCmpPoint.GetY()));
+            item.subRect.SetLeft(PipelineBase::Px2VpWithCurrentDensity(item.subRect.GetX()));
+            item.subRect.SetTop(PipelineBase::Px2VpWithCurrentDensity(item.subRect.GetY()));
+            item.subRect.SetWidth(PipelineBase::Px2VpWithCurrentDensity(item.subRect.Width()));
+            item.subRect.SetHeight(PipelineBase::Px2VpWithCurrentDensity(item.subRect.Height()));
+        }
+
+        Converter::ArkArrayHolder<Array_TouchTestInfo> holder(touchInfoUpd);
+        auto resultOpt =
+            callback.InvokeWithOptConvertResult<NG::TouchResult, Ark_TouchResult, Callback_TouchResult_Void>(
+                holder.ArkValue()
+        );
+        static const NG::TouchResult defaultRes{ NG::TouchTestStrategy::DEFAULT, "" };
+        return resultOpt.value_or(defaultRes);
+    };
+    ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onTouchTestFunc));
 }
 void LayoutWeightImpl(Ark_NativePointer node,
                       const Ark_Union_Number_String* value)
