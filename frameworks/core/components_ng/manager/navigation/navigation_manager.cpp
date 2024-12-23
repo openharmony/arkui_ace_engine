@@ -47,7 +47,7 @@ void NavigationManager::RemoveNavigationDumpCallback(int32_t nodeId, int32_t dep
 void NavigationManager::OnDumpInfo()
 {
     CHECK_RUN_ON(UI);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto rootNode = pipeline->GetRootElement();
     if (!rootNode) {
@@ -215,7 +215,7 @@ void NavigationManager::CacheNavigationNodeAnimation()
     if (!IsNavigationInAnimation()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     //  Cache exit pages for future use
     if (!preNodeHasAnimation_) {

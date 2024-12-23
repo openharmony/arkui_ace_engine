@@ -164,7 +164,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
                              weakMenu = WeakPtr<FrameNode>(barMenuNode)]() {
         auto context = weakContext.Upgrade();

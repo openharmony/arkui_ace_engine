@@ -50,7 +50,7 @@ void CustomNodeBase::MarkNeedUpdate()
             AceLogTag::ACE_STATE_MGMT, "[%{public}s] call markNeedUpdate in recycle/reuse", GetJSViewName().c_str());
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!context) {
         TAG_LOGW(AceLogTag::ACE_STATE_MGMT, "context no longer exist when [%{public}s] call markNeedUpdate",
             GetJSViewName().c_str());

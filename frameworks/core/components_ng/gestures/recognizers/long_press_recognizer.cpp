@@ -291,7 +291,7 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
     context->AddGestureTask(task_);
 
     auto&& flushCallback = []() {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         context->RequestFrame();
     };

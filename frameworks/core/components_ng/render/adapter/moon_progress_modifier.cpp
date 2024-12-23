@@ -82,7 +82,7 @@ void MoonProgressModifier::SetValue(float value)
     auto finishCallback = [weak = AceType::WeakClaim(this), bigRadius = bigRadius_, smallRadius = smallRadius_,
                               id = Container::CurrentId()]() {
         ContainerScope scope(id);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
@@ -293,7 +293,7 @@ void MoonProgressModifier::RegisterVisibleChange()
     if (hasVisibleChangeRegister_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
         auto modifier = weak.Upgrade();
@@ -314,7 +314,7 @@ void MoonProgressModifier::RegisterVisibleChange()
 
 void MoonProgressModifier::RemoveVisibleChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto node = maskNode_.Upgrade();
     CHECK_NULL_VOID(node);

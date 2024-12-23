@@ -156,7 +156,7 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
 
 void SheetPresentationPattern::InitPageHeight()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaInsets = pipelineContext->GetSafeAreaWithoutProcess();
     auto currentTopSafeArea = sheetTopSafeArea_;
@@ -307,7 +307,7 @@ void SheetPresentationPattern::AvoidAiBar()
     if (NonPositive(scrollPattern->GetScrollableDistance()) || isScrolling_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
@@ -768,7 +768,7 @@ void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
     if (!forceAvoid && keyboardHeight_ == manager->GetKeyboardInset().Length()) {
@@ -813,7 +813,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
 {
     // TextFieldManagerNG::GetClickPosition: The upper left corner offset of the cursor position relative to rootNode
     // TextFieldManagerNG::GetHeight: the cursor Height + 24vp
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, .0f);
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
@@ -1236,7 +1236,7 @@ void SheetPresentationPattern::UpdateCloseIconStatus()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -1274,7 +1274,7 @@ void SheetPresentationPattern::UpdateSheetTitle()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -1306,7 +1306,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -1351,7 +1351,7 @@ void SheetPresentationPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -1603,7 +1603,7 @@ SheetType SheetPresentationPattern::GetSheetType()
         return SHEET_BOTTOM;
     }
     SheetType sheetType = SheetType::SHEET_BOTTOM;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, sheetType);
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
@@ -1640,7 +1640,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 {
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
 #ifdef PREVIEW
@@ -1670,7 +1670,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
 
 void SheetPresentationPattern::GetSheetTypeWithPopup(SheetType& sheetType)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1902,7 +1902,7 @@ void SheetPresentationPattern::ClipSheetNode()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -2208,7 +2208,7 @@ RefPtr<OverlayManager> SheetPresentationPattern::GetOverlayManager()
     CHECK_NULL_RETURN(layoutProp, nullptr);
     auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
     if (!showInPage) {
-        return PipelineContext::GetCurrentContext()->GetOverlayManager();
+        return PipelineContext::GetCurrentContextSafelyWithCheck()->GetOverlayManager();
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
@@ -2259,7 +2259,7 @@ RefPtr<FrameNode> SheetPresentationPattern::GetOverlayRoot()
     CHECK_NULL_RETURN(layoutProp, nullptr);
     auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
     if (!showInPage) {
-        auto overlay = PipelineContext::GetCurrentContext()->GetOverlayManager();
+        auto overlay = PipelineContext::GetCurrentContextSafelyWithCheck()->GetOverlayManager();
         CHECK_NULL_RETURN(overlay, nullptr);
         return AceType::DynamicCast<FrameNode>(overlay->GetRootNode().Upgrade());
     }

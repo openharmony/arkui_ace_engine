@@ -187,7 +187,7 @@ void SelectPattern::SetItemSelected(int32_t index, const std::string& value)
 void SelectPattern::ShowSelectMenu()
 {
     CHECK_NULL_VOID(!options_.empty());
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

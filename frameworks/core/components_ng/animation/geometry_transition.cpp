@@ -248,7 +248,7 @@ void GeometryTransition::DidLayout(const RefPtr<LayoutWrapper>& layoutWrapper)
         direction = false;
     }
     if (direction.has_value()) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weak = WeakClaim(this), isNodeIn = direction.value()]() {
             auto geometryTransition = weak.Upgrade();
@@ -394,7 +394,7 @@ RefPtr<FrameNode> CreateHolderNode(const RefPtr<FrameNode>& node)
 void GeometryTransition::SyncGeometryPropertiesAfterLayout(const RefPtr<FrameNode>& syncNode)
 {
     CHECK_NULL_VOID(syncNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask(
         [nodeWeak = WeakClaim(RawPtr(syncNode))]() {

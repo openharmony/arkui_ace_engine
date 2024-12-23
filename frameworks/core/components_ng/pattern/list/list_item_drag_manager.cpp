@@ -429,7 +429,7 @@ void ListItemDragManager::HandleSwapAnimation(int32_t from, int32_t to)
             auto forEach = weak.Upgrade();
             CHECK_NULL_VOID(forEach);
             forEach->MoveData(from, to);
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }

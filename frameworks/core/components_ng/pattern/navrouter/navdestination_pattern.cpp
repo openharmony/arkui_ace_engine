@@ -228,7 +228,7 @@ void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationG
             renderContext->GetBackgroundColor()->ColorToString().c_str());
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!pipelineContext) {
         return;
     }

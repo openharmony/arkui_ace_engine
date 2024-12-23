@@ -3922,7 +3922,7 @@ void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline == nullptr) {
         return;
     }
@@ -5673,7 +5673,7 @@ void WebDelegate::OnAudioStateChanged(bool audible)
 
 void WebDelegate::OnGetTouchHandleHotZone(std::shared_ptr<OHOS::NWeb::NWebTouchHandleHotZone> hotZone)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(theme);

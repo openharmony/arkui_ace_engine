@@ -20,7 +20,7 @@
 namespace OHOS::Ace::NG {
 SafeAreaInsets GenerateCutOutAreaWithRoot(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, {});
     CHECK_NULL_RETURN(pipeline->GetUseCutout(), {});
     // cutout regions adjacent to edges.
@@ -281,7 +281,7 @@ float SafeAreaManager::GetKeyboardOffset(bool withoutProcess) const
 
 OffsetF SafeAreaManager::GetWindowWrapperOffset()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowManager = pipelineContext->GetWindowManager();
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
@@ -299,7 +299,7 @@ void SafeAreaManager::ExpandSafeArea()
     ACE_SCOPED_TRACE("ExpandSafeArea node count %zu, IsSafeAreaValid: %d, ignoreSafeArea: %d, isFullScreen: %d, "
                      "isNeedAvoidWindow %d",
         needExpandNodes_.size(), IsSafeAreaValid(), ignoreSafeArea_, isFullScreen_, isNeedAvoidWindow_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto iter = needExpandNodes_.begin();

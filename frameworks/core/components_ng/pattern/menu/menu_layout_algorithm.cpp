@@ -1874,7 +1874,7 @@ RefPtr<PipelineContext> MenuLayoutAlgorithm::GetCurrentPipelineContext()
         CHECK_NULL_RETURN(parentContainer, nullptr);
         context = DynamicCast<PipelineContext>(parentContainer->GetPipelineContext());
     } else {
-        context = PipelineContext::GetCurrentContext();
+        context = PipelineContext::GetCurrentContextSafelyWithCheck();
     }
     return context;
 }
@@ -1956,7 +1956,7 @@ void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double&
     auto containerOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
                             static_cast<float>(CONTENT_PADDING.ConvertToPx());
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto containerOffsetY = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()) +
                             static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +

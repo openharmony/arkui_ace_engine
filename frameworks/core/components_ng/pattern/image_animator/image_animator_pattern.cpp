@@ -30,7 +30,7 @@ constexpr int32_t DEFAULT_ITERATIONS = 1;
 
 ImageAnimatorPattern::ImageAnimatorPattern()
 {
-    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContext());
+    animator_ = CREATE_ANIMATOR(PipelineContext::GetCurrentContextSafelyWithCheck());
     animator_->SetFillMode(FillMode::FORWARDS);
     animator_->SetDuration(DEFAULT_DURATION);
     ResetFormAnimationFlag();

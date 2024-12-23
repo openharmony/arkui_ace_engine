@@ -159,7 +159,7 @@ RefPtr<FrameNode> AgingAdapationDialogUtil::CreateCustomDialog(const RefPtr<Fram
     layoutProperty->UpdateCalcMinSize(columnMinSize);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, nullptr);

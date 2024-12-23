@@ -347,7 +347,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         return;
     }
     ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);

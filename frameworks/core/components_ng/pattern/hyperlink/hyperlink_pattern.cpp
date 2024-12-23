@@ -188,7 +188,7 @@ void HyperlinkPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void HyperlinkPattern::OnTouchEvent(const TouchEventInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -268,7 +268,7 @@ bool HyperlinkPattern::OnKeyEvent(const KeyEvent& event)
 
 void HyperlinkPattern::OnHoverEvent(bool isHovered)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
@@ -299,7 +299,7 @@ void HyperlinkPattern::OnHoverEvent(bool isHovered)
 
 void HyperlinkPattern::OnMouseEvent(MouseInfo& info)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frame = GetHost();
     CHECK_NULL_VOID(frame);

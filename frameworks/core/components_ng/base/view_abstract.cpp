@@ -201,7 +201,7 @@ void ViewAbstract::SetBackgroundColor(const Color& color)
     }
 
     Color updateColor = color;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline != nullptr) {
         pipeline->CheckNeedUpdateBackgroundColor(updateColor);
     }
@@ -223,7 +223,7 @@ void ViewAbstract::SetBackgroundImage(const ImageSourceInfo& src)
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline != nullptr) {
         bool disableSetImage = pipeline->CheckNeedDisableUpdateBackgroundImage();
         if (disableSetImage) {
@@ -920,7 +920,7 @@ void ViewAbstract::DisableOnDetach()
 
 void ViewAbstract::DisableOnAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1305,7 +1305,7 @@ void ViewAbstract::SetOnAreaChanged(
     std::function<void(const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)>&&
         onAreaChanged)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1315,7 +1315,7 @@ void ViewAbstract::SetOnAreaChanged(
 
 void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, const RectF &rect)> &&onSizeChanged)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1325,7 +1325,7 @@ void ViewAbstract::SetOnSizeChanged(std::function<void(const RectF &oldRect, con
 void ViewAbstract::SetOnVisibleChange(std::function<void(bool, double)> &&onVisibleChange,
     const std::vector<double> &ratioList)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(frameNode);
@@ -1377,7 +1377,7 @@ void ViewAbstract::SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTes
 
 void ViewAbstract::AddDragFrameNodeToManager()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -1911,7 +1911,7 @@ void ViewAbstract::BindPopup(
         if (!showInSubWindow) {
             // erase popup when target node destroy
             auto destructor = [id = targetNode->GetId()]() {
-                auto pipeline = NG::PipelineContext::GetCurrentContext();
+                auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
                 auto overlayManager = pipeline->GetOverlayManager();
                 CHECK_NULL_VOID(overlayManager);
@@ -1974,7 +1974,7 @@ void ViewAbstract::BindPopup(
 
 void ViewAbstract::DismissPopup()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1983,7 +1983,7 @@ void ViewAbstract::DismissPopup()
 
 void ViewAbstract::DismissDialog()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -2880,7 +2880,7 @@ void ViewAbstract::SetForegroundColorStrategy(const ForegroundColorStrategy& str
 void ViewAbstract::SetKeyboardShortcut(
     const std::string& value, const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
@@ -5069,7 +5069,7 @@ void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG
 
 void ViewAbstract::SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

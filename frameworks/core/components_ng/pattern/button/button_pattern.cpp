@@ -493,7 +493,7 @@ void ButtonPattern::SetButtonPress(double xPos, double yPos)
     auto globalX = Dimension(x.ConvertToPx() + frameGlobalOffset.GetX());
     auto globalY = Dimension(y.ConvertToPx() + frameGlobalOffset.GetY());
     info.SetGlobalLocation(Offset(globalX.ConvertToVp(), globalY.ConvertToVp()));
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowOffset = pipeline->GetCurrentWindowRect().GetOffset();
     auto screenX = Dimension(windowOffset.GetX()) + globalX;

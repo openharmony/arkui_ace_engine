@@ -177,7 +177,7 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
         ChangeControlButtons(isFocus_);
         return;
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     auto stackNode = GetStackNode();
@@ -308,7 +308,7 @@ void ContainerModalPatternEnhance::ChangeControlButtons(bool isFocus)
 
 void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
@@ -322,7 +322,7 @@ void ContainerModalPatternEnhance::ChangeFloatingTitle(bool isFocus)
     CHECK_NULL_VOID(floatingTitleRow);
     auto floatingContext = floatingTitleRow->GetRenderContext();
     CHECK_NULL_VOID(floatingContext);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     floatingContext->UpdateBackgroundColor(GetContainerColor(isFocus));
@@ -679,7 +679,7 @@ RefPtr<FrameNode> ContainerModalPatternEnhance::ShowMaxMenu(const RefPtr<FrameNo
         TAG_LOGI(AceLogTag::ACE_APPBAR, "the app window is not support spilt menu");
         return nullptr;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);

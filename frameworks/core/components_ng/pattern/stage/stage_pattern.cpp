@@ -27,7 +27,7 @@ void StagePattern::OnAttachToFrameNode()
     if (container && container->IsDynamicRender()) {
         host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
 }

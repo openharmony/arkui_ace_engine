@@ -211,7 +211,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
 
 void FitScrollFullWindow(SizeF& frameSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (frameSize.Width() == Infinity<float>()) {
         frameSize.SetWidth(pipeline->GetRootWidth());
@@ -293,7 +293,7 @@ void NavigationLayoutAlgorithm::RangeCalculation(
     auto frameSize = parentSize.ConvertToSizeT();
     float frameSizeWidth = frameSize.Width();
     Dimension defaultValue = Dimension(-1.0);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     minContentWidthValue_ = navigationLayoutProperty->GetMinContentWidthValue(defaultValue);
@@ -424,7 +424,7 @@ void NavigationLayoutAlgorithm::SizeCalculation(LayoutWrapper* layoutWrapper,
     const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty,
     const SizeF& frameSize)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto constraint = navigationLayoutProperty->GetLayoutConstraint();
     auto parentSize = CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);

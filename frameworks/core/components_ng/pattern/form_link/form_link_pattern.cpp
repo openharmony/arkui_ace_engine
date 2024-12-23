@@ -24,7 +24,7 @@ void FormLinkPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddOnAreaChangeNode(GetHost()->GetId());
 }
@@ -38,7 +38,7 @@ void FormLinkPattern::OnAreaChangedInner()
     auto linkRect = geometryNode->GetFrameRect();
     linkRect.SetOffset(GetHost()->GetTransformRelativeOffset());
     formLinkInfo_.SetFomLinkRect(linkRect);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddFormLinkInfo(host->GetId(), formLinkInfo_.ToString());
 }

@@ -111,7 +111,7 @@ void RosenRenderSurface::InitSurface()
 {
     auto renderContext = renderContext_.Upgrade();
     if (!renderContext && SystemProperties::GetExtSurfaceEnabled()) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto windowId = context->GetWindowId();
         surfaceDelegate_ = new OHOS::SurfaceDelegate(windowId);

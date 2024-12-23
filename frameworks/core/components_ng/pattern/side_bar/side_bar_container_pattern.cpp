@@ -399,7 +399,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowDivider(layoutProperty, host);
     UpdateControlButtonIcon();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         OnUpdateSideBarAndContent(host);
@@ -784,7 +784,7 @@ void SideBarContainerPattern::DoAnimation()
     FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
 
     auto weak = AceType::WeakClaim(this);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     inAnimation_ = true;
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
@@ -1008,7 +1008,7 @@ void SideBarContainerPattern::HandleDragStart()
         return;
     }
     isInDividerDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -1027,7 +1027,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
         auto geometryNode = host->GetGeometryNode();
@@ -1080,7 +1080,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 void SideBarContainerPattern::HandleDragEnd()
 {
     isInDividerDrag_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -1124,7 +1124,7 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
@@ -1166,7 +1166,7 @@ void SideBarContainerPattern::OnHover(bool isHover)
     isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
@@ -1276,7 +1276,7 @@ void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& button
 
 void SideBarContainerPattern::HandleLongPressEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     float scale = pipeline->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -1290,7 +1290,7 @@ void SideBarContainerPattern::HandleLongPressActionEnd()
     if (!isDialogShow_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

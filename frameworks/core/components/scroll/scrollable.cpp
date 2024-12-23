@@ -707,7 +707,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
 void Scrollable::SetDelayedTask()
 {
     SetContinuousDragStatus(true);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     task_.Reset([weak = WeakClaim(this)] {

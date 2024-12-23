@@ -25,7 +25,7 @@ constexpr int32_t FIRST_OVERLAY_INDEX = 1;
 
 void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -55,7 +55,7 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
 
 void AtomicServicePattern::UpdateLayoutMargin()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
     auto atom = GetHost();
@@ -109,7 +109,7 @@ void AtomicServicePattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
 }
@@ -123,7 +123,7 @@ void AtomicServicePattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     host->GetRenderContext()->UpdateBackgroundColor(pipeline->GetAppBgColor());
     if (settedColorMode.has_value()) {
@@ -191,7 +191,7 @@ RefPtr<FrameNode> AtomicServicePattern::GetCloseIcon()
 
 void AtomicServicePattern::UpdateColor(std::optional<bool> isLight)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     if (!(isLight.has_value())) {
@@ -286,7 +286,7 @@ void AtomicServicePattern::UpdateIconColor(RefPtr<AppBarTheme>& theme, RefPtr<Fr
 
 void AtomicServicePattern::UpdateLayout()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<AppBarTheme>();
     CHECK_NULL_VOID(theme);
