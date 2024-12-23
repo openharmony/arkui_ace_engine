@@ -81,7 +81,7 @@ public:
     // replace all sections from start
     void ReplaceFrom(size_t start, const std::vector<Section>& newSections);
 
-    const std::vector<Section>& GetSectionInfo() const
+    virtual const std::vector<Section>& GetSectionInfo() const
     {
         return sections_;
     }

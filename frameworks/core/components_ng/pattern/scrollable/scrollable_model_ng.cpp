@@ -357,6 +357,7 @@ float ScrollableModelNG::GetFadingEdgeLength(FrameNode* frameNode)
     CHECK_NULL_RETURN(paintProperty, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
     return paintProperty->GetFadingEdgeLength().value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE).Value();
 }
+
 #ifdef SUPPORT_DIGITAL_CROWN
 void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
 {
