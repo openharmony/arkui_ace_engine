@@ -99,7 +99,7 @@ group("advanced_ui_component") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [ "selectionmenu/interfaces:selectionmenu" ]
-  } else (ace_engine_feature_wearable) {
+  } else {
     deps -= [
       "composelistitem/interfaces:composelistitem",
       "composetitlebar/interfaces:composetitlebar",
