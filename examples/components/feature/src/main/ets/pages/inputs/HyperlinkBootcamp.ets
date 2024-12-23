@@ -14,7 +14,7 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, useEnabled } from 'common';
+import { ColorBlock, RadioBlock, useEnabled, IconBlock } from 'common';
 
 @Component
 export struct HyperlinkBootcamp {
@@ -22,6 +22,12 @@ export struct HyperlinkBootcamp {
   @State showParameters: boolean = false;
   @State enableColor: boolean = false;
   @State color: ResourceColor | undefined = undefined;
+  @State enableAddress: boolean = false;
+  @State address: string | Resource = '';
+  @State enableContent: boolean = false;
+  @State content: string | Resource = 'Go to the developer website';
+  @State enableImage: boolean = true;
+  @State image: ResourceStr = $r('app.media.startIcon');
 
   build() {
     NavDestination() {
@@ -45,14 +51,16 @@ export struct HyperlinkBootcamp {
     Column() {
       Row(){
         Hyperlink('') {
-          Image($r('app.media.background'))
+          Image(useEnabled(this.enableImage,this.image))
             .width(200)
             .height(100)
         }
       }
 
       Row(){
-        Hyperlink('', 'Go to the developer website') {}
+        Hyperlink(useEnabled(this.enableAddress, this.address), useEnabled(this.enableContent, this.content)) {
+
+        }
           .color(useEnabled(this.enableColor,this.color))
       }.width('100%').height('100%').justifyContent(FlexAlign.Center)
 
@@ -69,6 +77,33 @@ export struct HyperlinkBootcamp {
           isEnabled: this.enableColor,
           color: this.color
         })
+
+        IconBlock({
+          title: 'image',
+          isEnabled: this.enableImage,
+          icon: this.image,
+        })
+
+        RadioBlock({
+          title: 'address',
+          isEnabled: this.enableAddress,
+          value: this.address,
+          dataSource: [
+            { label: 'null', value: ' ' },
+            { label: 'Address Component Example', value: 'www.example.com' },
+          ]
+        })
+
+        RadioBlock({
+          title: 'content',
+          isEnabled: this.enableContent,
+          value: this.content,
+          dataSource: [
+            { label: 'null', value: ' ' },
+            { label: 'Go to the developer website', value: 'Go to the developer website' },
+          ]
+        })
+
       }
     }
   }
