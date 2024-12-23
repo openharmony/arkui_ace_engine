@@ -512,6 +512,14 @@ void TextFieldModelNG::SetOnPaste(std::function<void(const std::string&)>&& func
     eventHub->SetOnPaste(std::move(func));
 }
 
+void TextFieldModelNG::SetOnPaste(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnPaste(std::move(func));
+}
+
 void TextFieldModelNG::SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
