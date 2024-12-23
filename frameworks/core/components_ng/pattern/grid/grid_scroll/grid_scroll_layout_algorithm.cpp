@@ -1965,12 +1965,11 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 info_.endIndex_ = elem.second;
             }
         }
-        if (info_.lineHeightMap_.find(currentLine) != info_.lineHeightMap_.end()) {
-            return info_.lineHeightMap_.find(currentLine)->second;
-        } else {
+        if (NonNegative(cellAveLength_)) {
             info_.lineHeightMap_[currentLine] = cellAveLength_;
             return cellAveLength_;
         }
+        return GetOrDefault(info_.lineHeightMap_, currentLine, -1.f);
     }
 
     lastCross_ = 0;
