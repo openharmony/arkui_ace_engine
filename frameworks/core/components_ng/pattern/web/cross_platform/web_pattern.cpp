@@ -779,8 +779,10 @@ void WebPattern::OnModifyDone()
     if (!delegate_) {
         // first create case,
 #if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
-        WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>(PipelineContext::GetCurrentContextSafelyWithCheck());
-        delegate_ = AceType::MakeRefPtr<WebDelegateCross>(PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "web");
+        WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>(
+            PipelineContext::GetCurrentContextSafelyWithCheck());
+        delegate_ = AceType::MakeRefPtr<WebDelegateCross>(
+            PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "web");
         delegate_->SetNGWebPattern(Claim(this));
         delegate_->CreatePlatformResource(Size(0, 0), Offset(0, 0), context);
         if (setWebIdCallback_) {
@@ -798,7 +800,8 @@ void WebPattern::OnModifyDone()
 #else
         delegate_ = AceType::MakeRefPtr<WebDelegate>(PipelineContext::GetCurrentContextSafelyWithCheck(), nullptr, "");
         CHECK_NULL_VOID(delegate_);
-        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(
+            delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);

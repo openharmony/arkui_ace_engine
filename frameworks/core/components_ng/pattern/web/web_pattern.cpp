@@ -2968,7 +2968,8 @@ void WebPattern::OnModifyDone()
             Container::CurrentId());
         instanceId_ = Container::CurrentId();
         CHECK_NULL_VOID(delegate_);
-        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
+        observer_ = AceType::MakeRefPtr<WebDelegateObserver>(
+            delegate_, PipelineContext::GetCurrentContextSafelyWithCheck());
         CHECK_NULL_VOID(observer_);
         delegate_->SetObserver(observer_);
         delegate_->SetRenderMode(renderMode_);
