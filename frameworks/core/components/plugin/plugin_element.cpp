@@ -165,7 +165,7 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
             auto uiTaskExecutor = SingleTaskExecutor::Make(
                 element->GetContext().Upgrade()->GetTaskExecutor(), TaskExecutor::TaskType::UI);
             uiTaskExecutor.PostTask(
-                [id, data, weak] {
+                [data, weak] {
                     auto plugin = weak.Upgrade();
                     if (plugin) {
                         plugin->GetPluginSubContainer()->UpdatePlugin(data);
