@@ -33,6 +33,15 @@ struct TraverseResult {
     uint64_t screenId_ = -1;
 };
 
+struct TraverseInfo {
+    uint8_t isAncestorRecent : 1;
+    uint8_t isAncestorDirty : 1;
+    uint8_t notSyncPosition : 1;
+    uint8_t rsv : 5;
+    int32_t transScenePosX;
+    int32_t transScenePosY;
+};
+
 class WindowSceneLayoutManager {
 public:
     static WindowSceneLayoutManager* GetInstance();
@@ -45,9 +54,9 @@ private:
     ~WindowSceneLayoutManager() = default;
     void Init();
     void TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-        bool isParentRecent, bool isParentDirty, bool isParentNotSyncPosition);
-    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, bool isAncestorRecent,
-        bool notSyncPosition);
+        TraverseInfo& parentInfo);
+    void FillWindowSceneInfo(const RefPtr<FrameNode>& node, TraverseResult& res, TraverseInfo& ancestorInfo);
+    void FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo);
     bool IsNodeVisible(const RefPtr<FrameNode>& node);
     bool IsNodeDirty(const RefPtr<FrameNode>& node);
     bool IsRecentContainerState(const RefPtr<FrameNode>& node);
