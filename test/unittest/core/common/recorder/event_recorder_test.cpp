@@ -14,6 +14,8 @@
  */
 
 #include "gtest/gtest.h"
+#define private public
+#define protected public
 #include "interfaces/inner_api/ace/ui_event_observer.h"
 
 #include "base/log/log.h"
@@ -63,6 +65,62 @@ void GetConfig(std::string& config)
 {
     config =
         "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigDisable(std::string& config)
+{
+    config =
+        "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigTest(std::string& config)
+{
+    config =
+        "{\"enable\":false,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"x\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+        "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+        "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"pageUrl\":\"pages/"
+        "ScrollPage\",\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+        "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigTest2(std::string& config)
+{
+    config = "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
+             "\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
+             "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
+             "TitleExpand\",\"ratio\":0.9,\"duration\":1000}]},{\"shareNode\":[\"scroll_item_1\"],\"exposureCfg\":[{"
+             "\"id\":\"scroll_item_2\",\"ratio\":0.85,"
+             "\"duration\":5000},{\"id\":\"scroll_item_12\",\"ratio\":0.4,\"duration\":3000}]}]}";
+}
+
+void GetConfigTest3(std::string& config)
+{
+    config =
+        "{\"enable\":true,\"switch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{\"pageUrl\":"
+        "\"pages/"
+        "Index\"},{\"pageUrl\":\"pages/"
+        "ScrollPage\"}]}";
+}
+
+void GetConfigTest4(std::string& config)
+{
+    config =
+        "{\"enable\":true,\"globalSwitch\":{\"page\":true,\"component\":true,\"exposure\":true},\"config\":[{"
+        "\"pageUrl\":"
         "\"pages/"
         "Index\",\"shareNode\":[\"hahaha\",\"btn_TitleExpand\",\"btn_OpenSelf\",\"btn_Screenshot\",\"btn_inspect\","
         "\"btn_xxx\",\"\"],\"exposureCfg\":[{\"id\":\"btn_Grid\",\"ratio\":0.75,\"duration\":5000},{\"id\":\"btn_"
@@ -517,6 +575,7 @@ HWTEST_F(EventRecorderTest, EventRecorderTest009, TestSize.Level1)
     EXPECT_EQ(observer->GetEventType(), static_cast<int32_t>(Recorder::EventType::PAGE_SHOW));
 
     Recorder::EventParamsBuilder builder5;
+    builder5.SetText("");
     builder5.SetText("tom");
     Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder5));
     sleep(1);
@@ -656,8 +715,71 @@ HWTEST_F(EventRecorderTest, SetFocusContainerInfo002, TestSize.Level1)
  */
 HWTEST_F(EventRecorderTest, Init001, TestSize.Level1)
 {
+    std::string str = "";
     Recorder::EventConfig* config = new Recorder::EventConfig();
-    config->Init("");
+    config->Init(str);
+    EXPECT_EQ(str, "");
+    delete config;
+}
+
+/**
+ * @tc.name: Init002
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init002, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+    delete config;
+}
+
+/**
+ * @tc.name: Init003
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init003, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest2(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+    delete config;
+}
+
+/**
+ * @tc.name: Init004
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init004, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest3(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+    delete config;
+}
+
+/**
+ * @tc.name: Init005
+ * @tc.desc: Test Init.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Init005, TestSize.Level1)
+{
+    std::string str;
+    GetConfigTest4(str);
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->Init(str);
+    EXPECT_NE(str, "");
+    delete config;
 }
 
 /**
@@ -671,6 +793,42 @@ HWTEST_F(EventRecorderTest, IsPageRecordEnable001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsPageRecordEnable002
+ * @tc.desc: Test IsPageRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsPageRecordEnable002, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().pageEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.pageEnable = true;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsPageRecordEnable());
+}
+
+/**
+ * @tc.name: IsPageRecordEnable003
+ * @tc.desc: Test IsPageRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsPageRecordEnable003, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().pageEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.pageEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsPageRecordEnable());
+}
+
+/**
+ * @tc.name: IsPageRecordEnable004
+ * @tc.desc: Test IsPageRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsPageRecordEnable004, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().pageEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.pageEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsPageRecordEnable());
+}
+
+/**
  * @tc.name: IsComponentRecordEnable001
  * @tc.desc: Test IsComponentRecordEnable.
  * @tc.type: FUNC
@@ -681,12 +839,65 @@ HWTEST_F(EventRecorderTest, IsComponentRecordEnable001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsComponentRecordEnable002
+ * @tc.desc: Test IsComponentRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsComponentRecordEnable002, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+}
+
+/**
+ * @tc.name: IsComponentRecordEnable003
+ * @tc.desc: Test IsComponentRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsComponentRecordEnable003, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().componentEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+}
+
+/**
+ * @tc.name: IsComponentRecordEnable004
+ * @tc.desc: Test IsComponentRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsComponentRecordEnable004, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().componentEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
+}
+
+/**
  * @tc.name: IsCacheAvaliable001
  * @tc.desc: Test IsCacheAvaliable.
  * @tc.type: FUNC
  */
 HWTEST_F(EventRecorderTest, IsCacheAvaliable001, TestSize.Level1)
 {
+    EXPECT_FALSE(Recorder::IsCacheAvaliable());
+}
+
+/**
+ * @tc.name: IsCacheAvaliable002
+ * @tc.desc: Test IsCacheAvaliable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsCacheAvaliable002, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().componentEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes["element"] = { "element1", "element2", "element3" };
+    Recorder::IsCacheAvaliable();
+    Recorder::EventRecorder::Get().componentEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = false;
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
     EXPECT_FALSE(Recorder::IsCacheAvaliable());
 }
 
@@ -720,6 +931,42 @@ HWTEST_F(EventRecorderTest, PutString002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: PutString003
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString003, TestSize.Level1)
+{
+    std::string config;
+    GetConfig(config);
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(config, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes["element"] = { "element1", "element2", "element3" };
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "1", "1");
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: PutString004
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString004, TestSize.Level1)
+{
+    std::string config;
+    GetConfig(config);
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(config, observer);
+    Recorder::NodeDataCache::Get().OnPageShow("pages/Index");
+    auto pageNode = CreatePageNode("pages/Index");
+    Recorder::NodeDataCache::Get().mergedConfig_->shareNodes.clear();
+    bool result = Recorder::NodeDataCache::Get().PutString(pageNode, "1", "1");
+    EXPECT_FALSE(result);
+}
+
+/**
  * @tc.name: OnBeforePagePop001
  * @tc.desc: Test OnBeforePagePop.
  * @tc.type: FUNC
@@ -738,8 +985,290 @@ HWTEST_F(EventRecorderTest, OnBeforePagePop001, TestSize.Level1)
 HWTEST_F(EventRecorderTest, GetExposureCfg001, TestSize.Level1)
 {
     Recorder::ExposureCfg cfg;
-    string pageUrl = "";
+    std::string pageUrl = "";
     Recorder::NodeDataCache::Get().GetExposureCfg(pageUrl, "", cfg);
     EXPECT_TRUE(pageUrl.empty());
+}
+
+/**
+ * @tc.name: SetExtra001
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra001, TestSize.Level1)
+{
+    std::string key = "";
+    std::string value = "";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    std::string result = builder1.GetText();
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: SetExtra002
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra002, TestSize.Level1)
+{
+    std::string key = "123";
+    std::string value = "";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetExtra003
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra003, TestSize.Level1)
+{
+    std::string key = "";
+    std::string value = "123";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetExtra004
+ * @tc.desc: Test SetExtra.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetExtra004, TestSize.Level1)
+{
+    std::string key = "123";
+    std::string value = "123";
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra(key, value);
+    std::string result = builder1.ToString();
+    EXPECT_NE(result, "");
+}
+
+/**
+ * @tc.name: SetTextArray001
+ * @tc.desc: Test SetTextArray.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetTextArray001, TestSize.Level1)
+{
+    std::vector<std::string> value = { "50", "100", "200", "300" };
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetTextArray(value);
+    EXPECT_FALSE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: SetId001
+ * @tc.desc: Test SetId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, SetId001, TestSize.Level1)
+{
+    std::vector<std::string> value = { "50", "100", "200", "300" };
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetId("");
+    EXPECT_TRUE(builder1.params_->empty());
+}
+
+/**
+ * @tc.name: OnNavDstHide001
+ * @tc.desc: Test OnNavDstHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnNavDstHide001, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetExtra("1", "1");
+    builder1.SetNavDst("1");
+    Recorder::EventRecorder::Get().navShowTime_ = 0;
+    Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder1));
+    EXPECT_EQ(Recorder::EventRecorder::Get().GetNavDstName(), builder1.GetText());
+}
+
+/**
+ * @tc.name: OnNavDstHide002
+ * @tc.desc: Test OnNavDstHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnNavDstHide002, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetText("1");
+    Recorder::EventRecorder::Get().navDstName_ = "";
+    Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder1));
+    EXPECT_NE(Recorder::EventRecorder::Get().GetNavDstName(), builder1.GetText());
+}
+
+/**
+ * @tc.name: IsCategoryEnable001
+ * @tc.desc: Test IsCategoryEnable
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsCategoryEnable001, TestSize.Level1)
+{
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    config->switches_->emplace(Recorder::EventCategory::CATEGORY_COMPONENT, false);
+    bool result = config->IsCategoryEnable(Recorder::EventCategory::CATEGORY_PAGE);
+    EXPECT_FALSE(result);
+    delete config;
+}
+
+/**
+ * @tc.name: Register001
+ * @tc.desc: Test register.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, Register001, TestSize.Level1)
+{
+    std::string config;
+    GetConfigDisable(config);
+    auto observer = std::make_shared<DemoUIEventObserver>();
+    Recorder::EventController::Get().Register(config, observer);
+    Recorder::EventController::Get().NotifyConfigChange();
+    EXPECT_FALSE(Recorder::EventController::Get().clientList_.empty());
+}
+
+/**
+ * @tc.name: ApplyNewestConfig001
+ * @tc.desc: Test ApplyNewestConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, ApplyNewestConfig001, TestSize.Level1)
+{
+    Recorder::EventParamsBuilder builder1;
+    builder1.SetId("hello").SetPageUrl("pages/Index").SetText("world");
+    auto params = builder1.build();
+    Recorder::EventController::Get().clientList_.clear();
+    Recorder::EventController::Get().ApplyNewestConfig();
+    Recorder::EventController::Get().NotifyEvent(
+        Recorder::EventCategory::CATEGORY_COMPONENT, Recorder::EventType::CHANGE, std::move(params));
+    EXPECT_TRUE(Recorder::EventController::Get().clientList_.empty());
+}
+
+/**
+ * @tc.name: IsExposureRecordEnable001
+ * @tc.desc: Test IsExposureRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsExposureRecordEnable001, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().exposureEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.exposureEnable = true;
+    EXPECT_TRUE(Recorder::EventRecorder::Get().IsExposureRecordEnable());
+}
+
+/**
+ * @tc.name: IsExposureRecordEnable002
+ * @tc.desc: Test IsExposureRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsExposureRecordEnable002, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().exposureEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.exposureEnable = true;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsExposureRecordEnable());
+}
+
+/**
+ * @tc.name: IsExposureRecordEnable003
+ * @tc.desc: Test IsExposureRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsExposureRecordEnable003, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().exposureEnable_ = true;
+    Recorder::EventRecorder::Get().eventSwitch_.exposureEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsExposureRecordEnable());
+}
+
+/**
+ * @tc.name: IsExposureRecordEnable004
+ * @tc.desc: Test IsExposureRecordEnable.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, IsExposureRecordEnable004, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().exposureEnable_ = false;
+    Recorder::EventRecorder::Get().eventSwitch_.exposureEnable = false;
+    EXPECT_FALSE(Recorder::EventRecorder::Get().IsExposureRecordEnable());
+}
+
+/**
+ * @tc.name: GetPageUrl001
+ * @tc.desc: Test GetPageUrl.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, GetPageUrl001, TestSize.Level1)
+{
+    Recorder::EventRecorder::Get().pageUrl_ = "url";
+    Recorder::EventRecorder::Get().isFocusContainerChanged_ = false;
+    std::string url = Recorder::EventRecorder::Get().GetPageUrl();
+    EXPECT_NE(url, "");
+}
+
+/**
+ * @tc.name: PutString005
+ * @tc.desc: Test PutString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, PutString005, TestSize.Level1)
+{
+    Recorder::ExposureCfg cfg;
+    Recorder::NodeDataCache::Get().Clear("");
+    auto node = CreatePageNode("pages/Index");
+    std::string id = "";
+    std::string value = "";
+    bool result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "";
+    value = "test";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "ROMYWBdsOgXB07y1XB1iVzym8n6QR5ZWaTDbjsCDe5PFbZKrPflxEEGpGPNbuNnHM1k1m9uveVLruC2KUkKOKGIxDo91RpTN1e7Etest";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "";
+    value = "ROMYWBdsOgXB07y1XB1iVzym8n6QR5ZWaTDbjsCDe5PFbZKrPflxEEGpGPNbuNnHM1k1m9uveVLruC2KUkKOKGIxDo91RpTN1e7Etest";
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+    EXPECT_FALSE(result);
+
+    id = "test";
+    value = "test";
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = false;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = true;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+
+    auto pageNode = node->GetPageNode();
+    auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
+    pagePattern->pageInfo_->url_ = "";
+    Recorder::NodeDataCache::Get().shouldCollectFull_ = true;
+    result = Recorder::NodeDataCache::Get().PutString(node, id, value);
+
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: OnPageReady001
+ * @tc.desc: Test OnPageReady.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventRecorderTest, OnPageReady001, TestSize.Level1)
+{
+    Recorder::NodeDataCache::Get().OnPageReady();
 }
 } // namespace OHOS::Ace
