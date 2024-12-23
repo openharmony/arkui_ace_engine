@@ -522,6 +522,7 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -532,6 +533,7 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowScrollIndex,
     NodeModifier::SetOnWaterFlowReachStart,
 };
+#endif
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -720,6 +722,7 @@ const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetListItemOnSelect,
 };
 
+#ifndef ARKUI_WEARABLE
 const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnWillScroll,
     NodeModifier::ResetOnWaterFlowReachEnd,
@@ -730,6 +733,7 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnWaterFlowScrollIndex,
     NodeModifier::ResetOnWaterFlowReachStart,
 };
+#endif
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -944,6 +948,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -953,6 +958,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1209,6 +1215,7 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >=
@@ -1220,6 +1227,7 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {

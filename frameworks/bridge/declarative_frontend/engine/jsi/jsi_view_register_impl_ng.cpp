@@ -366,9 +366,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -513,8 +515,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSCheckbox::JSBind(globalObj);
     JSCheckboxGroup::JSBind(globalObj);
     JSRefresh::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSWaterFlow::JSBind(globalObj);
     JSWaterFlowItem::JSBind(globalObj);
+#endif
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradient::JSBind(globalObj);
