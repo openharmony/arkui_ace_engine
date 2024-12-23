@@ -509,7 +509,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         expandableNode->MarkModifyDone();
         expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
         auto expandableAreaFrameSize = expandableNode->GetGeometryNode()->GetFrameSize();
@@ -548,7 +548,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     });
@@ -1910,7 +1910,7 @@ Ace::FontStyle MenuItemPattern::GetItalicFontStyle()
 
 Color MenuItemPattern::GetBgColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());
@@ -2055,7 +2055,7 @@ bool MenuItemPattern::OnSelectProcess()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);

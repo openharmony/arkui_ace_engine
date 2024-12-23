@@ -364,7 +364,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         return;
     }
     ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -2242,7 +2242,7 @@ void VideoPattern::ReleaseMediaPlayer()
     isSeekingWhenNotPrepared_ = false;
     isReleasingMediaPlayer_ = true;
     ContainerScope scope(instanceId_);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask([weak = WeakClaim(RawPtr(mediaPlayer_))] {

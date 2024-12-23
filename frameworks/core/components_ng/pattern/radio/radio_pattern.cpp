@@ -409,7 +409,7 @@ void RadioPattern::CheckPageNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto prePageId = GetPrePageId();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -439,7 +439,7 @@ void RadioPattern::UpdateState()
     auto eventHub = host->GetEventHub<RadioEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
@@ -914,7 +914,7 @@ RefPtr<GroupManager> RadioPattern::GetGroupManager()
 void RadioPattern::SetPrePageIdToLastPageId()
 {
     if (!Container::IsInSubContainer()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto stageManager = pipelineContext->GetStageManager();
         CHECK_NULL_VOID(stageManager);

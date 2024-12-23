@@ -835,7 +835,7 @@ void CheckBoxPattern::OnColorConfigurationUpdate()
 void CheckBoxPattern::SetPrePageIdToLastPageId()
 {
     if (!Container::IsInSubContainer()) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto stageManager = pipelineContext->GetStageManager();
         CHECK_NULL_VOID(stageManager);

@@ -146,7 +146,7 @@ RectF WindowNode::ConvertHotRect(const RectF& rect, int32_t sourceType)
     }
     float hotOffsetVp = (sourceType == static_cast<int32_t>(Ace::SourceType::MOUSE)) ?
         MOUSE_RECT_HOT_VP : TOUCH_RECT_HOT_VP;
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     double density = (context != nullptr) ? context->GetDensity() : DEFAULT_HOT_DENSITY;
     float hotOffset = static_cast<float>(hotOffsetVp * density);
     float hotX = rect.GetX() - hotOffset;

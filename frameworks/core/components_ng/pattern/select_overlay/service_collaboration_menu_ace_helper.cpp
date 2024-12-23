@@ -418,7 +418,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceMenuOnCol(
         }
         helper->subMenuIsHover_ = false;
         ContainerScope scope(Container::CurrentIdSafely());
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto cancelableCallback = [weakHelper, weakMenuWrapper, instanceId = Container::CurrentIdSafely()] {
             auto helper = weakHelper.Upgrade();
@@ -473,7 +473,7 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
         helper->mainMenuIsHover_ = false;
         // timeout 100ms to RemoveChild
         ContainerScope scope(Container::CurrentIdSafely());
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto cancelableCallback = [weakHelper, weakMenuWrapper, instanceId = Container::CurrentIdSafely()] {
             auto menuWrapper = weakMenuWrapper.Upgrade();
@@ -780,7 +780,7 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         return 0;
     }
     RemovePopupNode();
-    auto toastPipeline = PipelineContext::GetCurrentContext();
+    auto toastPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
@@ -820,7 +820,7 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     TAG_LOGI(AceLogTag::ACE_MENU, "code is %{public}d, dataLength is %{public}d.", code, dataLength);
     auto imagePix = CreatePixelMap((void *)data.get(), code, dataLength);
     CHECK_NULL_RETURN(imagePix, -1);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, -1);
     CancelableCallback<void()> caretTwinklingTask;
     caretTwinklingTask.Reset([weakCallback = WeakClaim(this), code, imagePix,

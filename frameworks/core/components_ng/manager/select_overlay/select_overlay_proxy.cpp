@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 namespace {
 RefPtr<SelectOverlayPattern> GetSelectOverlayPattern(int32_t selectOverlayId)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(manager, nullptr);
@@ -91,7 +91,7 @@ void SelectOverlayProxy::SetHandleReverse(bool reverse)
 
 bool SelectOverlayProxy::IsClosed() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, true);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(manager, true);
@@ -100,7 +100,7 @@ bool SelectOverlayProxy::IsClosed() const
 
 void SelectOverlayProxy::Close(bool animation) const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -166,7 +166,7 @@ bool SelectOverlayProxy::IsHandleReverse()
 
 SelectOverlayInfo SelectOverlayProxy::GetSelectOverlayMangerInfo()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, SelectOverlayInfo());
     auto manager = pipeline->GetSelectOverlayManager();
     CHECK_NULL_RETURN(manager, SelectOverlayInfo());

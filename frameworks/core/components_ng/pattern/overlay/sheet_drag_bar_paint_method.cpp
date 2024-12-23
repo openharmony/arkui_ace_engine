@@ -55,7 +55,7 @@ void SheetDragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper
 
     // paint offset
     auto paintOffset = paintWrapper->GetContentOffset();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
     CHECK_NULL_VOID(dragBarTheme);

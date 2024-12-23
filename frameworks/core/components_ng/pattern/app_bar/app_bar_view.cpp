@@ -31,7 +31,7 @@ namespace OHOS::Ace::NG {
 namespace {
 RefPtr<AppBarTheme> GetAppBarTheme()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     return pipeline->GetTheme<AppBarTheme>();
 }
@@ -252,7 +252,7 @@ void AppBarView::BindMenuCallback(const RefPtr<FrameNode>& menuButton)
 void AppBarView::BindCloseCallback(const RefPtr<FrameNode>& closeButton)
 {
     auto clickCallback = [](GestureEvent& info) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
@@ -291,7 +291,7 @@ void AppBarView::CreateServicePanel(bool firstTry)
         return;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -340,7 +340,7 @@ void AppBarView::InitUIExtensionNode(const RefPtr<FrameNode>& uiExtNode)
 
 std::optional<RectF> AppBarView::GetAppBarRect()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!pipeline || !pipeline->GetInstallationFree()) {
         return std::nullopt;
     }

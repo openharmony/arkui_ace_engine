@@ -139,7 +139,7 @@ void OptionPattern::OnSelectProcess()
     }
     host->OnAccessibilityEvent(AccessibilityEventType::SELECTED);
     // hide menu when option is clicked
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -319,7 +319,7 @@ void OptionPattern::OnHover(bool isHover)
     auto props = GetPaintProperty<OptionPaintProperty>();
     CHECK_NULL_VOID(props);
     if (isHover) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto theme = pipeline->GetTheme<SelectTheme>();
         auto hoverColor = theme->GetHoverColor();
@@ -457,7 +457,7 @@ std::string OptionPattern::InspectorGetFont()
 
 Color OptionPattern::GetBgColor()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color());
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());

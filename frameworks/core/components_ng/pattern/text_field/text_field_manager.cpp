@@ -230,7 +230,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
 
 bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
     bool isShowKeyboard = keyboardInset.IsValid();
@@ -267,7 +267,7 @@ void TextFieldManagerNG::UpdateScrollableParentViewPort(const RefPtr<FrameNode>&
 void TextFieldManagerNG::AvoidKeyBoardInNavigation()
 {
     auto node = onFocusTextField_.Upgrade();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     auto avoidKeyboardOffset =  manager ? manager->GetKeyboardOffset() : 0.0f;

@@ -75,7 +75,7 @@ public:
     {
         static RefPtr<StepperTheme> stepperTheme;
         if (!stepperTheme) {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_RETURN(pipeline, nullptr);
             stepperTheme = pipeline->GetTheme<StepperTheme>();
             CHECK_NULL_RETURN(stepperTheme, nullptr);

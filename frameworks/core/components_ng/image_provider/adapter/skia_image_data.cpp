@@ -78,7 +78,7 @@ RefPtr<SvgDomBase> SkiaImageData::MakeSvgDom(const std::optional<Color>& svgFill
         return nullptr;
     }
     svgDom_->SetFuncNormalizeToPx(
-        [pipeline = WeakPtr(PipelineContext::GetCurrentContext())](const Dimension& value) -> double {
+        [pipeline = WeakPtr(PipelineContext::GetCurrentContextSafelyWithCheck())](const Dimension& value) -> double {
             auto context = pipeline.Upgrade();
             CHECK_NULL_RETURN(context, 0.0);
             return context->NormalizeToPx(value);

@@ -29,7 +29,7 @@ void ModalPresentationPattern::OnAttachToFrameNode()
 
 void ModalPresentationPattern::ModalInteractiveDismiss()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

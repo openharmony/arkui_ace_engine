@@ -105,7 +105,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
 
 void TextInputClient::NotifyKeyboardHeight(uint32_t height)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
     CHECK_NULL_VOID(manager);

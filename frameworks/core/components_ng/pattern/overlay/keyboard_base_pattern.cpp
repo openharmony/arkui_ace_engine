@@ -65,7 +65,7 @@ void KeyboardPattern::DumpInfo()
 
 void KeyboardPattern::OnModifyDone()
 {
-    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+    auto context = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     context->AddOnAreaChangeNode(GetHost()->GetId());
 }
@@ -84,7 +84,7 @@ void KeyboardPattern::OnAreaChangedInner()
     auto boundaryHeight = 0.0f;
     // Check that the effective height of the keyboard is captured
     if (std::abs(customHeight) > boundaryHeight) {
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
@@ -100,7 +100,7 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto keyboardHeight = GetKeyboardHeight();
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
@@ -134,7 +134,7 @@ float KeyboardPattern::GetKeyboardHeight()
 
 void KeyboardPattern::OnDetachFromFrameNode(FrameNode* node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(node->GetId());
 }

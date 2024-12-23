@@ -158,7 +158,7 @@ void NavigationTitleUtil::BuildMoreItemNodeAction(const RefPtr<FrameNode>& butto
     auto eventHub = barItemNode->GetEventHub<BarItemEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context), id = barItemNode->GetId(),
                              weakMenu = WeakPtr<FrameNode>(barMenuNode)]() {
         auto context = weakContext.Upgrade();
@@ -516,7 +516,7 @@ void NavigationTitleUtil::HandleLongPressActionEnd(const RefPtr<FrameNode>& targ
     CHECK_NULL_VOID(titleBarPattern);
     auto dialogNode = titleBarPattern->GetLargeFontPopUpDialogNode();
     CHECK_NULL_VOID(dialogNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);

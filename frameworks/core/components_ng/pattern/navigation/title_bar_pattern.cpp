@@ -797,7 +797,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
     SetTempTitleBarHeightVp(maxTitleBarHeight_ + overDragOffset_ / 6.0f);
     UpdateScaleByDragOverDragOffset(overDragOffset_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipeline) {
         pipeline->FlushUITasks();
     }
@@ -828,7 +828,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
             pattern->tempTitleOffsetY_ = 0.0f;
             pattern->isFreeTitleUpdated_ = false;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }
@@ -900,7 +900,7 @@ void TitleBarPattern::AnimateTo(float offset, bool isFullTitleMode)
                 pattern->isFreeTitleUpdated_ = false;
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (pipeline) {
                 pipeline->FlushUITasks();
             }
@@ -1120,7 +1120,7 @@ void TitleBarPattern::OnAttachToFrameNode()
             .edges = SAFE_AREA_EDGE_TOP };
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
 
     auto halfFoldHoverCallbackId = pipelineContext->RegisterHalfFoldHoverChangedCallback(
@@ -1417,7 +1417,7 @@ void TitleBarPattern::UpdateBackgroundStyle(RefPtr<FrameNode>& host)
 void TitleBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     if (HasHalfFoldHoverChangedCallbackId()) {

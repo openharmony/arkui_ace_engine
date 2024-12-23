@@ -157,7 +157,7 @@ void PagePattern::ProcessShowState()
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
     auto parent = host->GetAncestorNodeOfFrame();
     CHECK_NULL_VOID(parent);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto manager = context->GetSafeAreaManager();
     if (manager) {
@@ -209,7 +209,7 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
     CHECK_NULL_VOID(!isOnShow_);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
@@ -261,7 +261,7 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::GetInstance().FlushRecord();
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
@@ -383,7 +383,7 @@ void PagePattern::AddJsAnimator(const std::string& animatorId, const RefPtr<Fram
     CHECK_NULL_VOID(animatorInfo);
     auto animator = animatorInfo->GetAnimator();
     CHECK_NULL_VOID(animator);
-    animator->AttachScheduler(PipelineContext::GetCurrentContext());
+    animator->AttachScheduler(PipelineContext::GetCurrentContextSafelyWithCheck());
     jsAnimatorMap_[animatorId] = animatorInfo;
 }
 
@@ -435,7 +435,7 @@ void PagePattern::StopPageTransition()
 
 void PagePattern::BeforeCreateLayoutWrapper()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     // SafeArea already applied to AppBar (AtomicServicePattern)
     if (pipeline->GetInstallationFree()) {
@@ -460,7 +460,7 @@ void PagePattern::BeforeCreateLayoutWrapper()
 
 bool PagePattern::AvoidKeyboard() const
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     return pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled();
 }
@@ -469,7 +469,7 @@ bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
     CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);

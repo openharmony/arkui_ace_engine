@@ -187,7 +187,7 @@ void SystemWindowScene::RegisterEventCallback()
     auto pointerEventCallback =
         [weakThis = WeakClaim(this), instanceId = instanceId_](std::shared_ptr<MMI::PointerEvent> PointerEvent) {
             ContainerScope Scope(instanceId);
-            auto pipelineContext = PipelineContext::GetCurrentContext();
+            auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipelineContext) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "PipelineContext GetCurrentContext null,id:%{public}d", PointerEvent->GetId());
@@ -279,11 +279,11 @@ void SystemWindowScene::RegisterFocusCallback()
 
     auto requestFocusCallback = [weakThis = WeakClaim(this), frameNode = frameNode_, instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->SetFocusedWindowSceneNode(frameNode);
         pipelineContext->PostAsyncEvent([weakThis]() {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             pipeline->SetIsFocusActive(false);
             auto self = weakThis.Upgrade();
@@ -295,10 +295,10 @@ void SystemWindowScene::RegisterFocusCallback()
 
     auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->PostAsyncEvent([weakThis]() {
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
@@ -317,7 +317,7 @@ void SystemWindowScene::LostViewFocus()
     if (!focusHub || !focusHub->IsCurrentFocus()) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto screenNode = pipeline->GetScreenNode();
     CHECK_NULL_VOID(screenNode);
@@ -338,7 +338,7 @@ void SystemWindowScene::PostCheckContextTransparentTask()
         }
     });
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -358,7 +358,7 @@ void SystemWindowScene::PostFaultInjectTask()
         host->MarkDirtyNode();
     });
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
