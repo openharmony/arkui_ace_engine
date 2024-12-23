@@ -2614,5 +2614,13 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_HostWindowInfo_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_StartImageAnalyzer"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_XComponent_StopImageAnalyzer"
     }
 ]

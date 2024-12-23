@@ -1444,6 +1444,8 @@ typedef ArkUIAnimator* ArkUIAnimatorHandle;
 
 typedef void (*DragStatusCallback)(ArkUIDragAndDropInfo* dragAndDropInfo, void* userData);
 
+typedef void (*XComponentAnalyzerCallback)(void* node, int32_t statusCode, void* userData);
+
 struct ArkUIImageFrameInfo {
     ArkUI_CharPtr src;
     ArkUI_Int32 width;
@@ -5141,6 +5143,15 @@ struct ArkUIXComponentModifier {
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getXComponentRenderFit)(ArkUINodeHandle node);
+    void (*setXComponentSurfaceRect)(ArkUINodeHandle node, ArkUI_Int32 offsetX, ArkUI_Int32 offsetY,
+        ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight);
+    void (*getXComponentSurfaceRect)(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_Int32& offsetY,
+        ArkUI_Int32& surfaceWidth, ArkUI_Int32& surfaceHeight);
+    void (*resetXComponentSurfaceRect)(ArkUINodeHandle node);
+    ArkUI_Bool (*getXComponentEnableAnalyzer)(ArkUINodeHandle node);
+    void (*startImageAnalyzer)(ArkUINodeHandle node, void* arkuiNode, void* userData,
+        XComponentAnalyzerCallback callback);
+    void (*stopImageAnalyzer)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

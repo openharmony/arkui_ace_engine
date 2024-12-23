@@ -3652,6 +3652,37 @@ typedef enum {
      *
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
+    /**
+     * @brief Defines the rectangle information of surface created by the <b><XComponent></b> component.
+     * This attribute can be set and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontal offset of the surface relative to XComponent, in pixels. \n
+     * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
+     * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
+     * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontal offset of the surface relative to XComponent, in pixels. \n
+     * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
+     * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
+     * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
+     * @since 16
+     */
+    NODE_XCOMPONENT_SURFACE_RECT,
+    /**
+     * @brief Defines whether to enable the AI analyzer for the <b><XComponent></b> component.
+     * This attribute can be set and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: The parameter type is 1 or 0.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The parameter type is 1 or 0.
+     * @since 16
+     */
+    NODE_XCOMPONENT_ENABLE_ANALYZER,
 
     /**
      * @brief Defines whether to display the lunar calendar in the date picker.
