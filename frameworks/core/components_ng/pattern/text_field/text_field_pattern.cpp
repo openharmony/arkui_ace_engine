@@ -2034,16 +2034,8 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
         CHECK_NULL_VOID(pattern);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
-        auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
         if (pattern->BetweenSelectedPosition(point)) {
-            auto manager = pattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
-            CHECK_NULL_VOID(manager);
-            auto selectOverlayInfo = manager->GetSelectOverlayInfo();
-            CHECK_NULL_VOID(selectOverlayInfo);
-            auto textFieldTheme = pattern->GetTheme();
-            CHECK_NULL_VOID(textFieldTheme);
-            auto info = pattern->CreateRichEditorDragInfo(*selectOverlayInfo, *paintProperty, *textFieldTheme);
+            auto info = pattern->CreateTextDragInfo();
             pattern->dragNode_ = TextDragPattern::CreateDragNode(frameNode);
             auto textDragPattern = pattern->dragNode_->GetPattern<TextDragPattern>();
             if (textDragPattern) {
@@ -2063,23 +2055,32 @@ std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
     return callback;
 }
 
-TextDragInfo TextFieldPattern::CreateRichEditorDragInfo(const SelectOverlayInfo& selectOverlayInfo,
-    const TextFieldPaintProperty& paintProperty, const TextFieldTheme& textFieldTheme) const
+TextDragInfo TextFieldPattern::CreateTextDragInfo() const
 {
-    auto handleColor = paintProperty.GetCursorColorValue(textFieldTheme.GetCursorColor());
-    auto selectedBackgroundColor = textFieldTheme.GetSelectedColor();
+    TextDragInfo info;
+    auto manager = selectOverlay_->GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_RETURN(manager, info);
+    auto selectOverlayInfo = manager->GetSelectOverlayInfo();
+    CHECK_NULL_RETURN(selectOverlayInfo, info);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, info);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, info);
+    auto handleColor = paintProperty->GetCursorColorValue(textFieldTheme->GetCursorColor());
+    auto selectedBackgroundColor = textFieldTheme->GetSelectedColor();
     auto firstIndex = selectController_->GetFirstHandleIndex();
     auto secondIndex = selectController_->GetSecondHandleIndex();
-    TextDragInfo info;
     if (firstIndex > secondIndex) {
-        info.secondHandle = selectOverlayInfo.firstHandle.paintRect;
-        info.firstHandle = selectOverlayInfo.secondHandle.paintRect;
+        info.secondHandle = selectOverlayInfo->firstHandle.paintRect;
+        info.firstHandle = selectOverlayInfo->secondHandle.paintRect;
     } else {
-        info.firstHandle = selectOverlayInfo.firstHandle.paintRect;
-        info.secondHandle = selectOverlayInfo.secondHandle.paintRect;
+        info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+        info.secondHandle = selectOverlayInfo->secondHandle.paintRect;
     }
-    if ((textRect_.Width() > contentRect_.Width()) ||
-        paintProperty.GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
+    auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
+    auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
+    if (!(firstIsShow && secondIsShow) ||
+        paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
         info.isInline = false;
     }
     info.selectedBackgroundColor = selectedBackgroundColor;
