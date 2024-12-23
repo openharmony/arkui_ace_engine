@@ -1071,6 +1071,7 @@ void WebDelegate::SetJavaScriptItemsByOrder(
     const ScriptItemsByOrder& scriptItemsByOrder) {}
 void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
 void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
+void WebDelegate::JavaScriptOnHeadReadyByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
