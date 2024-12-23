@@ -233,6 +233,17 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
     }
     XComponentModelNG::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
 }
+
+ArkUI_Int32 GetXComponentRenderFit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, static_cast<ArkUI_Int32>(RenderFit::RESIZE_FILL));
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::TEXTURE) {
+        return static_cast<ArkUI_Int32>(ViewAbstract::GetRenderFit(frameNode));
+    }
+    return static_cast<ArkUI_Int32>(XComponentModelNG::GetSurfaceRenderFit(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -265,6 +276,7 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .resetXComponentEnableTransparentLayer = ResetXComponentEnableTransparentLayer,
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
+        .getXComponentRenderFit = GetXComponentRenderFit,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

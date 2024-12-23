@@ -76,6 +76,16 @@ std::string XComponentTypeToString(XComponentType type)
     }
 }
 
+std::string XComponentRenderFitToString(RenderFit renderFit)
+{
+    static const std::string renderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
+        "RenderFit.LEFT", "RenderFit.RIGHT", "RenderFit.TOP_LEFT", "RenderFit.TOP_RIGHT", "RenderFit.BOTTOM_LEFT",
+        "RenderFit.BOTTOM_RIGHT", "RenderFit.RESIZE_FILL", "RenderFit.RESIZE_CONTAIN",
+        "RenderFit.RESIZE_CONTAIN_TOP_LEFT", "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT", "RenderFit.RESIZE_COVER",
+        "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
+    return renderFitStyles[static_cast<int>(renderFit)];
+}
+
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
 {
     switch (touchType) {
@@ -568,6 +578,9 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
     json->PutExtAttr("hdrBrightness", std::to_string(hdrBrightness_).c_str(), filter);
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
+    if (type_ == XComponentType::SURFACE) {
+        json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
+    }
 }
 
 void XComponentPattern::SetRotation(uint32_t rotation)
@@ -2085,5 +2098,11 @@ void XComponentPattern::EnableTransparentLayer(bool isTransparentLayer)
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetTransparentLayer(isTransparentLayer);
     isTransparentLayer_ = isTransparentLayer;
+}
+
+RenderFit XComponentPattern::GetSurfaceRenderFit() const
+{
+    CHECK_NULL_RETURN(handlingSurfaceRenderContext_, RenderFit::RESIZE_FILL);
+    return handlingSurfaceRenderContext_->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
 }
 } // namespace OHOS::Ace::NG

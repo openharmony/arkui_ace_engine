@@ -3539,8 +3539,13 @@ void ResetRenderFit(ArkUI_NodeHandle node)
 
 const ArkUI_AttributeItem* GetRenderFit(ArkUI_NodeHandle node)
 {
-    auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
-    g_numberValues[0].i32 = modifier->getRenderFit(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_XCOMPONENT) {
+        auto modifier = GetFullImpl()->getNodeModifiers()->getXComponentModifier();
+        g_numberValues[0].i32 = modifier->getXComponentRenderFit(node->uiNodeHandle);
+    } else {
+        auto modifier = GetFullImpl()->getNodeModifiers()->getCommonModifier();
+        g_numberValues[0].i32 = modifier->getRenderFit(node->uiNodeHandle);
+    }
     return &g_attributeItem;
 }
 

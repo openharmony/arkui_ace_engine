@@ -535,4 +535,12 @@ void XComponentModelNG::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetRenderFit(renderFit);
 }
+
+RenderFit XComponentModelNG::GetSurfaceRenderFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RenderFit::RESIZE_FILL);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, RenderFit::RESIZE_FILL);
+    return xcPattern->GetSurfaceRenderFit();
+}
 } // namespace OHOS::Ace::NG
