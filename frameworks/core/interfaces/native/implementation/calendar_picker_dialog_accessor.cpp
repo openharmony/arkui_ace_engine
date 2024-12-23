@@ -17,7 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "arkoala_api_generated.h"
 
@@ -73,22 +72,7 @@ void BuildDialogPropertiesCallbacks(const Ark_CalendarDialogOptions options, Dia
 DialogProperties BuildDialogProperties(const Ark_CalendarDialogOptions options)
 {
     DialogProperties dialogProps;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, dialogProps);
-    auto dialogTheme = pipeline->GetTheme<DialogTheme>();
-    CHECK_NULL_RETURN(dialogTheme, dialogProps);
-    auto calendarTheme = pipeline->GetTheme<CalendarTheme>();
-    CHECK_NULL_RETURN(calendarTheme, dialogProps);
-    dialogProps.alignment = dialogTheme->GetAlignment();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        dialogProps.alignment = DialogAlignment::CENTER;
-    }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
-        NG::BorderRadiusProperty dialogRadius;
-        dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
-        dialogProps.borderRadius = dialogRadius;
-    }
+    dialogProps.alignment = DialogAlignment::CENTER;
     dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
         options.backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
     dialogProps.backgroundColor = Converter::OptConvert<Color>(options.backgroundColor);

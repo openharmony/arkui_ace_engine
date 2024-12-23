@@ -79,9 +79,7 @@ DialogProperties BuildDialogProperties(const Ark_DatePickerDialogOptions options
     CHECK_NULL_RETURN(dialogTheme, dialogProps);
     
     dialogProps.alignment = dialogTheme->GetAlignment();
-    if ((dialogProps.alignment == DialogAlignment::BOTTOM &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) ||
-        Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (dialogProps.alignment == DialogAlignment::BOTTOM) {
         dialogProps.offset = DimensionOffset(Offset(0, -dialogTheme->GetMarginBottom().ConvertToPx()));
     }
     dialogProps.customStyle = false;
