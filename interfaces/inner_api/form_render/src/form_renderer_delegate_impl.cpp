@@ -110,7 +110,6 @@ int32_t FormRendererDelegateImpl::OnGetRectRelativeToWindow(AccessibilityParentR
 
 int32_t FormRendererDelegateImpl::OnCheckManagerDelegate(bool &checkFlag)
 {
-    HILOG_DEBUG("%{public}s called.", __func__);
     if (!checkManagerDelegate_) {
         HILOG_ERROR("checkManagerDelegate_ is null");
         return ERR_INVALID_DATA;
