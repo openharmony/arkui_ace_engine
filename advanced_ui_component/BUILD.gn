@@ -89,7 +89,6 @@ group("advanced_ui_component") {
     "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
     "segmentbutton/interfaces:segmentbutton",
-    "selectionmenu/interfaces:selectionmenu",
     "selecttitlebar/interfaces:selecttitlebar",
     "splitlayout/interfaces:splitlayout",
     "subheader/interfaces:subheader",
@@ -98,4 +97,7 @@ group("advanced_ui_component") {
     "toolbar/interfaces:toolbar",
     "treeview/interfaces:treeview",
   ]
+  if (!ace_engine_feature_wearable) {
+    deps += [ "selectionmenu/interfaces:selectionmenu" ]
+  }
 }
