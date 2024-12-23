@@ -11939,6 +11939,37 @@ class TextOnClickModifier extends ModifierWithKey {
 }
 TextOnClickModifier.identity = Symbol('textOnClick');
 
+class TextMarqueeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMarqueeOptionsModifier.identity = Symbol('textMarqueeOptions');
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
+  }
+}
+TextOnMarqueeStateChangeModifier.identity = Symbol('textOnMarqueeStateChange');
+
 class TextResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12186,6 +12217,16 @@ class ArkTextComponent extends ArkComponent {
   onTextSelectionChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  marqueeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMarqueeOptionsModifier.identity,
+      TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity,
+      TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
   editMenuOptions(value) {

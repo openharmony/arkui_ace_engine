@@ -3347,6 +3347,19 @@ let TextResponseType;
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
 
+let MarqueeState;
+(function (MarqueeState) {
+  MarqueeState[MarqueeState.START = 0] = 'START';
+  MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
+  MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
+})(MarqueeState || (MarqueeState = {}));
+
+let MarqueeStartPolicy;
+(function (MarqueeStartPolicy) {
+  MarqueeStartPolicy[MarqueeStartPolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
+})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
+
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
   NativeEmbedStatus.CREATE = 0;

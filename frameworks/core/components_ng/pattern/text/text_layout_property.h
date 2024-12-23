@@ -72,6 +72,16 @@ public:                                                                     \
 
 class InspectorFilter;
 
+struct TextMarqueeOptions {
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStart, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStep, double);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeLoop, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDirection, MarqueeDirection);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeDelay, int32_t);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeFadeout, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(TextMarqueeStartPolicy, MarqueeStartPolicy);
+};
+
 class ACE_EXPORT TextLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(TextLayoutProperty, LayoutProperty);
 
@@ -97,6 +107,7 @@ public:
         ResetContent();
         ResetSymbolSourceInfo();
         ResetAdaptFontSizeStep();
+        ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
         ResetTextColorFlagByUser();
@@ -145,6 +156,17 @@ public:
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(
         TextLineStyle, LineBreakStrategy, LineBreakStrategy, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP(TextLineStyle, HalfLeading, bool, PROPERTY_UPDATE_MEASURE_SELF);
+
+    ACE_DEFINE_PROPERTY_GROUP(TextMarqueeOptions, TextMarqueeOptions);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStart, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeStep, double, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeLoop, int32_t, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeDirection, MarqueeDirection, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeDelay, int32_t, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(TextMarqueeOptions, TextMarqueeFadeout, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        TextMarqueeOptions, TextMarqueeStartPolicy, MarqueeStartPolicy, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Content, std::u16string, PROPERTY_UPDATE_MEASURE);
 public:
@@ -227,6 +249,9 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
+    std::string GetTextMarqueeOptionsString() const;
+    void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -236,6 +261,7 @@ protected:
         value->propTextLineStyle_ = CloneTextLineStyle();
         value->propContent_ = CloneContent();
         value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
+        value->propTextMarqueeOptions_ = CloneTextMarqueeOptions();
         value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
     }
