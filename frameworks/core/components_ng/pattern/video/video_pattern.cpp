@@ -388,6 +388,7 @@ void VideoPattern::ResetMediaPlayer()
         return;
     }
 
+    mediaPlayer_->SetRenderFirstFrame(showFirstFrame_);
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.GetSrc(), instanceId_);
     PrepareSurface();
     if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
@@ -669,6 +670,7 @@ void VideoPattern::OnStartRenderFrameCb()
     auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
     CHECK_NULL_VOID(image);
     auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(posterLayoutProperty);
     posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
     image->MarkModifyDone();
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
@@ -1155,8 +1157,18 @@ void VideoPattern::UpdatePreviewImage()
     CHECK_NULL_VOID(video);
     auto image = AceType::DynamicCast<FrameNode>(video->GetPreviewImage());
     CHECK_NULL_VOID(image);
+
+    if (showFirstFrame_) {
+        auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(posterLayoutProperty);
+        posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        image->MarkModifyDone();
+        return;
+    }
+
     if (!isInitialState_) {
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         image->MarkModifyDone();
         return;
@@ -1164,6 +1176,7 @@ void VideoPattern::UpdatePreviewImage()
 
     if (!posterSourceInfo.IsValid()) {
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
         image->MarkModifyDone();
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Src image is not valid.");
@@ -1173,6 +1186,7 @@ void VideoPattern::UpdatePreviewImage()
     if (image) {
         image->SetDraggable(false);
         auto posterLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(posterLayoutProperty);
         posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         posterLayoutProperty->UpdateImageSourceInfo(posterSourceInfo);
         posterLayoutProperty->UpdateImageFit(imageFit);
@@ -2045,6 +2059,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     autoPlay_ = videoPattern->GetAutoPlay();
     loop_ = videoPattern->GetLoop();
     duration_ = videoPattern->GetDuration();
+    showFirstFrame_ = videoPattern->showFirstFrame_;
     progressRate_ = videoPattern->GetProgressRate();
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
