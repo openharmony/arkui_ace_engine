@@ -473,8 +473,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSDatePicker::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSRowSplit::JSBind(globalObj);
     JSColumnSplit::JSBind(globalObj);
+#endif
     JSIndexer::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);
@@ -566,8 +568,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 #endif
     JSNodeContainer::JSBind(globalObj);
     JSBaseNode::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
+#endif
     JSGestureRecognizer::JSBind(globalObj);
     JSEventTargetInfo::JSBind(globalObj);
     JSScrollableTargetInfo::JSBind(globalObj);

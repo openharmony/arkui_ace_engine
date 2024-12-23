@@ -448,7 +448,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Row", JSRow::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+#ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
+#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -540,7 +542,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridContainer", JSGridContainer::JSBind },
     { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
+#ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
+#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
@@ -552,7 +556,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeNavPathStack", JSNavPathStack::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
-    { "ColumnSplit", JSColumnSplit::JSBind },
     { "If", JSIfElse::JSBind },
     { "Scroll", JSScroll::JSBind },
     { "ScrollBar", JSScrollBar::JSBind },
@@ -582,8 +585,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DatePickerDialog", JSDatePickerDialog::JSBind },
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
+#ifndef ARKUI_WEARABLE
     { "RowSplit", JSRowSplit::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
+#endif
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
     { "Radio", JSRadio::JSBind },
@@ -748,8 +753,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__CircleShape__", JSCircleShape::JSBind },
     { "__EllipseShape__", JSEllipseShape::JSBind },
     { "__PathShape__", JSPathShape::JSBind },
+#ifndef ARKUI_WEARABLE
     { "ContentSlot", JSContentSlot::JSBind },
     { "ArkUINativeNodeContent", JSNodeContent::JSBind },
+#endif
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
