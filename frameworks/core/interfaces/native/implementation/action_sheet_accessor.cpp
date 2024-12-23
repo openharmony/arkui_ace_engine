@@ -15,14 +15,73 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/base/view_abstract.h"
+#include "action_sheet_peer_impl.h"
 #include "arkoala_api_generated.h"
 
-struct ActionSheetPeer {};
+namespace OHOS::Ace::NG::Converter {
+template<>
+DimensionOffset Convert(const Ark_ActionSheetOffset& src)
+{
+    return DimensionOffset(OptConvert<Dimension>(src.dx).value_or(Dimension()),
+        OptConvert<Dimension>(src.dy).value_or(Dimension()));
+}
+
+void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
+{
+    switch (src) {
+        case BindSheetDismissReason::BACK_PRESSED:
+            dst = Ark_DismissReason::ARK_DISMISS_REASON_PRESS_BACK;
+            break;
+        case BindSheetDismissReason::TOUCH_OUTSIDE:
+            dst = Ark_DismissReason::ARK_DISMISS_REASON_TOUCH_OUTSIDE;
+            break;
+        case BindSheetDismissReason::CLOSE_BUTTON:
+            dst = Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON;
+            break;
+        case BindSheetDismissReason::SLIDE_DOWN:
+            dst = Ark_DismissReason::ARK_DISMISS_REASON_SLIDE_DOWN;
+            break;
+        default:
+            dst = static_cast<Ark_DismissReason>(-1);
+            LOGE("Unexpected enum value in BindSheetDismissReason: %{public}d", src);
+    }
+}
+
+template<>
+ActionSheetInfo Convert(const Ark_SheetInfo& src)
+{
+    ActionSheetInfo info;
+    auto title = Converter::OptConvert<std::string>(src.title);
+    if (title) { info.title = *title; }
+    auto icon = Converter::OptConvert<std::string>(src.icon);
+    if (icon) { info.icon = *icon; }
+    
+    auto action = Converter::OptConvert<VoidCallback>(src.action);
+    auto onClick = [callback = CallbackHelper(*action)](GestureEvent& info) {
+        callback.Invoke();
+    };
+    info.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(onClick));
+    return info;
+}
+} // namespace OHOS::Ace::NG::Converter
+
+namespace OHOS::Ace {
+const DimensionOffset DEFAULT_OFFSET = DimensionOffset(0.0_vp, -40.0_vp);
+const DimensionOffset DEFAULT_OFFSET_TOP = DimensionOffset(0.0_vp, 40.0_vp);
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ActionSheetAccessor {
 void DestroyPeerImpl(ActionSheetPeer* peer)
 {
+    if (peer) {
+        delete peer;
+    }
 }
 Ark_NativePointer CtorImpl()
 {
@@ -32,8 +91,105 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void CreateConfirmButton(DialogProperties& dialogProps, const Ark_ActionSheetOptions options)
+{
+    auto confirmInfoOpt = Converter::OptConvert<Ark_ActionSheetButtonOptions>(options.confirm);
+    auto text = confirmInfoOpt ? Converter::OptConvert<std::string>(confirmInfoOpt->value) : nullptr;
+    if (text) {
+        ButtonInfo confirmInfo { .text = *text };
+        auto arkCallbackOpt = Converter::OptConvert<VoidCallback>(confirmInfoOpt->action);
+        if (arkCallbackOpt) {
+            auto gestureEvent = [arkCallback = CallbackHelper(*arkCallbackOpt)](
+                                     const GestureEvent& info) -> void { arkCallback.Invoke(); };
+            confirmInfo.action = AceType::MakeRefPtr<NG::ClickEvent>(std::move(gestureEvent));
+        }
+        confirmInfo.enabled = Converter::OptConvert<bool>(confirmInfoOpt->enabled).value_or(confirmInfo.enabled);
+        confirmInfo.defaultFocus =
+            Converter::OptConvert<bool>(confirmInfoOpt->defaultFocus).value_or(confirmInfo.defaultFocus);
+        if (!confirmInfo.defaultFocus) {
+            confirmInfo.isPrimary = true;
+        }
+        confirmInfo.dlgButtonStyle = Converter::OptConvert<DialogButtonStyle>(confirmInfoOpt->style);
+        if (confirmInfo.IsValid()) {
+            dialogProps.buttons.clear();
+            dialogProps.buttons.emplace_back(confirmInfo);
+        }
+    }
+}
+void UpdateDynamicDialogProperties(DialogProperties& dialogProps, const Ark_ActionSheetOptions options)
+{
+    dialogProps.title = Converter::OptConvert<std::string>(options.title).value_or("");
+    dialogProps.subtitle = Converter::OptConvert<std::string>(options.subtitle).value_or("");
+    dialogProps.content = Converter::OptConvert<std::string>(options.message).value_or("");
+    CreateConfirmButton(dialogProps, options);
+    dialogProps.shadow = Converter::OptConvert<Shadow>(options.shadow);
+    dialogProps.borderWidth = Converter::OptConvert<BorderWidthProperty>(options.borderWidth);
+    dialogProps.borderColor = Converter::OptConvert<BorderColorProperty>(options.borderColor);
+    dialogProps.borderRadius = Converter::OptConvert<BorderRadiusProperty>(options.cornerRadius);
+    dialogProps.borderStyle = Converter::OptConvert<BorderStyleProperty>(options.borderStyle);
+    dialogProps.alignment = Converter::OptConvert<DialogAlignment>(
+        options.alignment).value_or(DialogAlignment::BOTTOM);
+    auto isTopAligned = dialogProps.alignment == DialogAlignment::TOP
+        || dialogProps.alignment == DialogAlignment::TOP_START
+        || dialogProps.alignment == DialogAlignment::TOP_END;
+    dialogProps.offset = Converter::OptConvert<DimensionOffset>(options.offset).value_or(
+        isTopAligned ? DEFAULT_OFFSET_TOP : DEFAULT_OFFSET
+    );
+    dialogProps.maskRect = Converter::OptConvert<DimensionRect>(options.maskRect);
+    dialogProps.sheetsInfo = Converter::Convert<std::vector<ActionSheetInfo>>(options.sheets);
+    auto transition = Converter::OptConvert<RefPtr<NG::ChainedTransitionEffect>>(options.transition);
+    if (transition) {
+        dialogProps.transitionEffect = *transition;
+    }
+}
 void ShowImpl(const Ark_ActionSheetOptions* value)
 {
+    DialogProperties dialogProps {
+        .type = DialogType::ACTION_SHEET
+    };
+    UpdateDynamicDialogProperties(dialogProps, *value);
+    dialogProps.backgroundBlurStyle = static_cast<int32_t>(Converter::OptConvert<BlurStyle>(
+        value->backgroundBlurStyle).value_or(BlurStyle::COMPONENT_REGULAR));
+    dialogProps.backgroundColor = Converter::OptConvert<Color>(value->backgroundColor);
+    dialogProps.enableHoverMode =
+        Converter::OptConvert<bool>(value->enableHoverMode).value_or(dialogProps.enableHoverMode);
+    dialogProps.hoverModeArea = Converter::OptConvert<HoverModeAreaType>(value->hoverModeArea);
+    dialogProps.autoCancel = Converter::OptConvert<bool>(value->autoCancel).value_or(dialogProps.autoCancel);
+    dialogProps.isModal = Converter::OptConvert<bool>(value->isModal).value_or(dialogProps.isModal);
+    dialogProps.isShowInSubWindow =
+        Converter::OptConvert<bool>(value->showInSubWindow).value_or(dialogProps.isShowInSubWindow);
+    dialogProps.width = Converter::OptConvert<CalcDimension>(value->width);
+    dialogProps.height = Converter::OptConvert<CalcDimension>(value->height);
+
+    auto willDismissCallbackOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(value->onWillDismiss);
+    if (willDismissCallbackOpt) {
+        auto onWillDismiss = [arkCallback = CallbackHelper(*willDismissCallbackOpt)](
+            const int32_t& info, const int32_t& instanceId) -> void {
+            Ark_DismissDialogAction action;
+            auto dismissReason = static_cast<BindSheetDismissReason>(info);
+            action.reason = Converter::ArkValue<Ark_DismissReason>(dismissReason);
+
+            auto dismissCallback = [](const Ark_Int32 resourceId) {
+                ViewAbstract::DismissDialog();
+            };
+            Callback_Void arkDismissCallback = Converter::ArkValue<Callback_Void>(dismissCallback, instanceId);
+
+            action.dismiss = arkDismissCallback;
+            arkCallback.Invoke(action);
+        };
+        dialogProps.onWillDismiss = std::move(onWillDismiss);
+    }
+    auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(value->cancel);
+    if (cancelCallbackOpt) {
+        auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
+        dialogProps.onCancel = cancelFunc;
+    }
+    dialogProps.onLanguageChange = [value, updateDialogProperties = UpdateDynamicDialogProperties](
+        DialogProperties& dialogProps) {
+        updateDialogProperties(dialogProps, *value);
+    };
+    auto peer = static_cast<ActionSheetPeer *>(CtorImpl());
+    peer->sheetModel.ShowActionSheet(dialogProps);
 }
 } // ActionSheetAccessor
 const GENERATED_ArkUIActionSheetAccessor* GetActionSheetAccessor()

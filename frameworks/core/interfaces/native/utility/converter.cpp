@@ -17,6 +17,7 @@
 #include "reverse_converter.h"
 #include "core/common/card_scope.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "core/interfaces/native/implementation/i_curve_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -1032,6 +1033,18 @@ void AssignCast(std::optional<FontWeight>& dst, const Ark_String& src)
 }
 
 template<>
+RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
+{
+    OHOS::Ace::RefPtr<ChainedTransitionEffect> effect;
+    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
+    if (effectPeer) {
+        return effectPeer->handler;
+    } else {
+        return nullptr;
+    }
+}
+
+template<>
 RefPtr<Curve> Convert(const Ark_String& src)
 {
     return Framework::CreateCurve(Converter::Convert<std::string>(src), false);
@@ -1286,6 +1299,22 @@ BorderColorProperty Convert(const Ark_EdgeColors& src)
 }
 
 template<>
+BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
+{
+    BorderColorProperty dst;
+    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
+        " handles invalid structure"
+    );
+    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
+    dst.leftColor = OptConvert<Color>(src.start);
+    dst.topColor = OptConvert<Color>(src.top);
+    dst.rightColor = OptConvert<Color>(src.end);
+    dst.bottomColor = OptConvert<Color>(src.bottom);
+    dst.multiValued = true;
+    return dst;
+}
+
+template<>
 BorderRadiusProperty Convert(const Ark_BorderRadiuses& src)
 {
     BorderRadiusProperty borderRadius;
@@ -1355,6 +1384,14 @@ BorderWidthProperty Convert(const Ark_LengthMetrics& src)
 {
     BorderWidthProperty dst;
     LOGE("Convert [Ark_LengthMetrics] to [BorderWidthProperty] is not implemented yet");
+    return dst;
+}
+
+template<>
+BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
+{
+    BorderWidthProperty dst;
+    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
     return dst;
 }
 

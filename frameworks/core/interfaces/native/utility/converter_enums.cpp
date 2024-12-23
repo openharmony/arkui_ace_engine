@@ -1542,6 +1542,16 @@ void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& 
 }
 
 template<>
+void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
+{
+    switch (src) {
+        case ARK_DIALOG_BUTTON_STYLE_DEFAULT: dst = DialogButtonStyle::DEFAULT; break;
+        case ARK_DIALOG_BUTTON_STYLE_HIGHLIGHT: dst = DialogButtonStyle::HIGHTLIGHT; break;
+        default: LOGE("Unexpected enum value in Ark_DialogButtonStyle: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<RectWidthStyle>& dst, const Ark_RectWidthStyle& src)
 {
     switch (src) {

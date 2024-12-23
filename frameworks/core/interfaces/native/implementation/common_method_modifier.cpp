@@ -505,14 +505,6 @@ BlurStyleOption Convert(const Ark_ForegroundBlurStyleOptions& src)
 }
 
 template<>
-BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src)
-{
-    BorderWidthProperty dst;
-    LOGE("ARKOALA: Convert to [BorderWidthProperty] from [Ark_LocalizedEdgeWidths] is not supported\n");
-    return dst;
-}
-
-template<>
 OverlayOptions Convert(const Ark_OverlayOptions& src)
 {
     OverlayOptions dst;
@@ -566,22 +558,6 @@ BorderRadiusProperty Convert(const Ark_OutlineRadiuses& src)
     dst.radiusTopRight = OptConvert<Dimension>(src.topRight);
     dst.radiusBottomLeft = OptConvert<Dimension>(src.bottomLeft);
     dst.radiusBottomRight = OptConvert<Dimension>(src.bottomRight);
-    dst.multiValued = true;
-    return dst;
-}
-
-template<>
-BorderColorProperty Convert(const Ark_LocalizedEdgeColors& src)
-{
-    BorderColorProperty dst;
-    LOGE("Converter::AssignTo(std::optional<BorderColorProperty> &, const Ark_LocalizedEdgeColors&)"
-        " handles invalid structure"
-    );
-    // the src.left/.right should be used instead .start/.end, interface_sdk-js/issues/IB0DVD
-    dst.leftColor = OptConvert<Color>(src.start);
-    dst.topColor = OptConvert<Color>(src.top);
-    dst.rightColor = OptConvert<Color>(src.end);
-    dst.bottomColor = OptConvert<Color>(src.bottom);
     dst.multiValued = true;
     return dst;
 }
@@ -1017,18 +993,6 @@ TransitionOptions Convert(const Ark_TransitionOptions& src)
         options.UpdateRotate(rotateOpt.value());
     }
     return options;
-}
-
-template<>
-RefPtr<NG::ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src)
-{
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::ChainedTransitionEffect> effect;
-    auto effectPeer = reinterpret_cast<TransitionEffectPeer*>(src.ptr);
-    if (effectPeer) {
-        return effectPeer->handler;
-    } else {
-        return nullptr;
-    }
 }
 
 template<>
