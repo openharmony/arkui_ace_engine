@@ -27,7 +27,7 @@ public:
     static ArkUINativeModuleValue RemoveFromCache(ArkUIRuntimeCallInfo* runtimeCallInfo);
 
 private:
-    static void HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
+    static bool HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
         std::vector<ArkUI_Uint32>& colors);
     static ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 themeScopeId);
 };

@@ -51,7 +51,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     private onWillApplyThemeInternally(): void {
-        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__());
+        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this);
         if (theme) {
             this.onWillApplyTheme(theme);
         }
