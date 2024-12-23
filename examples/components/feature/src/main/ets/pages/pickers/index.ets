@@ -16,6 +16,7 @@
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { CalendarPickerBootcamp } from './CalendarPickerBootcamp';
 import { CheckboxGroupBootcamp } from './CheckboxGroupBootcamp';
+import { CheckboxBootcamp } from './CheckboxBootcamp'
 import { RatingBootcamp } from './RatingBootcamp';
 import { ToggleBootcamp } from './ToggleBootcamp';
 import { SliderBootcamp } from '../pickers/SliderBootcamp';
@@ -26,6 +27,7 @@ export const pickersRoute: RouteGroup = {
   children: [
     { name: 'calendar', label: '日历选择器/calendar' },
     { name: 'checkbox-group', label: '勾选文本/CheckboxGroup' },
+    { name: 'checkbox', label: '多选框/Checkbox' },
     { name: 'rating', label: '评分条/Rating' },
     { name: 'toggle', label: '切换按钮/Toggle' },
     { name: 'Slider', label: '滑动条/Slider' },
@@ -38,6 +40,8 @@ export function PickersDestination(name: string, route: Route) {
     CalendarPickerBootcamp({ title: route.label })
   } else if (name === 'pickers/checkbox-group') {
     CheckboxGroupBootcamp({ title: route.label })
+  } else if (name === 'pickers/checkbox') {
+    CheckboxBootcamp({ title: route.label })
   } else if (name === 'pickers/rating') {
     RatingBootcamp({ title: route.label })
   } else if (name === 'pickers/toggle') {
