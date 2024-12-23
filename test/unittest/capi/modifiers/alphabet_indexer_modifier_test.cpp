@@ -1344,8 +1344,8 @@ HWTEST_F(IndexerModifierTest, setOnRequestPopupData, TestSize.Level1)
         CallbackHelper(cbReturn).Invoke(arkArrStr.ArkValue());
     };
 
-    auto arkCallback = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(nullptr, expectedResourceId,
-        callback);
+    auto arkCallback = Converter::ArkValue<OnAlphabetIndexerRequestPopupDataCallback>(nullptr, callback,
+        expectedResourceId);
     modifier_->setOnRequestPopupData(node_, &arkCallback);
 
     auto onRequestPopupData = eventHub->GetOnRequestPopupData();
