@@ -128,6 +128,14 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
     eventHub->SetOnSelect(std::move(onSelect));
 }
 
+void GridItemModelNG::SetForceRebuild(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetForceRebuild(value);
+}
+
 void GridItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -173,5 +181,13 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
     auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateGridItemStyle(gridItemStyle);
+}
+
+void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(onSelect));
 }
 } // namespace OHOS::Ace::NG

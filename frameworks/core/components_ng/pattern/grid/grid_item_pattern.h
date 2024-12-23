@@ -109,6 +109,7 @@ public:
             json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
             return;
         }
+        json->PutExtAttr("style", gridItemStyle_ == GridItemStyle::NONE ? "NONE" : "PLAIN", filter);
         json->PutExtAttr("forceRebuild", forceRebuild_ ? "true" : "false", filter);
         json->PutFixedAttr("selectable", selectable_ ? "true" : "false", filter, FIXED_ATTR_SELECTABLE);
         json->PutExtAttr("selected", isSelected_ ? "true" : "false", filter);
