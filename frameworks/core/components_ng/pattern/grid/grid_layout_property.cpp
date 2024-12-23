@@ -58,6 +58,24 @@ void GridLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Ins
     json->PutExtAttr("minCount", propMinCount_.value_or(1), filter);
     json->PutExtAttr("cellLength", propCellLength_.value_or(0), filter);
     json->PutExtAttr("enableScrollInteraction", propScrollEnabled_.value_or(true), filter);
+    json->PutExtAttr("gridLayoutOptions", propLayoutOptions_.has_value() ? "true" : "false", filter);
+    auto regularSizeArray = JsonUtil::CreateArray();
+    auto irregularIndexesArray = JsonUtil::CreateArray();
+    auto layoutOptions = GetLayoutOptions();
+    if (layoutOptions) {
+        auto regularSize = layoutOptions.value().regularSize;
+        regularSizeArray->Put("", regularSize.rows);
+        regularSizeArray->Put("", regularSize.columns);
+
+        auto irregularIndexes = layoutOptions.value().irregularIndexes;
+        for (auto item : irregularIndexes) {
+            irregularIndexesArray->Put("", item);
+        }
+    }
+    json->PutExtAttr("regularSize", regularSizeArray, filter);
+    json->PutExtAttr("irregularIndexes", irregularIndexesArray, filter);
+    json->PutExtAttr("alignItems", GetAlignItems().value_or(GridItemAlignment::DEFAULT) ==
+        GridItemAlignment::DEFAULT ? "GridItemAlignment.Default" : "GridItemAlignment.Stretch", filter);
 }
 
 std::string GridLayoutProperty::GetGridDirectionStr() const
