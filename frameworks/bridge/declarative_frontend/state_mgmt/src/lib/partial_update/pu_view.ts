@@ -1021,8 +1021,10 @@ abstract class ViewPU extends PUV2ViewBase
     */
   protected onDumpInspector(): string {
     let res: DumpInfo = new DumpInfo();
-    res.viewInfo = { componentName: this.constructor.name, id: this.id__(), isV2: false,
-      isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive() };
+    res.viewInfo = {
+      componentName: this.constructor.name, id: this.id__(), isV2: false,
+      isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
+    };
     Object.getOwnPropertyNames(this)
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
