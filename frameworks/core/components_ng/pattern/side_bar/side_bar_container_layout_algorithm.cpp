@@ -49,12 +49,13 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize =
-        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto idealSize = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
-    CreateIdealSize(
-        constraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
+    CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
+        layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT), true);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
 
     AdjustMinAndMaxSideBarWidth(layoutWrapper);
@@ -62,7 +63,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto parentWidth = idealSize.Width();
     realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
     if (needInitRealSideBarWidth_ || NearZero(realSideBarWidth_)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             GetAllPropertyValue(layoutProperty, parentWidth);
         } else {
