@@ -105,6 +105,11 @@ public:
                 pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
                 "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            ParseAdditionalStylePattern(pattern, theme);
+        }
+        void ParseAdditionalStylePattern(
+            const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
+        {
             theme->targetSpace_ = pattern->GetAttr<Dimension>("popup_target_space", TARGET_SPACE);
             theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
             theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
