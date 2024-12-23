@@ -75,6 +75,7 @@ group("linux_core_unittest") {
     "pattern/counter:counter_test_ng",
     "pattern/custom:custom_test_ng",
     "pattern/custom_frame_node:custom_frame_node_test",
+    "pattern/custom_node_ext:custom_node_ext_test",
     "pattern/data_panel:data_panel_test_ng",
     "pattern/dialog:dialog_test_ng",
     "pattern/divider:divider_test_ng",

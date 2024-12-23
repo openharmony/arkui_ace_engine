@@ -583,7 +583,6 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
 {
     auto frameNode = CustomNodeExtModelNG::GetOrCreateFrameNode(std::string(tag));
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
 
