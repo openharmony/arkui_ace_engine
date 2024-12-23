@@ -139,6 +139,7 @@ void UIExtensionModelNG::CreateDynamicComponent(const UIExtensionConfig& config)
         V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
     auto pattern = frameNode->GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetBackgroundTransparent(config.backgroundTransparent);
     stack->Push(frameNode);
 }
 

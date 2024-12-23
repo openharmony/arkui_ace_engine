@@ -36,6 +36,8 @@ public:
     ~DynamicComponentRendererImpl() override = default;
 
     void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) override;
+    void SetBackgroundTransparent(bool backgroundTransparent) override;
+    bool GetBackgroundTransparent() const override;
     void CreateContent() override;
     void DestroyContent() override;
 
@@ -107,6 +109,7 @@ private:
     SizeT<int32_t> viewport_;
     bool adaptiveWidth_ = true;
     bool adaptiveHeight_ = true;
+    bool backgroundTransparent_ = true;
     static std::set<void *> usingWorkers_;
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;
