@@ -100,6 +100,7 @@ RefPtr<FrameNode> TextPickerDialogView::RangeShow(const DialogProperties& dialog
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
+    pickerNodeLayout->UpdateDisableTextStyleAnimation(settingData.isDisableTextStyleAnimation);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsCreateNode(textPickerPattern, settingData, textPickerNode, showCount, 1, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
@@ -256,6 +257,7 @@ RefPtr<FrameNode> TextPickerDialogView::OptionsShow(const DialogProperties& dial
     pickerNodeLayout->UpdateUserDefinedIdealSize(
         CalcSize(NG::CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), std::nullopt));
     pickerNodeLayout->UpdateCanLoop(settingData.canLoop);
+    pickerNodeLayout->UpdateDisableTextStyleAnimation(settingData.isDisableTextStyleAnimation);
     uint32_t showCount = pickerTheme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     OptionsShowInternal(textPickerPattern, settingData, textPickerNode, showCount, pickerTheme);
     SetDefaultPickerItemHeight(settingData.height);
@@ -950,6 +952,8 @@ void TextPickerDialogView::SetRange(
 void TextPickerDialogView::SetTextProperties(
     const RefPtr<PickerTheme>& pickerTheme, const PickerTextProperties& properties)
 {
+    SetDefaultTextStyle(properties.defaultTextStyle_);
+
     CHECK_NULL_VOID(pickerTheme);
     auto selectedStyle = pickerTheme->GetOptionStyle(true, false);
     auto normalStyle = pickerTheme->GetOptionStyle(false, false);
@@ -1012,6 +1016,41 @@ void TextPickerDialogView::SetTextDisappearProperties(
         properties.disappearTextStyle_.fontFamily.value_or(disappearStyle.GetFontFamilies()));
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DisappearFontStyle,
         properties.disappearTextStyle_.fontStyle.value_or(disappearStyle.GetFontStyle()));
+}
+
+void TextPickerDialogView::SetDefaultTextStyle(const NG::PickerTextStyle& value)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textStyle = theme->GetTextStyle();
+
+    if (value.fontSize.has_value() && value.fontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(value.fontSize.value()));
+    } else {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
+            ConvertFontScaleValue(textStyle.GetFontSize()));
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultColor,
+        value.textColor.value_or(textStyle.GetTextColor()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultWeight,
+        value.fontWeight.value_or(textStyle.GetFontWeight()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontFamily,
+        value.fontFamily.value_or(textStyle.GetFontFamilies()));
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontStyle,
+        value.fontStyle.value_or(textStyle.GetFontStyle()));
+    if (value.minFontSize.has_value() && value.minFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMinFontSize,
+            ConvertFontScaleValue(value.minFontSize.value()));
+    }
+    if (value.maxFontSize.has_value() && value.maxFontSize->IsValid()) {
+        ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultMaxFontSize,
+            ConvertFontScaleValue(value.maxFontSize.value()));
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultTextOverflow,
+        value.textOverflow.value_or(textStyle.GetTextOverflow()));
 }
 
 void TextPickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange)

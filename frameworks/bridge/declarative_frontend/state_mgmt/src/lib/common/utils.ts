@@ -15,21 +15,22 @@
  */
 
 class Utils {
+    private static currentAppApiVersion: number = -1;
+
     public static getApiVersion() : number {
-        return typeof ViewStackProcessor["getApiVersion"] === "function"
-               ? ViewStackProcessor["getApiVersion"]()
-               : undefined;
+        if (Utils.currentAppApiVersion <= 0) {
+            Utils.currentAppApiVersion = typeof ViewStackProcessor.getApiVersion === 'function'
+                ? ViewStackProcessor.getApiVersion() : -1;
+        }
+        return Utils.currentAppApiVersion;
     }
 
     public static isApiVersionEQAbove(target: number): boolean {
         let version = Utils.getApiVersion();
-
-        if (version == null) {
+        if (version <= 0) {
+            stateMgmtConsole.error(`get api version error in isApiVersionEQAbove, version:${version}`);
             return false;
         }
-        if (typeof version === "number") {
-            version = version % 1000;
-        }
-        return version >= target;
+        return version % 1000 >= target;
     }
 }

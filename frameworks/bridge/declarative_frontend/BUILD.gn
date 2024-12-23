@@ -16,6 +16,8 @@ import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+import(
+    "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/files_to_watch.gni")
 
 # declarative frontend source
 template("declarative_frontend") {
@@ -29,8 +31,10 @@ template("declarative_frontend") {
     defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs =
-        [ "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi" ]
+    include_dirs = [
+      "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi",
+      "$ace_root",
+    ]
     if (platform == "ohos_ng" || is_arkui_x) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
@@ -100,13 +104,27 @@ ark_theme_obj_path = base_output_path + "/arkTheme.o"
 jsuicontext_obj_path = base_output_path + "/jsUIContext.o"
 arkcomponent_obj_path = base_output_path + "/arkComponent.o"
 
+action("run_state_mgmt_build") {
+  script = "state_mgmt/build.py"
+  inputs = state_mgmt_release_files_to_watch
+  outputs = [ "$target_out_dir/stateMgmt.js" ]
+  args = [
+    # Paths: 1 StateMgmt root folder. 2. Folder to check need of npm install. 3. stateMgmt.js output path.
+    rebase_path("$ace_root/frameworks/bridge/declarative_frontend/state_mgmt"),
+    rebase_path(
+        "$ace_root/frameworks/bridge/declarative_frontend/state_mgmt/node_modules"),
+    rebase_path("$target_out_dir"),
+    "--release",
+  ]
+}
+
 gen_obj("js_proxyclass") {
-  input = "engine/stateMgmt.js"
+  input = "$target_out_dir/stateMgmt.js"
   if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
     jsproxyclass_obj_path = base_output_path + "/js_proxy_class.c"
   }
   output = jsproxyclass_obj_path
-  snapshot_dep = []
+  snapshot_dep = [ ":run_state_mgmt_build" ]
 }
 
 gen_obj("js_enum_style") {
@@ -260,12 +278,10 @@ template("declarative_js_engine") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
-      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
-      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -276,7 +292,6 @@ template("declarative_js_engine") {
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -341,7 +356,6 @@ template("declarative_js_engine") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
-      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -437,7 +451,6 @@ template("declarative_js_engine") {
       "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
-      "jsview/models/linear_split_model_impl.cpp",
       "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
@@ -490,6 +503,16 @@ template("declarative_js_engine") {
       "jsview/models/water_flow_item_model_impl.cpp",
       "jsview/models/water_flow_model_impl.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "jsview/js_column_split.cpp",
+        "jsview/js_content_slot.cpp",
+        "jsview/js_folder_stack.cpp",
+        "jsview/js_row_split.cpp",
+        "jsview/models/linear_split_model_impl.cpp",
+      ]
+    }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
@@ -614,7 +637,7 @@ template("declarative_js_engine") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&
@@ -806,12 +829,10 @@ template("declarative_js_engine_ng") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
-      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
-      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -820,7 +841,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -879,7 +899,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
-      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -929,6 +948,15 @@ template("declarative_js_engine_ng") {
       # ark_theme
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "jsview/js_column_split.cpp",
+        "jsview/js_content_slot.cpp",
+        "jsview/js_folder_stack.cpp",
+        "jsview/js_row_split.cpp",
+      ]
+    }
 
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
@@ -1039,7 +1067,7 @@ template("declarative_js_engine_ng") {
     if (defined(config.model_component_support) &&
         config.model_component_support) {
       sources += [ "jsview/js_sceneview.cpp" ]
-      external_deps += [ "graphic_3d:3dWidgetAdapterInterface" ]
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
     }
 
     if (defined(config.use_build_in_js_engine) &&

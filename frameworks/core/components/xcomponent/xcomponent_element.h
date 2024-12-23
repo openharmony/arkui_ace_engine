@@ -22,7 +22,6 @@
 #include "core/pipeline/base/render_element.h"
 
 #ifdef OHOS_STANDARD_SYSTEM
-#include "display_type.h"
 #include "surface/window.h"
 #include "wm/window.h"
 #include "render_service_client/core/ui/rs_node.h"

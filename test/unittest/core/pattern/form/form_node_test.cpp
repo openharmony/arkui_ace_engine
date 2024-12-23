@@ -31,6 +31,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/form/form_pattern.h"
+#include "core/pipeline/pipeline_base.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -401,5 +402,89 @@ HWTEST_F(FormNodeTest, FormNodeTest_013, TestSize.Level1)
     pattern->UpdateStaticCard();
     auto retRef = pattern->GetAccessibilitySessionAdapter();
     EXPECT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormNodeTest_014
+ * @tc.desc: AxisTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_014, TestSize.Level1)
+{
+    PointF globalPoint;
+    PointF parentLocalPoint;
+    PointF parentRevertPoint;
+    TouchRestrict touchRestrict;
+    touchRestrict.sourceType = SourceType::MOUSE;
+    touchRestrict.hitTestType = SourceType::MOUSE;
+    touchRestrict.inputEventType = InputEventType::AXIS;
+    touchRestrict.touchEvent.sourceType = SourceType::MOUSE;
+    touchRestrict.touchEvent.sourceTool = SourceTool::MOUSE;
+    AxisTestResult result;
+    auto formNode = CreateFromNode();
+
+    touchRestrict.hitTestType = SourceType::NONE;
+    auto res = formNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+
+    PipelineContext* contextBak = formNode->GetContext();
+    formNode->context_ = nullptr;
+    res = formNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    formNode->context_ = contextBak;
+
+    auto patternBak = formNode->GetPattern<FormPattern>();
+    formNode->pattern_ = nullptr;
+    res = formNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    formNode->pattern_ = patternBak;
+
+    auto pattern = formNode->GetPattern<FormPattern>();
+    WeakPtr<PipelineContext> context = WeakPtr<PipelineContext>();
+    auto subContainer = AceType::MakeRefPtr<MockSubContainer>(context);
+    ASSERT_NE(subContainer, nullptr);
+    subContainer->instanceId_ = 0;
+
+    EXPECT_EQ(pattern->subContainer_, nullptr);
+    res = formNode->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, result);
+    EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
+    pattern->subContainer_ = subContainer;
+}
+
+/**
+ * @tc.name: FormNodeTest_015
+ * @tc.desc: DumpInfo in string format
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_015, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormNodeTest_016
+ * @tc.desc: DumpInfo in json format
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_016, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> dumpJson;
+    pattern->DumpInfo(dumpJson);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
 }
 } // namespace OHOS::Ace::NG

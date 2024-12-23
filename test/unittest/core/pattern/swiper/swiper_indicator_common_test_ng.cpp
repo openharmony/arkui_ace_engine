@@ -726,34 +726,55 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperIndicatorPattern020
- * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
+ * @tc.name: UpdateTextContentSub001
+ * @tc.desc: Test UpdateTextContentSub method of SwiperIndicatorPattern
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
+HWTEST_F(SwiperIndicatorCommon, UpdateTextContentSub001, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
-    model.SetDisplayCount(2);
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
     model.SetSwipeByGroup(true);
+    model.SetDisplayCount(3);
     CreateSwiperItems();
     CreateSwiperDone();
+
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto firstTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto lastTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
+    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(lastTextLayoutProperty, nullptr);
+    EXPECT_EQ(lastTextLayoutProperty->GetContent().value_or(u""), u"/4");
+}
 
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+/**
+ * @tc.name: UpdateTextContentSub002
+ * @tc.desc: Test UpdateTextContentSub method of SwiperIndicatorPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, UpdateTextContentSub002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetSwipeByGroup(true);
+    model.SetDisplayCount(3);
+    model.SetIndex(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
 
-    TouchEventInfo touchEventInfo("default");
-    TouchLocationInfo touchLocationInfo("down", 0);
-    touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
-    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
-
-    GestureEvent info;
-    info.SetLocalLocation(Offset(0.0f, 1.0f));
-    indicatorPattern->HandleTouchDown();
-    indicatorPattern->HandleDragStart(info);
-    indicatorPattern->HandleTouchEvent(touchEventInfo);
-    EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto firstTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto lastTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(firstTextLayoutProperty, nullptr);
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 }
 } // namespace OHOS::Ace::NG

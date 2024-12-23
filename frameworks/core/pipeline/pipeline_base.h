@@ -92,8 +92,6 @@ class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
-using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
-    SerializedGesture& serializedGesture)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -386,9 +384,6 @@ public:
 
     virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
-    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-        uint32_t closeButtonRightMargin, int32_t colorMode){};
-
     virtual void EnableContainerModalGesture(bool isEnable) {}
 
     virtual bool GetContainerFloatingTitleVisible()
@@ -462,6 +457,13 @@ public:
         startAbilityHandler_ = std::move(listener);
     }
     void HyperlinkStartAbility(const std::string& address) const;
+
+    using StartAbilityOnQueryHandler = std::function<void(const std::string& queryWord)>;
+    void SetStartAbilityOnQueryHandler(StartAbilityOnQueryHandler&& listener)
+    {
+        startAbilityOnQueryHandler_ = std::move(listener);
+    }
+    void StartAbilityOnQuery(const std::string& queryWord) const;
 
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
@@ -683,6 +685,16 @@ public:
         std::shared_lock<std::shared_mutex> lock(themeMtx_);
         if (themeManager_) {
             return themeManager_->GetTheme<T>();
+        }
+        return {};
+    }
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>(themeScopeId);
         }
         return {};
     }
@@ -1142,12 +1154,6 @@ public:
 
     virtual void SetupSubRootElement() = 0;
 
-    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
-
-    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
-
-    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
-
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
     void SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
@@ -1420,10 +1426,16 @@ public:
         return true;
     }
 
+    virtual bool IsDirtyPropertyNodesEmpty() const
+    {
+        return true;
+    }
+
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+    void FireUIExtensionEventInner(uint32_t eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1453,6 +1465,9 @@ public:
     void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
 
     void FireAccessibilityEvents();
+    void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
+
+    virtual void SetEnableSwipeBack(bool isEnable) {}
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1563,6 +1578,7 @@ protected:
     ProfilerCallback onVsyncProfiler_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
+    StartAbilityOnQueryHandler startAbilityOnQueryHandler_;
     ActionEventHandler actionEventHandler_;
     FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
@@ -1570,8 +1586,6 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
-
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;

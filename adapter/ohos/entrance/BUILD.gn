@@ -90,7 +90,10 @@ template("ace_ohos_standard_source_set") {
 
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs = [ "$ace_root/interfaces/inner_api/ui_session" ]
+    include_dirs = [
+      "$ace_root/interfaces/inner_api/ui_session",
+      "$ace_root",
+    ]
 
     deps = [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",
@@ -142,6 +145,12 @@ template("ace_ohos_standard_source_set") {
     defines += [ "INDEXER_SUPPORT_VIBRATOR" ]
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       external_deps += [ "graphic_2d:librender_service_base" ]
+    }
+
+    if (defined(global_parts_info) &&
+        defined(global_parts_info.resourceschedule_resource_schedule_service)) {
+      external_deps += [ "resource_schedule_service:ressched_client" ]
+      defines += [ "RESOURCE_SCHEDULE_SERVICE_ENABLE" ]
     }
 
     if (form_fwk_enable) {

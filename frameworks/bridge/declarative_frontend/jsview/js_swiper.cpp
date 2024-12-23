@@ -22,12 +22,13 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_swiper_function.h"
+#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_swiper_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
@@ -40,7 +41,6 @@
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
-#include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -158,6 +158,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("nestedScroll", &JSSwiper::SetNestedScroll);
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
+    JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -309,9 +310,15 @@ void JSSwiper::SetIndex(const JSCallbackInfo& info)
     if (length < 1 || length > 2) {
         return;
     }
-
     int32_t index = 0;
     auto jsIndex = info[0];
+    if (jsIndex->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsIndex);
+        jsIndex = obj->GetProperty("value");
+        auto changeEventVal = obj->GetProperty("$value");
+        ParseSwiperIndexObject(info, changeEventVal);
+    }
+
     if (length > 0 && jsIndex->IsNumber()) {
         index = jsIndex->ToNumber<int32_t>();
     }
@@ -1278,5 +1285,17 @@ void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
         func->Execute(selectedIndex, index, position, mainAxisLength);
     };
     SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
+{
+    // default value
+    int32_t value = 0;
+    if (info.Length() < 1 || !info[0]->IsNumber()) {
+        SwiperModel::GetInstance()->SetPageFlipMode(value);
+        return;
+    }
+    JSViewAbstract::ParseJsInt32(info[0], value);
+    SwiperModel::GetInstance()->SetPageFlipMode(value);
 }
 } // namespace OHOS::Ace::Framework

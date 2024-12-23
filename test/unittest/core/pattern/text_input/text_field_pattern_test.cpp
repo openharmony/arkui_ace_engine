@@ -647,6 +647,28 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
     pattern->GetFocusHub()->focusType_ = FocusType::NODE;
     pattern->hasPreviewText_ = true;
     pattern->HandleLongPress(info);
+
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.SetLocalLocation(Offset(10, 10));
+    pattern->hasPreviewText_ = false;
+    std::list<FingerInfo> fingerList;
+    fingerList.push_back({ .fingerId_ = 0 });
+    info.SetFingerList(fingerList);
+    pattern->HandleLongPress(info);
+
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo moveLocationInfo(0);
+    moveLocationInfo.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo.SetTouchType(TouchType::MOVE);
+    touchInfo.AddChangedTouchLocationInfo(std::move(moveLocationInfo));
+
+    TouchLocationInfo moveLocationInfo0(0);
+    moveLocationInfo0.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo0.SetTouchType(TouchType::MOVE);
+    touchInfo.AddTouchLocationInfo(std::move(moveLocationInfo0));
+    pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16("Hello"));
+    pattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(pattern->GetMagnifierController()->magnifierNodeExist_);
 }
 
 /**
@@ -1937,7 +1959,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
-    EXPECT_TRUE(controller->GetShowMagnifier());
+    EXPECT_FALSE(controller->GetShowMagnifier());
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
@@ -2163,6 +2185,19 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     pattern->frameRect_ = RectF(0, 0, 10, 0);
     pattern->ChangeMouseState(offset3, frameId, true);
     Offset offset4(1.0, 1.0);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+    pattern->ChangeMouseState(offset4, frameId, true);
+
+    // test rtl
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    pattern->frameRect_ = RectF(0, 0, 0, 0);
+    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset3, frameId, true);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
     pattern->ChangeMouseState(offset4, frameId, true);
 }
@@ -2656,5 +2691,37 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
     autoFillType = AceAutoFillType::ACE_NEW_PASSWORD;
     pattern->SetAutoFillTriggeredStateByType(autoFillType);
     EXPECT_EQ(stateHolder->IsAutoFillNewPasswordTriggered(), true);
+}
+
+/**
+ * @tc.name: TextFieldShiftMultipleSelection001
+ * @tc.desc: test text_field_pattern.cpp shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->UpdateShiftFlag(keyEvent);
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    Offset offset(5.0, 10.0);
+    info.SetGlobalLocation(offset);
+    pattern->HandleMouseEvent(info);
+    pattern->UpdateCaretByClick(offset);
+
+    EXPECT_EQ(pattern->IsSelected(), false);
 }
 } // namespace OHOS::Ace::NG

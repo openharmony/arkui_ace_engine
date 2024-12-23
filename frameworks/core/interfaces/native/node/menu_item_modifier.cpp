@@ -222,20 +222,66 @@ void ResetSelectIconSymbol(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIMenuItemModifier* GetMenuItemModifier()
 {
-    static const ArkUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
-        ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
-        ResetSelectIconSymbol };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIMenuItemModifier modifier = {
+        .setMenuItemSelected = SetMenuItemSelected,
+        .resetMenuItemSelected = ResetMenuItemSelected,
+        .setLabelFontColor = SetLabelFontColor,
+        .resetLabelFontColor = ResetLabelFontColor,
+        .setContentFontColor = SetContentFontColor,
+        .resetContentFontColor = ResetContentFontColor,
+        .setLabelFont = SetLabelFont,
+        .resetLabelFont = ResetLabelFont,
+        .setContentFont = SetContentFont,
+        .resetContentFont = ResetContentFont,
+        .setSelectIcon = SetSelectIcon,
+        .resetSelectIcon = ResetSelectIcon,
+        .setSelectIconSrc = SetSelectIconSrc,
+        .resetSelectIconSrc = ResetSelectIconSrc,
+        .setSelectIconSymbol = SetSelectIconSymbol,
+        .resetSelectIconSymbol = ResetSelectIconSymbol,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIMenuItemModifier* GetCJUIMenuItemModifier()
 {
-    static const CJUIMenuItemModifier modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
-        ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc, SetSelectIconSymbol,
-        ResetSelectIconSymbol };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIMenuItemModifier modifier = {
+        .setMenuItemSelected = SetMenuItemSelected,
+        .resetMenuItemSelected = ResetMenuItemSelected,
+        .setLabelFontColor = SetLabelFontColor,
+        .resetLabelFontColor = ResetLabelFontColor,
+        .setContentFontColor = SetContentFontColor,
+        .resetContentFontColor = ResetContentFontColor,
+        .setLabelFont = SetLabelFont,
+        .resetLabelFont = ResetLabelFont,
+        .setContentFont = SetContentFont,
+        .resetContentFont = ResetContentFont,
+        .setSelectIcon = SetSelectIcon,
+        .resetSelectIcon = ResetSelectIcon,
+        .setSelectIconSrc = SetSelectIconSrc,
+        .resetSelectIconSrc = ResetSelectIconSrc,
+        .setSelectIconSymbol = SetSelectIconSymbol,
+        .resetSelectIconSymbol = ResetSelectIconSymbol,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

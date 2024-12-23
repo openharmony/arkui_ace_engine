@@ -109,6 +109,8 @@ private:
     void FinalMeasureInWeightMode();
     void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
     void SecondMeasureInGrowOrShrink();
+    void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
+        FlexItemProperties& flexItemProperties);
 
     template<typename T>
     void PatternOperator(T pattern, FlexOperatorType operation, FlexMeasureResult& measureResult,

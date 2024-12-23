@@ -208,6 +208,17 @@ public:
         json->PutExtAttr("select", select ? "true" : "false", filter);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        Pattern::ToTreeJson(json, config);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto select = paintProperty->GetCheckBoxSelectValue(false);
+        json->Put(TreeKey::CHECKED, select ? "true" : "false");
+    }
+
     void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
     {
         originalStyle_ = style;

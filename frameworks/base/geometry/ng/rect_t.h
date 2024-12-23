@@ -23,6 +23,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
+#include "base/log/log.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 

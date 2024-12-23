@@ -18,6 +18,7 @@
 #include "text_base.h"
 
 #include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/property/calc_length.h"
 
 namespace OHOS::Ace::NG {
@@ -58,7 +59,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     auto span0 = AceType::MakeRefPtr<SpanItem>();
     span0->interval = { 0, 7 };
-    span0->content = "012345";
+    span0->content = u"012345";
     selectSpanItems.emplace_back(span0);
     selectSpanItems.emplace_back(span0);
     pattern->spans_ = selectSpanItems;
@@ -67,6 +68,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString001, TestSize.Level1)
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = true;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 
@@ -88,7 +90,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     std::list<RefPtr<NG::SpanItem>> selectSpanItems;
     auto span0 = AceType::MakeRefPtr<SpanItem>();
     span0->interval = { 0, 7 };
-    span0->content = "0123456789";
+    span0->content = u"0123456789";
     span0->position = 7;
     span0->placeholderIndex = -1;
     selectSpanItems.emplace_back(span0);
@@ -98,6 +100,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString002, TestSize.Level1)
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = false;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 
@@ -116,12 +119,13 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
     pattern->clipboard_ = mockClipboardImpl;
 
     pattern->textSelector_.Update(0, 6);
-    pattern->textForDisplay_ = "123456789";
+    pattern->textForDisplay_ = u"123456789";
     auto textLayoutProperty = frameNode->GetLayoutPropertyPtr<TextLayoutProperty>();
     textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::SELECTABLE_FOCUSABLE);
     frameNode->layoutProperty_ = textLayoutProperty;
     pattern->copyOption_ = CopyOptions::InApp;
     pattern->isSpanStringMode_ = false;
+    pattern->AllocStyledString();
     pattern->HandleOnCopy();
 }
 
@@ -132,9 +136,9 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString003, TestSize.Level1)
  */
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString004, TestSize.Level1)
 {
-    auto spanStr = AceType::MakeRefPtr<SpanString>("123456789");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"123456789");
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     std::list<RefPtr<NG::SpanItem>> spansEn;
     spansEn.emplace_back(span0);
     spanStr->spans_ = spansEn;
@@ -194,7 +198,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString005, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), "123456789");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, "123456789");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "123456789");
     EXPECT_EQ((*it)->interval.first, 0);
     EXPECT_EQ((*it)->interval.second, 9);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(1));
@@ -236,7 +240,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString006, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     span0->position = 9;
     span0->length = 9;
     std::list<RefPtr<NG::SpanItem>> spansEn;
@@ -260,7 +264,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString006, TestSize.Level1)
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
 {
     auto span0 = AceType::MakeRefPtr<SpanItem>();
-    span0->content = "123456789";
+    span0->content = u"123456789";
     span0->interval.first = 0;
     span0->interval.second = 9;
     std::vector<Shadow> shadow;
@@ -293,7 +297,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     span0->textLineStyle->UpdateLineBreakStrategy(LineBreakStrategy::GREEDY);
     span0->textLineStyle->UpdateEllipsisMode(EllipsisMode::MIDDLE);
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = "123456789";
+    span1->content = u"123456789";
     span1->interval.first = 0;
     span1->interval.second = 9;
 
@@ -312,7 +316,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), "123456789");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, "123456789");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "123456789");
     EXPECT_EQ((*it)->interval.first, 0);
     EXPECT_EQ((*it)->interval.second, 9);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(1));
@@ -351,7 +355,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString007, TestSize.Level1)
 HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
 {
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     ImageSpanOptions options;
@@ -362,7 +366,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     span0->options = options;
 
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -381,7 +385,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString008, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::IMAGE) {
         auto spanDe = AceType::DynamicCast<ImageSpanItem>(*it);
         EXPECT_EQ(spanDe->options.image, "iamge");
@@ -423,12 +427,12 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     frameNode->renderContext_ = renderContext;
 
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -447,7 +451,7 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString009, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::IMAGE) {
         auto spanDe = AceType::DynamicCast<ImageSpanItem>(*it);
         EXPECT_EQ(spanDe->options.image, "iamge");
@@ -473,12 +477,12 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
 
     auto span0 = AceType::MakeRefPtr<ImageSpanItem>();
-    span0->content = " ";
+    span0->content = u" ";
     span0->interval.first = 0;
     span0->interval.second = 1;
     span0->imageNodeId = 1;
     auto span1 = span0->GetSameStyleSpanItem();
-    span1->content = " ";
+    span1->content = u" ";
     span1->interval.first = 0;
     span1->interval.second = 1;
 
@@ -497,12 +501,108 @@ HWTEST_F(TextTestSevenNg, CopyTextWithSpanString010, TestSize.Level1)
     EXPECT_EQ(spanStringDe->GetString(), " ");
     EXPECT_EQ(spanStringDe->spans_.size(), 1);
     auto it = spansDe.begin();
-    EXPECT_EQ((*it)->content, " ");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), " ");
     if ((*it)->spanItemType == SpanItemType::NORMAL) {
         auto spanDe = AceType::DynamicCast<SpanItem>(*it);
         EXPECT_EQ(spanDe->interval.first, 0);
         EXPECT_EQ(spanDe->interval.second, 1);
-        EXPECT_EQ(spanDe->content, " ");
+        EXPECT_EQ(StringUtils::Str16ToStr8(spanDe->content), " ");
     }
+}
+
+
+/**
+ * @tc.name: InheritParentTextStyle001
+ * @tc.desc: test InheritParentTextStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, InheritParentTextStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct a minimal version 10.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
+    TextStyle textStyleBase;
+    textStyleBase.SetFontSize(ADAPT_FONT_SIZE_VALUE);
+    auto multipleAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>();
+    multipleAlgorithm->textStyle_ = textStyleBase;
+
+    /**
+     * @tc.steps: step2. Construct MultipleParagraphLayoutAlgorithm and test inheritTextStyle_.
+     */
+    TextStyle textStyle;
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    multipleAlgorithm->InheritParentTextStyle(textStyle);
+    EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), ADAPT_FONT_SIZE_VALUE);
+
+    /**
+     * @tc.steps: step3. Construct a minimal version 16 and test inheritTextStyle_.
+     */
+    int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+    multipleAlgorithm->InheritParentTextStyle(textStyle);
+    MockContainer::Current()->SetApiTargetVersion(originApiVersion);
+    EXPECT_EQ(multipleAlgorithm->inheritTextStyle_.GetFontSize(), FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: SpanBuildParagraph001
+ * @tc.desc: test InheritParentTextStyle of multiple paragraph.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestSevenNg, SpanBuildParagraph001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construct textLayoutAlgorithm with span.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_TWELVE)); // 12 means min platformVersion.
+    std::list<RefPtr<NG::SpanItem>> selectSpanItems;
+    auto span0 = AceType::MakeRefPtr<SpanItem>();
+    span0->interval = { 0, 7 };
+    span0->content = u"012345";
+    selectSpanItems.emplace_back(span0);
+    selectSpanItems.emplace_back(span0);
+    auto pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pManager_, nullptr);
+    auto textLayoutAlgorithm = AceType::MakeRefPtr<TextLayoutAlgorithm>(selectSpanItems, pManager_, true);
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    LayoutConstraintF contentConstraint;
+    contentConstraint.maxSize.SetHeight(RK356_HEIGHT);
+    contentConstraint.maxSize.SetWidth(RK356_WIDTH);
+
+    /**
+     * @tc.steps: step2. test span MAX_LINES_FIRST.
+     */
+    TextStyle textStyle;
+    textStyle.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE);
+    textStyle.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    textStyle.SetFontSize(FONT_SIZE_VALUE);
+
+    textLayoutAlgorithm->BuildParagraph(
+        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_EQ(textStyle.GetFontSize(), FONT_SIZE_VALUE);
+
+    int originApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(
+        static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)); // 16 means min platformVersion.
+
+    textLayoutAlgorithm->BuildParagraph(
+        textStyle, textLayoutProperty, contentConstraint, AccessibilityManager::RawPtr(layoutWrapper));
+    MockContainer::Current()->SetApiTargetVersion(originApiVersion);
+    EXPECT_EQ(textStyle.GetFontSize(), ADAPT_MAX_FONT_SIZE_VALUE);
 }
 } // namespace OHOS::Ace::NG

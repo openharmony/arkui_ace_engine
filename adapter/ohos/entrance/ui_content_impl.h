@@ -240,6 +240,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) override;
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
@@ -373,6 +375,10 @@ public:
 
     void OnContainerModalEvent(const std::string& name, const std::string& value) override;
     void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+
+    int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback) override;
+    void RemoveFocusActiveChangeCallback(int32_t handler) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -397,7 +403,8 @@ private:
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void UnregisterDisplayManagerCallback();
-
+    void RegisterLinkJumpCallback();
+    void ExecuteUITask(std::function<void()> task, const std::string& name);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;

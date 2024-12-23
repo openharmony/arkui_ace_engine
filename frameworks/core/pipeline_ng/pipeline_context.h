@@ -44,6 +44,8 @@
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/navigation/navigation_manager.h"
 #include "core/components_ng/manager/form_visible/form_visible_manager.h"
+#include "core/components_ng/manager/form_event/form_event_manager.h"
+#include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -80,7 +82,7 @@ public:
         const RefPtr<Frontend>& frontend, int32_t instanceId);
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId);
-    PipelineContext() = default;
+    PipelineContext();
 
     ~PipelineContext() override = default;
 
@@ -109,10 +111,7 @@ public:
 
     bool NeedSoftKeyboard() override;
 
-    void SetOnWindowFocused(const std::function<void()>& callback) override
-    {
-        focusOnNodeCallback_ = callback;
-    }
+    void SetOnWindowFocused(const std::function<void()>& callback) override;
 
     const std::function<void()>& GetWindowFocusCallback() const
     {
@@ -123,6 +122,21 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
     {
         sizeChangeByRotateCallback_ = callback;
+    }
+
+    void SetLinkJumpCallback(const std::function<void(const std::string& link)>& callback)
+    {
+        linkJumpCallback_ = callback;
+    }
+
+    void ExecuteLinkJumpCallback(const std::string& link)
+    {
+        linkJumpCallback_(link);
+    }
+
+    bool GetIsLinkJumpOpen()
+    {
+        return linkJumpCallback_ != nullptr;
     }
 
     void FireSizeChangeByRotateCallback(bool isRotate,
@@ -495,7 +509,8 @@ public:
         return onShow_;
     }
 
-    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false);
+    bool ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId = 0, bool isByPass = false,
+        MouseStyleChangeReason reason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE);
 
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
@@ -648,22 +663,29 @@ public:
 
     void SetMouseStyleHoldNode(int32_t id)
     {
-        if (!mouseStyleNodeId_.has_value()) {
-            mouseStyleNodeId_ = id;
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->SetMouseStyleHoldNode(id);
         }
     }
 
     void FreeMouseStyleHoldNode(int32_t id)
     {
-        if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
-            mouseStyleNodeId_.reset();
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode(id);
         }
     }
 
     void FreeMouseStyleHoldNode()
     {
-        CHECK_NULL_VOID(mouseStyleNodeId_.has_value());
-        mouseStyleNodeId_.reset();
+        CHECK_NULL_VOID(eventManager_);
+        auto mouseStyleManager = eventManager_->GetMouseStyleManager();
+        if (mouseStyleManager) {
+            mouseStyleManager->FreeMouseStyleHoldNode();
+        }
     }
 
     void MarkNeedFlushMouseEvent()
@@ -789,8 +811,6 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
-    virtual void SetContainerButtonStyle(uint32_t buttonsize, uint32_t spacingBetweenButtons,
-        uint32_t closeButtonRightMargin, int32_t isDarkMode) override;
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
@@ -833,6 +853,16 @@ public:
     const RefPtr<FormVisibleManager>& GetFormVisibleManager() const
     {
         return formVisibleMgr_;
+    }
+
+    const RefPtr<FormEventManager>& GetFormEventManager() const
+    {
+        return formEventMgr_;
+    }
+
+    const RefPtr<FormGestureManager>& GetFormGestureManager() const
+    {
+        return formGestureMgr_;
     }
 
     const std::unique_ptr<RecycleManager>& GetRecycleManager() const
@@ -984,6 +1014,11 @@ public:
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
     }
 
+    bool IsDirtyPropertyNodesEmpty() const override
+    {
+        return dirtyPropertyNodes_.empty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
 
@@ -1007,6 +1042,12 @@ public:
     bool GetContainerCustomTitleVisible() override;
 
     bool GetContainerControlButtonVisible() override;
+
+    std::string GetBundleName();
+    std::string GetModuleName();
+
+    void SetEnableSwipeBack(bool isEnable) override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1028,6 +1069,7 @@ protected:
         const bool supportAvoidance = false, bool forceChange = false) override;
     void OnVirtualKeyboardHeightChange(float keyboardHeight, double positionY, double height,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false) override;
+    void FlushDirtyPropertyNodesWhenExist();
 
     void SetIsLayouting(bool layouting)
     {
@@ -1089,6 +1131,8 @@ private:
     bool CompensatePointerMoveEventFromUnhandledEvents(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1195,7 +1239,6 @@ private:
     WeakPtr<FrameNode> screenNode_;
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
-    std::optional<int32_t> mouseStyleNodeId_;
     uint64_t resampleTimeStamp_ = 0;
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
@@ -1218,6 +1261,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
     std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
+    std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1255,6 +1299,8 @@ private:
 
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
+    RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
+    RefPtr<FormGestureManager> formGestureMgr_ = MakeRefPtr<FormGestureManager>();
     std::unique_ptr<RecycleManager> recycleManager_ = std::make_unique<RecycleManager>();
     std::atomic<int32_t> localColorMode_ = static_cast<int32_t>(ColorMode::COLOR_MODE_UNDEFINED);
     std::vector<std::shared_ptr<ITouchEventCallback>> listenerVector_;
@@ -1279,8 +1325,9 @@ private:
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
-    
+
     friend class ScopedLayout;
+    friend class FormGestureManager;
 };
 
 /**

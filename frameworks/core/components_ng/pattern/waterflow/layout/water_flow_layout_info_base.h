@@ -94,6 +94,9 @@ public:
      */
     virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
+    /**
+     * @note should take unconsumed delta into account.
+     */
     virtual bool OutOfBounds() const = 0;
 
     /**

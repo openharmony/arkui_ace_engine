@@ -764,13 +764,13 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScroll009, TestSize.Level1)
 HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.Level1)
 {
     CreateDefaultSwiper();
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
 
     // second child calling
     pattern_->OnScrollStartRecursive(pattern_, 0.0f, 0.0f);
@@ -782,7 +782,7 @@ HWTEST_F(SwiperEventTestNg, SwiperPatternHandleScrollMultiChildren001, TestSize.
     // second child scrolling
     pattern_->HandleScroll(-5.0f, SCROLL_FROM_UPDATE, NestedState::CHILD_SCROLL);
     EXPECT_TRUE(pattern_->childScrolling_);
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     pattern_->OnScrollEndRecursive(std::nullopt);
 
     // self scroll
@@ -988,37 +988,6 @@ HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop003, TestSize.Level1)
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     pattern_->HandleTouchBottomLoop();
     EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-}
-
-/**
- * @tc.name: HandleTouchBottomLoop004
- * @tc.desc: test Swiper indicator touch left bottom in loop when SwipeByGroup is true
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperEventTestNg, HandleTouchBottomLoop004, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    CreateSwiperItems(6);
-    model.SetDisplayCount(3);
-    model.SetSwipeByGroup(true);
-    CreateSwiperDone();
-    EXPECT_EQ(pattern_->TotalCount(), 6);
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 2;
-    pattern_->currentIndex_ = 0;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
-
-    pattern_->currentIndex_ = pattern_->TotalCount() - 3;
-    pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
-    pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 
 /**
@@ -1288,5 +1257,139 @@ HWTEST_F(SwiperEventTestNg, UpdateSwiperPanEvent001, TestSize.Level1)
     layoutProperty_->UpdateDisableSwipe(true);
     frameNode_->MarkModifyDone();
     EXPECT_FALSE(pattern_->isTouchDown_);
+}
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode001
+ * @tc.desc: PageFlipMode property test with CONTINUOUS mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // default mode is PageFlipMode::CONTINUOUS(0)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 0);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    pattern_->propertyAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+}
+
+/**
+ * @tc.name: MouseAxisEventWithPageFlipMode002
+ * @tc.desc: PageFlipMode property test with SINGLE mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetPageFlipMode(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    // mode is PageFlipMode::SINGLE(1)
+    EXPECT_EQ(pattern_->GetPageFlipMode(), 1);
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::MOUSE);
+    info.SetMainDelta(-10.f);
+    auto panEvent = frameNode_->GetEventHub<EventHub>()->gestureEventHub_->panEventActuator_->panEvents_.front();
+    panEvent->actionStart_(info);
+    EXPECT_TRUE(pattern_->isFirstAxisAction_);
+    // axis update event will flip page, and isFirstAxisAction_ will be marked
+    panEvent->actionUpdate_(info);
+    EXPECT_FALSE(pattern_->isFirstAxisAction_);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // propertyAnimation running will block page flipping
+    pattern_->propertyAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    // frameAnimation running will block page flipping
+    pattern_->propertyAnimationIsRunning_ = false;
+    pattern_->translateAnimationIsRunning_ = true;
+    panEvent->actionUpdate_(info);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest001
+ * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, totalcount equal to displaycount.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetPreviousMargin(Dimension(PRE_MARGIN), true);
+    model.SetNextMargin(Dimension(0.f), true);
+    model.SetDisplayCount(4);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step2. drag over end.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+
+    info.SetMainDelta(-SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+
+    /**
+     * @tc.steps: step3. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
+}
+
+/**
+ * @tc.name: MarginIgnoreBlankDragTest002
+ * @tc.desc: Test Swiper IgnoreBlank with drag.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateWith SetLoop false, index = 1.
+     * @tc.expected: ignoreBlankOffset_ will be NEXT_MARGIN.
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    model.SetNextMargin(Dimension(NEXT_MARGIN), true);
+    model.SetDisplayCount(3);
+    model.SetIndex(1);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, NEXT_MARGIN);
+
+    /**
+     * @tc.steps: step2. drag over start.
+     * @tc.expected: ignoreBlankOffset_ will be 0.f.
+     */
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(SWIPER_WIDTH);
+    HandleDrag(info);
+    EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
 }
 } // namespace OHOS::Ace::NG

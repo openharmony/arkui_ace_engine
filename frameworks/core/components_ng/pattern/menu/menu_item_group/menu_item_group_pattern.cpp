@@ -27,7 +27,7 @@ void MenuItemGroupPattern::OnMountToParentDone()
     bool needDivider = false;
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        if (child && child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemNode);
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -193,7 +193,9 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
         OnExtItemPressed(press, true); // beforeGroup=true just to hide header divider
         auto prevNode = parent->GetChildAtIndex(currentIndex - 1);
         if (prevNode != nullptr && prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(prevNode)->GetPattern<MenuItemGroupPattern>();
+            auto prevFrameNode = DynamicCast<FrameNode>(prevNode);
+            CHECK_NULL_VOID(prevFrameNode);
+            auto pattern = prevFrameNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->OnExtItemPressed(press, false); // hide common divider for 2 group if another group before
         }
@@ -202,7 +204,9 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
         OnExtItemPressed(press, false); // beforeGroup=false just to hide footer divider
         auto nextNode = parent->GetChildAtIndex(currentIndex + 1);
         if (nextNode != nullptr && nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
-            auto pattern = DynamicCast<FrameNode>(nextNode)->GetPattern<MenuItemGroupPattern>();
+            auto nextFrameNode = DynamicCast<FrameNode>(nextNode);
+            CHECK_NULL_VOID(nextFrameNode);
+            auto pattern = nextFrameNode->GetPattern<MenuItemGroupPattern>();
             CHECK_NULL_VOID(pattern);
             pattern->OnExtItemPressed(press, true); // hide common divider for 2 group if another group after
         }

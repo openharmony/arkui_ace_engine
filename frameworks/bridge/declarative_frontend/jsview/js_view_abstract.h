@@ -297,6 +297,7 @@ public:
     static bool ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent = true);
 
     // for number and string with no unit, use default dimension unit.
+    static bool ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
@@ -318,6 +319,7 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result);
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -429,6 +431,7 @@ public:
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
+    static void JsOnFocusAxisEvent(const JSCallbackInfo& args);
 
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
@@ -436,6 +439,7 @@ public:
     static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
+    static void JsAccessibilityNextFocusId(const JSCallbackInfo& info);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
@@ -494,7 +498,18 @@ public:
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
-        return themeManager->GetTheme<T>();
+        auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        return node ? themeManager->GetTheme<T>(node->GetThemeScopeId()) : themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        auto pipelineContext = GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>(themeScopeId);
     }
 
     /**

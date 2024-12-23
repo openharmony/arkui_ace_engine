@@ -203,6 +203,8 @@ protected:
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
+    int32_t apiVersion_ = 0;
+
 private:
     void ExtractInfoToImage(CanvasImage& image, const JSCallbackInfo& info, bool isImage);
     JSRef<JSObject> createGradientObj(const std::shared_ptr<Gradient>& gradient);
@@ -220,6 +222,7 @@ private:
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
     Dimension GetDimensionValue(const std::string& str);
+    bool IsCustomFont(const std::string& fontName);
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;

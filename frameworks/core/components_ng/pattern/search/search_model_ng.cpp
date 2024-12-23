@@ -181,6 +181,7 @@ void SearchModelNG::SetSearchButton(const std::string& text)
     } else {
         searchButtonEvent->SetEnabled(false);
         searchButtonRenderContext->UpdateOpacity(0.0);
+        ACE_RESET_LAYOUT_PROPERTY(SearchLayoutProperty, SearchButton);
     }
 
     buttonFrameNode->MarkModifyDone();
@@ -792,6 +793,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }

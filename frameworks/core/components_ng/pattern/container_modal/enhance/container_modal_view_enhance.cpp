@@ -25,6 +25,10 @@
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INVALID_LISTENER_ID = -1;
+}
+
 /**
  * The structure of container_modal enhanced is designed as follows :
  * |--container_modal(stack)
@@ -215,5 +219,64 @@ bool ContainerModalViewEnhance::GetContainerModalComponentRect(PipelineContext *
     auto pattern = containerMode->GetPattern<NG::ContainerModalPatternEnhance>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->GetContainerModalComponentRect(floatContainerModal, floatButtons);
+}
+
+void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
+    uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode)
+{
+    CHECK_NULL_VOID(pipeline);
+    if (!pipeline || pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL) {
+        return;
+    }
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().front());
+    CHECK_NULL_VOID(containerNode);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(containerPattern);
+    auto controlButtonsNode = containerPattern->GetCustomButtonNode();
+    CHECK_NULL_VOID(controlButtonsNode);
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SPACING_CHANGE, std::to_string(spacingBetweenButtons));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_SIZE_CHANGE, std::to_string(buttonsize));
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_COLOR_CONFIGURATION_LOCKED, std::to_string(colorMode));
+    if (colorMode != static_cast<int32_t>(ColorMode::DARK) && colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
+        containerPattern->OnColorConfigurationUpdate();
+    }
+    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
+        std::to_string(closeButtonRightMargin));
+    containerPattern->CallButtonsRectChange();
+}
+
+int32_t ContainerModalViewEnhance::AddButtonsRectChangeListener(
+    PipelineContext* context, ButtonsRectChangeListener&& listener)
+{
+    CHECK_NULL_RETURN(context, INVALID_LISTENER_ID);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, INVALID_LISTENER_ID);
+    auto children = rootNode->GetChildren();
+    if (children.empty()) {
+        return INVALID_LISTENER_ID;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_RETURN(containerNode, INVALID_LISTENER_ID);
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_RETURN(pattern, INVALID_LISTENER_ID);
+    return pattern->AddButtonsRectChangeListener(std::move(listener));
+}
+
+void ContainerModalViewEnhance::RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id)
+{
+    CHECK_NULL_VOID(context);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    auto children = rootNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
+    CHECK_NULL_VOID(containerNode);
+    auto pattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveButtonsRectChangeListener(id);
 }
 } // namespace OHOS::Ace::NG

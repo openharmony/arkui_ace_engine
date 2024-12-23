@@ -349,6 +349,12 @@ typedef enum {
     ARKUI_KEY_SOURCE_TYPE_MOUSE = 1,
     /** Keyboard **/
     ARKUI_KEY_SOURCE_TYPE_KEYBOARD = 4,
+    /**
+    * @brief Joystick.
+    *
+    * @since 15
+    */
+    ARKUI_KEY_SOURCE_TYPE_JOYSTICK = 5,
 } ArkUI_KeySourceType;
 
 /**

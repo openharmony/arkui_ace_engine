@@ -784,6 +784,52 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRecognizerTest014
+ * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case7: equalsToFingers = true, currentTouchPointsNum = 1,
+     * @tc.steps: tap != count, useCatchMode_ = false, refereeState = DETECTING.
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = 0;
+    clickRecognizer.count_ = 1;
+    clickRecognizer.fingersId_.insert(0);
+    clickRecognizer.refereeState_ = RefereeState::DETECTING;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent function and compare result.
+     * @tc.steps: case7: equalsToFingers = false, currentTouchPointsNum = 1,
+     * @tc.steps: tap != count, useCatchMode_ = false, refereeState = DETECTING.
+     * @tc.expected: step2. result equals.
+     */
+    clickRecognizer.currentTouchPointsNum_ = 1;
+    clickRecognizer.equalsToFingers_ = true;
+    clickRecognizer.useCatchMode_ = false;
+    clickRecognizer.tappedCount_ = 0;
+    clickRecognizer.count_ = 1;
+    clickRecognizer.fingersId_.insert(0);
+    clickRecognizer.refereeState_ = RefereeState::DETECTING;
+    clickRecognizer.HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+}
+
+/**
  * @tc.name: ClickRecognizerHandleTouchUpEventTest101
  * @tc.desc: Test ClickRecognizer function: HandleTouchUpEvent
  * @tc.type: FUNC

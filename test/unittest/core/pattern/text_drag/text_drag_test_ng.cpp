@@ -15,15 +15,23 @@
 
 #include "text_drag_test_ng.h"
 
+#include "gmock/gmock.h"
+
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#define private public
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
-#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
-#include "core/components_ng/render/canvas_image.h"
-
+#undef private
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+
+#include "base/memory/ace_type.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/render/drawing_forward.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -47,6 +55,11 @@ constexpr int32_t PARAGRAPHSIZE_START = -1;
 constexpr int32_t PARAGRAPHSIZE_END = 1000;
 const RectF DEFAULT_TEXT_CONTENT_RECTF(80.f, 80.f, 100.f, 200.f);
 } // namespace
+
+class MockCanvas : public RSCanvas {
+public:
+    MOCK_METHOD0(Restore, void());
+};
 
 void TextDragTestNg::SetUpTestSuite()
 {
@@ -336,5 +349,43 @@ HWTEST_F(TextDragTestNg, TextDragTestNg004, TestSize.Level1)
      */
     EXPECT_EQ(dragPattern_->GetFrameWidth(), 64.f);
     EXPECT_EQ(dragPattern_->GetFrameHeight(), 76.f);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintShadow001
+ * @tc.desc: test PaintShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintShadow001, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::Ace::NG::Pattern> pattern = std::make_shared<OHOS::Ace::NG::Pattern>();
+    RefPtr<OHOS::Ace::NG::Pattern> refPattern(pattern.get(), false);
+    WeakPtr<OHOS::Ace::NG::Pattern> weakPattern(refPattern);
+    TextDragOverlayModifier modifier(weakPattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    Shadow shadow;
+    modifier.type_ = DragAnimType::DEFAULT;
+    EXPECT_CALL(mockCanvas, Restore()).Times(0);
+    modifier.PaintShadow(path, shadow, mockCanvas);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintShadow002
+ * @tc.desc: test PaintShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintShadow002, TestSize.Level1)
+{
+    std::shared_ptr<OHOS::Ace::NG::Pattern> pattern = std::make_shared<OHOS::Ace::NG::Pattern>();
+    RefPtr<OHOS::Ace::NG::Pattern> refPattern(pattern.get(), false);
+    WeakPtr<OHOS::Ace::NG::Pattern> weakPattern(refPattern);
+    TextDragOverlayModifier modifier(weakPattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    Shadow shadow;
+    modifier.type_ = DragAnimType::FLOATING;
+    EXPECT_CALL(mockCanvas, Restore()).Times(1);
+    modifier.PaintShadow(path, shadow, mockCanvas);
 }
 } // namespace OHOS::Ace::NG

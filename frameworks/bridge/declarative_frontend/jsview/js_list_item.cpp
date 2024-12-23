@@ -19,6 +19,7 @@
 #include <functional>
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_list_item_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -118,7 +119,9 @@ void JSListItem::CreateForPartialUpdate(const JSCallbackInfo& args)
             ListItemModel::GetInstance()->Create();
         }
     } else {
-        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), JSRef<JSFunc>::Cast(arg0));
+        auto deepRenderFunc = JSRef<JSFunc>::Cast(arg0);
+        JSListItemTheme::ObtainDeepRenderFuncForThemeSupport(args.GetVm(), deepRenderFunc);
+        RefPtr<JsFunction> jsDeepRender = AceType::MakeRefPtr<JsFunction>(args.This(), deepRenderFunc);
         auto listItemDeepRenderFunc = [execCtx = args.GetExecutionContext(),
                                           jsDeepRenderFunc = std::move(jsDeepRender)](int32_t nodeId) {
             ACE_SCOPED_TRACE("JSListItem::ExecuteDeepRender");
@@ -171,13 +174,21 @@ void JSListItem::SetSelected(const JSCallbackInfo& info)
         return;
     }
     bool select = false;
-    if (info[0]->IsBoolean()) {
-        select = info[0]->ToBoolean();
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (selectedVal->IsBoolean()) {
+        select = selectedVal->ToBoolean();
     }
     ListItemModel::GetInstance()->SetSelected(select);
-
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
+    if (changeEventVal->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
         auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
         auto changeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
                                bool param) {
@@ -195,13 +206,6 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
     bool isStartArea, NG::FrameNode* node)
 {
     auto deleteAreaObj = JSRef<JSObject>::Cast(jsValue);
-
-    std::function<void()> builderAction;
-    auto builderObject = deleteAreaObj->GetProperty("builder");
-    if (builderObject->IsFunction()) {
-        auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject));
-        builderAction = [builderFunc]() { builderFunc->Execute(); };
-    }
 
     auto onAction = deleteAreaObj->GetProperty("onAction");
     std::function<void()> onActionCallback;
@@ -247,9 +251,24 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
         };
     }
 
-    ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onActionCallback),
-        std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), std::move(onStateChangeCallback),
-        length, isStartArea, node);
+    if (deleteAreaObj->HasProperty("builderComponent")) {
+        auto builderComponentObject = deleteAreaObj->GetProperty("builderComponent");
+        RefPtr<NG::FrameNode> builderNode;
+        ParseBuilderComponentContent(builderComponentObject, builderNode);
+        ListItemModel::GetInstance()->SetDeleteAreaWithFrameNode(builderNode, std::move(onActionCallback),
+            std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), std::move(onStateChangeCallback),
+            length, isStartArea, node);
+    } else {
+        std::function<void()> builderAction;
+        auto builderObject = deleteAreaObj->GetProperty("builder");
+        if (builderObject->IsFunction()) {
+            auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builderObject));
+            builderAction = [builderFunc]() { builderFunc->Execute(); };
+        }
+        ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onActionCallback),
+            std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback), std::move(onStateChangeCallback),
+            length, isStartArea, node);
+    }
 }
 
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
@@ -388,11 +407,31 @@ void JSListItem::JsOnDragStart(const JSCallbackInfo& info)
     }
 #endif
 }
+void JSListItem::ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, RefPtr<NG::FrameNode>& refPtrFrameNode)
+{
+    if (!contentParam->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> contentObject = JSRef<JSObject>::Cast(contentParam);
+    JSRef<JSVal> builderNodeParam = contentObject->GetProperty("builderNode_");
+    if (!builderNodeParam->IsObject()) {
+        return ;
+    }
+    JSRef<JSObject> builderNodeObject = JSRef<JSObject>::Cast(builderNodeParam);
+    JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+    if (nodeptr.IsEmpty()) {
+        return ;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    refPtrFrameNode = AceType::Claim(frameNode);
+}
 
 void JSListItem::JSBind(BindingTarget globalObj)
 {
     JSClass<JSListItem>::Declare("ListItem");
-    JSClass<JSListItem>::StaticMethod("createInternal", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("create", &JSListItem::Create);
     JSClass<JSListItem>::StaticMethod("pop", &JSListItem::Pop);
 

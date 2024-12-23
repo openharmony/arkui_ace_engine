@@ -50,8 +50,6 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
-constexpr double OPACITY_DISABLED = 0.4;
-constexpr double OPACITY_ENABLED = 1.0;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -144,22 +142,34 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     CHECK_NULL_VOID(frameNode);
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(searchButtonFrameNode);
-    auto searchButtonContext = searchButtonFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(searchButtonContext);
-    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEventHub);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
     auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
-    if (needToDisable) {
-        if (textValue.empty()) {
-            searchButtonContext->UpdateOpacity(OPACITY_DISABLED);
-            buttonEventHub->SetEnabled(false);
-        } else {
-            searchButtonContext->UpdateOpacity(OPACITY_ENABLED);
-            buttonEventHub->SetEnabled(true);
-        }
+    if (!needToDisable) {
+        return;
     }
+    bool isEmptyText = textValue.empty();
+    if (isSearchButtonEnabled_ && isEmptyText) {
+        UpdateEnable(false);
+    } else if (!isSearchButtonEnabled_ && !isEmptyText) {
+        UpdateEnable(true);
+    }
+}
+
+void SearchPattern::UpdateEnable(bool needToenable)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (needToenable) {
+        buttonEventHub->SetEnabled(true);
+    } else {
+        buttonEventHub->SetEnabled(false);
+    }
+    isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
     searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -243,7 +253,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->HasText());
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
@@ -741,7 +751,7 @@ int32_t SearchPattern::HandleTextContentLines()
     CHECK_NULL_RETURN(textFieldFrameNode, lines);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, lines);
-    if (!textFieldPattern->IsOperation()) {
+    if (!textFieldPattern->HasText()) {
         return lines;
     }
     RectF textRect = textFieldPattern->GetTextRect();
@@ -930,7 +940,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::SEARCH && event.IsShiftWith(KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH && !isAllTextSelected && !isTextEmpty) {
@@ -947,7 +956,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
                 event.code == KeyCode::KEY_DPAD_RIGHT) {
                 return true;
             } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                textFieldPattern->CloseKeyboard(true);
                 return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
@@ -985,7 +993,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON &&
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&

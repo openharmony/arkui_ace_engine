@@ -57,6 +57,9 @@ void TextFieldModelNG::CreateNode(
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
     }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
+    }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -72,13 +75,13 @@ void TextFieldModelNG::CreateNode(
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->InitTheme();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
@@ -109,6 +112,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+    }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
@@ -883,6 +889,14 @@ void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
+}
+
+Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, LetterSpacing, value, frameNode, value);
+    return value;
 }
 
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
@@ -1905,6 +1919,14 @@ void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSupportPreviewText(enablePreviewText);
+}
+
+bool TextFieldModelNG::GetEnablePreviewText(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSupportPreviewText();
 }
 
 void TextFieldModelNG::SetEnableHapticFeedback(bool state)

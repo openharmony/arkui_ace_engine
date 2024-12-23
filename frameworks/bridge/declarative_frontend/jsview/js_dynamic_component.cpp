@@ -61,18 +61,17 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || !info[0]->IsObject()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument is invalid");
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument is invalid");
         return;
     }
     auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
     auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
-    if (!hapPathValue->IsString() || !abcPathValue->IsString() || !entryPointValue->IsString()) {
-        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "DynamicComponent argument type is invalid");
+    if (!entryPointValue->IsString()) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
     }
-
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
     NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
@@ -83,33 +82,28 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
     if (worker == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_ISOLATED_COMPONENT, "worker is nullptr");
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
         return;
-    } else {
-        TAG_LOGD(AceLogTag::ACE_ISOLATED_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
-            worker->IsRunning(), worker->GetName().c_str());
     }
-    auto hapPath = hapPathValue->ToString();
-    auto abcPath = abcPathValue->ToString();
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
+        worker->IsRunning(), worker->GetName().c_str());
     auto entryPoint = entryPointValue->ToString();
-
     NG::UIExtensionConfig config;
-    config.sessionType = NG::SessionType::ISOLATED_COMPONENT;
+    config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
     UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
-
-    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(frameNode), hapPath,
-                                             abcPath, entryPoint](napi_env env) {
+    worker->RegisterCallbackForWorkerEnv([instanceId,
+        weak = AceType::WeakClaim(frameNode), entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
         container->GetTaskExecutor()->PostTask(
-            [weak, hapPath, abcPath, entryPoint, env]() {
+            [weak, entryPoint, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 UIExtensionModel::GetInstance()->InitializeDynamicComponent(
-                    frameNode, hapPath, abcPath, entryPoint, env);
+                    frameNode, "", "", entryPoint, env);
             },
             TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });

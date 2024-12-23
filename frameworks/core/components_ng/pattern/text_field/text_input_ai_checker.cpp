@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_input_ai_checker.h"
 
 using namespace OHOS::Ace::NG;
@@ -51,15 +52,15 @@ bool InputAIChecker::IsSingleClickAtBoundary(int32_t position, int32_t textLengt
 }
 bool InputAIChecker::IsMultiClickAtBoundary(const NG::OffsetF& handleOffset, const NG::RectF& textRect)
 {
-    if (textRect.GetX() - FLOAT_DIFF_COMPARE <= handleOffset.GetX() &&
-        handleOffset.GetX() <= textRect.GetX() + FLOAT_DIFF_COMPARE) {
+    if (LessOrEqualCustomPrecision(textRect.GetX(), handleOffset.GetX(), FLOAT_DIFF_COMPARE) &&
+        LessOrEqual(handleOffset.GetX() - FLOAT_DIFF_COMPARE, textRect.GetX() + FLOAT_DIFF_COMPARE)) {
         TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "multi font boundary offset is handle: %{public}f,textRect: %{public}f ",
             handleOffset.GetX(), textRect.GetX());
         return true;
     }
 
     auto edge = textRect.GetX() + textRect.Width();
-    if (handleOffset.GetX() >= edge - FLOAT_DIFF_COMPARE) {
+    if (LessOrEqualCustomPrecision(edge, handleOffset.GetX(), FLOAT_DIFF_COMPARE)) {
         TAG_LOGI(AceLogTag::ACE_TEXTINPUT, "multi tail boundary offset is handle: %{public}f,textRect: %{public}f ",
             handleOffset.GetX(), edge);
         return true;

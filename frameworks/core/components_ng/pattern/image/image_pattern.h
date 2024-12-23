@@ -426,11 +426,6 @@ private:
     void OnModifyDone() override;
     void UpdateGestureAndDragWhenModify();
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     void OnLanguageConfigurationUpdate() override;
 
     /**

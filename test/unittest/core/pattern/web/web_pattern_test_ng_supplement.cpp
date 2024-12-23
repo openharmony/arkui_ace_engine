@@ -175,7 +175,7 @@ HWTEST_F(WebPatternTestNgSupplement, OnDetachFromFrameNode_001, TestSize.Level1)
     webPattern->transformHintChangedCallbackId_.reset();
     webPattern->OnDetachFromFrameNode(&node);
     EXPECT_FALSE(webPattern->transformHintChangedCallbackId_.has_value());
-    
+
 #endif
 }
 
@@ -392,6 +392,140 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentEnd001, TestSize.
     webPattern->UpdateJavaScriptOnDocumentEnd();
     webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     webPattern->UpdateJavaScriptOnDocumentEnd();
+    EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentStartByOrder005
+ * @tc.desc: JavaScriptOnDocumentStartByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentStartByOrder005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->delegate_ = nullptr;
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    EXPECT_EQ(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentEndByOrder005
+ * @tc.desc: JavaScriptOnDocumentEndByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, JavaScriptOnDocumentEndByOrder005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->delegate_ = nullptr;
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    EXPECT_EQ(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UpdateJavaScriptOnDocumentStartByOrder005
+ * @tc.desc: UpdateJavaScriptOnDocumentStartByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentStartByOrder005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentStartByOrder();
+    EXPECT_FALSE(webPattern->onDocumentStartScriptItems_.has_value());
+    webPattern->UpdateJavaScriptOnDocumentStartByOrder();
+    webPattern->delegate_ = nullptr;
+    webPattern->UpdateJavaScriptOnDocumentStartByOrder();
+    webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentStartByOrder();
+    EXPECT_TRUE(webPattern->onDocumentStartScriptItems_.has_value());
+#endif
+}
+
+/**
+ * @tc.name: UpdateJavaScriptOnDocumentEndByOrder005
+ * @tc.desc: UpdateJavaScriptOnDocumentEndByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentEndByOrder005, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentEndByOrder();
+    EXPECT_FALSE(webPattern->onDocumentEndScriptItems_.has_value());
+    webPattern->UpdateJavaScriptOnDocumentEndByOrder();
+    webPattern->delegate_ = nullptr;
+    webPattern->UpdateJavaScriptOnDocumentEndByOrder();
+    webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
 #endif
 }

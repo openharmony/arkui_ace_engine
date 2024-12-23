@@ -47,7 +47,7 @@ struct ListItemInfo {
     float endPos;
     bool isGroup;
     bool isPressed = false;
-    std::optional<ListItemGroupLayoutInfo> groupInfo;
+    std::optional<ListItemGroupLayoutInfo> groupInfo = std::nullopt;
 };
 
 struct ListPredictLayoutParam {
@@ -517,13 +517,13 @@ private:
     static void PredictBuildV2(RefPtr<FrameNode> frameNode, int64_t deadline,
         ListMainSizeValues listMainSizeValues, bool show);
 
-    float GetStopOnScreenOffset(V2::ScrollSnapAlign scrollSnapAlign) const;
+    float GetStopOnScreenOffset(ScrollSnapAlign scrollSnapAlign) const;
     void FindPredictSnapIndexInItemPositionsStart(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsCenter(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
     void FindPredictSnapIndexInItemPositionsEnd(float predictEndPos, int32_t& endIndex, int32_t& currIndex) const;
-    int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, V2::ScrollSnapAlign scrollSnapAlign);
+    int32_t FindPredictSnapEndIndexInItemPositions(float predictEndPos, ScrollSnapAlign scrollSnapAlign);
     bool IsUniformHeightProbably();
-    float CalculatePredictSnapEndPositionByIndex(int32_t index, V2::ScrollSnapAlign scrollSnapAlign);
+    float CalculatePredictSnapEndPositionByIndex(int32_t index, ScrollSnapAlign scrollSnapAlign);
     void UpdateSnapCenterContentOffset(LayoutWrapper* layoutWrapper);
     std::optional<ListItemGroupLayoutInfo> GetListItemGroupLayoutInfo(
         const RefPtr<LayoutWrapper>& wrapper) const;
@@ -575,7 +575,7 @@ private:
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;
-    V2::ScrollSnapAlign scrollSnapAlign_ = V2::ScrollSnapAlign::NONE;
+    ScrollSnapAlign scrollSnapAlign_ = ScrollSnapAlign::NONE;
     bool isReverse_ = false;
     float contentMainSize_ = 0.0f;
     float prevContentMainSize_ = 0.0f;

@@ -393,7 +393,7 @@ void ResetWaterFlowBarWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollBarWidth(frameNode, "0vp");
+    ScrollableModelNG::ResetScrollBarWidth(frameNode);
 }
 
 ArkUI_Float32 GetWaterFlowBarWidth(ArkUINodeHandle node)
@@ -415,7 +415,7 @@ void ResetWaterFlowScrollBarColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    WaterFlowModelNG::SetScrollBarColor(frameNode, "#FF000000");
+    ScrollableModelNG::ResetScrollBarColor(frameNode);
 }
 
 ArkUI_Uint32 GetWaterFlowScrollBarColor(ArkUINodeHandle node)
@@ -653,41 +653,167 @@ void ResetWaterFlowFadingEdge(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIWaterFlowModifier* GetWaterFlowModifier()
 {
-    static const ArkUIWaterFlowModifier modifier = { ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate,
-        SetRowsTemplate, ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap,
-        ResetColumnsGap, SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth,
-        ResetItemMaxWidth, SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight,
-        SetLayoutDirection, ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll,
-        SetWaterFlowFriction, ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate,
-        GetColumnsGap, GetRowsGap, GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter,
-        SetCachedCount, ResetCachedCount, GetCachedCount, SetShowCached, ResetShowCached, GetShowCached, SetEdgeEffect,
-        ResetEdgeEffect, SetWaterFlowScrollBar, ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth,
-        ResetWaterFlowBarWidth, GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor,
-        GetWaterFlowScrollBarColor, GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions,
-        GetWaterFlowSectionOptions, GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight,
-        GetWaterFlowEnableScrollInteraction, GetWaterFlowFriction, SetScrollToIndex, SetWaterflowFooter,
-        ResetWaterflowFooter, SetWaterFlowFlingSpeedLimit, ResetWaterFlowFlingSpeedLimit, GetScrollController,
-        SetWaterFlowScroller, SetWaterFlowLayoutMode, ResetWaterFlowLayoutMode, ResetWaterFlowSections,
-        SetWaterFlowFadingEdge, ResetWaterFlowFadingEdge };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIWaterFlowModifier modifier = {
+        .resetColumnsTemplate = ResetColumnsTemplate,
+        .setColumnsTemplate = SetColumnsTemplate,
+        .resetRowsTemplate = ResetRowsTemplate,
+        .setRowsTemplate = SetRowsTemplate,
+        .resetWaterFlowEnableScrollInteraction = ResetWaterFlowEnableScrollInteraction,
+        .setWaterFlowEnableScrollInteraction = SetWaterFlowEnableScrollInteraction,
+        .setColumnsGap = SetColumnsGap,
+        .resetColumnsGap = ResetColumnsGap,
+        .setRowsGap = SetRowsGap,
+        .resetRowsGap = ResetRowsGap,
+        .setItemMinWidth = SetItemMinWidth,
+        .resetItemMinWidth = ResetItemMinWidth,
+        .setItemMaxWidth = SetItemMaxWidth,
+        .resetItemMaxWidth = ResetItemMaxWidth,
+        .setItemMinHeight = SetItemMinHeight,
+        .resetItemMinHeight = ResetItemMinHeight,
+        .setItemMaxHeight = SetItemMaxHeight,
+        .resetItemMaxHeight = ResetItemMaxHeight,
+        .setLayoutDirection = SetLayoutDirection,
+        .resetLayoutDirection = ResetLayoutDirection,
+        .setWaterFlowNestedScroll = SetWaterFlowNestedScroll,
+        .resetWaterFlowNestedScroll = ResetWaterFlowNestedScroll,
+        .setWaterFlowFriction = SetWaterFlowFriction,
+        .resetWaterFlowFriction = ResetWaterFlowFriction,
+        .getLayoutDirection = GetLayoutDirection,
+        .getColumnsTemplate = GetColumnsTemplate,
+        .getRowsTemplate = GetRowsTemplate,
+        .getColumnsGap = GetColumnsGap,
+        .getRowsGap = GetRowsGap,
+        .getWaterFlowNestedScroll = GetWaterFlowNestedScroll,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setShowCached = SetShowCached,
+        .resetShowCached = ResetShowCached,
+        .getShowCached = GetShowCached,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setWaterFlowScrollBar = SetWaterFlowScrollBar,
+        .resetWaterFlowScrollBar = ResetWaterFlowScrollBar,
+        .getWaterFlowScrollBar = GetWaterFlowScrollBar,
+        .setWaterFlowScrollBarWidth = SetWaterFlowBarWidth,
+        .resetWaterFlowScrollBarWidth = ResetWaterFlowBarWidth,
+        .getWaterFlowScrollBarWidth = GetWaterFlowBarWidth,
+        .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
+        .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
+        .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,
+        .getEdgeEffect = GetEdgeEffect,
+        .setSectionOption = SetWaterFlowSectionOptions,
+        .resetSectionOption = ResetWaterFlowSectionOptions,
+        .getSectionOption = GetWaterFlowSectionOptions,
+        .getItemMinWidth = GetItemMinWidth,
+        .getItemMaxWidth = GetItemMaxWidth,
+        .getItemMinHeight = GetItemMinHeight,
+        .getItemMaxHeight = GetItemMaxHeight,
+        .getWaterFlowEnableScrollInteraction = GetWaterFlowEnableScrollInteraction,
+        .getWaterFlowFriction = GetWaterFlowFriction,
+        .setScrollToIndex = SetScrollToIndex,
+        .setWaterflowFooter = SetWaterflowFooter,
+        .resetWaterflowFooter = ResetWaterflowFooter,
+        .setWaterFlowFlingSpeedLimit = SetWaterFlowFlingSpeedLimit,
+        .resetWaterFlowFlingSpeedLimit = ResetWaterFlowFlingSpeedLimit,
+        .getScrollController = GetScrollController,
+        .setWaterFlowScroller = SetWaterFlowScroller,
+        .setWaterFlowLayoutMode = SetWaterFlowLayoutMode,
+        .resetWaterFlowLayoutMode = ResetWaterFlowLayoutMode,
+        .resetWaterFlowSections = ResetWaterFlowSections,
+        .setWaterFlowFadingEdge = SetWaterFlowFadingEdge,
+        .resetWaterFlowFadingEdge = ResetWaterFlowFadingEdge,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIWaterFlowModifier* GetCJUIWaterFlowModifier()
 {
-    static const CJUIWaterFlowModifier modifier = { ResetColumnsTemplate, SetColumnsTemplate, ResetRowsTemplate,
-        SetRowsTemplate, ResetWaterFlowEnableScrollInteraction, SetWaterFlowEnableScrollInteraction, SetColumnsGap,
-        ResetColumnsGap, SetRowsGap, ResetRowsGap, SetItemMinWidth, ResetItemMinWidth, SetItemMaxWidth,
-        ResetItemMaxWidth, SetItemMinHeight, ResetItemMinHeight, SetItemMaxHeight, ResetItemMaxHeight,
-        SetLayoutDirection, ResetLayoutDirection, SetWaterFlowNestedScroll, ResetWaterFlowNestedScroll,
-        SetWaterFlowFriction, ResetWaterFlowFriction, GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate,
-        GetColumnsGap, GetRowsGap, GetWaterFlowNestedScroll, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter,
-        SetCachedCount, ResetCachedCount, GetCachedCount, SetEdgeEffect, ResetEdgeEffect, SetWaterFlowScrollBar,
-        ResetWaterFlowScrollBar, GetWaterFlowScrollBar, SetWaterFlowBarWidth, ResetWaterFlowBarWidth,
-        GetWaterFlowBarWidth, SetWaterFlowScrollBarColor, ResetWaterFlowScrollBarColor, GetWaterFlowScrollBarColor,
-        GetEdgeEffect, SetWaterFlowSectionOptions, ResetWaterFlowSectionOptions, GetWaterFlowSectionOptions,
-        GetItemMinWidth, GetItemMaxWidth, GetItemMinHeight, GetItemMaxHeight, GetWaterFlowEnableScrollInteraction,
-        GetWaterFlowFriction, SetWaterflowFooter, ResetWaterflowFooter, SetScrollToIndex, SetWaterFlowFlingSpeedLimit,
-        ResetWaterFlowFlingSpeedLimit, };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIWaterFlowModifier modifier = {
+        .resetColumnsTemplate = ResetColumnsTemplate,
+        .setColumnsTemplate = SetColumnsTemplate,
+        .resetRowsTemplate = ResetRowsTemplate,
+        .setRowsTemplate = SetRowsTemplate,
+        .resetWaterFlowEnableScrollInteraction = ResetWaterFlowEnableScrollInteraction,
+        .setWaterFlowEnableScrollInteraction = SetWaterFlowEnableScrollInteraction,
+        .setColumnsGap = SetColumnsGap,
+        .resetColumnsGap = ResetColumnsGap,
+        .setRowsGap = SetRowsGap,
+        .resetRowsGap = ResetRowsGap,
+        .setItemMinWidth = SetItemMinWidth,
+        .resetItemMinWidth = ResetItemMinWidth,
+        .setItemMaxWidth = SetItemMaxWidth,
+        .resetItemMaxWidth = ResetItemMaxWidth,
+        .setItemMinHeight = SetItemMinHeight,
+        .resetItemMinHeight = ResetItemMinHeight,
+        .setItemMaxHeight = SetItemMaxHeight,
+        .resetItemMaxHeight = ResetItemMaxHeight,
+        .setLayoutDirection = SetLayoutDirection,
+        .resetLayoutDirection = ResetLayoutDirection,
+        .setWaterFlowNestedScroll = SetWaterFlowNestedScroll,
+        .resetWaterFlowNestedScroll = ResetWaterFlowNestedScroll,
+        .setWaterFlowFriction = SetWaterFlowFriction,
+        .resetWaterFlowFriction = ResetWaterFlowFriction,
+        .getLayoutDirection = GetLayoutDirection,
+        .getColumnsTemplate = GetColumnsTemplate,
+        .getRowsTemplate = GetRowsTemplate,
+        .getColumnsGap = GetColumnsGap,
+        .getRowsGap = GetRowsGap,
+        .getWaterFlowNestedScroll = GetWaterFlowNestedScroll,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setWaterFlowScrollBar = SetWaterFlowScrollBar,
+        .resetWaterFlowScrollBar = ResetWaterFlowScrollBar,
+        .getWaterFlowScrollBar = GetWaterFlowScrollBar,
+        .setWaterFlowScrollBarWidth = SetWaterFlowBarWidth,
+        .resetWaterFlowScrollBarWidth = ResetWaterFlowBarWidth,
+        .getWaterFlowScrollBarWidth = GetWaterFlowBarWidth,
+        .setWaterFlowScrollBarColor = SetWaterFlowScrollBarColor,
+        .resetWaterFlowScrollBarColor = ResetWaterFlowScrollBarColor,
+        .getWaterFlowScrollBarColor = GetWaterFlowScrollBarColor,
+        .getEdgeEffect = GetEdgeEffect,
+        .setSectionOption = SetWaterFlowSectionOptions,
+        .resetSectionOption = ResetWaterFlowSectionOptions,
+        .getSectionOption = GetWaterFlowSectionOptions,
+        .getItemMinWidth = GetItemMinWidth,
+        .getItemMaxWidth = GetItemMaxWidth,
+        .getItemMinHeight = GetItemMinHeight,
+        .getItemMaxHeight = GetItemMaxHeight,
+        .getWaterFlowEnableScrollInteraction = GetWaterFlowEnableScrollInteraction,
+        .getWaterFlowFriction = GetWaterFlowFriction,
+        .setWaterflowFooter = SetWaterflowFooter,
+        .resetWaterflowFooter = ResetWaterflowFooter,
+        .setScrollToIndex = SetScrollToIndex,
+        .setWaterFlowFlingSpeedLimit = SetWaterFlowFlingSpeedLimit,
+        .resetWaterFlowFlingSpeedLimit = ResetWaterFlowFlingSpeedLimit,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
@@ -708,7 +834,7 @@ void SetOnWillScroll(ArkUINodeHandle node, void* extraParam)
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         event.componentAsyncEvent.data[2].i32 = static_cast<int>(source);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
     };
@@ -724,7 +850,7 @@ void SetOnWaterFlowReachEnd(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_REACH_END;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachEnd(frameNode, std::move(onReachEnd));
 }
@@ -743,7 +869,7 @@ void SetOnDidScroll(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ScrollableModelNG::SetOnDidScroll(frameNode, std::move(setOnDidScroll));
 }
@@ -758,7 +884,7 @@ void SetOnWaterFlowScrollStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
@@ -773,7 +899,7 @@ void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_STOP;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
@@ -794,7 +920,7 @@ void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.data[0].f32 =
             usePx ? static_cast<float>(offset.ConvertToPx()) : static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         scrollRes.offset = usePx ? Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::PX)
                                  : Dimension(event.componentAsyncEvent.data[0].f32, DimensionUnit::VP);
         return scrollRes;
@@ -814,7 +940,7 @@ void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_SCROLL_INDEX;
         event.componentAsyncEvent.data[0].i32 = first;
         event.componentAsyncEvent.data[1].i32 = last;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(onScrollIndex));
 }
@@ -828,7 +954,7 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_WATER_FLOW_REACH_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
 }

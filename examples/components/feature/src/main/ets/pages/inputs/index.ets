@@ -19,6 +19,8 @@ import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { RichEditorSpanUrlBootcamp } from './RichEditorSpanUrlBootcamp';
 import { HyperlinkBootcamp } from './HyperlinkBootcamp';
+import { SelectionMenuBootcamp } from './SelectionMenuBootcamp';
+
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -29,6 +31,7 @@ export const inputsRoute: RouteGroup = {
     { name: 'richeditor', label: '富文本/RichEditor' },
     { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
     { name: 'hyperlink', label: '超链接/Hyperlink' },
+    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'}
   ]
 };
 
@@ -44,5 +47,7 @@ export function InputsDestination(name: string, route: Route) {
     RichEditorSpanUrlBootcamp({ title: route.label })
   } else if (name === 'inputs/hyperlink') {
     HyperlinkBootcamp({ title: route.label })
+  } else if (name === 'inputs/SelectionMenu'){
+    SelectionMenuBootcamp({ title: route.label})
   }
 }

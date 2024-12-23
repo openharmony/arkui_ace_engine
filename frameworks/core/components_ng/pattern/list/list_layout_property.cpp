@@ -87,12 +87,12 @@ void ListLayoutProperty::ScrollSnapPropToJsonValue(
     if (filter.IsFastFilter()) {
         return;
     }
-    auto scrollSnapAlign = propScrollSnapAlign_.value_or(V2::ScrollSnapAlign::NONE);
-    if (scrollSnapAlign == V2::ScrollSnapAlign::START) {
+    auto scrollSnapAlign = propScrollSnapAlign_.value_or(ScrollSnapAlign::NONE);
+    if (scrollSnapAlign == ScrollSnapAlign::START) {
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.START", filter);
-    } else if (scrollSnapAlign == V2::ScrollSnapAlign::CENTER) {
+    } else if (scrollSnapAlign == ScrollSnapAlign::CENTER) {
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.CENTER", filter);
-    } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
+    } else if (scrollSnapAlign == ScrollSnapAlign::END) {
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.END", filter);
     } else {
         json->PutExtAttr("scrollSnapAlign", "ScrollSnapAlign.NONE", filter);

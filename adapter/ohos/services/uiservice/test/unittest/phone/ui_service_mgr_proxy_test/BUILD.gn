@@ -20,7 +20,10 @@ ohos_unittest("ui_service_mgr_proxy_test") {
 
   include_dirs = []
 
-  sources = [ "ui_service_mgr_proxy_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "ui_service_mgr_proxy_test.cpp",
+  ]
 
   configs = [ "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config" ]
   cflags = []

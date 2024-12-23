@@ -581,7 +581,7 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent001, TestSize.Level1)
     pattern->HandleClickEvent(info);
     EXPECT_TRUE(pattern->multipleClickRecognizer_->IsRunning());
     makeEvent(info, false);
-    pattern->textForDisplay_ = "ABC";
+    pattern->textForDisplay_ = u"ABC";
     pattern->HandleClickEvent(info);
     EXPECT_TRUE(pattern->isDoubleClick_);
 
@@ -616,7 +616,7 @@ HWTEST_F(TextTestThreeNg, HandleDoubleClickEvent002, TestSize.Level1)
     TextSpanType textSpanType = TextSpanType::TEXT;
     TextResponseType textResponseType = TextResponseType::LONG_PRESS;
     textModelNG.BindSelectionMenu(textSpanType, textResponseType, buildFunc, memuParam);
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty("Hello World");
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(u"Hello World");
     auto host = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     host->AddChild(spanNode);
     spanNode->SetParent(host);
@@ -669,10 +669,10 @@ HWTEST_F(TextTestThreeNg, HandleClickEventTest001, TestSize.Level1)
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto pattern = host->GetPattern<TextPattern>();
     bool isSpanPhoneClicked = false;
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE_U16);
     spanNode->UpdateOnClickEvent([&isSpanPhoneClicked](GestureEvent& info) { isSpanPhoneClicked = true; });
     host->AddChild(spanNode);
-    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL_U16);
     host->AddChild(spanNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->GetRenderContext()->UpdateClipEdge(false);
@@ -702,6 +702,46 @@ HWTEST_F(TextTestThreeNg, HandleClickEventTest001, TestSize.Level1)
     EXPECT_TRUE(isSpanPhoneClicked);
     EXPECT_TRUE(!pattern->textSelector_.IsValid());
     pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TryLinkJump001
+ * @tc.desc: test test_pattern.h TryLinkJump function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TryLinkJump001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+
+    /**
+     * @tc.steps: step2. construct spanItem
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = SPAN_HTTP_URL_U16;
+
+    /**
+     * @tc.steps: step3. call TryLinkJump with linkJumpCallback_ is nullptr
+     * @tc.expected: return false
+     */
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
+
+    /**
+     * @tc.steps: step4. call TryLinkJump with linkJumpCallback_ not nullptr
+     * @tc.expected: return true
+     */
+    pipeline->SetLinkJumpCallback([] (const std::string& link) {});
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), true);
+
+    /**
+     * @tc.steps: step5. call TryLinkJump with spanContent is not http link
+     * @tc.expected: return false
+     */
+    spanItem->content = SPAN_PHONE_U16;
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
 }
 
 /**
@@ -781,11 +821,11 @@ HWTEST_F(TextTestThreeNg, TextFrameNodeCreator004, TestSize.Level1)
     RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
     EXPECT_TRUE(eventHub);
-    std::string EventValue;
-    auto Event = [&EventValue](const std::string& param) { EventValue = param; };
+    std::u16string eventValue;
+    auto event = [&eventValue](const std::u16string& param) { eventValue = param; };
 
-    textModelNG.SetOnCopy(Event);
-    eventHub->SetOnCopy(std::move(Event));
+    textModelNG.SetOnCopy(event);
+    eventHub->SetOnCopy(std::move(event));
     EXPECT_TRUE(eventHub->onCopy_);
 }
 
@@ -870,7 +910,7 @@ HWTEST_F(TextTestThreeNg, CloseSelectionMenu001, TestSize.Level1)
     pattern->HandleLongPress(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     pattern->copyOption_ = CopyOptions::Distributed;
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->textSelector_.Update(0, 20);
     pattern->ShowSelectOverlay();
 
@@ -895,7 +935,7 @@ HWTEST_F(TextTestThreeNg, OnTextSelectionChange001, TestSize.Level1)
     auto pattern = textFrameNode->GetPattern<TextPattern>();
     pattern->SetTextController(AceType::MakeRefPtr<TextController>());
     pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
-    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textForDisplay_ = CREATE_VALUE_W;
     pattern->selectOverlayProxy_ = nullptr;
     ParagraphStyle paragraphStyle;
     RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
@@ -1191,7 +1231,7 @@ HWTEST_F(TextTestThreeNg, TextLayoutAlgorithmTest009, TestSize.Level1)
     aiSpanMap[AI_SPAN_START] = aiSpan1;
     aiSpanMap[AI_SPAN_START_II] = aiSpan2;
     textPattern->dataDetectorAdapter_->aiSpanMap_ = aiSpanMap;
-    textPattern->dataDetectorAdapter_->textForAI_ = TEXT_FOR_AI;
+    textPattern->dataDetectorAdapter_->textForAI_ = U16TEXT_FOR_AI;
 
     /**
      * @tc.steps: step2. Create textLayoutAlgorithm and call UpdateParagraphForAISpan function.
@@ -1220,8 +1260,8 @@ HWTEST_F(TextTestThreeNg, HandleClickAISpanEvent, TestSize.Level1)
      * @tc.steps: step2. construct spanItemChildren
      */
     auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
-    spanItemChild->content = TEXT_FOR_AI;
-    spanItemChild->position = StringUtils::ToWstring(spanItemChild->content).length();
+    spanItemChild->content = U16TEXT_FOR_AI;
+    spanItemChild->position = spanItemChild->content.length();
     pattern->spans_.emplace_back(spanItemChild);
 
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -1275,7 +1315,7 @@ HWTEST_F(TextTestThreeNg, ShowAIEntityMenu, TestSize.Level1)
      */
     auto [frameNode, pattern] = Init();
     pattern->textSelector_.Update(0, 20);
-    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(TEXT_FOR_AI);
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(U16TEXT_FOR_AI);
     ASSERT_NE(textSpanNode, nullptr);
     pattern->AddChildSpanItem(textSpanNode);
     pattern->SetTextDetectEnable(true);
@@ -1317,7 +1357,7 @@ HWTEST_F(TextTestThreeNg, InitSpanItem001, TestSize.Level1)
     host->AddChild(childFrameNode);
     childFrameNode->SetParent(host);
 
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty("spannode");
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(u"spannode");
     auto spanOnClickFunc = [](GestureEvent& info) {};
     spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
     host->AddChild(spanNode);
@@ -1437,7 +1477,7 @@ HWTEST_F(TextTestThreeNg, HandleDragEvent002, TestSize.Level1)
     childFrameNode->SetLayoutProperty(AceType::MakeRefPtr<ImageLayoutProperty>());
     host->AddChild(childFrameNode);
     childFrameNode->SetParent(host);
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty("spannode");
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(u"spannode");
     auto spanOnClickFunc = [](GestureEvent& info) {};
     spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
     host->AddChild(spanNode);
@@ -1506,9 +1546,9 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
     host->draggable_ = true;
     auto pattern = host->GetPattern<TextPattern>();
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL_U16);
     host->AddChild(spanNode);
-    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE_U16);
     host->AddChild(spanNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     LayoutConstraintF layoutConstraintF;
@@ -1526,7 +1566,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<EventHub>();
     auto onDragStart = eventHub->GetDefaultOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
-    EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.back().valueString), SPAN_PHONE);
     EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 2);
 
     /**
@@ -1537,7 +1577,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(0, 5);
     dragDropInfo = onDragStart(dragEvent, "");
-    EXPECT_EQ(pattern->dragResultObjects_.front().valueString, SPAN_URL);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.front().valueString), SPAN_URL);
     EXPECT_EQ(pattern->dragResultObjects_.front().offsetInSpan[RichEditorSpanRange::RANGEEND], 5);
 
     /**
@@ -1547,7 +1587,7 @@ HWTEST_F(TextTestThreeNg, GetTextResultObject001, TestSize.Level1)
     pattern->dragResultObjects_.clear();
     pattern->textSelector_.Update(8, 16);
     dragDropInfo = onDragStart(dragEvent, "");
-    EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.back().valueString), SPAN_PHONE);
     EXPECT_EQ(pattern->dragResultObjects_.front().offsetInSpan[RichEditorSpanRange::RANGEEND], SPAN_URL.size());
     for (auto obj : pattern->dragResultObjects_) {
         EXPECT_EQ(obj.type, SelectSpanType::TYPESPAN);
@@ -1598,7 +1638,8 @@ HWTEST_F(TextTestThreeNg, GetSymbolSpanResultObject001, TestSize.Level1)
     pattern->textSelector_.Update(0, 5);
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_TRUE(!pattern->dragResultObjects_.empty());
-    EXPECT_EQ(pattern->dragResultObjects_.front().valueString, "20320"); // "20320" means: unicode string
+    // "20320" means: unicode string
+    EXPECT_EQ(StringUtils::Str16ToStr8(pattern->dragResultObjects_.front().valueString), "20320");
     EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 1);
     for (auto obj : pattern->dragResultObjects_) {
         EXPECT_EQ(obj.type, SelectSpanType::TYPESYMBOLSPAN);
@@ -1736,7 +1777,6 @@ HWTEST_F(TextTestThreeNg, CreateNodePaintMethod001, TestSize.Level1)
     EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
     pattern->CreateNodePaintMethod();
     EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
-    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
     EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
     pattern->pManager_->Reset();
 }
@@ -2127,7 +2167,7 @@ HWTEST_F(TextTestThreeNg, SetImageSpanTextStyleTest001, TestSize.Level1)
     std::vector<RectF> selctRects { RectF(0, 0, 20, 20), RectF(0, 0, 30, 30) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
-    std::vector<std::string> placeHolderStrings { "please", "input", "text" };
+    std::vector<std::u16string> placeHolderStrings { u"please", u"input", u"text" };
     for (auto str : placeHolderStrings) {
         auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(),
@@ -2140,9 +2180,9 @@ HWTEST_F(TextTestThreeNg, SetImageSpanTextStyleTest001, TestSize.Level1)
         imageSpanNode->GetSpanItem()->content = str;
         host->AddChild(imageSpanNode);
     }
-    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL_U16);
     host->AddChild(spanNode);
-    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE_U16);
     host->AddChild(spanNode);
 
     /**

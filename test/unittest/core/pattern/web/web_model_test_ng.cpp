@@ -19,6 +19,7 @@
 #define private public
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "nweb_helper.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/web/web_model_ng.h"
 #define protected public
@@ -1390,6 +1391,40 @@ HWTEST_F(WebModelTestNg, SetNativeVideoPlayerConfig029, TestSize.Level1)
     WebModelNG webModelNG;
     webModelNG.SetNativeVideoPlayerConfig(true, true);
     EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckNativeVideoPlayerConfig(std::make_tuple(true, true)), true);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentStart030
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, JavaScriptOnDocumentStart030, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    webModelNG.JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentStartScriptItems_, std::nullopt);
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnDocumentEnd031
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd031, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    ScriptItems scriptItemsEnd;
+    ScriptItemsByOrder scriptItemsByOrder;
+    webModelNG.JavaScriptOnDocumentEndByOrder(scriptItemsEnd, scriptItemsByOrder);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onDocumentEndScriptItems_, std::nullopt);
 #endif
 }
 

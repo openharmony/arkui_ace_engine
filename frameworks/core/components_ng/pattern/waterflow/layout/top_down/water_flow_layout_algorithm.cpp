@@ -251,13 +251,13 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 
-            if (isCache) {
-                continue;
-            }
-            if (wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
                 wrapper->Layout();
             } else {
                 wrapper->GetHostNode()->ForceSyncGeometryNode();
+            }
+            if (isCache) {
+                continue;
             }
             // recode restore info
             if (item.first == layoutInfo_->startIndex_) {

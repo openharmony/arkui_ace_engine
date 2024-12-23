@@ -39,8 +39,13 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         info_->isDataValid_ = false;
         return;
     }
-    CheckReset();
+    if (int32_t change = CheckReset(); change > -1) {
+        FillBack(mainLen_, change, itemCnt_ - 1);
+    }
 
+    if (canSkip_) {
+        info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_);
+    }
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
@@ -83,7 +88,6 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
     auto padding = props_->CreatePaddingAndBorder();
     OffsetF paddingOffset { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
-
     const bool reverse = props_->IsReverse();
     for (size_t idx = 0; idx < info_->lanes_.size(); ++idx) {
         LayoutSection(idx, paddingOffset, wrapper->GetGeometryNode()->GetContentSize().CrossSize(axis_), reverse,
@@ -180,20 +184,19 @@ bool WaterFlowLayoutSW::ItemHeightChanged() const
     return false;
 }
 
-void WaterFlowLayoutSW::CheckReset()
+int32_t WaterFlowLayoutSW::CheckReset()
 {
     int32_t updateIdx = GetUpdateIdx(wrapper_, info_->footerIndex_);
     if (info_->newStartIndex_ >= 0) {
         info_->UpdateLanesIndex(updateIdx);
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
-        return;
+        return -1;
     }
     if (updateIdx > -1) {
         wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         if (updateIdx <= info_->startIndex_) {
             info_->ResetWithLaneOffset(std::nullopt);
-            FillBack(mainLen_, std::min(info_->startIndex_, itemCnt_ - 1), itemCnt_ - 1);
-            return;
+            return std::min(info_->startIndex_, itemCnt_ - 1);
         }
         info_->maxHeight_ = 0.0f;
         info_->ClearDataFrom(updateIdx, mainGaps_);
@@ -202,14 +205,18 @@ void WaterFlowLayoutSW::CheckReset()
     const bool childDirty = props_->GetPropertyChangeFlag() & PROPERTY_UPDATE_BY_CHILD_REQUEST;
     if (childDirty && ItemHeightChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
-        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
-        return;
+        return info_->startIndex_;
     }
 
     if (wrapper_->ConstraintChanged()) {
         info_->ResetWithLaneOffset(std::nullopt);
-        FillBack(mainLen_, info_->startIndex_, itemCnt_ - 1);
+        return info_->startIndex_;
     }
+    
+    if (updateIdx <= info_->endIndex_) {
+        return updateIdx;
+    }
+    return -1; // updates beyond current viewport don't need a refill
 }
 
 bool WaterFlowLayoutSW::CheckData() const
@@ -402,7 +409,7 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
 float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
@@ -418,7 +425,7 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
@@ -709,8 +716,7 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            const bool isCache = !props_->GetShowCachedItemsValue(false) &&
-                                 (item.idx < info_->startIndex_ || item.idx > info_->endIndex_);
+            const bool isCache = IsCache(info_, item.idx);
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 mainPos += item.mainSize + mainGaps_[idx];
@@ -724,10 +730,7 @@ void WaterFlowLayoutSW::LayoutSection(
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
             mainPos += item.mainSize + mainGaps_[idx];
-            if (isCache) {
-                continue;
-            }
-            if (child->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();

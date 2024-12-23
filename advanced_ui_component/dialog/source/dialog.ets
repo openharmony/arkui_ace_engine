@@ -22,6 +22,8 @@ import resourceManager from '@ohos.resourceManager';
 import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
+import { accessibility } from '@kit.AccessibilityKit';
+import { KeyCode } from '@kit.InputKit';
 
 class CustomThemeImpl implements CustomTheme {
   public colors?: CustomColors;
@@ -85,6 +87,7 @@ const DIALOG_DIVIDER_SHOW = getNumberByResourceId(125831202, 1, true);
 const ALERT_BUTTON_STYLE = getNumberByResourceId(125831085, 2, true);
 // 'sys.float.alert_title_alignment'
 const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
+const SCROLL_BAR_OFFSET = 20;
 
 @CustomDialog
 export struct TipsDialog {
@@ -175,7 +178,6 @@ export struct TipsDialog {
               this.onCheckedChange(checked);
             }
           })
-          .accessibilityLevel('yes')
           .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
         Text(this.checkTips)
           .fontSize(`${BODY_L}fp`)
@@ -188,11 +190,24 @@ export struct TipsDialog {
       }
     }
     .accessibilityGroup(true)
+    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isChecked))
+    .accessibilityDescription(this.isChecked ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
+    $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
       this.isChecked = !this.isChecked;
       if (this.checkAction) {
         this.checkAction(this.isChecked);
       }
+      let eventInfo: accessibility.EventInfo = ({
+        type: 'announceForAccessibility',
+        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+        triggerAction: 'click',
+        textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+        getContext().resourceManager.getStringSync(125833935)
+      });
+      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+        console.info(`Accessibility send event`)
+      });
     })
     .padding({ top: 8, bottom: 8 })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
@@ -703,7 +718,6 @@ export struct ConfirmDialog {
           }
         })
         .hitTestBehavior(HitTestMode.Block)
-        .accessibilityLevel('yes')
         .margin({ start: LengthMetrics.vp(0), end: LengthMetrics.vp(CHECK_BOX_MARGIN_END) })
 
       Text(this.checkTips)
@@ -716,8 +730,21 @@ export struct ConfirmDialog {
         .textOverflow({ overflow: TextOverflow.Ellipsis })
     }
     .accessibilityGroup(true)
+    .accessibilityText(getCheckTipsAccessibilityText(this.checkTips, this.isChecked))
+    .accessibilityDescription(this.isChecked ? $r('sys.string.advanced_dialog_accessibility_cancel_checked_desc') :
+    $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
       this.isChecked = !this.isChecked;
+      let eventInfo: accessibility.EventInfo = ({
+        type: 'announceForAccessibility',
+        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+        triggerAction: 'click',
+        textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+        getContext().resourceManager.getStringSync(125833935)
+      });
+      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+        console.info(`Accessibility send event`)
+      });
     })
     .width('100%')
     .padding({ top: 8, bottom: 8 })
@@ -827,7 +854,7 @@ export struct AlertDialog {
           .fontSize(`${BODY_L}fp`)
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
-          .margin({ end: LengthMetrics.resource($r('sys.float.padding_level8')) })
+          .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
           .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
           .textAlign(this.textAlign)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
@@ -842,7 +869,7 @@ export struct AlertDialog {
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
       .width('100%')
     }
-    .margin({ end: LengthMetrics.vp(this.getMargin()) })
+    .margin({ end: LengthMetrics.vp(0 - SCROLL_BAR_OFFSET) })
   }
 
   aboutToAppear(): void {
@@ -866,10 +893,6 @@ export struct AlertDialog {
     if (this.secondaryButton) {
       this.buttons.push(this.secondaryButton);
     }
-  }
-
-  private getMargin(): number {
-    return 0 - PADDING_LEVEL_8;
   }
 
   private getFontWeight(): number {
@@ -1473,6 +1496,19 @@ struct CustomDialogContentComponent {
 @Extend(Button)
 function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOptions[],
   controller?: CustomDialogController) {
+  .onKeyEvent((event: KeyEvent) => {
+    if (!event) {
+      return;
+    }
+    if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) && 
+      event.type === KeyType.Down) {
+      if (buttonOptions.action) {
+        buttonOptions.action();
+      }
+      controller?.close();
+      event.stopPropagation();
+    }
+  })
   .onClick(() => {
     if (buttonOptions.action) {
       buttonOptions.action();
@@ -1555,7 +1591,7 @@ function getEnumNumberByResourceId(resourceId: number, defaultValue: number): nu
 }
 
 /**
- * 获取无障碍文本
+ * 获取SelectDialog无障碍文本
  *
  * @param resource 资源
  * @param selected select state
@@ -1641,6 +1677,37 @@ function resolveKeyEvent(event: KeyEvent, controller: Scroller) {
   }
 }
 
+/**
+ * 获取checkTips无障碍文本
+ *
+ * @param resource 资源
+ * @param selected select state
+ * @returns string
+ */
+function getCheckTipsAccessibilityText(resource: ResourceStr | null | undefined, selected?: boolean): string {
+  try {
+    // 'sys.string.slider_accessibility_selected'
+    let selectText: string = getContext().resourceManager.getStringSync(125833934);
+    // 'sys.string.slider_accessibility_unselected'
+    let unselectText: string = getContext().resourceManager.getStringSync(125833935);
+    // 'sys.string.advanced_dialog_accessibility_checkbox'
+    let checkBoxText: string = getContext().resourceManager.getStringSync(125834354);
+    let resourceString: string = '';
+    if (typeof resource === 'string') {
+      resourceString = resource
+    } else {
+      resourceString = getContext().resourceManager.getStringSync(resource);
+    }
+    return selected ? `${selectText},${resourceString},${checkBoxText}` :
+      `${unselectText},${resourceString},${checkBoxText}`;
+  } catch (error) {
+    let code: number = (error as BusinessError).code;
+    let message: string = (error as BusinessError).message;
+    hilog.error(0x3900, 'Ace', `getCheckTipsAccessibilityText error, code: ${code}, message: ${message}`);
+    return '';
+  }
+}
+
 @CustomDialog
 export struct LoadingDialog {
   controller: CustomDialogController;
@@ -1723,14 +1790,20 @@ export struct PopoverDialog {
       this.targetBuilder();
     }
     .onClick(() => {
-      let screenSize: display.Display = display.getDefaultDisplaySync();
-      let screenWidth: number = px2vp(screenSize.width);
-      if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
-        this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
-      } else {
-        this.popover.width = this.dialogWidth;
+      try {
+        let screenSize: display.Display = display.getDefaultDisplaySync();
+        let screenWidth: number = px2vp(screenSize.width);
+        if (screenWidth - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+          this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
+        } else {
+          this.popover.width = this.dialogWidth;
+        }
+        this.visible = !this.visible;
+      } catch (error) {
+        let code: number = (error as BusinessError).code;
+        let message: string = (error as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
       }
-      this.visible = !this.visible;
     })
     .bindPopup(this.visible, {
       builder: this.popover?.builder,

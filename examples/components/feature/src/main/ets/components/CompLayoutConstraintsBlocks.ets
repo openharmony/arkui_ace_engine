@@ -23,7 +23,6 @@ export struct CompLayoutConstraintsBlocks {
         min: 0,
         max: 5
       })
-
       RadioBlock({
         title: 'pixelRound',
         isEnabled: $enableCompPixelRound,

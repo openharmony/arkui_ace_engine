@@ -62,6 +62,18 @@ enum class ScrollPagingStatus {
     VALID,
 };
 
+enum class SnapType {
+    SCROLL_SNAP = 0,
+    LIST_SNAP,
+    NONE_SNAP
+};
+
+enum class SnapDirection {
+    FORWARD = 0,
+    BACKWARD,
+    NONE
+};
+
 // use in dumpInfo, excluding events truggered per frame,
 // such as onScroll, onScrollFrameBegin, onWillScroll, onDidScroll
 enum class ScrollableEventType {
@@ -439,6 +451,14 @@ enum class ScrollSource {
     SCROLLER_ANIMATION, // constexpr int32_t SCROLL_FROM_ANIMATION_CONTROLLER = 12;
 };
 
+struct SnapAnimationOptions {
+    float snapDelta = 0.f;
+    float animationVelocity = 0.f;
+    float dragDistance = 0.f;
+    SnapDirection snapDirection = SnapDirection::NONE;
+    bool fromScrollBar = false;
+};
+
 // app tail animation
 constexpr char TRAILING_ANIMATION[] = "TRAILING_ANIMATION ";
 
@@ -461,8 +481,7 @@ using OnScrollVisibleContentChangeEvent = std::function<void(ListItemIndex, List
 
 using ScrollPositionCallback = std::function<bool(double, int32_t source)>;
 using ScrollEndCallback = std::function<void()>;
-using StartSnapAnimationCallback =
-    std::function<bool(float delta, float animationVelocity, float predictVelocity, float dragDistance)>;
+using StartSnapAnimationCallback = std::function<bool(SnapAnimationOptions)>;
 using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 
