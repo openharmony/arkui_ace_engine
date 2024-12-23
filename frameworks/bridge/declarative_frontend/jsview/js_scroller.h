@@ -41,6 +41,7 @@ public:
     void ScrollBy(const JSCallbackInfo& args);
     void IsAtEnd(const JSCallbackInfo& args);
     void GetItemRect(const JSCallbackInfo& args);
+    void GetItemIndex(const JSCallbackInfo& args);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {

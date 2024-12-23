@@ -596,7 +596,7 @@ HWTEST_F(NavigationPatternTestNg, NavigationPatternTest_016, TestSize.Level1)
     ASSERT_NE(hub, nullptr);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
-    pattern->InitPanEvent(gestureHub);
+    pattern->InitDividerPanEvent(gestureHub);
     ASSERT_NE(pattern->panEvent_, nullptr);
     GestureEvent event;
     pattern->panEvent_->GetActionStartEventFunc()(event);

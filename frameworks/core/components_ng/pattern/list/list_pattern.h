@@ -156,7 +156,7 @@ public:
             });
     }
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -177,6 +177,10 @@ public:
         return positionController_;
     }
     
+    int32_t ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
+    int32_t ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+        RefPtr<ListItemGroupPattern> groupItemPattern) const;
     void TriggerModifyDone();
 
     float GetTotalHeight() const override;
@@ -188,12 +192,17 @@ public:
     void ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth = false,
         ScrollAlign align = ScrollAlign::START);
     bool CheckTargetValid(int32_t index, int32_t indexInGroup);
-    bool ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollBy(float offset);
     bool AnimateToTarget(int32_t index, std::optional<int32_t> indexInGroup, ScrollAlign align);
     Offset GetCurrentOffset() const;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
     Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const;
+    ListItemIndex GetItemIndexInGroup(double x, double y) const;
+    bool GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode, int32_t& index,
+        ListItemIndex& itemIndex) const;
     void OnAnimateStop() override;
     float GetMainContentSize() const override
     {
@@ -331,6 +340,9 @@ public:
         }
         return canOverScroll;
     }
+    void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
+
+    SizeF GetChildrenExpandedSize() override;
 private:
 
     bool IsNeedInitClickEventRecorder() const override
@@ -435,6 +447,7 @@ private:
     bool isNeedCheckOffset_ = false;
 
     ListLayoutAlgorithm::PositionMap itemPosition_;
+    ListLayoutAlgorithm::PositionMap cachedItemPosition_;
     RefPtr<ListPositionMap> posMap_;
     RefPtr<ListChildrenMainSize> childrenSize_;
     float listTotalHeight_ = 0.0f;

@@ -46,6 +46,7 @@ public:
     static void SetRange(const RefPtr<TextPickerPattern>& textPickerPattern,
         const std::vector<NG::RangeContent>& value);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
+    static void SetDialogScrollStop(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onScrollStop);
     static void SetDefaultPickerItemHeight(const Dimension& value);
     static void SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogTextEvent&& onChange);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,

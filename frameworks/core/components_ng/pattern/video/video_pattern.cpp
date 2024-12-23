@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -316,11 +316,14 @@ void VideoPattern::PrepareMediaPlayer()
     auto videoLayoutProperty = GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
     // src has not set/changed
-    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource().value() == src_) {
+    if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null or the source has not changed.");
         return;
     }
-    src_ = videoLayoutProperty->GetVideoSource().value();
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
+    videoSrcInfo_.src = videoSrcInfo->GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
@@ -349,14 +352,14 @@ void VideoPattern::PrepareMediaPlayer()
 
 bool VideoPattern::SetSourceForMediaPlayer()
 {
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video Set src for media, it is : %{private}s", src_.c_str());
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    return mediaPlayer_->SetSource(src_);
+    return mediaPlayer_->SetSource(videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(),
+        videoSrcInfo_.GetModuleName());
 }
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
-    if (src_.empty() || !mediaPlayer_) {
+    if (videoSrcInfo_.GetSrc().empty() || !mediaPlayer_) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video src is empty or mediaPlayer is null, register mediaPlayerEvent fail");
         return;
     }
@@ -877,6 +880,11 @@ void VideoPattern::OnAttachToFrameNode()
                                                  RenderContext::PatternType::VIDEO };
 #endif
     renderContextForMediaPlayer_->InitContext(false, param);
+
+    if (SystemProperties::GetExtSurfaceEnabled()) {
+        RegisterRenderContextCallBack();
+    }
+
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
@@ -899,6 +907,30 @@ void VideoPattern::OnDetachFromMainTree()
     }
 }
 
+void VideoPattern::RegisterRenderContextCallBack()
+{
+#ifdef RENDER_EXTRACT_SUPPORTED
+    renderSurfaceWeakPtr_ = renderSurface_;
+    renderContextForMediaPlayerWeakPtr_ = renderContextForMediaPlayer_;
+    auto OnAttachCallBack = [weak = WeakClaim(this)](int64_t textureId, bool isAttach) mutable {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->AttachToGLContext(textureId, isAttach);
+        }
+    };
+    renderContextForMediaPlayer_->AddAttachCallBack(OnAttachCallBack);
+    auto OnUpdateCallBack = [weak = WeakClaim(this)](std::vector<float>& matrix) mutable {
+        auto videoPattern = weak.Upgrade();
+        CHECK_NULL_VOID(videoPattern);
+        if (auto renderSurface = videoPattern->renderSurfaceWeakPtr_.Upgrade(); renderSurface) {
+            renderSurface->UpdateTextureImage(matrix);
+        }
+    };
+    renderContextForMediaPlayer_->AddUpdateCallBack(OnUpdateCallBack);
+#endif
+}
+
 void VideoPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -909,8 +941,12 @@ void VideoPattern::OnModifyDone()
 
     // src has changed
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if ((layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
+#else
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
-        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource().value() != src_)) {
+        (layoutProperty && layoutProperty->HasVideoSource() && layoutProperty->GetVideoSource() != videoSrcInfo_)) {
+#endif
         ResetStatus();
     }
 
@@ -1797,7 +1833,8 @@ void VideoPattern::EnableDrag()
         }
 
         videoPattern->SetIsDragEndAutoPlay(true);
-        videoLayoutProperty->UpdateVideoSource(videoSrc);
+        VideoSourceInfo videoSrcInfo = {videoSrc, "", ""};
+        videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
         auto frameNode = videoPattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
@@ -1809,6 +1846,11 @@ void VideoPattern::EnableDrag()
 
 VideoPattern::~VideoPattern()
 {
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if (renderContextForMediaPlayer_) {
+        renderContextForMediaPlayer_->RemoveSurfaceChangedCallBack();
+    }
+#endif
     if (IsSupportImageAnalyzer()) {
         DestroyAnalyzerOverlay();
     }
@@ -1833,7 +1875,10 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     }
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    src_ = layoutProperty->GetVideoSourceValue("");
+    auto videoSrcInfo = layoutProperty->GetVideoSource();
+    videoSrcInfo_.src = videoSrcInfo->GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();

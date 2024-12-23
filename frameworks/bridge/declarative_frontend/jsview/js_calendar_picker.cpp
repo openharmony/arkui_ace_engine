@@ -757,7 +757,6 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     }
 
     auto backgroundBlurStyle = paramObj->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -771,6 +770,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         properties.shadow = shadow;
     }
+
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -778,6 +778,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
         dialogRadius.SetRadius(calendarTheme->GetDialogBorderRadius());
         properties.borderRadius = dialogRadius;
     }
+    JSViewAbstract::SetDialogHoverModeProperties(paramObj, properties);
 
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;

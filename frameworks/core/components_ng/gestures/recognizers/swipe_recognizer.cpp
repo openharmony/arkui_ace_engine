@@ -412,6 +412,7 @@ void SwipeRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
         if (prevAngle_) {
             info.SetAngle(prevAngle_.value());
         }
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);

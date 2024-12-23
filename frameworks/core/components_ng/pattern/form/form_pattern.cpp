@@ -156,6 +156,7 @@ void FormPattern::InitClickEvent()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FORM, "gestureEvent - clickCallback");
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleStaticFormEvent(
             { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
@@ -285,6 +286,7 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
     if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
     for (const auto& info : formLinkInfos_) {
         auto linkInfo = JsonUtil::ParseJsonString(info);
         CHECK_NULL_VOID(linkInfo);
@@ -773,6 +775,12 @@ void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
     cardInfo_.borderWidth = info.borderWidth;
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+
+    externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
+        round(cardInfo_.width.Value() - cardInfo_.borderWidth * DOUBLE),
+        round(cardInfo_.height.Value() - cardInfo_.borderWidth * DOUBLE));
 
     if (formManagerBridge_) {
         formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value(), info.borderWidth);
@@ -1362,6 +1370,13 @@ void FormPattern::InitFormManagerDelegate()
             formPattern->HandleEnableForm(enable);
             }, "ArkUIFormHandleEnableForm");
         });
+
+    const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback = [this](bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
+        FormManager::GetInstance().NotifyIsSizeChangeByRotate(isRotate, rsTransaction);
+    };
+    context->SetSizeChangeByRotateCallback(callback);
 }
 
 void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
@@ -1704,7 +1719,11 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID(formManagerBridge_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
+        return;
+    }
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;

@@ -150,6 +150,15 @@ void FrontendDelegate::ResetRequestFocusCallback()
     focusManager->ResetRequestFocusCallback();
 }
 
+void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
+}
+
 template<typename T>
 bool FrontendDelegate::GetResourceData(const std::string& fileUri, T& content, std::string& ami)
 {

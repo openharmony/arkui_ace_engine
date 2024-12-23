@@ -278,6 +278,38 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     return true;
 }
 
+bool StageManager::InsertPage(const RefPtr<FrameNode>& node, bool bellowTopOrBottom)
+{
+    CHECK_NULL_RETURN(stageNode_, false);
+    CHECK_NULL_RETURN(node, false);
+    StopPageTransition();
+
+    const auto& children = stageNode_->GetChildren();
+    if (children.empty()) {
+        return false;
+    }
+
+    RefPtr<FrameNode> targetNode = nullptr;
+    if (bellowTopOrBottom) {
+        targetNode = AceType::DynamicCast<FrameNode>(children.back());
+    } else {
+        targetNode = AceType::DynamicCast<FrameNode>(children.front());
+    }
+    auto rect = stageNode_->GetGeometryNode()->GetFrameRect();
+    rect.SetOffset({});
+    node->GetRenderContext()->SyncGeometryProperties(rect);
+    // mount to parent and mark build render tree.
+    stageNode_->AddChildBefore(node, targetNode);
+    // then build the total child. Build will trigger page create and onAboutToAppear
+    node->Build(nullptr);
+
+    stageNode_->RebuildRenderContextTree();
+
+    stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    return true;
+}
+
 void StageManager::PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path)
 {
     CHECK_NULL_VOID(pageNode);

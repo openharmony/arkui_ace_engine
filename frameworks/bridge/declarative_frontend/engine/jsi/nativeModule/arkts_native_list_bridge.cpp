@@ -32,6 +32,7 @@ constexpr int32_t LIST_ARG_INDEX_4 = 4;
 constexpr int32_t LIST_ARG_INDEX_5 = 5;
 constexpr int32_t LIST_ARG_INDEX_6 = 6;
 constexpr int32_t LIST_ARG_INDEX_7 = 7;
+constexpr int32_t DEFAULT_CACHED_COUNT = 1;
 
 constexpr int32_t ARG_LENGTH = 3;
 
@@ -174,12 +175,23 @@ ArkUINativeModuleValue ListBridge::SetCachedCount(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    int32_t cachedCount = secondArg->Int32Value(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> cacheCountArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> cacheShowArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
 
-    GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cachedCount);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    auto cacheCount = DEFAULT_CACHED_COUNT;
+    if (!cacheCountArg->IsUndefined()) {
+        ArkTSUtils::ParseJsInteger(vm, cacheCountArg, cacheCount);
+        if (cacheCount < 0) {
+            cacheCount = DEFAULT_CACHED_COUNT;
+        }
+    }
+    GetArkUINodeModifiers()->getListModifier()->setCachedCount(nativeNode, cacheCount);
+
+    bool show = !cacheShowArg.IsNull() && cacheShowArg->IsTrue();
+    GetArkUINodeModifiers()->getListModifier()->setShowCached(nativeNode, show);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -191,6 +203,7 @@ ArkUINativeModuleValue ListBridge::ResetCachedCount(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetCachedCount(nativeNode);
+    GetArkUINodeModifiers()->getListModifier()->resetShowCached(nativeNode);
 
     return panda::JSValueRef::Undefined(vm);
 }
@@ -286,6 +299,42 @@ ArkUINativeModuleValue ListBridge::ResetListEdgeEffect(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getListModifier()->resetListEdgeEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
+    Local<JSValueRef> fadingEdgeArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
+    Local<JSValueRef> fadingEdgeLengthArg = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_2);
+
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension fadingEdgeLength = Dimension(32.0f, DimensionUnit::VP); // default value
+
+    if (fadingEdgeArg->IsUndefined() || fadingEdgeArg->IsNull()) {
+        GetArkUINodeModifiers()->getListModifier()->resetListFadingEdge(nativeNode);
+    } else {
+        bool fadingEdge = fadingEdgeArg->ToBoolean(vm)->Value();
+        if (!fadingEdgeLengthArg->IsUndefined() && !fadingEdgeLengthArg->IsNull() &&
+            fadingEdgeLengthArg->IsObject(vm)) {
+            ArkTSUtils::ParseJsLengthMetrics(vm, fadingEdgeLengthArg, fadingEdgeLength);
+        }
+        GetArkUINodeModifiers()->getListModifier()->setListFadingEdge(
+            nativeNode, fadingEdge, fadingEdgeLength.Value(), static_cast<int32_t>(fadingEdgeLength.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getListModifier()->resetListFadingEdge(nativeNode);
+
     return panda::JSValueRef::Undefined(vm);
 }
 

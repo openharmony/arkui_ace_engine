@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/scrollable/refresh_coordination.h"
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 #include "core/components_ng/pattern/scrollable/scrollable_coordination_event.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -58,6 +59,12 @@ enum class ModalSheetCoordinationMode : char {
     SHEET_SCROLL = 1,
     SCROLLABLE_SCROLL = 2,
 };
+struct ScrollOffsetAbility {
+    std::function<bool(float)> scrollFunc = nullptr;
+    Axis axis = Axis::VERTICAL;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
+};
 class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
@@ -79,6 +86,10 @@ public:
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override;
+
+    void CreateAnalyzerOverlay(const RefPtr<FrameNode> node);
+
+    void UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& paint);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void OnWindowHide() override;
@@ -119,6 +130,10 @@ public:
     }
     virtual bool IsAtTop() const = 0;
     virtual bool IsAtBottom() const = 0;
+    virtual bool IsFadingBottom() const
+    {
+        return !IsAtBottom();
+    }
     virtual bool OutBoundaryCallback()
     {
         return IsOutOfBoundary();
@@ -490,6 +505,11 @@ public:
         return Rect();
     };
 
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
     {
         edgeEffect_ = edgeEffect;
@@ -562,7 +582,10 @@ public:
     }
     void InitScrollBarGestureEvent();
 
-    void ScrollPage(
+    virtual void InitScrollBarClickEvent();
+    void HandleClickEvent();
+    void InitScrollBarMouseEvent();
+    virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
 
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
@@ -603,7 +626,7 @@ public:
         return isScrollToSafeAreaHelper_;
     }
 
-    virtual std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility()
+    virtual ScrollOffsetAbility GetScrollOffsetAbility()
     {
         return { nullptr, Axis::NONE };
     }
@@ -624,6 +647,10 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+    void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+
     virtual void SetAccessibilityAction();
 
     void SetUseTotalOffset(bool useTotalOffset)
@@ -638,6 +665,13 @@ public:
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetNestedScrolling();
     }
+
+    virtual SizeF GetChildrenExpandedSize()
+    {
+        return SizeF();
+    }
+
+    SizeF GetViewSizeMinusPadding();
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -875,6 +909,11 @@ private:
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;
 
+    float startPercent_ = 0.0f;
+    float endPercent_ = 1.0f;
+    void UpdateFadeInfo(
+        bool isFadingTop, bool isFadingBottom, float fadeFrameSize, const RefPtr<ScrollablePaintMethod>& paint);
+
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };
     SelectDirection selectDirection_ = SELECT_NONE;
@@ -928,6 +967,8 @@ private:
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
+    RefPtr<InputEvent> mouseEvent_;
+    bool isMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

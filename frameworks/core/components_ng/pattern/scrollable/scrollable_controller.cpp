@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_controller.h"
 
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
 void ScrollableController::ScrollToIndex(
@@ -125,20 +126,35 @@ void ScrollableController::Fling(double flingVelocity)
     pattern->Fling(flingVelocity);
 }
 
-void ScrollableController::ScrollPage(bool reverse, bool /* smooth */)
+void ScrollableController::ScrollPage(bool reverse, bool smooth)
 {
     auto pattern = scroll_.Upgrade();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetAxis() == Axis::NONE) {
         return;
     }
+    if (InstanceOf<WaterFlowPattern>(pattern)) {
+        pattern->ScrollPage(reverse, smooth);
+        return;
+    }
+    // todo: remove impl here, all types of ScrollablePattern should call ScrollPage directly
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     pattern->StopAnimate();
     auto offset = reverse ? pattern->GetMainContentSize() : -pattern->GetMainContentSize();
     ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
-    pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
+    if (smooth) {
+        auto position = pattern->GetTotalOffset() - offset;
+        ACE_SCOPED_TRACE("ScrollPage with animation, position:%f, id:%d, tag:%s", position,
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+        pattern->AnimateTo(position, -1, nullptr, true, false, false);
+    } else {
+        pattern->StopAnimate();
+        ACE_SCOPED_TRACE("ScrollPage without animation, offset:%f, id:%d, tag:%s", offset,
+            static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+        pattern->UpdateCurrentOffset(offset, SCROLL_FROM_JUMP);
+    }
 }
 
 bool ScrollableController::IsAtEnd() const
@@ -158,5 +174,12 @@ Rect ScrollableController::GetItemRect(int32_t index) const
                 Dimension(pxOffset.GetY(), DimensionUnit::PX).ConvertToVp(),
                 Dimension(pxRect.Width(), DimensionUnit::PX).ConvertToVp(),
                 Dimension(pxRect.Height(), DimensionUnit::PX).ConvertToVp());
+}
+
+int32_t ScrollableController::GetItemIndex(double x, double y) const
+{
+    auto pattern = scroll_.Upgrade();
+    CHECK_NULL_RETURN(pattern, -1);
+    return pattern->GetItemIndex(x, y);
 }
 } // namespace OHOS::Ace::NG

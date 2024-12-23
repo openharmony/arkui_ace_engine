@@ -34,6 +34,7 @@ const std::map<std::string, RefPtr<Curve>> curveMap {
     { "easeInOut",          Curves::EASE_IN_OUT },
 };
 const uint32_t CLEAN_WINDOW_DELAY_TIME = 3000;
+const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 } // namespace
 
@@ -244,16 +245,20 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posX_ = std::round(bounds.x_ + session_->GetOffsetX());
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     auto transactionController = Rosen::RSSyncTransactionController::GetInstance();
-    if (transactionController && (session_->GetSessionRect() != windowRect)) {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED,
-            "OnBoundsChanged", transactionController->GetRSTransaction());
-    } else {
-        session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
+    auto transaction = transactionController && session_->GetSessionRect() != windowRect ?
+        transactionController->GetRSTransaction() : nullptr;
+    auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
+    if (ret != Rosen::WSError::WS_OK) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
     }
 }
 
 void WindowScene::BufferAvailableCallback()
 {
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "BufferAvailableCallback id: %{public}d, enableRemoveStartingWindow: %{public}d, appBufferReady: %{public}d",
+        session_->GetPersistentId(), session_->GetEnableRemoveStartingWindow(), session_->GetAppBufferReady());
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallback");
         auto self = weakThis.Upgrade();
@@ -298,8 +303,17 @@ void WindowScene::BufferAvailableCallback()
     ContainerScope scope(instanceId_);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    pipelineContext->PostAsyncEvent(
-        std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
+    if (session_->GetEnableRemoveStartingWindow() && !session_->GetAppBufferReady()) {
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        removeStartingWindowTask_.Cancel();
+        removeStartingWindowTask_.Reset(uiTask);
+        taskExecutor->PostDelayedTask(removeStartingWindowTask_, TaskExecutor::TaskType::UI,
+            REMOVE_STARTING_WINDOW_TIMEOUT_MS, "ArkUIWindowSceneBufferAvailableDelayedCallback");
+    } else {
+        pipelineContext->PostAsyncEvent(
+            std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
+    }
 }
 
 void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
@@ -578,6 +592,13 @@ void WindowScene::OnRemoveBlank()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
+}
+
+void WindowScene::OnAppRemoveStartingWindow()
+{
+    CHECK_EQUAL_VOID(session_->GetEnableRemoveStartingWindow(), false);
+    session_->SetAppBufferReady(true);
+    BufferAvailableCallback();
 }
 
 bool WindowScene::IsWindowSizeEqual(bool allowEmpty)

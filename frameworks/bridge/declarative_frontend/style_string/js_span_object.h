@@ -210,7 +210,26 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSTextShadowSpan);
     RefPtr<TextShadowSpan> textShadowSpan_;
 };
+class JSBackgroundColorSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSBackgroundColorSpan, AceType)
 
+public:
+    JSBackgroundColorSpan() = default;
+    ~JSBackgroundColorSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSBackgroundColorSpan* backgroundColorSpan);
+    static void JSBind(BindingTarget globalObj);
+    static RefPtr<BackgroundColorSpan> ParseJSBackgroundColorSpan(const JSCallbackInfo& info);
+    void GetBackgroundColor(const JSCallbackInfo& info);
+    void SetBackgroundColor(const JSCallbackInfo& info);
+
+    RefPtr<BackgroundColorSpan>& GetBackgroundColorSpan();
+    void SetBackgroundColorSpan(const RefPtr<BackgroundColorSpan>& backgroundColorSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSBackgroundColorSpan);
+    RefPtr<BackgroundColorSpan> backgroundColorSpan_;
+};
 class JSLineHeightSpan : public virtual AceType {
     DECLARE_ACE_TYPE(JSLineHeightSpan, AceType)
 

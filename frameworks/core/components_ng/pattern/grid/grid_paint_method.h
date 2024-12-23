@@ -16,15 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_PAINT_METHOD_H
 
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT GridPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(GridPaintMethod, NodePaintMethod)
+class ACE_EXPORT GridPaintMethod : public ScrollablePaintMethod {
+    DECLARE_ACE_TYPE(GridPaintMethod, ScrollablePaintMethod)
 public:
     explicit GridPaintMethod(const RefPtr<ScrollBar>& scrollBar) : scrollBar_(scrollBar) {}
+    explicit GridPaintMethod(bool vertical, bool isReverse, const RefPtr<ScrollBar>& scrollBar)
+        : ScrollablePaintMethod(vertical, isReverse), scrollBar_(scrollBar)
+    {}
 
     ~GridPaintMethod() override = default;
 
@@ -47,7 +51,19 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        return gridContentModifier_;
+    }
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
+    void SetContentModifier(const RefPtr<GridContentModifier>& modify)
+    {
+        gridContentModifier_ = modify;
+    }
+
 private:
+    RefPtr<GridContentModifier> gridContentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;
     WeakPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;

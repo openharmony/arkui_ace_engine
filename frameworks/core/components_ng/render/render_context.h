@@ -166,7 +166,13 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t { DEFAULT, VIDEO };
+    enum class PatternType : int8_t {
+        DEFAULT,
+        VIDEO,
+#ifdef PLATFORM_VIEW_SUPPORTED
+        PLATFORM_VIEW,
+#endif
+    };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -290,6 +296,7 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
+    virtual void UpdateWindowFocusState(bool isFocused) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}

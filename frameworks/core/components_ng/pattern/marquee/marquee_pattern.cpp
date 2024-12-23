@@ -216,6 +216,10 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     }
     lastAnimationParam_.lastDuration = duration;
     AnimationOption option;
+    auto iter = frameRateRange_.find(MarqueeDynamicSyncSceneType::ANIMATE);
+    if (iter != frameRateRange_.end()) {
+        option.SetFrameRateRange(iter->second);
+    }
     option.SetCurve(Curves::LINEAR);
     option.SetDuration(duration);
     needSecondPlay ? option.SetIteration(1) : option.SetIteration(playCount);

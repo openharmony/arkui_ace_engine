@@ -99,6 +99,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     onTouch(event: (event?: TouchEvent) => void): this;
     onKeyEvent(event: (event?: KeyEvent) => void): this;
     focusable(value: boolean): this;
+    tabStop(value: boolean): this;
     onFocus(event: () => void): this;
     onBlur(event: () => void): this;
     tabIndex(index: number): this;
@@ -294,6 +295,7 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     onItemDragLeave(event: (event: ItemDragInfo, itemIndex: number) => void): this;
     onItemDrop(event: (event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => void): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     nestedScroll(value: NestedScrollOptions): this;
     enableScrollInteraction(value: boolean): this;
     friction(value: number | Resource): this;
@@ -896,6 +898,7 @@ declare class ArkScrollComponent extends ArkComponent implements ScrollAttribute
     scrollBarColor(color: ResourceColor): this;
     scrollBarWidth(value: string | number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     onScrollFrameBegin(event: (offset: number, state: ScrollState) => {
         offsetRemain: number;
     }): this;
@@ -1029,7 +1032,9 @@ declare class ArkCheckboxComponent extends ArkComponent implements CheckboxAttri
 }
 declare class ArkNavDestinationComponent extends ArkComponent implements NavDestinationAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
-    title(value: any, options?: NavigationTitleOptions): this;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): this;
+    menus(value: Array<NavigationMenuItem> | undefined): this;
     hideTitleBar(value: boolean): this;
     onShown(callback: () => void): this;
     onHidden(callback: () => void): this;
@@ -1082,12 +1087,13 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     mode(value: number): NavigationAttribute;
     backButtonIcon(value: any): NavigationAttribute;
     hideNavBar(value: boolean): NavigationAttribute;
-    title(value: any, options?: NavigationTitleOptions): NavigationAttribute;
+    title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+        options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
-    menus(value: any): NavigationAttribute;
+    menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;
     toolBar(value: any): NavigationAttribute;
     toolbarConfiguration(value: any): NavigationAttribute;
     hideToolBar(value: boolean): NavigationAttribute;
@@ -1096,6 +1102,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
     onNavigationModeChange(callback: (mode: NavigationMode) => void): NavigationAttribute;
     navDestination(builder: (name: string, param: unknown) => void): NavigationAttribute;
     ignoreLayoutSafeArea(types?: SafeAreaType[], edges?: SafeAreaEdge[]): NavigationAttribute;
+    enableDragBar(value: boolean | undefined): NavigationAttribute;
 }
 declare class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1741,6 +1748,7 @@ declare class ArkListComponent extends ArkComponent implements ListAttribute {
     scrollBarColor(value: string | number | Color): this;
     flingSpeedLimit(value: number): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     contentStartOffset(value: number): this;
     contentEndOffset(value: number): this;
     divider(value: {
@@ -1886,6 +1894,7 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     }): this;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this;
+    fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this;
     scrollBarWidth(value: string | number): this;
     scrollBarColor(value: string | number | Color): this;
     scrollBar(value: BarState): this;

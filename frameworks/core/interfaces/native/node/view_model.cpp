@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/symbol/symbol_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -84,6 +85,14 @@ ArkUIAPICallbackMethod* callbacks = nullptr;
 void* createTextNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSymbolNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SymbolModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -557,6 +566,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSelectNode,
     createNavigationNode,
     createCustomSpanNode,
+    createSymbolNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

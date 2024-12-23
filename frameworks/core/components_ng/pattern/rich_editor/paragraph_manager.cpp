@@ -271,6 +271,47 @@ TextLineMetrics ParagraphManager::GetLineMetrics(size_t lineNumber)
     return TextLineMetrics();
 }
 
+std::vector<ParagraphManager::TextBox> ParagraphManager::GetRectsForRange(
+    int32_t start, int32_t end, RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+{
+    std::vector<TextBox> resultTextBoxes;
+    float y = 0.0f;
+    for (const auto& info : paragraphs_) {
+        if (info.start >= end) {
+            break;
+        }
+        int32_t relativeStart = std::max(static_cast<int32_t>(0), start - info.start);
+        int32_t relativeEnd = std::min(info.end - info.start, end - info.start);
+        if (relativeStart >= relativeEnd) {
+            y += info.paragraph->GetHeight();
+            continue;
+        }
+        std::vector<RectF> tempRects;
+        std::vector<TextDirection> tempTextDirections;
+        info.paragraph->TxtGetRectsForRange(
+            relativeStart, relativeEnd, heightStyle, widthStyle, tempRects, tempTextDirections);
+        for (size_t i = 0; i < tempRects.size(); ++i) {
+            tempRects[i].SetTop(tempRects[i].Top() + y);
+            resultTextBoxes.emplace_back(TextBox(tempRects[i], tempTextDirections[i]));
+        }
+        y += info.paragraph->GetHeight();
+    }
+    return resultTextBoxes;
+}
+
+void ParagraphManager::GetPaintRegion(RectF& boundsRect, float x, float y) const
+{
+    if (paragraphs_.empty()) {
+        return;
+    }
+    for (const auto& info : paragraphs_) {
+        CHECK_NULL_VOID(info.paragraph);
+        auto rect = info.paragraph->GetPaintRegion(x, y);
+        boundsRect = boundsRect.CombineRectT(rect);
+        y += info.paragraph->GetHeight();
+    }
+}
+
 std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy) const
 {
     std::vector<RectF> res;

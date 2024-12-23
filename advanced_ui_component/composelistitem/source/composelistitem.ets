@@ -104,7 +104,6 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
@@ -736,6 +735,7 @@ export struct ComposeListItem {
     if (ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number >= this.itemHeight) {
       this.itemHeight = ICON_SIZE_MAP.get(this.contentItem?.iconStyle as number) as number + SAFE_LIST_PADDING;
     }
+
   }
 
   aboutToAppear() {

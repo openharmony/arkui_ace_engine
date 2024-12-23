@@ -248,7 +248,8 @@ void SessionWrapperImpl::InitAllCallback()
 /************************************************ Begin: About session ************************************************/
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
-    UIEXT_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    UIEXT_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
@@ -499,6 +500,16 @@ void SessionWrapperImpl::NotifyBackground(bool isHandleError)
             session_, nullptr);
     }
 }
+
+void SessionWrapperImpl::OnReleaseDone()
+{
+    CHECK_NULL_VOID(session_);
+    UIEXT_LOGI("OnReleaseDone, persistentid = %{public}d.", session_->GetPersistentId());
+    session_->UnregisterLifecycleListener(lifecycleListener_);
+    Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestructionDone(session_);
+    session_ = nullptr;
+}
+
 void SessionWrapperImpl::NotifyDestroy(bool isHandleError)
 {
     CHECK_NULL_VOID(session_);

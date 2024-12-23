@@ -240,6 +240,10 @@ void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }
 
+void SessionWrapperImpl::OnReleaseDone()
+{
+}
+
 int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
     return 1;

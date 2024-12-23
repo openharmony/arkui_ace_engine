@@ -23,10 +23,12 @@
 namespace OHOS::Ace {
 
 class MutableSpanString;
+class SpanString;
 
 class ACE_FORCE_EXPORT HtmlUtils {
 public:
     static RefPtr<MutableSpanString> FromHtml(const std::string& str);
+    static std::string ToHtml(const SpanString* str);
 };
 
 } // namespace OHOS::Ace

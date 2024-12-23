@@ -59,8 +59,15 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
-  title(value: any, options?: NavigationTitleOptions): NavigationAttribute {
+  title(value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined,
+    options?: NavigationTitleOptions): NavigationAttribute {
+    if (isUndefined(value) || isNull(value)) {
+      modifierWithKey(this._modifiersWithKeys, TitleModifier.identity,
+        TitleModifier, undefined);
+      return this;
+    }
     let arkNavigationTitle = new ArkNavigationTitle();
+    arkNavigationTitle.value = value;
     if (!isUndefined(options) && !isNull(options) && isObject(options)) {
       if (Object.keys(options).length !== 0) {
         arkNavigationTitle.navigationTitleOptions = options;
@@ -97,8 +104,13 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
-  menus(value: any): NavigationAttribute {
-    throw new Error('Method not implemented.');
+  menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute {
+    if (isUndefined(value)) {
+      modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, undefined);
+      return this;
+    }
+    modifierWithKey(this._modifiersWithKeys, MenusModifier.identity, MenusModifier, value);
+    return this;
   }
   toolBar(value: any): NavigationAttribute {
     throw new Error('Method not implemented.');
@@ -172,6 +184,11 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     } else {
       modifierWithKey(this._modifiersWithKeys, IgnoreNavLayoutSafeAreaModifier.identity, IgnoreNavLayoutSafeAreaModifier, opts);
     }
+    return this;
+  }
+
+  enableDargBar(value: boolean | undefined): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavigationEnableDragBarModifier.identity, NavigationEnableDragBarModifier, value);
     return this;
   }
 }
@@ -290,6 +307,41 @@ class TitleModeModifier extends ModifierWithKey<number> {
   }
 }
 
+class MenusModifier extends ModifierWithKey<Array<NavigationMenuItem> | undefined> {
+  constructor(value: Array<NavigationMenuItem> | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menus');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetMenus(node);
+    } else {
+      getUINativeModule().navigation.setMenus(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!Array.isArray(this.value) || !Array.isArray(this.stageValue)) {
+      return true;
+    }
+    if (this.value.length !== this.stageValue.length) {
+      return true;
+    }
+    for (let i = 0; i < this.value.length; i++) {
+      if (!(isBaseOrResourceEqual(this.stageValue[i].value, this.value[i].value) &&
+        isBaseOrResourceEqual(this.stageValue[i].icon, this.value[i].icon) &&
+        isBaseOrResourceEqual(this.stageValue[i].isEnabled, this.value[i].isEnabled) &&
+        isBaseOrResourceEqual(this.stageValue[i].action, this.value[i].action) &&
+        isBaseOrResourceEqual(this.stageValue[i].symbolIcon, this.value[i].symbolIcon)
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 class HideBackButtonModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('hideBackButton');
 
@@ -311,7 +363,7 @@ class TitleModifier extends ModifierWithKey<ArkNavigationTitle | undefined> {
     if (reset) {
       getUINativeModule().navigation.resetTitle(node);
     } else {
-      getUINativeModule().navigation.setTitle(node, this.value?.navigationTitleOptions);
+      getUINativeModule().navigation.setTitle(node, this.value?.value, this.value?.navigationTitleOptions);
     }
   }
   checkObjectDiff(): boolean {
@@ -374,6 +426,21 @@ class IgnoreNavLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandO
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
       !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+
+class NavigationEnableDragBarModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableDragBar');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navigation.resetEnableDragBar(node);
+    } else {
+      getUINativeModule().navigation.setEnableDragBar(node, this.value);
+    }
   }
 }
 

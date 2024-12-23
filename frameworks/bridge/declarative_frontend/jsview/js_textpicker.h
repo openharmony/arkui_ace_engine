@@ -88,6 +88,7 @@ public:
     static void OnAccept(const JSCallbackInfo& info);
     static void OnCancel(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
+    static void OnScrollStop(const JSCallbackInfo& info);
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);

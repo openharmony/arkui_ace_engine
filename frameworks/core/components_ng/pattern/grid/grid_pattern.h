@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -111,7 +112,7 @@ public:
 
     void ScrollToFocusNodeIndex(int32_t index) override;
 
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     std::function<bool(int32_t)> GetScrollIndexAbility() override;
 
@@ -173,10 +174,13 @@ public:
         return gridLayoutInfo_.offsetEnd_;
     }
 
+    bool IsFadingBottom() const override;
+
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     void GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const;
 
-    void ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     bool UpdateStartIndex(int32_t index);
 
@@ -223,15 +227,21 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
     }
 
-    const std::list<GridPreloadItem>& GetPreloadItemList() const
+    bool HasPreloadItemList() const
     {
-        return preloadItemList_;
+        return !preloadItemList_.empty();
+    }
+
+    std::list<GridPreloadItem> MovePreloadItemList()
+    {
+        return std::move(preloadItemList_);
     }
 
     void SetPreloadItemList(std::list<GridPreloadItem>&& list)
@@ -256,6 +266,8 @@ public:
     {
         return gridLayoutInfo_.defCachedCount_;
     }
+
+    SizeF GetChildrenExpandedSize() override;
 
 private:
     /**
@@ -323,6 +335,8 @@ private:
 
     bool scrollable_ = true;
     bool forceOverScroll_ = false;
+
+    RefPtr<GridContentModifier> gridContentModifier_;
 
     float endHeight_ = 0.0f;
     bool isLeftStep_ = false;

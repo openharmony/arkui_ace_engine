@@ -13,26 +13,79 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class FetchedRegistry {
-  private readonly fetchedIndicies: Set<number> = new Set(); // {I where I is in cache} ∩ `prefetchRange`
-  private rangeToPrefetch: IndexRange = new IndexRange(0, 0);
+  private fetchedIndexes: Set<number> = new Set();
+  private rangeToFetchInternal: IndexRange = new IndexRange(0, 0);
+  private missedIndexes: Set<number> = new Set();
 
-  addFetched(index: number): void {
-    this.fetchedIndicies.add(index);
+  get rangeToFetch(): IndexRange {
+    return this.rangeToFetchInternal;
   }
 
-  getFetchedInRange(range: IndexRange): void {
+  addFetched(index: number): void {
+    if (this.rangeToFetch.contains(index)) {
+      this.fetchedIndexes.add(index);
+      this.missedIndexes.delete(index);
+    }
+  }
+
+  removeFetched(index: number): void {
+    if (this.rangeToFetch.contains(index)) {
+      this.fetchedIndexes.delete(index);
+      this.missedIndexes.add(index);
+    }
+  }
+
+  has(index: number): boolean {
+    return this.fetchedIndexes.has(index);
+  }
+
+  getFetchedInRange(range: IndexRange): number {
     let fetched = 0;
     range.forEachIndex((index) => {
-      fetched += this.fetchedIndicies.has(index) ? 1 : 0;
+      fetched += this.fetchedIndexes.has(index) ? 1 : 0;
     });
     return fetched;
   }
 
-  updateRangeToPrefetch(prefetchRange: IndexRange): void {
-    this.rangeToPrefetch.subtract(prefetchRange).forEachIndex((index) => {
-      this.fetchedIndicies.delete(index);
+  updateRangeToFetch(fetchRange: IndexRange): void {
+    this.rangeToFetch.subtract(fetchRange).forEachIndex((index) => {
+      this.fetchedIndexes.delete(index);
     });
-    this.rangeToPrefetch = prefetchRange;
+    this.rangeToFetchInternal = fetchRange;
+    this.missedIndexes.clear();
+    this.rangeToFetch.forEachIndex((index) => {
+      if (!this.fetchedIndexes.has(index)) {
+        this.missedIndexes.add(index);
+      }
+    });
+  }
+
+  getItemsToFetch(): Set<number> {
+    return new Set(this.missedIndexes);
+  }
+
+  incrementFetchedGreaterThen(value: number, newFetchRange: IndexRange): void {
+    this.offsetAllGreaterThen(value, 1);
+    this.updateRangeToFetch(newFetchRange);
+  }
+
+  decrementFetchedGreaterThen(value: number, newFetchRange: IndexRange): void {
+    this.offsetAllGreaterThen(value, -1);
+    this.updateRangeToFetch(newFetchRange);
+  }
+
+  private offsetAllGreaterThen(value: number, offset: number): void {
+    const updated = new Set<number>();
+    this.fetchedIndexes.forEach((index) => {
+      updated.add(index > value ? index + offset : index);
+    });
+    this.fetchedIndexes = updated;
+  }
+
+  clearFetched(newFetchRange: IndexRange): void {
+    this.fetchedIndexes.clear();
+    this.updateRangeToFetch(newFetchRange);
   }
 }

@@ -62,7 +62,13 @@ public:
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
-        auto paint = MakeRefPtr<ScrollPaintMethod>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto layoutProperty = host->GetLayoutProperty<ScrollLayoutProperty>();
+        CHECK_NULL_RETURN(layoutProperty, nullptr);
+        auto layoutDirection = layoutProperty->GetNonAutoLayoutDirection();
+        auto drawDirection = (layoutDirection == TextDirection::RTL);
+        auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
         paint->SetScrollBar(GetScrollBar());
         CreateScrollBarOverlayModifier();
         paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -70,6 +76,11 @@ public:
         if (scrollEffect && scrollEffect->IsFadeEffect()) {
             paint->SetEdgeEffect(scrollEffect);
         }
+        if (!scrollContentModifier_) {
+            scrollContentModifier_ = AceType::MakeRefPtr<ScrollContentModifier>();
+        }
+        paint->SetContentModifier(scrollContentModifier_);
+        UpdateFadingEdge(paint);
         return paint;
     }
 
@@ -148,7 +159,7 @@ public:
     }
 
     bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode) override;
-    std::pair<std::function<bool(float)>, Axis> GetScrollOffsetAbility() override;
+    ScrollOffsetAbility GetScrollOffsetAbility() override;
 
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
@@ -172,9 +183,8 @@ public:
     }
 
     void ScrollBy(float pixelX, float pixelY, bool smooth, const std::function<void()>& onFinish = nullptr);
-    bool ScrollPage(bool reverse, bool smooth,
-        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL,
-        const std::function<void()>& onFinish = nullptr);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void ScrollTo(float position) override;
     void JumpToPosition(float position, int32_t source = SCROLL_FROM_JUMP);
     float GetMainContentSize() const override
@@ -359,6 +369,8 @@ public:
 
     bool OnScrollSnapCallback(double targetOffset, double velocity) override;
 
+    SizeF GetChildrenExpandedSize() override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -423,6 +435,8 @@ private:
     float lastPageLength_ = 0.0f;
     float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
+
+    RefPtr<ScrollContentModifier> scrollContentModifier_;
 
     //initialOffset
     std::optional<OffsetT<CalcDimension>> initialOffset_;

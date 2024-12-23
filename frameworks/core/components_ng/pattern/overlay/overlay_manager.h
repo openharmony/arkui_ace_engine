@@ -165,6 +165,8 @@ public:
     void ClearToast();
     void ShowToast(const NG::ToastInfo& toastInfo);
 
+    void FireAutoSave(const RefPtr<FrameNode>& ContainerNode);
+
     std::unordered_map<int32_t, RefPtr<FrameNode>> GetDialogMap()
     {
         return dialogMap_;
@@ -809,7 +811,6 @@ private:
     CustomKeyboardOffsetInfo CalcCustomKeyboardOffset(const RefPtr<FrameNode>& customKeyboard);
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
 
-    void FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode);
     void SetDragNodeNeedClean();
 
     RefPtr<FrameNode> overlayNode_;

@@ -88,6 +88,11 @@ void MediaPlayerImpl::InitListener()
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(isPlaying ? PlaybackStatus::STARTED : PlaybackStatus::PAUSED);
                 }
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
+                if (player->startRenderFrameCallback_ && isPlaying) {
+                    player->startRenderFrameCallback_();
+                }
+#endif
             }, "ArkUIVideoPlayerStatusChanged");
     };
 
@@ -130,7 +135,8 @@ void MediaPlayerImpl::SetVolume(float leftVolume, float rightVolume)
     player_->SetVolume(leftVolume);
 }
 
-bool MediaPlayerImpl::SetSource(const std::string& src)
+bool MediaPlayerImpl::SetSource(const std::string& src, const std::string& /* bundleName */,
+    const std::string& /* moduleName */)
 {
     CHECK_NULL_RETURN(player_, false);
     player_->SetSource(src);
@@ -140,7 +146,7 @@ bool MediaPlayerImpl::SetSource(const std::string& src)
 void MediaPlayerImpl::SetRenderSurface(const RefPtr<RenderSurface>& renderSurface)
 {
     renderSurface_ = renderSurface;
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto surfaceImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         surfaceImpl->SetExtSurfaceCallback(AceType::Claim(this));
@@ -208,7 +214,7 @@ int32_t MediaPlayerImpl::SetSurface()
     CHECK_NULL_RETURN(player_, -1);
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
-#ifdef VIDEO_TEXTURE_SUPPORTED
+#ifdef RENDER_EXTRACT_SUPPORTED
     if (renderSurface ->IsTexture()) {
         auto textureImpl = AceType::DynamicCast<RenderTextureImpl>(renderSurface);
         CHECK_NULL_RETURN(textureImpl, -1);

@@ -36,6 +36,16 @@ public:
     RefPtr<SubContainer> GetSubContainer(int64_t formId);
     void SetFormUtils(const std::shared_ptr<FormUtils>& formUtils);
     std::shared_ptr<FormUtils> GetFormUtils();
+    void NotifyIsSizeChangeByRotate(
+        bool isRotate, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
+    std::weak_ptr<Rosen::RSTransaction> GetRSTransaction()
+    {
+        return rsTransaction_;
+    }
+    bool IsSizeChangeByRotate()
+    {
+        return isRotate_;
+    }
 
 private:
     std::mutex mutex_;
@@ -44,6 +54,8 @@ private:
     std::unordered_map<std::string, RefPtr<SubContainer>> nonmatchedContainerMap_;
     std::mutex formUtilsMutex_;
     std::shared_ptr<FormUtils> formUtils_;
+    std::weak_ptr<Rosen::RSTransaction> rsTransaction_;
+    bool isRotate_;
 };
 
 } // namespace OHOS::Ace

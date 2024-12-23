@@ -398,7 +398,7 @@ public:
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
     virtual void RefreshRootBgColor() const {}
 
@@ -1026,7 +1026,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;

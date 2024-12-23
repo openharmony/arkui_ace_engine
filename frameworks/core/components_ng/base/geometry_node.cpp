@@ -67,6 +67,52 @@ void GeometryNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
 #endif
 }
 
+void GeometryNode::SetAccumulatedSafeAreaEdges(const ExpandEdges& safeAreaPadding)
+{
+    if (!accumulatedSafeAreaExpand_) {
+        accumulatedSafeAreaExpand_ = std::make_unique<ExpandEdges>(safeAreaPadding);
+        return;
+    }
+    if (safeAreaPadding.left) {
+        accumulatedSafeAreaExpand_->left = safeAreaPadding.left;
+    }
+    if (safeAreaPadding.right) {
+        accumulatedSafeAreaExpand_->right = safeAreaPadding.right;
+    }
+    if (safeAreaPadding.top) {
+        accumulatedSafeAreaExpand_->top = safeAreaPadding.top;
+    }
+    if (safeAreaPadding.bottom) {
+        accumulatedSafeAreaExpand_->bottom = safeAreaPadding.bottom;
+    }
+}
+
+const std::unique_ptr<ExpandEdges>& GeometryNode::GetAccumulatedSafeAreaExpand() const
+{
+    return accumulatedSafeAreaExpand_;
+}
+
+void GeometryNode::ResetAccumulatedSafeAreaPadding()
+{
+    CHECK_NULL_VOID(accumulatedSafeAreaExpand_);
+    accumulatedSafeAreaExpand_.reset();
+}
+
+void GeometryNode::SetResolvedSingleSafeAreaPadding(const PaddingPropertyF& safeAreaPadding)
+{
+    resolvedSingleSafeAreaPadding_ = std::make_unique<PaddingPropertyF>(safeAreaPadding);
+}
+
+const std::unique_ptr<PaddingPropertyF>& GeometryNode::GetResolvedSingleSafeAreaPadding() const
+{
+    return resolvedSingleSafeAreaPadding_;
+}
+
+void GeometryNode::ResetResolvedSelfSafeAreaPadding()
+{
+    resolvedSingleSafeAreaPadding_.reset();
+}
+
 RectF GeometryNode::GetParentAdjust() const
 {
     return parentAdjust_;

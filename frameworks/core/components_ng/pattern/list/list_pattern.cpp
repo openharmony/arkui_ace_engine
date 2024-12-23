@@ -15,9 +15,6 @@
 
 #include "core/components_ng/pattern/list/list_pattern.h"
 
-#include <cstdint>
-#include <string>
-
 #include "base/geometry/axis.h"
 #include "base/geometry/rect.h"
 #include "base/log/dump_log.h"
@@ -49,6 +46,8 @@ constexpr double CHAIN_SPRING_DAMPING = 30.0;
 constexpr double CHAIN_SPRING_STIFFNESS = 228;
 constexpr float DEFAULT_MIN_SPACE_SCALE = 0.75f;
 constexpr float DEFAULT_MAX_SPACE_SCALE = 2.0f;
+constexpr int DEFAULT_HEADER_VALUE = 2;
+constexpr int DEFAULT_FOOTER_VALUE = 3;
 } // namespace
 
 void ListPattern::OnModifyDone()
@@ -94,6 +93,10 @@ void ListPattern::OnModifyDone()
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
     }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
@@ -130,6 +133,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     auto listLayoutAlgorithm = DynamicCast<ListLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(listLayoutAlgorithm, false);
     itemPosition_ = listLayoutAlgorithm->GetItemPosition();
+    cachedItemPosition_ = listLayoutAlgorithm->GetCachedItemPosition();
     maxListItemIndex_ = listLayoutAlgorithm->GetMaxListItemIndex();
     spaceWidth_ = listLayoutAlgorithm->GetSpaceWidth();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
@@ -309,16 +313,17 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         divider = listLayoutProperty->GetDivider().value();
     }
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    auto layoutDirection = listLayoutProperty->GetNonAutoLayoutDirection();
     auto drawVertical = (axis == Axis::HORIZONTAL);
-    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, lanes_, spaceWidth_);
+    auto drawDirection = (layoutDirection == TextDirection::RTL);
+    auto paint = MakeRefPtr<ListPaintMethod>(divider, drawVertical, drawDirection, lanes_, spaceWidth_);
+    if (drawDirection) {
+        paint->SetDirection(true);
+    }
     paint->SetScrollBar(GetScrollBar());
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
-    auto layoutDirection = listLayoutProperty->GetNonAutoLayoutDirection();
-    if (layoutDirection == TextDirection::RTL) {
-        paint->SetDirection(true);
-    }
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
@@ -338,8 +343,9 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         listContentModifier_ = AceType::MakeRefPtr<ListContentModifier>(offset, size);
     }
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_, pressedItem_);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
     paint->SetContentModifier(listContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -691,6 +697,10 @@ bool ListPattern::IsAtBottom() const
     GetListItemGroupEdge(groupAtStart, groupAtEnd);
     int32_t endIndex = endIndex_;
     float endMainPos = endMainPos_;
+    auto res = GetOutBoundaryOffset(false);
+    if (Positive(res.start)) {
+        return false;
+    }
     return (endIndex == maxListItemIndex_ && groupAtEnd) &&
            LessOrEqual(endMainPos - currentDelta_ + GetChainDelta(endIndex), contentMainSize_ - contentEndOffset_);
 }
@@ -1183,15 +1193,19 @@ bool ListPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return true;
 }
 
-std::pair<std::function<bool(float)>, Axis> ListPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ListPattern::GetScrollOffsetAbility()
 {
-    return { [wp = WeakClaim(this)](float moveOffset) -> bool {
-                auto pattern = wp.Upgrade();
-                CHECK_NULL_RETURN(pattern, false);
-                pattern->ScrollBy(-moveOffset);
-                return true;
-            },
-        GetAxis() };
+    return {
+        [wp = WeakClaim(this)](float moveOffset) -> bool {
+            auto pattern = wp.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->ScrollBy(-moveOffset);
+            return true;
+        },
+        GetAxis(),
+        IsScrollSnapAlignCenter() ? 0 : contentStartOffset_,
+        IsScrollSnapAlignCenter() ? 0 : contentEndOffset_,
+    };
 }
 
 std::function<bool(int32_t)> ListPattern::GetScrollIndexAbility()
@@ -1557,7 +1571,7 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         ResetExtraOffset();
     }
     if (!NearZero(targetPos)) {
-        AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
+        AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
         if (predictSnapOffset_.has_value() && AnimateRunning()) {
             scrollSnapVelocity_ = 0.0f;
             predictSnapOffset_.reset();
@@ -1570,17 +1584,20 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
     return true;
 }
 
-bool ListPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void ListPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    LOGI("ScrollPage:%{public}d", reverse);
-    StopAnimate();
     float distance = reverse ? contentMainSize_ : -contentMainSize_;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-    isScrollEnd_ = true;
-    return true;
+    if (smooth) {
+        float position = -GetTotalOffset() + distance;
+        AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+        isScrollEnd_ = true;
+    }
 }
 
 void ListPattern::ScrollBy(float offset)
@@ -1642,6 +1659,145 @@ Rect ListPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+int32_t ListPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
+ListItemIndex ListPattern::GetItemIndexInGroup(double x, double y) const
+{
+    ListItemIndex itemIndex = { -1, -1, -1 };
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, itemIndex);
+    for (int32_t index = startIndex_; index <= endIndex_; ++index) {
+        auto item = host->GetChildByIndex(index);
+        if (!AceType::InstanceOf<FrameNode>(item)) {
+            continue;
+        }
+        auto itemFrameNode = AceType::DynamicCast<FrameNode>(item);
+        auto groupItemPattern  = itemFrameNode->GetPattern<ListItemGroupPattern>();
+        if (groupItemPattern) {
+            if (GetGroupItemIndex(x, y, itemFrameNode, index, itemIndex)) {
+                return itemIndex;
+            }
+        } else {
+            Rect rect = GetItemRect(index);
+            if (rect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                return itemIndex;
+            }
+        }
+    }
+    return itemIndex;
+}
+
+bool ListPattern::GetGroupItemIndex(double x, double y, RefPtr<FrameNode> itemFrameNode,
+    int32_t& index, ListItemIndex& itemIndex) const
+{
+    auto groupItemPattern = itemFrameNode->GetPattern<ListItemGroupPattern>();
+    Rect rect = GetItemRect(index);
+    if (groupItemPattern && rect.IsInRegion({x, y})) {
+        itemIndex.index = index;
+        for (int32_t groupIndex = groupItemPattern->GetDisplayStartIndexInGroup();
+            groupIndex <= groupItemPattern->GetDisplayEndIndexInGroup(); ++groupIndex) {
+            Rect groupRect = GetItemRectInGroup(index, groupIndex);
+            if (groupRect.IsInRegion({x, y})) {
+                itemIndex.index = index;
+                itemIndex.area = 1; // item area
+                itemIndex.indexInGroup = groupIndex;
+                return true;
+            }
+        }
+
+        int32_t areaValue = 0;
+        if (GetAxis() == Axis::VERTICAL) {
+            areaValue = ProcessAreaVertical(x, y, rect, index, groupItemPattern);
+        } else {
+            areaValue = ProcessAreaHorizontal(x, y, rect, index, groupItemPattern);
+        }
+        if (areaValue != -1) {
+            itemIndex.index = index;
+            itemIndex.area = areaValue;
+            itemIndex.indexInGroup = -1;
+            return true;
+        }
+    }
+
+    return false;
+}
+
+int32_t ListPattern::ProcessAreaVertical(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(y, firstRect.Top()) && GreatOrEqual(y, groupRect.Top())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(y, endRect.Bottom()) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float topPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->top.value_or(0.0f);
+        float bottomPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->bottom.value_or(0.0f);
+        if (LessOrEqual(y, groupRect.Top() + headerHeight + topPaddng)  && GreatOrEqual(y, groupRect.Top())) { //header
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(y, groupRect.Bottom() - footerHeight - bottomPaddng) &&
+            LessOrEqual(y, groupRect.Bottom())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(y, groupRect.Top())  && LessOrEqual(y, groupRect.Bottom())) {
+        return  0;
+    }
+
+    return -1;
+}
+
+int32_t ListPattern::ProcessAreaHorizontal(double& x, double& y, Rect& groupRect, int32_t& index,
+    RefPtr<ListItemGroupPattern> groupItemPattern) const
+{
+    if (groupItemPattern->GetTotalItemCount() > 0) { // has item
+        Rect firstRect = GetItemRectInGroup(index, 0); //first item Rect
+        Rect endRect = GetItemRectInGroup(index, groupItemPattern->GetDisplayEndIndexInGroup()); //end item Rect
+
+        if (groupItemPattern->IsHasHeader() && LessOrEqual(x, firstRect.Left()) && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        }
+
+        if (groupItemPattern->IsHasFooter() && GreatOrEqual(x, endRect.Right()) && LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (groupItemPattern->IsHasHeader() || groupItemPattern->IsHasFooter()) {
+        float headerHeight = groupItemPattern->GetHeaderMainSize();
+        float footerHeight = groupItemPattern->GetFooterMainSize();
+        float leftPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->left.value_or(0.0f);
+        float rightPaddng = groupItemPattern->GetHost()->GetGeometryNode()->GetPadding()->right.value_or(0.0f);
+        if (LessOrEqual(x, groupRect.Left() + headerHeight + leftPaddng)  && GreatOrEqual(x, groupRect.Left())) {
+            return  DEFAULT_HEADER_VALUE;
+        } else if (GreatOrEqual(x, groupRect.Right() - footerHeight - rightPaddng) &&
+            LessOrEqual(x, groupRect.Right())) {
+            return  DEFAULT_FOOTER_VALUE;
+        }
+    } else if (GreatOrEqual(x, groupRect.Left())  && LessOrEqual(x, groupRect.Right())) {
+        return  0;
+    }
+
+    return -1;
 }
 
 Rect ListPattern::GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
@@ -1748,6 +1904,31 @@ void ListPattern::CalculateCurrentOffset(float delta, const ListLayoutAlgorithm:
     auto& endGroupInfo = itemPos.rbegin()->second.groupInfo;
     bool groupAtEnd = (!endGroupInfo || endGroupInfo.value().atEnd);
     posMap_->UpdatePosMapEnd(itemPos.rbegin()->first, spaceWidth_, groupAtEnd);
+}
+
+void ListPattern::UpdateChildPosInfo(int32_t index, float delta, float sizeChange)
+{
+    if (itemPosition_.find(index) == itemPosition_.end()) {
+        return;
+    }
+    if (index == GetStartIndex()) {
+        sizeChange += delta;
+        float startPos = itemPosition_.begin()->second.startPos;
+        auto iter = itemPosition_.begin();
+        while (iter != itemPosition_.end() && NearEqual(startPos, iter->second.startPos)) {
+            iter->second.startPos += delta;
+            iter++;
+        }
+    }
+    if (index == GetEndIndex()) {
+        float endPos = itemPosition_.rbegin()->second.endPos;
+        auto iter = itemPosition_.rbegin();
+        while (iter != itemPosition_.rend() && NearEqual(endPos, iter->second.endPos)) {
+            iter->second.endPos += sizeChange;
+            iter++;
+        }
+    }
+    CalculateCurrentOffset(0.0f, ListLayoutAlgorithm::PositionMap());
 }
 
 void ListPattern::UpdateScrollBarOffset()
@@ -2459,5 +2640,26 @@ void ListPattern::NotifyDataChange(int32_t index, int32_t count)
         }
     }
     needReEstimateOffset_ = true;
+}
+
+SizeF ListPattern::GetChildrenExpandedSize()
+{
+    auto viewSize = GetViewSizeMinusPadding();
+    auto axis = GetAxis();
+    float estimatedHeight = 0.0f;
+    if (childrenSize_) {
+        estimatedHeight = listTotalHeight_;
+    } else if (!itemPosition_.empty()) {
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, axis);
+        calculate.GetEstimateHeightAndOffset(GetHost());
+        estimatedHeight = calculate.GetEstimateHeight();
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

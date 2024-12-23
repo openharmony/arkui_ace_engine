@@ -328,11 +328,14 @@ public:
         }
     }
 
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false)
     {
+        int32_t startIndex = showCache ? start - cacheStart : start;
+        int32_t endIndex = showCache ? end + cacheEnd : end;
         for (auto itor = partFrameNodeChildren_.begin(); itor != partFrameNodeChildren_.end();) {
             int32_t index = itor->first;
-            if ((start <= end && index >= start && index <= end) || (start > end && (index <= end || start <= index))) {
+            if ((startIndex <= endIndex && index >= startIndex && index <= endIndex) ||
+                (startIndex > endIndex && (index <= endIndex || startIndex <= index))) {
                 itor++;
             } else {
                 itor = partFrameNodeChildren_.erase(itor);
@@ -340,7 +343,8 @@ public:
         }
         auto guard = GetGuard();
         for (const auto& child : children_) {
-            child.node->DoSetActiveChildRange(start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd);
+            child.node->DoSetActiveChildRange(
+                start - child.startIndex, end - child.startIndex, cacheStart, cacheEnd, showCache);
         }
     }
 
@@ -632,7 +636,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node)
     node->UpdateLayoutPropertyFlag();
     node->SetActive();
     node->isLayoutDirtyMarked_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = node->GetContext();
     if (pipeline) {
         pipeline->FlushUITaskWithSingleDirtyNode(node);
     }
@@ -707,7 +711,7 @@ void FrameNode::DumpSafeAreaInfo()
                                        .append(std::string(", isFullScreen: ").c_str())
                                        .append(std::to_string(manager->IsFullScreen()))
                                        .append(std::string(", isKeyboardAvoidMode").c_str())
-                                       .append(std::to_string(manager->KeyboardSafeAreaEnabled()))
+                                       .append(std::to_string(static_cast<int32_t>(manager->GetKeyBoardAvoidMode())))
                                        .append(std::string(", isUseCutout").c_str())
                                        .append(std::to_string(pipeline->GetUseCutout())));
 }
@@ -765,6 +769,10 @@ void FrameNode::DumpCommonInfo()
         DumpLog::GetInstance().AddDesc(
             std::string("Padding: ").append(layoutProperty_->GetPaddingProperty()->ToString().c_str()));
     }
+    if (layoutProperty_->GetSafeAreaPaddingProperty()) {
+        DumpLog::GetInstance().AddDesc(std::string("SafeArea Padding: ")
+                                           .append(layoutProperty_->GetSafeAreaPaddingProperty()->ToString().c_str()));
+    }
     if (layoutProperty_->GetBorderWidthProperty()) {
         DumpLog::GetInstance().AddDesc(
             std::string("Border: ").append(layoutProperty_->GetBorderWidthProperty()->ToString().c_str()));
@@ -793,6 +801,11 @@ void FrameNode::DumpCommonInfo()
                 .append(layoutProperty_->GetContentLayoutConstraint().has_value()
                             ? layoutProperty_->GetContentLayoutConstraint().value().ToString()
                             : "NA"));
+    }
+    if (GetTag() == V2::ROOT_ETS_TAG) {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        DumpLog::GetInstance().AddDesc(std::string("dpi: ").append(std::to_string(pipeline->GetDensity())));
     }
     DumpAlignRulesInfo();
     DumpDragInfo();
@@ -988,7 +1001,7 @@ void FrameNode::DumpSimplifySafeAreaInfo(std::unique_ptr<JsonValue>& json)
             json->Put("IsFullScreen", manager->IsFullScreen());
         }
         if (!manager->KeyboardSafeAreaEnabled()) {
-            json->Put("IsKeyboardAvoidMode", manager->KeyboardSafeAreaEnabled());
+            json->Put("IsKeyboardAvoidMode", static_cast<int32_t>(manager->GetKeyBoardAvoidMode()));
         }
         if (!pipeline->GetUseCutout()) {
             json->Put("IsUseCutout", pipeline->GetUseCutout());
@@ -1206,6 +1219,9 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
 
+    if (isActive_ && SystemProperties::GetDeveloperModeOn()) {
+        PaintDebugBoundary(SystemProperties::GetDebugBoundaryEnabled());
+    }
     // node may have been measured before AttachToMainTree
     if (geometryNode_->GetParentLayoutConstraint().has_value() && !UseOffscreenProcess()) {
         layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1336,7 +1352,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
     if (focusHub) {
         auto focusView = focusHub->GetFirstChildFocusView();
         if (focusView) {
-            focusView->FocusViewClose();
+            focusView->FocusViewClose(true);
         }
         focusHub->RemoveSelf();
     }
@@ -1614,7 +1630,7 @@ void FrameNode::TriggerOnSizeChangeCallback()
     }
 }
 
-bool FrameNode::IsFrameDisappear()
+bool FrameNode::IsFrameDisappear() const
 {
     auto context = GetContext();
     CHECK_NULL_RETURN(context, true);
@@ -3109,11 +3125,17 @@ void FrameNode::OnWindowHide()
 
 void FrameNode::OnWindowFocused()
 {
+    if (renderContext_) {
+        renderContext_->UpdateWindowFocusState(true);
+    }
     pattern_->OnWindowFocused();
 }
 
 void FrameNode::OnWindowUnfocused()
 {
+    if (renderContext_) {
+        renderContext_->UpdateWindowFocusState(false);
+    }
     pattern_->OnWindowUnfocused();
 }
 
@@ -4128,6 +4150,11 @@ bool FrameNode::ParentExpansive()
     return parentOpts && parentOpts->Expansive();
 }
 
+void FrameNode::ProcessSafeAreaPadding()
+{
+    pattern_->ProcessSafeAreaPadding();
+}
+
 void FrameNode::UpdateFocusState()
 {
     auto focusHub = GetFocusHub();
@@ -4376,9 +4403,9 @@ void FrameNode::RemoveAllChildInRenderTree()
     frameProxy_->RemoveAllChildInRenderTree();
 }
 
-void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+    frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd, showCached);
 }
 
 void FrameNode::SetActiveChildRange(
@@ -4520,13 +4547,18 @@ void FrameNode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     SetActive(false);
 }
 
-void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    if (showCache) {
+        start -= cacheStart;
+        end += cacheEnd;
+    }
     if (start <= end) {
         if (start > 0 || end < 0) {
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     } else {
@@ -4534,6 +4566,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
             SetActive(false);
             SetJSViewActive(false);
         } else {
+            SetActive(true);
             SetJSViewActive(true);
         }
     }
@@ -5019,7 +5052,8 @@ bool FrameNode::AllowVisibleAreaCheck() const
     return IsOnMainTree() || (pattern_ && pattern_->AllowVisibleAreaCheck());
 }
 
-void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect)
+void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
+    bool withClip) const
 {
     visibleRect = GetPaintRectWithTransform();
     frameRect = visibleRect;
@@ -5040,7 +5074,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
             visibleRect = visibleRect.Constrain(parentRect);
         }
 
-        if (isCalculateInnerVisibleRectClip_) {
+        if (isCalculateInnerVisibleRectClip_ || withClip) {
             visibleInnerRect = ApplyFrameNodeTranformToRect(visibleInnerRect, parentUi);
             auto parentContext = parentUi->GetRenderContext();
             if (!visibleInnerRect.IsEmpty() && ((parentContext && parentContext->GetClipEdge().value_or(false)) ||
@@ -5049,7 +5083,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
             }
         }
 
-        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || visibleInnerRect.IsEmpty())) {
+        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || withClip || visibleInnerRect.IsEmpty())) {
             visibleInnerRect = visibleRect;
             return;
         }
@@ -5057,7 +5091,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
         parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
 
-    if (!isCalculateInnerVisibleRectClip_) {
+    if (!(isCalculateInnerVisibleRectClip_ || withClip)) {
         visibleInnerRect = visibleRect;
     }
 }
@@ -5635,5 +5669,31 @@ void FrameNode::RemoveCustomProperty(const std::string& key)
     if (iter != customPropertyMap_.end()) {
         customPropertyMap_.erase(iter);
     }
+}
+
+RefPtr<UINode> FrameNode::GetCurrentPageRootNode()
+{
+    auto pageNode = GetPageNode();
+    CHECK_NULL_RETURN(pageNode, nullptr);
+    auto jsView = pageNode->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(jsView, nullptr);
+    if (jsView->GetTag() == V2::JS_VIEW_ETS_TAG) {
+        auto rootNode = jsView->GetChildAtIndex(0);
+        CHECK_NULL_RETURN(rootNode, nullptr);
+        return rootNode;
+    }
+    return jsView;
+}
+
+std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
+{
+    std::list<RefPtr<FrameNode>> list;
+    for (int32_t i = 0; i < TotalChildCount(); i++) {
+        auto child = GetFrameNodeChildByIndex(i, false, false);
+        if (child->IsActive()) {
+            list.emplace_back(Referenced::Claim(child));
+        }
+    }
+    return list;
 }
 } // namespace OHOS::Ace::NG

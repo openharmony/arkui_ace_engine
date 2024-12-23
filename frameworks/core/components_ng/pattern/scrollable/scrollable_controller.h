@@ -49,6 +49,7 @@ public:
     void Fling(double flingVelocity) override;
     bool IsAtEnd() const override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     void SetObserver(const ScrollerObserver& observer) override
     {

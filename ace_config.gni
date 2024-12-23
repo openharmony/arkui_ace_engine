@@ -65,6 +65,9 @@ declare_args() {
   # Enable split_mode support
   ace_engine_feature_enable_split_mode = false
 
+  # Enable navigation split mode support
+  ace_engine_feature_enable_nav_split_mode = false
+
   # Enable aps framework support
   ace_engine_feature_enable_aps = false
 }
@@ -100,7 +103,6 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
-checking_function_root = "//third_party/bounds_checking_function"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
@@ -322,4 +324,8 @@ foreach(item, ace_platforms) {
 
 if (ace_engine_feature_enable_split_mode) {
   ace_common_defines += [ "ENABLE_SPLIT_MODE" ]
+}
+
+if (ace_engine_feature_enable_nav_split_mode) {
+  ace_common_defines += [ "ENABLE_NAV_SPLIT_MODE" ]
 }

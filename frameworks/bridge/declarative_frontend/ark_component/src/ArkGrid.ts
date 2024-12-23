@@ -106,6 +106,13 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
     modifierWithKey(this._modifiersWithKeys, GridEdgeEffectModifier.identity, GridEdgeEffectModifier, effect);
     return this;
   }
+  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
+    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
+    fadingEdge.value = value;
+    fadingEdge.options = options;
+    modifierWithKey(this._modifiersWithKeys, GridFadingEdgeModifier.identity, GridFadingEdgeModifier, fadingEdge);
+    return this;
+  }
   nestedScroll(value: NestedScrollOptions): this {
     modifierWithKey(this._modifiersWithKeys, GridNestedScrollModifier.identity, GridNestedScrollModifier, value);
     return this;
@@ -276,6 +283,24 @@ class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
     }
   }
 
+  checkObjectDiff(): boolean {
+    return !((this.stageValue.value === this.value.value) &&
+      (this.stageValue.options === this.value.options));
+  }
+}
+
+class GridFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
+  constructor(value: ArkFadingEdge) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridFadingEdge');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().grid.resetFadingEdge(node);
+    } else {
+      getUINativeModule().grid.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
+    }
+  }
   checkObjectDiff(): boolean {
     return !((this.stageValue.value === this.value.value) &&
       (this.stageValue.options === this.value.options));

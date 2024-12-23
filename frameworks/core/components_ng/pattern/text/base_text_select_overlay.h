@@ -249,6 +249,12 @@ public:
     }
 
     void MarkOverlayDirty();
+    void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
+    void UpdateHandleColor();
+    virtual std::optional<Color> GetHandleColor()
+    {
+        return std::nullopt;
+    }
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);

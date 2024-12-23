@@ -46,6 +46,12 @@ constexpr double BAR_FRICTION = 0.9;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
+enum class BarDirection {
+    BAR_NONE = 0,
+    PAGE_UP,
+    PAGE_DOWN,
+};
+
 class ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
@@ -316,6 +322,16 @@ public:
     {
         return isReverse_;
     }
+
+    Rect GetTouchRegion() const
+    {
+        return touchRegion_;
+    }
+    BarDirection CheckBarDirection(const Point& point);
+    RefPtr<ClickEvent> GetClickEvent()
+    {
+        return clickevent_;
+    }
     void SetAxis(Axis axis)
     {
         axis_ = axis;
@@ -362,6 +378,17 @@ public:
     void GetPanDirectionDumpInfo();
     void DumpAdvanceInfo();
     void StopFlingAnimation();
+    void SetScrollPageCallback(ScrollPageCallback&& scrollPageCallback)
+    {
+        scrollPageCallback_ = std::move(scrollPageCallback);
+    }
+    void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+    void InitLongPressEvent();
+    void HandleLongPress(bool smooth);
+    bool AnalysisUpOrDown(Point point, bool& reverse);
+    void ScheduleCaretLongPress();
 
 protected:
     void InitTheme();
@@ -397,6 +424,7 @@ private:
     Dimension endReservedHeight_;   // this is reservedHeight on the end
     Dimension inactiveWidth_;
     Dimension activeWidth_;
+    double barWidth_ = 0.0;         // actual width of the scrollbar
     Dimension normalWidth_; // user-set width of the scrollbar
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
@@ -446,6 +474,7 @@ private:
     ScrollEndCallback scrollEndCallback_;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback_;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback_;
+    ScrollPageCallback scrollPageCallback_;
     OpacityAnimationType opacityAnimationType_ = OpacityAnimationType::NONE;
     HoverAnimationType hoverAnimationType_ = HoverAnimationType::NONE;
     CancelableCallback<void()> disappearDelayTask_;
@@ -456,6 +485,10 @@ private:
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+    RefPtr<ClickEvent> clickevent_;
+    RefPtr<LongPressRecognizer> longPressRecognizer_;
+    bool isMousePressed_ = false;
+    Offset locationInfo_;
 };
 
 } // namespace OHOS::Ace::NG

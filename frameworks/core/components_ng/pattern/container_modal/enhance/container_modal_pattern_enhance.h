@@ -28,7 +28,7 @@ public:
     void OnWindowUnfocused() override;
     void OnWindowForceUnfocused() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
     VisibleType GetControlButtonVisibleBeforeAnim()
     {

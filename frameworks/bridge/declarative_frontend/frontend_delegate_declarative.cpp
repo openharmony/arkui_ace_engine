@@ -804,17 +804,6 @@ void FrontendDelegateDeclarative::GetStageSourceMap(
     }
 }
 
-void FrontendDelegateDeclarative::InitializeRouterManager(NG::LoadPageCallback&& loadPageCallback,
-    NG::LoadPageByBufferCallback&& loadPageByBufferCallback, NG::LoadNamedRouterCallback&& loadNamedRouterCallback,
-    NG::UpdateRootComponentCallback&& updateRootComponentCallback)
-{
-    pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
-    pageRouterManager_->SetLoadJsCallback(std::move(loadPageCallback));
-    pageRouterManager_->SetLoadJsByBufferCallback(std::move(loadPageByBufferCallback));
-    pageRouterManager_->SetLoadNamedRouterCallback(std::move(loadNamedRouterCallback));
-    pageRouterManager_->SetUpdateRootComponentCallback(std::move(updateRootComponentCallback));
-}
-
 #if defined(PREVIEW)
 void FrontendDelegateDeclarative::SetIsComponentPreview(NG::IsComponentPreviewCallback&& callback)
 {
@@ -830,7 +819,7 @@ void FrontendDelegateDeclarative::Push(const std::string& uri, const std::string
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
+        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
         OnMediaQueryUpdate();
         return;
     }
@@ -845,7 +834,8 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+        pageRouterManager_->Push(
+            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
     }
@@ -853,7 +843,7 @@ void FrontendDelegateDeclarative::PushWithMode(const std::string& uri, const std
 }
 
 void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
@@ -861,7 +851,7 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
         pageRouterManager_->Push(
-            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
         return;
     }
@@ -869,14 +859,14 @@ void FrontendDelegateDeclarative::PushWithCallback(const std::string& uri, const
 }
 
 void FrontendDelegateDeclarative::PushNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
     pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -887,7 +877,7 @@ void FrontendDelegateDeclarative::Replace(const std::string& uri, const std::str
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
         OnMediaQueryUpdate();
         return;
     }
@@ -902,7 +892,8 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
         auto currentId = GetEffectiveContainerId();
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
-        pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+        pageRouterManager_->Replace(
+            NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
         OnMediaQueryUpdate();
         return;
     }
@@ -910,7 +901,7 @@ void FrontendDelegateDeclarative::ReplaceWithMode(
 }
 
 void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     if (Container::IsCurrentUseNewPipeline()) {
         CHECK_NULL_VOID(pageRouterManager_);
@@ -918,7 +909,7 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
         CHECK_EQUAL_VOID(currentId.has_value(), false);
         ContainerScope scope(currentId.value());
         pageRouterManager_->Replace(
-            NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+            NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
         OnMediaQueryUpdate();
         return;
     }
@@ -926,14 +917,14 @@ void FrontendDelegateDeclarative::ReplaceWithCallback(const std::string& uri, co
 }
 
 void FrontendDelegateDeclarative::ReplaceNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     auto currentId = GetEffectiveContainerId();
     CHECK_EQUAL_VOID(currentId.has_value(), false);
     ContainerScope scope(currentId.value());
     pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -1020,6 +1011,19 @@ int32_t FrontendDelegateDeclarative::GetStackSize() const
     return static_cast<int32_t>(pageRouteStack_.size());
 }
 
+int32_t FrontendDelegateDeclarative::GetCurrentPageIndex() const
+{
+    if (Container::IsCurrentUseNewPipeline()) {
+        CHECK_NULL_RETURN(pageRouterManager_, 0);
+        auto currentId = GetEffectiveContainerId();
+        CHECK_EQUAL_RETURN(currentId.has_value(), false, 0);
+        ContainerScope scope(currentId.value());
+        return pageRouterManager_->GetCurrentPageIndex();
+    }
+    std::lock_guard<std::mutex> lock(mutex_);
+    return static_cast<int32_t>(pageRouteStack_.size());
+}
+
 void FrontendDelegateDeclarative::GetState(int32_t& index, std::string& name, std::string& path)
 {
     if (Container::IsCurrentUseNewPipeline()) {
@@ -1092,6 +1096,18 @@ void FrontendDelegateDeclarative::GetRouterStateByIndex(int32_t& index, std::str
         path = url.substr(0, pos + 1);
     }
     params = GetParams();
+}
+
+bool FrontendDelegateDeclarative::IsUnrestoreByIndex(int32_t index)
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, false);
+    auto currentId = GetEffectiveContainerId();
+    CHECK_EQUAL_RETURN(currentId.has_value(), false, false);
+    ContainerScope scope(currentId.value());
+    return pageRouterManager_->IsUnrestoreByIndex(index);
 }
 
 void FrontendDelegateDeclarative::GetRouterStateByUrl(std::string& url, std::vector<StateInfo>& stateArray)
@@ -1702,6 +1718,7 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .onLanguageChange = dialogAttr.onLanguageChange,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
     };
 #if defined(PREVIEW)
@@ -1725,6 +1742,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
@@ -1776,6 +1796,7 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
@@ -1803,6 +1824,9 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         dialogProperties.isSysBlurStyle = false;
@@ -3229,35 +3253,36 @@ RefPtr<PipelineBase> FrontendDelegateDeclarative::GetPipelineContext()
     return pipelineContextHolder_.Get();
 }
 
-std::pair<std::string, UIContentErrorCode> FrontendDelegateDeclarative::RestoreRouterStack(
-    const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::RestoreRouterStack(
+    const std::string& contentInfo, ContentInfoType type)
 {
     LOGI("FrontendDelegateDeclarative::RestoreRouterStack: contentInfo = %{public}s", contentInfo.c_str());
     auto jsonContentInfo = JsonUtil::ParseJsonString(contentInfo);
     if (!jsonContentInfo->IsValid() || !jsonContentInfo->IsObject()) {
         LOGW("restore contentInfo is invalid");
-        return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+        return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
     }
-    // restore node info
-    auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER));
-    pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        // restore node info
+        auto jsonNodeInfo = jsonContentInfo->GetValue("nodeInfo");
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext,
+            std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER));
+        pipelineContext->RestoreNodeInfo(std::move(jsonNodeInfo));
+    }
+
     // restore stack info
     auto routerStack = jsonContentInfo->GetValue("stackInfo");
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_RETURN(pageRouterManager_, std::make_pair("", UIContentErrorCode::NULL_PAGE_ROUTER));
-        return pageRouterManager_->RestoreRouterStack(std::move(routerStack));
-    } else {
+    if (!Container::IsCurrentUseNewPipeline()) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!routerStack->IsValid() || !routerStack->IsArray()) {
             LOGW("restore router stack is invalid");
-            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+            return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         int32_t stackSize = routerStack->GetArraySize();
         if (stackSize < 1) {
-            LOGW("restore stack size is invalid");
-            return std::make_pair("", UIContentErrorCode::WRONG_PAGE_ROUTER);
+            LOGW("restore stack size: %{public}d is invalid", stackSize);
+            return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
         }
         for (int32_t index = 0; index < stackSize - 1; ++index) {
             std::string url = routerStack->GetArrayItem(index)->ToString();
@@ -3266,11 +3291,34 @@ std::pair<std::string, UIContentErrorCode> FrontendDelegateDeclarative::RestoreR
         }
         std::string startUrl = routerStack->GetArrayItem(stackSize - 1)->ToString();
         // remove 5 useless character, as "XXX.js" to XXX
-        return std::make_pair(startUrl.substr(1, startUrl.size() - 5), UIContentErrorCode::NO_ERRORS);
+        return std::make_pair(RouterRecoverRecord(startUrl.substr(1, startUrl.size() - 5), "", false),
+            UIContentErrorCode::NO_ERRORS);
     }
+
+    CHECK_NULL_RETURN(pageRouterManager_,
+        std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_PAGE_ROUTER));
+    if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+        auto namedRouterInfo = jsonContentInfo->GetValue("namedRouterInfo");
+        if (namedRouterInfo && namedRouterInfo->IsValid()) {
+            if (!namedRouterInfo->IsArray()) {
+                LOGD("restore named router info is invalid");
+                return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
+            }
+            pageRouterManager_->RestoreNamedRouterInfo(std::move(namedRouterInfo));
+        }
+        auto fullPathInfo = jsonContentInfo->GetValue("fullPathInfo");
+        if (fullPathInfo && fullPathInfo->IsValid()) {
+            if (!fullPathInfo->IsArray()) {
+                LOGD("restore full path info is invalid");
+                return std::make_pair(RouterRecoverRecord(), UIContentErrorCode::WRONG_PAGE_ROUTER);
+            }
+            pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
+        }
+    }
+    return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
-std::string FrontendDelegateDeclarative::GetContentInfo()
+std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
@@ -3283,12 +3331,24 @@ std::string FrontendDelegateDeclarative::GetContentInfo()
         jsonContentInfo->Put("stackInfo", jsonRouterStack);
     } else {
         CHECK_NULL_RETURN(pageRouterManager_, "");
-        jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+        jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo(type));
+        if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+            auto namedRouterInfo = pageRouterManager_->GetNamedRouterInfo();
+            if (namedRouterInfo) {
+                jsonContentInfo->Put("namedRouterInfo", std::move(namedRouterInfo));
+            }
+            auto fullPathInfo = pageRouterManager_->GetFullPathInfo();
+            if (fullPathInfo) {
+                jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
+            }
+        }
     }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
-    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
+        jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    }
 
     return jsonContentInfo->ToString();
 }

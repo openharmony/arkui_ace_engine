@@ -128,6 +128,20 @@ public:
         return focusOnNodeCallback_;
     }
 
+    void SetSizeChangeByRotateCallback(const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    {
+        sizeChangeByRotateCallback_ = callback;
+    }
+
+    void FireSizeChangeByRotateCallback(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        if (sizeChangeByRotateCallback_) {
+            sizeChangeByRotateCallback_(isRotate, rsTransaction);
+        }
+    }
+
     const RefPtr<FrameNode>& GetRootElement() const
     {
         return rootNode_;
@@ -294,6 +308,9 @@ public:
 
     void AddAfterRenderTask(std::function<void()>&& task);
 
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
         dragWindowVisibleCallback_ = std::move(task);
@@ -304,6 +321,7 @@ public:
     void FlushFreezeNode();
     void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
+    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -333,7 +351,20 @@ public:
     {
         return displayAvailableRect_;
     }
-    void SetEnableKeyBoardAvoidMode(bool value) override;
+
+    void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
+
+    KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    bool UsingCaretAvoidMode();
+
+    void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF& rootSize);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF rootSize);
+
     bool IsEnableKeyBoardAvoidMode() override;
 
     void RequireSummary() override;
@@ -453,7 +484,7 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -730,10 +761,7 @@ public:
         isWindowAnimation_ = true;
     }
 
-    void StopWindowAnimation() override
-    {
-        isWindowAnimation_ = false;
-    }
+    void StopWindowAnimation() override;
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
@@ -1060,7 +1088,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::list<int32_t> onWindowFocusChangedCallbacks_;
+    std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -1132,11 +1160,13 @@ private:
     WeakPtr<FrameNode> activeNode_;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;

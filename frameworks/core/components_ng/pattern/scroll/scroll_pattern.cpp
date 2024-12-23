@@ -67,6 +67,10 @@ void ScrollPattern::OnModifyDone()
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     Register2DragDropManager();
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -104,7 +108,9 @@ bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     host->SetViewPort(globalViewPort);
     isInitialized_ = true;
     SetScrollSource(SCROLL_FROM_NONE);
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
@@ -224,6 +230,9 @@ bool ScrollPattern::IsAtTop() const
 
 bool ScrollPattern::IsAtBottom() const
 {
+    if (LessNotEqual(scrollableDistance_, 0.0f)) {
+        return LessOrEqual(currentOffset_, 0.0f);
+    }
     return LessOrEqual(currentOffset_, -scrollableDistance_);
 }
 
@@ -581,25 +590,23 @@ void ScrollPattern::ScrollBy(float pixelX, float pixelY, bool smooth, const std:
     }
     float position = currentOffset_ + distance;
     if (smooth) {
-        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true);
+        AnimateTo(-position, fabs(distance) * UNIT_CONVERT / SCROLL_BY_SPEED, Curves::EASE_OUT, true, false, false);
         return;
     }
     JumpToPosition(position);
 }
 
-bool ScrollPattern::ScrollPage(
-    bool reverse, bool smooth, AccessibilityScrollType scrollType, const std::function<void()>& onFinish)
+void ScrollPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, true);
+    CHECK_NULL_VOID(host);
     float distance = reverse ? viewPortLength_ : -viewPortLength_;
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
     ACE_SCOPED_TRACE(
         "Scroll ScrollPage distance:%f, id:%d", distance, static_cast<int32_t>(host->GetAccessibilityId()));
-    ScrollBy(distance, distance, smooth, onFinish);
-    return true;
+    ScrollBy(distance, distance, smooth);
 }
 
 void ScrollPattern::JumpToPosition(float position, int32_t source)
@@ -787,7 +794,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return false;
 }
 
-std::pair<std::function<bool(float)>, Axis> ScrollPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
@@ -1253,5 +1260,16 @@ std::string ScrollPattern::GetScrollSnapPagination() const
 bool ScrollPattern::OnScrollSnapCallback(double targetOffset, double velocity)
 {
     return ScrollSnapTrigger();
+}
+
+SizeF ScrollPattern::GetChildrenExpandedSize()
+{
+    auto axis = GetAxis();
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewPort_.Width(), viewPortExtent_.Height());
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(viewPortExtent_.Width(), viewPort_.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

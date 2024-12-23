@@ -28,7 +28,7 @@ std::string VideoAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_RETURN(videoLayoutProperty, "");
-    return videoLayoutProperty->GetVideoSource().value_or("");
+    return videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc();
 }
 
 AccessibilityValue VideoAccessibilityProperty::GetAccessibilityValue() const

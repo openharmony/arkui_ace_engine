@@ -283,7 +283,7 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
         { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
         { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
-        { "FlowItem", ARKUI_FLOW_ITEM} };
+        { "FlowItem", ARKUI_FLOW_ITEM},  { "SymbolGlyph", ARKUI_SYMBOL_GLYPH} };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     ArkUINodeHandle nodePtr = nullptr;
@@ -307,6 +307,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
             if (nodePtr) {
                 node = AceType::Claim(reinterpret_cast<FrameNode*>(nodePtr));
                 node->SetIsArkTsFrameNode(true);
+                auto renderContext = node->GetRenderContext();
+                if (renderContext) {
+                    renderContext->SetNeedDebugBoundary(true);
+                }
                 // let 'node' take the reference, so decrease ref of C node
                 node->DecRefCount();
             }

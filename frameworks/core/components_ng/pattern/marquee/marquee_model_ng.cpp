@@ -269,4 +269,13 @@ void MarqueeModelNG::SetOnFinish(FrameNode* frameNode, std::function<void()>&& o
     eventHub->SetOnFinish(std::move(onChange));
 }
 
+void MarqueeModelNG::SetMarqueeFrameRateRange(
+    FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMarqueeFrameRateRange(rateRange, type);
+}
+
 } // namespace OHOS::Ace::NG

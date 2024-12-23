@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -41,6 +42,7 @@ const InspectorFilter filter;
 const std::string TEST_TAG = "test";
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+const CalcDimension DEFAULT_PADDING = 24.0_vp;
 } // namespace
 
 class NavigationModelTestNg : public testing::Test {
@@ -566,6 +568,59 @@ HWTEST_F(NavigationModelTestNg, ParseCommonTitle002, TestSize.Level1)
     titleBarLayoutProperty->propTitleHeight_ = Dimension();
     EXPECT_TRUE(titleBarLayoutProperty->HasTitleHeight());
     navigationModel.ParseCommonTitle(hasSubTitle, hasMainTitle, "", "", ignoreMainTitle);
+}
+
+/**
+ * @tc.name: ParseCommonTitle003
+ * @tc.desc: Test ParseCommonTitle with Specific frameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, ParseCommonTitle003, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    bool hasSubTitle = true, hasMainTitle = true, ignoreMainTitle = false;
+    NG::NavigationTitleInfo titleInfo = { hasSubTitle, hasMainTitle, "", "" };
+    navBarNode->propPrevTitleIsCustom_ = false;
+    EXPECT_TRUE(hasSubTitle && hasMainTitle);
+    EXPECT_FALSE(navBarNode->GetPrevTitleIsCustomValue(false));
+    EXPECT_FALSE(ignoreMainTitle);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+    EXPECT_EQ(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
+
+    // Make mainTitle true
+    titleBarNode->title_ = FrameNode::CreateFrameNode("title", 101, AceType::MakeRefPtr<TextPattern>());
+    // Make subTitle true
+    titleBarNode->subtitle_ = FrameNode::CreateFrameNode("subTitle", 102, AceType::MakeRefPtr<TextPattern>());
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle()), nullptr);
+    EXPECT_NE(AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle()), nullptr);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
+
+    // Make !hasMainTitle true
+    titleInfo.hasMainTitle = false;
+    EXPECT_TRUE(titleInfo.hasSubTitle && !titleInfo.hasMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
+
+    titleInfo.hasMainTitle = true;
+    ignoreMainTitle = true;
+    // Make !hasSubTitle true
+    titleInfo.hasSubTitle = false;
+    EXPECT_TRUE(!titleInfo.hasSubTitle && titleInfo.hasMainTitle);
+    EXPECT_TRUE(ignoreMainTitle);
+    NavigationModelNG::ParseCommonTitle(&(*frameNode), titleInfo, ignoreMainTitle);
 }
 
 /**
@@ -1809,5 +1864,101 @@ HWTEST_F(NavigationModelTestNg, SetNavigationPathInfo001, TestSize.Level1)
     ASSERT_NE(navigationGroupNode, nullptr);
     EXPECT_EQ(navigationGroupNode->navigationModuleName_, "TestName");
     EXPECT_EQ(navigationGroupNode->navigationPathInfo_, "TestPath");
+}
+
+/**
+ * @tc.name: SetTitlebarOptions001
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetTitlebarOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+
+    navigationModel.SetTitlebarOptions(std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+    
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/**
+ * @tc.name: SetTitlebarOptions002
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationModelTestNg, SetTitlebarOptions002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigationGroupNode, nullptr);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    ASSERT_NE(navBarNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+    
+    NavigationModelNG::SetTitlebarOptions(&(*frameNode), std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
 }
 } // namespace OHOS::Ace::NG

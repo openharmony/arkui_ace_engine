@@ -125,10 +125,11 @@ public:
     virtual void Destroy() = 0;
     virtual void OnNewWant(const OHOS::AAFwk::Want& want) = 0;
 
-    // distribute
-    virtual UIContentErrorCode Restore(OHOS::Rosen::Window *window, const std::string &contentInfo,
-                                       napi_value storage) = 0;
-    virtual std::string GetContentInfo() const = 0;
+    // restore
+    virtual UIContentErrorCode Restore(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage,
+        ContentInfoType type = ContentInfoType::CONTINUATION) = 0;
+    virtual std::string GetContentInfo(ContentInfoType type = ContentInfoType::CONTINUATION) const = 0;
     virtual void DestroyUIDirector() = 0;
 
     // UI content event process
@@ -143,7 +144,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
-    virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) = 0;
+    virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
     virtual void ProcessFormVisibleChange(bool isVisible) {};
@@ -191,7 +192,10 @@ public:
     virtual float GetFormWidth() = 0;
     virtual float GetFormHeight() = 0;
     virtual void ReloadForm(const std::string& url) {};
-    virtual void OnFormSurfaceChange(float width, float height) {}
+    virtual void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) {}
+
     virtual void SetFormBackgroundColor(const std::string& color) {};
     virtual void SetFontScaleFollowSystem(const bool fontScaleFollowSystem) {};
     virtual void SetFormRenderingMode(int8_t renderMode) {};

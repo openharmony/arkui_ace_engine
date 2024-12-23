@@ -349,6 +349,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -386,6 +389,7 @@ public:
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -861,6 +865,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckMousePressedOverScrollBar(GestureEvent& info);
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
@@ -1362,6 +1367,10 @@ public:
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
 
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    void InitScrollBarClickEvent() override {}
+
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -1399,6 +1408,10 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
+    void TriggerAvoidOnCaretChange();
+
+    void TriggerAvoidWhenCaretGoesDown();
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
@@ -1406,6 +1419,16 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, true);
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
     }
 
     void SetEnableHapticFeedback(bool isEnabled)
@@ -1614,6 +1637,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
@@ -1871,6 +1895,8 @@ private:
     uint32_t longPressFingerNum_ = 0;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> maxFontSizeScale_;
+    float lastCaretPos_ = 0.0f;
+    bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

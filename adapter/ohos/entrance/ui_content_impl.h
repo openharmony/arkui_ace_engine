@@ -76,10 +76,10 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
-    // distribute
-    UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
-    std::string GetContentInfo() const override;
+    // restore
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
@@ -103,7 +103,7 @@ public:
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
@@ -172,7 +172,9 @@ public:
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
 
-    void OnFormSurfaceChange(float width, float height) override;
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
 

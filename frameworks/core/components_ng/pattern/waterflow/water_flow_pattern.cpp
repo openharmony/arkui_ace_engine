@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_segmented_layout.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
+#include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 SizeF WaterFlowPattern::GetContentSize() const
@@ -93,6 +94,14 @@ bool WaterFlowPattern::IsReverse() const
     auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->IsReverse();
+}
+bool WaterFlowPattern::IsVerticalReverse() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto layoutProperty = host->GetLayoutProperty<WaterFlowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->IsVerticalReverse();
 }
 OverScrollOffset WaterFlowPattern::GetOverScrollOffset(double delta) const
 {
@@ -166,7 +175,7 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
 
 RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<WaterFlowPaintMethod>();
+    auto paint = MakeRefPtr<WaterFlowPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), IsVerticalReverse());
     if (!contentModifier_) {
         contentModifier_ = AceType::MakeRefPtr<WaterFlowContentModifier>();
     }
@@ -180,6 +189,7 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -204,6 +214,12 @@ void WaterFlowPattern::OnModifyDone()
     }
     SetAccessibilityAction();
     Register2DragDropManager();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
+    }
 }
 
 void WaterFlowPattern::TriggerModifyDone()
@@ -381,7 +397,7 @@ int32_t WaterFlowPattern::GetColumns() const
     return layoutProperty->GetAxis() == Axis::VERTICAL ? layoutInfo_->GetCrossCount() : layoutInfo_->GetMainCount();
 }
 
-void WaterFlowPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
     CHECK_NULL_VOID(IsScrollable());
 
@@ -395,11 +411,18 @@ void WaterFlowPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollTy
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
+    if (layoutProperty->IsReverse()) {
+        distance = -distance;
+    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
-
+    if (smooth) {
+        float position = layoutInfo_->Offset() + distance;
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+    } else {
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -438,6 +461,17 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
     CHECK_NULL_RETURN(itemGeometry, Rect());
     return Rect(itemGeometry->GetFrameRect().GetX(), itemGeometry->GetFrameRect().GetY(),
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
+}
+
+int32_t WaterFlowPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = layoutInfo_->FirstIdx(); index <= layoutInfo_->endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
 }
 
 RefPtr<WaterFlowSections> WaterFlowPattern::GetSections() const
@@ -602,6 +636,9 @@ bool WaterFlowPattern::NeedRender()
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
     needRender = property->GetPaddingProperty() != nullptr || needRender;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, needRender);
+    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
     return needRender;
 }
 
@@ -789,5 +826,23 @@ void WaterFlowPattern::DumpAdvanceInfo()
         }
         DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
     }
+}
+
+SizeF WaterFlowPattern::GetChildrenExpandedSize()
+{
+    auto viewSize = GetViewSizeMinusPadding();
+    auto axis = GetAxis();
+    float estimatedHeight = 0.0f;
+    if (layoutInfo_->Mode() != LayoutMode::SLIDING_WINDOW) {
+        auto info = DynamicCast<WaterFlowLayoutInfo>(layoutInfo_);
+        estimatedHeight = info->EstimateContentHeight();
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

@@ -108,7 +108,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
-    auto paint = MakeRefPtr<GridPaintMethod>(GetScrollBar());
+    auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
     CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
@@ -116,6 +116,11 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
         paint->SetEdgeEffect(scrollEffect);
     }
+    if (!gridContentModifier_) {
+        gridContentModifier_ = AceType::MakeRefPtr<GridContentModifier>();
+    }
+    paint->SetContentModifier(gridContentModifier_);
+    UpdateFadingEdge(paint);
     return paint;
 }
 
@@ -161,6 +166,10 @@ void GridPattern::OnModifyDone()
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+    auto overlayNode = host->GetOverlayNode();
+    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+        CreateAnalyzerOverlay(host);
     }
 }
 
@@ -370,6 +379,16 @@ float GridPattern::GetMainGap() const
     return mainGap;
 }
 
+bool GridPattern::IsFadingBottom() const
+{
+    float mainSize = gridLayoutInfo_.lastMainSize_ - gridLayoutInfo_.contentEndPadding_;
+    if (LessNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, mainSize) && gridLayoutInfo_.startIndex_ == 0) {
+        return Positive(gridLayoutInfo_.currentOffset_);
+    } else {
+        return !gridLayoutInfo_.offsetEnd_;
+    }
+}
+
 bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
 {
     if (!isConfigScrollable_ || !scrollable_) {
@@ -490,7 +509,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
-    return false;
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    return paintProperty->GetFadingEdge().value_or(false);
 }
 
 void GridPattern::CheckScrollable()
@@ -1213,7 +1234,7 @@ bool GridPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     return ret;
 }
 
-std::pair<std::function<bool(float)>, Axis> GridPattern::GetScrollOffsetAbility()
+ScrollOffsetAbility GridPattern::GetScrollOffsetAbility()
 {
     return { [wp = WeakClaim(this)](float moveOffset) -> bool {
                 auto pattern = wp.Upgrade();
@@ -1294,17 +1315,23 @@ bool GridPattern::HandleDirectionKey(KeyCode code)
     return false;
 }
 
-void GridPattern::ScrollPage(bool reverse, AccessibilityScrollType scrollType)
+void GridPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScrollType scrollType)
 {
-    StopAnimate();
-    if (!isConfigScrollable_) {
-        return;
-    }
     float distance = reverse ? GetMainContentSize() : -GetMainContentSize();
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
-    UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    if (smooth) {
+        float position = -gridLayoutInfo_.currentHeight_ + distance;
+        ScrollablePattern::AnimateTo(-position, -1, nullptr, true, false, false);
+        return;
+    } else {
+        if (!isConfigScrollable_) {
+            return;
+        }
+        StopAnimate();
+        UpdateCurrentOffset(distance, SCROLL_FROM_JUMP);
+    }
     // AccessibilityEventType::SCROLL_END
 }
 
@@ -1883,6 +1910,17 @@ Rect GridPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
+int32_t GridPattern::GetItemIndex(double x, double y) const
+{
+    for (int32_t index = gridLayoutInfo_.startIndex_; index <= gridLayoutInfo_.endIndex_; ++index) {
+        Rect rect = GetItemRect(index);
+        if (rect.IsInRegion({x, y})) {
+            return index;
+        }
+    }
+    return -1;
+}
+
 void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
@@ -2027,5 +2065,39 @@ bool GridPattern::IsReverse() const
     auto gridLayoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     CHECK_NULL_RETURN(gridLayoutProperty, false);
     return gridLayoutProperty->IsReverse();
+}
+
+SizeF GridPattern::GetChildrenExpandedSize()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF());
+    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, SizeF());
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto viewSize = geometryNode->GetFrameSize();
+    MinusPaddingToSize(padding, viewSize);
+
+    auto axis = GetAxis();
+    float estimatedHeight = 0.f;
+    const auto& info = gridLayoutInfo_;
+    auto viewScopeSize = geometryNode->GetPaddingSize();
+    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+    if (UseIrregularLayout()) {
+        estimatedHeight = info.GetIrregularHeight(mainGap);
+    } else if (!layoutProperty->GetLayoutOptions().has_value()) {
+        estimatedHeight = info.GetContentHeight(mainGap);
+    } else {
+        estimatedHeight =
+            info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
+    }
+
+    if (axis == Axis::VERTICAL) {
+        return SizeF(viewSize.Width(), estimatedHeight);
+    } else if (axis == Axis::HORIZONTAL) {
+        return SizeF(estimatedHeight, viewSize.Height());
+    }
+    return SizeF();
 }
 } // namespace OHOS::Ace::NG

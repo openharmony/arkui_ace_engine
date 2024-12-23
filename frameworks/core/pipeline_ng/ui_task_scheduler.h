@@ -105,6 +105,8 @@ public:
 
     bool isEmpty();
 
+    bool IsPredictTaskEmpty();
+
     void StartRecordFrameInfo(FrameInfo* info)
     {
         frameInfo_ = info;
@@ -135,6 +137,10 @@ public:
     {
         syncGeometryNodeTasks_.emplace_back(task);
     }
+
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
+    void FlushSafeAreaPaddingProcess();
 
     void SetIsLayouting(bool layouting)
     {
@@ -182,6 +188,7 @@ private:
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> latestFrameLayoutFinishTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
+    std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;

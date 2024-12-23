@@ -269,7 +269,7 @@ int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* compo
 int32_t OH_NativeXComponent_AttachNativeRootNode(
     OH_NativeXComponent* component, ArkUI_NodeHandle root)
 {
-    if ((component == nullptr) || (root == nullptr)) {
+    if ((component == nullptr) || (root == nullptr) || !OHOS::Ace::NodeModel::CheckIsCNode(root)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     return component->AttachNativeRootNode(root->uiNodeHandle);
@@ -278,7 +278,7 @@ int32_t OH_NativeXComponent_AttachNativeRootNode(
 int32_t OH_NativeXComponent_DetachNativeRootNode(
     OH_NativeXComponent* component, ArkUI_NodeHandle root)
 {
-    if ((component == nullptr) || (root == nullptr)) {
+    if ((component == nullptr) || (root == nullptr) || !OHOS::Ace::NodeModel::CheckIsCNode(root)) {
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     return component->DetachNativeRootNode(root->uiNodeHandle);

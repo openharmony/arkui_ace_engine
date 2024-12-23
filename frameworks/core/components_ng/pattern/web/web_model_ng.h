@@ -171,6 +171,7 @@ public:
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) override;
     void SetMetaViewport(bool enabled) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;

@@ -73,6 +73,9 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
+    void OnRecycle() override;
+    void OnReuse() override;
+
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
@@ -89,7 +92,8 @@ public:
      * those items out of cached range are removed from L1
      * requests idle task
      */
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     bool CheckNode4IndexInL1(int32_t index, int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd,
         RefPtr<FrameNode>& frameNode);

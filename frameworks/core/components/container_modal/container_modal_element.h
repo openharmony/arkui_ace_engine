@@ -34,7 +34,7 @@ public:
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
     void WindowFocus(bool isFocus);
     void SetAppBgColor(const Color& color);
-    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose);
     void Update() override;
     void PerformBuild() override;
     void FlushReload();
