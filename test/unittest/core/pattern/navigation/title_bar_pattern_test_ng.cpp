@@ -694,7 +694,6 @@ HWTEST_F(TitleBarPatternTestNg, OnModifyDone006, TestSize.Level1)
     titleBarLayoutProperty->propTitleMode_ = NavigationTitleMode::MINI;
     titleBarPattern->isTitleChanged_ = true;
     titleBarPattern->tempTitleBarHeight_ = FULL_DOUBLE_LINE_TITLEBAR_HEIGHT;
-    std::cout << "LPC OnModifyDone006 GetTempTitleBarHeight_" << titleBarPattern->GetTempTitleBarHeight() << "\n";
 
     titleBarPattern->OnModifyDone();
     EXPECT_TRUE(titleBarPattern->isTitleChanged_);
