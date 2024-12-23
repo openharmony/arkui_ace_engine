@@ -1543,6 +1543,11 @@ public:
         ViewAbstract::SetChainStyle(frameNode, chainInfo);
     }
 
+    static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
+    {
+        CHECK_NULL_VOID(targetNode);
+        ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
 
 private:
     bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);

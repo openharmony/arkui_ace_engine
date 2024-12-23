@@ -107,6 +107,103 @@ using ClipType = std::variant<
     Ark_RectAttribute
 >;
 
+auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
+    auto targetId = frameNode->GetId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    if (popupInfo.popupId == -1 || !popupInfo.popupNode) {
+        return false;
+    }
+    return true;
+};
+
+auto g_onWillDismissPopup = [](
+    const Opt_Union_Boolean_Callback_DismissPopupAction_Void& param, RefPtr<PopupParam>& popupParam) {
+    CHECK_NULL_VOID(popupParam);
+    Converter::VisitUnion(param,
+        [&popupParam](const Ark_Boolean& value) {
+            popupParam->SetInteractiveDismiss(Converter::Convert<bool>(value));
+            popupParam->SetOnWillDismiss(nullptr);
+        },
+        [&popupParam](const Callback_DismissPopupAction_Void& value) {
+            auto callback = [arkCallback = CallbackHelper(value)](int32_t reason) {
+                Ark_DismissPopupAction parameter;
+                auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+                    static_cast<BindSheetDismissReason>(reason));
+                parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+                    .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+                auto dismiss = []() {
+                    ViewAbstract::DismissPopup();
+                };
+                parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+                arkCallback.Invoke(parameter);
+                parameter.dismiss.resource.release(parameter.dismiss.resource.resourceId); // release reverse callback
+            };
+            popupParam->SetOnWillDismiss(std::move(callback));
+            popupParam->SetInteractiveDismiss(true);
+        },
+        []() {});
+};
+
+auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetEnableHoverMode(OptConvert<bool>(src.enableHoverMode).value_or(popupParam->EnableHoverMode()));
+    popupParam->SetFollowTransformOfTarget(OptConvert<bool>(src.followTransformOfTarget)
+        .value_or(popupParam->IsFollowTransformOfTarget()));
+    Converter::VisitUnion(src.mask,
+        [&popupParam](const Ark_Boolean& mask) {
+            popupParam->SetBlockEvent(Convert<bool>(mask));
+        },
+        [&popupParam](const Ark_Literal_ResourceColor_color& mask) {
+            popupParam->SetMaskColor(OptConvert<Color>(mask.color));
+        },
+        []() {});
+    auto arkOnStateChange = OptConvert<Callback_Literal_Boolean_isVisible_Void>(src.onStateChange);
+    if (arkOnStateChange) {
+        auto onStateChangeCallback = [arkCallback = CallbackHelper(arkOnStateChange.value())](
+            const std::string& param) {
+            auto json = JsonUtil::Create(true);
+            json->Put("isVisible", param.c_str());
+            Ark_Literal_Boolean_isVisible event;
+            event.isVisible = Converter::ArkValue<Ark_Boolean>(json->GetBool("isVisible", false));
+            arkCallback.Invoke(event);
+        };
+        popupParam->SetOnStateChange(std::move(onStateChangeCallback));
+    }
+    auto offsetVal = OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(src.offset);
+    if (offsetVal) {
+        Offset popupOffset;
+        popupOffset.SetX(offsetVal.value().first->ConvertToPx());
+        popupOffset.SetY(offsetVal.value().second->ConvertToPx());
+        popupParam->SetTargetOffset(popupOffset);
+    }
+    popupParam->SetMaskColor(Converter::OptConvert<Color>(src.popupColor));
+    popupParam->SetHasAction(Converter::OptConvert<bool>(src.autoCancel).value_or(popupParam->HasAction()));
+    auto width = Converter::OptConvert<CalcDimension>(src.width);
+    Validator::ValidateNonNegative(width);
+    popupParam->SetChildWidth(width);
+    auto arrowWidth = Converter::OptConvert<CalcDimension>(src.arrowWidth);
+    Validator::ValidateNonNegative(arrowWidth);
+    Validator::ValidateNonPercent(arrowWidth);
+    popupParam->SetArrowWidth(arrowWidth);
+    auto arrowHeight = Converter::OptConvert<CalcDimension>(src.arrowHeight);
+    Validator::ValidateNonNegative(arrowHeight);
+    Validator::ValidateNonPercent(arrowHeight);
+    popupParam->SetArrowHeight(arrowHeight);
+    auto radius = Converter::OptConvert<CalcDimension>(src.radius);
+    Validator::ValidateNonNegative(radius);
+    popupParam->SetRadius(radius);
+    popupParam->SetShadow(Converter::OptConvert<Shadow>(src.shadow));
+    popupParam->SetBlurStyle(Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle));
+};
+
 namespace Validator {
 void ValidateAnimationOption(AnimationOption& opt, bool isForm)
 {
@@ -686,6 +783,19 @@ PositionWithLocalization Convert(const Ark_LocalizedPosition& src)
 }
 
 template<>
+ButtonProperties Convert(const Ark_Literal_String_value_Callback_Void_action& src)
+{
+    ButtonProperties properties;
+    properties.value = Converter::Convert<std::string>(src.value);
+    auto clickCallback = [callback = CallbackHelper(src.action)](GestureEvent& info) {
+        callback.Invoke();
+    };
+    properties.action = AceType::MakeRefPtr<NG::ClickEvent>(clickCallback);
+    properties.showButton = true;
+    return properties;
+}
+
+template<>
 void AssignCast(std::optional<HorizontalAlign>& dst, const Ark_HorizontalAlign& src)
 {
     switch (src) {
@@ -1170,6 +1280,66 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
     dst.follow = OptConvert<bool>(src.follow);
     dst.hierarchyStrategy = OptConvert<TransitionHierarchyStrategy>(src.hierarchyStrategy);
     return dst;
+}
+template<>
+RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetMessage(Converter::Convert<std::string>(src.message));
+    auto messageOptions = Converter::OptConvert<Ark_PopupMessageOptions>(src.messageOptions);
+    if (messageOptions) {
+        popupParam->SetTextColor(Converter::OptConvert<Color>(messageOptions.value().textColor));
+        auto font = Converter::OptConvert<Ark_Font>(messageOptions.value().font);
+        if (font) {
+            popupParam->SetFontSize(Converter::OptConvert<CalcDimension>(font.value().size));
+            popupParam->SetFontWeight(Converter::OptConvert<FontWeight>(font.value().weight));
+            popupParam->SetFontStyle(Converter::OptConvert<OHOS::Ace::FontStyle>(font.value().style));
+        }
+    }
+    auto primaryButton = OptConvert<ButtonProperties>(src.primaryButton);
+    if (primaryButton) {
+        popupParam->SetPrimaryButtonProperties(primaryButton.value());
+    }
+    auto secondaryButton = OptConvert<ButtonProperties>(src.secondaryButton);
+    if (secondaryButton) {
+        popupParam->SetSecondaryButtonProperties(secondaryButton.value());
+    }
+    auto offset = Converter::OptConvert<Dimension>(src.arrowOffset);
+    auto pointPosition = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+    popupParam->SetArrowOffset(pointPosition ? pointPosition : offset);
+    popupParam->SetTargetSpace(Converter::OptConvert<CalcDimension>(src.targetSpace));
+    bool showInSubBoolean = OptConvert<bool>(src.showInSubWindow).value_or(popupParam->IsShowInSubWindow());
+#if defined(PREVIEW)
+    showInSubBoolean = false;
+#endif
+    popupParam->SetShowInSubWindow(showInSubBoolean);
+    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(
+        OptConvert<bool>(src.placementOnTop).value_or(false) ? Placement::TOP : Placement::BOTTOM));
+    popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
+    popupParam->SetTransitionEffects(OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition));
+    g_popupCommonParam(src, popupParam);
+    return popupParam;
+}
+template<>
+RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
+{
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetFocusable(OptConvert<bool>(src.focusable).value_or(popupParam->GetFocusable()));
+    popupParam->SetUseCustomComponent(true);
+    auto offset = Converter::OptConvert<Dimension>(src.arrowOffset);
+    auto pointPosition = Converter::OptConvert<Dimension>(src.arrowPointPosition);
+    popupParam->SetArrowOffset(pointPosition ? pointPosition : offset);
+    popupParam->SetTargetSpace(Converter::OptConvert<CalcDimension>(src.targetSpace));
+    bool showInSubBoolean = OptConvert<bool>(src.showInSubWindow).value_or(popupParam->IsShowInSubWindow());
+#if defined(PREVIEW)
+    showInSubBoolean = false;
+#endif
+    popupParam->SetShowInSubWindow(showInSubBoolean);
+    popupParam->SetPlacement(OptConvert<Placement>(src.placement).value_or(Placement::BOTTOM));
+    popupParam->SetEnableArrow(OptConvert<bool>(src.enableArrow).value_or(popupParam->EnableArrow()));
+    popupParam->SetTransitionEffects(OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition));
+    g_popupCommonParam(src, popupParam);
+    return popupParam;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -3697,9 +3867,29 @@ void BindPopupImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(show);
-    //auto convValue = Converter::OptConvert<type>(show); // for enums
-    //CommonMethodModelNG::SetBindPopup(frameNode, convValue);
+    CHECK_NULL_VOID(popup);
+    RefPtr<UINode> customNode = nullptr;
+    RefPtr<PopupParam> popupParam = nullptr;
+    Converter::VisitUnion(*popup,
+        [&popupParam](const Ark_PopupOptions& value) {
+            popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+        },
+        [&popupParam, &customNode, frameNode, node](const Ark_CustomPopupOptions& value) {
+            popupParam = Converter::Convert<RefPtr<PopupParam>>(value);
+            CHECK_NULL_VOID(popupParam);
+            if (popupParam->IsShow() && !g_isPopupCreated(frameNode)) {
+                customNode = CallbackHelper(value.builder, frameNode).BuildSync(node);
+            }
+            g_onWillDismissPopup(value.onWillDismiss, popupParam);
+        },
+        [&popupParam]() {
+            popupParam = AceType::MakeRefPtr<PopupParam>();
+        });
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetIsShow(Converter::Convert<bool>(show));
+    ViewAbstractModelNG::BindPopup(frameNode, popupParam, customNode);
 }
 void BindMenu0Impl(Ark_NativePointer node,
                    const Ark_Union_Array_MenuElement_CustomBuilder* content,
