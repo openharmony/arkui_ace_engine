@@ -518,7 +518,6 @@ void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNod
             curNavDestination->InitSystemTransitionPop(true);
         }
     }
-
     // start transition animation
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
@@ -527,6 +526,7 @@ void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNod
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page pop transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
+
             // ENTER_POP nodes animation
             if (curNode) {
                 if (isNavBar) {
@@ -547,7 +547,6 @@ void NavigationGroupNode::CreateAnimationWithPop(const RefPtr<FrameNode>& preNod
     if (newPopAnimation) {
         popAnimations_.emplace_back(newPopAnimation);
     }
-
     auto titleOpacityAnimation = preNavDestination->TitleOpacityAnimation(false);
     if (titleOpacityAnimation) {
         popAnimations_.emplace_back(titleOpacityAnimation);
@@ -597,7 +596,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
         };
-
     CreateAnimationWithPop(preNode, curNode, callback, isNavBar);
 
     // clear this flag for navBar layout only
@@ -673,7 +671,6 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     if (titleOpacityAnimation) {
         pushAnimations_.emplace_back(titleOpacityAnimation);
     }
-
     // backIcon opacity
     auto backButtonAnimation = curNavdestination->BackButtonAnimation(true);
     if (backButtonAnimation) {
