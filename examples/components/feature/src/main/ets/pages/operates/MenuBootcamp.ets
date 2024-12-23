@@ -626,43 +626,7 @@ export struct MenuBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-  // Universal Text Attributes
-  @State enableCompFontColor: boolean = false
-  @State compFontColor: ResourceColor = $r('sys.color.font_on_primary');
-  @State enableCompFontSize: boolean = false
-  @State compFontSize: number = 16
-  @State enableCompFontStyle: boolean = false
-  @State compFontStyle: FontStyle = FontStyle.Normal
-  @State enableCompFontWeight: boolean = false
-  @State compFontWeight: FontWeight = FontWeight.Normal
-  @State enableCompLineHeight: boolean = false
-  @State compLineHeight: number = 16
-  @State enableCompDecorationType: boolean = false
-  @State compDecorationType: TextDecorationType = TextDecorationType.None
-  @State enableCompDecorationColor: boolean = false
-  @State compDecorationColor: ResourceColor = Color.Black
-  @State enableCompDecorationStyle: boolean = false
-  @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
-  @State enableCompDraggable: boolean = false
-  // Drag and Drop Control
-  @State compDraggable: boolean = false
-  @State enableCompDragPreview: boolean = false
-  @State compDragPreview: string = '默认'
-  @State enableCompDragPreviewOptionsValueMode: boolean = false
-  @State compDragPreviewOptionsValueMode: DragPreviewMode = DragPreviewMode.AUTO
-  @State enableCompDragPreviewOptionsValueNumberBadge: boolean = false
-  @State compDragPreviewOptionsValueNumberBadge: number = 1
-  @State enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  // Safe Area
-  @State enableCompExpandSafeAreaTypes: boolean = false
-  @State compExpandSafeAreaTypes: Array<SafeAreaType> =
-    [SafeAreaType.SYSTEM, SafeAreaType.CUTOUT, SafeAreaType.KEYBOARD]
-  @State enableCompExpandSafeAreaEdges: boolean = false
-  @State compExpandSafeAreaEdges: Array<SafeAreaEdge> =
-    [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM, SafeAreaEdge.START, SafeAreaEdge.END]
+
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -1343,23 +1307,6 @@ export struct MenuBootcamp {
     .hitTestBehavior(useEnabled(this.enableCompHitTestBehavior, this.compHitTestBehavior))
     .obscured(useEnabled(this.enableCompObscured,
       this.compObscured))
-    .draggable(useEnabled(this.enableCompDraggable, this.compDraggable))
-    .dragPreview(useEnabled(this.enableCompDragPreview, this.compDragPreview))
-    .dragPreviewOptions({
-      mode: useEnabled(this.enableCompDragPreviewOptionsValueMode, this.compDragPreviewOptionsValueMode),
-      numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
-        this.compDragPreviewOptionsValueNumberBadge),
-    }, {
-      isMultiSelectionEnabled:
-      useEnabled(this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-        this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
-      defaultAnimationBeforeLifting:
-      useEnabled(this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-        this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
-    })
-    .expandSafeArea(
-      useEnabled(this.enableCompExpandSafeAreaTypes, this.compExpandSafeAreaTypes),
-      useEnabled(this.enableCompExpandSafeAreaEdges, this.compExpandSafeAreaEdges))
     .renderFit(useEnabled(this.enableCompRenderFit, this.compRenderFit))
     .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
     .onHover((flag) => {
