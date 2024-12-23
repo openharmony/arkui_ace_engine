@@ -755,7 +755,7 @@ void WebPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
 
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
     if (!renderContextForSurface_) {
         renderContextForSurface_ = RenderContext::Create();
         static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
