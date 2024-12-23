@@ -2041,9 +2041,8 @@ void SliderPattern::AddIsFocusActiveUpdateEvent()
             pattern->OnIsFocusActiveUpdate(isFocusAcitve);
         };
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipline = host->GetContext();
+
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
 }
@@ -2052,7 +2051,7 @@ void SliderPattern::RemoveIsFocusActiveUpdateEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipline = host->GetContext();
+    auto pipline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipline);
     pipline->RemoveIsFocusActiveUpdateEvent(host);
 }

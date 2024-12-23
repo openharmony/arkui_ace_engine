@@ -170,7 +170,7 @@ void GridItemPattern::HandleHoverEvent(bool isHover)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<GridItemTheme>();
     CHECK_NULL_VOID(theme);
