@@ -52,7 +52,7 @@ public:
     static void SetRenderWidth(FrameNode* frameNode, const std::optional<Dimension>& width);
     static void SetRenderHeight(FrameNode* frameNode, const std::optional<Dimension>& width);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void Create(FrameNode* frameNode, const ModelViewContext& context);
+    static void SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context);
 private:
     // Camera and lights animations are done from the frontend with Animatable types.
     WeakPtr<FrameNode> frameNode_;

@@ -79,7 +79,7 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             [frameNode, surfaceType](const Ark_ResourceStr& value0) {
                 std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
                 std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
-                ModelViewNG::Create(frameNode, { bundleName, moduleName, surfaceType });
+                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
             },
             [](const Ark_Scene& value) {
 #if defined(KIT_3D_ENABLE)

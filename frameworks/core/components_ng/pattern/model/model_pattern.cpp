@@ -39,6 +39,25 @@ ModelPattern::ModelPattern(uint32_t key, const ModelViewContext& context) : key_
             }
         });
 }
+ModelPattern::ModelPattern(uint32_t key) : key_(key)
+{
+}
+
+ModelPattern::SetModelViewContext(const ModelViewContext& context)
+{
+    modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, context);
+    modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
+            auto model = weak.Upgrade();
+            if (model) {
+                if (model->NeedsRepaint()) {
+                    model->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                }
+                model->GetPaintProperty<ModelPaintProperty>()->ResetFlagProperties();
+            }
+        });
+}
+
+
 
 void ModelPattern::OnModifyDone()
 {

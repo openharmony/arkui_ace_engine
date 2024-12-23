@@ -35,7 +35,10 @@ class ACE_EXPORT ModelPattern : public Pattern {
 
 public:
     ModelPattern(uint32_t key, const ModelViewContext& context);
+    ModelPattern(uint32_t key) : key_(key);
     ~ModelPattern() override;
+
+    void SetModelViewContext(const ModelViewContext& context);
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
