@@ -88,6 +88,16 @@ void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adap
     adaptiveHeight_ = adaptiveHeight;
 }
 
+void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
+}
+
+bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
+{
+    return backgroundTransparent_;
+}
+
 void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType)
 {
     uIContentType_ = uIContentType;
@@ -375,7 +385,8 @@ void DynamicComponentRendererImpl::AttachRenderContext()
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
-        instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_]() {
+        instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_,
+        backgroundTransparent = GetBackgroundTransparent()]() {
             ContainerScope scope(hostInstanceId);
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
@@ -393,7 +404,9 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             auto renderContext = rootElement->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
 
-            pipeline->SetAppBgColor(Color::TRANSPARENT);
+            if (backgroundTransparent) {
+                pipeline->SetAppBgColor(Color::TRANSPARENT);
+            }
             renderContext->SetClipToFrame(true);
             renderContext->SetClipToBounds(true);
 
