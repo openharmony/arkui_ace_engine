@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 namespace Converter {
-
+#if defined(MODEL_COMPONENT_SUPPORTED)
 template<>
 void AssignCast(std::optional<OHOS::Render3D::SurfaceType>& dst, const Ark_ModelType& src)
 {
@@ -33,6 +33,7 @@ void AssignCast(std::optional<OHOS::Render3D::SurfaceType>& dst, const Ark_Model
         default: LOGE("Unexpected enum value in Ark_ModelType: %{public}d", src);
     }
 }
+#endif // MODEL_COMPONENT_SUPPORTED
 } // Converter
 } // OHOS::Ace::NG
 
@@ -75,19 +76,19 @@ void SetComponent3DOptionsImpl(Ark_NativePointer node,
             }
         }
         Converter::VisitUnion(options.value().scene,
-        [frameNode, surfaceType](const Ark_ResourceStr& value0) {
-            std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
-            std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
-            ModelViewNG::Create(frameNode, { bundleName, moduleName, surfaceType });
-        },
-        [](const Ark_Scene& value) {
+            [frameNode, surfaceType](const Ark_ResourceStr& value0) {
+                std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
+                std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
+                ModelViewNG::Create(frameNode, { bundleName, moduleName, surfaceType });
+            },
+            [](const Ark_Scene& value) {
 #if defined(KIT_3D_ENABLE)
-            auto sceneStub = Converter::Convert<std::string>(value.__SceneStub);
-            LOGE("Component3DInterfaceModifier::SetComponent3DOptionsImpl scene attribute is stub.");
+                auto sceneStub = Converter::Convert<std::string>(value.__SceneStub);
+                LOGE("Component3DInterfaceModifier::SetComponent3DOptionsImpl scene attribute is stub.");
 #endif
-        },
-        []() {}
-    );
+            },
+            []() {}
+        );
     }
 #endif
 }

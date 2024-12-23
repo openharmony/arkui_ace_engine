@@ -40,7 +40,6 @@ void ModelViewNG::Create(FrameNode* node, const ModelViewContext& context)
         });
 
     stack->Push(frameNode);
-    //frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
 }
 
 RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
