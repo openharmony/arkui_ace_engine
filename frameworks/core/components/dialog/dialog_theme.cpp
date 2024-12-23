@@ -46,7 +46,6 @@ void DialogTheme::Builder::ParsePattern(
     theme->dividerLength_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_LENGTH, 24.0_vp);
     theme->dividerBetweenButtonWidth_ = dialogPattern->GetAttr<Dimension>(DIALOG_DIVIDER_BETWEEN_BUTTON_WIDTH, 2.0_px);
     theme->dividerColor_ = dialogPattern->GetAttr<Color>("divider_color", Color(0x33000000));
-    theme->dialogBackgroundBlurStyle_ = dialogPattern->GetAttr<int>("dialog_background_blur_style", 0);
     auto defaultPadding = dialogPattern->GetAttr<Dimension>(DIALOG_CONTENT_TOP_PADDING, 24.0_vp);
     theme->contentAdjustPadding_ = Edge(defaultPadding, defaultPadding, defaultPadding, 0.0_vp);
     theme->defaultPaddingBottomFixed_ = dialogPattern->GetAttr<Dimension>("default_padding_bottom_fixed", 24.0_vp);
