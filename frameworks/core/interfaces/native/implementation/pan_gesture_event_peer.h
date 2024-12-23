@@ -15,8 +15,9 @@
 
 #pragma once
 
-#include "core/interfaces/native/implementation/gesture_event_peer.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct PanGestureEventPeer : public GestureEventPeer {
+struct PanGestureEventPeer
+    : public OHOS::Ace::NG::GeneratedModifier::SomeGestureEventPeer<OHOS::Ace::PanGestureEvent> {
     ~PanGestureEventPeer() override = default;
 };

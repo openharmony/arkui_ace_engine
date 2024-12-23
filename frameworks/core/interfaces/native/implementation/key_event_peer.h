@@ -19,6 +19,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct KeyEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::KeyEventInfo> {
+    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::KeyEventInfo> {
     ~KeyEventPeer() override = default;
 };

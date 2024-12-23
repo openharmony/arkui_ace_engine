@@ -37,8 +37,8 @@ const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
 const auto ATTRIBUTE_TEXT_VALUE = "yyy";
 const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
 const auto ATTRIBUTE_TEXT_OVERFLOW_NAME = "textOverflow";
-const std::u16string ERROR_TEXT = u"error_text";
-const std::u16string ERROR_TEXT2 = u"error_text2";
+const std::string ERROR_TEXT = "error_text";
+const std::string ERROR_TEXT2 = "error_text2";
 const std::string STR_TEST_TEXT("test_text");
 const std::string STR_TEST_TEXT2("test_text2");
 const std::string COLOR_RED = "#FFFF0000";
@@ -277,9 +277,9 @@ std::vector<TextOverflowTestStep> TEXT_OVERFLOW_VALID_TEST_PLAN = {
 };
 
 // events
-const auto CHECK_TEXT(u"test_text");
-PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
-const auto EMPTY_TEXT(u"");
+const auto CHECK_TEXT("test_text");
+PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
+const auto EMPTY_TEXT("");
 
 bool g_isEditChangeTest(true);
 std::string g_EventTestString("");
@@ -1298,13 +1298,13 @@ HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
     ASSERT_NE(modifier_->setInputFilter, nullptr);
     struct CheckEvent {
         int32_t nodeId;
-        std::u16string error;
+        std::string error;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
         checkEvent = {
             .nodeId = nodeId,
-            .error = Converter::Convert<std::u16string>(error)
+            .error = Converter::Convert<std::string>(error)
         };
     };
 
@@ -1641,8 +1641,8 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
     bool checkInvoke = false;
     auto frameNode = reinterpret_cast<FrameNode *>(node_);
     ASSERT_NE(frameNode, nullptr);
-    std::optional<std::u16string> placeholder;
-    std::optional<std::u16string> text;
+    std::optional<std::string> placeholder;
+    std::optional<std::string> text;
     auto internalController = TextFieldModelNG::GetController(frameNode, placeholder, text);
     ASSERT_NE(internalController, nullptr);
     internalController->SetStopEditing([&checkInvoke]() {
@@ -1725,16 +1725,16 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPaste, nullptr);
     TextCommonEvent event;
-    const std::u16string testString = u"testText";
+    const std::string testString = "testText";
     struct CheckEvent {
         int32_t resourceId;
-        std::u16string content;
+        std::string content;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = {
             .resourceId = resourceId,
-            .content = Converter::Convert<std::u16string>(content)
+            .content = Converter::Convert<std::string>(content)
         };
         auto arkCallback = Converter::OptConvert<Callback_Void>(event.preventDefault);
         if (arkCallback) {
@@ -1766,16 +1766,16 @@ HWTEST_F(TextAreaModifierTest, setOnPasteTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPaste, nullptr);
     TextCommonEvent event;
-    const std::u16string testString = u"testText";
+    const std::string testString = "testText";
     struct CheckEvent {
         int32_t resourceId;
-        std::u16string content;
+        std::string content;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = {
             .resourceId = resourceId,
-            .content = Converter::Convert<std::u16string>(content)
+            .content = Converter::Convert<std::string>(content)
         };
     };
 

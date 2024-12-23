@@ -290,7 +290,7 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::string& content,
         NG::TextCommonEvent& event) -> void {
         Converter::ConvContext ctx;
         auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
@@ -583,11 +583,11 @@ void InputFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    std::function<void(const std::u16string&)> onErrorEvent = nullptr;
+    std::function<void(const std::string&)> onErrorEvent = nullptr;
     if (error) {
         auto arkOnError = Converter::OptConvert<Callback_String_Void>(*error);
         if (arkOnError) {
-            onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::u16string& val) {
+            onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::string& val) {
                 Converter::ConvContext ctx;
                 arkCallback.Invoke(Converter::ArkValue<Ark_String>(val, &ctx));
             };

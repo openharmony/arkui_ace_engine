@@ -95,7 +95,7 @@ void Lunar1Impl(Ark_NativePointer node,
     auto lunar = Converter::OptConvert<bool>(*value).value_or(false);
     DatePickerModelNG::SetShowLunar(frameNode, lunar);
 }
-void DisappearTextStyle0Impl(Ark_NativePointer node,
+void DisappearTextStyleImpl(Ark_NativePointer node,
                              const Ark_PickerTextStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);

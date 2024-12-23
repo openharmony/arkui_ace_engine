@@ -225,51 +225,6 @@ void AssignArkValue(Ark_Date& dst, const PickerDate& src)
     time_t time = std::mktime(&tm);
     dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
 }
-    
-void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info)
-{
-    Offset globalOffset = info.GetGlobalLocation();
-    Offset localOffset = info.GetLocalLocation();
-    Offset screenOffset = info.GetScreenLocation();
-
-    onClick.axisHorizontal = ArkValue<Opt_Number>();
-    onClick.axisVertical = ArkValue<Opt_Number>();
-    onClick.displayX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    onClick.displayY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
-
-    onClick.pressure = ArkValue<Ark_Number>(0.0f);
-
-    onClick.screenX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    onClick.screenY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    onClick.source = static_cast<Ark_SourceType>(info.GetSourceDevice());
-
-    onClick.sourceTool = static_cast<Ark_SourceTool>(0);
-    onClick.deviceId = ArkValue<Opt_Number>();
-    onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.height = ArkValue<Ark_Length>(0);
-    onClick.target.area.width = ArkValue<Ark_Length>(0);
-
-    onClick.tiltX = ArkValue<Ark_Number>(0);
-    onClick.tiltY = ArkValue<Ark_Number>(0);
-
-    onClick.timestamp = ArkValue<Ark_Number>(
-        static_cast<float>(info.GetTimeStamp().time_since_epoch().count()));
-
-    onClick.windowX = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    onClick.windowY = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
-
-    onClick.x = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    onClick.y = ArkValue<Ark_Number>(PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
-
-    onClick.preventDefault = {
-        { 0, stubHoldRelease, stubHoldRelease },
-        stubCall,
-    };
-}
 
 void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
 {

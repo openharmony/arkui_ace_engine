@@ -29,12 +29,7 @@ using namespace Converter;
 using namespace TypeHelper;
 namespace {
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_NAME = "imageAIOptions";
-<<<<<<< HEAD
 const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
-const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME = "lightSource";
-=======
->>>>>>> 72d9cee86b (!54453 Tests for pointLight of the Column, Stack, Row, Flex, Image modifiers)
 const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
 const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
 const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
@@ -74,25 +69,6 @@ const auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
 const auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_COPY_OPTION_NAME = "copyOption";
 const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.None";
-<<<<<<< HEAD
-const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
-const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "true";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME = "positionX";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME = "positionY";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME = "positionZ";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME = "intensity";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME = "color";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE = "#FFFFFFFF";
-const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME = "illuminated";
-const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE = "IlluminatedType.NONE";
-const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME = "bloom";
-const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = "0";
-=======
->>>>>>> 72d9cee86b (!54453 Tests for pointLight of the Column, Stack, Row, Flex, Image modifiers)
 const auto ATTRIBUTE_EDGE_ANTIALIASING_NAME = "edgeAntialiasing";
 const auto ATTRIBUTE_EDGE_ANTIALIASING_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
@@ -109,8 +85,6 @@ const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME = "left";
 const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_NAME = "privacySensitive";
 const auto ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE = "false";
-const auto ATTRIBUTE_ORIENTATION_NAME = "orientation";
-const auto ATTRIBUTE_ORIENTATION_DEFAULT_VALUE = "1";
 } // namespace
 
 class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
@@ -1718,78 +1692,6 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, 
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setOrientationTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, setOrientationTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) << "Default value for attribute 'orientation'";
-}
-
-/*
- * @tc.name: setOrientationTestOrientationValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, setOrientationTestOrientationValidValues, TestSize.Level1)
-{
-    Ark_ImageRotateOrientation initValueOrientation;
-
-    // Initial setup
-    initValueOrientation = std::get<1>(Fixtures::testFixtureImageRotateOrientationValidValues[0]);
-
-    auto checkValue = [this, &initValueOrientation](const std::string& input, const std::string& expectedStr,
-                          const Ark_ImageRotateOrientation& value) {
-        Ark_ImageRotateOrientation inputValueOrientation = initValueOrientation;
-
-        inputValueOrientation = value;
-        modifier_->setOrientation(node_, inputValueOrientation);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setOrientation, attribute: orientation";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureImageRotateOrientationValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setOrientationTestOrientationInvalidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, setOrientationTestOrientationInvalidValues, TestSize.Level1)
-{
-    Ark_ImageRotateOrientation initValueOrientation;
-
-    // Initial setup
-    initValueOrientation = std::get<1>(Fixtures::testFixtureImageRotateOrientationValidValues[0]);
-
-    auto checkValue = [this, &initValueOrientation](const std::string& input, const Ark_ImageRotateOrientation& value) {
-        Ark_ImageRotateOrientation inputValueOrientation = initValueOrientation;
-
-        modifier_->setOrientation(node_, inputValueOrientation);
-        inputValueOrientation = value;
-        modifier_->setOrientation(node_, inputValueOrientation);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
-        EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setOrientation, attribute: orientation";
-    };
-
-    for (auto& [input, value] : Fixtures::testFixtureImageRotateOrientationInvalidValues) {
-        checkValue(input, value);
     }
 }
 } // namespace OHOS::Ace::NG

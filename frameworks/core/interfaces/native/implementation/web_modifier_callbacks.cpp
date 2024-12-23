@@ -701,23 +701,7 @@ bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
-    Ark_KeyEvent parameter;
-    parameter.type = Converter::ArkValue<Ark_KeyType>(keyEventInfo.GetKeyType());
-    parameter.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(keyEventInfo.GetKeyCode()));
-    parameter.keyText = Converter::ArkValue<Ark_String>(keyEventInfo.GetKeyText());
-    parameter.keySource = Converter::ArkValue<Ark_KeySource>(keyEventInfo.GetKeySource());
-    parameter.deviceId = Converter::ArkValue<Ark_Number>(keyEventInfo.GetDeviceId());
-    parameter.metaKey = Converter::ArkValue<Ark_Number>(keyEventInfo.GetMetaKey());
-    parameter.timestamp = Converter::ArkValue<Ark_Number>(
-        static_cast<double>(keyEventInfo.GetTimeStamp().time_since_epoch().count()));
-    auto stopPropagationHandler = [&keyEventInfo]() {
-        keyEventInfo.SetStopPropagation(true);
-    };
-    auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-        std::move(stopPropagationHandler));
-    parameter.stopPropagation = stopPropagation;
-    LOGE("WebAttributeModifier::OnInterceptKeyEventImpl IntentionCode supporting is not implemented yet");
-    parameter.unicode = Converter::ArkValue<Opt_Number>(keyEventInfo.GetUnicode());
+    auto parameter = Converter::ArkValue<Ark_KeyEvent>(keyEventInfo);
     auto arkCallback = CallbackHelper(*value, refNode.GetRawPtr());
     const auto result = arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(parameter);
     return result.value_or(false);

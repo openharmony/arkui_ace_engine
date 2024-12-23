@@ -56,7 +56,6 @@ class MockGestureEventResult : public GestureEventResult {
 
 public:
     void SetGestureEventResult(bool result) override {}
-    void SetGestureEventResult(bool result, bool stopPropagation) override {}
 };
 
 class WebModifierTest2 : public ModifierTestBase<GENERATED_ArkUIWebModifier,

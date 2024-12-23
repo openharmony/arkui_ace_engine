@@ -434,9 +434,9 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_Length& src);
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src);
-    template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
     template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
+    template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
@@ -484,8 +484,8 @@ namespace Converter {
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
-    template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> SheetHeight Convert(const Ark_Length& src);
+    template<> SheetHeight Convert(const Ark_SheetSize& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
@@ -613,8 +613,8 @@ namespace Converter {
     template<> void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src);
     template<> void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src);
     template<> void AssignCast(std::optional<NavDestinationMode>& dst, const Ark_NavDestinationMode& src);
-    template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
     template<> void AssignCast(std::optional<NavRouteMode>& dst, const Ark_NavRouteMode& src);
+    template<> void AssignCast(std::optional<NavigationType>& dst, const Ark_WebNavigationType& src);
     template<> void AssignCast(std::optional<NestedScrollMode>& dst, const Ark_NestedScrollMode& src);
     template<> void AssignCast(std::optional<OHOS::Ace::FontStyle>& dst, const Ark_FontStyle& src);
     template<> void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src);

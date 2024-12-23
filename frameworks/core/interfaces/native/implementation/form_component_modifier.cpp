@@ -104,17 +104,11 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_FormRenderingMode& src)
     }
 }
 template<>
-LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
+LiteralDimension Convert(const Ark_SizeOptions& src)
 {
-    auto dstWidth = Converter::OptConvert<Dimension>(src.width);
-    auto dstHeight = Converter::OptConvert<Dimension>(src.height);
-    if (!(dstWidth.has_value() && dstHeight.has_value())) {
-        dstWidth = Dimension();
-        dstHeight = Dimension();
-    }
     return LiteralDimension {
-        .width = dstWidth.value(),
-        .height = dstHeight.value()
+        .width = Converter::OptConvert<Dimension>(src.width).value_or(Dimension()),
+        .height = Converter::OptConvert<Dimension>(src.height).value_or(Dimension()),
     };
 }
 template<>

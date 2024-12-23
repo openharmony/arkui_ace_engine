@@ -36,8 +36,8 @@ namespace {
 const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
 const std::string STR_TEST_TEXT("test_text");
 const std::string STR_TEST_TEXT2("test_text2");
-const std::u16string ERROR_TEXT = u"error_text";
-const std::u16string ERROR_TEXT2 = u"error_text2";
+const std::string ERROR_TEXT = "error_text";
+const std::string ERROR_TEXT2 = "error_text2";
 const Ark_Int32 AINT32_POS(1234);
 const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
@@ -476,15 +476,15 @@ HWTEST_F(TextInputModifierTest, setOnTextSelectionChangeTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setOnCopyTest, TestSize.Level1)
 {
     const int32_t id = 123;
-    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr auto CHECK_TEXT("test_text");
     ASSERT_NE(modifier_->setOnCopy, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    static std::optional<std::u16string> expected = std::nullopt;
+    static std::optional<std::string> expected = std::nullopt;
     auto onCopy = [](const Ark_Int32 resourceId, Ark_String parameter) {
-        expected = Converter::Convert<std::u16string>(parameter);
+        expected = Converter::Convert<std::string>(parameter);
     };
     auto arkCallback = Converter::ArkValue<Callback_String_Void>(onCopy, id);
     modifier_->setOnCopy(node_, &arkCallback);
@@ -501,15 +501,15 @@ HWTEST_F(TextInputModifierTest, setOnCopyTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setOnCutTest, TestSize.Level1)
 {
     const int32_t id = 123;
-    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr auto CHECK_TEXT("test_text");
     ASSERT_NE(modifier_->setOnCut, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    static std::optional<std::u16string> expected = std::nullopt;
+    static std::optional<std::string> expected = std::nullopt;
     auto onCut = [](const Ark_Int32 resourceId, Ark_String parameter) {
-        expected = Converter::Convert<std::u16string>(parameter);
+        expected = Converter::Convert<std::string>(parameter);
     };
     auto arkCallback = Converter::ArkValue<Callback_String_Void>(onCut, id);
     modifier_->setOnCut(node_, &arkCallback);
@@ -526,17 +526,17 @@ HWTEST_F(TextInputModifierTest, setOnCutTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setOnDidInsertTest, TestSize.Level1)
 {
     const int32_t id = 123;
-    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr auto CHECK_TEXT("test_text");
     constexpr int32_t OFFSET(0);
     ASSERT_NE(modifier_->setOnDidInsert, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    static std::optional<std::u16string> expectedText = std::nullopt;
+    static std::optional<std::string> expectedText = std::nullopt;
     static std::optional<int32_t> expectedOffset = std::nullopt;
     auto onDidInsert = [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-        expectedText = Convert<std::u16string>(data.insertValue);
+        expectedText = Convert<std::string>(data.insertValue);
         expectedOffset = Convert<int32_t>(data.insertOffset);
     };
     auto arkCallback = Converter::ArkValue<Callback_InsertValue_Void>(onDidInsert, id);
@@ -562,7 +562,7 @@ HWTEST_F(TextInputModifierTest, setOnDidInsertTest, TestSize.Level1)
 HWTEST_F(TextInputModifierTest, setOnDidDeleteTest, TestSize.Level1)
 {
     const int32_t id = 123;
-    constexpr auto CHECK_TEXT(u"test_text");
+    constexpr auto CHECK_TEXT("test_text");
     constexpr int32_t OFFSET(0);
     constexpr TextDeleteDirection DIRECTION(TextDeleteDirection::FORWARD);
     ASSERT_NE(modifier_->setOnDidDelete, nullptr);
@@ -570,11 +570,11 @@ HWTEST_F(TextInputModifierTest, setOnDidDeleteTest, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    static std::optional<std::u16string> expectedText = std::nullopt;
+    static std::optional<std::string> expectedText = std::nullopt;
     static std::optional<int32_t> expectedOffset = std::nullopt;
     static std::optional<TextDeleteDirection> expectedDirection = std::nullopt;
     auto onDidDelete = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-        expectedText = Convert<std::u16string>(data.deleteValue);
+        expectedText = Convert<std::string>(data.deleteValue);
         expectedOffset = Convert<int32_t>(data.deleteOffset);
         expectedDirection = OptConvert<TextDeleteDirection>(data.direction);
     };
@@ -613,13 +613,13 @@ HWTEST_F(TextInputModifierTest, setInputFilterTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     struct CheckEvent {
         int32_t nodeId;
-        std::u16string error;
+        std::string error;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
         checkEvent = {
             .nodeId = id,
-            .error = Converter::Convert<std::u16string>(error)
+            .error = Converter::Convert<std::string>(error)
         };
     };
     auto arkCallback = Converter::ArkValue<Callback_String_Void>(onErrorChange, id);

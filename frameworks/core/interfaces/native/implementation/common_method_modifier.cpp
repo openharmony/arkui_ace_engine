@@ -128,6 +128,7 @@ using ClipType = std::variant<
 namespace GeneratedModifier {
 const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
 }
+
 auto g_isPopupCreated = [](FrameNode* frameNode) -> bool {
     auto targetId = frameNode->GetId();
     auto container = Container::Current();
@@ -363,10 +364,6 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOpt
         []() {});
 };
 
-namespace GeneratedModifier {
-const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
-}
-
 auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
     auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
     if (onAppear) {
@@ -484,8 +481,6 @@ auto g_bindSheetParams = [](SheetStyle sheetStyle, const Ark_SheetOptions& sheet
     sheetStyle.borderColor = OptConvert<BorderColorProperty>(sheetOptions.borderColor);
     sheetStyle.borderStyle = OptConvert<BorderStyleProperty>(sheetOptions.borderStyle);
     sheetStyle.shadow = OptConvert<Shadow>(sheetOptions.shadow);
-    sheetStyle.enableHoverMode = OptConvert<bool>(sheetOptions.enableHoverMode);
-    sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
     sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
     Validator::ValidateNonNegative(sheetStyle.width);
     auto height = OptConvert<SheetHeight>(sheetOptions.height);
@@ -1577,6 +1572,15 @@ GeometryTransitionOptions Convert(const Ark_GeometryTransitionOptions& src)
     return dst;
 }
 
+template<>
+RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
+{
+    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(src.ptr); peer) {
+        return peer->GetRecognizer();
+    }
+    return nullptr;
+}
+
 // this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
 {
@@ -1629,15 +1633,6 @@ void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
     }
 }
 
-template<>
-RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
-{
-    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(src.ptr); peer) {
-        return peer->GetRecognizer();
-    }
-    return nullptr;
-}
-
 void AssignArkValue(Ark_RectResult& dst, const RectF& src)
 {
     dst.x = ArkValue<Ark_Number>(src.GetX());
@@ -1656,69 +1651,7 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
-// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
-void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
-{
-    auto accessor = GeneratedModifier::GetGestureRecognizerAccessor();
-    CHECK_NULL_VOID(accessor);
-    dst.ptr = accessor->ctor();
-    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
-        peer->SetRecognizer(src);
-    }
-}
-void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
-{
-    auto tagOpt = src.GetTag();
-    dst.tag = ArkValue<Opt_String>(tagOpt);
-    dst.type = ArkValue<Ark_GestureControl_GestureType>(src.GetType());
-    dst.isSystemGesture = ArkValue<Ark_Boolean>(src.IsSystemGesture());
-}
 
-template<>
-void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeResult& src)
-{
-    switch (src) {
-        case ARK_GESTURE_JUDGE_RESULT_CONTINUE: dst = GestureJudgeResult::CONTINUE; break;
-        case ARK_GESTURE_JUDGE_RESULT_REJECT: dst = GestureJudgeResult::REJECT; break;
-        default: LOGE("Unexpected enum value in Ark_GestureJudgeResult: %{public}d", src);
-    }
-}
-
-void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
-{
-    dst.id = ArkValue<Ark_Number>(src.fingerId_);
-    dst.globalX = ArkValue<Ark_Number>(src.globalLocation_.GetX());
-    dst.globalY = ArkValue<Ark_Number>(src.globalLocation_.GetY());
-    dst.localX = ArkValue<Ark_Number>(src.localLocation_.GetX());
-    dst.localY = ArkValue<Ark_Number>(src.localLocation_.GetY());
-    dst.displayX = ArkValue<Ark_Number>(src.screenLocation_.GetX());
-    dst.displayY = ArkValue<Ark_Number>(src.screenLocation_.GetY());
-}
-
-template<>
-template<>
-ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& data)
-{
-    std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const FingerInfo& src) {
-        return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
-    });
-}
-
-void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
-{
-    dst.tiltX = ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
-    dst.tiltY = ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
-    dst.deviceId = ArkValue<Opt_Number>(src.GetDeviceId());
-    dst.target = ArkValue<Ark_EventTarget>(src.GetTarget());
-    dst.source = ArkValue<Ark_SourceType>(src.GetSourceDevice());
-    dst.sourceTool = ArkValue<Ark_SourceTool>(src.GetSourceTool());
-    dst.axisHorizontal = ArkValue<Opt_Number>();
-    dst.axisVertical = ArkValue<Opt_Number>();
-    auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(src.GetTimeStamp().time_since_epoch()).count();
-    dst.timestamp = ArkValue<Ark_Number>(tstamp);
-    dst.pressure = ArkValue<Ark_Number>(src.GetForce());
-    ArkArrayHolder<Array_FingerInfo> holder(src.GetFingerList());
-    dst.fingerList = holder.ArkValue();
 template<>
 RefPtr<PopupParam> Convert(const Ark_PopupOptions& src)
 {
@@ -2686,9 +2619,6 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
             -> bool {
             PipelineContext::SetCallBackNode(node);
             auto event = Converter::ArkValue<Ark_KeyEvent>(info);
-            const auto keeper = CallbackKeeper::Claim(std::move(stopPropagationHandler));
-            event.stopPropagation = keeper.ArkValue();
-            LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
             auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
             return Converter::Convert<bool>(arkResult);
         };
@@ -3406,7 +3336,7 @@ void OnDragStartImpl(Ark_NativePointer node,
         (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
         DragDropInfo result;
         CHECK_NULL_RETURN(info, result);
-        auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(*info);
+        auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(info);
         auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
 
         auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
@@ -4663,14 +4593,6 @@ void BindSheetImpl(Ark_NativePointer node,
                     ViewStackProcessor::GetInstance()->Push(uiNode);
                 };
             }, []() {});
-        auto offsetVal =
-            OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(sheetOptions->offset);
-        if (offsetVal) {
-            OffsetF sheetOffset;
-            sheetOffset.SetX(offsetVal.value().first->ConvertToPx());
-            sheetOffset.SetY(offsetVal.value().second->ConvertToPx());
-            sheetStyle.bottomOffset = sheetOffset;
-        }
         g_bindSheetParams(sheetStyle, sheetOptions.value());
     }
     ViewAbstractModelNG::BindSheet(frameNode, isShow, nullptr, std::move(buildFunc),

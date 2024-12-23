@@ -231,12 +231,6 @@ const std::vector<BoolTest> BOOL_TEST_PLAN = {
     { -25, "true" },
     { 25, "true" },
 };
-typedef std::pair<Opt_Boolean, std::string> OptBoolTest;
-const std::vector<OptBoolTest> OPT_BOOL_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Boolean>(false), "false" },
-    { Converter::ArkValue<Opt_Boolean>(true), "true" },
-    { Converter::ArkValue<Opt_Boolean>(Ark_Empty()), "false" },
-};
 
 typedef std::tuple<PickerDate, PickerDate, PickerDate> PickerDateStepTest;
 typedef std::tuple<std::string, std::string, std::string> PickerStringStepTest;
@@ -1102,23 +1096,5 @@ HWTEST_F(DatePickerModifierTest, setOnDateChangeTest, TestSize.Level1)
         EXPECT_EQ(selectedDate->GetMonth(), testValue.second.GetMonth());
         EXPECT_EQ(selectedDate->GetDay(), testValue.second.GetDay());
     };
-}
-
-/*
- * @tc.name: setLunar1Test
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(DatePickerModifierTest, setLunar1Test, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setLunar1, nullptr);
-    auto initialValue = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-    EXPECT_EQ(initialValue, ATTRIBUTE_LUNAR_DEFAULT_VALUE);
-
-    for (auto& [actual, expected] : OPT_BOOL_TEST_PLAN) {
-        modifier_->setLunar1(node_, &actual);
-        auto result = GetAttrValue<std::string>(node_, ATTRIBUTE_LUNAR_NAME);
-        EXPECT_EQ(result, expected);
-    }
 }
 } // namespace OHOS::Ace::NG

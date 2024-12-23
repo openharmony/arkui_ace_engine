@@ -16,24 +16,16 @@
 #include "reverse_converter.h"
 #include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/base_gesture_event_peer.h"
+
+#include "base/utils/string_utils.h"
+#include "core/interfaces/native/implementation/accessiblt_hover_event_peer.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
-#include "core/interfaces/native/implementation/mouse_event_peer.h"
 #include "validators.h"
-namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
-    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
-    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
-    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
-    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
-    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
-    const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
-    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
-}
 namespace OHOS::Ace {
 namespace {
 const std::string YEAR = "year";
@@ -43,6 +35,17 @@ const int32_t STD_TM_START_YEAR = 1900;
 const int32_t SEC_TO_MILLISEC = 1000;
 } // namespace
 } // namespace OHOS::Ace
+
+namespace OHOS::Ace::NG::GeneratedModifier {
+    const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor();
+    const GENERATED_ArkUIAccessibilityHoverEventAccessor* GetAccessibilityHoverEventAccessor();
+    const GENERATED_ArkUIClickEventAccessor* GetClickEventAccessor();
+    const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor();
+    const GENERATED_ArkUIGestureEventAccessor* GetGestureEventAccessor();
+    const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor();
+    const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor();
+    const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+}
 
 namespace OHOS::Ace::NG::Converter {
 void *ConvContext::Allocate(std::size_t size)
@@ -73,6 +76,14 @@ void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverIn
 void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
 {
     const auto peer = reinterpret_cast<BaseGestureEventPeer*>(GeneratedModifier::GetBaseGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.ptr = peer;
+}
+
+void AssignArkValue(Ark_AccessibilityHoverEvent& dst, const AccessibilityHoverInfo& src)
+{
+    const auto peer = reinterpret_cast<AccessibilityHoverEventPeer*>(
+        GeneratedModifier::GetAccessibilityHoverEventAccessor()->ctor());
     peer->SetEventInfo(src);
     dst.ptr = peer;
 }
@@ -185,7 +196,7 @@ void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& s
 
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
@@ -261,33 +272,6 @@ void AssignArkValue(Ark_Number& dst, const Dimension& src)
     AssignArkValue(dst, value);
 }
 
-void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
-}
-
-void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
-{
-    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
-    peer->SetEventInfo(src);
-    dst.result.ptr = peer;
-
-}
-
-void AssignArkValue(Ark_Date& dst, const PickerDate& src)
-{
-    auto date = src;
-    Validator::ValidatePickerDate(date);
-    std::tm tm {};
-    tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
-    tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11
-    tm.tm_mday = date.GetDay();
-    time_t time = std::mktime(&tm);
-    dst = reinterpret_cast<Ark_Date>(time * SEC_TO_MILLISEC);
-}
-
 void AssignArkValue(Ark_Date& dst, const std::string& src)
 {
     auto json = JsonUtil::ParseJsonString(src);
@@ -334,5 +318,19 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
     globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
     area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
     dst.area = area;
+}
+
+void AssignArkValue(Converter::ClickEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<ClickEventPeer*>(GeneratedModifier::GetClickEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
+}
+
+void AssignArkValue(Converter::GestureEventInfo& dst, const OHOS::Ace::GestureEvent& src)
+{
+    const auto peer = reinterpret_cast<GestureEventPeer*>(NG::GeneratedModifier::GetGestureEventAccessor()->ctor());
+    peer->SetEventInfo(src);
+    dst.result.ptr = peer;
 }
 } // namespace OHOS::Ace::NG::Converter

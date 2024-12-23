@@ -264,17 +264,17 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTestCallEvent, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPaste, nullptr);
     TextCommonEvent event;
-    const std::u16string testString = u"testText";
+    const std::string testString = "testText";
     const int contextId = 99999;
     struct CheckEvent {
         int32_t resourceId;
-        std::u16string content;
+        std::string content;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = {
             .resourceId = resourceId,
-            .content = Convert<std::u16string>(content),
+            .content = Convert<std::string>(content),
         };
         auto arkCallback = OptConvert<Callback_Void>(event.preventDefault);
         if (arkCallback) {
@@ -307,17 +307,17 @@ HWTEST_F(SearchModifierCallbackTest, setOnPasteTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOnPaste, nullptr);
     TextCommonEvent event;
-    const std::u16string testString = u"testText";
+    const std::string testString = "testText";
     const int contextId = 99999;
     struct CheckEvent {
         int32_t resourceId;
-        std::u16string content;
+        std::string content;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
         checkEvent = {
             .resourceId = resourceId,
-            .content = Convert<std::u16string>(content),
+            .content = Convert<std::string>(content),
         };
     };
     auto arkCallback = ArkValue<OnPasteCallback>(testCallback, contextId);
