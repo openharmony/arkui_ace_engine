@@ -184,7 +184,7 @@ void WindowScene::RegisterFocusCallback()
     CHECK_NULL_VOID(session_);
     auto requestFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->PostAsyncEvent(
             [weakThis]() {
@@ -202,7 +202,7 @@ void WindowScene::RegisterFocusCallback()
 
     auto lostFocusCallback = [weakThis = WeakClaim(this), instanceId = instanceId_]() {
         ContainerScope scope(instanceId);
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->PostAsyncEvent(
             [weakThis]() {
@@ -298,7 +298,7 @@ void WindowScene::BufferAvailableCallback()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
         std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallback", TaskExecutor::TaskType::UI);
@@ -328,7 +328,7 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
 
     CHECK_EQUAL_RETURN(fromMainThread, true, uiTask());
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
         std::move(uiTask), "ArkUIBufferAvailableCallbackForBlank", TaskExecutor::TaskType::UI);
@@ -356,7 +356,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(
         std::move(uiTask), "ArkUIWindowSceneBufferAvailableCallbackForSnapshot", TaskExecutor::TaskType::UI);
@@ -407,7 +407,7 @@ void WindowScene::OnActivation()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneActivation", TaskExecutor::TaskType::UI);
 }
@@ -473,7 +473,7 @@ void WindowScene::OnConnect()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneConnect", TaskExecutor::TaskType::UI);
 }
@@ -504,7 +504,7 @@ void WindowScene::OnDisconnect()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDisconnect", TaskExecutor::TaskType::UI);
 }
@@ -534,7 +534,7 @@ void WindowScene::OnLayoutFinished()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneLayoutFinished", TaskExecutor::TaskType::UI);
 }
@@ -561,7 +561,7 @@ void WindowScene::OnDrawingCompleted()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneDrawingCompleted", TaskExecutor::TaskType::UI);
 }
@@ -577,7 +577,7 @@ void WindowScene::OnRemoveBlank()
     };
 
     ContainerScope scope(instanceId_);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->PostAsyncEvent(std::move(uiTask), "ArkUIWindowSceneRemoveBlank", TaskExecutor::TaskType::UI);
 }
@@ -649,7 +649,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
 
 void WindowScene::CleanBlankWindow()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

@@ -122,7 +122,7 @@ RefPtr<FrameNode> GroupManager::GetCheckboxGroup(const std::string& group)
 WeakPtr<GroupManager> GroupManager::GetGroupManager()
 {
     WeakPtr<GroupManager> groupManager;
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, nullptr);
     if (Container::IsInSubContainer()) {
         auto overlayManager = context->GetOverlayManager();

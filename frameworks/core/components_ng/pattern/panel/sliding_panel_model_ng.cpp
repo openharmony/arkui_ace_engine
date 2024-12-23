@@ -62,7 +62,7 @@ void SlidingPanelModelNG::Create(bool isShow)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_VOID(dragBarTheme);
@@ -240,7 +240,7 @@ RefPtr<FrameNode> SlidingPanelModelNG::CreateFrameNode(int32_t nodeId)
 
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, panelNode);
         auto dragBarTheme = pipeline->GetTheme<DragBarTheme>();
         CHECK_NULL_RETURN(dragBarTheme, panelNode);

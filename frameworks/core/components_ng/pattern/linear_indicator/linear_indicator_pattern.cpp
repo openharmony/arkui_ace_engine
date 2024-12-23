@@ -159,7 +159,7 @@ void LinearIndicatorPattern::RegisterVisibleChange()
     if (hasVisibleChangeRegistered_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

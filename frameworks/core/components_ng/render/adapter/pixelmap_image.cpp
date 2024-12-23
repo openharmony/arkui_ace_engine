@@ -430,7 +430,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& srcRect, const RSRe
 
 void PixelMapImage::Cache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -439,7 +439,7 @@ void PixelMapImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto cache = pipeline->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

@@ -22,7 +22,7 @@ void StageLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     // apply safe area to page nodes
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     childInsets_ = pipeline->GetSafeArea();
     LayoutWrapper::ApplySafeArea(childInsets_, layoutConstraint);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {

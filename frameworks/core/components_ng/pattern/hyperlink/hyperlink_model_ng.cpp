@@ -30,7 +30,7 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
     stack->Push(hyperlinkNode);
     SetTextStyle(hyperlinkNode, content, address);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto draggable = pipeline->GetDraggable<HyperlinkTheme>();
     SetDraggable(draggable);
@@ -58,7 +58,7 @@ void HyperlinkModelNG::SetTextStyle(
     auto textStyle = PipelineBase::GetCurrentContext()->GetTheme<TextTheme>()->GetTextStyle();
     textLayoutProperty->UpdateContent(content.empty() ? address : content);
     textLayoutProperty->UpdateAddress(address);
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(textStyle.GetFontSize());
@@ -87,7 +87,7 @@ void HyperlinkModelNG::SetTextStyle(
     auto textTheme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     auto textStyle = textTheme->GetTextStyle();
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<HyperlinkTheme>();
+    auto theme = PipelineContext::GetCurrentContextSafelyWithCheck()->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(theme);
 
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);

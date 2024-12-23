@@ -181,7 +181,7 @@ int32_t DragDropManager::GetWindowId()
 
 RefPtr<FrameNode> DragDropManager::CreateDragRootNode(const RefPtr<UINode>& customNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
 
     auto rootNode = FrameNode::CreateFrameNodeWithTree(
@@ -244,7 +244,7 @@ void DragDropManager::UpdateItemDragPosition(int32_t globalX, int32_t globalY)
 
 void DragDropManager::HideDragPreviewOverlay()
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(manager);
@@ -366,7 +366,7 @@ RefPtr<FrameNode> DragDropManager::FindDragFrameNodeByPosition(float globalX, fl
 {
     auto rootNode = node;
     if (!rootNode) {
-        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_RETURN(pipeline, nullptr);
         rootNode = pipeline->GetRootElement();
     }
@@ -973,7 +973,7 @@ RefPtr<UnifiedData> DragDropManager::RequestUDMFDataWithUDKey(const std::string&
 void DragDropManager::TryGetDataBackGround(
     const RefPtr<FrameNode>& dragFrameNode, const PointerEvent& pointerEvent, const std::string& udKey, int32_t count)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -1036,7 +1036,7 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
     eventHub->HandleInternalOnDrop(event, extraParams);
     ClearVelocityInfo();
     SetIsDragged(false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragResult = event->GetResult();
     auto useCustomAnimation = event->IsUseCustomAnimation();
@@ -1187,7 +1187,7 @@ void DragDropManager::FireOnDragEvent(
     }
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (!eventHub->HasOnDrop() && !eventHub->HasOnItemDrop() && !eventHub->HasCustomerOnDrop()) {
         return;
@@ -1416,7 +1416,7 @@ int32_t DragDropManager::GetItemIndex(
 
 void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (!extraInfo.empty()) {
         if (!newData_) {
@@ -1450,7 +1450,7 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
 
 void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     if (!clipboard_) {
@@ -1477,7 +1477,7 @@ void DragDropManager::GetExtraInfoFromClipboard(std::string& extraInfo)
 
 void DragDropManager::RestoreClipboardData()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     if (!clipboard_) {
@@ -2147,7 +2147,7 @@ bool DragDropManager::IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& nod
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_RETURN(node, true);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, true);
     auto manager = pipeline->GetUIExtensionManager();
     CHECK_NULL_RETURN(manager, true);
@@ -2193,7 +2193,7 @@ void DragDropManager::HandleUIExtensionDragEvent(
 
 RectF DragDropManager::GetMenuPreviewRect()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, RectF());
     auto dragDropManager = pipelineContext->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, RectF());

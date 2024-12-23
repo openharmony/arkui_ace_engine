@@ -128,7 +128,7 @@ void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 
 void ResetRichEditorCaretColor(ArkUINodeHandle node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);
@@ -261,7 +261,7 @@ void SetRichEditorSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 col
 
 void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_VOID(richEditorTheme);

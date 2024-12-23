@@ -207,7 +207,7 @@ RefPtr<CanvasImage> DrawingImage::Clone()
 
 void DrawingImage::Cache(const std::string& key)
 {
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineCtx);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_VOID(cache);
@@ -219,7 +219,7 @@ void DrawingImage::Cache(const std::string& key)
 
 RefPtr<CanvasImage> DrawingImage::QueryFromCache(const std::string& key)
 {
-    auto pipelineCtx = PipelineContext::GetCurrentContext();
+    auto pipelineCtx = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineCtx, nullptr);
     auto cache = pipelineCtx->GetImageCache();
     CHECK_NULL_RETURN(cache, nullptr);

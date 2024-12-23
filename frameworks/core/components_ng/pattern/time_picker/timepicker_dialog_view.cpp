@@ -257,7 +257,7 @@ std::function<void()> TimePickerDialogView::CloseDialogEvent(const RefPtr<TimePi
 RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<void()>& timePickerSwitchEvent,
     const RefPtr<FrameNode>& timeNode, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
@@ -372,7 +372,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateButtonNode()
 
 RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode>& dateNode, bool isCreateDivider)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerPattern = dateNode->GetPattern<TimePickerRowPattern>();
@@ -424,7 +424,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateDividerNode(const RefPtr<FrameNode
 
 RefPtr<FrameNode> TimePickerDialogView::CreateTitleButtonNode(const RefPtr<FrameNode>& dateNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -624,7 +624,7 @@ void TimePickerDialogView::SwitchTimePickerPage(const RefPtr<FrameNode>& buttonT
 RefPtr<FrameNode> TimePickerDialogView::CreateConfirmNode(const RefPtr<FrameNode>& dateNode,
     const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos, DialogEvent& acceptEvent)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
@@ -743,7 +743,7 @@ void TimePickerDialogView::UpdateCancelButtonMargin(
 RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent& cancelEvent,
     const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     auto buttonTheme = pipeline->GetTheme<ButtonTheme>();
@@ -1024,7 +1024,7 @@ bool TimePickerDialogView::GetIsUserSetTextProperties(const PickerTextProperties
 }
 bool TimePickerDialogView::NeedAdaptForAging()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_RETURN(pickerTheme, false);

@@ -254,7 +254,7 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
 
 void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
@@ -1281,7 +1281,7 @@ void FormPattern::InitFormManagerDelegate()
         [weak = WeakClaim(this), instanceID](
             const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want) {
             ContainerScope scope(instanceID);
-            auto pipeline = PipelineContext::GetCurrentContext();
+            auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
             auto executor = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(executor);
@@ -2122,7 +2122,7 @@ void FormPattern::DoSkeletonAnimation()
         TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
     };
 
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     AnimationOption option = AnimationOption();
     option.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);

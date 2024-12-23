@@ -148,7 +148,7 @@ UIExtensionPattern::UIExtensionPattern(
     : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
     isAsyncModalBinding_(isAsyncModalBinding), sessionType_(sessionType)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -182,7 +182,7 @@ UIExtensionPattern::~UIExtensionPattern()
     }
     NotifyDestroy();
     FireModalOnDestroy();
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
@@ -195,7 +195,7 @@ UIExtensionPattern::~UIExtensionPattern()
 
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -210,7 +210,7 @@ void UIExtensionPattern::LogoutModalUIExtension()
 {
     auto sessionId = GetSessionId();
     UIEXT_LOGI("LogoutModalUIExtension sessionId %{public}d.", sessionId);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto overlay = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
@@ -452,7 +452,7 @@ void UIExtensionPattern::OnAccessibilityEvent(
 {
     UIEXT_LOGI("The accessibility event is reported and the current state is '%{public}s'.", ToString(state_));
     ContainerScope scope(instanceId_);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     uiExtensionOffset = uiExtensionId_ * NG::UI_EXTENSION_OFFSET_MAX + uiExtensionOffset;
     auto frontend = ngPipeline->GetFrontend();
@@ -559,7 +559,7 @@ void UIExtensionPattern::NotifyDestroy()
 void UIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -596,7 +596,7 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
@@ -725,7 +725,7 @@ bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 
 void UIExtensionPattern::HandleFocusEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (canFocusSendToUIExtension_) {
         if (pipeline->GetIsFocusActive()) {
@@ -747,7 +747,7 @@ void UIExtensionPattern::HandleBlurEvent()
 {
     DispatchFocusActiveEvent(false);
     DispatchFocusState(false);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
@@ -1129,7 +1129,7 @@ void UIExtensionPattern::InitializeAccessibility()
     }
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -1199,7 +1199,7 @@ void UIExtensionPattern::ResetAccessibilityChildTreeCallback()
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto instanceId = GetInstanceIdFromHost();
     ContainerScope scope(instanceId);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    auto ngPipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(ngPipeline);
     auto frontend = ngPipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
@@ -1255,7 +1255,7 @@ void UIExtensionPattern::AfterMountToParent()
 
 void UIExtensionPattern::RegisterVisibleAreaChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);

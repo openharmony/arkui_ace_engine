@@ -108,7 +108,7 @@ void TextClockPattern::OnAttachToFrameNode()
 
 void TextClockPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
 }

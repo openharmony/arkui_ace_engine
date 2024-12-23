@@ -735,7 +735,7 @@ int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
 
 const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, fontSizeValue);
     auto maxAppFontScale = pipeline->GetMaxAppFontScale();
     auto follow = pipeline->IsFollowSystem();

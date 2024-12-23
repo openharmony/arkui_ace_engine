@@ -181,7 +181,7 @@ void SetAnimationDuration(ArkUINodeHandle node, ArkUI_Float32 duration)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (std::isnan(duration)) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto tabTheme = pipelineContext->GetTheme<TabTheme>();
         CHECK_NULL_VOID(tabTheme);

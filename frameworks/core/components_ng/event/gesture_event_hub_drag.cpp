@@ -126,7 +126,7 @@ bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
 void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "DragDrop start long press action for web");
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -145,7 +145,7 @@ void GestureEventHub::StartLongPressActionForWeb(bool isFloatImage)
 void GestureEventHub::CancelDragForWeb()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop cancel drag for web");
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -170,7 +170,7 @@ void GestureEventHub::ResetDragActionForWeb()
 
     // fix drag failed when long press drag after 500ms and before 800ms
     // need to reset the state of the drag manager
-    auto pipeLine = PipelineContext::GetCurrentContext();
+    auto pipeLine = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeLine);
     auto dragDropManager = pipeLine->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -186,7 +186,7 @@ void GestureEventHub::StartDragTaskForWeb()
     }
 
     isReceivedDragGestureInfo_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto taskScheduler = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskScheduler);
@@ -386,7 +386,7 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, scale);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, scale);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, scale);
@@ -426,7 +426,7 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         CHECK_NULL_VOID(pattern);
         auto dragNode = pattern->MoveDragNode();
         CHECK_NULL_VOID(dragNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushPipelineImmediately();
         context = dragNode->GetRenderContext();
@@ -474,7 +474,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotallowDrag(info);
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto eventManager = pipeline->GetEventManager();
     CHECK_NULL_VOID(eventManager);
@@ -920,7 +920,7 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 {
     gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
     CHECK_NULL_VOID(dragDropProxy_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     if (dragDropManager->IsDragged()) {
@@ -930,7 +930,7 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     const static int32_t PLATFORM_VERSION_TEN = 10;
     if (pipeline && (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN)) {
         auto eventHub = eventHub_.Upgrade();
@@ -1106,7 +1106,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
 {
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -1136,7 +1136,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
 
 void GestureEventHub::SetNotMouseDragGatherPixelMaps()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

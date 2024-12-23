@@ -975,7 +975,7 @@ void WebModelNG::NotifyPopupWindowResult(int32_t webId, bool result)
 
 void WebModelNG::AddDragFrameNodeToManager()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);

@@ -5050,7 +5050,7 @@ void RosenRenderContext::MaskAnimation(const Color& initialBackgroundColor, cons
 
 float RosenRenderContext::GetStatusBarHeight()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, false);
     auto safeAreaInsets = context->GetSafeAreaWithoutProcess();
     auto statusBarHeight = safeAreaInsets.top_.Length();

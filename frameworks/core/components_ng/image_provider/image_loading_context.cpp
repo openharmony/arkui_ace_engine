@@ -107,7 +107,7 @@ SizeF ImageLoadingContext::CalculateTargetSize(const SizeF& srcSize, const SizeF
     }
 
     SizeF targetSize = rawImageSize;
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     auto viewScale = context ? context->GetViewScale() : 1.0;
     double widthScale = dstSize.Width() / srcSize.Width() * viewScale;
     double heightScale = dstSize.Height() / srcSize.Height() * viewScale;

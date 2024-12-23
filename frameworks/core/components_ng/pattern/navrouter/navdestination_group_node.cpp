@@ -424,7 +424,7 @@ void NavDestinationGroupNode::UpdateTextNodeListAsRenderGroup(
         CollectTextNodeAsRenderGroup(isPopPage);
     } else {
         CHECK_NULL_VOID(proxy);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterLayoutTask([weakNavDestiniation = WeakClaim(this),
             weakProxy = WeakPtr<NavigationTransitionProxy>(proxy)] () {

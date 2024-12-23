@@ -46,7 +46,7 @@ void OnPageEnd(const Callback_OnPageEndEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageFinishEvent>(info);
@@ -61,7 +61,7 @@ void OnPageBegin(const Callback_OnPageBeginEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebPageStartEvent>(info);
@@ -76,7 +76,7 @@ void OnProgressChange(const Callback_OnProgressChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebProgressChangeEvent>(info);
@@ -91,7 +91,7 @@ void OnTitleReceive(const Callback_OnTitleReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebTitleReceiveEvent>(info);
@@ -106,7 +106,7 @@ void OnGeolocationHide(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -117,7 +117,7 @@ void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebGeolocationShowEvent>(info);
@@ -134,7 +134,7 @@ void OnGeolocationShow(const Callback_OnGeolocationShowEvent_Void* value,
 void OnRequestSelected(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -145,7 +145,7 @@ bool OnAlert(const Callback_OnAlertEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
@@ -167,7 +167,7 @@ bool OnBeforeUnload(const Callback_OnBeforeUnloadEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
@@ -189,7 +189,7 @@ bool OnConfirm(const Callback_OnConfirmEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
@@ -211,7 +211,7 @@ bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebDialogEvent>(info);
@@ -232,7 +232,7 @@ bool OnPrompt(const Callback_OnPromptEvent_Boolean* value,
 bool OnConsole(const Callback_OnConsoleEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, const BaseEventInfo* info)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadWebConsoleLogEvent>(info);
@@ -252,7 +252,7 @@ void OnErrorReceive(const Callback_OnErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedErrorEvent>(info);
@@ -272,7 +272,7 @@ void OnHttpErrorReceive(const Callback_OnHttpErrorReceiveEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ReceivedHttpErrorEvent>(info);
@@ -292,7 +292,7 @@ void OnDownloadStart(const Callback_OnDownloadStartEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<DownloadStartEvent>(info);
@@ -311,7 +311,7 @@ void OnRefreshAccessedHistory(const Callback_OnRefreshAccessedHistoryEvent_Void*
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<RefreshAccessedHistoryEvent>(info);
@@ -327,7 +327,7 @@ bool OnUrlLoadIntercept(const Type_WebAttribute_onUrlLoadIntercept_callback* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<UrlLoadInterceptEvent>(info);
@@ -347,7 +347,7 @@ void OnRenderExited(const Callback_OnRenderExitedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<RenderExitedEvent>(info);
@@ -363,7 +363,7 @@ bool OnShowFileSelector(const Callback_OnShowFileSelectorEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
@@ -386,7 +386,7 @@ void OnResourceLoad(const Callback_OnResourceLoadEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ResourceLoadEvent>(info);
@@ -401,7 +401,7 @@ void OnFullScreenExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -412,7 +412,7 @@ void OnFullScreenEnter(const OnFullScreenEnterCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<FullScreenEnterEvent>(info);
@@ -431,7 +431,7 @@ void OnScaleChange(const Callback_OnScaleChangeEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ScaleChangeEvent>(info);
@@ -447,7 +447,7 @@ bool OnHttpAuthRequest(const Callback_OnHttpAuthRequestEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebHttpAuthEvent>(info);
@@ -469,7 +469,7 @@ RefPtr<WebResponse> OnInterceptRequest(const Callback_OnInterceptRequestEvent_We
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<OnInterceptRequestEvent>(info);
@@ -489,7 +489,7 @@ void OnPermissionRequest(const Callback_OnPermissionRequestEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
@@ -506,7 +506,7 @@ void OnScreenCaptureRequest(const Callback_OnScreenCaptureRequestEvent_Void* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebScreenCaptureRequestEvent>(info);
@@ -523,7 +523,7 @@ bool OnContextMenuShow(const Callback_OnContextMenuShowEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ContextMenuEvent>(info);
@@ -546,7 +546,7 @@ void OnContextMenuHide(const OnContextMenuHideCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -557,7 +557,7 @@ void OnSearchResultReceive(const Callback_OnSearchResultReceiveEvent_Void* value
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<SearchResultReceiveEvent>(info);
@@ -574,7 +574,7 @@ void OnScroll(const Callback_OnScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnScrollEvent>(info);
@@ -590,7 +590,7 @@ bool OnSslErrorEventReceive(const Callback_OnSslErrorEventReceiveEvent_Void* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslErrorEvent>(info);
@@ -611,7 +611,7 @@ bool OnSslError(const OnSslErrorEventCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebAllSslErrorEvent>(info);
@@ -638,7 +638,7 @@ bool OnClientAuthentication(const Callback_OnClientAuthenticationEvent_Void* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebSslSelectCertEvent>(info);
@@ -664,7 +664,7 @@ void OnWindowNew(const Callback_OnWindowNewEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewEvent>(info.get());
@@ -684,7 +684,7 @@ void OnWindowExit(const Callback_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -694,7 +694,7 @@ void OnWindowExit(const Callback_Void* value,
 bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, KeyEventInfo& keyEventInfo)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     Ark_KeyEvent parameter;
@@ -720,7 +720,7 @@ void OnTouchIconUrlReceived(const Callback_OnTouchIconUrlReceivedEvent_Void* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -743,7 +743,7 @@ void OnFaviconReceived(const Callback_OnFaviconReceivedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -758,7 +758,7 @@ void OnPageVisible(const Callback_OnPageVisibleEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -780,7 +780,7 @@ void OnDataResubmitted(const Callback_OnDataResubmittedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -804,7 +804,7 @@ void OnAudioStateChanged(const Callback_OnAudioStateChangedEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<AudioStateChangedEvent>(info.get());
@@ -819,7 +819,7 @@ void OnFirstContentfulPaint(const Callback_OnFirstContentfulPaintEvent_Void* val
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -843,7 +843,7 @@ void OnFirstMeaningfulPaint(const OnFirstMeaningfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -866,7 +866,7 @@ void OnLargestContentfulPaint(const OnLargestContentfulPaintCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -894,7 +894,7 @@ bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadInterceptEvent>(info);
@@ -913,7 +913,7 @@ bool OnLoadIntercept(const Callback_OnLoadInterceptEvent_Boolean* value,
 void OnControllerAttached(const Callback_Void* value, WeakPtr<FrameNode> weakNode, int32_t instanceId)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -931,7 +931,7 @@ void OnOverScroll(const Callback_OnOverScrollEvent_Void* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<WebOnOverScrollEvent>(info);
@@ -947,7 +947,7 @@ void OnSafeBrowsingCheckResult(const OnSafeBrowsingCheckResultCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -969,7 +969,7 @@ void OnNavigationEntryCommitted(const OnNavigationEntryCommittedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -995,7 +995,7 @@ void OnIntelligentTrackingPrevention(const OnIntelligentTrackingPreventionCallba
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -1092,7 +1092,7 @@ bool OnOverrideUrlLoading(const OnOverrideUrlLoadingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<LoadOverrideEvent>(info);
@@ -1112,7 +1112,7 @@ void OnRenderProcessNotResponding(const OnRenderProcessNotRespondingCallback* va
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<RenderProcessNotRespondingEvent>(info);
@@ -1130,7 +1130,7 @@ void OnRenderProcessResponding(const OnRenderProcessRespondingCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto arkCallback = CallbackHelper(*value);
@@ -1141,7 +1141,7 @@ void OnViewportFitChanged(const OnViewportFitChangedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<ViewportFitChangedEvent>(info);
@@ -1157,7 +1157,7 @@ WebKeyboardOption OnWebKeyboard(const WebKeyboardCallback* valueCallback,
 {
     WebKeyboardOption opt;
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, opt);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<InterceptKeyboardEvent>(info);
@@ -1195,7 +1195,7 @@ void OnAdsBlocked(const OnAdsBlockedCallback* value,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {
     ContainerScope scope(instanceId);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     auto* eventInfo = TypeInfoHelper::DynamicCast<AdsBlockedEvent>(info);

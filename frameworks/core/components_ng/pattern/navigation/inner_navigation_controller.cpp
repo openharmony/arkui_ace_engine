@@ -123,7 +123,7 @@ void InnerNavigationController::PushInPIP(int32_t handle)
     }
 
     navigationStack->ReOrderCache(cacheNode->first, cacheNode->second);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto nodePairs = navigationStack->GetAllNavDestinationNodes();
@@ -157,7 +157,7 @@ void InnerNavigationController::DeletePIPMode(int32_t handle)
     CHECK_NULL_VOID(navigationPattern);
     auto navigationStack = navigationPattern->GetNavigationStack();
     CHECK_NULL_VOID(navigationStack);
-    auto context = NG::PipelineContext::GetCurrentContext();
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
 
     auto task = [weakStack = AceType::WeakClaim(AceType::RawPtr(navigationStack)), handle]() {

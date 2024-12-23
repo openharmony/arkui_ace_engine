@@ -376,7 +376,7 @@ void RichEditorDragOverlayModifier::StartFloatingSelBackgroundAnimate()
 
 Color RichEditorDragOverlayModifier::GetDragBackgroundColor(const Color& defaultColor)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, defaultColor);
     auto richEditorTheme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richEditorTheme, defaultColor);

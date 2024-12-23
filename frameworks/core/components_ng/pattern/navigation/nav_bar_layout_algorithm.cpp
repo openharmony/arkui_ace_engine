@@ -129,7 +129,7 @@ bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutPropert
         return false;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
 
@@ -167,7 +167,7 @@ bool CheckBottomEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutProp
         return false;
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
 
@@ -191,7 +191,7 @@ NavSafeArea CheckIgnoreLayoutSafeArea(LayoutWrapper* layoutWrapper, const RefPtr
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
     NavSafeArea safeArea;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, safeArea);
     auto inset = pipeline->GetSafeArea();
     auto safeAreaManager = pipeline->GetSafeAreaManager();

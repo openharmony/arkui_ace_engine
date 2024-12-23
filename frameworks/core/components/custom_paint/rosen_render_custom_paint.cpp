@@ -675,7 +675,7 @@ double RosenRenderCustomPaint::MeasureTextInner(const MeasureContext& context)
 
 bool RosenRenderCustomPaint::IsApplyIndent(const MeasureContext& context, double& indent)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
     if (context.textIndent.value().Unit() != DimensionUnit::PERCENT) {
         indent = context.textIndent.value().ConvertToPx();

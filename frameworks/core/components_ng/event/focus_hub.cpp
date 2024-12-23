@@ -733,7 +733,7 @@ bool FocusHub::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
     auto onKeyPreIme = GetOnKeyPreIme();
     if (onKeyPreIme) {
         bool retPreIme = onKeyPreIme(info);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         auto eventManager = pipeline->GetEventManager();
         if (eventManager) {
             eventManager->SetIsKeyConsumed(retPreIme);
@@ -2152,7 +2152,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
             moveOffset, parentFrameNode->GetTag().c_str(), parentFrameNode->GetId(), scrollAxis);
         auto ret = scrollFunc(parentPattern->IsReverse() ? -moveOffset : moveOffset);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline) {
             pipeline->FlushUITasks();
         }

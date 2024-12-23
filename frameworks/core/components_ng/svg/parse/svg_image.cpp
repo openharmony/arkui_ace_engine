@@ -84,7 +84,7 @@ std::shared_ptr<RSData> SvgImage::LoadLocalImage(const std::string& uri)
         assetSrc = assetSrc.substr(2); // 2 : get the asset src without './'.
     }
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (!pipelineContext) {
         LOGW("invalid pipeline context");
         return nullptr;

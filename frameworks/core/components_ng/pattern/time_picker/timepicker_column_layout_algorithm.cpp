@@ -42,7 +42,7 @@ GradientColor CreatePercentGradientColor(float percent, Color color)
 } // namespace
 void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -157,7 +157,7 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
     const RefPtr<LayoutWrapper>& childLayoutWrapper, LayoutWrapper* layoutWrapper)
 {
     SizeF frameSize = { -1.0f, -1.0f };
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
@@ -177,7 +177,7 @@ void TimePickerColumnLayoutAlgorithm::ChangeAmPmTextStyle(uint32_t index, uint32
 void TimePickerColumnLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);

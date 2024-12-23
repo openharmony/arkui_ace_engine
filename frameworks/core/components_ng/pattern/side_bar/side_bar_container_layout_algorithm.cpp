@@ -49,7 +49,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto idealSize = PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
     CreateIdealSize(
@@ -61,7 +61,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto parentWidth = idealSize.Width();
     realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
     if (needInitRealSideBarWidth_ || NearZero(realSideBarWidth_)) {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             GetAllPropertyValue(layoutProperty, parentWidth);
         } else {
@@ -132,7 +132,7 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
 void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
@@ -167,7 +167,7 @@ void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper*
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
 
     if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
@@ -406,7 +406,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto sideBarIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto sideBarIdealSize = PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT():
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
@@ -419,7 +419,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     sideBarIdealSize.SetWidth(realSideBarWidth_);
     sideBarIdealSize.SetHeight(realSideBarHeight_);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
@@ -497,7 +497,7 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     }
     contentWidth = std::max(contentWidth, minContentWidth_);
 
-    auto contentIdealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto contentIdealSize = PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
     CreateIdealSize(

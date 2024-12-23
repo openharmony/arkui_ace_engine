@@ -148,7 +148,7 @@ constexpr double DISTANCE_THRESHOLD = 20.0;
 
 RefPtr<FrameNode> GetLastPage()
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_RETURN(stageManager, nullptr);
@@ -227,7 +227,7 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     CHECK_NULL_VOID(menuPattern);
     auto previewPosition = menuPattern->GetPreviewOriginOffset();
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -295,7 +295,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(previewPattern);
     // reverse scale
     auto scaleTo = previewPattern->GetHoverImageScaleFrom();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -384,7 +384,7 @@ void UpdateContextMenuDisappearPositionAnimation(const RefPtr<FrameNode>& menu, 
     menuChild->GetGeometryNode()->SetFrameOffset(menuPosition);
     menuPattern->SetEndOffset(menuPosition);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -472,7 +472,7 @@ void ContextMenuSwitchDragPreviewAnimationProc(const RefPtr<FrameNode>& menu,
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern && menuWrapperPattern->GetIsShowHoverImage());
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -538,7 +538,7 @@ void ShowContextMenuDisappearAnimation(
     auto menuPosition = hasTransition ? menuPattern->GetEndOffset() : menuPattern->GetPreviewMenuDisappearPosition();
     menuWrapperPattern->ClearAllSubMenu();
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -605,7 +605,7 @@ OverlayManager::~OverlayManager()
 void OverlayManager::UpdateContextMenuDisappearPosition(
     const NG::OffsetF& offset, float menuScale, bool isRedragStart, int32_t menuWrapperId)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -705,7 +705,7 @@ void OverlayManager::ContextMenuSwitchDragPreviewAnimation(const RefPtr<NG::Fram
 void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
 {
     TAG_LOGI(AceLogTag::ACE_DIALOG, "post dialog finish event enter");
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -801,7 +801,7 @@ void OverlayManager::OpenDialogAnimation(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "open dialog animation");
     CHECK_NULL_VOID(node);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -863,7 +863,7 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog animation");
     CHECK_NULL_VOID(node);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -989,7 +989,7 @@ void OverlayManager::CloseDialogMatchTransition(const RefPtr<FrameNode>& node)
 
 void OverlayManager::SetContainerButtonEnable(bool isEnabled)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->SetCloseButtonStatus(isEnabled);
 }
@@ -1073,7 +1073,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
             overlayManager->SendToAccessibility(menuWK, true);
         });
     if (wrapperPattern->GetPreviewMode() == MenuPreviewMode::CUSTOM) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
         CHECK_NULL_VOID(menuTheme);
@@ -1212,7 +1212,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                     overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
                 });
         } else {
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
@@ -1348,7 +1348,7 @@ bool OverlayManager::IsContextMenuBindedOnOrigNode()
 void OverlayManager::ShowToast(const NG::ToastInfo& toastInfo, const std::function<void(int32_t)>& callback)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show toast enter");
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
@@ -1424,7 +1424,7 @@ void OverlayManager::OpenToastAnimation(const RefPtr<FrameNode>& toastNode, int3
     });
     option.SetOnFinishEvent([continuousTask = continuousTask_, duration, id = Container::CurrentId()] {
         ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -1470,7 +1470,7 @@ void OverlayManager::PopToast(int32_t toastId)
         }
         auto toastUnderPop = toastIter->second.Upgrade();
         CHECK_NULL_VOID(toastUnderPop);
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
@@ -1519,7 +1519,7 @@ void OverlayManager::PopToast(int32_t toastId)
     }
 #endif
     // start animation immediately
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
     auto toastProperty = toastUnderPop->GetLayoutProperty<ToastLayoutProperty>();
@@ -1539,7 +1539,7 @@ void OverlayManager::ClearToastInSubwindow()
 void OverlayManager::ClearToast()
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "clear toast enter");
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
@@ -1607,7 +1607,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
     CHECK_NULL_VOID(rootNode);
     auto frameNode = AceType::DynamicCast<FrameNode>(rootNode);
     if (frameNode && !frameNode->IsLayoutComplete()) {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -2703,7 +2703,7 @@ void RegisterDialogCallback(
     const RefPtr<FrameNode>& node, std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent)
 {
     CHECK_NULL_VOID(node);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
@@ -3684,7 +3684,7 @@ void OverlayManager::ResetLowerNodeFocusable(const RefPtr<FrameNode>& currentOve
 
 void OverlayManager::SaveLastModalNode()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto stageManager = pipeline->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -4115,7 +4115,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
 {
     auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
     ContainerScope scope(instanceId);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto bindSheetTask = [weak = AceType::WeakClaim(this), isShow, callback = std::move(callback),
                              buildNodeFunc = std::move(buildNodeFunc),
@@ -4136,7 +4136,7 @@ void OverlayManager::BindSheet(bool isShow, std::function<void(const std::string
             std::move(onWillAppear), std::move(onWillDisappear), std::move(onHeightDidChange),
             std::move(onDetentsDidChange), std::move(onWidthDidChange), std::move(onTypeDidChange),
             std::move(sheetSpringBack), targetNode);
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
     };
@@ -4161,7 +4161,7 @@ void OverlayManager::InitSheetMask(
 {
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -4875,7 +4875,7 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
 {
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
@@ -4949,7 +4949,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
             [rootWeak = rootNodeWeak_, sheetWK = WeakClaim(RawPtr(sheetNode)), id = Container::CurrentId(),
                     weakOverlayManager = WeakClaim(this)] {
                 ContainerScope scope(id);
-                auto context = PipelineContext::GetCurrentContext();
+                auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(context);
                 auto taskExecutor = context->GetTaskExecutor();
                 CHECK_NULL_VOID(taskExecutor);
@@ -5425,7 +5425,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "BindKeyboard targetId:%{public}d", targetId);
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
@@ -5655,7 +5655,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
         }
     });
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -5668,7 +5668,7 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y,
 
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED);
     scaleOption.SetOnFinishEvent([weak = WeakClaim(this), isSubwindowOverlay] {
-        auto pipeline = PipelineContext::GetCurrentContext();
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         auto dragDropManager = pipeline->GetDragDropManager();
         CHECK_NULL_VOID(dragDropManager);
@@ -5767,7 +5767,7 @@ void OverlayManager::RemoveFilterAnimation()
     CHECK_NULL_VOID(filterNode);
     auto filterContext = filterNode->GetRenderContext();
     CHECK_NULL_VOID(filterContext);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -6067,7 +6067,7 @@ RefPtr<FrameNode> OverlayManager::CreateAIEntityMenu(
 {
     TAG_LOGI(AceLogTag::ACE_OVERLAY, "create AI entity menu enter");
     CHECK_NULL_RETURN(targetNode, nullptr);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, nullptr);
     MenuParam menuParam;
     menuParam.type = MenuType::MENU;
@@ -6154,7 +6154,7 @@ void OverlayManager::CreateOverlayNode()
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -6307,7 +6307,7 @@ void OverlayManager::MarkDirty(PropertyChangeFlag flag)
 {
     auto root = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(root);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto markNode = root;
     if (pipeline->GetInstallationFree()) {
@@ -6469,7 +6469,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
     option.SetCurve(Curves::SHARP);
 
     option.SetOnFinishEvent([weak = gatherNodeWeak_] {
-        auto context = PipelineContext::GetCurrentContext();
+        auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
         auto taskExecutor = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
@@ -6640,7 +6640,7 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     auto filterRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(filterRenderContext);
 
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
@@ -6654,7 +6654,7 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
     option.SetDuration(menuTheme->GetFilterAnimationDuration());
     option.SetCurve(Curves::SHARP);
     option.SetOnFinishEvent([] {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
+        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         auto manager = pipelineContext->GetOverlayManager();
         CHECK_NULL_VOID(manager);
         manager->SetFilterActive(false);
