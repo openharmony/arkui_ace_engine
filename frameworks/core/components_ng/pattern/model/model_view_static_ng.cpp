@@ -27,6 +27,22 @@
 
 namespace OHOS::Ace::NG {
 
+void ModelViewNG::Create(FrameNode* node, const ModelViewContext& context)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    static int staticKey = 0;
+
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MODEL_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MODEL_ETS_TAG, nodeId, [&context]() {
+            return AceType::MakeRefPtr<ModelPattern>(staticKey++, context);
+        });
+
+    stack->Push(frameNode);
+    //frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+}
+
 RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
 {
     static uint32_t staticKey = 0;
