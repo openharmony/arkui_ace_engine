@@ -348,6 +348,8 @@ public:
     bool GetContainerCustomTitleVisible() override;
 
     bool GetContainerControlButtonVisible() override;
+
+    void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

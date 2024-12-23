@@ -2369,6 +2369,36 @@ bool UIContentImpl::ProcessVsyncEvent(uint64_t timeStampNanos)
     return false;
 }
 
+void BuildParsedConfig(Platform::ParsedConfig& parsedConfig,
+    const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config, const bool formFontUseDefault)
+{
+    parsedConfig.colorMode = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_COLORMODE);
+    parsedConfig.deviceAccess = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::INPUT_POINTER_DEVICE);
+    parsedConfig.direction = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DIRECTION);
+    parsedConfig.densitydpi = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
+    parsedConfig.fontFamily = config->GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_FONT);
+    parsedConfig.themeTag = config->GetItem("ohos.application.theme");
+    parsedConfig.colorModeIsSetByApp = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::COLORMODE_IS_SET_BY_APP);
+    parsedConfig.mcc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MCC);
+    parsedConfig.mnc = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_MNC);
+    parsedConfig.fontId = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_ID);
+    // Process system language and preferred language
+    auto isPreferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::IS_PREFERRED_LANGUAGE);
+    if (isPreferredLanguage == IS_PREFERRED_LANGUAGE) {
+        parsedConfig.preferredLanguage = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    } else {
+        parsedConfig.languageTag = config->GetItem(OHOS::AppExecFwk::GlobalConfigurationKey::SYSTEM_LANGUAGE);
+    }
+    // EtsCard Font followSytem disable
+    if (formFontUseDefault) {
+        parsedConfig.fontScale = "1.0";
+        parsedConfig.fontWeightScale = "1.0";
+    } else {
+        parsedConfig.fontScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_SIZE_SCALE);
+        parsedConfig.fontWeightScale = config->GetItem(OHOS::AAFwk::GlobalConfigurationKey::SYSTEM_FONT_WEIGHT_SCALE);
+    }
+}
+
 void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
 {
     CHECK_NULL_VOID(config);
@@ -2423,6 +2453,25 @@ void UIContentImpl::UpdateConfiguration(const std::shared_ptr<OHOS::AppExecFwk::
                 instanceId, bundleName.c_str(), moduleName.c_str(), config->GetName().c_str());
         },
         TaskExecutor::TaskType::UI, "ArkUIUIContentUpdateConfiguration");
+}
+
+void UIContentImpl::UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config)
+{
+    CHECK_NULL_VOID(config);
+
+    auto dialogContainer = Platform::DialogContainer::GetContainer(instanceId_);
+    if (dialogContainer) {
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    bool formFontUseDefault = isFormRender_ && !fontScaleFollowSystem_;
+    Platform::ParsedConfig parsedConfig;
+    BuildParsedConfig(parsedConfig, config, formFontUseDefault);
+    container->UpdateConfigurationSyncForAll(parsedConfig, config->GetName());
+    LOGI("[%{public}d][%{public}s][%{public}s] UpdateConfigurationSyncForAll, name:%{public}s",
+        instanceId_, bundleName_.c_str(), moduleName_.c_str(), config->GetName().c_str());
 }
 
 void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Rosen::WindowSizeChangeReason reason,
