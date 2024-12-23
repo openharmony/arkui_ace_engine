@@ -108,6 +108,42 @@ public:
         groupProperty->propMotionBlur = motionBlurOption;
     }
 
+    void UpdateTransition(const TransitionOptions& options)
+    {
+        const auto& groupPropertyA = GetOrCreateTransitionAppearing();
+        if (options.Type == TransitionType::APPEARING || options.Type == TransitionType::ALL) {
+            groupPropertyA->Type = options.Type;
+            if (options.HasOpacity()) {
+                groupPropertyA->UpdateOpacity(options.GetOpacityValue());
+            }
+            if (options.HasTranslate()) {
+                groupPropertyA->UpdateTranslate(options.GetTranslateValue());
+            }
+            if (options.HasScale()) {
+                groupPropertyA->UpdateScale(options.GetScaleValue());
+            }
+            if (options.HasRotate()) {
+                groupPropertyA->UpdateRotate(options.GetRotateValue());
+            }
+        }
+        const auto& groupPropertyD = GetOrCreateTransitionDisappearing();
+        if (options.Type == TransitionType::DISAPPEARING || options.Type == TransitionType::ALL) {
+            groupPropertyD->Type = options.Type;
+            if (options.HasOpacity()) {
+                groupPropertyD->UpdateOpacity(options.GetOpacityValue());
+            }
+            if (options.HasTranslate()) {
+                groupPropertyD->UpdateTranslate(options.GetTranslateValue());
+            }
+            if (options.HasScale()) {
+                groupPropertyD->UpdateScale(options.GetScaleValue());
+            }
+            if (options.HasRotate()) {
+                groupPropertyD->UpdateRotate(options.GetRotateValue());
+            }
+        }
+    }
+
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
     {
         return 0;

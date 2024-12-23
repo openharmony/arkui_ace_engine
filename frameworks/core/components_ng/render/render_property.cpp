@@ -341,24 +341,21 @@ void TransformProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     if (filter.IsFastFilter()) {
         return;
     }
-    if (propTransformRotate.has_value()) {
-        auto jsonValue = JsonUtil::Create(true);
-        jsonValue->Put("x", std::to_string(propTransformRotate->x).c_str());
-        jsonValue->Put("y", std::to_string(propTransformRotate->y).c_str());
-        jsonValue->Put("z", std::to_string(propTransformRotate->z).c_str());
-        jsonValue->Put("angle", std::to_string(propTransformRotate->w).c_str());
-        jsonValue->Put("perspective", std::to_string(propTransformRotate->v).c_str());
-        jsonValue->Put("centerX", center.GetX().ToString().c_str());
-        jsonValue->Put("centerY", center.GetY().ToString().c_str());
-        if (center.GetZ().has_value()) {
-            jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
-        } else {
-            json->PutExtAttr("centerZ", JsonUtil::Create(true), filter);
-        }
-        json->PutExtAttr("rotate", jsonValue, filter);
+    auto transformRotate = HasTransformRotate() ? GetTransformRotateValue() : DEFAULT_ROTATE_VEC;
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("x", std::to_string(transformRotate.x).c_str());
+    jsonValue->Put("y", std::to_string(transformRotate.y).c_str());
+    jsonValue->Put("z", std::to_string(transformRotate.z).c_str());
+    jsonValue->Put("angle", std::to_string(transformRotate.w).c_str());
+    jsonValue->Put("perspective", std::to_string(transformRotate.v).c_str());
+    jsonValue->Put("centerX", center.GetX().ToString().c_str());
+    jsonValue->Put("centerY", center.GetY().ToString().c_str());
+    if (center.GetZ().has_value()) {
+        jsonValue->Put("centerZ", center.GetZ().value().ToString().c_str());
     } else {
-        json->PutExtAttr("rotate", JsonUtil::Create(true), filter);
+        json->PutExtAttr("centerZ", Dimension().ToString().c_str(), filter);
     }
+    json->PutExtAttr("rotate", jsonValue, filter);
 
     if (propTransformScale.has_value()) {
         auto jsonValue = JsonUtil::Create(true);

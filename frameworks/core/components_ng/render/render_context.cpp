@@ -164,12 +164,32 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         json->PutExtAttr("clickEffect", clickEffectJsonValue, filter);
     }
     ObscuredToJsonValue(json, filter);
+    TransitionToJsonValue(json, filter);
     json->PutExtAttr("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str(), filter);
     json->PutExtAttr("useShadowBatching", propUseShadowBatching_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("useEffect", propUseEffect_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("useEffectType",
         UseEffectTypeToString(propUseEffectType_.value_or(EffectType::DEFAULT)).c_str(), filter);
+}
+
+void RenderContext::TransitionToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto transitionOptionJson = JsonUtil::Create(true);
+    const auto& transitionA = GetTransitionAppearing();
+    if (transitionA) {
+        auto transitionJson = JsonUtil::Create(true);
+        transitionOptionJson->PutExtAttr("insert", transitionA->ToJsonValue(), filter);
+    }
+    const auto& transitionD = GetTransitionDisappearing();
+    if (transitionD) {
+        transitionOptionJson->PutExtAttr("delete", transitionD->ToJsonValue(), filter);
+    }
+    json->PutExtAttr("transition", transitionOptionJson, filter);
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
