@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "core/gestures/drag_event.h"
@@ -146,6 +147,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);

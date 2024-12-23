@@ -256,4 +256,10 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
+{
+    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
+        peer->SetRecognizer(src);
+    }
+}
 } // namespace OHOS::Ace::NG::Converter

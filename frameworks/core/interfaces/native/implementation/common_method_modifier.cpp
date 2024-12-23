@@ -31,11 +31,11 @@
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
-
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
+#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "core/interfaces/native/implementation/progress_mask_peer.h"
 #include "core/interfaces/native/implementation/transition_effect_peer_impl.h"
 #include "base/log/log_wrapper.h"
@@ -1450,6 +1450,15 @@ void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
     } else {
         dst.reset();
     }
+}
+
+template<>
+RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
+{
+    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(src.ptr); peer) {
+        return peer->GetRecognizer();
+    }
+    return nullptr;
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -3780,14 +3789,26 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(callback); // for enums
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin1(frameNode, convValue);
 }
+
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
                                              const ShouldBuiltInRecognizerParallelWithCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetShouldBuiltInRecognizerParallelWith(frameNode, convValue);
+    auto shouldBuiltInRecognizerParallelWithFunc = [callback = CallbackHelper(*value, frameNode), node = frameNode](
+        const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
+    ) -> RefPtr<NG::NGGestureRecognizer> {
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(node));
+
+        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
+        Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
+        auto arkValOthers = holderOthers.ArkValue();
+        auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
+            Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        return resultOpt.value_or(nullptr);
+    };
+    ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
 }
 void MonopolizeEventsImpl(Ark_NativePointer node,
                           Ark_Boolean value)
