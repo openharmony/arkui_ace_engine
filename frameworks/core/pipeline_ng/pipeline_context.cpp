@@ -4663,10 +4663,6 @@ std::string PipelineContext::GetCurrentExtraInfo()
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        auto window = GetWindow();
-        CHECK_NULL_VOID(window);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        CHECK_NULL_VOID(mouseStyle);
         auto mouseFormat = static_cast<MouseFormat>(cursorValue);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         CHECK_NULL_VOID(mouseStyleManager);
@@ -4678,10 +4674,6 @@ void PipelineContext::SetCursor(int32_t cursorValue)
 
 void PipelineContext::RestoreDefault(int32_t windowId)
 {
-    auto window = GetWindow();
-    CHECK_NULL_VOID(window);
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_VOID(mouseStyle);
     ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
         false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();
