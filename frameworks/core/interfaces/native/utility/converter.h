@@ -415,6 +415,8 @@ namespace Converter {
     template<> BorderWidthProperty Convert(const Ark_LengthMetrics& src);
     template<> BorderWidthProperty Convert(const Ark_LocalizedEdgeWidths& src);
     template<> ButtonInfo Convert(const Ark_PickerDialogButtonStyle& src);
+    template<> ButtonInfo Convert(const Ark_AlertDialogButtonBaseOptions& src);
+    template<> ButtonInfo Convert(const Ark_AlertDialogButtonOptions& src);
     template<> CalcLength Convert(const Ark_Length& src);
     template<> CalcLength Convert(const Ark_LengthMetrics& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
@@ -540,6 +542,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<CopyOptions>& dst, const Ark_CopyOptions& src);
     template<> void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src);
     template<> void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src);
+    template<> void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src);
     template<> void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src);
     template<> void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src);
     template<> void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src);

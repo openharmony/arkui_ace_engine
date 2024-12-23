@@ -1573,6 +1573,17 @@ void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& 
 }
 
 template<>
+void AssignCast(std::optional<DialogButtonDirection>& dst, const Ark_DialogButtonDirection& src)
+{
+    switch (src) {
+        case ARK_DIALOG_BUTTON_DIRECTION_AUTO: dst = DialogButtonDirection::AUTO; break;
+        case ARK_DIALOG_BUTTON_DIRECTION_HORIZONTAL: dst = DialogButtonDirection::HORIZONTAL; break;
+        case ARK_DIALOG_BUTTON_DIRECTION_VERTICAL: dst = DialogButtonDirection::VERTICAL; break;
+        default: LOGE("Unexpected enum value in Ark_DialogButtonDirection: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<DialogButtonStyle>& dst, const Ark_DialogButtonStyle& src)
 {
     switch (src) {

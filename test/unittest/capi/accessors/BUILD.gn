@@ -19,6 +19,7 @@ ace_unittest("capi_all_accessors_test") {
   sources = [
     # place here your UT source code
     "action_sheet_accessor_test.cpp",
+    "alert_dialog_accessor_test.cpp",
     "calendar_accessor_test.cpp",
     "canvas_gradient_accessor_test.cpp",
     "canvas_path_accessor_test.cpp",
