@@ -678,7 +678,6 @@ void RichEditorPattern::SupplementIdealSizeWidth(const RefPtr<FrameNode>& frameN
 void RichEditorPattern::MoveCaretOnLayoutSwap()
 {
     MoveCaretAfterTextChange();
-    auto context = GetContext();
     if (needMoveCaretToContentRect_ || isEditing_) {
         MoveCaretToContentRect();
         needMoveCaretToContentRect_ = false;
