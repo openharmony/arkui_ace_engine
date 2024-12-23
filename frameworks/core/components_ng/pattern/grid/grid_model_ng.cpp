@@ -50,6 +50,26 @@ RefPtr<ScrollControllerBase> GridModelNG::GetOrCreateController(FrameNode* frame
     return pattern->GetOrCreatePositionController();
 }
 
+RefPtr<ScrollProxy> GridModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto scrollBarProxy = pattern->GetScrollBarProxy();
+    if (scrollBarProxy == nullptr) {
+        scrollBarProxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(scrollBarProxy);
+    }
+    return scrollBarProxy;
+}
+
+RefPtr<FrameNode> GridModelNG::CreateGrid(int32_t nodeId)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridPattern>(); });
+    return frameNode;
+}
+
 void GridModelNG::Pop()
 {
     NG::ViewStackProcessor::GetInstance()->PopContainer();

@@ -77,6 +77,7 @@ public:
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
     static void SetOnScrollIndex(FrameNode* frameNode, ScrollIndexFunc&& onScrollIndex);
     static void SetColumnsTemplate(FrameNode* frameNode, const std::string& columnsTemplate);
     static void SetRowsTemplate(FrameNode* frameNode, const std::string& rowsTemplate);
