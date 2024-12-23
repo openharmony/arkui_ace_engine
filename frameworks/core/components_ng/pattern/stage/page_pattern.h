@@ -337,7 +337,7 @@ protected:
     void UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
         RefPtr<PageTransitionEffect>& effect, AnimationOption& option, PageTransitionType type);
 
-    void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
+    virtual void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 

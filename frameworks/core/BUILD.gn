@@ -73,6 +73,18 @@ template("ace_core_source_set") {
           vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
     }
 
+    if (ace_engine_enable_circle_feature &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs
+    }
+
+    if (ace_engine_enable_circle_feature &&
+        defined(vendor_configs.ace_engine_advanced_router_circle_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_router_circle_mode_dirs
+    }
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
