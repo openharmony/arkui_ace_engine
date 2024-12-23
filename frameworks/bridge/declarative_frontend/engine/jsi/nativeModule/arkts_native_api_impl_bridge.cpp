@@ -1386,6 +1386,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetEnableHapticFeedback));
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetEnableHapticFeedback));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMarqueeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetMarqueeOptions));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMarqueeOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetMarqueeOptions));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnMarqueeStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::SetOnMarqueeStateChange));
+    text->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnMarqueeStateChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextBridge::ResetOnMarqueeStateChange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "text"), text);
 
     auto search = panda::ObjectRef::New(vm);
