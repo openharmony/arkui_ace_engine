@@ -466,7 +466,12 @@ WebPattern::~WebPattern()
     }
     if (isActive_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
-        OnInActive();
+        if (delegate_ && delegate_->IsActivePolicyDisable()) {
+            // if active policy disable, must force it Inactive, otherwise OnInActive will inactive it.
+            delegate_->OnInactive();
+        } else {
+            OnInActive();
+        }
     }
     if (imageAnalyzerManager_) {
         imageAnalyzerManager_->ReleaseImageAnalyzer();
@@ -3354,6 +3359,18 @@ void WebPattern::GetPageContentAsync(const std::string& jsCode)
 #endif
 }
 
+void WebPattern::LoadUrlInOfflineMode()
+{
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webSrc_) {
+            delegate_->LoadUrl();
+        } else if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
+    }
+}
+
 void WebPattern::InitInOfflineMode()
 {
     if (offlineWebInited_) {
@@ -3394,13 +3411,10 @@ void WebPattern::InitInOfflineMode()
         (uint32_t)displayId, drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
 
-    if (!isUrlLoaded_) {
-        isUrlLoaded_ = true;
-        if (webSrc_) {
-            delegate_->LoadUrl();
-        } else if (webData_) {
-            delegate_->LoadDataWithRichText();
-        }
+    LoadUrlInOfflineMode();
+    if (delegate_->IsActivePolicyDisable()) {
+        // if active policy disable, must force it Inactive, otherwise HideWebView will inactive it.
+        delegate_->OnInactive();
     }
     delegate_->HideWebView();
     CloseContextSelectionMenu();
@@ -5949,27 +5963,35 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (!isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnInactive();
+    if (!policyDisable) {
+        delegate_->OnInactive();
+    }
     isActive_ = false;
 }
 
 void WebPattern::OnActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnActive();
+    if (!policyDisable) {
+        delegate_->OnActive();
+    }
     isActive_ = true;
 }
 
