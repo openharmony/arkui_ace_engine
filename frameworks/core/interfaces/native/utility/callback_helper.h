@@ -104,6 +104,13 @@ public:
         return retValueOpt;
     }
 
+    template<typename... Params>
+    RefPtr<UINode> BuildSync(Params&&... args) const
+    {
+        return Referenced::Claim(reinterpret_cast<UINode*>(
+            InvokeWithObtainResult<Ark_NativePointer, Callback_Pointer_Void>(std::forward<Params>(args)...)));
+    }
+
     bool IsValid() const
     {
         return callback_.call != nullptr;

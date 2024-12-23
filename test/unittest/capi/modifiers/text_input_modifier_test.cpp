@@ -15,6 +15,10 @@
 
 #include "test/unittest/capi/modifiers/generated/text_input_modifier_test.h"
 
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -88,6 +92,55 @@ HWTEST_F(TextInputModifierTest, setCaretPositionTestCaretPositionValidValues, Te
     for (auto& [input, value, unusedStr] : Fixtures::testFixtureTextInputCaretPositionValidValues) {
         checkValue(input);
     }
+}
+
+/*
+ * @tc.name: setShowUnitTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+
+    struct CheckEvent {
+        int32_t resourceId;
+        Ark_NativePointer parentNode;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    int32_t nodeId = 555;
+    auto node = BlankModelNG::CreateFrameNode(nodeId);
+    EXPECT_NE(node, nullptr);
+    static std::optional<RefPtr<UINode>> uiNode = node;
+
+    auto checkCallback = [](
+        Ark_VMContext context,
+        const Ark_Int32 resourceId,
+        const Ark_NativePointer parentNode,
+        const Callback_Pointer_Void continuation) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .parentNode = parentNode
+        };
+
+        if (uiNode) {
+            CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+        }
+    };
+
+    static constexpr int32_t contextId = 123;
+    CustomNodeBuilder customBuilder =
+        Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, contextId);
+
+    EXPECT_EQ(checkEvent.has_value(), false);
+    EXPECT_EQ(pattern->GetUnitNode(), nullptr);
+    modifier_->setShowUnit(node_, &customBuilder);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(reinterpret_cast<FrameNode*>(checkEvent->parentNode), frameNode);
+    EXPECT_EQ(pattern->GetUnitNode(), node);
 }
 
 } // namespace OHOS::Ace::NG
