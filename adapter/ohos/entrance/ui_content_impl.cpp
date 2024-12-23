@@ -1646,15 +1646,19 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     if (!defaultDisplay) {
         defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
     }
+    sptr<Rosen::DisplayInfo> displayInfo;
     if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
+        displayInfo = defaultDisplay->GetDisplayInfo();
+    }
+    if (displayInfo) {
+        density = displayInfo->GetVirtualPixelRatio();
         if (isSceneBoardWindow && !NearEqual(defaultDensity, 1.0f)) {
             density = defaultDensity;
         }
-        deviceWidth = defaultDisplay->GetWidth();
-        deviceHeight = defaultDisplay->GetHeight();
-        devicePhysicalWidth = defaultDisplay->GetPhysicalWidth();
-        devicePhysicalHeight = defaultDisplay->GetPhysicalHeight();
+        deviceWidth = displayInfo->GetWidth();
+        deviceHeight = displayInfo->GetHeight();
+        devicePhysicalWidth = displayInfo->GetPhysicalWidth();
+        devicePhysicalHeight = displayInfo->GetPhysicalHeight();
     }
     SystemProperties::InitDeviceInfo(deviceWidth, deviceHeight, deviceHeight >= deviceWidth ? 0 : 1, density, false);
     SystemProperties::SetDevicePhysicalWidth(devicePhysicalWidth);
