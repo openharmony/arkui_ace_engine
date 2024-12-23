@@ -34,9 +34,10 @@
 #include "base/thread/task_executor.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
-#include "base/view_data/view_data_wrap.h"
+#include "base/view_data/ace_auto_fill_error.h"
 #include "base/view_data/hint_to_type_wrap.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
+#include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
 #include "core/common/display_info.h"
@@ -59,6 +60,7 @@ class FontManager;
 namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
+using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -246,7 +248,7 @@ public:
         colorScheme_ = colorScheme;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -343,6 +345,13 @@ public:
         }
     }
 
+    void OnStartAbilityOnQuery(const std::string& queryWord)
+    {
+        if (abilityOnQueryCallback_) {
+            abilityOnQueryCallback_(queryWord);
+        }
+    }
+
     int32_t GeneratePageId()
     {
         return pageId_++;
@@ -431,6 +440,11 @@ public:
     }
 
     bool IsTransparentBg() const;
+
+    void SetAbilityOnSearch(AbilityOnQueryCallback&& callback)
+    {
+        abilityOnQueryCallback_ = std::move(callback);
+    }
 
     static void CreateContainer(int32_t instanceId, FrontendType type, const std::string& instanceName,
         std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
@@ -610,8 +624,10 @@ public:
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
-    bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true) override;
+    int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr) override;
     bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType) override;
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std::function<void()>& onFinish,
         const std::function<void()>& onUIExtNodeBindingCompleted, bool isNative = true,
@@ -817,6 +833,7 @@ private:
 
     bool installationFree_ = false;
     SharePanelCallback sharePanelCallback_ = nullptr;
+    AbilityOnQueryCallback abilityOnQueryCallback_ = nullptr;
 
     std::atomic_flag isDumping_ = ATOMIC_FLAG_INIT;
 

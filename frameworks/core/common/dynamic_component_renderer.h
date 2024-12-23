@@ -76,11 +76,16 @@ public:
         int32_t action, int64_t offset) = 0;
     virtual void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) = 0;
+    virtual void TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;
+    virtual void TransferAccessibilityChildTreeDeregister() = 0;
+    virtual void TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual void SetUIContentType(UIContentType uIContentType) {};
     virtual bool IsRestrictedWorkerThread() { return false; }
     virtual bool HasWorkerUsing(void *worker) { return false; }
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
+    virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) {}
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);

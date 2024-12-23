@@ -4647,10 +4647,12 @@ void OverlayManager::UpdateSheetRender(
     if (sheetStyle.shadow.has_value()) {
         sheetRenderContext->UpdateBackShadow(sheetStyle.shadow.value());
     } else if (sheetTheme->IsOuterBorderEnable()) {
-        Shadow shadow = ShadowConfig::GetShadowConfig(sheetTheme->GetSheetShadowConfig());
+        auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+        auto shadow = sheetNodePattern->GetShadowFromTheme(style);
         sheetRenderContext->UpdateBackShadow(shadow);
     } else if (!isPartialUpdate) {
-        sheetRenderContext->UpdateBackShadow(ShadowConfig::NoneShadow);
+        auto shadow = sheetNodePattern->GetShadowFromTheme(ShadowStyle::None);
+        sheetRenderContext->UpdateBackShadow(shadow);
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
 }
@@ -4966,7 +4968,6 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
     CHECK_NULL_VOID(sheetPattern);
     if (isTransitionIn) {
         sheetPattern->ResetToInvisible();
-        sheetPattern->SetCurrentHeight(sheetHeight_);
         sheetPattern->StartOffsetEnteringAnimation();
         sheetPattern->FireOnHeightDidChange(sheetHeight_);
         sheetPattern->StartAlphaEnteringAnimation([sheetWK = WeakClaim(RawPtr(sheetNode))] {
@@ -5111,7 +5112,9 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
                 break;
             }
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_OFFSET:
             if (!sheetStyle.detents.empty()) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
@@ -6094,6 +6097,24 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(),
         nullptr, -(sessionId));
     ResetRootNode(-(sessionId));
+}
+
+void OverlayManager::UpdateModalUIExtensionConfig(
+    int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config)
+{
+    auto targetModalNode = GetModal((-(sessionId)));
+    if (!targetModalNode) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY,
+            "not has sessionId(%{public}d) when UpdateModalUIExtensionConfig", sessionId);
+        return;
+    }
+
+    const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_VOID(targetModalPattern);
+    targetModalPattern->SetProhibitedRemoveByNavigation(config.prohibitedRemoveByNavigation);
+    targetModalPattern->SetProhibitedRemoveByRouter(config.prohibitedRemoveByRouter);
+    TAG_LOGE(AceLogTag::ACE_OVERLAY,
+        "UpdateModalUIExtensionConfig seccess with sessionId(%{public}d)", sessionId);
 }
 
 RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(

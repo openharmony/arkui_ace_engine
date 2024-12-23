@@ -118,4 +118,9 @@ group("core_pattern_unittest") {
       defined(vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng)) {
     deps += vendor_configs.ace_engine_advanced_split_mode_pattern_test_ng
   }
+
+  if (ace_engine_feature_wearable &&
+      defined(vendor_configs.ace_engine_advanced_wearable_test)) {
+    deps += vendor_configs.ace_engine_advanced_wearable_test
+  }
 }

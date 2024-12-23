@@ -152,6 +152,11 @@ bool IsWindowRectResizeEnabled()
     return (system::GetParameter("persist.ace.windowresize.enabled", "true") == "true");
 }
 
+bool IsFocusCanBeActive()
+{
+    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") == "1";
+}
+
 bool IsCacheNavigationNodeEnable()
 {
     return system::GetParameter("persist.ace.navigation.groupnode.cached", "false") == "true";
@@ -453,6 +458,7 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
+bool SystemProperties::focusCanBeActive_ = IsFocusCanBeActive();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -600,6 +606,7 @@ void SystemProperties::InitDeviceInfo(
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    focusCanBeActive_ = IsFocusCanBeActive();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -951,5 +958,10 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
+}
+
+bool SystemProperties::GetFocusCanBeActive()
+{
+    return focusCanBeActive_;
 }
 } // namespace OHOS::Ace

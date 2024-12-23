@@ -436,21 +436,7 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
     return useEdges;
 }
 
-bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
-{
-    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
-    if (!value->IsNumber()) {
-        return false;
-    }
-    auto unit = DimensionUnit::VP;
-    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
-    if (jsUnit->IsNumber()) {
-        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
-    }
-    CalcDimension dimension(value->ToNumber<double>(), unit);
-    result = dimension;
-    return true;
-}
+decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
@@ -834,6 +820,28 @@ bool IsPopupCreated()
     return true;
 }
 
+ShadowStyle GetPopupDefaultShadowStyle()
+{
+    auto shadowStyle = ShadowStyle::OuterDefaultMD;
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, shadowStyle);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, shadowStyle);
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_RETURN(popupTheme, shadowStyle);
+    return popupTheme->GetPopupShadowStyle();
+}
+
+static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
+    auto blurStyle = static_cast<BlurStyle>(theme->GetPopupBackgroundBlurStyle());
+    popupParam->SetBlurStyle(blurStyle);
+}
+
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -1027,15 +1035,16 @@ void ParsePopupCommonParam(
         popupParam->SetErrorRadius(setError);
     }
 
+    auto defaultShadowStyle = GetPopupDefaultShadowStyle();
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
         }
     } else {
-        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+        JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
     }
     popupParam->SetShadow(shadow);
 
@@ -1045,7 +1054,11 @@ void ParsePopupCommonParam(
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
+        } else {
+            GetBlurStyleFromTheme(popupParam);
         }
+    } else {
+       GetBlurStyleFromTheme(popupParam);
     }
 
     auto popupTransition = popupObj->GetProperty("transition");
@@ -2440,7 +2453,7 @@ void ParseOverlayFirstParam(const JSCallbackInfo& info, std::optional<Alignment>
         }
         const auto* vm = nodePtr->GetEcmaVM();
         auto localHandle = nodePtr->GetLocalHandle();
-        if (localHandle.IsEmpty()) {
+        if (!localHandle->IsNativePointer(vm)) {
             return;
         }
         auto* node = localHandle->ToNativePointer(vm)->Value();
@@ -4869,8 +4882,8 @@ void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
             if (effectType < EffectType::DEFAULT || effectType > EffectType::WINDOW_EFFECT) {
                 effectType = EffectType::DEFAULT;
             }
-        } 
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);  
+        }
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);
     }
 }
 
@@ -5305,6 +5318,22 @@ bool JSViewAbstract::ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimen
 {
     // 'vp' -> the value varies with pixel density of device.
     return ParseJsDimensionNG(jsValue, result, DimensionUnit::VP, isSupportPercent);
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result)
+{
+    auto value = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return false;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = jsObj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return true;
 }
 
 bool JSViewAbstract::ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result)
@@ -7623,6 +7652,16 @@ void JSViewAbstract::JsAccessibilityTextHint(const std::string& text)
     ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(text);
 }
 
+void JSViewAbstract::JsAccessibilityNextFocusId(const JSCallbackInfo& info)
+{
+    const JSRef<JSVal>& jsValue = info[0];
+    std::string nextFocusId;
+    if (!ParseJsString(jsValue, nextFocusId)) {
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityNextFocusId(nextFocusId);
+}
+
 void JSViewAbstract::JsAccessibilityDescription(const JSCallbackInfo& info)
 {
     const JSRef<JSVal>& jsValue = info[0];
@@ -8852,6 +8891,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
 
     JSClass<JSViewAbstract>::StaticMethod("accessibilityGroup", &JSViewAbstract::JsAccessibilityGroup);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityText", &JSViewAbstract::JsAccessibilityText);
+    JSClass<JSViewAbstract>::StaticMethod("accessibilityNextFocusId", &JSViewAbstract::JsAccessibilityNextFocusId);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityDescription", &JSViewAbstract::JsAccessibilityDescription);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityImportance", &JSViewAbstract::JsAccessibilityImportance);
     JSClass<JSViewAbstract>::StaticMethod("accessibilityLevel", &JSViewAbstract::JsAccessibilityLevel);
@@ -10215,7 +10255,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
     }
     EcmaVM* vm = args.GetVm();
     CHECK_NULL_VOID(vm);
-    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(args[0]);
+    auto jsOnFocusAxisEventFunc = JSRef<JSFunc>::Cast(arg);
     if (jsOnFocusAxisEventFunc->IsEmpty()) {
         return;
     }

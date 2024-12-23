@@ -578,6 +578,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    bool IsShowSearch();
     void SetTextSelectableMode(TextSelectableMode value);
 
     OffsetF GetTextPaintOffset() const override

@@ -962,7 +962,7 @@ export class ToolBar extends ViewPU {
         If.pop();
       };
       this.forEachUpdateFunction(u2, this.toolBarList, w2, (z2, a3) => {
-        return `${this.getUniqueId}__${a3}}`;
+        return `${this.getUniqueId()}__${a3}}`;
       }, true, true);
     }, ForEach);
     ForEach.pop();

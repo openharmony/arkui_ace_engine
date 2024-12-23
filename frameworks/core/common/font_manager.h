@@ -122,6 +122,7 @@ public:
     const std::string& GetAppCustomFont() const;
     void AddFontObserver(WeakPtr<FontChangeObserver> node);
     void RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node);
+    std::vector<std::string> GetFontNames();
 
 protected:
     static float fontWeightScale_;

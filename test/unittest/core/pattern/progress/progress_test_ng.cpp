@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "progress_test_ng.h"
+#include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -20,6 +21,20 @@ DirtySwapConfig config;
 ProgressModelNG progressModel;
 RefPtr<ProgressTheme> progressTheme;
 RefPtr<MockThemeManager> themeManager;
+
+void InitCanvas(Testing::MockCanvas& canvas)
+{
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
+}
 } // namespace
 
 void ProgressTestNg::SetUpTestSuite()
@@ -50,6 +65,7 @@ void ProgressTestNg::TearDownTestSuite()
 
 void ProgressTestNg::SetUp()
 {
+    MockContainer::SetUp();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(progressTheme));
 }
 
@@ -85,6 +101,21 @@ ProgressModelNG ProgressTestNg::CreateProgress(double value, double max, NG::Pro
     ViewAbstract::SetHeight(CalcLength(PROGRESS_COMPONENT_HEIGHT));
     GetProgress();
     return model;
+}
+
+RefPtr<ProgressModifier> ProgressTestNg::CreateProgressModifier()
+{
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    CHECK_NULL_RETURN(progressNode, nullptr);
+    FrameNode* frameNode = progressNode.GetRawPtr();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto progressPattern = progressNode->GetPattern<ProgressPattern>();
+    CHECK_NULL_RETURN(progressPattern, nullptr);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    progressPattern->progressModifier_ = AceType::MakeRefPtr<ProgressModifier>();
+    return progressPattern->progressModifier_;
 }
 
 /**
@@ -1143,5 +1174,204 @@ HWTEST_F(ProgressTestNg, ProgressIsRightToLeftTest001, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     pattern->OnLanguageConfigurationUpdate();
     EXPECT_EQ(modifier->isRightToLeft_->Get(), false);
+}
+
+/**
+ * @tc.name: ProgressBorderRadiusTest001
+ * @tc.desc: Test function border radius setting value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the progress model.
+     * @tc.expected: step1. Check the progress model.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(progressNode, nullptr);
+    FrameNode* frameNode = progressNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto progressPattern = progressNode->GetPattern<ProgressPattern>();
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPattern, nullptr);
+    // call UpdateProgressItemChildren
+    progressPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Set borderRadiu value.
+     * @tc.expected: step2. Check the borderRadiu value.
+     */
+    CalcDimension borderRadius = CalcDimension(10.0, DimensionUnit::VP);
+    model.SetBorderRadius(borderRadius);
+    progressPattern->OnModifyDone();
+    auto borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 1.0f);
+
+    /**
+     * @tc.steps: step3. Reset borderRadiu value.
+     * @tc.expected: step3. Check the borderRadiu value.
+     */
+    model.ResetBorderRadius();
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 1.0f);
+
+    /**
+     * @tc.steps: step4. Set borderRadiu value.
+     * @tc.expected: step4. Check the borderRadiu value.
+     */
+    borderRadius = CalcDimension(20.0, DimensionUnit::VP);
+    model.SetBorderRadius(frameNode, borderRadius);
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 20.0f);
+
+    /**
+     * @tc.steps: step5. Reset borderRadiu value.
+     * @tc.expected: step5. Check the borderRadiu value.
+     */
+    model.ResetBorderRadius(frameNode);
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 1.0f);
+}
+
+/**
+ * @tc.name: ProgressBorderRadiusTest002
+ * @tc.desc: Test function border radius setting different units.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the progress model.
+     * @tc.expected: step1. Check the progress model.
+     */
+    ProgressModelNG model = CreateProgress(VALUE_OF_PROGRESS_2, 100.0, PROGRESS_TYPE_CAPSULE);
+    auto progressNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(progressNode, nullptr);
+    FrameNode* frameNode = progressNode.GetRawPtr();
+    CHECK_NULL_VOID(frameNode);
+    auto progressPattern = progressNode->GetPattern<ProgressPattern>();
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    ASSERT_NE(progressPattern, nullptr);
+    // call UpdateProgressItemChildren
+    progressPattern->OnModifyDone();
+
+    /**
+     * @tc.steps: step2. Set borderRadiu unit as vp.
+     * @tc.expected: step2. Check the borderRadiu value and unit.
+     */
+    auto borderRadius = CalcDimension(20.0, DimensionUnit::VP);
+    model.SetBorderRadius(frameNode, borderRadius);
+    progressPattern->OnModifyDone();
+    auto borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 20.0f);
+    EXPECT_EQ(borderRadiusRet.Unit(), DimensionUnit::VP);
+
+    /**
+     * @tc.steps: step3. Set borderRadiu unit as px.
+     * @tc.expected: step3. Check the borderRadiu value and unit.
+     */
+    borderRadius = CalcDimension(20.0, DimensionUnit::PX);
+    model.SetBorderRadius(frameNode, borderRadius);
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 20.0f);
+    EXPECT_EQ(borderRadiusRet.Unit(), DimensionUnit::PX);
+
+    /**
+     * @tc.steps: step4. Set borderRadiu unit as fp.
+     * @tc.expected: step4. Check the borderRadiu value and unit.
+     */
+    borderRadius = CalcDimension(20.0, DimensionUnit::FP);
+    model.SetBorderRadius(frameNode, borderRadius);
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 20.0f);
+    EXPECT_EQ(borderRadiusRet.Unit(), DimensionUnit::FP);
+
+    /**
+     * @tc.steps: step5. Set borderRadiu unit as lpx.
+     * @tc.expected: step5. Check the borderRadiu value and unit.
+     */
+    borderRadius = CalcDimension(20.0, DimensionUnit::LPX);
+    model.SetBorderRadius(frameNode, borderRadius);
+    progressPattern->OnModifyDone();
+    borderRadiusRet = paintProperty->GetBorderRadiusValue(Dimension(1.0f, DimensionUnit::PX));
+    EXPECT_EQ(borderRadiusRet.Value(), 20.0f);
+    EXPECT_EQ(borderRadiusRet.Unit(), DimensionUnit::LPX);
+}
+
+/**
+ * @tc.name: ProgressBorderRadiusTest003
+ * @tc.desc: Test function RightToLeft border radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, ProgressBorderRadiusTest003, TestSize.Level1)
+{
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
+    /**
+     * @tc.steps: step1. Create the progress modifier.
+     */
+    auto progressModifier = CreateProgressModifier();
+    ASSERT_NE(progressModifier, nullptr);
+
+    /**
+     * @tc.steps: step2. Set different properties, call function onDraw.
+     * @tc.expected: step2. Set the properties success.
+     */
+    Testing::MockCanvas canvas;
+    InitCanvas(canvas);
+    DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
+
+    // set ProgressType CAPSULE
+    progressModifier->SetProgressType(PROGRESS_TYPE_CAPSULE);
+    EXPECT_EQ(progressModifier->progressType_->Get(), static_cast<int32_t>(PROGRESS_TYPE_CAPSULE));
+    // set ProgressType CAPSULE(Width < Height)
+    SizeF progressContentSize(50.0f, 100.0f);
+    progressModifier->SetContentSize(progressContentSize);
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    pattern_->OnLanguageConfigurationUpdate();
+
+    // radius < Width/2
+    progressModifier->SetCapsuleBorderRadius(20.0f);
+    progressModifier->onDraw(context);
+    auto borderRadiusRet = progressModifier->capsuleBorderRadius_->Get();
+    EXPECT_EQ(borderRadiusRet, 20.0f);
+    progressModifier->value_->Set(90.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->value_->Get(), 90.0f);
+
+    // radius > Width/2
+    progressModifier->SetCapsuleBorderRadius(50.0f);
+    progressModifier->onDraw(context);
+    borderRadiusRet = progressModifier->capsuleBorderRadius_->Get();
+    EXPECT_EQ(borderRadiusRet, 50.0f);
+
+    progressModifier->value_->Set(90.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->value_->Get(), 90.0f);
+
+    // set ProgressType CAPSULE(Width > Height)
+    progressModifier->SetContentSize(SizeF(100.0f, 50.0f));
+    progressModifier->SetCapsuleBorderRadius(20.0f);
+    progressModifier->value_->Set(10.0f);
+    progressModifier->onDraw(context);
+
+    progressModifier->value_->Set(90.0f);
+    progressModifier->onDraw(context);
+
+    progressModifier->isRightToLeft_->Set(true);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->value_->Get(), 90.0f);
+
+    progressModifier->value_->Set(10.0f);
+    progressModifier->onDraw(context);
+    EXPECT_EQ(progressModifier->value_->Get(), 10.0f);
+
+    Container::Current()->SetApiTargetVersion(backupApiVersion);
 }
 } // namespace OHOS::Ace::NG

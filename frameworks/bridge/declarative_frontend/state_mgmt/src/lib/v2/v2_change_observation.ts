@@ -64,7 +64,6 @@ class ObserveV2 {
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
-  public static readonly CONSUMER_PREFIX = '__consumer_';
 
   // used by array Handler to create dependency on artificial 'length'
   // property of array, mark it as changed when array has changed.
@@ -89,15 +88,14 @@ class ObserveV2 {
 
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
-  // @Monitor functions that need to executed
+  // @monitor functions that need to execute
   private elmtIdsChanged_: Set<number> = new Set();
   private computedPropIdsChanged_: Set<number> = new Set();
   private monitorIdsChanged_: Set<number> = new Set();
-  private monitorFuncsToRun_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
   // avoid recursive execution of updateDirty
   // by state changes => fireChange while
-  // UINode rerender or @Monitor function execution
+  // UINode rerender or @monitor function execution
   private startDirty_: boolean = false;
 
   // flag to indicate change observation is disabled
@@ -128,19 +126,6 @@ class ObserveV2 {
   // return true given value is the return value of makeObserved
   public static IsMakeObserved(value: any): boolean {
     return (value && typeof (value) === 'object' && value[ObserveV2.SYMBOL_MAKE_OBSERVED]);
-  }
-
-  public static IsTrackedProperty(parentObj: any, prop: string): boolean {
-    if (!parentObj || typeof parentObj !== 'object') {
-      return false;
-    }
-    const trackedKey = ObserveV2.OB_PREFIX + prop;
-    const consumerKey = ObserveV2.CONSUMER_PREFIX + prop;
-    const computedKey = ComputedV2.COMPUTED_CACHED_PREFIX + prop;
-    if (trackedKey in parentObj || consumerKey in parentObj || computedKey in parentObj) {
-      return true;
-    }
-    return false;
   }
 
   public static getCurrentRecordedId(): number {
@@ -304,12 +289,6 @@ class ObserveV2 {
     return [totalCount, aliveCount];
   }
 
-  // Register the "parent" @Monitor id to known components
-  // it's needed when running the dirty @Monitor functions
-  public registerMonitor(monitor: object, id: number): void {
-    this.id2cmp_[id] = new WeakRef<Object>(monitor);
-  }
-  
   // add dependency view model object 'target' property 'attrName'
   // to current this.bindId
   public addRef(target: object, attrName: string): void {
@@ -373,7 +352,7 @@ class ObserveV2 {
   /**
    * Execute given task while state change observation is disabled
    * A state mutation caused by the task will NOT trigger UI rerender
-   * and @Monitor function execution.
+   * and @monitor function execution.
    *
    * !!! Use with Caution !!!
    *
@@ -485,9 +464,8 @@ class ObserveV2 {
 
     // priority order of processing:
     // 1- update computed properties until no more need computed props update
-    // 2- update monitors paths until no more monitors paths and no more computed props
-    // 3- run all monitor functions
-    // 4- update UINodes until no more monitors, no more computed props, and no more UINodes
+    // 2- update monitors until no more monitors and no more computed props
+    // 3- update UINodes until no more monitors, no more computed props, and no more UINodes
     // FIXME prevent infinite loops
     do {
       do {
@@ -509,16 +487,9 @@ class ObserveV2 {
         if (this.monitorIdsChanged_.size) {
           const monitors = this.monitorIdsChanged_;
           this.monitorIdsChanged_ = new Set<number>();
-          this.updateDirtyMonitorPaths(monitors);
+          this.updateDirtyMonitors(monitors);
         }
-
-        if (this.monitorFuncsToRun_.size) {
-          const monitorFuncs = this.monitorFuncsToRun_;
-          this.monitorFuncsToRun_ = new Set<number>();
-          this.runDirtyMonitors(monitorFuncs);
-        }
-      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + 
-               this.computedPropIdsChanged_.size + this.monitorFuncsToRun_.size > 0);
+      } while (this.monitorIdsChanged_.size + this.persistenceChanged_.size + this.computedPropIdsChanged_.size > 0);
 
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
@@ -551,29 +522,9 @@ class ObserveV2 {
   }
 
 
-  public updateDirtyMonitorPaths(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV2.updateDirtyMonitorPaths: ${Array.from(monitors).length} @Monitor`);
-    let weakMonitor: WeakRef<MonitorV2 | undefined>;
-    let monitor: MonitorV2 | undefined;
-    let ret: number = 0;
-    monitors.forEach((watchId) => {
-      ret = 0;
-      weakMonitor = this.id2cmp_[watchId];
-      if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
-        ret = monitor.notifyChange(watchId);
-      }
-      // Collect @Monitor functions that need to be executed later
-      if (ret > 0) {
-        this.monitorFuncsToRun_.add(ret);
-      }
-    });
-    aceDebugTrace.end();
-  }
-
-  public runDirtyMonitors(monitors: Set<number>): void {
-    stateMgmtConsole.debug(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
-    aceDebugTrace.begin(`ObservedV2.runDirtyMonitors: ${Array.from(monitors).length} @Monitor`);
+  public updateDirtyMonitors(monitors: Set<number>): void {
+    stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);
+    aceDebugTrace.begin(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor`);
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
     let monitorTarget: Object;
@@ -584,7 +535,7 @@ class ObserveV2 {
           // monitor notifyChange delayed if target is a View that is not active
           monitorTarget.addDelayedMonitorIds(watchId);
         } else {
-          monitor.runMonitorFunction();
+          monitor.notifyChange();
         }
       }
     });

@@ -711,6 +711,102 @@ HWTEST_F(ScrollableNestedTestNg, NestedScrollTest008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NestedScrollTest009
+ * @tc.desc: Scroll nested List, touch scroll trigger list animate stop
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableNestedTestNg, NestedScrollTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Scroll nested List, edge effect is none
+     */
+    auto rootNode = CreatScrollNestedList(EdgeEffect::SPRING, EdgeEffect::NONE, NestedScrollOptions {
+        .forward = NestedScrollMode::PARENT_FIRST,
+        .backward = NestedScrollMode::SELF_FIRST,
+    });
+    FlushLayoutTask(rootNode);
+
+    auto colNode = GetChildFrameNode(rootNode, 0);
+    auto listNode = GetChildFrameNode(colNode, 1);
+    auto listPattern = listNode->GetPattern<ListPattern>();
+    auto scrollPattern = rootNode->GetPattern<ScrollPattern>();
+    auto scrollScrollable = GetScrollable(rootNode);
+    scrollScrollable->ratio_ = 0;
+    scrollPattern->ratio_ = 0;
+
+    bool listOnScrollStart = false;
+    bool scrollOnScrollStart = false;
+    bool listOnScrollStop = false;
+    bool scrollOnScrollStop = false;
+    ListModelNG::SetOnScrollStart(AceType::RawPtr(listNode), [&listOnScrollStart]() {
+        listOnScrollStart = true;
+    });
+    ScrollModelNG::SetOnScrollStart(AceType::RawPtr(rootNode), [&scrollOnScrollStart]() {
+        scrollOnScrollStart = true;
+    });
+    ListModelNG::SetOnScrollStop(AceType::RawPtr(listNode), [&listOnScrollStop]() {
+        listOnScrollStop = true;
+    });
+    ScrollModelNG::SetOnScrollStop(AceType::RawPtr(rootNode), [&scrollOnScrollStop]() {
+        scrollOnScrollStop = true;
+    });
+
+    /**
+     * @tc.steps: step2. Scroll forward
+     * @tc.expected: parent process scroll
+     */
+    auto listScrollable = GetScrollable(listNode);
+    DragStart(listScrollable);
+    DragUpdate(listScrollable, -10);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
+
+    /**
+     * @tc.steps: step3. DragEnd with velocity
+     * @tc.expected: start fling animation
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    DragEnd(listScrollable, -252);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -10);
+    EXPECT_TRUE(listOnScrollStart);
+    EXPECT_TRUE(scrollOnScrollStart);
+
+    MockPipelineContext::GetCurrent()->SetVsyncTime(GetSysTimestamp());
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -60);
+    MockPipelineContext::GetCurrent()->SetVsyncTime(scrollPattern->nestedScrollTimestamp_ + 50 * MS);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+
+    /**
+     * @tc.steps: step4. Scroll touch down
+     * @tc.expected: list stop animation
+     */
+    TouchEventInfo touchEvent = TouchEventInfo("unknown");
+    scrollPattern->OnTouchDown(touchEvent);
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_TRUE(listOnScrollStop);
+    EXPECT_TRUE(scrollOnScrollStop);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(rootNode);
+    FlushLayoutTask(listNode);
+    EXPECT_FLOAT_EQ(listPattern->currentOffset_, 0);
+    EXPECT_FLOAT_EQ(scrollPattern->currentOffset_, -110);
+}
+
+/**
  * @tc.name: SheetNestedScroll001
  * @tc.desc: Sheet nested Scroll
  * @tc.type: FUNC

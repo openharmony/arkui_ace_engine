@@ -37,7 +37,10 @@ void BoxLayoutAlgorithm::Layout()
     }
 }
 
-void BoxLayoutAlgorithm::MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) {}
+std::optional<NG::SizeF> BoxLayoutAlgorithm::MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint)
+{
+    return std::nullopt;
+}
 
 void BoxLayoutAlgorithm::PerformMeasureSelf(FrameNode* frameNode)
 {

@@ -1200,12 +1200,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowBridge::ResetReverse));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "row"), row);
 
+#ifndef ARKUI_WEARABLE
     auto rowSplit = panda::ObjectRef::New(vm);
     rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setResizeable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::SetResizable));
     rowSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RowSplitBridge::ResetResizable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "rowSplit"), rowSplit);
+#endif
 
     auto text = panda::ObjectRef::New(vm);
     text->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontColor"),
@@ -1568,6 +1570,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StackBridge::ResetAlignContent));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stack"), stack);
 
+#ifndef ARKUI_WEARABLE
     auto folderStack = panda::ObjectRef::New(vm);
     folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnimation"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetEnableAnimation));
@@ -1578,6 +1581,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoHalfFold"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetAutoHalfFold));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "folderStack"), folderStack);
+#endif
 
     auto imageSpan = panda::ObjectRef::New(vm);
     imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVerticalAlign"),
@@ -2134,6 +2138,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ArkUINativeModule::PreviewMockComponent));
 #else
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoPlay"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetAutoPlay));
@@ -2155,6 +2163,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetMuted));
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMuted"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetMuted));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetShortcutKeyEnabled));
+    video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShortcutKeyEnabled"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetShortcutKeyEnabled));
 #endif
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::SetOpacity));
@@ -2215,6 +2227,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
             const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSkipUnselectedPoint));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
 
+#ifndef ARKUI_WEARABLE
     auto columnSplit = panda::ObjectRef::New(vm);
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::SetDivider));
@@ -2225,6 +2238,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     columnSplit->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetResizeable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), ColumnSplitBridge::ResetResizable));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "columnSplit"), columnSplit);
+#endif
 
     auto imageAnimator = panda::ObjectRef::New(vm);
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setState"),
@@ -2850,6 +2864,14 @@ void ArkUINativeModule::RegisterTextpickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetGradientHeight));
     textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetGradientHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetGradientHeight));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDisableTextStyleAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDisableTextStyleAnimation));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDisableTextStyleAnimation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDisableTextStyleAnimation));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDefaultTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::SetDefaultTextStyle));
+    textpicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDefaultTextStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextPickerBridge::ResetDefaultTextStyle));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textpicker"), textpicker);
 }
 
@@ -3830,12 +3852,16 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RegisterFrameCallback));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "markDirty"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MarkDirty));
+
+#ifndef ARKUI_WEARABLE
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addFrameNodeToNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::AddFrameNodeToNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeFrameNodeFromNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RemoveFrameNodeFromNodeContent));
+#endif
+
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFirstUINode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetFirstUINode));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCustomPropertyCapiByKey"),

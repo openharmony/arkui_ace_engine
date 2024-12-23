@@ -100,6 +100,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 
@@ -131,7 +132,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
+    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
         .getTextModifier = NodeModifier::GetTextModifier,
         .getButtonModifier = NodeModifier::GetButtonModifier,
         .getToggleModifier = NodeModifier::GetToggleModifier,
@@ -147,7 +152,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSliderModifier = NodeModifier::GetSliderModifier,
         .getDividerModifier = NodeModifier::GetDividerModifier,
         .getStackModifier = NodeModifier::GetStackModifier,
+    #ifndef ARKUI_WEARABLE
         .getFolderStackModifier = NodeModifier::GetFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
         .getNavDestinationModifier = NodeModifier::GetNavDestinationModifier,
         .getGridModifier = NodeModifier::GetGridModifier,
         .getGridColModifier = NodeModifier::GetGridColModifier,
@@ -164,7 +173,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetNavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetNodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
         .getLineModifier = NodeModifier::GetLineModifier,
         .getPathModifier = NodeModifier::GetPathModifier,
         .getPolygonModifier = NodeModifier::GetPolygonModifier,
@@ -238,7 +251,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
         .getParticleModifier = NodeModifier::GetParticleModifier,
+    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
         .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
     #ifdef MODEL_COMPONENT_SUPPORTED
@@ -248,12 +265,13 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #endif
         .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
         .getCustomNodeExtModifier = nullptr,
+        .getThemeModifier = NodeModifier::GetThemeModifier,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 4; // modify this line accordingly
+    constexpr auto ifdefs = 8; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
         "ensure all fields are explicitly initialized");
@@ -269,7 +287,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCJUICheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCJUICounterModifier,
         .getRowModifier = NodeModifier::GetCJUIRowModifier,
+    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetCJUIRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
         .getTextModifier = NodeModifier::GetCJUITextModifier,
         .getButtonModifier = NodeModifier::GetCJUIButtonModifier,
         .getToggleModifier = NodeModifier::GetCJUIToggleModifier,
@@ -285,7 +307,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSliderModifier = NodeModifier::GetCJUISliderModifier,
         .getDividerModifier = NodeModifier::GetCJUIDividerModifier,
         .getStackModifier = NodeModifier::GetCJUIStackModifier,
+    #ifndef ARKUI_WEARABLE
         .getFolderStackModifier = NodeModifier::GetCJUIFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
         .getNavDestinationModifier = NodeModifier::GetCJUINavDestinationModifier,
         .getGridModifier = NodeModifier::GetCJUIGridModifier,
         .getGridColModifier = NodeModifier::GetCJUIGridColModifier,
@@ -302,7 +328,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetCJUINavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetCJUINodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetCJUIPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetCJUIColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
         .getLineModifier = NodeModifier::GetCJUILineModifier,
         .getPathModifier = NodeModifier::GetCJUIPathModifier,
         .getPolygonModifier = NodeModifier::GetCJUIPolygonModifier,
@@ -378,7 +408,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
+    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
         .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
         .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
@@ -395,7 +429,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 4; // modify this line accordingly
+    constexpr auto ifdefs = 8; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
         "ensure all fields are explicitly initialized");

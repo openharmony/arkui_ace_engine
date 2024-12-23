@@ -218,7 +218,7 @@ void ListModelNG::SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign)
     if (lastScrollSnapAlign != scrollSnapAlign) {
         auto pattern = frameNode->GetPattern<ListPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetLastSnapTargetIndex(-1);
+        pattern->ResetLastSnapTargetIndex();
     }
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
 }

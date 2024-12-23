@@ -35,7 +35,8 @@ class ACE_EXPORT CustomNode : public UINode, public CustomNodeBase {
 public:
     static RefPtr<CustomNode> CreateCustomNode(int32_t nodeId, const std::string& viewKey);
 
-    CustomNode(int32_t nodeId, const std::string& viewKey);
+    CustomNode(int32_t nodeId, const std::string& viewKey)
+    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey) {}
     ~CustomNode() override
     {
         ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
@@ -46,6 +47,11 @@ public:
     RefPtr<LayoutWrapperNode> CreateLayoutWrapper(bool forceMeasure = false, bool forceLayout = false) override;
 
     bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    bool IsSyntaxNode() const override
     {
         return true;
     }

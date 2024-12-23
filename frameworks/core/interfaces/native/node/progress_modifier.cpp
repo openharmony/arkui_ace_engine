@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,6 +256,13 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
     ProgressModelNG::SetFontFamily(node, families);
     ProgressModelNG::SetItalicFontStyle(node, static_cast<Ace::FontStyle>(fontStyle));
+    if ((value->borderRadiusValue < 0) ||
+        (static_cast<DimensionUnit>(value->borderRadiusUnit) == DimensionUnit::PERCENT)) {
+        ProgressModelNG::ResetBorderRadius(node);
+    } else {
+        ProgressModelNG::SetBorderRadius(node, Dimension(value->borderRadiusValue,
+            static_cast<DimensionUnit>(value->borderRadiusUnit)));
+    }
 }
 
 void SetProgressStyle(ArkUINodeHandle node, ArkUIProgressStyle* value)
@@ -323,6 +330,7 @@ void SetCapsuleStyleOptions(FrameNode* node)
     ProgressModelNG::SetFontWeight(node, textTheme->GetTextStyle().GetFontWeight());
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
     ProgressModelNG::SetItalicFontStyle(node, textTheme->GetTextStyle().GetFontStyle());
+    ProgressModelNG::ResetBorderRadius(node); // Set default value.
 }
 
 void ResetProgressStyle(ArkUINodeHandle node)

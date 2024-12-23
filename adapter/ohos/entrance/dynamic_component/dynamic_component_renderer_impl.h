@@ -67,6 +67,11 @@ public:
         int32_t action, int64_t offset) override;
     void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
+    void TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    void TransferAccessibilityChildTreeDeregister() override;
+    void TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
@@ -86,6 +91,7 @@ private:
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
+    void InitializeDynamicAccessibility();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;

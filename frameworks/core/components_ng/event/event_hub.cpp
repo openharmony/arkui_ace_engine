@@ -115,12 +115,26 @@ void EventHub::PostEnabledTask()
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)]() {
-            auto eventHub = weak.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
-        }, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)]() {
+        auto eventHub = weak.Upgrade();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+    };
+    if (!host->IsOnMainTree()) {
+        enabledFunc_ = callback;
+        return;
+    }
+    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
+}
+
+void EventHub::FireEnabledTask()
+{
+    if (enabledFunc_) {
+        enabledFunc_();
+        enabledFunc_ = nullptr;
+    }
 }
 
 void EventHub::MarkModifyDone()
@@ -971,5 +985,39 @@ void EventHub::FireUntriggeredInnerOnAreaChanged(
         }
     }
     hasInnerAreaChangeUntriggered_.clear();
+}
+
+void EventHub::FireDrawCompletedNDKCallback(PipelineContext* pipeline)
+{
+    if (ndkDrawCompletedCallback_) {
+        if (!pipeline) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, pipeline is null");
+            return;
+        }
+        auto executor = pipeline->GetTaskExecutor();
+        if (!executor) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire draw callback, executor is null");
+            return;
+        }
+        auto cb = ndkDrawCompletedCallback_;
+        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireDrawCompletedNDKCallback");
+    }
+}
+
+void EventHub::FireLayoutNDKCallback(PipelineContext* pipeline)
+{
+    if (ndkLayoutCallback_) {
+        if (!pipeline) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, pipeline is null");
+            return;
+        }
+        auto executor = pipeline->GetTaskExecutor();
+        if (!executor) {
+            TAG_LOGW(AceLogTag::ACE_UIEVENT, "can not fire layout callback, executor is null");
+            return;
+        }
+        auto cb = ndkLayoutCallback_;
+        executor->PostTask(std::move(cb), TaskExecutor::TaskType::UI, "FireLayoutNDKCallback");
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -19,7 +19,6 @@
 #include "ui/base/macros.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/layout/layout_algorithm.h"
-
 namespace OHOS::Ace::Kit {
 class ACE_FORCE_EXPORT BoxLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(BoxLayoutAlgorithm, LayoutAlgorithm);
@@ -32,8 +31,7 @@ public:
 
     void Layout() override;
 
-    // TODO: unify LayoutConstraint and return size
-    void MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) override;
+    std::optional<NG::SizeF> MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) override;
 
     // Called to perform measure current render node.
     static void PerformMeasureSelf(FrameNode* frameNode);

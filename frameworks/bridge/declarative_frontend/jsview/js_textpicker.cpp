@@ -47,6 +47,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
@@ -207,6 +209,8 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("selectedIndex", &JSTextPicker::SetSelectedIndex);
     JSClass<JSTextPicker>::StaticMethod("divider", &JSTextPicker::SetDivider);
     JSClass<JSTextPicker>::StaticMethod("opacity", &JSTextPicker::JsOpacity);
+    JSClass<JSTextPicker>::StaticMethod("disableTextStyleAnimation", &JSTextPicker::SetDisableTextStyleAnimation);
+    JSClass<JSTextPicker>::StaticMethod("defaultTextStyle", &JSTextPicker::SetDefaultTextStyle);
 
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
@@ -223,6 +227,24 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
+}
+
+void JSTextPicker::SetDisableTextStyleAnimation(const JSCallbackInfo& info)
+{
+    bool value = false;
+    if (info[0]->IsBoolean()) {
+        value = info[0]->ToBoolean();
+    }
+    TextPickerModel::GetInstance()->SetDisableTextStyleAnimation(value);
+}
+
+void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
+{
+    NG::PickerTextStyle textStyle;
+    if (info[0]->IsObject()) {
+        JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
+    }
+    TextPickerModel::GetInstance()->SetDefaultTextStyle(textStyle);
 }
 
 void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)
@@ -884,6 +906,34 @@ void JSTextPickerParser::IsUserDefinedFontFamily(const std::string& pos)
     }
 }
 
+void JSTextPickerParser::ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle)
+{
+    auto minFontSize = paramObj->GetProperty("minFontSize");
+    auto maxFontSize = paramObj->GetProperty("maxFontSize");
+    if (!minFontSize->IsNull() && !minFontSize->IsUndefined()) {
+        CalcDimension minSize;
+        if (ParseJsDimensionFp(minFontSize, minSize) && minSize.Unit() != DimensionUnit::PERCENT) {
+            textStyle.minFontSize = minSize;
+        }
+    }
+    if (!maxFontSize->IsNull() && !maxFontSize->IsUndefined()) {
+        CalcDimension maxSize;
+        if (ParseJsDimensionFp(maxFontSize, maxSize) && maxSize.Unit() != DimensionUnit::PERCENT) {
+            textStyle.maxFontSize = maxSize;
+        }
+    }
+
+    auto overflow = paramObj->GetProperty("overflow");
+    if (!overflow->IsNull() && !overflow->IsUndefined()) {
+        if (overflow->IsNumber()) {
+            auto overflowValue = overflow->ToNumber<int32_t>();
+            if (overflowValue >= 0 && overflowValue < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+                textStyle.textOverflow = TEXT_OVERFLOWS[overflowValue];
+            }
+        }
+    }
+}
+
 void JSTextPickerParser::ParseTextStyle(
     const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos)
 {
@@ -894,6 +944,8 @@ void JSTextPickerParser::ParseTextStyle(
     if (ParseJsColor(fontColor, textColor)) {
         textStyle.textColor = textColor;
     }
+
+    ParseDefaultTextStyle(paramObj, textStyle);
 
     if (!fontOptions->IsObject()) {
         return;
@@ -1650,6 +1702,7 @@ bool JSTextPickerDialog::ParseShowDataAttribute(
     ParseTextProperties(paramObject, settingData.properties);
     return true;
 }
+
 bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject, bool& canLoop)
 {
     bool result = false;
@@ -1663,6 +1716,18 @@ bool JSTextPickerDialog::ParseCanLoop(const JSRef<JSObject>& paramObject, bool& 
         result = false;
     }
     return result;
+}
+
+void JSTextPickerDialog::ParseDisableTextStyleAnimation(
+    const JSRef<JSObject>& paramObject, bool& isDisableTextStyleAnimation)
+{
+    auto prop = paramObject->GetProperty("disableTextStyleAnimation");
+    bool value = false;
+    if (prop->IsBoolean() && JSViewAbstract::ParseJsBool(prop, value)) {
+        isDisableTextStyleAnimation = value;
+    } else {
+        isDisableTextStyleAnimation = false;
+    }
 }
 
 void JSTextPickerDialog::ParseShowDataMultiContent(const std::vector<NG::TextCascadePickerOptions>& options,
@@ -1712,6 +1777,7 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
         return false;
     }
     ParseCanLoop(paramObject, settingData.canLoop);
+    ParseDisableTextStyleAnimation(paramObject, settingData.isDisableTextStyleAnimation);
     if (param.result.size() > 0) {
         settingData.selected = param.selected;
         settingData.columnKind = param.kind;
@@ -1729,6 +1795,7 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
     auto disappearProperty = paramObj->GetProperty("disappearTextStyle");
     auto normalProperty = paramObj->GetProperty("textStyle");
     auto selectedProperty = paramObj->GetProperty("selectedTextStyle");
+    auto defaultProperty = paramObj->GetProperty("defaultTextStyle");
 
     if (!disappearProperty->IsNull() && disappearProperty->IsObject()) {
         JSRef<JSObject> disappearObj = JSRef<JSObject>::Cast(disappearProperty);
@@ -1743,6 +1810,11 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
     if (!selectedProperty->IsNull() && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         JSTextPickerParser::ParseTextStyle(selectedObj, result.selectedTextStyle_, "selectedTextStyle");
+    }
+
+    if (!defaultProperty->IsNull() && defaultProperty->IsObject()) {
+        JSRef<JSObject> defaultObj = JSRef<JSObject>::Cast(defaultProperty);
+        JSTextPickerParser::ParseTextStyle(defaultObj, result.defaultTextStyle_, "defaultTextStyle");
     }
 }
 

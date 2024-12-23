@@ -22,16 +22,18 @@ const resourceManager = requireNapi('resourceManager');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 export var EditableLeftIconType;
 
-(function (m8) {
-    m8[m8['Back'] = 0] = 'Back';
-    m8[m8['Cancel'] = 1] = 'Cancel';
+(function (w30) {
+    w30[w30['Back'] = 0] = 'Back';
+    w30[w30['Cancel'] = 1] = 'Cancel';
 })(EditableLeftIconType || (EditableLeftIconType = {}));
 var ItemType;
-(function (l8) {
-    l8[l8['Image'] = 0] = 'Image';
-    l8[l8['Icon'] = 1] = 'Icon';
-    l8[l8['LeftIcon'] = 2] = 'LeftIcon';
+
+(function (j30) {
+    j30[j30['Image'] = 0] = 'Image';
+    j30[j30['Icon'] = 1] = 'Icon';
+    j30[j30['LeftIcon'] = 2] = 'LeftIcon';
 })(ItemType || (ItemType = {}));
+
 const PUBLIC_CANCEL = {
     'id': -1,
     'type': 40000,
@@ -54,11 +56,11 @@ const PUBLIC_BACK = {
     'moduleName': '__harDefaultModuleName__'
 };
 const PUBLIC_IMAGE_BACK = {
-    'id': -1,
-    'type': 20000,
+    "id": -1,
+    "type": 20000,
     params: ['sys.media.ohos_ic_compnent_titlebar_back'],
-    'bundleName': '__harDefaultBundleName__',
-    'moduleName': '__harDefaultModuleName__'
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
 };
 const DEFAULT_TITLE_BAR_HEIGHT = 56;
 const DEFAULT_TITLE_PADDING = 2;
@@ -75,11 +77,12 @@ const SYMBOL_SIZE = '24vp';
 const SYMBOL_TITLE_SIZE = '64vp';
 const TITLE_VP = 20;
 const SUBTITLE_VP = 14;
+// 'sys.float.titlebar_title_tertiary_size' id,value: 20vp
 const TITLE_F = getNumberByResource(125831095, TITLE_VP);
+// 'sys.float.titlebar_subheader_size' id,value: 14vp
 const SUBTITLE_F = getNumberByResource(125831097, SUBTITLE_VP);
 const TITLE_F_VP = (TITLE_F > 0 ? TITLE_F : TITLE_VP) + 'vp';
 const SUBTITLE_F_VP = (SUBTITLE_F > 0 ? SUBTITLE_F : SUBTITLE_VP) + 'vp';
-
 class EditableTitleBarTheme {
     constructor() {
         this.iconColor = {
@@ -133,39 +136,37 @@ class EditableTitleBarTheme {
         };
     }
 }
-
 class ButtonGestureModifier {
-    constructor(k8) {
+    constructor(g30) {
         this.fontSize = 1;
         this.controller = null;
-        this.controller = k8;
+        this.controller = g30;
     }
-
-    applyGesture(j8) {
+    applyGesture(f25) {
         if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-            j8.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+            f25.addGesture(new LongPressGestureHandler({
+                repeat: false, duration: ButtonGestureModifier.longPressTime })
                 .onAction(() => {
-                    if (j8) {
+                    if (f25) {
                         this.controller?.open();
                     }
                 })
                 .onActionEnd(() => {
                     this.controller?.close();
                 }));
-        } else {
-            j8.clearGestures();
+        }
+        else {
+            f25.clearGestures();
         }
     }
 }
-
 ButtonGestureModifier.longPressTime = 500;
 ButtonGestureModifier.minFontSize = 1.75;
-
 export class EditableTitleBar extends ViewPU {
-    constructor(d8, e8, f8, g8 = -1, h8 = undefined, i8) {
-        super(d8, f8, g8, i8);
-        if (typeof h8 === 'function') {
-            this.paramsGenerator_ = h8;
+    constructor(i21, t21, t24, z24 = -1, d25 = undefined, e25) {
+        super(i21, t24, z24, e25);
+        if (typeof d25 === 'function') {
+            this.paramsGenerator_ = d25;
         }
         this.leftIconStyle = EditableLeftIconType.Back;
         this.title = '';
@@ -180,10 +181,10 @@ export class EditableTitleBar extends ViewPU {
         this.isFollowingSystemFontScale = false;
         this.maxFontScale = 1;
         this.systemFontScale = 1;
-        this.__editableTitleBarTheme =
-            new ObservedPropertyObjectPU(new EditableTitleBarTheme(), this, 'editableTitleBarTheme');
+        this.__editableTitleBarTheme = new ObservedPropertyObjectPU(new EditableTitleBarTheme(),
+            this, 'editableTitleBarTheme');
         this.addProvidedVar('editableTitleBarTheme', this.__editableTitleBarTheme, false);
-        this.__contentMargin = new SynchedPropertyObjectOneWayPU(e8.contentMargin, this, 'contentMargin');
+        this.__contentMargin = new SynchedPropertyObjectOneWayPU(t21.contentMargin, this, 'contentMargin');
         this.__titleBarMargin = new ObservedPropertyObjectPU({
             start: LengthMetrics.resource({
                 'id': -1,
@@ -201,72 +202,68 @@ export class EditableTitleBar extends ViewPU {
             }),
         }, this, 'titleBarMargin');
         this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.setInitiallyProvidedValue(e8);
+        this.setInitiallyProvidedValue(t21);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(c8) {
-        if (c8.leftIconStyle !== undefined) {
-            this.leftIconStyle = c8.leftIconStyle;
+    setInitiallyProvidedValue(f21) {
+        if (f21.leftIconStyle !== undefined) {
+            this.leftIconStyle = f21.leftIconStyle;
         }
-        if (c8.title !== undefined) {
-            this.title = c8.title;
+        if (f21.title !== undefined) {
+            this.title = f21.title;
         }
-        if (c8.subtitle !== undefined) {
-            this.subtitle = c8.subtitle;
+        if (f21.subtitle !== undefined) {
+            this.subtitle = f21.subtitle;
         }
-        if (c8.isSaveIconRequired !== undefined) {
-            this.isSaveIconRequired = c8.isSaveIconRequired;
+        if (f21.isSaveIconRequired !== undefined) {
+            this.isSaveIconRequired = f21.isSaveIconRequired;
         }
-        if (c8.imageItem !== undefined) {
-            this.imageItem = c8.imageItem;
+        if (f21.imageItem !== undefined) {
+            this.imageItem = f21.imageItem;
         }
-        if (c8.menuItems !== undefined) {
-            this.menuItems = c8.menuItems;
+        if (f21.menuItems !== undefined) {
+            this.menuItems = f21.menuItems;
         }
-        if (c8.options !== undefined) {
-            this.options = c8.options;
+        if (f21.options !== undefined) {
+            this.options = f21.options;
         }
-        if (c8.onSave !== undefined) {
-            this.onSave = c8.onSave;
+        if (f21.onSave !== undefined) {
+            this.onSave = f21.onSave;
         }
-        if (c8.onCancel !== undefined) {
-            this.onCancel = c8.onCancel;
+        if (f21.onCancel !== undefined) {
+            this.onCancel = f21.onCancel;
         }
-        if (c8.constraintWidth !== undefined) {
-            this.constraintWidth = c8.constraintWidth;
+        if (f21.constraintWidth !== undefined) {
+            this.constraintWidth = f21.constraintWidth;
         }
-        if (c8.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = c8.isFollowingSystemFontScale;
+        if (f21.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = f21.isFollowingSystemFontScale;
         }
-        if (c8.maxFontScale !== undefined) {
-            this.maxFontScale = c8.maxFontScale;
+        if (f21.maxFontScale !== undefined) {
+            this.maxFontScale = f21.maxFontScale;
         }
-        if (c8.systemFontScale !== undefined) {
-            this.systemFontScale = c8.systemFontScale;
+        if (f21.systemFontScale !== undefined) {
+            this.systemFontScale = f21.systemFontScale;
         }
-        if (c8.editableTitleBarTheme !== undefined) {
-            this.editableTitleBarTheme = c8.editableTitleBarTheme;
+        if (f21.editableTitleBarTheme !== undefined) {
+            this.editableTitleBarTheme = f21.editableTitleBarTheme;
         }
-        if (c8.titleBarMargin !== undefined) {
-            this.titleBarMargin = c8.titleBarMargin;
+        if (f21.titleBarMargin !== undefined) {
+            this.titleBarMargin = f21.titleBarMargin;
         }
-        if (c8.fontSize !== undefined) {
-            this.fontSize = c8.fontSize;
+        if (f21.fontSize !== undefined) {
+            this.fontSize = f21.fontSize;
         }
     }
-
-    updateStateVars(b8) {
-        this.__contentMargin.reset(b8.contentMargin);
+    updateStateVars(y20) {
+        this.__contentMargin.reset(y20.contentMargin);
     }
-
-    purgeVariableDependenciesOnElmtId(a8) {
-        this.__editableTitleBarTheme.purgeDependencyOnElmtId(a8);
-        this.__contentMargin.purgeDependencyOnElmtId(a8);
-        this.__titleBarMargin.purgeDependencyOnElmtId(a8);
-        this.__fontSize.purgeDependencyOnElmtId(a8);
+    purgeVariableDependenciesOnElmtId(e20) {
+        this.__editableTitleBarTheme.purgeDependencyOnElmtId(e20);
+        this.__contentMargin.purgeDependencyOnElmtId(e20);
+        this.__titleBarMargin.purgeDependencyOnElmtId(e20);
+        this.__fontSize.purgeDependencyOnElmtId(e20);
     }
-
     aboutToBeDeleted() {
         this.__editableTitleBarTheme.aboutToBeDeleted();
         this.__contentMargin.aboutToBeDeleted();
@@ -275,117 +272,114 @@ export class EditableTitleBar extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get editableTitleBarTheme() {
         return this.__editableTitleBarTheme.get();
     }
-
-    set editableTitleBarTheme(z7) {
-        this.__editableTitleBarTheme.set(z7);
+    set editableTitleBarTheme(g19) {
+        this.__editableTitleBarTheme.set(g19);
     }
-
     get contentMargin() {
         return this.__contentMargin.get();
     }
-
-    set contentMargin(y7) {
-        this.__contentMargin.set(y7);
+    set contentMargin(f19) {
+        this.__contentMargin.set(f19);
     }
-
     get titleBarMargin() {
         return this.__titleBarMargin.get();
     }
-
-    set titleBarMargin(x7) {
-        this.__titleBarMargin.set(x7);
+    set titleBarMargin(e19) {
+        this.__titleBarMargin.set(e19);
     }
-
     get fontSize() {
         return this.__fontSize.get();
     }
-
-    set fontSize(w7) {
-        this.__fontSize.set(w7);
+    set fontSize(y18) {
+        this.__fontSize.set(y18);
     }
-
-    onWillApplyTheme(v7) {
-        this.editableTitleBarTheme.iconColor = v7.colors.iconPrimary;
-        this.editableTitleBarTheme.titleColor = v7.colors.fontPrimary;
-        this.editableTitleBarTheme.subTitleColor = v7.colors.fontSecondary;
-        this.editableTitleBarTheme.iconBackgroundPressedColor = v7.colors.interactivePressed;
-        this.editableTitleBarTheme.iconBackgroundHoverColor = v7.colors.interactiveHover;
-        this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = v7.colors.interactiveFocus;
+    onWillApplyTheme(v15) {
+        this.editableTitleBarTheme.iconColor = v15.colors.iconPrimary;
+        this.editableTitleBarTheme.titleColor = v15.colors.fontPrimary;
+        this.editableTitleBarTheme.subTitleColor = v15.colors.fontSecondary;
+        this.editableTitleBarTheme.iconBackgroundPressedColor = v15.colors.interactivePressed;
+        this.editableTitleBarTheme.iconBackgroundHoverColor = v15.colors.interactiveHover;
+        this.editableTitleBarTheme.iconBackgroundFocusOutlineColor = v15.colors.interactiveFocus;
     }
-
     aboutToAppear() {
         try {
-            let u7 = this.getUIContext();
-            this.isFollowingSystemFontScale = u7.isFollowingSystemFontScale();
-            this.maxFontScale = u7.getMaxFontScale();
-        } catch (r7) {
-            let s7 = r7.code;
-            let t7 = r7.message;
-            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${s7}, message: ${t7}`);
+            let u15 = this.getUIContext();
+            this.isFollowingSystemFontScale = u15.isFollowingSystemFontScale();
+            this.maxFontScale = u15.getMaxFontScale();
+        }
+        catch (r15) {
+            let s15 = r15.code;
+            let t15 = r15.message;
+            hilog.error(0x3900, 'Ace', `Faild to init fontsizescale info,cause, code: ${s15}, message: ${t15}`);
         }
     }
-
     decideFontScale() {
-        let q7 = this.getUIContext();
-        this.systemFontScale = q7.getHostContext()?.config?.fontSizeScale ?? 1;
+        let q15 = this.getUIContext();
+        this.systemFontScale = q15.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.isFollowingSystemFontScale) {
             return 1;
         }
         return Math.min(this.systemFontScale, this.maxFontScale);
     }
-
     initialRender() {
-        this.observeComponentCreation2((o7, p7) => {
+        this.observeComponentCreation2((o15, p15) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch,
             });
             Flex.backgroundColor(this.options.backgroundColor ?? EditableTitleBar.noneColor);
             Flex.backgroundBlurStyle(this.options.backgroundBlurStyle ?? BlurStyle.NONE);
-            Flex.expandSafeArea(this.options.safeAreaTypes ? this.options.safeAreaTypes : [SafeAreaType.SYSTEM],
-                this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP]);
+            Flex.expandSafeArea(this.options.safeAreaTypes ? this.options.safeAreaTypes :
+                [SafeAreaType.SYSTEM], this.options.safeAreaEdges ? this.options.safeAreaEdges : [SafeAreaEdge.TOP]);
         }, Flex);
-        this.observeComponentCreation2((m7, n7) => {
+        this.observeComponentCreation2((m15, n15) => {
             Row.create();
             Row.width('100%');
             Row.margin(this.contentMargin ?? this.titleBarMargin);
             Row.height(EditableTitleBar.totalHeight);
         }, Row);
-        this.observeComponentCreation2((k7, l7) => {
+        this.observeComponentCreation2((k15, l15) => {
             Row.create();
             Row.flexShrink(0);
         }, Row);
         this.leftIconLayout.bind(this)();
         Row.pop();
-        this.observeComponentCreation2((i7, j7) => {
+        this.observeComponentCreation2((i15, j15) => {
+            Row.create();
+            Row.width('100%');
+            Row.flexShrink(1);
+            Row.accessibilityGroup(true);
+        }, Row);
+        this.observeComponentCreation2((e15, f15) => {
             If.create();
             if (this.imageItem) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((n8, o8) => {
+                    this.observeComponentCreation2((g15, h15) => {
                         Row.create();
                         Row.flexShrink(0);
                     }, Row);
                     this.imageItemLayout.bind(this)();
                     Row.pop();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((e7, f7) => {
+        this.observeComponentCreation2((c15, d15) => {
             Row.create();
             Row.width('100%');
             Row.flexShrink(1);
         }, Row);
         this.titleLayout.bind(this)();
         Row.pop();
-        this.observeComponentCreation2((c7, d7) => {
+        Row.pop();
+        this.observeComponentCreation2((a15, b15) => {
             Row.create();
             Row.flexShrink(0);
         }, Row);
@@ -394,40 +388,39 @@ export class EditableTitleBar extends ViewPU {
         Row.pop();
         Flex.pop();
     }
-
-    imageItemLayout(v6 = null) {
+    imageItemLayout(v14 = null) {
         {
-            this.observeComponentCreation2((w6, x6) => {
-                if (x6) {
-                    let y6 = new ImageMenuItem(this, {
+            this.observeComponentCreation2((w14, x14) => {
+                if (x14) {
+                    let y14 = new ImageMenuItem(this, {
                         item: this.imageItem,
                         attribute: ItemType.Image,
-                    }, undefined, w6, () => {
-                    }, { page: 'EditableTitleBar/src/main/ets/components/MainPage.ets', line: 241, col: 5 });
-                    ViewPU.create(y6);
-                    let z6 = () => {
+                    }, undefined, w14, () => {
+                    }, { page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 249, col: 5 });
+                    ViewPU.create(y14);
+                    let z14 = () => {
                         return {
                             item: this.imageItem,
                             attribute: ItemType.Image
                         };
                     };
-                    y6.paramsGenerator_ = z6;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(w6, {});
+                    y14.paramsGenerator_ = z14;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(w14, {});
                 }
             }, { name: 'ImageMenuItem' });
         }
     }
-
-    leftIconLayout(k6 = null) {
-        this.observeComponentCreation2((l6, m6) => {
+    leftIconLayout(j14 = null) {
+        this.observeComponentCreation2((k14, m14) => {
             If.create();
             if (this.leftIconStyle === EditableLeftIconType.Back) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((r6, s6) => {
-                            if (s6) {
-                                let t6 = new ImageMenuItem(this, {
+                        this.observeComponentCreation2((r14, s14) => {
+                            if (s14) {
+                                let t14 = new ImageMenuItem(this, {
                                     item: {
                                         value: PUBLIC_BACK,
                                         isEnabled: true,
@@ -436,14 +429,10 @@ export class EditableTitleBar extends ViewPU {
                                     },
                                     fontSize: this.fontSize,
                                     attribute: ItemType.LeftIcon,
-                                }, undefined, r6, () => {
-                                }, {
-                                    page: 'EditableTitleBar/src/main/ets/components/MainPage.ets',
-                                    line: 250,
-                                    col: 7
-                                });
-                                ViewPU.create(t6);
-                                let u6 = () => {
+                                }, undefined, r14, () => {
+                                }, { page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 258, col: 7 });
+                                ViewPU.create(t14);
+                                let u14 = () => {
                                     return {
                                         item: {
                                             value: PUBLIC_BACK,
@@ -455,21 +444,23 @@ export class EditableTitleBar extends ViewPU {
                                         attribute: ItemType.LeftIcon
                                     };
                                 };
-                                t6.paramsGenerator_ = u6;
-                            } else {
-                                this.updateStateVarsOfChildByElmtId(r6, {
+                                t14.paramsGenerator_ = u14;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(r14, {
                                     fontSize: this.fontSize
                                 });
                             }
                         }, { name: 'ImageMenuItem' });
                     }
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     {
-                        this.observeComponentCreation2((n6, o6) => {
-                            if (o6) {
-                                let p6 = new ImageMenuItem(this, {
+                        this.observeComponentCreation2((n14, o14) => {
+                            if (o14) {
+                                let p14 = new ImageMenuItem(this, {
                                     item: {
                                         value: PUBLIC_CANCEL,
                                         isEnabled: true,
@@ -477,14 +468,10 @@ export class EditableTitleBar extends ViewPU {
                                     },
                                     fontSize: this.fontSize,
                                     attribute: ItemType.LeftIcon,
-                                }, undefined, n6, () => {
-                                }, {
-                                    page: 'EditableTitleBar/src/main/ets/components/MainPage.ets',
-                                    line: 260,
-                                    col: 7
-                                });
-                                ViewPU.create(p6);
-                                let q6 = () => {
+                                }, undefined, n14, () => {
+                                }, { page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 268, col: 7 });
+                                ViewPU.create(p14);
+                                let q14 = () => {
                                     return {
                                         item: {
                                             value: PUBLIC_CANCEL,
@@ -495,9 +482,10 @@ export class EditableTitleBar extends ViewPU {
                                         attribute: ItemType.LeftIcon
                                     };
                                 };
-                                p6.paramsGenerator_ = q6;
-                            } else {
-                                this.updateStateVarsOfChildByElmtId(n6, {
+                                p14.paramsGenerator_ = q14;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(n14, {
                                     fontSize: this.fontSize
                                 });
                             }
@@ -508,9 +496,8 @@ export class EditableTitleBar extends ViewPU {
         }, If);
         If.pop();
     }
-
-    titleLayout(x5 = null) {
-        this.observeComponentCreation2((i6, j6) => {
+    titleLayout(s13 = null) {
+        this.observeComponentCreation2((g14, h14) => {
             Column.create();
             Column.height(EditableTitleBar.totalHeight);
             Column.justifyContent(FlexAlign.Center);
@@ -525,11 +512,11 @@ export class EditableTitleBar extends ViewPU {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((g6, h6) => {
+        this.observeComponentCreation2((d14, e14) => {
             Row.create();
             Row.justifyContent(FlexAlign.Start);
         }, Row);
-        this.observeComponentCreation2((e6, f6) => {
+        this.observeComponentCreation2((b14, c14) => {
             Text.create(this.title);
             Text.maxFontSize(TITLE_F_VP);
             Text.minFontSize(SUBTITLE_F_VP);
@@ -546,11 +533,11 @@ export class EditableTitleBar extends ViewPU {
         }, Text);
         Text.pop();
         Row.pop();
-        this.observeComponentCreation2((y5, z5) => {
+        this.observeComponentCreation2((t13, u13) => {
             If.create();
             if (this.subtitle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c6, d6) => {
+                    this.observeComponentCreation2((x13, y13) => {
                         Row.create();
                         Row.margin({
                             top: {
@@ -563,7 +550,7 @@ export class EditableTitleBar extends ViewPU {
                         });
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((a6, b6) => {
+                    this.observeComponentCreation2((v13, w13) => {
                         Text.create(this.subtitle);
                         Text.maxFontSize(SUBTITLE_F_VP);
                         Text.minFontSize(MIN_SUBTITLE_SIZE);
@@ -580,7 +567,8 @@ export class EditableTitleBar extends ViewPU {
                     Text.pop();
                     Row.pop();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -588,20 +576,19 @@ export class EditableTitleBar extends ViewPU {
         If.pop();
         Column.pop();
     }
-
-    rightMenuItemsLayout(s5 = null) {
+    rightMenuItemsLayout(n13 = null) {
         {
-            this.observeComponentCreation2((t5, u5) => {
-                if (u5) {
-                    let v5 = new EditableTitleBarMenuSection(this, {
+            this.observeComponentCreation2((o13, p13) => {
+                if (p13) {
+                    let q13 = new EditableTitleBarMenuSection(this, {
                         menuItems: this.menuItems,
                         onSave: this.onSave,
                         isSaveEnabled: this.isSaveIconRequired,
                         fontSize: this.fontSize,
-                    }, undefined, t5, () => {
-                    }, { page: 'EditableTitleBar/src/main/ets/components/MainPage.ets', line: 324, col: 5 });
-                    ViewPU.create(v5);
-                    let w5 = () => {
+                    }, undefined, o13, () => {
+                    }, { page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 332, col: 5 });
+                    ViewPU.create(q13);
+                    let r13 = () => {
                         return {
                             menuItems: this.menuItems,
                             onSave: this.onSave,
@@ -609,32 +596,30 @@ export class EditableTitleBar extends ViewPU {
                             fontSize: this.fontSize
                         };
                     };
-                    v5.paramsGenerator_ = w5;
-                } else {
-                    this.updateStateVarsOfChildByElmtId(t5, {
+                    q13.paramsGenerator_ = r13;
+                }
+                else {
+                    this.updateStateVarsOfChildByElmtId(o13, {
                         fontSize: this.fontSize
                     });
                 }
             }, { name: 'EditableTitleBarMenuSection' });
         }
     }
-
-    onPlaceChildren(o5, p5, q5) {
-        p5.forEach((r5) => {
-            r5.layout({ x: 0, y: 0 });
+    onPlaceChildren(j13, k13, l13) {
+        k13.forEach((m13) => {
+            m13.layout({ x: 0, y: 0 });
         });
     }
-
-    onMeasureSize(j5, k5, l5) {
-        let m5 = { width: j5.width, height: j5.height };
+    onMeasureSize(c13, d13, g13) {
+        let h13 = { width: c13.width, height: c13.height };
         this.fontSize = this.decideFontScale();
-        k5.forEach((n5) => {
-            m5.height = n5.measure(l5).height;
-            m5.width = Number(l5.maxWidth);
+        d13.forEach((i13) => {
+            h13.height = i13.measure(g13).height;
+            h13.width = Number(g13.maxWidth);
         });
-        return m5;
+        return h13;
     }
-
     rerender() {
         this.updateDirtyElements();
     }
@@ -643,135 +628,127 @@ EditableTitleBar.maxCountOfExtraItems = 3;
 EditableTitleBar.maxOtherCountOfExtraItems = 2;
 EditableTitleBar.commonZero = 0;
 EditableTitleBar.noneColor = '#00000000';
+// 'sys.float.titlebar_default_height' id,value: 56vp
 EditableTitleBar.defaultHeight = getNumberByResource(125831115, DEFAULT_TITLE_BAR_HEIGHT);
+// 'sys.float.padding_level1' id,value: 2vp
 EditableTitleBar.defaultTitlePadding = getNumberByResource(125830920, DEFAULT_TITLE_PADDING);
-EditableTitleBar.totalHeight =
-    EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ? DEFAULT_TITLE_BAR_HEIGHT :
-    EditableTitleBar.defaultHeight;
+EditableTitleBar.totalHeight = EditableTitleBar.defaultHeight === EditableTitleBar.commonZero ?
+    DEFAULT_TITLE_BAR_HEIGHT : EditableTitleBar.defaultHeight;
 EditableTitleBar.titlePadding = EditableTitleBar.defaultTitlePadding === EditableTitleBar.commonZero ?
     DEFAULT_TITLE_PADDING : EditableTitleBar.defaultTitlePadding;
 EditableTitleBar.maxMainTitleHeight =
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_MAIN_TITLE_PERCENT;
 EditableTitleBar.maxSubTitleHeight =
     (EditableTitleBar.totalHeight - EditableTitleBar.titlePadding) * MAX_SUB_TITLE_PERCENT;
-
 class EditableTitleBarMenuSection extends ViewPU {
-    constructor(d5, e5, f5, g5 = -1, h5 = undefined, i5) {
-        super(d5, f5, g5, i5);
-        if (typeof h5 === 'function') {
-            this.paramsGenerator_ = h5;
+    constructor(w12, x12, y12, z12 = -1, a13 = undefined, b13) {
+        super(w12, y12, z12, b13);
+        if (typeof a13 === 'function') {
+            this.paramsGenerator_ = a13;
         }
         this.menuItems = undefined;
         this.onSave = undefined;
         this.isSaveEnabled = true;
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(e5.fontSize, this, 'fontSize');
-        this.setInitiallyProvidedValue(e5);
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(x12.fontSize, this, 'fontSize');
+        this.setInitiallyProvidedValue(x12);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(c5) {
-        if (c5.menuItems !== undefined) {
-            this.menuItems = c5.menuItems;
+    setInitiallyProvidedValue(v12) {
+        if (v12.menuItems !== undefined) {
+            this.menuItems = v12.menuItems;
         }
-        if (c5.onSave !== undefined) {
-            this.onSave = c5.onSave;
+        if (v12.onSave !== undefined) {
+            this.onSave = v12.onSave;
         }
-        if (c5.isSaveEnabled !== undefined) {
-            this.isSaveEnabled = c5.isSaveEnabled;
+        if (v12.isSaveEnabled !== undefined) {
+            this.isSaveEnabled = v12.isSaveEnabled;
         }
-        if (c5.fontSize === undefined) {
+        if (v12.fontSize === undefined) {
             this.__fontSize.set(1);
         }
     }
-
-    updateStateVars(b5) {
-        this.__fontSize.reset(b5.fontSize);
+    updateStateVars(u12) {
+        this.__fontSize.reset(u12.fontSize);
     }
-
-    purgeVariableDependenciesOnElmtId(a5) {
-        this.__fontSize.purgeDependencyOnElmtId(a5);
+    purgeVariableDependenciesOnElmtId(t12) {
+        this.__fontSize.purgeDependencyOnElmtId(t12);
     }
-
     aboutToBeDeleted() {
         this.__fontSize.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get fontSize() {
         return this.__fontSize.get();
     }
-
-    set fontSize(z4) {
-        this.__fontSize.set(z4);
+    set fontSize(s12) {
+        this.__fontSize.set(s12);
     }
-
     initialRender() {
-        this.observeComponentCreation2((x4, y4) => {
+        this.observeComponentCreation2((p12, q12) => {
             Column.create();
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((v4, w4) => {
+        this.observeComponentCreation2((m12, n12) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((k4, l4) => {
+        this.observeComponentCreation2((a12, c12) => {
             If.create();
             if (this.menuItems !== undefined && this.menuItems.length > EditableTitleBar.commonZero) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m4, n4) => {
+                    this.observeComponentCreation2((d12, e12) => {
                         ForEach.create();
-                        const o4 = p4 => {
-                            const q4 = p4;
+                        const f12 = g12 => {
+                            const h12 = g12;
                             {
-                                this.observeComponentCreation2((r4, s4) => {
-                                    if (s4) {
-                                        let t4 = new ImageMenuItem(this, {
-                                            item: q4,
+                                this.observeComponentCreation2((i12, j12) => {
+                                    if (j12) {
+                                        let k12 = new ImageMenuItem(this, {
+                                            item: h12,
                                             attribute: ItemType.Icon,
                                             fontSize: this.fontSize,
-                                        }, undefined, r4, () => {
-                                        }, {
-                                            page: 'EditableTitleBar/src/main/ets/components/MainPage.ets',
-                                            line: 364,
-                                            col: 15
-                                        });
-                                        ViewPU.create(t4);
-                                        let u4 = () => {
+                                        }, undefined, i12, () => {
+                                        }, { page: 'library/src/main/ets/components/EditableTitleBar.ets',
+                                            line: 372, col: 15 });
+                                        ViewPU.create(k12);
+                                        let l12 = () => {
                                             return {
-                                                item: q4,
+                                                item: h12,
                                                 attribute: ItemType.Icon,
                                                 fontSize: this.fontSize
                                             };
                                         };
-                                        t4.paramsGenerator_ = u4;
-                                    } else {
-                                        this.updateStateVarsOfChildByElmtId(r4, {
+                                        k12.paramsGenerator_ = l12;
+                                    }
+                                    else {
+                                        this.updateStateVarsOfChildByElmtId(i12, {
                                             fontSize: this.fontSize
                                         });
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(m4,
-                            this.menuItems.slice(EditableTitleBar.commonZero, this.isSaveEnabled ?
-                            EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems), o4);
+                        this.forEachUpdateFunction(d12, this.menuItems.slice(EditableTitleBar.commonZero,
+                            this.isSaveEnabled ? EditableTitleBar.maxOtherCountOfExtraItems :
+                            EditableTitleBar.maxCountOfExtraItems), f12);
                     }, ForEach);
                     ForEach.pop();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((e4, f4) => {
+        this.observeComponentCreation2((q11, s11) => {
             If.create();
             if (this.isSaveEnabled) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((g4, h4) => {
-                            if (h4) {
-                                let i4 = new ImageMenuItem(this, {
+                        this.observeComponentCreation2((t11, w11) => {
+                            if (w11) {
+                                let x11 = new ImageMenuItem(this, {
                                     item: {
                                         value: PUBLIC_OK,
                                         isEnabled: true,
@@ -779,14 +756,10 @@ class EditableTitleBarMenuSection extends ViewPU {
                                     },
                                     fontSize: this.fontSize,
                                     attribute: ItemType.Icon,
-                                }, undefined, g4, () => {
-                                }, {
-                                    page: 'EditableTitleBar/src/main/ets/components/MainPage.ets',
-                                    line: 372,
-                                    col: 11
-                                });
-                                ViewPU.create(i4);
-                                let j4 = () => {
+                                }, undefined, t11, () => {}, {
+                                    page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 380, col: 11 });
+                                ViewPU.create(x11);
+                                let y11 = () => {
                                     return {
                                         item: {
                                             value: PUBLIC_OK,
@@ -797,16 +770,18 @@ class EditableTitleBarMenuSection extends ViewPU {
                                         attribute: ItemType.Icon
                                     };
                                 };
-                                i4.paramsGenerator_ = j4;
-                            } else {
-                                this.updateStateVarsOfChildByElmtId(g4, {
+                                x11.paramsGenerator_ = y11;
+                            }
+                            else {
+                                this.updateStateVarsOfChildByElmtId(t11, {
                                     fontSize: this.fontSize
                                 });
                             }
                         }, { name: 'ImageMenuItem' });
                     }
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                 });
             }
@@ -815,36 +790,37 @@ class EditableTitleBarMenuSection extends ViewPU {
         Row.pop();
         Column.pop();
     }
-
     rerender() {
         this.updateDirtyElements();
     }
 }
-
 class ImageMenuItem extends ViewPU {
-    constructor(w3, x3, y3, z3 = -1, a4 = undefined, b4) {
-        super(w3, y3, z3, b4);
-        if (typeof a4 === 'function') {
-            this.paramsGenerator_ = a4;
+    constructor(f11, g11, h11, i11 = -1, j11 = undefined, m11) {
+        super(f11, h11, i11, m11);
+        if (typeof j11 === 'function') {
+            this.paramsGenerator_ = j11;
         }
         this.item = {
             value: '',
             isEnabled: true,
             label: '',
+            accessibilityLevel: 'auto',
+            accessibilityText: '',
+            accessibilityDescription: '',
         };
         this.attribute = ItemType.Image;
         this.callbackId = undefined;
         this.minFontSize = 1.75;
         this.maxFontSize = 3.2;
         this.longPressTime = 500;
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(x3.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(g11.fontSize, this, 'fontSize');
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
         this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
         this.__editableTitleBarTheme = this.initializeConsume('editableTitleBarTheme', 'editableTitleBarTheme');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let c4 = new EditableTitleBarDialog(this, {
+                let n11 = new EditableTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -852,11 +828,11 @@ class ImageMenuItem extends ViewPU {
                     itemEditableDialog: this.item,
                     textEditableTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                     fontSize: this.fontSize,
-                }, undefined, -1, () => {
-                }, { page: 'EditableTitleBar/src/main/ets/components/MainPage.ets', line: 406, col: 14 });
-                c4.setController(this.dialogController);
-                ViewPU.create(c4);
-                let d4 = () => {
+                }, undefined, -1, () => { }, {
+                    page: 'library/src/main/ets/components/EditableTitleBar.ets', line: 417, col: 14 });
+                n11.setController(this.dialogController);
+                ViewPU.create(n11);
+                let o11 = () => {
                     return {
                         cancel: () => {
                         },
@@ -867,72 +843,67 @@ class ImageMenuItem extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                c4.paramsGenerator_ = d4;
+                n11.paramsGenerator_ = o11;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
-        this.__buttonGestureModifier =
-            new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this,
-                'buttonGestureModifier');
-        this.setInitiallyProvidedValue(x3);
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController),
+            this, 'buttonGestureModifier');
+        this.setInitiallyProvidedValue(g11);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(v3) {
-        if (v3.item !== undefined) {
-            this.item = v3.item;
+    setInitiallyProvidedValue(e11) {
+        if (e11.item !== undefined) {
+            this.item = e11.item;
         }
-        if (v3.attribute !== undefined) {
-            this.attribute = v3.attribute;
+        if (e11.attribute !== undefined) {
+            this.attribute = e11.attribute;
         }
-        if (v3.callbackId !== undefined) {
-            this.callbackId = v3.callbackId;
+        if (e11.callbackId !== undefined) {
+            this.callbackId = e11.callbackId;
         }
-        if (v3.minFontSize !== undefined) {
-            this.minFontSize = v3.minFontSize;
+        if (e11.minFontSize !== undefined) {
+            this.minFontSize = e11.minFontSize;
         }
-        if (v3.maxFontSize !== undefined) {
-            this.maxFontSize = v3.maxFontSize;
+        if (e11.maxFontSize !== undefined) {
+            this.maxFontSize = e11.maxFontSize;
         }
-        if (v3.longPressTime !== undefined) {
-            this.longPressTime = v3.longPressTime;
+        if (e11.longPressTime !== undefined) {
+            this.longPressTime = e11.longPressTime;
         }
-        if (v3.fontSize === undefined) {
+        if (e11.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (v3.isOnFocus !== undefined) {
-            this.isOnFocus = v3.isOnFocus;
+        if (e11.isOnFocus !== undefined) {
+            this.isOnFocus = e11.isOnFocus;
         }
-        if (v3.isOnHover !== undefined) {
-            this.isOnHover = v3.isOnHover;
+        if (e11.isOnHover !== undefined) {
+            this.isOnHover = e11.isOnHover;
         }
-        if (v3.isOnClick !== undefined) {
-            this.isOnClick = v3.isOnClick;
+        if (e11.isOnClick !== undefined) {
+            this.isOnClick = e11.isOnClick;
         }
-        if (v3.dialogController !== undefined) {
-            this.dialogController = v3.dialogController;
+        if (e11.dialogController !== undefined) {
+            this.dialogController = e11.dialogController;
         }
-        if (v3.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = v3.buttonGestureModifier;
+        if (e11.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = e11.buttonGestureModifier;
         }
     }
-
-    updateStateVars(u3) {
-        this.__fontSize.reset(u3.fontSize);
+    updateStateVars(c11) {
+        this.__fontSize.reset(c11.fontSize);
     }
-
-    purgeVariableDependenciesOnElmtId(t3) {
-        this.__fontSize.purgeDependencyOnElmtId(t3);
-        this.__isOnFocus.purgeDependencyOnElmtId(t3);
-        this.__isOnHover.purgeDependencyOnElmtId(t3);
-        this.__isOnClick.purgeDependencyOnElmtId(t3);
-        this.__editableTitleBarTheme.purgeDependencyOnElmtId(t3);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(t3);
+    purgeVariableDependenciesOnElmtId(b11) {
+        this.__fontSize.purgeDependencyOnElmtId(b11);
+        this.__isOnFocus.purgeDependencyOnElmtId(b11);
+        this.__isOnHover.purgeDependencyOnElmtId(b11);
+        this.__isOnClick.purgeDependencyOnElmtId(b11);
+        this.__editableTitleBarTheme.purgeDependencyOnElmtId(b11);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(b11);
     }
-
     aboutToBeDeleted() {
         this.__fontSize.aboutToBeDeleted();
         this.__isOnFocus.aboutToBeDeleted();
@@ -943,55 +914,42 @@ class ImageMenuItem extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
     get fontSize() {
         return this.__fontSize.get();
     }
-
-    set fontSize(s3) {
-        this.__fontSize.set(s3);
+    set fontSize(a11) {
+        this.__fontSize.set(a11);
     }
-
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
-
-    set isOnFocus(r3) {
-        this.__isOnFocus.set(r3);
+    set isOnFocus(z10) {
+        this.__isOnFocus.set(z10);
     }
-
     get isOnHover() {
         return this.__isOnHover.get();
     }
-
-    set isOnHover(q3) {
-        this.__isOnHover.set(q3);
+    set isOnHover(y10) {
+        this.__isOnHover.set(y10);
     }
-
     get isOnClick() {
         return this.__isOnClick.get();
     }
-
-    set isOnClick(p3) {
-        this.__isOnClick.set(p3);
+    set isOnClick(x10) {
+        this.__isOnClick.set(x10);
     }
-
     get editableTitleBarTheme() {
         return this.__editableTitleBarTheme.get();
     }
-
-    set editableTitleBarTheme(o3) {
-        this.__editableTitleBarTheme.set(o3);
+    set editableTitleBarTheme(w10) {
+        this.__editableTitleBarTheme.set(w10);
     }
-
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-
-    set buttonGestureModifier(n3) {
-        this.__buttonGestureModifier.set(n3);
+    set buttonGestureModifier(v10) {
+        this.__buttonGestureModifier.set(v10);
     }
-
     textDialog() {
         if (this.item.value === PUBLIC_OK) {
             return {
@@ -1001,7 +959,8 @@ class ImageMenuItem extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-        } else if (this.item.value === PUBLIC_CANCEL) {
+        }
+        else if (this.item.value === PUBLIC_CANCEL) {
             return {
                 'id': -1,
                 'type': 10003,
@@ -1009,7 +968,8 @@ class ImageMenuItem extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-        } else if (this.item.value === PUBLIC_BACK) {
+        }
+        else if (this.item.value === PUBLIC_BACK) {
             return {
                 'id': -1,
                 'type': 10003,
@@ -1017,55 +977,53 @@ class ImageMenuItem extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-        } else {
+        }
+        else {
             return this.item.label ? this.item.label : '';
         }
     }
-
     onFontSizeUpdated() {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
-
-    touchEventAction(m3) {
+    touchEventAction(u10) {
         if (!this.item.isEnabled) {
             return;
         }
-        if (m3.type === TouchType.Down) {
+        if (u10.type === TouchType.Down) {
             this.isOnClick = true;
         }
-        if (m3.type === TouchType.Up || m3.type === TouchType.Cancel) {
+        if (u10.type === TouchType.Up || u10.type === TouchType.Cancel) {
             if (this.fontSize >= this.minFontSize) {
                 this.dialogController?.close();
             }
             this.isOnClick = false;
         }
     }
-
-    keyEventAction(l3) {
+    keyEventAction(t10) {
         if (!this.item.isEnabled) {
             return;
         }
-        if (l3.keyCode !== KeyCode.KEYCODE_ENTER && l3.keyCode !== KeyCode.KEYCODE_SPACE) {
+        if (t10.keyCode !== KeyCode.KEYCODE_ENTER && t10.keyCode !== KeyCode.KEYCODE_SPACE) {
             return;
         }
-        if (l3.type === KeyType.Down) {
+        if (t10.type === KeyType.Down) {
             this.isOnClick = true;
         }
-        if (l3.type === KeyType.Up) {
+        if (t10.type === KeyType.Up) {
             this.isOnClick = false;
         }
     }
-
     getBgColor() {
         if (this.isOnClick) {
             return this.editableTitleBarTheme.iconBackgroundPressedColor;
-        } else if (this.isOnHover) {
+        }
+        else if (this.isOnHover) {
             return this.editableTitleBarTheme.iconBackgroundHoverColor;
-        } else {
+        }
+        else {
             return this.editableTitleBarTheme.iconBackgroundColor;
         }
     }
-
     getFgColor() {
         if (this.isOnClick) {
             return {
@@ -1075,7 +1033,8 @@ class ImageMenuItem extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-        } else if (this.isOnHover) {
+        }
+        else if (this.isOnHover) {
             return {
                 'id': -1,
                 'type': 10001,
@@ -1083,44 +1042,59 @@ class ImageMenuItem extends ViewPU {
                 'bundleName': '__harDefaultBundleName__',
                 'moduleName': '__harDefaultModuleName__'
             };
-        } else {
+        }
+        else {
             return EditableTitleBar.noneColor;
         }
     }
-
+    toStringFormat(o10) {
+        if (typeof o10 === 'string' || typeof o10 === 'undefined') {
+            return o10;
+        }
+        else {
+            let p10 = '';
+            try {
+                p10 = getContext()?.resourceManager?.getStringSync(o10);
+            }
+            catch (q10) {
+                let r10 = q10?.code;
+                let s10 = q10?.message;
+                hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${r10}, message: ${s10}`);
+            }
+            return p10;
+        }
+    }
     getAccessibilityReadText() {
         if (this.item.value === PUBLIC_OK) {
-            return {
-                'id': -1,
-                'type': 10003,
-                params: ['sys.string.icon_save'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            };
-        } else if (this.item.value === PUBLIC_CANCEL) {
-            return {
-                'id': -1,
-                'type': 10003,
-                params: ['sys.string.icon_cancel'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            };
-        } else if (this.item.value === PUBLIC_BACK) {
-            return {
-                'id': -1,
-                'type': 10003,
-                params: ['sys.string.icon_back'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
-            };
-        } else if (this.item.label) {
-            return this.item.label;
+            return getContext()?.resourceManager?.getStringByNameSync('icon_save');
         }
-        return undefined;
+        else if (this.item.value === PUBLIC_CANCEL) {
+            return getContext()?.resourceManager?.getStringByNameSync('icon_cancel');
+        }
+        else if (this.item.value === PUBLIC_BACK) {
+            return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+        }
+        else if (this.item.accessibilityText) {
+            return this.toStringFormat(this.item.accessibilityText);
+        } else if (this.item.label) {
+            return this.toStringFormat(this.item.label);
+        }
+        return ' ';
     }
-
-    IconBuilder(q2 = null) {
-        this.observeComponentCreation2((b3, c3) => {
+    getRightIconAccessibilityLevel() {
+        if (this.item.accessibilityLevel && this.item.accessibilityLevel !== '') {
+            return this.item.accessibilityLevel;
+        }
+        return 'auto';
+    }
+    getAccessibilityDescription() {
+        if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
+            return this.toStringFormat(this.item.accessibilityDescription);
+        }
+        return '';
+    }
+    IconBuilder(y9 = null) {
+        this.observeComponentCreation2((j10, k10) => {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
             Button.width({
                 'id': -1,
@@ -1207,17 +1181,17 @@ class ImageMenuItem extends ViewPU {
                 this.isOnFocus = true;
             });
             Button.onBlur(() => this.isOnFocus = false);
-            Button.onHover((f3) => {
+            Button.onHover((n10) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
-                this.isOnHover = f3;
+                this.isOnHover = n10;
             });
-            Button.onKeyEvent((e3) => {
-                this.keyEventAction(e3);
+            Button.onKeyEvent((m10) => {
+                this.keyEventAction(m10);
             });
-            Button.onTouch((d3) => {
-                this.touchEventAction(d3);
+            Button.onTouch((l10) => {
+                this.touchEventAction(l10);
             });
             Button.onClick(() => {
                 if (this.item.isEnabled === undefined) {
@@ -1226,12 +1200,14 @@ class ImageMenuItem extends ViewPU {
                 this.item.isEnabled && this.item.action && this.item.action();
             });
             Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
+            Button.accessibilityLevel(this.getRightIconAccessibilityLevel());
+            Button.accessibilityDescription(this.getAccessibilityDescription());
         }, Button);
-        this.observeComponentCreation2((r2, s2) => {
+        this.observeComponentCreation2((z9, a10) => {
             If.create();
             if (this.item.symbolStyle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((z2, a3) => {
+                    this.observeComponentCreation2((h10, i10) => {
                         SymbolGlyph.create();
                         SymbolGlyph.fontColor([this.editableTitleBarTheme.iconColor]);
                         SymbolGlyph.attributeModifier.bind(this)(this.item.symbolStyle);
@@ -1244,13 +1220,14 @@ class ImageMenuItem extends ViewPU {
                         SymbolGlyph.fontSize(SYMBOL_SIZE);
                     }, SymbolGlyph);
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((t2, u2) => {
+                    this.observeComponentCreation2((b10, c10) => {
                         If.create();
                         if (Util.isSymbolResource(this.item.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((x2, y2) => {
+                                this.observeComponentCreation2((f10, g10) => {
                                     SymbolGlyph.create(this.item.value);
                                     SymbolGlyph.fontSize(SYMBOL_SIZE);
                                     SymbolGlyph.fontColor([this.editableTitleBarTheme.iconColor]);
@@ -1260,9 +1237,10 @@ class ImageMenuItem extends ViewPU {
                                     SymbolGlyph.accessibilityText(this.getAccessibilityReadText());
                                 }, SymbolGlyph);
                             });
-                        } else {
+                        }
+                        else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((v2, w2) => {
+                                this.observeComponentCreation2((d10, e10) => {
                                     Image.create(this.item.value);
                                     Image.fillColor(this.editableTitleBarTheme.iconColor);
                                     Image.matchTextDirection(this.item.value === PUBLIC_IMAGE_BACK ? true : false);
@@ -1295,9 +1273,8 @@ class ImageMenuItem extends ViewPU {
         If.pop();
         Button.pop();
     }
-
-    ImageBuilder(g2 = null) {
-        this.observeComponentCreation2((o2, p2) => {
+    ImageBuilder(o9 = null) {
+        this.observeComponentCreation2((w9, x9) => {
             Stack.create({ alignContent: Alignment.Center });
             Stack.margin({
                 start: LengthMetrics.resource({
@@ -1309,7 +1286,7 @@ class ImageMenuItem extends ViewPU {
                 }),
             });
         }, Stack);
-        this.observeComponentCreation2((m2, n2) => {
+        this.observeComponentCreation2((u9, v9) => {
             Image.create(this.item.value);
             Image.width({
                 'id': -1,
@@ -1336,7 +1313,7 @@ class ImageMenuItem extends ViewPU {
             Image.enabled(this.item.isEnabled);
             Image.objectFit(ImageFit.Cover);
         }, Image);
-        this.observeComponentCreation2((h2, i2) => {
+        this.observeComponentCreation2((p9, q9) => {
             Button.createWithLabel({ type: ButtonType.Circle });
             Button.width({
                 'id': -1,
@@ -1405,17 +1382,17 @@ class ImageMenuItem extends ViewPU {
                 this.isOnFocus = true;
             });
             Button.onBlur(() => this.isOnFocus = false);
-            Button.onHover((l2) => {
+            Button.onHover((t9) => {
                 if (!this.item.isEnabled) {
                     return;
                 }
-                this.isOnHover = l2;
+                this.isOnHover = t9;
             });
-            Button.onKeyEvent((k2) => {
-                this.keyEventAction(k2);
+            Button.onKeyEvent((s9) => {
+                this.keyEventAction(s9);
             });
-            Button.onTouch((j2) => {
-                this.touchEventAction(j2);
+            Button.onTouch((r9) => {
+                this.touchEventAction(r9);
             });
             Button.onClick(() => {
                 if (this.item.isEnabled === undefined) {
@@ -1428,15 +1405,15 @@ class ImageMenuItem extends ViewPU {
         Button.pop();
         Stack.pop();
     }
-
     initialRender() {
-        this.observeComponentCreation2((e2, f2) => {
+        this.observeComponentCreation2((m9, n9) => {
             If.create();
             if (this.attribute === ItemType.Icon || this.attribute === ItemType.LeftIcon) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.IconBuilder.bind(this)();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.ImageBuilder.bind(this)();
                 });
@@ -1444,17 +1421,15 @@ class ImageMenuItem extends ViewPU {
         }, If);
         If.pop();
     }
-
     rerender() {
         this.updateDirtyElements();
     }
 }
-
 class EditableTitleBarDialog extends ViewPU {
-    constructor(y1, z1, a2, b2 = -1, c2 = undefined, d2) {
-        super(y1, a2, b2, d2);
-        if (typeof c2 === 'function') {
-            this.paramsGenerator_ = c2;
+    constructor(g9, h9, i9, j9 = -1, k9 = undefined, l9) {
+        super(g9, i9, j9, l9);
+        if (typeof k9 === 'function') {
+            this.paramsGenerator_ = k9;
         }
         this.itemEditableDialog = {
             value: '',
@@ -1474,69 +1449,65 @@ class EditableTitleBarDialog extends ViewPU {
         this.confirm = () => {
         };
         this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(z1.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(h9.fontSize, this, 'fontSize');
         this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
         this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
-        this.setInitiallyProvidedValue(z1);
+        this.setInitiallyProvidedValue(h9);
         this.finalizeConstruction();
     }
-
-    setInitiallyProvidedValue(x1) {
-        if (x1.itemEditableDialog !== undefined) {
-            this.itemEditableDialog = x1.itemEditableDialog;
+    setInitiallyProvidedValue(f9) {
+        if (f9.itemEditableDialog !== undefined) {
+            this.itemEditableDialog = f9.itemEditableDialog;
         }
-        if (x1.callbackId !== undefined) {
-            this.callbackId = x1.callbackId;
+        if (f9.callbackId !== undefined) {
+            this.callbackId = f9.callbackId;
         }
-        if (x1.textEditableTitleBarDialog !== undefined) {
-            this.textEditableTitleBarDialog = x1.textEditableTitleBarDialog;
+        if (f9.textEditableTitleBarDialog !== undefined) {
+            this.textEditableTitleBarDialog = f9.textEditableTitleBarDialog;
         }
-        if (x1.mainWindowStage !== undefined) {
-            this.mainWindowStage = x1.mainWindowStage;
+        if (f9.mainWindowStage !== undefined) {
+            this.mainWindowStage = f9.mainWindowStage;
         }
-        if (x1.controller !== undefined) {
-            this.controller = x1.controller;
+        if (f9.controller !== undefined) {
+            this.controller = f9.controller;
         }
-        if (x1.minFontSize !== undefined) {
-            this.minFontSize = x1.minFontSize;
+        if (f9.minFontSize !== undefined) {
+            this.minFontSize = f9.minFontSize;
         }
-        if (x1.maxFontSize !== undefined) {
-            this.maxFontSize = x1.maxFontSize;
+        if (f9.maxFontSize !== undefined) {
+            this.maxFontSize = f9.maxFontSize;
         }
-        if (x1.screenWidth !== undefined) {
-            this.screenWidth = x1.screenWidth;
+        if (f9.screenWidth !== undefined) {
+            this.screenWidth = f9.screenWidth;
         }
-        if (x1.verticalScreenLines !== undefined) {
-            this.verticalScreenLines = x1.verticalScreenLines;
+        if (f9.verticalScreenLines !== undefined) {
+            this.verticalScreenLines = f9.verticalScreenLines;
         }
-        if (x1.horizontalsScreenLines !== undefined) {
-            this.horizontalsScreenLines = x1.horizontalsScreenLines;
+        if (f9.horizontalsScreenLines !== undefined) {
+            this.horizontalsScreenLines = f9.horizontalsScreenLines;
         }
-        if (x1.cancel !== undefined) {
-            this.cancel = x1.cancel;
+        if (f9.cancel !== undefined) {
+            this.cancel = f9.cancel;
         }
-        if (x1.confirm !== undefined) {
-            this.confirm = x1.confirm;
+        if (f9.confirm !== undefined) {
+            this.confirm = f9.confirm;
         }
-        if (x1.fontSize === undefined) {
+        if (f9.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (x1.maxLines !== undefined) {
-            this.maxLines = x1.maxLines;
+        if (f9.maxLines !== undefined) {
+            this.maxLines = f9.maxLines;
         }
     }
-
-    updateStateVars(w1) {
-        this.__fontSize.reset(w1.fontSize);
+    updateStateVars(e9) {
+        this.__fontSize.reset(e9.fontSize);
     }
-
-    purgeVariableDependenciesOnElmtId(v1) {
-        this.__mainWindow.purgeDependencyOnElmtId(v1);
-        this.__fontSize.purgeDependencyOnElmtId(v1);
-        this.__maxLines.purgeDependencyOnElmtId(v1);
-        this.__windowStandardHeight.purgeDependencyOnElmtId(v1);
+    purgeVariableDependenciesOnElmtId(d9) {
+        this.__mainWindow.purgeDependencyOnElmtId(d9);
+        this.__fontSize.purgeDependencyOnElmtId(d9);
+        this.__maxLines.purgeDependencyOnElmtId(d9);
+        this.__windowStandardHeight.purgeDependencyOnElmtId(d9);
     }
-
     aboutToBeDeleted() {
         this.__mainWindow.aboutToBeDeleted();
         this.__fontSize.aboutToBeDeleted();
@@ -1545,54 +1516,43 @@ class EditableTitleBarDialog extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-
-    setController(u1) {
-        this.controller = u1;
+    setController(c9) {
+        this.controller = c9;
     }
-
     get mainWindow() {
         return this.__mainWindow.get();
     }
-
-    set mainWindow(t1) {
-        this.__mainWindow.set(t1);
+    set mainWindow(b9) {
+        this.__mainWindow.set(b9);
     }
-
     get fontSize() {
         return this.__fontSize.get();
     }
-
-    set fontSize(s1) {
-        this.__fontSize.set(s1);
+    set fontSize(a9) {
+        this.__fontSize.set(a9);
     }
-
     get maxLines() {
         return this.__maxLines.get();
     }
-
-    set maxLines(r1) {
-        this.__maxLines.set(r1);
+    set maxLines(z8) {
+        this.__maxLines.set(z8);
     }
-
     get windowStandardHeight() {
         return this.__windowStandardHeight.get();
     }
-
-    set windowStandardHeight(q1) {
-        this.__windowStandardHeight.set(q1);
+    set windowStandardHeight(y8) {
+        this.__windowStandardHeight.set(y8);
     }
-
     initialRender() {
-        this.observeComponentCreation2((m, n) => {
+        this.observeComponentCreation2((k5, l5) => {
             If.create();
             if (this.textEditableTitleBarDialog) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o1, p1) => {
+                    this.observeComponentCreation2((w8, x8) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-                        Column.constraintSize({
-                            minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
-                        });
+                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ?
+                            MAX_DIALOG : MIN_DIALOG });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({
@@ -1603,11 +1563,11 @@ class EditableTitleBarDialog extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         }));
                     }, Column);
-                    this.observeComponentCreation2((e1, f1) => {
+                    this.observeComponentCreation2((m8, n8) => {
                         If.create();
                         if (this.itemEditableDialog.symbolStyle !== undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((m1, n1) => {
+                                this.observeComponentCreation2((u8, v8) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{
                                         'id': -1,
@@ -1636,15 +1596,17 @@ class EditableTitleBarDialog extends ViewPU {
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.fontSize(SYMBOL_TITLE_SIZE);
+                                    SymbolGlyph.direction(Direction.Ltr);
                                 }, SymbolGlyph);
                             });
-                        } else {
+                        }
+                        else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((g1, h1) => {
+                                this.observeComponentCreation2((o8, p8) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.itemEditableDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((k1, l1) => {
+                                            this.observeComponentCreation2((s8, t8) => {
                                                 SymbolGlyph.create(this.itemEditableDialog.value);
                                                 SymbolGlyph.margin({
                                                     top: {
@@ -1670,11 +1632,13 @@ class EditableTitleBarDialog extends ViewPU {
                                                     'moduleName': '__harDefaultModuleName__'
                                                 }]);
                                                 SymbolGlyph.fontSize(SYMBOL_TITLE_SIZE);
+                                                SymbolGlyph.direction(Direction.Ltr);
                                             }, SymbolGlyph);
                                         });
-                                    } else {
+                                    }
+                                    else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((i1, j1) => {
+                                            this.observeComponentCreation2((q8, r8) => {
                                                 Image.create(this.itemEditableDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1701,6 +1665,7 @@ class EditableTitleBarDialog extends ViewPU {
                                                     'bundleName': '__harDefaultBundleName__',
                                                     'moduleName': '__harDefaultModuleName__'
                                                 });
+                                                Image.direction(Direction.Ltr);
                                             }, Image);
                                         });
                                     }
@@ -1710,7 +1675,7 @@ class EditableTitleBarDialog extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((c1, d1) => {
+                    this.observeComponentCreation2((k8, l8) => {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
@@ -1737,7 +1702,7 @@ class EditableTitleBarDialog extends ViewPU {
                             },
                         });
                     }, Column);
-                    this.observeComponentCreation2((a1, b1) => {
+                    this.observeComponentCreation2((i8, j8) => {
                         Text.create(this.textEditableTitleBarDialog);
                         Text.fontSize(TEXT_EDITABLE_DIALOG);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1756,14 +1721,13 @@ class EditableTitleBarDialog extends ViewPU {
                     Column.pop();
                     Column.pop();
                 });
-            } else {
+            }
+            else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((y, z) => {
+                    this.observeComponentCreation2((g8, h8) => {
                         Column.create();
                         Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
-                        Column.constraintSize({
-                            minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG
-                        });
+                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius(({
@@ -1774,12 +1738,13 @@ class EditableTitleBarDialog extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         }));
                         Column.justifyContent(FlexAlign.Center);
+                        Column.direction(Direction.Ltr);
                     }, Column);
-                    this.observeComponentCreation2((o, p) => {
+                    this.observeComponentCreation2((f6, j6) => {
                         If.create();
                         if (this.itemEditableDialog.symbolStyle !== undefined) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((w, x) => {
+                                this.observeComponentCreation2((e8, f8) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{
                                         'id': -1,
@@ -1794,13 +1759,14 @@ class EditableTitleBarDialog extends ViewPU {
                                     SymbolGlyph.fontSize(SYMBOL_TITLE_SIZE);
                                 }, SymbolGlyph);
                             });
-                        } else {
+                        }
+                        else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((q, r) => {
+                                this.observeComponentCreation2((o6, o7) => {
                                     If.create();
                                     if (Util.isSymbolResource(this.itemEditableDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((u, v) => {
+                                            this.observeComponentCreation2((c8, d8) => {
                                                 SymbolGlyph.create(this.itemEditableDialog.value);
                                                 SymbolGlyph.fontColor([{
                                                     'id': -1,
@@ -1812,9 +1778,10 @@ class EditableTitleBarDialog extends ViewPU {
                                                 SymbolGlyph.fontSize(SYMBOL_TITLE_SIZE);
                                             }, SymbolGlyph);
                                         });
-                                    } else {
+                                    }
+                                    else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((s, t) => {
+                                            this.observeComponentCreation2((r7, a8) => {
                                                 Image.create(this.itemEditableDialog.value);
                                                 Image.width(IMAGE_SIZE);
                                                 Image.height(IMAGE_SIZE);
@@ -1840,60 +1807,63 @@ class EditableTitleBarDialog extends ViewPU {
         }, If);
         If.pop();
     }
-
     async aboutToAppear() {
-        let j = this.getUIContext().getHostContext();
-        this.mainWindowStage = j.windowStage.getMainWindowSync();
-        let k = this.mainWindowStage.getWindowProperties();
-        let l = k.windowRect;
-        if (px2vp(l.height) > this.screenWidth) {
+        let x4 = this.getUIContext().getHostContext();
+        this.mainWindowStage = x4.windowStage.getMainWindowSync();
+        let a5 = this.mainWindowStage.getWindowProperties();
+        let d5 = a5.windowRect;
+        if (px2vp(d5.height) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
-        } else {
+        }
+        else {
             this.maxLines = this.horizontalsScreenLines;
         }
     }
-
     rerender() {
         this.updateDirtyElements();
     }
 }
-
-function getNumberByResource(d, e) {
+/**
+ * get resource size
+ *
+ * @param resourceId resource id
+ * @return resource size
+ */
+function getNumberByResource(s3, y3) {
     try {
-        let i = resourceManager.getSystemResourceManager().getNumber(d);
-        if (i === 0) {
-            return e;
-        } else {
-            return i;
+        let q4 = resourceManager.getSystemResourceManager().getNumber(s3);
+        if (q4 === 0) {
+            return y3;
         }
-    } catch (f) {
-        let g = f.code;
-        let h = f.message;
-        hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${g},message:${h}`);
+        else {
+            return q4;
+        }
+    }
+    catch (d4) {
+        let f4 = d4.code;
+        let j4 = d4.message;
+        hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${f4},message:${j4}`);
         return 0;
     }
 }
-
 class Util {
-    static isSymbolResource(b) {
-        if (b === undefined) {
+    static isSymbolResource(i1) {
+        if (i1 === undefined) {
             return true;
         }
-        if (!Util.isResourceType(b)) {
+        if (!Util.isResourceType(i1)) {
             return false;
         }
-        let c = b;
-        return c.type === Util.RESOURCE_TYPE_SYMBOL;
+        let r3 = i1;
+        return r3.type === Util.RESOURCE_TYPE_SYMBOL;
     }
-
-    static isResourceType(a) {
-        if (!a) {
+    static isResourceType(e1) {
+        if (!e1) {
             return false;
         }
-        return typeof a !== 'string';
+        return typeof e1 !== 'string';
     }
 }
-
 Util.RESOURCE_TYPE_SYMBOL = 40000;
 
 export default {

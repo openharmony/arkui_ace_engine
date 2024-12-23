@@ -458,6 +458,13 @@ public:
     }
     void HyperlinkStartAbility(const std::string& address) const;
 
+    using StartAbilityOnQueryHandler = std::function<void(const std::string& queryWord)>;
+    void SetStartAbilityOnQueryHandler(StartAbilityOnQueryHandler&& listener)
+    {
+        startAbilityOnQueryHandler_ = std::move(listener);
+    }
+    void StartAbilityOnQuery(const std::string& queryWord) const;
+
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
     {
@@ -678,6 +685,16 @@ public:
         std::shared_lock<std::shared_mutex> lock(themeMtx_);
         if (themeManager_) {
             return themeManager_->GetTheme<T>();
+        }
+        return {};
+    }
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>(themeScopeId);
         }
         return {};
     }
@@ -1445,6 +1462,8 @@ public:
     void FireAccessibilityEvents();
     void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
 
+    virtual void SetEnableSwipeBack(bool isEnable) {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1554,6 +1573,7 @@ protected:
     ProfilerCallback onVsyncProfiler_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
+    StartAbilityOnQueryHandler startAbilityOnQueryHandler_;
     ActionEventHandler actionEventHandler_;
     FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;

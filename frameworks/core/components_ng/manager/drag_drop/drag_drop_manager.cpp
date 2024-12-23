@@ -574,12 +574,26 @@ void DragDropManager::OnDragStart(const Point& point, const RefPtr<FrameNode>& f
     draggedFrameNode_ = preTargetFrameNode_;
     preMovePoint_ = point;
     parentHitNodes_.emplace(frameNode->GetId());
+
+    // Reset hover status when drag start.
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->CleanHoverStatusForDragBegin();
 }
 
 void DragDropManager::OnDragStart(const Point& point)
 {
     dragDropState_ = DragDropMgrState::DRAGGING;
     NotifyDragFrameNode(point, DragEventType::START);
+
+    // Reset hover status when drag start.
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->CleanHoverStatusForDragBegin();
 }
 
 void DragDropManager::PrintDragFrameNode(
@@ -1455,8 +1469,8 @@ void DragDropManager::AddDataToClipboard(const std::string& extraInfo)
     if (!addDataCallback_) {
         auto callback = [weakManager = WeakClaim(this)](const std::string& data) {
             auto dragDropManager = weakManager.Upgrade();
-            auto addData = dragDropManager->newData_->ToString();
             CHECK_NULL_VOID(dragDropManager);
+            auto addData = dragDropManager->newData_->ToString();
             auto clipboardAllData = JsonUtil::Create(true);
             clipboardAllData->Put("preData", data.c_str());
             clipboardAllData->Put("newData", addData.c_str());
@@ -1590,6 +1604,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetSourceTool(pointerEvent.sourceTool);
 }
 
 std::string DragDropManager::GetExtraInfo()

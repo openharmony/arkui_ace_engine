@@ -123,11 +123,10 @@ bool ListPattern::HandleTargetIndex(bool isJump)
         return true;
     }
     auto iter = itemPosition_.find(targetIndex_.value());
-    if (iter != itemPosition_.end()) {
-        AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
-    } else if (lastSnapTargetIndex_ >= 0) {
-        lastSnapTargetIndex_ = -1;
+    if (iter == itemPosition_.end()) {
+        ResetExtraOffset();
     }
+    AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
     // AniamteToTarget does not need to update endIndex and startIndex in the first frame.
     targetIndex_.reset();
     targetIndexInGroup_.reset();
@@ -345,7 +344,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     }
     listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
-    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_);
+    bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
@@ -927,9 +927,6 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     CHECK_NULL_RETURN(listProperty, false);
     auto scrollSnapAlign = listProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     CHECK_NULL_RETURN(scrollSnapAlign != ScrollSnapAlign::NONE, false);
-    if (lastSnapTargetIndex_ < 0 && snapDirection != SnapDirection::NONE && AnimateRunning()) {
-        return false;
-    }
     if (snapDirection != SnapDirection::NONE) {
         return ScrollToSnapIndex(snapDirection, scrollSnapAlign);
     }
@@ -939,7 +936,7 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     predictSnapOffset_ = snapAnimationOptions.snapDelta;
     scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
     snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
-    lastSnapTargetIndex_ = -1;
+    ResetLastSnapTargetIndex();
     MarkDirtyNodeSelf();
     return true;
 }
@@ -965,7 +962,7 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
             break;
     }
     if (snapDirection == SnapDirection::FORWARD) {
-        if (lastSnapTargetIndex_ < 0) {
+        if (!lastSnapTargetIndex_.has_value()) {
             if (align == ScrollAlign::START) {
                 auto isAligned = NearEqual(itemPosition_[anchorIndex].startPos, contentStartOffset_);
                 lastSnapTargetIndex_ = isAligned ? anchorIndex - 1 : anchorIndex;
@@ -978,10 +975,10 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
                     GreatOrEqual(itemCenterPos, contentMainSize_ / 2) ? anchorIndex - 1 : anchorIndex;
             }
         } else {
-            lastSnapTargetIndex_--;
+            lastSnapTargetIndex_ = lastSnapTargetIndex_.value() - 1;
         }
     } else if (snapDirection == SnapDirection::BACKWARD) {
-        if (lastSnapTargetIndex_ < 0) {
+        if (!lastSnapTargetIndex_.has_value()) {
             if (align == ScrollAlign::START) {
                 lastSnapTargetIndex_ = anchorIndex + 1;
             } else if (align == ScrollAlign::END) {
@@ -993,10 +990,12 @@ bool ListPattern::ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign
                 lastSnapTargetIndex_ = LessOrEqual(itemCenterPos, contentMainSize_ / 2) ? anchorIndex + 1 : anchorIndex;
             }
         } else {
-            lastSnapTargetIndex_++;
+            lastSnapTargetIndex_ = lastSnapTargetIndex_.value() + 1;
         }
     }
-    ScrollToIndex(lastSnapTargetIndex_, true, align);
+    lastSnapTargetIndex_ = std::max(lastSnapTargetIndex_.value(), 0);
+    lastSnapTargetIndex_ = std::min(lastSnapTargetIndex_.value(), maxListItemIndex_);
+    ScrollToIndex(lastSnapTargetIndex_.value(), true, align);
     return true;
 }
 

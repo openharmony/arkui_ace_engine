@@ -319,6 +319,7 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result);
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -438,6 +439,7 @@ public:
     static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
+    static void JsAccessibilityNextFocusId(const JSCallbackInfo& info);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);

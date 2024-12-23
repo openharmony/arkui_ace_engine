@@ -1356,9 +1356,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
-    if ((mouseHoveredX_ != localLocation.GetX()) ||
-        (mouseHoveredY_ != localLocation.GetY()) ||
-        (info.GetAction() == MouseAction::PRESS) ||
+    if ((info.GetAction() == MouseAction::PRESS) ||
         (info.GetButton() == MouseButton::LEFT_BUTTON) ||
         (info.GetButton() == MouseButton::RIGHT_BUTTON)) {
         OnTooltip("");
@@ -1384,6 +1382,8 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         isHoverExit_ = true;
+    } else if (info.GetAction() == MouseAction::HOVER && isMouseLocked_) {
+        OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
     }
     int32_t clickNum = HandleMouseClickEvent(info);
 
@@ -1405,6 +1405,7 @@ void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 
     std::shared_ptr<NWebMouseEventImpl> mouseEvent =
         std::make_shared<NWebMouseEventImpl>(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(),
+        info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY(),
         static_cast<int32_t>(info.GetButton()), static_cast<int32_t>(info.GetAction()),
         clickNum, pressedCodes);
     delegate_->WebOnMouseEvent(mouseEvent);
@@ -3153,8 +3154,14 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
-        UpdateJavaScriptOnDocumentStart();
-        UpdateJavaScriptOnDocumentEnd();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            UpdateJavaScriptOnDocumentStartByOrder();
+            UpdateJavaScriptOnDocumentEndByOrder();
+        } else {
+            UpdateJavaScriptOnDocumentStart();
+            UpdateJavaScriptOnDocumentEnd();
+        }
+
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
         delegate_->UpdateBackgroundColor(GetBackgroundColorValue(
@@ -4909,7 +4916,8 @@ bool WebPattern::RequestAutoFill(AceAutoFillType autoFillType)
     CHECK_NULL_RETURN(container, false);
     isAutoFillClosing_ = false;
     bool isPopup = false;
-    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false);
+    return container->RequestAutoFill(host, autoFillType, false, isPopup, autoFillSessionId_, false) ==
+           AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
 
 bool WebPattern::RequestAutoSave()
@@ -5060,12 +5068,10 @@ void WebPattern::OnTouchSelectionChanged(std::shared_ptr<OHOS::NWeb::NWebTouchHa
     }
 }
 
-bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info)
+bool WebPattern::OnCursorChange(
+    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
 {
-    if (cursorType_ != type) {
-        TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
-        cursorType_ = type;
-    }
+    auto [type, info] = GetAndUpdateCursorStyleInfo(cursorType, cursorInfo);
     if (mouseEventDeviceId_ == RESERVED_DEVICEID) {
         TAG_LOGD(AceLogTag::ACE_WEB, "OnCursorChange this device id is reserved.");
         return false;
@@ -5099,6 +5105,31 @@ bool WebPattern::OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_
         }
     }
     return true;
+}
+
+CursorStyleInfo WebPattern::GetAndUpdateCursorStyleInfo(
+    const OHOS::NWeb::CursorType& cursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> cursorInfo)
+{
+    auto type = cursorType;
+    auto info = cursorInfo;
+    if (type == OHOS::NWeb::CursorType::CT_LOCK) {
+        type = OHOS::NWeb::CursorType::CT_NONE;
+        isMouseLocked_ = true;
+    } else if (type == OHOS::NWeb::CursorType::CT_UNLOCK) {
+        type = cursorType_;
+        info = nweb_cursorInfo_;
+        isMouseLocked_ = false;
+    } else {
+        if (cursorType_ != type) {
+            TAG_LOGI(AceLogTag::ACE_WEB, "OnCursorChange type: %{public}d isHoverExit: %{public}d", type, isHoverExit_);
+            cursorType_ = type;
+        }
+        nweb_cursorInfo_.reset();
+        if (type == OHOS::NWeb::CursorType::CT_CUSTOM) {
+            nweb_cursorInfo_ = info;
+        }
+    }
+    return std::make_tuple(type, info);
 }
 
 void WebPattern::UpdateLocalCursorStyle(int32_t windowId, const OHOS::NWeb::CursorType& type)
@@ -5206,6 +5237,21 @@ void WebPattern::OnPopupShow(bool show)
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RequestFrame();
+}
+
+void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    visibleX = visibleInnerRect.GetX() - offset.GetX();
+    visibleY = visibleInnerRect.GetY() - offset.GetY();
+    visibleWidth = visibleInnerRect.Width();
+    visibleHeight = visibleInnerRect.Height();
 }
 
 void WebPattern::AttachCustomKeyboard()
@@ -6569,6 +6615,27 @@ void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     }
 }
 
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        delegate_->JavaScriptOnDocumentStartByOrder();
+    }
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnDocumentEndByOrder();
+        delegate_->JavaScriptOnDocumentEndByOrder();
+    }
+}
+
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
@@ -6584,6 +6651,26 @@ void WebPattern::UpdateJavaScriptOnDocumentStart()
     if (delegate_ && onDocumentStartScriptItems_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
         onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentStartByOrder()
+{
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START,
+            onDocumentStartScriptItemsByOrder_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
+{
+    if (delegate_ && onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END,
+            onDocumentEndScriptItemsByOrder_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
 

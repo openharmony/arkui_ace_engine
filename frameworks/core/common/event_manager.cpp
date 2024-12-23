@@ -463,10 +463,10 @@ void EventManager::HandleGlobalEvent(const TouchEvent& touchPoint, const RefPtr<
     if (touchPoint.type != TouchType::DOWN) {
         return;
     }
+    CHECK_NULL_VOID(textOverlayManager);
     auto coordinateOffset = textOverlayManager->GetCoordinateOffset();
     const Point point { touchPoint.x - coordinateOffset.GetX(), touchPoint.y - coordinateOffset.GetY(),
         touchPoint.sourceType };
-    CHECK_NULL_VOID(textOverlayManager);
     auto textOverlayBase = textOverlayManager->GetTextOverlayBase();
     CHECK_NULL_VOID(textOverlayBase);
     auto targetNode = textOverlayManager->GetTargetNode();
@@ -881,6 +881,7 @@ void EventManager::ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent)
 
 void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
 {
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Clean recognizers for drag begin.");
     // send cancel to all recognizer
     for (const auto& iter : touchTestResults_) {
         touchEvent.id = iter.first;
@@ -895,6 +896,19 @@ void EventManager::CleanRecognizersForDragBegin(TouchEvent& touchEvent)
     downFingerIds_.erase(touchEvent.id);
     touchTestResults_.clear();
     refereeNG_->CleanRedundanceScope();
+}
+
+void EventManager::CleanHoverStatusForDragBegin()
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Clean hover status for drag begin.");
+    lastHoverTestResults_ = std::move(currHoverTestResults_);
+    currHoverTestResults_.clear();
+    lastHoverNode_ = currHoverNode_;
+    currHoverNode_ = nullptr;
+    DispatchMouseHoverEventNG(lastMouseEvent_);
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
@@ -1296,6 +1310,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
     if (validAction.find(event.action) == validAction.end()) {
         return false;
     }
+    lastMouseEvent_ = event;
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
         return DispatchMouseEventInGreatOrEqualAPI13(event);
     }

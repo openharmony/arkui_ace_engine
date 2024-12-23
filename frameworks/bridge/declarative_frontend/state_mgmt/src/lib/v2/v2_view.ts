@@ -263,7 +263,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -379,13 +379,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.computedIdsDelayedUpdate.add(watchId);
     }
 
-    public setActiveInternal(newState: boolean): void {
+    public setActiveInternal(active: boolean): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
 
         if (this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
-            this.isActive_ = newState;
-            if (this.isActive_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            this.setActiveCount(active);
+            if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
             } else {
@@ -395,9 +395,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView: IView | undefined = child.deref();
             if (childView) {
-              childView.setActiveInternal(newState);
+                childView.setActiveInternal(active);
             }
-          }
+        }
         stateMgmtProfiler.end();
     }
 
@@ -409,7 +409,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         if(this.monitorIdsDelayedUpdate.size) {
           // exec monitor functions
-          ObserveV2.getObserve().runDirtyMonitors(this.monitorIdsDelayedUpdate);
+          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active

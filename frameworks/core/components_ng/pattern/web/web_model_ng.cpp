@@ -1169,6 +1169,22 @@ void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     webPattern->JavaScriptOnDocumentStart(scriptItems);
 }
 
+void WebModelNG::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void WebModelNG::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+}
+
 void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

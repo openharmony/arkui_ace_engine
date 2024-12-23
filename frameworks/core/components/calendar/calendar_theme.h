@@ -18,6 +18,7 @@
 
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -352,6 +353,8 @@ public:
                 "calendar_day_key_focused_pen_width", 0.0_vp);
             theme->entryFontSize_ = pattern->GetAttr<Dimension>("calendar_picker_entry_font_size", 0.0_fp);
             theme->dialogBorderRadius_ = pattern->GetAttr<Dimension>("calendar_picker_dialog_border_radius", 0.0_vp);
+            theme->calendarPickerDialogBlurStyle_ = pattern->GetAttr<int>(
+                "calendar_picker_dialog_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
 
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CalendarTheme>& theme) const
@@ -799,6 +802,12 @@ public:
     {
         return calendarPickerLargerScale_;
     }
+
+    const int& GetCalendarPickerDialogBlurStyle() const
+    {
+        return calendarPickerDialogBlurStyle_;
+    }
+    
 protected:
     CalendarTheme() = default;
 
@@ -863,6 +872,7 @@ private:
     bool isDividerTransparent_ = false;
     double calendarPickerLargeScale_ = 0.0;
     double calendarPickerLargerScale_ = 0.0;
+    int calendarPickerDialogBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace

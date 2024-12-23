@@ -1297,7 +1297,7 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
     model.SetPageFlipMode(1);
     CreateSwiperItems();
     CreateSwiperDone();
-    // mode is PageFlipMode::SINGLE(0)
+    // mode is PageFlipMode::SINGLE(1)
     EXPECT_EQ(pattern_->GetPageFlipMode(), 1);
     GestureEvent info;
     info.SetInputEventType(InputEventType::AXIS);

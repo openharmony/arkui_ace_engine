@@ -405,6 +405,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidInsert,
     NodeModifier::SetTextInputOnWillDelete,
     NodeModifier::SetTextInputOnDidDelete,
+    NodeModifier::SetOnTextInputChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -421,6 +422,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidInsertValue,
     NodeModifier::SetTextAreaOnWillDeleteValue,
     NodeModifier::SetTextAreaOnDidDeleteValue,
+    NodeModifier::SetOnTextAreaChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -603,6 +605,11 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     NodeModifier::ResetOnTextInputContentSizeChange,
     NodeModifier::ResetOnTextInputInputFilterError,
     NodeModifier::ResetTextInputOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextInputChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -615,6 +622,11 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnTextAreaContentSizeChange,
     NodeModifier::ResetOnTextAreaInputFilterError,
     NodeModifier::ResetTextAreaOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextAreaChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

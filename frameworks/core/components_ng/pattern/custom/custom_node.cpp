@@ -27,10 +27,6 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     return node;
 }
 
-CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
-    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{}
-
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     Render();

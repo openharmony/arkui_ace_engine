@@ -673,18 +673,19 @@ void HtmlToSpan::SetBorderOption(const std::string& key, const std::string& valu
 void HtmlToSpan::HandleImgSpanOption(const Styles& styleMap, ImageSpanOptions& options)
 {
     for (const auto& [key, value] : styleMap) {
+        auto trimVal = StringUtils::TrimStr(value);
         if (IsPaddingAttr(key)) {
-            SetPaddingOption(key, value, options);
+            SetPaddingOption(key, trimVal, options);
         } else if (IsMarginAttr(key)) {
-            SetMarginOption(key, value, options);
+            SetMarginOption(key, trimVal, options);
         } else if (IsBorderAttr(key)) {
-            SetBorderOption(key, value, options);
+            SetBorderOption(key, trimVal, options);
         } else if (key == "object-fit") {
-            options.imageAttribute->objectFit = ConvertStrToFit(value);
+            options.imageAttribute->objectFit = ConvertStrToFit(trimVal);
         } else if (key == "vertical-align") {
-            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(value);
+            options.imageAttribute->verticalAlign = StringToTextVerticalAlign(trimVal);
         } else if (key == "width" || key == "height") {
-            HandleImageSize(key, value, options);
+            HandleImageSize(key, trimVal, options);
         }
     }
 }

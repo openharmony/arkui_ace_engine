@@ -2506,5 +2506,65 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_RegisterLayoutCallbackOnNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_RegisterDrawCallbackOnNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UnregisterDrawCallbackOnNodeHandle"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius"
     }
 ]

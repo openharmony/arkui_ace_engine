@@ -736,4 +736,21 @@ HWTEST_F(TextPickerModelTestNg, StaticConvertFontScaleValue001, TestSize.Level2)
     EXPECT_FLOAT_EQ(TextPickerModelNG::ConvertFontScaleValue(defaultFontSize).ConvertToPx(),
         defaultFontSize.ConvertToPx());
 }
+
+/**
+ * @tc.name: SetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_FALSE(pickerProperty->GetDisableTextStyleAnimation().value_or(false));
+
+    TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(pickerProperty->GetDisableTextStyleAnimation().value_or(false));
+}
 } // namespace OHOS::Ace::NG

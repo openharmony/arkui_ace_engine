@@ -285,6 +285,8 @@ public:
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static Dimension GetLetterSpacing(FrameNode* frameNode);
+    static bool GetEnablePreviewText(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

@@ -17,13 +17,13 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_THEME_H
 
 #include "base/geometry/dimension.h"
-#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -74,19 +74,15 @@ public:
             theme->maskColor_ = pattern->GetAttr<Color>("popup_mask_color", Color());
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("popup_text_color", Color()));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("popup_text_font_size", 0.0_vp));
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffffff));
-            } else {
-                theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
-            }
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
             theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            auto popupBorderRadius = pattern->GetAttr<Dimension>("popup_border_radius", BORDER_RADIUS_POPUP);
-            theme->radius_ = Radius(popupBorderRadius, popupBorderRadius);
+            auto popupBorderRadius = pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, BORDER_RADIUS_POPUP);
+            theme->radius_ = Radius(popupBorderRadius);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
@@ -100,6 +96,10 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
+                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
     };
 
@@ -333,6 +333,16 @@ public:
         return fontSecondaryColor_;
     }
 
+    ShadowStyle GetPopupShadowStyle() const
+    {
+        return popupShadowStyle_;
+    }
+
+    const int& GetPopupBackgroundBlurStyle() const
+    {
+        return popupBackgroundBlurStyle_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -384,6 +394,8 @@ private:
     Color buttonFontColor_;
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
+    ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int popupBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace

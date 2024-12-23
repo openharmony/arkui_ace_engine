@@ -128,6 +128,7 @@ template("ace_core_interfaces_native_node") {
       "node/tabs_modifier.cpp",
       "node/text_clock_modifier.cpp",
       "node/text_timer_modifier.cpp",
+      "node/theme_modifier.cpp",
       "node/util_modifier.cpp",
       "node/video_modifier.cpp",
       "node/view_model.cpp",

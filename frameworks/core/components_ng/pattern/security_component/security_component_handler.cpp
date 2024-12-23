@@ -189,7 +189,7 @@ bool SecurityComponentHandler::CheckDiagonalLinearGradientBlur(const RectF& pare
     switch (direction) {
         case GradientDirection::LEFT_TOP:
             dest.SetX(rect.GetX() + radius);
-            dest.SetY(rect.GetY()+ radius);
+            dest.SetY(rect.GetY() + radius);
             src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
             src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
             gradient = (0 - parentRect.Width()) / parentRect.Height();
@@ -240,9 +240,9 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
     }
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
-    CHECK_NULL_RETURN(buttonNode, false);
+    CHECK_NULL_RETURN(buttonNode, 0.0);
     auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(bgProp, false);
+    CHECK_NULL_RETURN(bgProp, 0.0);
     auto borderRadius = bgProp->GetBorderRadius();
     float radius = 0.0;
 

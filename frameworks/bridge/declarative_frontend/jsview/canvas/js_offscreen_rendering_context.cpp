@@ -220,10 +220,7 @@ void JSOffscreenRenderingContext::JsTransferToImageBitmap(const JSCallbackInfo& 
         return;
     }
     void* nativeObj = nullptr;
-    napi_status status = napi_unwrap(env, renderImage, &nativeObj);
-    if (status != napi_ok) {
-        return;
-    }
+    NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, renderImage, &nativeObj));
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_VOID(jsImage);
 #ifndef PIXEL_MAP_SUPPORTED
