@@ -189,7 +189,7 @@ static bool CheckRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
             return true;
         }
     }
-    return group->CheckGroupState();;
+    return group->CheckGroupState();
 }
 
 bool GestureScope::CheckRecognizerState()
