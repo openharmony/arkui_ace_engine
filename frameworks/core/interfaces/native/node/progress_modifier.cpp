@@ -434,19 +434,69 @@ void ResetProgressInitialize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
-    static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
-        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIProgressModifier modifier = {
+        .setProgressValue = SetProgressValue,
+        .resetProgressValue = ResetProgressValue,
+        .setProgressGradientColor = SetProgressGradientColor,
+        .setProgressColor = SetProgressColor,
+        .resetProgressColor = ResetProgressColor,
+        .setProgressStyle = SetProgressStyle,
+        .resetProgressStyle = ResetProgressStyle,
+        .setProgressBackgroundColor = SetProgressBackgroundColor,
+        .resetProgressBackgroundColor = ResetProgressBackgroundColor,
+        .setProgressTotal = SetProgressTotal,
+        .setProgressType = SetProgressType,
+        .resetProgressType = ResetProgressType,
+        .getProgressValue = GetProgressValue,
+        .getProgressTotal = GetProgressTotal,
+        .getProgressType = GetProgressType,
+        .getProgressColor = GetProgressColor,
+        .setProgressInitialize = SetProgressInitialize,
+        .resetProgressInitialize = ResetProgressInitialize,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIProgressModifier* GetCJUIProgressModifier()
 {
-    static const CJUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
-        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIProgressModifier modifier = {
+        .setProgressValue = SetProgressValue,
+        .resetProgressValue = ResetProgressValue,
+        .setProgressGradientColor = SetProgressGradientColor,
+        .setProgressColor = SetProgressColor,
+        .resetProgressColor = ResetProgressColor,
+        .setProgressStyle = SetProgressStyle,
+        .resetProgressStyle = ResetProgressStyle,
+        .setProgressBackgroundColor = SetProgressBackgroundColor,
+        .resetProgressBackgroundColor = ResetProgressBackgroundColor,
+        .setProgressTotal = SetProgressTotal,
+        .setProgressType = SetProgressType,
+        .resetProgressType = ResetProgressType,
+        .getProgressValue = GetProgressValue,
+        .getProgressTotal = GetProgressTotal,
+        .getProgressType = GetProgressType,
+        .getProgressColor = GetProgressColor,
+        .setProgressInitialize = SetProgressInitialize,
+        .resetProgressInitialize = ResetProgressInitialize,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }
