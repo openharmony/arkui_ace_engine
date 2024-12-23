@@ -125,7 +125,7 @@ const RefPtr<Curve> HIDE_CUSTOM_KEYBOARD_ANIMATION_CURVE =
 const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 528.0f, 35.0f);
 
-const RefPtr<Curve> CUSTOM_PREVIEW_ANIMATION_CURVE =
+const RefPtr<InterpolatingSpring> CUSTOM_PREVIEW_ANIMATION_CURVE =
     AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 280.0f, 30.0f);
 const std::string HOVER_IMAGE_CLIP_DISAPPEAR_PROPERTY_NAME = "hoverImageClipDisAppear";
 constexpr double MENU_ORIGINAL_SCALE = 0.6f;
@@ -135,6 +135,7 @@ constexpr int32_t DUMP_LOG_DEPTH_2 = 2;
 constexpr int32_t EVENT_COLUMN_SLOT = -2;
 
 const float MINIMUM_AMPLITUDE_RATION = 0.08f;
+const float PREVIEW_MINIMUM_AMPLITUDE_RATION = 0.025f;
 
 // UIExtensionComponent Transform param key
 #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
@@ -210,6 +211,39 @@ void UpdateHoverImagePreviewOpacityAnimation(const RefPtr<MenuTheme>& menuTheme,
         });
 }
 
+AnimationOption GetPreviewDisappearAnimationOption(const RefPtr<MenuWrapperPattern>& menuWrapperPattern)
+{
+    AnimationOption option;
+    CHECK_NULL_RETURN(menuWrapperPattern, option);
+    auto menuWrapper = menuWrapperPattern->GetHost();
+    CHECK_NULL_RETURN(menuWrapper, option);
+    auto pipeline = menuWrapper->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, option);
+
+    if (menuWrapperPattern->GetIsShowHoverImage()) {
+        CUSTOM_PREVIEW_ANIMATION_CURVE->UpdateMinimumAmplitudeRatio(PREVIEW_MINIMUM_AMPLITUDE_RATION);
+        option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
+    } else {
+        auto menuTheme = pipeline->GetTheme<MenuTheme>();
+        CHECK_NULL_RETURN(menuTheme, option);
+        auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
+        auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
+        option.SetCurve(motion);
+    }
+
+    auto overlayManager = pipeline->GetOverlayManager();
+    option.SetOnFinishEvent([overlayManager, menuWrapperPattern, instanceId = Container::CurrentId()] {
+        CHECK_NULL_VOID(menuWrapperPattern);
+        menuWrapperPattern->SetOnPreviewDisappear(false);
+        CHECK_NULL_VOID(overlayManager);
+        if (overlayManager->RemoveMenuInSubWindow(menuWrapperPattern->GetHost(), instanceId)) {
+            overlayManager->SetIsMenuShow(false);
+        }
+    });
+    return option;
+}
+
 void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWrapperPattern,
     RefPtr<FrameNode>& previewChild)
 {
@@ -235,11 +269,6 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     CHECK_NULL_VOID(menuTheme);
     UpdateHoverImagePreviewOpacityAnimation(menuTheme, menuPattern, previewChild);
 
-    auto springMotionResponse = menuTheme->GetPreviewDisappearSpringMotionResponse();
-    auto springMotionDampingFraction = menuTheme->GetPreviewDisappearSpringMotionDampingFraction();
-    AnimationOption scaleOption;
-    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(springMotionResponse, springMotionDampingFraction);
-    scaleOption.SetCurve(motion);
     float previewScale = 1.0f;
     if (menuPattern->GetPreviewMode() == MenuPreviewMode::IMAGE) {
         auto previewGeometryNode = previewChild->GetGeometryNode();
@@ -251,15 +280,18 @@ void ShowPreviewDisappearAnimationProc(const RefPtr<MenuWrapperPattern>& menuWra
     }
     ShowPreviewBgDisappearAnimationProc(previewRenderContext, menuTheme, menuWrapperPattern->GetIsShowHoverImage());
 
+    // preview without hoverScale
     CHECK_NULL_VOID(!menuPattern->GetIsShowHoverImage());
     menuWrapperPattern->StopPreviewMenuAnimation();
+    menuWrapperPattern->SetOnPreviewDisappear(true);
+    auto scaleOption = GetPreviewDisappearAnimationOption(menuWrapperPattern);
     AnimationUtils::Animate(scaleOption,
         [previewRenderContext, previewPosition, previewScale]() {
         CHECK_NULL_VOID(previewRenderContext);
         previewRenderContext->UpdatePosition(
             OffsetT<Dimension>(Dimension(previewPosition.GetX()), Dimension(previewPosition.GetY())));
         previewRenderContext->UpdateTransformScale(VectorF(previewScale, previewScale));
-    });
+    }, scaleOption.GetOnFinishEvent());
 }
 
 RefPtr<NodeAnimatablePropertyFloat> CreateVisibleAreaClipAnimationWhenDisappear(
@@ -320,8 +352,6 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     auto previewPosition = menuPattern->GetPreviewOriginOffset();
 
     menuWrapperPattern->StopPreviewMenuAnimation();
-    AnimationOption option = AnimationOption();
-    option.SetCurve(CUSTOM_PREVIEW_ANIMATION_CURVE);
 
     RefPtr<NodeAnimatablePropertyFloat> animateProperty;
     if (previewPattern->IsHoverImageAnimationPlaying()) {
@@ -336,6 +366,8 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
         animateProperty->Set(NonNegative(clipRate) ? 1.0 - clipRate : 0.0);
     }
 
+    menuWrapperPattern->SetOnPreviewDisappear(true);
+    auto option = GetPreviewDisappearAnimationOption(menuWrapperPattern);
     AnimationUtils::Animate(
         option, [stackContext, scaleAfter, flexContext, previewPosition, animateProperty]() {
             CHECK_NULL_VOID(stackContext);
@@ -347,7 +379,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
 
             CHECK_NULL_VOID(animateProperty);
             animateProperty->Set(1.0);
-        });
+        }, option.GetOnFinishEvent());
 
     ShowPreviewBgDisappearAnimationProc(stackContext, menuTheme, menuWrapperPattern->GetHoverImageStackNode());
 }
@@ -1149,8 +1181,10 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     overlayManager->SetContextMenuDragHideFinished(true);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->CallMenuDisappearCallback();
     menuWrapperPattern->SetMenuStatus(MenuStatus::HIDE);
+    menuWrapperPattern->SetOnMenuDisappear(false);
     menuWrapperPattern->CallMenuStateChangeCallback("false");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
@@ -1168,11 +1202,11 @@ void OverlayManager::OnPopMenuAnimationFinished(const WeakPtr<FrameNode> menuWK,
     bool isShowInSubWindow = menuLayoutProp->GetShowInSubWindowValue(true);
     auto targetId = menuWrapperPattern->GetTargetId();
     overlayManager->EraseMenuInfo(targetId);
-    if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || (isShowInSubWindow && expandDisplay)) &&
-        (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
-        SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
-        overlayManager->ResetContextMenuDragHideFinished();
-        overlayManager->SetIsMenuShow(false);
+    auto isContextMenuOrPcSubwindow = menuWrapperPattern->IsContextMenu() || (isShowInSubWindow && expandDisplay);
+    if (isContextMenuOrPcSubwindow && (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
+        if (overlayManager->RemoveMenuInSubWindow(menu, instanceId)) {
+            overlayManager->SetIsMenuShow(false);
+        }
         return;
     }
     overlayManager->RemoveMenuNotInSubWindow(menuWK, rootWeak, weak);
@@ -1202,6 +1236,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
 
     wrapperPattern->CallMenuAboutToDisappearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_HIDE_ANIMATION);
+    wrapperPattern->SetOnMenuDisappear(true);
     if (wrapperPattern->HasTransitionEffect() || wrapperPattern->HasFoldModeChangedTransition()) {
         ShowMenuDisappearTransition(menu);
         return;
@@ -6769,6 +6804,22 @@ void OverlayManager::ShowFilterAnimation(const RefPtr<FrameNode>& columnNode)
             }
         },
         option.GetOnFinishEvent());
+}
+
+bool OverlayManager::RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId)
+{
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    auto isContextMenu = menuWrapperPattern->IsContextMenu();
+    auto onDisappear = menuWrapperPattern->GetOnMenuDisappear() || menuWrapperPattern->GetOnPreviewDisappear();
+    if (isContextMenu && onDisappear) {
+        return false;
+    }
+
+    SubwindowManager::GetInstance()->ClearMenuNG(instanceId, menuWrapperPattern->GetTargetId());
+    ResetContextMenuDragHideFinished();
+    return true;
 }
 
 void OverlayManager::RemoveMenuNotInSubWindow(
