@@ -20,9 +20,10 @@
 
 #include <type_traits>
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_keeper.h"
-#include "core/interfaces/native/common/extension_companion_node.h"
+#include "core/interfaces/native/utility/converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -76,17 +77,31 @@ public:
         }
     }
 
-    template <typename ResultType, typename ObtainResultCallbackType, typename... Params>
-    ResultType InvokeWithObtainResult(Params&&... args) const
+    // this works for primitive ArkResultType types only - enum/Ark_NativePtr/structs_without_any_pointers
+    template <typename ArkResultType, typename ContinuationType, typename... Params>
+    ArkResultType InvokeWithObtainResult(Params&&... args) const
     {
-        ResultType retValue {};
+        ArkResultType retValue {};
         auto handler = [&retValue](const void *valuePtr) {
-            retValue = *(reinterpret_cast<const ResultType *>(valuePtr));
+            retValue = *(reinterpret_cast<const ArkResultType *>(valuePtr));
         };
-        CallbackKeeper::InvokeWithResultHandler<ResultType, ObtainResultCallbackType>(
+        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
             handler, *this, std::forward<Params>(args)...
         );
         return retValue;
+    }
+
+    template <typename ResultType, typename ArkResultType, typename ContinuationType, typename... Params>
+    std::optional<ResultType> InvokeWithOptConvertResult(Params&&... args) const
+    {
+        std::optional<ResultType> retValueOpt = std::nullopt;
+        auto handler = [&retValueOpt](const void *valuePtr) {
+            retValueOpt = Converter::OptConvert<ResultType>(*(reinterpret_cast<const ArkResultType *>(valuePtr)));
+        };
+        CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
+            handler, *this, std::forward<Params>(args)...
+        );
+        return retValueOpt;
     }
 
     bool IsValid() const
@@ -114,7 +129,8 @@ public:
 protected:
     CallbackType callback_  = {
         .resource = {.hold = nullptr, .release = nullptr},
-        .call = nullptr
+        .call = nullptr,
+        .callSync = nullptr
     };
     Ark_VMContext vmContext_;
 };

@@ -24,6 +24,7 @@
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 
 namespace OHOS::Ace::NG {
@@ -365,27 +366,32 @@ HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
  */
 HWTEST_F(SearchModifierCallbackTest, setOnWillInsertTest, TestSize.Level1)
 {
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    EventsTracker::eventsReceiver.onWillInsert = [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-        g_EventTestString = Convert<std::string>(data.insertValue);
-        g_EventTestOffset = Convert<int32_t>(data.insertOffset);
+    static const Ark_Int32 expectedResId = 123;
+    auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
+        const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Convert<std::string>(data.insertValue), CHECK_TEXT);
+        auto result = Convert<int32_t>(data.insertOffset) > 0;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
     };
+    auto arkFunc = Converter::ArkValue<Callback_InsertValue_Boolean>(nullptr, onWillInsertHandler, expectedResId);
+    modifier_->setOnWillInsert(node_, &arkFunc);
+
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
-    InsertValueInfo checkValueDefault;
-    textFieldEventHub->FireOnWillInsertValueEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    Callback_InsertValue_Boolean func{};
-    modifier_->setOnWillInsert(node_, &func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        InsertValueInfo checkValue = { .insertOffset = value, .insertValue = CHECK_TEXT };
-        textFieldEventHub->FireOnWillInsertValueEvent(checkValue);
-        EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-        EXPECT_EQ(g_EventTestOffset, expectVal);
+
+    {
+        InsertValueInfo checkValue = { .insertOffset = AINT32_POS, .insertValue = CHECK_TEXT };
+        auto returnVal = textFieldEventHub->FireOnWillInsertValueEvent(checkValue);
+        EXPECT_TRUE(returnVal);
+    }
+
+    {
+        InsertValueInfo checkValue = { .insertOffset = AINT32_NEG, .insertValue = CHECK_TEXT };
+        auto returnVal = textFieldEventHub->FireOnWillInsertValueEvent(checkValue);
+        EXPECT_FALSE(returnVal);
     }
 }
 
@@ -427,38 +433,42 @@ HWTEST_F(SearchModifierCallbackTest, setOnDidInsertTest, TestSize.Level1)
  */
 HWTEST_F(SearchModifierCallbackTest, setOnWillDeleteTest, TestSize.Level1)
 {
-    g_EventTestString = "";
-    g_EventTestOffset = 0;
-    EventsTracker::eventsReceiver.onWillDelete = [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-        g_EventTestString = Convert<std::string>(data.deleteValue);
-        g_EventTestOffset = Convert<int32_t>(data.deleteOffset);
+    static const Ark_Int32 expectedResId = 123;
+    static const Ark_Int32 expectedOffset = AINT32_POS;
+
+    ASSERT_NE(modifier_->setOnWillDelete, nullptr);
+    auto onWillDeleteHandler = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_DeleteValue data, const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Convert<std::string>(data.deleteValue), CHECK_TEXT);
+        EXPECT_EQ(Convert<int32_t>(data.deleteOffset), expectedOffset);
         auto willDeleteDirection = OptConvert<TextDeleteDirection>(data.direction);
-        if (willDeleteDirection) {
-            g_deleteDirection = willDeleteDirection.value();
-        }
+        auto result = willDeleteDirection == TextDeleteDirection::FORWARD;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
     };
-    g_deleteDirection = TextDeleteDirection::FORWARD;
+    auto arkFunc = Converter::ArkValue<Callback_DeleteValue_Boolean>(nullptr, onWillDeleteHandler, expectedResId);
+    modifier_->setOnWillDelete(node_, &arkFunc);
+
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(textFieldEventHub, nullptr);
     DeleteValueInfo checkValueDefault;
-    textFieldEventHub->FireOnWillDeleteEvent(checkValueDefault);
-    EXPECT_EQ(g_EventTestString, EMPTY_TEXT);
-    EXPECT_EQ(g_EventTestOffset, 0);
-    EXPECT_EQ(g_deleteDirection, TextDeleteDirection::FORWARD);
-    Callback_DeleteValue_Boolean func{};
-    modifier_->setOnWillDelete(node_, &func);
-    for (const auto& [value, expectVal] : INT_NUMBER_TEST_PLAN) {
-        for (const auto& deleteDirection : DELETE_DIRECTION_TEST_PLAN) {
-            DeleteValueInfo checkValue = {
-                .deleteOffset = value, .deleteValue = CHECK_TEXT, .direction = deleteDirection
-            };
-            textFieldEventHub->FireOnWillDeleteEvent(checkValue);
-            EXPECT_EQ(g_EventTestString, CHECK_TEXT);
-            EXPECT_EQ(g_EventTestOffset, expectVal);
-            EXPECT_EQ(g_deleteDirection, deleteDirection);
-        }
+
+    {
+        DeleteValueInfo checkValue = {
+            .deleteOffset = expectedOffset, .deleteValue = CHECK_TEXT, .direction = TextDeleteDirection::FORWARD
+        };
+        auto checkVal = textFieldEventHub->FireOnWillDeleteEvent(checkValue);
+        EXPECT_TRUE(checkVal);
+    }
+
+    {
+        DeleteValueInfo checkValue = {
+            .deleteOffset = expectedOffset, .deleteValue = CHECK_TEXT, .direction = TextDeleteDirection::BACKWARD
+        };
+        auto checkVal = textFieldEventHub->FireOnWillDeleteEvent(checkValue);
+        EXPECT_FALSE(checkVal);
     }
 }
 

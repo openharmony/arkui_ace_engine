@@ -55,27 +55,27 @@ public:
         };
     }
 
-    template <typename ResultType>
-    static void ReceiveResult(const Ark_Int32 resourceId, const ResultType value)
+    template <typename ArkResultType>
+    inline static void ReceiveResult(const Ark_Int32 resourceId, const ArkResultType value)
     {
-        if (auto it = storage_.find(resourceId); it != storage_.end()) {
-            it->second.handler(&value);
-        }
+        ReceiveResultInternal(resourceId, &value);
     }
 
-    template <typename ResultType, typename ObtainResultCallbackType, typename CallbackHelper, typename... Params>
+    template <typename ArkResultType, typename ContinuationType, typename CallbackHelper, typename... Params>
     static void InvokeWithResultHandler(ResultHandler &&handler, const CallbackHelper &helper, Params&&... args)
     {
         // create continuation
-        auto cbResource = GetNextCallbackResource();
-        ObtainResultCallbackType continuation { .resource = cbResource, .call = &ReceiveResult<ResultType> };
+        ContinuationType continuation {
+            .resource = GetNextCallbackResource(),
+            .call = &ReceiveResult<ArkResultType>
+        };
 
         // register handler
-        storage_[cbResource.resourceId] = { 1, std::move(handler) }; // +1 for automatic Hold
+        storage_[continuation.resource.resourceId] = { 1, std::move(handler) }; // +1 for automatic Hold
 
         helper.InvokeSync(std::forward<Params>(args)..., continuation);
 
-        Release(cbResource.resourceId);
+        Release(continuation.resource.resourceId);
     }
 private:
     struct CallbackData {
@@ -85,6 +85,13 @@ private:
 
     inline static std::unordered_map<Ark_Int32, CallbackData> storage_;
     inline static Ark_Int32 currentId_ = 0;
+
+    static void ReceiveResultInternal(const Ark_Int32 resourceId, const void* valuePtr)
+    {
+        if (auto it = storage_.find(resourceId); it != storage_.end()) {
+            it->second.handler(valuePtr);
+        }
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CALLBACK_KEEPER_H
