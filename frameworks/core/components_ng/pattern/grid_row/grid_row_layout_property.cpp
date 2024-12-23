@@ -14,15 +14,14 @@
  */
 
 #include "core/components_ng/pattern/grid_row/grid_row_layout_property.h"
-
 #include "core/components_v2/grid_layout/grid_container_utils.h"
 
 namespace OHOS::Ace::NG {
-using OHOS::Ace::V2::GridContainerUtils;
-using OHOS::Ace::V2::GridContainerUtils;
 const auto COLUMNS_DEFAULT_VALUE = 12;
 const auto DIRECTION_DEFAULT_VALUE = V2::GridRowDirection::Row;
 const auto ALIGN_ITEMS_DEFAULT_VALUE = FlexAlign::FLEX_START;
+
+using OHOS::Ace::V2::GridContainerUtils;
 
 std::string BreakPointsReferenceToStr(V2::BreakPointsReference reference)
 {
@@ -60,6 +59,7 @@ std::string FlexAlignToStr(FlexAlign alignItem)
             return "Unknown";
     }
 }
+
 void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
@@ -68,6 +68,8 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         return;
     }
     auto sizeType = GetSizeTypeValue(V2::GridSizeType::UNDEFINED);
+    std::string str;
+
     auto gutter = GridContainerUtils::ProcessGutter(sizeType, GetGutterValue(V2::Gutter()));
     auto jsonGutter = JsonUtil::Create(false);
     jsonGutter->Put("x", std::to_string(gutter.first.ConvertToPx()).c_str());
@@ -91,13 +93,14 @@ void GridRowLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     auto referenceStr = BreakPointsReferenceToStr(breakPoints.reference);
     jsonBreakpoints->Put("reference", referenceStr.c_str());
     json->Put("breakpoints", jsonBreakpoints);
-    
+
     auto direction = GetDirection().value_or(DIRECTION_DEFAULT_VALUE);
     auto directStr = GridRowDirectionToStr(direction);
-    json->PutExtAttr("gridRowDirection", directStr.c_str(), filter);
+    json->PutExtAttr("gridRowDirection", directStr.c_str(), filter); // direction key — duplicated in TextDirection
 
     auto alignItem = GetAlignItemsValue(ALIGN_ITEMS_DEFAULT_VALUE);
     std::string alignItemsStr = FlexAlignToStr(alignItem);
+    // Instead of "alignSelf", which is not touched for compatibility
     json->Put("itemAlign", alignItemsStr.c_str());
 }
 } // namespace OHOS::Ace::NG
