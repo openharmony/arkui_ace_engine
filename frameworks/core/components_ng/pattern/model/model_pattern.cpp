@@ -57,8 +57,6 @@ ModelPattern::SetModelViewContext(const ModelViewContext& context)
         });
 }
 
-
-
 void ModelPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

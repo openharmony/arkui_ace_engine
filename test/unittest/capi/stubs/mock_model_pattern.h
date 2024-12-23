@@ -28,7 +28,7 @@ class ModelPattern : public Pattern {
     DECLARE_ACE_TYPE(ModelPattern, Pattern);
 public:
     ModelPattern(uint32_t key, const ModelViewContext& context);
-    ModelPattern(uint32_t key);
+    explicit ModelPattern(uint32_t key);
     ~ModelPattern() override;
 
     void SetModelViewContext(const ModelViewContext& context);
