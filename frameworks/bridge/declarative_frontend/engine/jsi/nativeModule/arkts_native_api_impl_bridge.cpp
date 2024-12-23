@@ -1878,6 +1878,14 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetBarState));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBarState"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetBarState));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetMaxLength));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLength"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetMaxLength));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetMaxLines));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetMaxLines));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto textArea = panda::ObjectRef::New(vm);

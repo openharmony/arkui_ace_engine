@@ -153,13 +153,21 @@ RichEditorPattern::~RichEditorPattern()
 
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
+    if (GetTextContentLength() > maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return;
+    }
     CHECK_NULL_VOID(value && styledString_);
+    auto subValue = value;
+    if (value->GetLength() != styledString_->GetLength() && value->GetLength() > maxLength_.value_or(INT_MAX)) {
+        subValue = value->GetSubSpanString(0, maxLength_.value_or(INT_MAX));
+    }
     IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
     CloseSelectOverlay();
     ResetSelection();
     styledString_->RemoveCustomSpan();
     auto length = styledString_->GetLength();
-    styledString_->ReplaceSpanString(0, length, value);
+    styledString_->ReplaceSpanString(0, length, subValue);
     SetCaretPosition(styledString_->GetLength());
     MoveCaretToContentRect();
     auto host = GetHost();
@@ -823,6 +831,10 @@ void RichEditorPattern::AddSpanHoverEvent(
 int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index,
     bool updateCaret)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddImageSpan, opts=%{public}s, updateCaret=%{public}d",
@@ -999,6 +1011,10 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     CHECK_NULL_RETURN(customNode, 0);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0);
@@ -1091,6 +1107,13 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
+    std::u16string utf16Value =
+        StringUtils::Str8ToStr16(options.value).substr(0, maxLength_.value_or(INT_MAX) - GetTextContentLength());
+    options.value = StringUtils::Str16ToStr8(utf16Value);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options).c_str());
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", options.ToString().c_str());
     AdjustAddPosition(options);
@@ -1209,6 +1232,10 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return 0;
+    }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isPaste=%{public}d, index=%{public}d", isPaste, index);
 
@@ -4188,9 +4215,13 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
         DeleteForwardInStyledString(changeLength, false);
     }
     ResetSelection();
-    styledString_->InsertSpanString(changeStart, spanString);
-    SetCaretPosition(caretPosition_ + spanString->GetLength());
-    AfterStyledStringChange(changeStart, changeLength, spanString->GetU16string());
+    auto subSpanString = spanString;
+    if (spanString->GetLength() + GetTextContentLength() > maxLength_.value_or(INT_MAX)) {
+        subSpanString = subSpanString->GetSubSpanString(0, maxLength_.value_or(INT_MAX) - GetTextContentLength());
+    }
+    styledString_->InsertSpanString(changeStart, subSpanString);
+    SetCaretPosition(caretPosition_ + subSpanString->GetLength());
+    AfterStyledStringChange(changeStart, changeLength, subSpanString->GetU16string());
 }
 
 void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy)
@@ -4226,6 +4257,10 @@ void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>&
 
 void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans)
 {
+    if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return;
+    }
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         DeleteForward(textSelector_.GetTextStart(), textSelector_.GetTextEnd() - textSelector_.GetTextStart());
@@ -4988,13 +5023,45 @@ void RichEditorPattern::InsertValueByOperationType(const std::string& insertValu
     ProcessInsertValue(insertValue, operationType, true);
 }
 
+void RichEditorPattern::ProcessInsertValueMore(std::string text, OperationRecord record, OperationType operationType,
+    RichEditorChangeValue changeValue, PreviewTextRecord preRecord)
+{
+    if (preRecord.needReplacePreviewText && !previewTextRecord_.needReplacePreviewText) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewText finished when ProcessInsertValue");
+        NotifyImfFinishTextPreview();
+        return;
+    }
+    ClearRedoOperationRecords();
+    InsertValueOperation(text, &record, operationType);
+    record.afterCaretPosition = caretPosition_;
+    if (isDragSponsor_) {
+        record.deleteCaretPostion = dragRange_.first;
+    }
+    AddOperationRecord(record);
+    AfterContentChange(changeValue);
+}
+
 // operationType: when type is IME, it controls whether to perform ime callbacks
 // calledByImf: true means real input; false means preview input
 void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, OperationType operationType,
     bool calledByImf)
 {
+    bool needTruncationInsertValue = calledByImf || !previewTextRecord_.needReplacePreviewText;
+    if (needTruncationInsertValue && GetTextContentLength() - previewTextRecord_.previewContent.length() >= maxLength_.value_or(INT_MAX)) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        return;
+    }
     CONTENT_MODIFY_LOCK(this);
     bool isIME = IsIMEOperation(operationType);
+    auto text = insertValue;
+    if (needTruncationInsertValue) {
+        std::u16string utf16Text = StringUtils::Str8ToStr16(text);
+        if (utf16Text.length() != 1) {
+            utf16Text = utf16Text.substr(
+                0, maxLength_.value_or(INT_MAX) - GetTextContentLength() + previewTextRecord_.previewContent.length());
+        }
+        text = StringUtils::Str16ToStr8(utf16Text);
+    }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "insertLen=%{public}zu, isIME=%{public}d, calledByImf=%{public}d, isSpanString=%{public}d",
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
@@ -5006,7 +5073,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
         return;
     }
     if (isSpanStringMode_) {
-        InsertValueInStyledString(insertValue, calledByImf);
+        InsertValueInStyledString(text);
         return;
     }
     OperationRecord record;
@@ -5014,7 +5081,7 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
     if (textSelector_.IsValid()) {
         record.beforeCaretPosition = textSelector_.GetTextStart();
     }
-    record.addText = insertValue;
+    record.addText = text;
 
     RichEditorChangeValue changeValue;
     auto preRecord = previewTextRecord_;
@@ -5022,23 +5089,11 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
     if (calledByImf && previewTextRecord_.IsValid()) {
         FinishTextPreviewInner();
     }
-    bool allowImeInput = isIME ? BeforeIMEInsertValue(insertValue) : true;
+    bool allowImeInput = isIME ? BeforeIMEInsertValue(text) : true;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "allowContentChange=%{public}d, allowImeInput=%{public}d, needReplacePreviewText=%{public}d",
         allowContentChange, allowImeInput, previewTextRecord_.needReplacePreviewText);
     CHECK_NULL_VOID((allowContentChange && allowImeInput) || previewTextRecord_.needReplacePreviewText);
-    if (preRecord.needReplacePreviewText && !previewTextRecord_.needReplacePreviewText) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "previewText finished when ProcessInsertValue");
-        NotifyImfFinishTextPreview();
-        return;
-    }
-    ClearRedoOperationRecords();
-    InsertValueOperation(insertValue, &record, operationType);
-    record.afterCaretPosition = caretPosition_;
-    if (isDragSponsor_) {
-        record.deleteCaretPostion = dragRange_.first;
-    }
-    AddOperationRecord(record);
-    AfterContentChange(changeValue);
+    ProcessInsertValueMore(text, record, operationType, changeValue, preRecord);
 }
 
 void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record,
@@ -5521,6 +5576,51 @@ std::u16string RichEditorPattern::DeleteForwardOperation(int32_t length)
         }
     }
     return deleteText;
+}
+
+std::u16string RichEditorPattern::DeleteContentRichEditor(int32_t length)
+{
+    std::u16string textContent;
+    GetContentBySpans(textContent);
+
+    auto start = std::clamp(GetTextContentLength() - length, 0, static_cast<int32_t>(textContent.length()));
+    std::u16string deleteText =
+        textContent.substr(static_cast<uint32_t>(start), static_cast<uint32_t>(GetTextContentLength() - start));
+    RichEditorDeleteValue info;
+    info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
+    if (GetTextContentLength() == 0) {
+        info.SetLength(0);
+        DoDeleteActions(0, 0, info);
+        return deleteText;
+    }
+    info.SetOffset(GetTextContentLength() - length);
+    info.SetLength(length);
+    int32_t currentPosition = std::clamp((GetTextContentLength() - length), 0, static_cast<int32_t>(GetTextContentLength()));
+    if (!spans_.empty()) {
+        CalcDeleteValueObj(currentPosition, length, info);
+        bool doDelete = DoDeleteActions(currentPosition, length, info);
+        if (!doDelete) {
+            return u"";
+        }
+    }
+    auto host = GetHost();
+    if (host && host->GetChildren().empty()) {
+        textForDisplay_.clear();
+    }
+    RequestKeyboardToEdit();
+    return deleteText;
+}
+
+void RichEditorPattern::DeleteToMaxLength(std::optional<int32_t> length)
+{
+    if (length.value_or(INT_MAX) >= GetTextContentLength()) {
+        return;
+    }
+    if (isSpanStringMode_) {
+        DeleteValueInStyledString(length.value_or(INT_MAX), GetTextContentLength() - length.value_or(INT_MAX));
+    } else {
+        DeleteContentRichEditor(GetTextContentLength() - length.value_or(INT_MAX));
+    }
 }
 
 bool RichEditorPattern::OnBackPressed()
