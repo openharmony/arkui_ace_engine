@@ -64,6 +64,7 @@ public:
     void SetTextOverflow(const TextOverflow value);
     void SetTextDecoration(const TextDecoration& value, const Color& color, const TextDecorationStyle& style);
     void ContentChange();
+    void SetTextFadeoutEnabled(bool enabled);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -78,6 +79,12 @@ private:
     void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
     void ModifyDecorationInTextStyle(TextStyle& textStyle);
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
+    void DoNormalDraw(DrawingContext& context);
+    void DoTextFadeoutDraw(DrawingContext& context);
+    void DrawTextFadeout(DrawingContext& context);
+    void UpdateTextFadeout(
+        RSCanvas& canvas, const RectF& textRect, float gradientPercent, bool leftFade, bool rightFade);
+    void AdjustTextFadeRect(RectF& textFadeRect);
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
@@ -120,6 +127,9 @@ private:
     RefPtr<PropertyInt> fontStyle_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyInt> textOverflow_;
+
+    // 是否需要开启渐隐
+    bool textFadeoutEnabled_ { false };
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };

@@ -73,6 +73,11 @@ public:
         return unitWidth_;
     }
 
+    float GetTextIndent() const
+    {
+        return indent_;
+    }
+
     InlineMeasureItem GetInlineMeasureItem() const
     {
         return inlineMeasureItem_;

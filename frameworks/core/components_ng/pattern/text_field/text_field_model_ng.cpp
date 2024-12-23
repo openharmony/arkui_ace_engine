@@ -86,6 +86,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
+    pattern->SetHoverPressBgColorEnabled(textFieldTheme->GetHoverAndPressBgColorEnabled());
     SetCaretColor(textFieldTheme->GetCursorColor());
     CaretStyle caretStyle;
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
