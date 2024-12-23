@@ -99,5 +99,22 @@ group("advanced_ui_component") {
   ]
   if (!ace_engine_feature_wearable) {
     deps += [ "selectionmenu/interfaces:selectionmenu" ]
+  } else (ace_engine_feature_wearable) {
+    deps -= [
+      "composelistitem/interfaces:composelistitem",
+      "composetitlebar/interfaces:composetitlebar",
+      "editabletitlebar/interfaces:editabletitlebar",
+      "exceptionprompt/interfaces:exceptionprompt",
+      "filter/interfaces:filter",
+      "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+      "progressbutton/interfaces:progressbutton",
+      "selecttitlebar/interfaces:selecttitlebar",
+      "splitlayout/interfaces:splitlayout",
+      "subheader/interfaces:subheader",
+      "swiperefresher/interfaces:swiperefresher",
+      "tabtitlebar/interfaces:tabtitlebar",
+      "toolbar/interfaces:toolbar",
+      "treeview/interfaces:treeview",
+    ]
   }
 }
