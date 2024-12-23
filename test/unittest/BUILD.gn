@@ -52,7 +52,7 @@ config("ace_coverage_config") {
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]
-  if (ace_engine_feature_enable_split_mode &&
+  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
       defined(vendor_configs.ace_engine_advanced_split_mode_test_visibility)) {
     visibility += vendor_configs.ace_engine_advanced_split_mode_test_visibility
   }
@@ -69,7 +69,7 @@ config("ace_unittest_config") {
     "//commonlibrary/c_utils/base/include/",
     "//third_party/node/src",
   ]
-  if (ace_engine_feature_enable_split_mode &&
+  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
       defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
     include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
   }
