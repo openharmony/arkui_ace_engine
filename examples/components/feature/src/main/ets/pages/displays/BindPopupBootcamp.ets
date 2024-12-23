@@ -26,6 +26,10 @@ export struct BindPopupBootcamp {
 
   build() {
     NavDestination() {
+
+
+
+      
       Drawer({
         title: this.title,
         showParameters: $showParameters,
