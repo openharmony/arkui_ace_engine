@@ -86,8 +86,6 @@ export struct GridBootcamp {
   @State compBorderRadius: number = 0;
   @State enableCompBorderStyle: boolean = false;
   @State compBorderStyle: BorderStyle = BorderStyle.Solid;
-  @State enableCompFlexBasis: boolean = false;
-  @State compFlexBasis: number | string = 'auto';
   @State enableCompOpacity: boolean = false;
   @State compOpacity: number = 1;
   @State enableCompVisibility: boolean = false;
@@ -102,6 +100,20 @@ export struct GridBootcamp {
   scrollerForH: Scroller = new Scroller();
   @State currentIndex: number = 0
   private controller: TabsController = new TabsController()
+  private listScrollerForV: ListScroller = new ListScroller()
+  private listScrollerForH: ListScroller = new ListScroller()
+  @State dragText: string = 'drag'
+
+  @Builder pixelMapBuilder() { //拖拽过程样式
+    Column() {
+      Text(this.dragText)
+        .fontSize(16)
+        .backgroundColor(0xF9CF93)
+        .width(80)
+        .height(80)
+        .textAlign(TextAlign.Center)
+    }
+  }
 
   @Builder
   tabBuilder(index: number, name: string) {
@@ -140,128 +152,226 @@ export struct GridBootcamp {
     Column() {
       Tabs({ barPosition: BarPosition.Start, index: this.currentIndex, controller: this.controller }) {
         TabContent() {
-          Grid(this.scrollerForV) {
-            ForEach(this.getElements(), (row: string) => {
-              GridItem() {
-              }
-              .height(80)
-              .backgroundColor('#510A59F7')
-              .borderRadius(12)
-            }, (row: string) => row)
-          }
-          .columnsTemplate(Array(this.frCount).fill('1fr').join(' '))
-          .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
-          .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
-          .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
-          .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
-          .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
-          .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
-          .editMode(useEnabled(this.enableEditMode, this.editMode))
-          .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
-          .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
-          .minCount(useEnabled(this.enableMinCount, this.minCount))
-          .cellLength(useEnabled(this.enableCellLength, this.cellLength))
-          .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
-          .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
-          .edgeEffect(
-            useEnabled(this.enableEdgeEffect, this.edgeEffect),
-            {
-              alwaysEnabled: useEnabled(
-                this.enableEdgeEffectOptionsAlwaysEnabled,
-                this.edgeEffectOptionsAlwaysEnabled
-              )
+          List({scroller: this.listScrollerForV}) {
+            ListItem() {
+              Text('1').width('90%').textAlign(TextAlign.Center)
             }
-          )
-          .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
-          .nestedScroll({
-            scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
-            scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
-          })
-          .friction(useEnabled(this.enableFriction, this.friction))
-          .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
-          .width(useEnabled(this.enableCompWidth, this.compWidth))
-          .height(useEnabled(this.enableCompHeight, this.compHeight))
-          .padding(useEnabled(this.enableCompPadding, this.compPadding))
-          .margin(useEnabled(this.enableCompMargin, this.compMargin))
-          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
-          .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
-          .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
-          .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
-          .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
-          .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-          .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
-          .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
-          .direction(useEnabled(this.enableCompDirection, this.compDirection))
-          .clip(useEnabled(this.enableCompClip, this.compClip))
-          .fadingEdge(
-            useEnabled(this.enableFadingEdge, this.fadingEdge),
-            useEnabled<FadingEdgeOptions>(this.fadingEdge, {
-              fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
-            })
-          )
+            .height(200).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Text('2').width('90%').textAlign(TextAlign.Center)
+            }
+            .height(200).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Grid(this.scrollerForV) {
+                ForEach(this.getElements(), (row: string) => {
+                  GridItem() {
+                  }
+                  .height(80)
+                  .backgroundColor('#510A59F7')
+                  .borderRadius(12)
+                }, (row: string) => row)
+              }
+              .columnsTemplate(Array(this.frCount).fill('1fr').join(' '))
+              .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
+              .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
+              .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+              .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
+              .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+              .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
+              .editMode(useEnabled(this.enableEditMode, this.editMode))
+              .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
+              .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
+              .minCount(useEnabled(this.enableMinCount, this.minCount))
+              .cellLength(useEnabled(this.enableCellLength, this.cellLength))
+              .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
+              .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
+              .edgeEffect(
+                useEnabled(this.enableEdgeEffect, this.edgeEffect),
+                {
+                  alwaysEnabled: useEnabled(
+                    this.enableEdgeEffectOptionsAlwaysEnabled,
+                    this.edgeEffectOptionsAlwaysEnabled
+                  )
+                }
+              )
+              .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
+              .nestedScroll({
+                scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
+                scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
+              })
+              .friction(useEnabled(this.enableFriction, this.friction))
+              .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
+              .width(useEnabled(this.enableCompWidth, this.compWidth))
+              .height(useEnabled(this.enableCompHeight, this.compHeight))
+              .padding(useEnabled(this.enableCompPadding, this.compPadding))
+              .margin(useEnabled(this.enableCompMargin, this.compMargin))
+              .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+              .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+              .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+              .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+              .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+              .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+              .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+              .direction(useEnabled(this.enableCompDirection, this.compDirection))
+              .clip(useEnabled(this.enableCompClip, this.compClip))
+              .fadingEdge(
+                useEnabled(this.enableFadingEdge, this.fadingEdge),
+                useEnabled<FadingEdgeOptions>(this.fadingEdge, {
+                  fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
+                })
+              )
+              .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { //第一次拖拽此事件绑定的组件时，触发回调。
+                this.dragText = this.getElements()[itemIndex]
+                return this.pixelMapBuilder() //设置拖拽过程中显示的图片。
+              })
+              .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
+                //绑定此事件的组件可作为拖拽释放目标，当在本组件范围内停止拖拽行为时，触发回调。
+                console.info('onItemDrop event triggered')
+              })
+            }
+            .height(400)
+
+            ListItem() {
+              Text('4').width('90%').textAlign(TextAlign.Center)
+            }
+            .height(200).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Text('5').width('90%').textAlign(TextAlign.Center)
+            }
+            .height(200).backgroundColor(Color.Green).margin(10)
+          }
+          .height('100%')
         }.tabBar(this.tabBuilder(0, '竖直布局'))
 
         TabContent() {
-          Grid(this.scrollerForH) {
-            ForEach(this.getElements(), (row: string) => {
-              GridItem() {
+          List({scroller: this.listScrollerForH}) {
+            ListItem() {
+              Text('1').height('90%').textAlign(TextAlign.Center)
+            }
+            .width(150).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Text('2').height('90%').textAlign(TextAlign.Center)
+            }
+            .width(150).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Grid(this.scrollerForH) {
+                ForEach(this.getElements(), (row: string) => {
+                  GridItem() {
+                  }
+                  .width(80)
+                  .backgroundColor('#510A59F7')
+                  .borderRadius(12)
+                }, (row: string) => row)
               }
-              .width(80)
-              .backgroundColor('#510A59F7')
-              .borderRadius(12)
-            }, (row: string) => row)
+              .rowsTemplate(Array(this.frCount).fill('1fr').join(' '))
+              .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
+              .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
+              .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
+              .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
+              .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
+              .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
+              .editMode(useEnabled(this.enableEditMode, this.editMode))
+              .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
+              .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
+              .minCount(useEnabled(this.enableMinCount, this.minCount))
+              .cellLength(useEnabled(this.enableCellLength, this.cellLength))
+              .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
+              .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
+              .edgeEffect(
+                useEnabled(this.enableEdgeEffect, this.edgeEffect),
+                {
+                  alwaysEnabled: useEnabled(
+                    this.enableEdgeEffectOptionsAlwaysEnabled,
+                    this.edgeEffectOptionsAlwaysEnabled
+                  )
+                }
+              )
+              .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
+              .nestedScroll({
+                scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
+                scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
+              })
+              .friction(useEnabled(this.enableFriction, this.friction))
+              .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
+              .width(useEnabled(this.enableCompWidth, this.compWidth))
+              .height(useEnabled(this.enableCompHeight, this.compHeight))
+              .padding(useEnabled(this.enableCompPadding, this.compPadding))
+              .margin(useEnabled(this.enableCompMargin, this.compMargin))
+              .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+              .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+              .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+              .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+              .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+              .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+              .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+              .direction(useEnabled(this.enableCompDirection, this.compDirection))
+              .clip(useEnabled(this.enableCompClip, this.compClip))
+              .fadingEdge(
+                useEnabled(this.enableFadingEdge, this.fadingEdge),
+                useEnabled<FadingEdgeOptions>(this.fadingEdge, {
+                  fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
+                })
+              )
+              .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { //第一次拖拽此事件绑定的组件时，触发回调。
+                this.dragText = this.getElements()[itemIndex]
+                return this.pixelMapBuilder() //设置拖拽过程中显示的图片。
+              })
+              .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
+                //绑定此事件的组件可作为拖拽释放目标，当在本组件范围内停止拖拽行为时，触发回调。
+                console.info('onItemDrop event triggered')
+              })
+            }
+            .width(300)
+
+            ListItem() {
+              Text('4').height('90%').textAlign(TextAlign.Center)
+            }
+            .width(150).backgroundColor(Color.Green).margin(10)
+
+            ListItem() {
+              Text('5').height('90%').textAlign(TextAlign.Center)
+            }
+            .width(150).backgroundColor(Color.Green).margin(10)
           }
-          .rowsTemplate(Array(this.frCount).fill('1fr').join(' '))
+          .listDirection(Axis.Horizontal)
+          .width('100%')
+        }.tabBar(this.tabBuilder(1, '水平布局'))
+
+        TabContent() {
+          Grid() {
+            ForEach(this.getElements(), (idx: string) => {
+              GridItem() {
+                Text(idx)
+              }
+              .height(100)
+              .width(100)
+              .backgroundColor('#FFFA59F7')
+              .borderRadius(12)
+            }, (idx: string) => idx)
+          }
+          .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
           .columnsGap(useEnabled(this.enableColumnsGap, this.columnsGap))
           .rowsGap(useEnabled(this.enableRowsGap, this.rowsGap))
-          .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
-          .scrollBarColor(useEnabled(this.enableScrollBarColor, this.scrollBarColor))
-          .scrollBarWidth(useEnabled(this.enableScrollBarWidth, this.scrollBarWidth))
-          .cachedCount(useEnabled(this.enableCachedCount, this.cachedCount))
-          .editMode(useEnabled(this.enableEditMode, this.editMode))
-          .layoutDirection(useEnabled(this.enableLayoutDirection, this.layoutDirection))
           .maxCount(useEnabled(this.enableMaxCount, this.maxCount))
           .minCount(useEnabled(this.enableMinCount, this.minCount))
           .cellLength(useEnabled(this.enableCellLength, this.cellLength))
-          .multiSelectable(useEnabled(this.enableMultiSelectable, this.multiSelectable))
-          .supportAnimation(useEnabled(this.enableSupportAnimation, this.supportAnimation))
-          .edgeEffect(
-            useEnabled(this.enableEdgeEffect, this.edgeEffect),
-            {
-              alwaysEnabled: useEnabled(
-                this.enableEdgeEffectOptionsAlwaysEnabled,
-                this.edgeEffectOptionsAlwaysEnabled
-              )
-            }
-          )
-          .enableScrollInteraction(useEnabled(this.enableEnableScrollInteraction, this.enableScrollInteraction))
-          .nestedScroll({
-            scrollForward: useEnabled(this.enableNestedScrollScrollForward, this.nestedScrollScrollForward),
-            scrollBackward: useEnabled(this.enableNestedScrollScrollBackward, this.nestedScrollScrollBackward)
+          .editMode(useEnabled(this.enableEditMode, this.editMode))
+          .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { //第一次拖拽此事件绑定的组件时，触发回调。
+            this.dragText = this.getElements()[itemIndex]
+            return this.pixelMapBuilder() //设置拖拽过程中显示的图片。
           })
-          .friction(useEnabled(this.enableFriction, this.friction))
-          .alignItems(useEnabled(this.enableAlignItems, this.alignItems))
+          .onItemDrop((event: ItemDragInfo, itemIndex: number, insertIndex: number, isSuccess: boolean) => {
+            //绑定此事件的组件可作为拖拽释放目标，当在本组件范围内停止拖拽行为时，触发回调。
+            console.info('onItemDrop event triggered')
+          })
           .width(useEnabled(this.enableCompWidth, this.compWidth))
           .height(useEnabled(this.enableCompHeight, this.compHeight))
-          .padding(useEnabled(this.enableCompPadding, this.compPadding))
-          .margin(useEnabled(this.enableCompMargin, this.compMargin))
-          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
-          .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
-          .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
-          .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
-          .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
-          .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-          .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
-          .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
-          .direction(useEnabled(this.enableCompDirection, this.compDirection))
-          .clip(useEnabled(this.enableCompClip, this.compClip))
-          .fadingEdge(
-            useEnabled(this.enableFadingEdge, this.fadingEdge),
-            useEnabled<FadingEdgeOptions>(this.fadingEdge, {
-              fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
-            })
-          )
-        }.tabBar(this.tabBuilder(1, '水平布局'))
+        }.tabBar(this.tabBuilder(2, '可变布局'))
       }
       .onChange((index: number) => {
         this.currentIndex = index
@@ -571,14 +681,6 @@ export struct GridBootcamp {
             { label: 'Dotted', value: BorderStyle.Dotted },
             { label: 'Dashed', value: BorderStyle.Dashed },
           ]
-        })
-
-        SliderBlock({
-          title: 'flexBasis',
-          isEnabled: $enableCompFlexBasis,
-          value: $compFlexBasis,
-          min: 10,
-          max: 200
         })
 
         SliderBlock({
