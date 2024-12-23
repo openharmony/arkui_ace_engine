@@ -160,7 +160,7 @@ HWTEST_F(RichEditorModifierTest, setRichEditorOptions1Test, TestSize.Level1)
     RichEditorStyledStringController *rawPtr = reinterpret_cast<RichEditorStyledStringController *>(ptr);
     ASSERT_NE(rawPtr->GetStyledString().GetRawPtr(), nullptr);
 
-    GeneratedModifier::RichEditorStyledStringControllerPeerImpl peer;
+    RichEditorStyledStringControllerPeer peer;
     auto controller = Converter::ArkValue<Ark_RichEditorStyledStringOptions>(&peer);
     modifier_->setRichEditorOptions1(node_, &controller);
 

@@ -21,5 +21,8 @@
 
 namespace OHOS::Ace::NG::Converter {
     template<>
+    void AssignCast(std::optional<Ace::SpanType>& dst, const Ark_StyledStringKey& src);
+
+    template<>
     RefPtr<SpanBase> Convert(const Ark_StyleOptions& src);
 }
