@@ -642,6 +642,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
+    if (IsFocusWindowIdSetted()) {
+        FireAllUIExtensionEvents();
+    }
     FireAccessibilityEvents();
     // Keep the call sent at the end of the function
     ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_COMPLETE_EVENT);
@@ -2783,6 +2786,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (eventManager_) {
             eventManager_->DumpEvent(EventTreeType::TOUCH);
         }
+        DumpUIExt();
     } else if (params[0] == "-postevent") {
         if (eventManager_) {
             eventManager_->DumpEvent(EventTreeType::POST_EVENT);
@@ -2791,8 +2795,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (imageCache_) {
             imageCache_->DumpCacheInfo();
         }
+        DumpUIExt();
     } else if (params[0] == "-imagefilecache") {
         ImageFileCache::GetInstance().DumpCacheInfo();
+        DumpUIExt();
     } else if (params[0] == "-allelements") {
         AceEngine::Get().NotifyContainers([](const RefPtr<Container>& container) {
             auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
@@ -2820,6 +2826,15 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(json);
     }
     return true;
+}
+
+void PipelineContext::DumpUIExt() const
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    if (uiExtensionManager_) {
+        uiExtensionManager_->DumpUIExt();
+    }
+#endif
 }
 
 FrameInfo* PipelineContext::GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp)

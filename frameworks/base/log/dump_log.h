@@ -82,6 +82,11 @@ public:
         ostream_ = std::move(file);
     }
 
+    void SetSeparator(std::string separator)
+    {
+        separator_ = separator;
+    }
+
     const std::unique_ptr<std::ostream>& GetDumpFile() const
     {
         return ostream_;
@@ -140,6 +145,7 @@ private:
     std::vector<std::string> description_;
     std::unique_ptr<std::ostream> ostream_ { nullptr };
     std::string result_;
+    std::string separator_ = "\n";
     ACE_DISALLOW_MOVE(DumpLog);
 };
 

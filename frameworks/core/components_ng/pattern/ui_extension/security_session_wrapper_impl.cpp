@@ -595,6 +595,7 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
@@ -686,5 +687,16 @@ int32_t SecuritySessionWrapperImpl::SendDataSync(
         transferCode = session_->TransferComponentDataSync(wantParams, reWantParams);
     }
     return static_cast<int32_t>(transferCode);
+}
+
+uint32_t SecuritySessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
 }
 } // namespace OHOS::Ace::NG

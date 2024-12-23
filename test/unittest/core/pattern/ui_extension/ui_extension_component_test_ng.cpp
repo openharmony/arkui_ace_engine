@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper_factory.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/modal_ui_extension_proxy_impl.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/event/ace_events.h"
@@ -86,6 +87,7 @@ public:
     void ClearCallbacks(RefPtr<UIExtensionPattern> pattern);
     void SetCallbacks(RefPtr<UIExtensionPattern> pattern);
     void FireCallbacks(RefPtr<UIExtensionPattern> pattern);
+    void SetPlaceholder(RefPtr<UIExtensionPattern> pattern);
 };
 
 void UIExtensionComponentTestNg::SetUp() {
@@ -216,6 +218,25 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     pattern->FireBindModalCallback();
 }
 
+void UIExtensionComponentTestNg::SetPlaceholder(RefPtr<UIExtensionPattern> pattern)
+{
+    auto placeholderInitialId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderInitial = FrameNode::GetOrCreateFrameNode(
+        "placeholderInitial", placeholderInitialId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto placeholderRotationId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderRotation = FrameNode::GetOrCreateFrameNode(
+        "placeholderRotation", placeholderRotationId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto placeholderFoldId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderFold = FrameNode::GetOrCreateFrameNode(
+        "placeholderFold", placeholderFoldId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap = {
+        { PlaceholderType::INITIAL, placeholderInitial },
+        { PlaceholderType::ROTATION, placeholderRotation },
+        { PlaceholderType::FOLD_TO_EXPAND, placeholderFold }
+    };
+    pattern->SetPlaceholderMap(placeholderMap);
+}
+
 
 /**
  * @tc.name: UIExtensionComponentNgTest
@@ -250,7 +271,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
 
     RefPtr<WantWrap> want = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
     UIExtensionModelNG uecNG;
-    uecNG.Create(want);
+    std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+    uecNG.Create(want, placeholderMap);
     uecNG.SetOnError(onError);
     uecNG.SetOnError(onError, NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     uecNG.SetOnReceive(onReceive);
@@ -844,56 +866,47 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleMouseEventInValidSession, 
 
 /**
  * @tc.name: UIExtensionPlaceholderTest
- * @tc.desc: Test pattern SetPlaceholderNode/MountPlaceholderNode/RemovePlaceholderNode
+ * @tc.desc: Test pattern SetPlaceholder/MountPlaceholder/RemovePlaceholder
  * @tc.type: FUNC
  */
 HWTEST_F(UIExtensionComponentTestNg, UIExtensionPlaceholderTest, TestSize.Level1)
 {
 #ifdef OHOS_STANDARD_SYSTEM
-    /**
-     * @tc.steps: step1. construct a UIExtensionComponent Node
-     */
     auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
         UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
     ASSERT_NE(uiExtensionNode, nullptr);
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
-    /**
-     * @tc.steps: step2. get pattern
-     */
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_EQ(pattern->placeholderNode_, nullptr);
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->AttachToFrameNode(uiExtensionNode);
     pattern->OnModifyDone();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
-    pattern->MountPlaceholderNode();
+    pattern->MountPlaceholderNode(PlaceholderType::INITIAL);
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->RemovePlaceholderNode();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
-    /**
-     * @tc.steps: step3. SetPlaceholderNode
-     */
-    auto placeholderNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto placeholderNode = FrameNode::GetOrCreateFrameNode(
-        "placeholderNode", placeholderNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
-    pattern->SetPlaceholderNode(placeholderNode);
-    ASSERT_NE(pattern->placeholderNode_, nullptr);
-    /**
-     * @tc.steps: step4. MountPlaceholderNode
-     */
-    pattern->MountPlaceholderNode();
+    SetPlaceholder(pattern);
+    pattern->MountPlaceholderNode(PlaceholderType::UNDEFINED);
+    EXPECT_EQ(pattern->IsShowPlaceholder(), false);
+    pattern->MountPlaceholderNode(PlaceholderType::INITIAL);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
-    pattern->MountPlaceholderNode();
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
+    pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
     EXPECT_EQ(pattern->IsShowPlaceholder(), true);
-    /**
-     * @tc.steps: step5. RemovePlaceholderNode
-     */
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::INITIAL);
+    pattern->ReplacePlaceholderByContent();
+    EXPECT_EQ(pattern->IsShowPlaceholder(), false);
+    pattern->MountPlaceholderNode(PlaceholderType::ROTATION);
+    EXPECT_EQ(pattern->IsShowPlaceholder(), true);
+    EXPECT_EQ(pattern->curPlaceholderType_, PlaceholderType::ROTATION);
     pattern->RemovePlaceholderNode();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
     pattern->RemovePlaceholderNode();
     EXPECT_EQ(pattern->IsShowPlaceholder(), false);
+    pattern->curPlaceholderType_ = PlaceholderType::NONE;
+    pattern->ReplacePlaceholderByContent();
 #endif
 }
 

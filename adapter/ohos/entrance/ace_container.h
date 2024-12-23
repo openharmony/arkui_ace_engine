@@ -685,6 +685,11 @@ public:
         return registerComponents_;
     }
 
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
+
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
 
@@ -693,7 +698,7 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
-
+    void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
 private:
@@ -789,6 +794,8 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
 };
 
 } // namespace OHOS::Ace::Platform

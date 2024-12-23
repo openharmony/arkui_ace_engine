@@ -46,6 +46,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -356,6 +357,8 @@ public:
 
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
+
+    virtual void DumpUIExt() const {}
 
     virtual bool IsLastPage()
     {
@@ -1449,6 +1452,11 @@ public:
 
     void FireAccessibilityEvents();
 
+    void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
+    void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
+    void FireAllUIExtensionEvents();
+    void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1482,6 +1490,7 @@ protected:
     {
         isReloading_ = isReloading;
     }
+    bool FireUIExtensionEventValid();
 
     std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
 
@@ -1594,6 +1603,7 @@ protected:
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;
+    void FireUIExtensionEventInner(uint32_t eventId);
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;
@@ -1631,6 +1641,8 @@ private:
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
     std::function<double()> windowDensityCallback_;
+    std::function<void(uint32_t)> uiExtensionEventCallback_;
+    std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 

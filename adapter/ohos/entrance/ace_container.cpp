@@ -1739,9 +1739,13 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + GetBundleName());
     DumpLog::GetInstance().Print("moduleName:" + GetModuleName());
@@ -2091,6 +2095,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
             TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
+
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
 
     auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
         auto container = weak.Upgrade();
@@ -2934,6 +2945,15 @@ bool AceContainer::IsUIExtensionWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+}
+
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
 }
 
 bool AceContainer::IsSceneBoardEnabled()

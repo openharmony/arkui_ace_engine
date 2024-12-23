@@ -27,6 +27,8 @@
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
+#include "base/error/error_code.h"
+#include "base/log/dump_log.h"
 #include "base/geometry/offset.h"
 #include "base/error/error_code.h"
 #include "base/utils/utils.h"
@@ -61,6 +63,9 @@ constexpr char PROHIBIT_NESTING_FAIL_MESSAGE[] =
     "Prohibit nesting securityUIExtensionComponent in UIExtensionAbility";
 constexpr double SHOW_START = 0.0;
 constexpr double SHOW_FULL = 1.0;
+constexpr char PID_FLAG[] = "pidflag";
+constexpr char NO_EXTRA_UIE_DUMP[] = "-nouie";
+constexpr uint32_t REMOVE_PLACEHOLDER_DELAY_TIME = 32;
 
 bool StartWith(const std::string &source, const std::string &prefix)
 {
@@ -264,29 +269,41 @@ void UIExtensionPattern::UpdateWant(const RefPtr<OHOS::Ace::WantWrap>& wantWrap)
         return;
     }
     auto want = wantWrapOhos->GetWant();
+    want_ = want.GetElement().GetBundleName().append(want.GetElement().GetAbilityName().c_str());
     UpdateWant(want);
 }
 
-void UIExtensionPattern::MountPlaceholderNode()
+void UIExtensionPattern::MountPlaceholderNode(PlaceholderType type)
 {
-    if (!isShowPlaceholder_ && placeholderNode_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->AddChild(placeholderNode_, 0);
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        isShowPlaceholder_ = true;
+    if (!IsCanMountPlaceholder(type)) {
+        return;
     }
+    RefPtr<NG::FrameNode> placeholderNode = nullptr;
+    auto it = placeholderMap_.find(type);
+    if (it != placeholderMap_.end()) {
+        placeholderNode = it->second;
+    }
+    CHECK_NULL_VOID(placeholderNode);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    host->AddChild(placeholderNode, 0);
+    ACE_SCOPED_TRACE("MountPlaceholderNode type[%d]", static_cast<int32_t>(type));
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(type);
 }
 
 void UIExtensionPattern::RemovePlaceholderNode()
 {
-    if (isShowPlaceholder_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->RemoveChildAtIndex(0);
-        isShowPlaceholder_ = false;
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (!IsShowPlaceholder()) {
+        return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->RemoveChildAtIndex(0);
+    ACE_SCOPED_TRACE("RemovePlaceholderNode type[%d]", static_cast<int32_t>(curPlaceholderType_));
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
 bool UIExtensionPattern::CheckConstraint()
@@ -330,6 +347,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         CHECK_NULL_VOID(host);
         host->RemoveChildAtIndex(0);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SetCurPlaceholderType(PlaceholderType::NONE);
         NotifyDestroy();
         // reset callback, in order to register childtree call back again when onConnect to new ability
         ResetAccessibilityChildTreeCallback();
@@ -340,7 +358,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
     usage_ = uIExtensionUsage;
     UIEXT_LOGI("The ability KeyAsync %{public}d, uIExtensionUsage: %{public}u.",
         isKeyAsync_, uIExtensionUsage);
-    MountPlaceholderNode();
+    MountPlaceholderNode(PlaceholderType::INITIAL);
     SessionConfig config;
     config.isAsyncModalBinding = isAsyncModalBinding_;
     config.uiExtensionUsage = uIExtensionUsage;
@@ -440,6 +458,80 @@ void UIExtensionPattern::OnConnect()
     ReDispatchDisplayArea();
 }
 
+void UIExtensionPattern::ReplacePlaceholderByContent()
+{
+    CHECK_RUN_ON(UI);
+    if (!IsShowPlaceholder()) {
+        return;
+    }
+    RemovePlaceholderNode();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->AddChild(contentNode_, 0);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void UIExtensionPattern::OnAreaUpdated()
+{
+    PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
+}
+
+void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
+{
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ReplacePlaceholderByContent();
+        },
+        TaskExecutor::TaskType::UI, delay, "ArkUIUIExtensionRemovePlaceholder");
+}
+
+void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
+{
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(instanceId_);
+    switch (eventId) {
+        case UIExtCallbackEventId::ON_AREA_CHANGED:
+            OnAreaUpdated();
+            break;
+        case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
+            OnUeaAccessibilityEventAsync();
+            break;
+    }
+}
+
+void UIExtensionPattern::OnUeaAccessibilityEventAsync()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
+        UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
+            accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
+        ResetAccessibilityChildTreeCallback();
+        InitializeAccessibility();
+    }
+}
+
+PlaceholderType UIExtensionPattern::GetSizeChangeReason()
+{
+    CHECK_NULL_RETURN(sessionWrapper_, PlaceholderType::NONE);
+    if (IsFoldStatusChanged()) {
+        SetFoldStatusChanged(false);
+        return PlaceholderType::FOLD_TO_EXPAND;
+    }
+    if (IsRotateStatusChanged()) {
+        SetRotateStatusChanged(false);
+        return PlaceholderType::ROTATION;
+    }
+    return PlaceholderType::UNDEFINED;
+}
+
 void UIExtensionPattern::OnAccessibilityEvent(
     const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset)
 {
@@ -463,6 +555,7 @@ void UIExtensionPattern::OnDisconnect(bool isAbnormal)
     CHECK_NULL_VOID(host);
     host->RemoveChildAtIndex(0);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetCurPlaceholderType(PlaceholderType::NONE);
 }
 
 void UIExtensionPattern::OnSyncGeometryNode(const DirtySwapConfig& config)
@@ -501,6 +594,13 @@ void UIExtensionPattern::OnWindowHide()
         NotifyBackground();
     } else if (state_ == AbilityState::FOREGROUND) {
         NotifyBackground(false);
+    }
+}
+
+void UIExtensionPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*height*/, WindowSizeChangeReason type)
+{
+    if (WindowSizeChangeReason::ROTATION == type) {
+        SetRotateStatusChanged(true);
     }
 }
 
@@ -560,11 +660,18 @@ void UIExtensionPattern::OnAttachToFrameNode()
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     pipeline->AddOnAreaChangeNode(host->GetId());
-    callbackId_ = pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
+    surfacePositionCallBackId_ =
+        pipeline->RegisterSurfacePositionChangedCallback([weak = WeakClaim(this)](int32_t, int32_t) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            pattern->DispatchDisplayArea(true);
-        }
+        CHECK_NULL_VOID(pattern);
+        pattern->DispatchDisplayArea(true);
+    });
+    foldDisplayCallBackId_ =
+        pipeline->RegisterFoldDisplayModeChangedCallback([weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetFoldStatusChanged(true);
     });
     UIEXT_LOGI("OnAttachToFrameNode");
 }
@@ -576,8 +683,10 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
+    pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
-    pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
+    pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
+    pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -758,6 +867,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             UIEXT_LOGW("RequestFocusImmediately failed when HandleTouchEvent.");
         }
     }
+    focusState_ = pipeline->IsWindowFocused();
     DispatchPointerEvent(newPointerEvent);
     if (pipeline->IsWindowFocused() && needReSendFocusToUIExtension_ &&
         newPointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_UP) {
@@ -853,8 +963,12 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     CHECK_NULL_VOID(renderContext);
     auto displaySize = renderContext->GetPaintRectWithoutTransform().GetSize();
     auto displayArea = RectF(displayOffset, displaySize);
-    if (displayArea_ != displayArea || isForce) {
+    bool sizeChange = displayArea_ != displayArea;
+    if (sizeChange || isForce) {
         displayArea_ = displayArea;
+        if (sizeChange) {
+            MountPlaceholderNode(GetSizeChangeReason());
+        }
         sessionWrapper_->NotifyDisplayArea(displayArea_);
     }
 }
@@ -948,7 +1062,7 @@ void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& na
     state_ = AbilityState::NONE;
     // Release the session.
     if (sessionWrapper_ && sessionWrapper_->IsSessionValid()) {
-        if (!isShowPlaceholder_) {
+        if (!IsShowPlaceholder()) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
             host->RemoveChildAtIndex(0);
@@ -1118,6 +1232,8 @@ void UIExtensionPattern::InitializeAccessibility()
         WeakClaim(this), accessibilityId);
     CHECK_NULL_VOID(accessibilityChildTreeCallback_);
     auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    realHostWindowId_ = realHostWindowId;
+    focusWindowId_ = ngPipeline->GetFocusWindowId();
     if (accessibilityManager->IsRegister()) {
         accessibilityChildTreeCallback_->OnRegister(
             realHostWindowId, accessibilityManager->GetTreeId());
@@ -1336,6 +1452,105 @@ const char* UIExtensionPattern::ToString(AbilityState state)
         case AbilityState::NONE:
         default:
             return "NONE";
+    }
+}
+
+void UIExtensionPattern::DumpInfo()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In String Format");
+    DumpLog::GetInstance().AddDesc(std::string("focusWindowId: ").append(std::to_string(focusWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("realHostWindowId: ").append(std::to_string(realHostWindowId_)));
+    DumpLog::GetInstance().AddDesc(std::string("want: ").append(want_));
+    DumpLog::GetInstance().AddDesc(std::string("displayArea: ").append(displayArea_.ToString()));
+    DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
+    DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
+    DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            DumpLog::GetInstance().AddDesc(std::string("UI Extension info: ").append(info));
+        }
+    }
+}
+
+void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    UIEXT_LOGI("Dump UIE Info In Json Format");
+    json->Put("focusWindowId: ", std::to_string(focusWindowId_).c_str());
+    json->Put("realHostWindowId: ", std::to_string(realHostWindowId_).c_str());
+    json->Put("want: ", want_.c_str());
+    json->Put("displayArea: ", displayArea_.ToString().c_str());
+    json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
+    json->Put("focusStatus: ", std::to_string(focusState_).c_str());
+    json->Put("abilityState: ", ToString(state_));
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (!container->IsUIExtensionWindow()) {
+            params.push_back(PID_FLAG);
+        }
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            json->Put("UI Extension info: ", info.c_str());
+        }
+    }
+}
+
+void UIExtensionPattern::DumpOthers()
+{
+    CHECK_NULL_VOID(sessionWrapper_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    if (params.empty()) {
+        return;
+    }
+    // Use -nouie to choose not dump extra uie info
+    if (std::find(params.begin(), params.end(), NO_EXTRA_UIE_DUMP) != params.end()) {
+        UIEXT_LOGI("Not Support Dump Extra UIE Info");
+    } else {
+        if (params.back() == "-json") {
+            params.insert(params.end() - 1, std::to_string(getpid()));
+            if (!container->IsUIExtensionWindow()) {
+                params.insert(params.end() - 1, PID_FLAG);
+            }
+        } else {
+            if (!container->IsUIExtensionWindow()) {
+                params.push_back(PID_FLAG);
+            }
+            params.push_back(std::to_string(getpid()));
+        }
+        std::vector<std::string> dumpInfo;
+        sessionWrapper_->NotifyUieDump(params, dumpInfo);
+        for (std::string info : dumpInfo) {
+            std::stringstream ss(info);
+            std::string line;
+            DumpLog::GetInstance().Print("\n------ UIExtension Dump ------");
+            while (getline(ss, line, ';')) {
+                DumpLog::GetInstance().Print(line);
+            }
+        }
     }
 }
 } // namespace OHOS::Ace::NG

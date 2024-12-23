@@ -253,6 +253,7 @@ void FocusHub::DumpFocusNodeTree(int32_t depth)
         if (focusMgr && focusMgr->GetLastFocusStateNode() == this) {
             information += " [Painted]";
         }
+        DumpFocusUie();
         DumpLog::GetInstance().Print(depth, information, 0);
     }
 }
@@ -300,8 +301,19 @@ void FocusHub::DumpFocusScopeTree(int32_t depth)
         DumpLog::GetInstance().Print(depth, information, static_cast<int32_t>(focusNodes.size()));
     }
 
+    DumpFocusUie();
     for (const auto& item : focusNodes) {
         item->DumpFocusTree(depth + 1);
+    }
+}
+
+void FocusHub::DumpFocusUie()
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        pattern->DumpInfo();
     }
 }
 
@@ -2677,5 +2689,15 @@ void FocusHub::ToJsonValue(
     json->PutExtAttr("tabIndex", tabIndex, filter);
     json->PutExtAttr("focusBox", focusBox, filter);
     json->PutExtAttr("tabStop", tabStop, filter);
+}
+
+void FocusHub::DumpFocusUieInJson(std::unique_ptr<JsonValue>& json)
+{
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        pattern->DumpInfo(json);
+    }
 }
 } // namespace OHOS::Ace::NG

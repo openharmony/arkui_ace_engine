@@ -131,7 +131,7 @@ void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
     auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
-
+    auto callSessionId = GetSessionId();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
         if (errcode != OHOS::Rosen::WSError::WS_OK) {
             taskExecutor->PostTask(
@@ -241,6 +241,23 @@ void SessionWrapperImpl::InitAllCallback()
         CHECK_NULL_RETURN(container, avoidArea);
         avoidArea = container->GetAvoidAreaByType(type);
         return avoidArea;
+    };
+    sessionCallbacks->notifyExtensionEventFunc_ =
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t eventId) {
+        taskExecutor->PostTask(
+            [weak, callSessionId, eventId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                        "notifyBindModalFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                    return;
+                }
+                pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -665,6 +682,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     int32_t duration = 0;
     if (reason == Rosen::SizeChangeReason::ROTATION) {
@@ -816,4 +834,17 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
     return static_cast<int32_t>(transferCode);
 }
 /************************************************ End: The interface to send the data for ArkTS ***********************/
+
+/************************************************ Begin: The interface for UEC dump **********************************/
+uint32_t SessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
+}
+/************************************************ End: The interface for UEC dump **********************************/
 } // namespace OHOS::Ace::NG

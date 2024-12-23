@@ -654,6 +654,7 @@ public:
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
     void DumpJsInfo(const std::vector<std::string>& params) const;
+    void DumpUIExt() const override;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
