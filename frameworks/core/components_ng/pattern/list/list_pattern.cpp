@@ -1157,6 +1157,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 moveStep = curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
+                VerifyFocusIndex(nextIndex, nextIndexInGroup, curListItemGroupPara);
             }
         } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
             if (curIndexInGroup == -1) {
@@ -1166,6 +1167,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 moveStep = -curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
+                VerifyFocusIndex(nextIndex, nextIndexInGroup, curListItemGroupPara);
             }
         } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
             moveStep = 1;
@@ -1221,6 +1223,17 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
     }
     return nullptr;
+}
+
+void ListPattern::VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param)
+{
+    if (nextIndexInGroup < 0) {
+        nextIndex--;
+        nextIndexInGroup = -1;
+    } else if (nextIndexInGroup > param.itemEndIndex) {
+        nextIndex++;
+        nextIndexInGroup = -1;
+    }
 }
 
 WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
