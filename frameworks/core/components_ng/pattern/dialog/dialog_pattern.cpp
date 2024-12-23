@@ -931,7 +931,19 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
-    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, nullptr);
+    if (textTheme->GetIsTextFadeout()) {
+        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        textProps->UpdateTextMarqueeFadeout(true);
+    } else {
+        textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
     Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
                                                                            : dialogTheme_->GetNormalButtonFontSize();
     textProps->UpdateFontSize(buttonTextSize);

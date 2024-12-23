@@ -71,8 +71,6 @@ public:
             theme->toastLimitHeightRatio_ =
                 toastPattern->GetAttr<double>("toast_limit_height_ratio", toastLimitHeightRatio);
 
-            theme->borderColor_ = toastPattern->GetAttr<Color>("toast_border_color", Color());
-            theme->borderWidth_ = toastPattern->GetAttr<Dimension>("toast_border_width", 0.0_vp);
             theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>("toast_background_blur_style", 0);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
@@ -234,16 +232,6 @@ public:
         return toastBackgroundBlurStyle_;
     }
 
-    const Color& GetBorderColor() const
-    {
-        return borderColor_;
-    }
-
-    const Dimension& GetBorderWidth() const
-    {
-        return borderWidth_;
-    }
-
     uint32_t GetBgThemeColorMode() const
     {
         return bgThemeColorMode_;
@@ -273,12 +261,10 @@ private:
     Dimension minWidth_;
     Dimension minHeight_;
     Color backgroundColor_;
-    Color borderColor_;
     TextStyle textStyle_;
     Radius radius_;
     Dimension bottom_;
     Dimension minFontSize_;
-    Dimension borderWidth_;
     uint32_t textMaxLines_ = 1;
     uint32_t bgThemeColorMode_ = 0;
     Edge marging_;
