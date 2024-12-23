@@ -469,6 +469,12 @@ int32_t RosenMediaPlayer::SetSurface()
     return mediaPlayer_->SetVideoSurface(renderSurface->GetSurface());
 }
 
+int32_t RosenMediaPlayer::SetRenderFirstFrame(bool display)
+{
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetRenderFirstFrame(display);
+}
+
 int32_t RosenMediaPlayer::PrepareAsync()
 {
     CHECK_NULL_RETURN(mediaPlayer_, -1);
