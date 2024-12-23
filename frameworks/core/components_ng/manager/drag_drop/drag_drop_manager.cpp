@@ -754,8 +754,11 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     SetIsWindowConsumed(false);
     if (isDragFwkShow_) {
         auto menuWrapper = GetMenuWrapperNodeFromDrag();
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
-            static_cast<float>(point.GetY())), 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
+        if (menuWrapper) {
+            auto menuPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(point);
+            SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(
+                menuPosition, 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
+        }
     }
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
