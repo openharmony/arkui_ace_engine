@@ -719,6 +719,18 @@ class ObserveV2 {
     let view;
     return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId) : '';
   }
+
+  public getComputedInfoById(computedId: number): string {
+    let weak = this.id2cmp_[computedId];
+    let computedV2: ComputedV2;
+    return (weak && (computedV2 = weak.deref()) && (computedV2 instanceof ComputedV2)) ? computedV2.getComputedFuncName() : '';
+  }
+
+  public getMonitorInfoById(computedId: number): string {
+    let weak = this.id2cmp_[computedId];
+    let monitorV2: MonitorV2;
+    return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
+  }
 } // class ObserveV2
 
 
