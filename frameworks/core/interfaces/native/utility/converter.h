@@ -60,6 +60,10 @@
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 
+namespace OHOS::Ace {
+struct TextDetectConfig;
+}
+
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src);
 template<typename T>
@@ -456,6 +460,7 @@ namespace Converter {
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
+    template<> TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> std::map<std::string, std::string> Convert(const Map_String_String& src);
