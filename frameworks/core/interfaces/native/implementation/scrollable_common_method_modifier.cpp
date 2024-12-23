@@ -47,6 +47,12 @@ void AssignCast(std::optional<Dimension>& dst, const Ark_FadingEdgeOptions& src)
 {
     dst = OptConvert<Dimension>(src.fadingEdgeLength);
 }
+
+template<>
+ScrollFrameResult Convert<ScrollFrameResult>(const Ark_OffsetResult& src)
+{
+    return { .offset = Convert<Dimension>(src.xOffset) };
+}
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -141,23 +147,24 @@ void OnWillScrollImpl(Ark_NativePointer node,
         arkCallback = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
     }
     if (arkCallback) {
-        auto modelCallback = [callbackHelper = CallbackHelper(*arkCallback)]
+        auto modelCallback = [callback = CallbackHelper(*arkCallback, frameNode)]
             (const Dimension& scrollOffset, const ScrollState& scrollState, const ScrollSource& scrollSource) ->
                 ScrollFrameResult {
             auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
             auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
             auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
-            Callback_OffsetResult_Void continuation;
-            callbackHelper.Invoke(arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource, continuation);
-            ScrollFrameResult result = { .offset = scrollOffset };
-            LOGE("ScrollableCommonMethodModifier::OnWillScrollImpl return value can be incorrect");
-            return result;
+            auto resultOpt =
+                callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_OffsetResult, Callback_OffsetResult_Void>(
+                    arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource
+                );
+            return resultOpt.value_or(ScrollFrameResult());
         };
         ScrollableModelNG::SetOnWillScroll(frameNode, std::move(modelCallback));
     } else {
         ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
     }
 }
+
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnWillScrollCallback* value)
 {
