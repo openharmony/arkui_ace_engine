@@ -69,9 +69,8 @@ foreach(module, advanced_ui_component_libs) {
 }
 
 group("advanced_ui_component") {
-  deps = advanced_ui_component_targets
+  deps = []
   deps += [
-    "chipgroup/interfaces:chipgroup",
     "composelistitem/interfaces:composelistitem",
     "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",
@@ -86,9 +85,7 @@ group("advanced_ui_component") {
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
-    "popup/interfaces:popup",
     "progressbutton/interfaces:progressbutton",
-    "segmentbutton/interfaces:segmentbutton",
     "selecttitlebar/interfaces:selecttitlebar",
     "splitlayout/interfaces:splitlayout",
     "subheader/interfaces:subheader",
@@ -98,6 +95,12 @@ group("advanced_ui_component") {
     "treeview/interfaces:treeview",
   ]
   if (!ace_engine_feature_wearable) {
-    deps += [ "selectionmenu/interfaces:selectionmenu" ]
+    deps += advanced_ui_component_targets
+    deps += [
+      "chipgroup/interfaces:chipgroup",
+      "popup/interfaces:popup",
+      "segmentbutton/interfaces:segmentbutton",
+      "selectionmenu/interfaces:selectionmenu",
+    ]
   }
 }
