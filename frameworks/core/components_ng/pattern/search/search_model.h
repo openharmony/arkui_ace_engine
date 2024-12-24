@@ -54,6 +54,8 @@ public:
     virtual void SetPlaceholderColor(const Color& color);
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetTextColor(const Color& color);
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
