@@ -51,9 +51,7 @@ public:
         mockRichEditorControllerKeeper_ = AceType::Claim(mockRichEditorController_);
         ASSERT_NE(mockRichEditorControllerKeeper_, nullptr);
 
-        auto peerImpl = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(peer_);
-        ASSERT_NE(peerImpl, nullptr);
-        peerImpl->AddTargetController(mockRichEditorControllerKeeper_);
+        peer_->AddTargetController(mockRichEditorControllerKeeper_);
 
         ASSERT_NE(mockRichEditorController_, nullptr);
     }
@@ -108,9 +106,7 @@ HWTEST_F(RichEditorStyledStringControllerAccessorTest, DISABLED_onContentChanged
     patternRaw->AttachToFrameNode(frameNode);
     WeakPtr<RichEditorPattern> weakPattern = Referenced::WeakClaim(patternRaw);
 
-    auto peerImpl = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(peer_);
-    ASSERT_NE(peerImpl, nullptr);
-    peerImpl->SetPattern(weakPattern);
+    peer_->SetPattern(weakPattern);
 
     auto eventHub = frameNodeRaw->GetEventHub<NG::RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);

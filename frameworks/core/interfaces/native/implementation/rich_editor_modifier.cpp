@@ -212,8 +212,7 @@ void SetRichEditorOptions1Impl(Ark_NativePointer node,
     WeakPtr<RichEditorStyledStringController> controller;
     controller = rawPtr;
 
-    auto peerImplPtr = reinterpret_cast<GeneratedModifier::RichEditorStyledStringControllerPeerImpl *>(
-        options->controller.ptr);
+    auto peerImplPtr = reinterpret_cast<RichEditorStyledStringControllerPeer *>(options->controller.ptr);
     CHECK_NULL_VOID(peerImplPtr);
 
     // pass the internal controller to external management
