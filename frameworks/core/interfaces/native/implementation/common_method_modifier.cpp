@@ -1336,6 +1336,7 @@ RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
     g_popupCommonParam(src, popupParam);
     return popupParam;
 }
+template<>
 void AssignCast(std::optional<Alignment>& dst, const Ark_Literal_Alignment_align& src)
 {
     auto optAlign = Converter::OptConvert<Ark_Alignment>(src.align);
@@ -3089,8 +3090,7 @@ void DragPreviewImpl(Ark_NativePointer node,
         },
         []() {
             LOGE("DragPreviewImpl(): Invalid union argument");
-        }
-    );
+        });
     ViewAbstract::SetDragPreview(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
