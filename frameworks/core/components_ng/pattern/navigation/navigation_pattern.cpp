@@ -310,6 +310,12 @@ void NavigationPattern::OnModifyDone()
 
     auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto curNavBarPosition = layoutProperty->GetNavBarPositionValue(NavBarPosition::START);
+    if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition) {
+        MarkAllNavDestinationDirtyIfNeeded(hostNode);
+    }
+    preNavBarPosition_ = curNavBarPosition;
+
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
