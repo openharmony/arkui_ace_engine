@@ -162,6 +162,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
     }
+    algo->SetCachedShow(IsCachedShow());
     algo->SetCurrentIndex(currentIndex_);
     algo->SetMainSizeIsMeasured(mainSizeIsMeasured_);
     oldContentMainSize_ = contentMainSize_;
@@ -1752,6 +1753,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 {
+#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -1761,6 +1763,7 @@ void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->UpdateAnimationDuration();
+#endif
 }
 
 int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackward)
@@ -1955,7 +1958,7 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
     for (const auto& index : indexSet) {
         if (index < 0 || index >= childrenSize) {
             FirePreloadFinishEvent(ERROR_CODE_PARAM_INVALID,
-                "BusinessError 401: Parameter error. Each value in indices must be valid index value of tab content.");
+                "BusinessError 401: Parameter error. Each value in indices must be valid index value of child.");
             return;
         }
         validIndexSet.emplace(index);
@@ -1973,12 +1976,15 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
         auto parent = host->GetParent();
+#ifndef ARKUI_WEARABLE
         if (AceType::InstanceOf<TabsNode>(parent)) {
             swiperPattern->DoTabsPreloadItems(indexSet);
         } else {
             swiperPattern->DoSwiperPreloadItems(indexSet);
         }
-
+#else
+        swiperPattern->DoSwiperPreloadItems(indexSet);
+#endif
         swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
     };
 
@@ -1998,6 +2004,7 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
     }
 }
 
+#ifndef ARKUI_WEARABLE
 void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 {
     auto host = GetHost();
@@ -2032,6 +2039,29 @@ void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
         }
     }
 }
+#endif
+
+void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child)
+{
+    auto childNode = FindForEachNode(child);
+    if (!childNode) {
+        return;
+    }
+
+    auto forEachNode = AceType::DynamicCast<ForEachNode>(childNode.value());
+    auto repeatNode = AceType::DynamicCast<RepeatVirtualScrollNode>(childNode.value());
+    for (auto index : indexSet) {
+        if (forEachNode && forEachNode->GetChildAtIndex(index)) {
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
+            forEachNode->GetChildAtIndex(index)->Build(nullptr);
+            continue;
+        }
+
+        if (repeatNode) {
+            repeatNode->GetFrameChildByIndex(index, true);
+        }
+    }
+}
 
 void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
 {
@@ -2040,7 +2070,6 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
     auto targetNode = FindLazyForEachNode(host);
     if (targetNode.has_value()) {
         auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(targetNode.value());
-        CHECK_NULL_VOID(lazyForEachNode);
         for (auto index : indexSet) {
             if (lazyForEachNode) {
                 lazyForEachNode->GetFrameChildByIndex(index, true);
@@ -2049,18 +2078,7 @@ void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
     }
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
-        if (child->GetTag() != V2::JS_FOR_EACH_ETS_TAG) {
-            continue;
-        }
-
-        auto forEachNode = AceType::DynamicCast<ForEachNode>(child);
-        for (auto index : indexSet) {
-            if (forEachNode && forEachNode->GetChildAtIndex(index)) {
-                TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper preload item index: %{public}d", index);
-                forEachNode->GetChildAtIndex(index)->Build(nullptr);
-                continue;
-            }
-        }
+        BuildForEachChild(indexSet, child);
     }
 }
 
@@ -4038,6 +4056,13 @@ float SwiperPattern::GetItemSpace() const
     return itemSpace;
 }
 
+bool SwiperPattern::IsCachedShow() const
+{
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetCachedIsShown().value_or(false);
+}
+
 float SwiperPattern::GetPrevMargin() const
 {
     auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -5684,6 +5709,7 @@ bool SwiperPattern::ContentWillChange(int32_t comingIndex)
 
 bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
 {
+#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -5701,6 +5727,7 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     tabBarPattern->ResetTabContentWillChangeFlag();
+#endif
     return true;
 }
 
@@ -6061,6 +6088,30 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
             return targetNode;
         }
     }
+    return std::nullopt;
+}
+
+std::optional<RefPtr<UINode>> SwiperPattern::FindForEachNode(const RefPtr<UINode>& baseNode, bool isSelfNode) const
+{
+    if (AceType::DynamicCast<ForEachNode>(baseNode)) {
+        return baseNode;
+    }
+
+    if (AceType::DynamicCast<RepeatVirtualScrollNode>(baseNode)) {
+        return baseNode;
+    }
+
+    if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
+        return std::nullopt;
+    }
+
+    for (const auto& child : baseNode->GetChildren()) {
+        auto targetNode = FindForEachNode(child, false);
+        if (targetNode.has_value()) {
+            return targetNode;
+        }
+    }
+
     return std::nullopt;
 }
 

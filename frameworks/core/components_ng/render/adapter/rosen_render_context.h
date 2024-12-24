@@ -425,6 +425,7 @@ public:
         return isDisappearing_;
     }
     void UpdateWindowBlur() override;
+    void MarkUiFirstNode(bool isUiFirstNode) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;

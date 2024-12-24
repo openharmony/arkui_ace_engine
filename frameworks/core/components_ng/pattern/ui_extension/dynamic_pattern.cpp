@@ -69,6 +69,11 @@ void DynamicPattern::InitializeDynamicComponent(
     InitializeRender(runtime);
 }
 
+void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
+}
+
 void DynamicPattern::InitializeRender(void* runtime)
 {
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
@@ -85,6 +90,7 @@ void DynamicPattern::InitializeRender(void* runtime)
         }
         dynamicComponentRenderer_->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+        dynamicComponentRenderer_->SetBackgroundTransparent(backgroundTransparent_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);

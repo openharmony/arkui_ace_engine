@@ -252,6 +252,7 @@ public:
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {

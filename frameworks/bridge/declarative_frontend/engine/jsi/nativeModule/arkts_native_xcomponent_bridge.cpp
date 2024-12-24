@@ -28,11 +28,11 @@ void SetControllerOnCreatedCallback(EcmaVM* vm, FrameNode* frameNode, const Loca
 {
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const std::string& /* xcomponentId */) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
         };
@@ -44,11 +44,11 @@ void SetControllerOnChangedCallback(EcmaVM* vm, FrameNode* frameNode, const Loca
 {
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const NG::RectF& rect) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "offsetX", "offsetY", "surfaceWidth", "surfaceHeight" };
             Local<JSValueRef> rectValues[] = { panda::NumberRef::New(vm, rect.Left()),
                 panda::NumberRef::New(vm, rect.Top()), panda::NumberRef::New(vm, rect.Width()),
@@ -65,15 +65,15 @@ void SetControllerOnDestroyedCallback(EcmaVM* vm, FrameNode* frameNode, const Lo
 {
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto ondestroyed = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
-                               const std::string& surfaceId, const std::string& /* xcomponentId */) {
+        auto onSurfaceDestroyed = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                                      const std::string& surfaceId, const std::string& /* xcomponentId */) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
         };
-        XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(ondestroyed));
+        XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(onSurfaceDestroyed));
     }
 }
 } // namespace
@@ -169,11 +169,11 @@ void XComponentBridge::SetControllerOnCreated(ArkUIRuntimeCallInfo* runtimeCallI
     auto createdFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceCreated"));
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const std::string& xcomponentId) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] ControllerOnCreated surfaceId:%{public}s",
@@ -197,11 +197,11 @@ void XComponentBridge::SetControllerOnChanged(ArkUIRuntimeCallInfo* runtimeCallI
     auto changedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceChanged"));
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const NG::RectF& rect) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "offsetX", "offsetY", "surfaceWidth", "surfaceHeight" };
             Local<JSValueRef> rectValues[] = { panda::NumberRef::New(vm, rect.Left()),
                 panda::NumberRef::New(vm, rect.Top()), panda::NumberRef::New(vm, rect.Width()),
@@ -228,11 +228,11 @@ void XComponentBridge::SetControllerOnDestroyed(ArkUIRuntimeCallInfo* runtimeCal
     auto destroyedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceDestroyed"));
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onDestroyed = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onDestroyed = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                const std::string& surfaceId, const std::string& xcomponentId) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
@@ -619,10 +619,11 @@ ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
-    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), frameNode](const std::string& xcomponentId) {
+    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                      const std::string& xcomponentId) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         std::vector<Local<JSValueRef>> argv;
         Framework::JSRef<Framework::JSVal> jsVal;
         if (Framework::XComponentClient::GetInstance().GetJSVal(xcomponentId, jsVal)) {
@@ -652,10 +653,11 @@ ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
-    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), frameNode](const std::string& xcomponentId) {
+    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                         const std::string& xcomponentId) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         func->Call(vm, func.ToLocal(), nullptr, 0);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] onDestroy", xcomponentId.c_str());
     };

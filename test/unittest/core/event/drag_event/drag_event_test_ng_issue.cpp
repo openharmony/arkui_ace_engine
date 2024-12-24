@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "test/unittest/core/event/drag_event_test_ng.h"
-#include "test/unittest/core/event/drag_event_test_utils.h"
+#include "test/unittest/core/event/drag_event/drag_event_common_test_ng.h"
+
+#include "test/unittest/core/event/drag_event/drag_event_test_ng_issue_utils.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -173,12 +174,30 @@ const std::vector<DragStatusTestCase> DRAG_STATUS_TEXT_TEST_CASES = {
     DragStatusTestCase(DragInfo(false, false, false, false), InputEventType::KEYBOARD, false),     // case 79
 };
 
+class DragEventTestNgIssue : public DragEventCommonTestNg {
+public:
+    static void SetUpTestSuite();
+    static void TearDownTestSuite();
+};
+
+void DragEventTestNgIssue::SetUpTestSuite()
+{
+    MockPipelineContext::SetUp();
+    MockContainer::SetUp();
+}
+
+void DragEventTestNgIssue::TearDownTestSuite()
+{
+    MockPipelineContext::TearDown();
+    MockContainer::TearDown();
+}
+
 /**
  * @tc.name: DragEventTestNGIssue001
  * @tc.desc: Test IsCurrentNodeStatusSuitableForDragging function when frameNode is image.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, DragEventTestNGIssue001, TestSize.Level1)
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue001, TestSize.Level1)
 {
     int32_t caseNum = 0;
     for (const auto& testCase : DRAG_STATUS_IMAGE_TEST_CASES) {
@@ -215,7 +234,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNGIssue001, TestSize.Level1)
  * @tc.desc: Test IsCurrentNodeStatusSuitableForDragging function when frameNode is text.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, DragEventTestNGIssue002, TestSize.Level1)
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
 {
     int32_t caseNum = 0;
     for (const auto& testCase : DRAG_STATUS_TEXT_TEST_CASES) {

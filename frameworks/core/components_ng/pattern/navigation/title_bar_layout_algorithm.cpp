@@ -753,6 +753,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     if (isCustom) {
+        isInitialTitle_ = false;
         // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
         auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
         auto customOffsetX = 0.0f;
@@ -977,7 +978,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         }
         offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
-        if (isRightToLeft) {
+        if (isRightToLeft && geometryNode->GetMargin()) {
             offsetX = offsetX - geometryNode->GetMargin()->left.value_or(.0f) -
                       geometryNode->GetMargin()->right.value_or(.0f);
         }
@@ -1015,7 +1016,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     }
     menuOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, menuOffsetX);
     // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
-    if (isRightToLeft) {
+    if (isRightToLeft && geometryNode->GetMargin()) {
         menuOffsetX = menuOffsetX - geometryNode->GetMargin()->left.value_or(.0f) -
                       geometryNode->GetMargin()->right.value_or(.0f);
     }

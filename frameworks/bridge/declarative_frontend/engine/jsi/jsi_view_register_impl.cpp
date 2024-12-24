@@ -575,8 +575,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
+#endif
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
@@ -667,7 +669,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
+#ifndef ARKUI_WEARABLE
     { "TabsController", JSTabsController::JSBind },
+#endif
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityController", JSAbilityComponentController::JSBind },
@@ -701,8 +705,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Checkbox", JSCheckbox::JSBind },
     { "CheckboxGroup", JSCheckboxGroup::JSBind },
     { "Refresh", JSRefresh::JSBind },
+#ifndef ARKUI_WEARABLE
     { "WaterFlow", JSWaterFlow::JSBind },
     { "FlowItem", JSWaterFlowItem::JSBind },
+#endif
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
@@ -790,7 +796,9 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSTabsController::JSBind(globalObj);
+#endif
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -901,8 +909,10 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     }
     if ((*func).first == "Swiper") {
         JSSwiperController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     } else if ((*func).first == "Tabs") {
         JSTabsController::JSBind(globalObj);
+#endif
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "AbilityComponent") {
