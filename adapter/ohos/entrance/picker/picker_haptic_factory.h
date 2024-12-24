@@ -12,20 +12,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_AUDIO_HAPTIC_INTERFACE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_AUDIO_HAPTIC_INTERFACE_H
 
-#include <stddef.h>
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_FACTORY_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_FACTORY_H
+
+#include <atomic>
+#include <memory>
+#include <mutex>
+
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
-class ITimepickerAudioHaptic {
+class PickerAudioHapticFactory {
 public:
-    ITimepickerAudioHaptic() = default;
-    virtual ~ITimepickerAudioHaptic() = default;
-    virtual void Play(size_t speed) = 0;
-    virtual void PlayOnce() = 0;
-    virtual void Stop() = 0;
-    virtual void HandleDelta(double dy) = 0;
+    PickerAudioHapticFactory() = delete;
+    ~PickerAudioHapticFactory() = delete;
+    static std::shared_ptr<IPickerAudioHaptic> GetInstance();
+private:
+    static std::shared_ptr<IPickerAudioHaptic> instance_;
+    static std::mutex mutex_;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_AUDIO_HAPTIC_INTERFACE_H
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_FACTORY_H

@@ -13,24 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_FACTORY_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_FACTORY_H
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H
 
-#include <atomic>
-#include <memory>
-#include <mutex>
-
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
-class TimepickerAudioHapticFactory {
+class PickerAudioHapticStub : public IPickerAudioHaptic {
 public:
-    TimepickerAudioHapticFactory() = delete;
-    ~TimepickerAudioHapticFactory() = delete;
-    static std::shared_ptr<ITimepickerAudioHaptic> GetInstance();
-private:
-    static std::shared_ptr<ITimepickerAudioHaptic> instance_;
-    static std::mutex mutex_;
+    PickerAudioHapticStub() = default;
+    ~PickerAudioHapticStub() = default;
+    void Play(size_t speed) {}
+    void PlayOnce() {}
+    void Stop() {}
+    void HandleDelta(double dy) {}
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_FACTORY_H
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_STUB_H

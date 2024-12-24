@@ -20,7 +20,7 @@
 #include <iterator>
 #include <list>
 
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -156,7 +156,7 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
             });
         }
     } else {

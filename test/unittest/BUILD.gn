@@ -1251,7 +1251,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
-    "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
+    "$ace_root/test/mock/core/pattern/mock_picker_haptic_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
