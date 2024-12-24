@@ -826,11 +826,9 @@ public:
     {
         return DisplayMode::AUTO;
     }
-
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
-
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;

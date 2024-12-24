@@ -89,7 +89,7 @@ bool ModelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     bool measure = (config.skipMeasure || dirty->SkipMeasureContent()) ? false : true;
     float width = contentSize.Width();
     float height = contentSize.Height();
-    float scale = PipelineContext::GetCurrentContextSafelyWithCheck()->GetViewScale();
+    float scale = PipelineContext::GetCurrentContext()->GetViewScale();
     Render3D::WindowChangeInfo windowChangeInfo {
         contentOffset.GetX(), contentOffset.GetY(),
         width, height,

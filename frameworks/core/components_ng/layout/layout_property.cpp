@@ -489,6 +489,7 @@ void LayoutProperty::UpdateGridProperty(std::optional<int32_t> span, std::option
     if (!gridProperty_) {
         gridProperty_ = std::make_unique<GridProperty>();
     }
+
     bool isSpanUpdated = (span.has_value() && gridProperty_->UpdateSpan(span.value(), type));
     bool isOffsetUpdated = (offset.has_value() && gridProperty_->UpdateOffset(offset.value(), type));
     if (isSpanUpdated || isOffsetUpdated) {
