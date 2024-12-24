@@ -382,12 +382,12 @@ int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBac
         // try delete whole emoji
         if (isBackward) {
             TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-                startIndex - length, length, content_, true);
+                startIndex - length, length, content_, true, true);
             result = TextEmojiProcessor::Delete(range.endIndex,
                 length, content_, true);
         } else {
             TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-                startIndex, length, content_, true);
+                startIndex, length, content_, true, true);
             result = TextEmojiProcessor::Delete(range.startIndex,
                 length, content_, true);
         }
