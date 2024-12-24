@@ -486,6 +486,35 @@ HWTEST_F(GridCacheLayoutTestNg, Cache004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ShowCache004
+ * @tc.desc: Test Grid layout cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(60.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 32);
+    for (int i = 0; i < 50; ++i) {
+        if (i > 38) {
+            if (GetItem(i, true)) {
+                EXPECT_FALSE(GetItem(i, true)->IsActive());
+            }
+        } else {
+            EXPECT_TRUE(GetItem(i, true));
+            EXPECT_TRUE(GetItem(i, true)->IsActive());
+        }
+    }
+}
+
+/**
  * @tc.name: LayoutCachedItem001
  * @tc.desc: Test LayoutCachedItem
  * @tc.type: FUNC

@@ -226,8 +226,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
     float mainPos = -info_.GetHeightInRange(start, info_.startMainLineIndex_, mainGap_);
     for (auto i = start; i <= end; ++i) {
-        const bool isCache =
-            !props->GetShowCachedItemsValue(false) && (i < info_.startMainLineIndex_ || i > info_.endMainLineIndex_);
+        const bool inRange = i >= info_.startMainLineIndex_ && i <= info_.endMainLineIndex_;
+        const bool isCache = !props->GetShowCachedItemsValue(false) && !inRange;
         const auto& line = info_.gridMatrix_.find(i);
         if (line == info_.gridMatrix_.end()) {
             continue;
@@ -267,7 +267,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!wrapper) {
                 continue;
             }
-            if (!isCache) {
+            if (inRange) {
                 startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
                 endIndex = std::max(itemIdex, endIndex);
             }
