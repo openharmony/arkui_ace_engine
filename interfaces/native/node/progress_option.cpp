@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create()
+ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void)
 {
     ArkUI_ProgressLinearStyleOption* option = new ArkUI_ProgressLinearStyleOption {
         .scanEffectEnable = false,

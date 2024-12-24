@@ -91,6 +91,14 @@ private:
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
+    void PaintCapsuleLeftBorder(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleRightBorder(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleProgressLessRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintCapsuleProgressGreaterRadiusScene(RSPath& path, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
     void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
         const float borderRadius) const;
     void PaintCapsuleLightSweep(
