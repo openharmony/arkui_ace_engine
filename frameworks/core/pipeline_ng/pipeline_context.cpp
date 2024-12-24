@@ -2011,26 +2011,9 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         if (rootSize.Height() - positionY - height < 0) {
             height = rootSize.Height() - positionY;
         }
-        float offsetFix = (rootSize.Height() - positionY - height) < keyboardHeight
-                              ? keyboardHeight - (rootSize.Height() - positionY - height)
-                              : keyboardHeight;
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float newKeyboardOffset = 0.0f;
-        if (NearZero(keyboardHeight)) {
-            newKeyboardOffset = 0.0f;
-        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
-            newKeyboardOffset = -offsetFix;
-        } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
-                   LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
-            newKeyboardOffset = -keyboardHeight;
-        } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
-                       positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
-                   NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
-            newKeyboardOffset = -height - offsetFix / 2.0f;
-        } else {
-            newKeyboardOffset = 0.0f;
-        }
-
+        float newKeyboardOffset = context->CalcNewKeyboardOffset(
+            keyboardHeight, positionYWithOffset, height, rootSize);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
