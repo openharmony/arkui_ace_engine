@@ -29339,6 +29339,24 @@ class ArkTabsComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
+  initialize(options) {
+    if (options[0].barPosition !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, options[0].barPosition);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, undefined);
+    }
+    if (options[0].index !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, options[0].index);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsIndexModifier.identity, TabsOptionsIndexModifier, undefined);
+    }
+    if (options[0].controller !== undefined) {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, options[0].controller);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TabsOptionsControllerModifier.identity, TabsOptionsControllerModifier, undefined);
+    }
+    return this;
+  }
   onAnimationStart(handler) {
     throw new Error('Method not implemented.');
   }
@@ -29677,6 +29695,32 @@ class BarPositionModifier extends ModifierWithKey {
   }
 }
 BarPositionModifier.identity = Symbol('barPosition');
+class TabsOptionsIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsIndex(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsIndex(node, this.value);
+    }
+  }
+}
+TabsOptionsIndexModifier.identity = Symbol('tabsOptionsIndex');
+class TabsOptionsControllerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOptionsController(node);
+    } else {
+      getUINativeModule().tabs.setTabsOptionsController(node, this.value);
+    }
+  }
+}
+TabsOptionsControllerModifier.identity = Symbol('tabsOptionsController');
 class TabsHideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
