@@ -837,6 +837,7 @@ ShadowStyle GetPopupDefaultShadowStyle()
 
 static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
 {
+    CHECK_NULL_VOID(popupParam);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<PopupTheme>();
