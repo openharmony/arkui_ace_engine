@@ -24,6 +24,7 @@
 #include "arkoala_api_generated.h"
 #include "canvas_path_accessor_peer_impl.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -85,7 +86,12 @@ public:
         const double x0, const double y0, const double x1, const double y1);
     std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const std::vector<double> params);
     std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
-
+    void ClearImageData();
+    OHOS::Ace::ImageSize GetImageSize(const double& x, const double& y, const double& width, const double& height);
+    std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize);
+    void GetPixelMap(const ImageSize& imageSize);
+    double GetDimemsion(const Dimension& value, const bool force = false);
+  
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -122,8 +128,9 @@ public:
         pattern_ = canvasPattern;
     }
 
-protected:
+public:
     RefPtr<CanvasPattern> pattern_;
+    Ace::ImageData imageData;
 
 private:
     Dimension GetDimensionValue(const std::string& str);

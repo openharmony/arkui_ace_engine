@@ -32,6 +32,7 @@ const auto ALPHA_LIMIT_MAX = 1.0;
 const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
+constexpr uint32_t COLOR_WHITE = 0xffffffff;
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -272,9 +273,28 @@ Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
                                        const Ark_Number* sw,
                                        const Ark_Number* sh)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for ImageData.");
-    return 0;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(sw, nullptr);
+    CHECK_NULL_RETURN(sh, nullptr);
+    auto width = static_cast<double>(Converter::Convert<float>(*sw));
+    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    ImageSize imageSize = peerImpl->GetImageSize(0, 0, width, height);
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    peerImpl->ClearImageData();
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageDataImpl Integer Overflow!!! "
+             "The product of finalHeight and finalWidth is too big.");
+    } else {
+        peerImpl->imageData.dirtyWidth = finalWidth;
+        peerImpl->imageData.dirtyHeight = finalHeight;
+        for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
+            peerImpl->imageData.data.push_back(COLOR_WHITE);
+        }
+    }
+    return reinterpret_cast<Ark_NativePointer>(peerImpl);
 }
 Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
                                        const Ark_ImageData* imagedata)

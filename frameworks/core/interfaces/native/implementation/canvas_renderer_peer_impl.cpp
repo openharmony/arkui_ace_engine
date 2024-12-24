@@ -23,6 +23,7 @@ const std::set<std::string> FONT_WEIGHTS = {
 const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 constexpr double MATH_2_PI = 2 * M_PI;
+constexpr double DIFF = 1e-10;
 }
 namespace OHOS::Ace::NG::GeneratedModifier {
 
@@ -504,5 +505,26 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
     gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     return gradient;
+}
+void CanvasRendererPeerImpl::ClearImageData(){
+    imageData.x = 0;
+    imageData.y = 0;
+    imageData.dirtyX = 0;
+    imageData.dirtyY = 0;
+    imageData.dirtyWidth = 0;
+    imageData.dirtyHeight = 0;
+    imageData.data.clear();
+    imageData.pixelMap = nullptr;
+}
+OHOS::Ace::ImageSize CanvasRendererPeerImpl::GetImageSize(
+    const double& x, const double& y, const double& width, const double& height)
+{
+    ImageSize imageSize;
+    double density = GetDensity();
+    imageSize.left = x * density + DIFF;
+    imageSize.top = y * density + DIFF;
+    imageSize.width = width * density + DIFF;
+    imageSize.height = height * density + DIFF;
+    return imageSize;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
