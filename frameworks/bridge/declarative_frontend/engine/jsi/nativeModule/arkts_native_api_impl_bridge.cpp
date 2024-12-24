@@ -370,7 +370,7 @@ ArkUINativeModuleValue ArkUINativeModule::SetMarqueeFrameRateRange(ArkUIRuntimeC
 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2);
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2: parameter index
     auto marqueeNode = firstArg;
     auto obj = secondArg->ToObject(vm);
     auto minValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "min"))->Int32Value(vm);
