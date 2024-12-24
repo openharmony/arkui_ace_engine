@@ -347,6 +347,9 @@ public:
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
         const NG::OffsetF& offset, MenuParam menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindMenuWithCustomNode(std::function<RefPtr<UINode>()>&& buildFunc,
+        const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, MenuParam menuParam,
+        std::function<RefPtr<UINode>()>&& previewBuildFunc);
     static void ShowMenu(
         int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector

@@ -66,6 +66,9 @@ public:
         const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
     void ShowMenuNG(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
         const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
+    void ShowMenuNG(std::function<RefPtr<NG::UINode>()>&& buildFunc,
+        std::function<RefPtr<NG::UINode>()>&& previewBuildFunc, const NG::MenuParam& menuParam,
+        const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset);
     ACE_FORCE_EXPORT void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId);
     ACE_FORCE_EXPORT void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false);
     void UpdateHideMenuOffsetNG(const NG::OffsetF& offset = NG::OffsetF(0.0f, 0.0f), float menuScale = 1.0f,

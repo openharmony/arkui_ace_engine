@@ -733,8 +733,34 @@ RadioStyle Convert(const Ark_RadioStyle& src)
 template<>
 BorderRadiusProperty Convert(const Ark_LocalizedBorderRadiuses& src)
 {
-    LOGE("Convert [Ark_LocalizedPadding] to [PaddingProperty] is not supported.");
     BorderRadiusProperty property;
+    CalcDimension topStart;
+    auto topStartOpt = Converter::OptConvert<Dimension>(src.topStart);
+    if (topStartOpt) {
+        topStart = topStartOpt.value();
+    }
+    CalcDimension topEnd;
+    auto topEndOpt = Converter::OptConvert<Dimension>(src.topEnd);
+    if (topEndOpt) {
+        topEnd = topEndOpt.value();
+    }
+    CalcDimension bottomStart;
+    auto bottomStartOpt = Converter::OptConvert<Dimension>(src.bottomStart);
+    if (bottomStartOpt) {
+        bottomStart = bottomStartOpt.value();
+    }
+    CalcDimension bottomEnd;
+    auto bottomEndOpt = Converter::OptConvert<Dimension>(src.bottomEnd);
+    if (bottomEndOpt) {
+        bottomEnd = bottomEndOpt.value();
+    }
+    bool hasSetBorderRadius = topStartOpt || topEndOpt || bottomStartOpt || bottomEndOpt;
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    property.radiusTopLeft = isRtl ? topEnd : topStart;
+    property.radiusTopRight = isRtl ? topStart : topEnd;
+    property.radiusBottomLeft = isRtl ? bottomEnd : bottomStart;
+    property.radiusBottomRight = isRtl ? bottomStart : bottomEnd;
+    property.multiValued = true;
     return property;
 }
 
@@ -1077,6 +1103,20 @@ NestedScrollOptions Convert(const Ark_NestedScrollOptions& src)
         .backward = OptConvert<NestedScrollMode>(src.scrollBackward).value_or(NestedScrollMode::SELF_ONLY),
     };
     return nestedScrollOptions;
+}
+
+template<>
+OptionParam Convert(const Ark_MenuElement& src)
+{
+    OptionParam param;
+    param.value = Converter::OptConvert<std::string>(src.value).value_or(param.value);
+    param.action = [arkCallback = CallbackHelper(src.action)]() {
+        arkCallback.Invoke();
+    };
+    param.icon = Converter::OptConvert<std::string>(src.icon).value_or(param.icon);
+    LOGE("Ark_MenuElement Converter: SymbolGlyphModifier is not supported yet");
+    param.enabled = Converter::OptConvert<bool>(src.enabled).value_or(param.enabled);
+    return param;
 }
 
 template<>
