@@ -18,27 +18,6 @@
 #include "arkoala_api_generated.h"
 #include "canvas_path_accessor_peer_impl.h"
 
-namespace OHOS::Ace::NG {
-    struct Ark_Helper_Rect {
-    Ark_Number x;
-    Ark_Number y;
-    Ark_Number w;
-    Ark_Number h;
-};
-namespace Converter {
-template<>
-Rect Convert(const Ark_Helper_Rect& src)
-{
-    return Rect(
-        static_cast<double>(Converter::Convert<float>(src.x)),
-        static_cast<double>(Converter::Convert<float>(src.y)),
-        static_cast<double>(Converter::Convert<float>(src.w)),
-        static_cast<double>(Converter::Convert<float>(src.h))
-    );
-}
-} // namespace OHOS::Ace::NG::Converter
-} // namespace OHOS::Ace::NG
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPathAccessor {
 void DestroyPeerImpl(CanvasPathPeer* peer)
@@ -76,14 +55,13 @@ void ArcImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(startAngle);
     CHECK_NULL_VOID(endAngle);
     auto clockwise = Converter::OptConvert<bool>(*counterclockwise);
-    ArcParam params;
-    params.x = Converter::Convert<float>(*x);
-    params.y = Converter::Convert<float>(*y);
-    params.radius = Converter::Convert<float>(*radius);
-    params.startAngle = Converter::Convert<float>(*startAngle);
-    params.endAngle = Converter::Convert<float>(*endAngle);
-    params.anticlockwise = clockwise ? clockwise.value() : false;
-    peerImpl->path->Arc(params);
+    auto px = Converter::Convert<float>(*x);
+    auto py = Converter::Convert<float>(*y);
+    auto rad = Converter::Convert<float>(*radius);
+    auto start = Converter::Convert<float>(*startAngle);
+    auto end = Converter::Convert<float>(*endAngle);
+    auto ccw = clockwise ? clockwise.value() : false;
+    peerImpl->path->Arc(px, py, rad, start, end, ccw);
 }
 void ArcToImpl(CanvasPathPeer* peer,
                const Ark_Number* x1,
@@ -101,13 +79,13 @@ void ArcToImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(x2);
     CHECK_NULL_VOID(y2);
     CHECK_NULL_VOID(radius);
-    ArcToParam params;
-    params.x1 = Converter::Convert<float>(*x1);
-    params.y1 = Converter::Convert<float>(*y1);
-    params.x2 = Converter::Convert<float>(*x2);
-    params.y2 = Converter::Convert<float>(*y2);
-    params.radius = Converter::Convert<float>(*radius);
-    peerImpl->path->ArcTo(params);
+
+    auto px1 = Converter::Convert<float>(*x1);
+    auto py1 = Converter::Convert<float>(*y1);
+    auto px2 = Converter::Convert<float>(*x2);
+    auto py2 = Converter::Convert<float>(*y2);
+    auto rad = Converter::Convert<float>(*radius);
+    peerImpl->path->ArcTo(px1, py1, px2, py2, rad);
 }
 void BezierCurveToImpl(CanvasPathPeer* peer,
                        const Ark_Number* cp1x,
@@ -127,14 +105,14 @@ void BezierCurveToImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(cp2y);
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
-    BezierCurveParam  params;
-    params.cp1x = Converter::Convert<float>(*cp1x);
-    params.cp1y = Converter::Convert<float>(*cp1y);
-    params.cp2x = Converter::Convert<float>(*cp2x);
-    params.cp2y = Converter::Convert<float>(*cp2y);
-    params.x = Converter::Convert<float>(*x);
-    params.y = Converter::Convert<float>(*y);
-    peerImpl->path->BezierCurveTo(params);
+
+    auto pcp1x = Converter::Convert<float>(*cp1x);
+    auto pcp1y = Converter::Convert<float>(*cp1y);
+    auto pcp2x = Converter::Convert<float>(*cp2x);
+    auto pcp2y = Converter::Convert<float>(*cp2y);
+    auto px = Converter::Convert<float>(*x);
+    auto py = Converter::Convert<float>(*y);
+    peerImpl->path->BezierCurveTo(pcp1x, pcp1y, pcp2x, pcp2y, px, py);
 }
 void ClosePathImpl(CanvasPathPeer* peer)
 {
@@ -155,10 +133,10 @@ void EllipseImpl(CanvasPathPeer* peer,
                  const Opt_Boolean* counterclockwise)
 {
     CHECK_NULL_VOID(peer);
-    auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
+     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->path);
-    CHECK_NULL_VOID(x);
+   CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
     CHECK_NULL_VOID(radiusX);
     CHECK_NULL_VOID(radiusY);
@@ -167,16 +145,16 @@ void EllipseImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(endAngle);
     CHECK_NULL_VOID(counterclockwise);
     auto clockwise = Converter::OptConvert<bool>(*counterclockwise);
-    EllipseParam params;
-    params.x = Converter::Convert<float>(*x);
-    params.y = Converter::Convert<float>(*y);
-    params.radiusX = Converter::Convert<float>(*radiusX);
-    params.radiusY = Converter::Convert<float>(*radiusY);
-    params.rotation = Converter::Convert<float>(*rotation);
-    params.startAngle = Converter::Convert<float>(*startAngle);
-    params.endAngle = Converter::Convert<float>(*endAngle);
-    params.anticlockwise = clockwise ? clockwise.value() : false;
-    peerImpl->path->Ellipse(params);
+
+    auto px = Converter::Convert<float>(*x);
+    auto py = Converter::Convert<float>(*y);
+    auto radX = Converter::Convert<float>(*radiusX);
+    auto radY = Converter::Convert<float>(*radiusY);
+    auto rot = Converter::Convert<float>(*rotation);
+    auto start = Converter::Convert<float>(*startAngle);
+    auto end = Converter::Convert<float>(*endAngle);
+    auto ccw = clockwise ? clockwise.value() : false;
+    peerImpl->path->Ellipse(px, py, radX, radY, rot, start, end, ccw);
 }
 void LineToImpl(CanvasPathPeer* peer,
                 const Ark_Number* x,
@@ -217,11 +195,11 @@ void QuadraticCurveToImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
     QuadraticCurveParam params;
-    params.cpx = Converter::Convert<float>(*cpx);
-    params.cpy = Converter::Convert<float>(*cpy);
-    params.x = Converter::Convert<float>(*x);
-    params.y = Converter::Convert<float>(*y);
-    peerImpl->path->QuadraticCurveTo(params);
+    auto pcpx = Converter::Convert<float>(*cpx);
+    auto pcpy = Converter::Convert<float>(*cpy);
+    auto px = Converter::Convert<float>(*x);
+    auto py = Converter::Convert<float>(*y);
+    peerImpl->path->QuadraticCurveTo(pcpx, pcpy, px, py);
 }
 void RectImpl(CanvasPathPeer* peer,
               const Ark_Number* x,
@@ -237,14 +215,11 @@ void RectImpl(CanvasPathPeer* peer,
     CHECK_NULL_VOID(y);
     CHECK_NULL_VOID(w);
     CHECK_NULL_VOID(h);
-    auto arkRect = Ark_Helper_Rect {
-        .x = *x,
-        .y = *y,
-        .w = *w,
-        .h = *h
-    };
-    auto rect = Converter::Convert<Rect>(arkRect);
-    peerImpl->path->AddRect(rect);
+    auto px = Converter::Convert<float>(*x);
+    auto py = Converter::Convert<float>(*y);
+    auto pw = Converter::Convert<float>(*w);
+    auto ph = Converter::Convert<float>(*h);
+    peerImpl->path->Rect(px, py, pw, ph);
 }
 } // CanvasPathAccessor
 const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()

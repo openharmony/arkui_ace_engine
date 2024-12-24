@@ -122,7 +122,7 @@ public:
         pattern_ = canvasPattern;
     }
 
-public:
+protected:
     RefPtr<CanvasPattern> pattern_;
 
 private:

@@ -19,7 +19,7 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/implementation/canvas_path_peer.h"
+#include "core/interfaces/native/implementation/canvas_path_accessor_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_pattern_peer.h"
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer.h"
@@ -1102,8 +1102,8 @@ HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
     ASSERT_NE(accessor_->stroke1, nullptr);
 
     Ark_Materialized arkPath;
-    auto peer = new CanvasPathPeer();
-    arkPath.ptr = peer;
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
+    arkPath.ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl));
 
     for (const auto& expected : PATH2D_TEST_PLAN) {
         holder->SetUp();
@@ -1117,7 +1117,7 @@ HWTEST_F(CanvasRendererAccessorTest, stroke1Test, TestSize.Level1)
         } else {
             path->LineTo(x, y);
         }
-        peer->SetCanvasPath2D(path);
+        peerImpl->path = path;
 
         accessor_->stroke1(peer_, &arkPath);
 

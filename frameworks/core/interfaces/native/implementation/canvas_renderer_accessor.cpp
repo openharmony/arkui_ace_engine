@@ -18,7 +18,7 @@
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "canvas_renderer_peer_impl.h"
-#include "canvas_path_peer.h"
+#include "canvas_path_accessor_peer_impl.h"
 #include "canvas_pattern_peer.h"
 #include "canvas_gradient_peer.h"
 #include "matrix2d_peer.h"
@@ -180,11 +180,11 @@ void Stroke1Impl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(path);
-    auto pathPeer = reinterpret_cast<CanvasPathPeer*>(path->ptr);
-    CHECK_NULL_VOID(pathPeer);
-    auto path2D = pathPeer->GetCanvasPath2D();
-    CHECK_NULL_VOID(path2D);
-    peerImpl->TriggerStroke1Impl(path2D);
+    CHECK_NULL_VOID(path);
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    CHECK_NULL_VOID(pathImpl);
+    CHECK_NULL_VOID(pathImpl->path);
+    peerImpl->TriggerStroke1Impl(pathImpl->path);
 }
 Ark_NativePointer CreateLinearGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,
