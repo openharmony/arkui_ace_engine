@@ -1798,6 +1798,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
     }
     modifier->StartFloatingAnimate();
+    pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
