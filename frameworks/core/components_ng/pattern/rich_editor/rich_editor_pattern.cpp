@@ -3497,8 +3497,8 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     CalculateHandleOffsetAndShowOverlay();
     if (selectOverlay_->IsUsingMouse()) {
         CloseSelectOverlay();
-        StopTwinkling();
     }
+    IF_TRUE(IsSelected(), StopTwinkling());
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
     if (selectOverlayInfo && selectOverlay_->IsUsingMouse()) {
         textResponseType_ = static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0));
