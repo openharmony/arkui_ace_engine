@@ -4392,7 +4392,7 @@ void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
     auto scrollBar = GetScrollBar();
-    if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
+    if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
         ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     } else {
         ChangeMouseStyle(MouseFormat::DEFAULT, true);
@@ -7674,7 +7674,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_NULL_RETURN(range.first > 0 && range.second > 0, false);
+    CHECK_NULL_RETURN(0 <= range.first && range.first < range.second, false);
     auto offset = host->GetPaintRectOffsetNG();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
