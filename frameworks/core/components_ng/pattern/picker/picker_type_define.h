@@ -82,6 +82,7 @@ struct DatePickerSettingData {
     CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;
+    DatePickerMode mode;
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;

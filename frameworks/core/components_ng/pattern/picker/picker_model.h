@@ -60,6 +60,7 @@ public:
     virtual void SetStartDate(const PickerDate& value) = 0;
     virtual void SetEndDate(const PickerDate& value) = 0;
     virtual void SetSelectedDate(const PickerDate& value) = 0;
+    virtual void SetMode(const DatePickerMode& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
     virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;

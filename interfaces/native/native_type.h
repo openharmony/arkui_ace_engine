@@ -525,6 +525,20 @@ typedef enum {
 } ArkUI_ShadowType;
 
 /**
+ * @brief Enumerates the modes of the date picker.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** A mode that displays the date in months, days of month, and years. */
+    ARKUI_DATEPICKER_MODE_DATE = 0,
+    /** A mode that displays the date in months and years. */
+    ARKUI_DATEPICKER_YEAR_AND_MONTH = 1,
+    /** A mode that displays the date in months and days of the month. */
+    ARKUI_DATEPICKER_MONTH_AND_DAY = 2,
+} ArkUI_DatePickerMode;
+
+/**
  * @brief Enumerates the types of the text picker.
  *
  * @since 12

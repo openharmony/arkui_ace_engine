@@ -602,6 +602,18 @@ bool CheckAttributeIsSliderDirection(int32_t value)
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
+bool CheckAttributeIsDatePickerMode(const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, false);
+    if (item->size == 0) {
+        return false;
+    }
+    int32_t value = item->value[0].i32;
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_DatePickerMode::ARKUI_DATEPICKER_MODE_DATE);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_DatePickerMode::ARKUI_DATEPICKER_MONTH_AND_DAY);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
 bool CheckAttributeIsCheckboxShape(int32_t value)
 {
     int32_t minEnumValue = static_cast<int32_t>(ArkUI_CheckboxShape::ArkUI_CHECKBOX_SHAPE_CIRCLE);
@@ -7946,6 +7958,36 @@ void ResetDatePickerSelected(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getDatePickerModifier()->resetSelectedDate(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetDatePickerMode(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getDatePickerModifier() && node) {
+        auto resultValue = fullImpl->getNodeModifiers()->getDatePickerModifier()->getDatePickerMode(node->uiNodeHandle);
+        g_numberValues[0].i32 = resultValue;
+    }    
+    return &g_attributeItem;
+}
+
+int32_t SetDatePickerMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!CheckAttributeIsDatePickerMode(item)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getDatePickerModifier() && node) {
+        fullImpl->getNodeModifiers()->getDatePickerModifier()->setDatePickerMode(node->uiNodeHandle, item->value[0].i32);
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetDatePickerMode(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getDatePickerModifier() && node) {
+        fullImpl->getNodeModifiers()->getDatePickerModifier()->resetDatePickerMode(node->uiNodeHandle);
+    }
+}
+
 const ArkUI_AttributeItem* GetDatePickerDisappearTextStyle(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getDatePickerModifier()->getDisappearTextStyle(node->uiNodeHandle);
@@ -13666,7 +13708,7 @@ void ResetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetDatePickerLunar, SetDatePickerStart, SetDatePickerEnd, SetDatePickerSelected,
-        SetDatePickerDisappearTextStyle, SetDatePickerTextStyle, SetDatePickerSelectedTextStyle };
+        SetDatePickerDisappearTextStyle, SetDatePickerTextStyle, SetDatePickerSelectedTextStyle, SetDatePickerMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13677,7 +13719,7 @@ int32_t SetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 const ArkUI_AttributeItem* GetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetDatePickerLunar, GetDatePickerStart, GetDatePickerEnd, GetDatePickerSelected,
-        GetDatePickerDisappearTextStyle, GetDatePickerTextStyle, GetDatePickerSelectedTextStyle };
+        GetDatePickerDisappearTextStyle, GetDatePickerTextStyle, GetDatePickerSelectedTextStyle, GetDatePickerMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -13689,7 +13731,7 @@ void ResetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetDatePickerLunar, ResetDatePickerStart, ResetDatePickerEnd,
         ResetDatePickerSelected, ResetDatePickerDisappearTextStyle, ResetDatePickerTextStyle,
-        ResetDatePickerSelectedTextStyle };
+        ResetDatePickerSelectedTextStyle, ResetDatePickerMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
