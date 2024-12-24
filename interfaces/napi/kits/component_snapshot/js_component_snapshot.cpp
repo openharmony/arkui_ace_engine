@@ -272,6 +272,32 @@ void JsComponentSnapshot::ParseOptions(int32_t idx, NG::SnapshotOptions& options
     }
 }
 
+static void SnapshotGetByUniqueId(JsComponentSnapshot& helper, napi_env env, napi_value result)
+{
+    // parse id
+    int32_t uniqueId;
+    napi_get_value_int32(env, helper.GetArgv(0), &uniqueId);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get delegate of ace_engine. param: %{public}s",
+            componentId.c_str());
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        return;
+    }
+
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+
+    // delegate->GetSnapshot(componentId, helper.CreateCallback(&result), options);
+    delegate->GetSnapshotByUniqueId(uniqueId, helper.CreateCallback(&result), options);
+
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+}
+
 static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
 {
     napi_escapable_handle_scope scope = nullptr;
@@ -280,6 +306,13 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     JsComponentSnapshot helper(env, info);
 
     napi_value result = nullptr;
+
+    bool IsUniqueId = false;
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env_, argv_[0], &type);
+    if (helper.CheckArgs(napi_valuetype::napi_number)) {
+        IsUniqueId = true;
+    }
 
     if (!helper.CheckArgs(napi_valuetype::napi_string)) {
         TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of string type.");
