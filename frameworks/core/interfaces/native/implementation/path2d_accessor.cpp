@@ -16,18 +16,22 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
-#include "canvas_path_accessor_peer_impl.h"
-
-struct Path2DPeer : public CanvasPathPeer {};
+#include "path2d_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Path2DAccessor {
 void DestroyPeerImpl(Path2DPeer* peer)
 {
+    auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 Ark_NativePointer CtorImpl()
 {
-    return new Path2DPeer();
+    auto peerImpl = Referenced::MakeRefPtr<Path2DPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -38,7 +42,9 @@ void AddPathImpl(Path2DPeer* peer,
                  const Opt_Matrix2D* transform)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(peer->path2d);
+    auto peerImpl = reinterpret_cast<Path2DPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->path);
     CHECK_NULL_VOID(path);
     CHECK_NULL_VOID(transform);
     auto peer2 = reinterpret_cast<Path2DPeer*>(path->ptr);

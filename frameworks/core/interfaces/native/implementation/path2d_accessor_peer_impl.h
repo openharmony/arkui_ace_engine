@@ -18,7 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "canvas_path_accessor_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class Path2DPeerImpl : public CanvasPathPeerImpl {
