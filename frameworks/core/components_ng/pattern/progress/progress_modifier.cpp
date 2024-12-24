@@ -1455,15 +1455,11 @@ void ProgressModifier::PaintCapsule(
     if (GreatNotEqual(2 * borderWidth, contentSize.Height())) {
         borderWidth = contentSize.Height() / 2;
     }
-    static int32_t totalDegree = 1;
     float radiusBig = borderRadius - (borderWidth / INT32_TWO);
     float offsetXBig = offset.GetX() + borderWidth / INT32_TWO;
     float offsetYBig = offset.GetY() + borderWidth / INT32_TWO;
     float offsetX = offset.GetX();
     float offsetY = offset.GetY();
-    float progressWidth =
-        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
-    bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     RSBrush brush;
     brush.SetAntiAlias(true);
     RSPen pen;
@@ -1490,6 +1486,21 @@ void ProgressModifier::PaintCapsule(
     canvas.DetachPen();
     brush.SetColor(ToRSColor((color_->Get())));
     canvas.AttachBrush(brush);
+    PaintCapsuleLeftBorder(path, offset, contentSize, borderRadius);
+    PaintCapsuleRightBorder(path, offset, contentSize, borderRadius);
+    canvas.DrawPath(path);
+    canvas.DetachBrush();
+    canvas.Restore();
+
+    PaintCapsuleLightSweep(canvas, contentSize, offset, path, false);
+}
+
+void ProgressModifier::PaintCapsuleLeftBorder(
+    RSPath& path, const OffsetF& offset, const SizeF& contentSize, const float borderRadius) const
+{
+    float offsetX = offset.GetX();
+    float offsetY = offset.GetY();
+    bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
     if (isDefault) {
         if (!isRightToLeft_->Get()) {
             path.AddArc({ offsetX, offsetY, INT32_TWO * borderRadius + offsetX, contentSize.Height() + offsetY },
@@ -1513,65 +1524,22 @@ void ProgressModifier::PaintCapsule(
         }
         path.AddRoundRect(roundRect);
     }
+}
+
+void ProgressModifier::PaintCapsuleRightBorder(
+    RSPath& path, const OffsetF& offset, const SizeF& contentSize, const float borderRadius) const
+{
+    static int32_t totalDegree = 1;
+    float offsetX = offset.GetX();
+    float offsetY = offset.GetY();
+    float progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
     if (LessNotEqual(progressWidth, borderRadius)) {
-        if (isDefault) {
-            if (!isRightToLeft_->Get()) {
-                // startAngle:270  sweepAngle:-180
-                path.AddArc({ offsetX + progressWidth, offsetY, INT32_TWO * borderRadius - progressWidth + offsetX,
-                                contentSize.Height() + offsetY },
-                    ANGLE_270, -ANGLE_180);
-            } else {
-                path.AddArc({ offsetX + contentSize.Width() - INT32_TWO * borderRadius + progressWidth, offsetY,
-                                offsetX + contentSize.Width() - progressWidth, contentSize.Height() + offsetY },
-                    ANGLE_90, -ANGLE_180);
-            }
-        } else {
-            float tmpRadius = borderRadius - progressWidth;
-            RSRoundRect roundRect;
-            if (!isRightToLeft_->Get()) {
-                roundRect.SetRect(
-                    { offsetX + progressWidth, offsetY, borderRadius + offsetX, contentSize.Height() + offsetY });
-                roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, tmpRadius, tmpRadius);
-                roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, tmpRadius, tmpRadius);
-            } else {
-                roundRect.SetRect({ offsetX + contentSize.Width() - borderRadius, offsetY,
-                    offsetX + contentSize.Width() - progressWidth, contentSize.Height() + offsetY });
-                roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, tmpRadius, tmpRadius);
-                roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, tmpRadius, tmpRadius);
-            }
-            path.AddRoundRect(roundRect, RSPathDirection::CCW_DIRECTION);
-        }
+        PaintCapsuleProgressLessRadiusScene(path, offset, contentSize, borderRadius);
     } else if (GreatNotEqual(progressWidth, contentSize.Width() - borderRadius)) {
         path.AddRect({ offsetX + borderRadius, offsetY, contentSize.Width() + offsetX - borderRadius,
             contentSize.Height() + offsetY });
-        if (isDefault) {
-            if (!isRightToLeft_->Get()) {
-                // startAngle:270  sweepAngle:180
-                path.AddArc({ offsetX + (contentSize.Width() - borderRadius) * FLOAT_TWO_ZERO - progressWidth, offsetY,
-                                offsetX + progressWidth, contentSize.Height() + offsetY },
-                    ANGLE_270, ANGLE_180);
-            } else {
-                path.AddArc({ offsetX + contentSize.Width() - progressWidth, offsetY,
-                                offsetX - contentSize.Width() + progressWidth + INT32_TWO * borderRadius,
-                                contentSize.Height() + offsetY },
-                    ANGLE_90, ANGLE_180);
-            }
-        } else {
-            float tmpRadius = progressWidth - contentSize.Width() + borderRadius;
-            RSRoundRect roundRect;
-            if (!isRightToLeft_->Get()) {
-                roundRect.SetRect({ contentSize.Width() + offsetX - borderRadius, offsetY, offsetX + progressWidth,
-                    contentSize.Height() + offsetY });
-                roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, tmpRadius, tmpRadius);
-                roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, tmpRadius, tmpRadius);
-            } else {
-                roundRect.SetRect({ contentSize.Width() - progressWidth + offsetX, offsetY, offsetX + borderRadius,
-                    contentSize.Height() + offsetY });
-                roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, tmpRadius, tmpRadius);
-                roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, tmpRadius, tmpRadius);
-            }
-            path.AddRoundRect(roundRect);
-        }
+        PaintCapsuleProgressGreaterRadiusScene(path, offset, contentSize, borderRadius);
     } else {
         if (!isRightToLeft_->Get()) {
             path.AddRect({ borderRadius + offsetX, offsetY, progressWidth + offsetX, contentSize.Height() + offsetY });
@@ -1580,11 +1548,83 @@ void ProgressModifier::PaintCapsule(
                 contentSize.Width() + offsetX - borderRadius, contentSize.Height() + offsetY });
         }
     }
-    canvas.DrawPath(path);
-    canvas.DetachBrush();
-    canvas.Restore();
+}
 
-    PaintCapsuleLightSweep(canvas, contentSize, offset, path, false);
+void ProgressModifier::PaintCapsuleProgressLessRadiusScene(
+    RSPath& path, const OffsetF& offset, const SizeF& contentSize, const float borderRadius) const
+{
+    static int32_t totalDegree = 1;
+    float offsetX = offset.GetX();
+    float offsetY = offset.GetY();
+    float progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
+    if (isDefault) {
+        if (!isRightToLeft_->Get()) {
+            // startAngle:270  sweepAngle:-180
+            path.AddArc({ offsetX + progressWidth, offsetY, INT32_TWO * borderRadius - progressWidth + offsetX,
+                            contentSize.Height() + offsetY },
+                ANGLE_270, -ANGLE_180);
+        } else {
+            path.AddArc({ offsetX + contentSize.Width() - INT32_TWO * borderRadius + progressWidth, offsetY,
+                            offsetX + contentSize.Width() - progressWidth, contentSize.Height() + offsetY },
+                ANGLE_90, -ANGLE_180);
+        }
+    } else {
+        float tmpRadius = borderRadius - progressWidth;
+        RSRoundRect roundRect;
+        if (!isRightToLeft_->Get()) {
+            roundRect.SetRect(
+                { offsetX + progressWidth, offsetY, borderRadius + offsetX, contentSize.Height() + offsetY });
+            roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, tmpRadius, tmpRadius);
+            roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, tmpRadius, tmpRadius);
+        } else {
+            roundRect.SetRect({ offsetX + contentSize.Width() - borderRadius, offsetY,
+                offsetX + contentSize.Width() - progressWidth, contentSize.Height() + offsetY });
+            roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, tmpRadius, tmpRadius);
+            roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, tmpRadius, tmpRadius);
+        }
+        path.AddRoundRect(roundRect, RSPathDirection::CCW_DIRECTION);
+    }
+}
+
+void ProgressModifier::PaintCapsuleProgressGreaterRadiusScene(
+    RSPath& path, const OffsetF& offset, const SizeF& contentSize, const float borderRadius) const
+{
+    static int32_t totalDegree = 1;
+    float offsetX = offset.GetX();
+    float offsetY = offset.GetY();
+    float progressWidth =
+        std::min((value_->Get() / maxValue_->Get()) * totalDegree * contentSize.Width(), contentSize.Width());
+    bool isDefault = GreatOrEqual(borderRadius, contentSize.Height() / INT32_TWO);
+    if (isDefault) {
+        if (!isRightToLeft_->Get()) {
+            // startAngle:270  sweepAngle:180
+            path.AddArc({ offsetX + (contentSize.Width() - borderRadius) * FLOAT_TWO_ZERO - progressWidth, offsetY,
+                            offsetX + progressWidth, contentSize.Height() + offsetY },
+                ANGLE_270, ANGLE_180);
+        } else {
+            path.AddArc({ offsetX + contentSize.Width() - progressWidth, offsetY,
+                            offsetX - contentSize.Width() + progressWidth + INT32_TWO * borderRadius,
+                            contentSize.Height() + offsetY },
+                ANGLE_90, ANGLE_180);
+        }
+    } else {
+        float tmpRadius = progressWidth - contentSize.Width() + borderRadius;
+        RSRoundRect roundRect;
+        if (!isRightToLeft_->Get()) {
+            roundRect.SetRect({ contentSize.Width() + offsetX - borderRadius, offsetY, offsetX + progressWidth,
+                contentSize.Height() + offsetY });
+            roundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, tmpRadius, tmpRadius);
+            roundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, tmpRadius, tmpRadius);
+        } else {
+            roundRect.SetRect({ contentSize.Width() - progressWidth + offsetX, offsetY, offsetX + borderRadius,
+                contentSize.Height() + offsetY });
+            roundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, tmpRadius, tmpRadius);
+            roundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, tmpRadius, tmpRadius);
+        }
+        path.AddRoundRect(roundRect);
+    }
 }
 
 void ProgressModifier::PaintVerticalCapsule(

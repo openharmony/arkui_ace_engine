@@ -3899,7 +3899,7 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
  * <br> If the result returns nullptr, there may be out of memory.
  * @since 16
  */
-ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create();
+ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create(void);
 
 /**
  * @brief Destroy linear progress indicator style information.
