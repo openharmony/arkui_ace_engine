@@ -431,6 +431,7 @@ private:
         ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
         ScrollAlign align, float& targetPos);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     // multiSelectable
     void ClearMultiSelect() override;
