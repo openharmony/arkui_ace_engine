@@ -571,9 +571,11 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     return value;
 }
 
-void ButtonModelNG::GetAutoDisable(FrameNode* frameNode, bool autoDisable)
+bool ButtonModelNG::GetAutoDisable(FrameNode* frameNode)
 {
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, autoDisable, frameNode);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, value, frameNode);
+    return value;
 }
 
 void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)

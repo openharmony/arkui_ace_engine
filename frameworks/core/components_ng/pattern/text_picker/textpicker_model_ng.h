@@ -91,6 +91,9 @@ public:
     void SetDivider(const ItemDivider& divider) override;
     void HasUserDefinedOpacity() override;
 
+    void SetDisableTextStyleAnimation(const bool value) override;
+    void SetDefaultTextStyle(const NG::PickerTextStyle& value) override;
+
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
     static void SetSelecteds(FrameNode* frameNode, const std::vector<uint32_t>& values);
@@ -101,6 +104,7 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
+    static void SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value);
     static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);
@@ -122,6 +126,7 @@ public:
     static std::string getTextPickerValue(FrameNode* frameNode);
     static std::string getTextPickerRange(FrameNode* frameNode);
     static void SetGradientHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetDisableTextStyleAnimation(FrameNode* frameNode, const bool value);
     static void SetOnCascadeChange(FrameNode* frameNode, TextCascadeChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, TextCascadeChangeEvent&& onScrollStop);
     static int32_t GetSelectedSize(FrameNode* frameNode);

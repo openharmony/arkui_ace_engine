@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_UTILS_H
-#define TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_UTILS_H
+#ifndef TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_NG_BASE_UTILS_H
+#define TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_NG_BASE_UTILS_H
 
 #include "gtest/gtest.h"
 
 namespace OHOS::Ace::NG {
-testing::AssertionResult IsDragEventStateEqual(int32_t caseNum, bool actualState, bool expectState)
+testing::AssertionResult IsDragStartStateEqual(int32_t caseNum, bool actualState, bool expectState)
 {
     if (actualState == expectState) {
         return testing::AssertionSuccess();
     }
-    return testing::AssertionFailure() << "TestCaseNum:  " << caseNum << " actual state: "
+    return testing::AssertionFailure() << "TestCaseNum: " << caseNum << ", actual state: "
                                        << actualState << ", expect state: " << expectState;
 }
 } // namespace OHOS::Ace::NG
 
-#endif // TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_UTILS_H
+#endif // TEST_UNITTEST_CORE_EVENT_DRAG_EVENT_TEST_NG_BASE_UTILS_H

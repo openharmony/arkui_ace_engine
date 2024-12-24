@@ -146,6 +146,8 @@ JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradie
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
     if (pasteData) {
         pasteData->SetGradient(gradient);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "Failed to construct 'Gradient'.");
     }
     return pasteObj;
 }
@@ -295,7 +297,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
             auto fontStyle = ConvertStrToFontStyle(fontProp);
             paintState_.SetFontStyle(fontStyle);
             renderingContext2DModel_->SetFontStyle(fontStyle);
-        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end() || IsCustomFont(fontProp)) {
             auto families = ConvertStrToFontFamilies(fontProp);
             paintState_.SetFontFamilies(families);
             renderingContext2DModel_->SetFontFamilies(families);
@@ -1617,5 +1619,15 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
+}
+
+bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    auto fontNames = fontManager->GetFontNames();
+    return std::find(fontNames.begin(), fontNames.end(), fontName) != fontNames.end();
 }
 } // namespace OHOS::Ace::Framework

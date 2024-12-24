@@ -208,6 +208,13 @@ typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 typedef struct ArkUI_ActiveChildrenInfo ArkUI_ActiveChildrenInfo;
 
 /**
+ * @brief Set the linear progress indicator style.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_ProgressLinearStyleOption ArkUI_ProgressLinearStyleOption;
+
+/**
  * @brief Provides the number types of ArkUI in the native code.
  *
  * @since 12
@@ -3049,7 +3056,7 @@ uint32_t OH_ArkUI_SwiperIndicator_GetColor(ArkUI_SwiperIndicator* indicator);
  * @brief Sets the color of the selected dot for the navigation indicator.
  *
  * @param indicator Indicates the pointer to the indicator.
- * @param color the color of the selected dot, in 0xARGB format.
+ * @param selectedColor the color of the selected dot, in 0xARGB format.
  * @since 12
 */
 void OH_ArkUI_SwiperIndicator_SetSelectedColor(ArkUI_SwiperIndicator* indicator, uint32_t selectedColor);
@@ -3878,6 +3885,98 @@ ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildren
  * @since 14
  */
 int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle);
+
+/**
+ * @brief Create linear progress indicator style information.
+ *
+ * @return Returns a <b>ProgressLinearStyleOption</b> instance.
+ * <br> If the result returns nullptr, there may be out of memory.
+ * @since 16
+ */
+ArkUI_ProgressLinearStyleOption* OH_ArkUI_ProgressLinearStyleOption_Create();
+
+/**
+ * @brief Destroy linear progress indicator style information.
+ *
+ * @param option Linear progress indicator style information.
+ * @since 16
+ */
+void OH_ArkUI_ProgressLinearStyleOption_Destroy(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Set whether the scan effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @param enabled Whether to enable the scan effect. Default value: false.
+ * @since 16
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
+
+/**
+ * @brief Set whether smoothing effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @param enabled Whether to enable the smooth effect. When this effect is enabled, the progress change to
+ * the set value takes place gradually. Otherwise, it takes place immediately. Default value: true.
+ * @since 16
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option, bool enabled);
+
+/**
+ * @brief Set linear progress indicator stroke width.
+ *
+ * @param option Linear progress indicator style information.
+ * @param strokeWidth Stroke width of the progress indicator. It cannot be set in percentage.
+ * Default value: 4.0vp.
+ * @since 16
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(ArkUI_ProgressLinearStyleOption* option, float strokeWidth);
+
+/**
+ * @brief Set linear progress indicator stroke radius.
+ *
+ * @param option Linear progress indicator style information.
+ * @param strokeRadius Rounded corner radius of the progress indicator. Value range: [0, strokeWidth/2].
+ * Default value: strokeWidth/2.
+ * @since 16
+ */
+void OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(ArkUI_ProgressLinearStyleOption* option, float strokeRadius);
+
+/**
+ * @brief Get whether scan effect is enable.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Whether to enable the scan effect.
+ * @since 16
+ */
+bool OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get whether smoothing effect is enabled.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Whether to enable the smooth effect.
+ * @since 16
+ */
+bool OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get linear progress indicator stroke width.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Stroke width of the progress indicator.
+ * @since 16
+ */
+float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Get linear progress indicator stroke radius.
+ *
+ * @param option Linear progress indicator style information.
+ * @return Rounded corner radius of the progress indicator.
+ * @since 16
+ */
+float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
 #ifdef __cplusplus
 };
 #endif

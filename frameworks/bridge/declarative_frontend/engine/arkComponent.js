@@ -4890,6 +4890,11 @@ class UIGestureEvent {
     if (this._weakNodePtr.invalid()) {
       return;
     }
+    if (this._gestures === undefined) {
+      this._gestures = [gesture];
+    } else {
+      this._gestures.push(gesture);
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
@@ -4934,10 +4939,10 @@ class UIGestureEvent {
       }
       case CommonGestureType.GESTURE_GROUP: {
         let gestureGroup = gesture;
-        let groupPtr = getUINativeModule().common.addGestureGroup(
+        let groupPtr = getUINativeModule().common.addGestureGroup(this._nodePtr,
           gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode);
         gestureGroup.gestures.forEach((item) => {
-          addGestureToGroup(item, groupPtr);
+          addGestureToGroup(this._nodePtr, item, groupPtr);
         });
         getUINativeModule().common.attachGestureGroup(this._nodePtr, priority, mask, groupPtr);
         break;
@@ -4960,47 +4965,48 @@ class UIGestureEvent {
       return;
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
+    this._gestures = [];
   }
 }
 
-function addGestureToGroup(gesture, gestureGroupPtr) {
+function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
   switch (gesture.gestureType) {
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture = gesture;
-      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag, tapGesture.allowedTypes,
+      getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
         tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture = gesture;
-      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag, longPressGesture.allowedTypes,
+      getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture = gesture;
-      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag, panGesture.allowedTypes,
+      getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
         panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture = gesture;
-      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag, swipeGesture.allowedTypes,
+      getUINativeModule().common.addSwipeGestureToGroup(nodePtr, swipeGesture.gestureTag, swipeGesture.allowedTypes,
         swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture = gesture;
-      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag, pinchGesture.allowedTypes,
+      getUINativeModule().common.addPinchGestureToGroup(nodePtr, pinchGesture.gestureTag, pinchGesture.allowedTypes,
         pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture = gesture;
-      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag, rotationGesture.allowedTypes,
+      getUINativeModule().common.addRotationGestureToGroup(nodePtr, rotationGesture.gestureTag, rotationGesture.allowedTypes,
         rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
         rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
         rotationGesture.onActionCancelCallback, gestureGroupPtr);
@@ -5008,10 +5014,10 @@ function addGestureToGroup(gesture, gestureGroupPtr) {
     }
     case CommonGestureType.GESTURE_GROUP: {
       let gestureGroup = gesture;
-      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(
+      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(nodePtr,
         gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode, gestureGroupPtr);
         gestureGroup.gestures.forEach((item) => {
-          addGestureToGroup(item, groupPtr);
+          addGestureToGroup(nodePtr, item, groupPtr);
         });
       break;
     }
@@ -11939,6 +11945,37 @@ class TextOnClickModifier extends ModifierWithKey {
 }
 TextOnClickModifier.identity = Symbol('textOnClick');
 
+class TextMarqueeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMarqueeOptionsModifier.identity = Symbol('textMarqueeOptions');
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
+  }
+}
+TextOnMarqueeStateChangeModifier.identity = Symbol('textOnMarqueeStateChange');
+
 class TextResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12186,6 +12223,16 @@ class ArkTextComponent extends ArkComponent {
   onTextSelectionChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  marqueeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMarqueeOptionsModifier.identity,
+      TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity,
+      TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
   editMenuOptions(value) {
@@ -15566,6 +15613,22 @@ class VideoTransitionModifier extends ModifierWithKey {
   }
 }
 VideoTransitionModifier.identity = Symbol('videoTransition');
+class VideoEnableShortcutKeyModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetShortcutKeyEnabled(node);
+    } else {
+      getUINativeModule().video.setShortcutKeyEnabled(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoEnableShortcutKeyModifier.identity = Symbol('videoEnableShortcutKey');
 class ArkVideoComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15593,6 +15656,10 @@ class ArkVideoComponent extends ArkComponent {
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
+    return this;
+  }
+  enableShortcutKey(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoEnableShortcutKeyModifier.identity, VideoEnableShortcutKeyModifier, value);
     return this;
   }
   opacity(value) {
@@ -19602,6 +19669,14 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
     return this;
   }
+  disableTextStyleAnimation(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerDisableTextStyleAnimationModifier.identity, TextpickerDisableTextStyleAnimationModifier, value);
+    return this;
+  }
+  defaultTextStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
+    return this;
+  }
 }
 class TextpickerCanLoopModifier extends ModifierWithKey {
   constructor(value) {
@@ -19682,6 +19757,50 @@ class TextpickerGradientHeightModifier extends ModifierWithKey {
   }
 }
 TextpickerGradientHeightModifier.identity = Symbol('textpickerGradientHeight');
+class TextpickerDisableTextStyleAnimationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textpicker.resetDisableTextStyleAnimation(node);
+    }
+    else {
+      getUINativeModule().textpicker.setDisableTextStyleAnimation(node, this.value);
+    }
+  }
+}
+TextpickerDisableTextStyleAnimationModifier.identity = Symbol('textpickerDisableTextStyleAnimation');
+class TextpickerDefaultTextStyleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+      if (reset) {
+          getUINativeModule().textpicker.resetDefaultTextStyle(node);
+      }
+      else {
+          getUINativeModule().textpicker.setDefaultTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.minFontSize) !== null && _r !== void 0 ? _r : undefined, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.maxFontSize) !== null && _t !== void 0 ? _t : undefined, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.overflow) !== null && _v !== void 0 ? _v : undefined);
+      }
+  }
+  checkObjectDiff() {
+      var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z;
+      if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+          ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style) &&
+          ((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.overflow) === ((_k = this.value) === null || _k === void 0 ? void 0 : _k.overflow))) {
+          return true;
+      }
+      else {
+          return !isBaseOrResourceEqual((_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.color, (_m = this.value) === null || _m === void 0 ? void 0 : _m.color) ||
+              !isBaseOrResourceEqual((_p = (_o = this.stageValue) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size, (_r = (_q = this.value) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.size) ||
+              !isBaseOrResourceEqual((_t = (_s = this.stageValue) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family, (_v = (_u = this.value) === null || _u === void 0 ? void 0 : _u.font) === null || _v === void 0 ? void 0 : _v.family) ||
+              !isBaseOrResourceEqual((_w = this.stageValue) === null || _w === void 0 ? void 0 : _w.minFontSize, (_x = this.value) === null || _x === void 0 ? void 0 : _x.minFontSize) ||
+              !isBaseOrResourceEqual((_y = this.stageValue) === null || _y === void 0 ? void 0 : _y.maxFontSize, (_z = this.value) === null || _z === void 0 ? void 0 : _z.maxFontSize);
+      }
+  }
+}
+TextpickerDefaultTextStyleModifier.identity = Symbol('textpickerDefaultTextStyle');
 class TextpickerTextStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -24767,10 +24886,11 @@ class ProgressStyleModifier extends ModifierWithKey {
       let shadow = this.value.shadow;
       let status = this.value.status;
       let strokeRadius = this.value.strokeRadius;
+      let borderRadius = this.value.borderRadius;
       getUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount,
         scaleWidth, enableSmoothEffect, borderColor, borderWidth, content, fontSize,
         fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage,
-        shadow, status, strokeRadius);
+        shadow, status, strokeRadius, borderRadius);
     }
   }
   checkObjectDiff() {
@@ -30105,7 +30225,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey {
       getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
     } else {
       getUINativeModule().waterFlow.setWaterFlowInitialize(node,
-        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode, this.value?.footerContent);
     }
   }
 }

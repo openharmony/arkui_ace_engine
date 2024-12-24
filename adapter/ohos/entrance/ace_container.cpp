@@ -85,6 +85,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -1294,12 +1295,15 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative) {}
+        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
+          onFinish_(onFinish)
+    {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -1331,6 +1335,7 @@ public:
     void OnFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto node = node_.Upgrade();
@@ -1467,12 +1472,32 @@ private:
         return safeAreaManager->GetSystemSafeArea().bottom_.Length();
     }
 
+    void ProcessOnFinish()
+    {
+        if (!onFinish_) {
+            return;
+        }
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [onFinish = std::move(onFinish_)]() mutable {
+                if (onFinish) {
+                    onFinish();
+                    onFinish = nullptr;
+                }
+            },
+            TaskExecutor::TaskType::UI, "FillRequestCallbackProcessOnFinish");
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
+    std::function<void()> onFinish_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1627,31 +1652,32 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
     }
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(pipelineContext, false);
-    CHECK_NULL_RETURN(uiWindow_, false);
+    CHECK_NULL_RETURN(node, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(pipelineContext, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(uiWindow_, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContent = uiWindow_->GetUIContent();
-    CHECK_NULL_RETURN(uiContent, false);
+    CHECK_NULL_RETURN(uiContent, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
-    CHECK_NULL_RETURN(uiContentImpl, false);
+    CHECK_NULL_RETURN(uiContentImpl, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
+    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
-        return true;
+        return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
     }
     if (!isNative) {
         OverwritePageNodeInfo(node, viewData);
@@ -1667,14 +1693,15 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
+    autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
     AbilityRuntime::AutoFill::AutoFillResult result;
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
-        uiContent, autoFillRequest, callback, result) != 0) {
-        return false;
+    auto resultCode =
+        AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);
+    if (resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS) {
+        isPopup = result.isPopup;
+        autoFillSessionId = result.autoFillSessionId;
     }
-    isPopup = result.isPopup;
-    autoFillSessionId = result.autoFillSessionId;
-    return true;
+    return resultCode;
 }
 
 bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -2150,6 +2177,22 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
 
+    auto&& startAbilityOnQueryHandler = [weak = WeakClaim(this), instanceId](const std::string& queryWord) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), queryWord]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnQuery(queryWord);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnQuery");
+    };
+    pipelineContext_->SetStartAbilityOnQueryHandler(startAbilityOnQueryHandler);
+
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -2562,10 +2605,6 @@ void AceContainer::ReleaseResourceAdapter()
     if (isFormRender_) {
         auto runtimeContext = runtimeContext_.lock();
         if (runtimeContext) {
-            auto defaultBundleName = "";
-            auto defaultModuleName = "";
-            ResourceManager::GetInstance().RemoveResourceAdapter(defaultBundleName, defaultModuleName);
-
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
@@ -2609,16 +2648,7 @@ void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     if (!parsedConfig.colorMode.empty()) {
-        configurationChange.colorModeUpdate = true;
-        if (parsedConfig.colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-            SetColorScheme(ColorScheme::SCHEME_DARK);
-            resConfig.SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-            SetColorScheme(ColorScheme::SCHEME_LIGHT);
-            resConfig.SetColorMode(ColorMode::LIGHT);
-        }
+        ProcessColorModeUpdate(resConfig, configurationChange, parsedConfig);
     }
     if (!parsedConfig.deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -2650,6 +2680,23 @@ void AceContainer::BuildResConfig(
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+}
+
+void AceContainer::ProcessColorModeUpdate(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
+{
+    configurationChange.colorModeUpdate = true;
+    // clear cache of ark theme instances when configuration updates
+    NG::TokenThemeStorage::GetInstance()->CacheClear();
+    if (parsedConfig.colorMode == "dark") {
+        SystemProperties::SetColorMode(ColorMode::DARK);
+        SetColorScheme(ColorScheme::SCHEME_DARK);
+        resConfig.SetColorMode(ColorMode::DARK);
+    } else {
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        SetColorScheme(ColorScheme::SCHEME_LIGHT);
+        resConfig.SetColorMode(ColorMode::LIGHT);
     }
 }
 

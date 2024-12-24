@@ -77,7 +77,9 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url, params };
+    RouterPageInfo info;
+    info.url = url;
+    info.params = params;
 #if !defined(PREVIEW)
     if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
@@ -159,7 +161,9 @@ void PageRouterManager::RunPageByNamedRouterInner(const std::string& name, const
         return;
     }
 
-    RouterPageInfo info { name, params };
+    RouterPageInfo info;
+    info.url = name;
+    info.params = params;
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
@@ -169,7 +173,8 @@ UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url };
+    RouterPageInfo info;
+    info.url = url;
 #ifndef PREVIEW
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);

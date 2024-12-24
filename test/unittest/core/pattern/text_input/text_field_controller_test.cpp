@@ -18,7 +18,10 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::string NEWLINE = "\n";
+const std::u16string WIDE_NEWLINE = UtfUtils::Str8ToStr16(NEWLINE);
+} // namespace
 
 class TextAdjustObject : public TextInputBases {
 protected:
@@ -1373,5 +1376,158 @@ HWTEST_F(TextFieldControllerTest, IsPointInRect, TestSize.Level1)
     point = OffsetF(-1.0f, -1.0f);
     ret = pattern_->selectOverlay_->IsPointInRect(point, leftBottom, rightBottom, rightTop, leftTop);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: GetSubParagraphByOffset
+ * @tc.desc: test GetSubParagraphByOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, GetSubParagraphByOffset, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    int32_t pos = 2;
+    int32_t start = 2;
+    int32_t end = 2;
+    auto controller = pattern_->GetTextSelectController();
+
+    controller->contentController_->content_[2] = WIDE_NEWLINE[0];
+    controller->contentController_->content_[3] = WIDE_NEWLINE[0];
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 3);
+    EXPECT_EQ(end, 2);
+
+    pos = 2;
+    start = 2;
+    end = 2;
+    controller->contentController_->content_[2] = WIDE_NEWLINE[1];
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 3);
+
+    pos = 0;
+    start = 2;
+    end = 2;
+    controller->contentController_->content_.resize(7, WIDE_NEWLINE[1]);
+    controller->GetSubParagraphByOffset(pos, start, end);
+    EXPECT_EQ(start, 0);
+    EXPECT_EQ(end, 3);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect001
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 0.0f, 10.0f);
+    controller->contentRect_.SetRect(0.0f, 6.0f, 0.0f, 6.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 1.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect002
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect002, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 0.0f, 10.0f);
+    controller->contentRect_.SetRect(0.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect003
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect003, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(6.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect004
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect004, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = 1.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(4.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), -2.0f);
+}
+
+/**
+ * @tc.name: MoveHandleToContentRect005
+ * @tc.desc: test MoveHandleToContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, MoveHandleToContentRect005, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    auto controller = pattern_->GetTextSelectController();
+    ASSERT_NE(controller, nullptr);
+    RectF handleRect = RectF(OffsetF(-5.0f, 5.0f), SizeF(5.0f, 5.0f));
+    float boundaryAdjustment = -10.0f;
+    auto textFiled = AceType::DynamicCast<TextFieldPattern>(pattern_);
+    ASSERT_NE(textFiled, nullptr);
+    textFiled->textRect_.SetRect(0.0f, 0.0f, 4.0f, 10.0f);
+    controller->contentRect_.SetRect(-6.0f, 6.0f, 0.0f, 4.0f);
+    controller->MoveHandleToContentRect(handleRect, boundaryAdjustment);
+    EXPECT_EQ(textFiled->textRect_.GetY(), 0.0f);
+    EXPECT_EQ(textFiled->textRect_.GetX(), 0.0f);
 }
 }

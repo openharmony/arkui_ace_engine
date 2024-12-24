@@ -261,6 +261,9 @@ public:
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
 
+    virtual void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) {};
+
     /**
      * @description: Set parent ability token.
      * @param token ability token.
@@ -463,6 +466,13 @@ public:
     virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 
     virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
+
+    virtual int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback)
+    {
+        return 0;
+    }
+
+    virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
 };
 
 } // namespace OHOS::Ace

@@ -100,6 +100,7 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
+    TextStyle inheritTextStyle_;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
@@ -142,7 +143,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
-    TextStyle InheritParentTextStyle();
+    void InheritParentTextStyle(const TextStyle& textStyle);
 
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;

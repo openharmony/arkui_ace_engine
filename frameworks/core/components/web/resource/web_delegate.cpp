@@ -58,6 +58,8 @@
 #include "frameworks/base/utils/system_properties.h"
 #endif
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -1759,7 +1761,9 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    OnActive();
+    if (!IsActivePolicyDisable()) {
+        OnActive();
+    }
     OnWebviewShow();
 }
 
@@ -1769,8 +1773,19 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    OnInactive();
+    if (!IsActivePolicyDisable()) {
+        OnInactive();
+    }
     OnWebviewHide();
+}
+
+bool WebDelegate::IsActivePolicyDisable()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->IsActivePolicyDisable();
+    }
+    return false;
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -2586,8 +2601,13 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
-            delegate->JavaScriptOnDocumentStart();
-            delegate->JavaScriptOnDocumentEnd();
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+                delegate->JavaScriptOnDocumentStartByOrder();
+                delegate->JavaScriptOnDocumentEndByOrder();
+            } else {
+                delegate->JavaScriptOnDocumentStart();
+                delegate->JavaScriptOnDocumentEnd();
+            }
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2952,8 +2972,13 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Width(),
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
-                delegate->JavaScriptOnDocumentStart();
-                delegate->JavaScriptOnDocumentEnd();
+                if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+                    delegate->JavaScriptOnDocumentStartByOrder();
+                    delegate->JavaScriptOnDocumentEndByOrder();
+                } else {
+                    delegate->JavaScriptOnDocumentStart();
+                    delegate->JavaScriptOnDocumentEnd();
+                }
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 wptr<Surface> surfaceWeak(delegate->surface_);
@@ -2965,8 +2990,13 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Width(),
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
-                delegate->JavaScriptOnDocumentStart();
-                delegate->JavaScriptOnDocumentEnd();
+                if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+                    delegate->JavaScriptOnDocumentStartByOrder();
+                    delegate->JavaScriptOnDocumentEndByOrder();
+                } else {
+                    delegate->JavaScriptOnDocumentStart();
+                    delegate->JavaScriptOnDocumentEnd();
+                }
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -5149,6 +5179,13 @@ void WebDelegate::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t heigh
         TaskExecutor::TaskType::UI, "ArkUIWebPopupSize");
 }
 
+void WebDelegate::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 void WebDelegate::OnPopupShow(bool show)
 {
     auto context = context_.Upgrade();
@@ -6800,7 +6837,7 @@ void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const Scrip
 {
     if (type == ScriptItemType::DOCUMENT_START) {
         onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
-    } else {
+    } else if (type == ScriptItemType::DOCUMENT_END) {
         onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
     }
 }
@@ -6811,6 +6848,40 @@ void WebDelegate::JavaScriptOnDocumentStart()
     if (onDocumentStartScriptItems_.has_value()) {
         nweb_->JavaScriptOnDocumentStart(onDocumentStartScriptItems_.value());
         onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebDelegate::SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    if (type == ScriptItemType::DOCUMENT_START) {
+        onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    } else if (type == ScriptItemType::DOCUMENT_END) {
+        onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentStartByOrder()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
+        nweb_->JavaScriptOnDocumentStartByOrder(onDocumentStartScriptItems_.value(),
+            onDocumentStartScriptItemsByOrder_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentEndByOrder()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        nweb_->JavaScriptOnDocumentEndByOrder(onDocumentEndScriptItems_.value(),
+            onDocumentEndScriptItemsByOrder_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
     }
 }
 

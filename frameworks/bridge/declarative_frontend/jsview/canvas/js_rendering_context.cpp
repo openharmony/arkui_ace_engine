@@ -310,10 +310,7 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     JSValueWrapper valueWrapper = value;
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
     void* nativeObj = nullptr;
-    auto status = napi_unwrap(env, napiValue, &nativeObj);
-    if (status != napi_ok) {
-        return;
-    }
+    NAPI_CALL_RETURN_VOID(env, napi_unwrap(env, napiValue, &nativeObj));
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_VOID(jsImage);
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
@@ -349,10 +346,7 @@ void HandleDeferred(const shared_ptr<CanvasAsyncCxt>& asyncCtx, ImageAnalyzerSta
     CHECK_NULL_VOID(deferred);
 
     napi_handle_scope scope = nullptr;
-    auto status = napi_open_handle_scope(env, &scope);
-    if (status != napi_ok) {
-        return;
-    }
+    NAPI_CALL_RETURN_VOID(env, napi_open_handle_scope(env, &scope));
 
     napi_value result = nullptr;
     switch (state) {

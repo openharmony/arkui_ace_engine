@@ -74,6 +74,8 @@ public:
     void SetEllipsisMode(EllipsisMode modal) override {};
     void SetClipEdge(bool clip) override {};
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
+    void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;

@@ -527,6 +527,11 @@ public:
         return getSnapTypeCallback_();
     }
 
+    void ResetSnapDirection()
+    {
+        snapDirection_ = SnapDirection::NONE;
+    }
+
 private:
     void InitPanRecognizerNG();
     void SetOnActionStart();
@@ -631,6 +636,7 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
 
     uint64_t lastVsyncTime_ = 0;
+    uint64_t lastAxisVsyncTime_ = 0; // only used in mouse wheel scenes
     AnimationState state_ = AnimationState::IDLE;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;

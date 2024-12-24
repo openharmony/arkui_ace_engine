@@ -793,6 +793,8 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
     pattern->InitSurfaceChangedCallback();
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }

@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
+#include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
@@ -700,6 +701,7 @@ void NavigationPattern::UpdateNavPathList()
     CHECK_NULL_VOID(navigationStack_);
     auto pathNames = navigationStack_->GetAllPathName();
     auto indexes = navigationStack_->GetAllPathIndex();
+    navigationStack_->InitNavPathIndex(pathNames);
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
     NavPathList navPathList;
     int32_t pathListSize = static_cast<int32_t>(pathNames.size());
@@ -787,7 +789,6 @@ void NavigationPattern::UpdateNavPathList()
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
     navigationStack_->SetNavPathList(navPathList);
-    navigationStack_->InitNavPathIndex(pathNames);
 }
 
 void NavigationPattern::RefreshNavDestination()
@@ -2560,7 +2561,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     pipeline->AddAfterLayoutTask([weakNavigation = WeakClaim(this),
         weakPreDestination = WeakPtr<NavDestinationGroupNode>(preDestination),
         weakTopDestination = WeakPtr<NavDestinationGroupNode>(topDestination),
-        isPopPage, isAnimated, isNeedVisible]() {
+        isPopPage, isNeedVisible]() {
         auto navigationPattern = AceType::DynamicCast<NavigationPattern>(weakNavigation.Upgrade());
         CHECK_NULL_VOID(navigationPattern);
         auto preDestination = weakPreDestination.Upgrade();
@@ -3239,7 +3240,7 @@ void NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNod
     CHECK_NULL_VOID(groupNode);
     auto pipeline = groupNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetContainerCustomTitleVisible()) {
+    if (!NavigationTitleUtil::NeedAvoidContainerModal(pipeline)) {
         return;
     }
     auto contentNode = AceType::DynamicCast<FrameNode>(groupNode->GetContentNode());

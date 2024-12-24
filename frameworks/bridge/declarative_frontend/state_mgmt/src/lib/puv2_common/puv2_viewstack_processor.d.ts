@@ -82,4 +82,7 @@ declare class ViewStackProcessor {
   public static GetAndPushFrameNode(tag: string, elmtId: number): void;
   /** move deleted elmtIds from ElementRegistery in C++ to the caller */
   public static moveDeletedElmtIds(elmtIds : Array<number>);
+  
+  /* get Api version*/
+  public static getApiVersion(): number;
 }

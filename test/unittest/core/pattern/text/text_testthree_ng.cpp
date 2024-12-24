@@ -705,6 +705,46 @@ HWTEST_F(TextTestThreeNg, HandleClickEventTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TryLinkJump001
+ * @tc.desc: test test_pattern.h TryLinkJump function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TryLinkJump001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+
+    /**
+     * @tc.steps: step2. construct spanItem
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = SPAN_HTTP_URL_U16;
+
+    /**
+     * @tc.steps: step3. call TryLinkJump with linkJumpCallback_ is nullptr
+     * @tc.expected: return false
+     */
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
+
+    /**
+     * @tc.steps: step4. call TryLinkJump with linkJumpCallback_ not nullptr
+     * @tc.expected: return true
+     */
+    pipeline->SetLinkJumpCallback([] (const std::string& link) {});
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), true);
+
+    /**
+     * @tc.steps: step5. call TryLinkJump with spanContent is not http link
+     * @tc.expected: return false
+     */
+    spanItem->content = SPAN_PHONE_U16;
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
+}
+
+/**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
  * @tc.type: FUNC

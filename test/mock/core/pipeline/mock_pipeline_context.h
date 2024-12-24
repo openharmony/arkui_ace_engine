@@ -74,6 +74,7 @@ public:
         }
         return false;
     }
+    void SetEnableSwipeBack(bool isEnable) {}
 
 protected:
     float fontScale_ = 1.0f;

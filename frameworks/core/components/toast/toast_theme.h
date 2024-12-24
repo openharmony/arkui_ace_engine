@@ -105,6 +105,10 @@ public:
             theme->toastInnerBorderColor_ =
                 toastPattern->GetAttr<Color>("toast_inner_border_color", Color::TRANSPARENT);
             theme->toastInnerBorderWidth_ = toastPattern->GetAttr<double>("toast_inner_border_width", 0.0f);
+            theme->toastShadowStyle_ = static_cast<ShadowStyle>(toastPattern->GetAttr<int>(
+                "toast_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>(
+                "toast_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
     };
 
@@ -195,6 +199,16 @@ public:
         return toastInnerBorderColor_;
     }
 
+    ShadowStyle GetToastShadowStyle() const
+    {
+        return toastShadowStyle_;
+    }
+    
+    const int& GetToastBackgroundBlurStyle() const
+    {
+        return toastBackgroundBlurStyle_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -216,6 +230,8 @@ private:
     Color toastOuterBorderColor_ = Color::TRANSPARENT;
     double toastInnerBorderWidth_ = 0.0f;
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
+    ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace

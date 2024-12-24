@@ -493,6 +493,7 @@ void WaterFlowSegmentedLayout::PostMeasureSelf(SizeF size)
 
 void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const OffsetF& padding, bool isReverse)
 {
+    const bool isCache = IsCache(info_, idx);
     const auto& item = info_->itemInfos_[idx];
     auto mainOffset = item.mainOffset + info_->currentOffset_;
     if (isReverse) {
@@ -500,10 +501,10 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     }
 
     OffsetF offset = (axis_ == Axis::VERTICAL) ? OffsetF(crossPos, mainOffset) : OffsetF(mainOffset, crossPos);
-    auto wrapper = wrapper_->GetChildByIndex(idx, idx < info_->startIndex_ || idx > info_->endIndex_);
+    auto wrapper = wrapper_->GetChildByIndex(idx, isCache);
     CHECK_NULL_VOID(wrapper);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
-    if (wrapper->CheckNeedForceMeasureAndLayout()) {
+    if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
         wrapper->Layout();
     } else {
         wrapper->GetHostNode()->ForceSyncGeometryNode();

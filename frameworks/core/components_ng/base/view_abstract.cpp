@@ -5182,6 +5182,24 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
 }
 
+void ViewAbstract::SetDrawCompleteEvent(
+    FrameNode* frameNode, std::function<void()>&& onDraw)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKDrawCompletedCallback(std::move(onDraw));
+}
+
+void ViewAbstract::SetLayoutEvent(
+    FrameNode* frameNode, std::function<void()>&& onLayout)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKLayoutCallback(std::move(onLayout));
+}
+
 void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);

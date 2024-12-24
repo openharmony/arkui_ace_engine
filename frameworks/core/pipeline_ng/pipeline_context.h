@@ -1014,6 +1014,11 @@ public:
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
     }
 
+    bool IsDirtyPropertyNodesEmpty() const override
+    {
+        return dirtyPropertyNodes_.empty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
 
@@ -1040,6 +1045,8 @@ public:
 
     std::string GetBundleName();
     std::string GetModuleName();
+
+    void SetEnableSwipeBack(bool isEnable) override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,

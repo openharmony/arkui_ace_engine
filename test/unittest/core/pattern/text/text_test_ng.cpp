@@ -2406,11 +2406,13 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
     // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace();
+    // call onDraw function(MarqueeState::RUNNING == marqueeState_)
+    MarqueeOption option;
+    textContentModifier.StartTextRace(option);
     EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::RUNNING);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
-    // call onDraw function(textRacing_ = false)
+    // call onDraw function(MarqueeState::STOPPED == marqueeState_)
     textContentModifier.StopTextRace();
     EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::STOPPED);
     textContentModifier.onDraw(context);

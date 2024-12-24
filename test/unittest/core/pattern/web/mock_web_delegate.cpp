@@ -1063,6 +1063,13 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type) {}
 void WebDelegate::JavaScriptOnDocumentStart() {}
 void WebDelegate::JavaScriptOnDocumentEnd() {}
+
+void WebDelegate::SetJavaScriptItemsByOrder(
+    const ScriptItems& scriptItems,
+    const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder) {}
+void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
+void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
@@ -1187,4 +1194,8 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+bool WebDelegate::IsActivePolicyDisable()
+{
+    return false;
+}
 } // namespace OHOS::Ace

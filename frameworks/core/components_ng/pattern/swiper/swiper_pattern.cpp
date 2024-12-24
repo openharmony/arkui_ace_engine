@@ -107,7 +107,11 @@ void SwiperPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToFrame(true);
     renderContext->SetClipToBounds(true);
-    renderContext->UpdateClipEdge(true);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indicatorTheme = pipeline->GetTheme<SwiperIndicatorTheme>();
+    CHECK_NULL_VOID(indicatorTheme);
+    renderContext->UpdateClipEdge(indicatorTheme->GetClipEdge());
     InitSurfaceChangedCallback();
 }
 
@@ -1748,6 +1752,7 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 {
+#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -1757,6 +1762,7 @@ void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->UpdateAnimationDuration();
+#endif
 }
 
 int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackward)
@@ -1969,12 +1975,15 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
         auto parent = host->GetParent();
+#ifndef ARKUI_WEARABLE
         if (AceType::InstanceOf<TabsNode>(parent)) {
             swiperPattern->DoTabsPreloadItems(indexSet);
         } else {
             swiperPattern->DoSwiperPreloadItems(indexSet);
         }
-
+#else
+        swiperPattern->DoSwiperPreloadItems(indexSet);
+#endif
         swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
     };
 
@@ -1994,6 +2003,7 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
     }
 }
 
+#ifndef ARKUI_WEARABLE
 void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 {
     auto host = GetHost();
@@ -2028,6 +2038,7 @@ void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
         }
     }
 }
+#endif
 
 void SwiperPattern::DoSwiperPreloadItems(const std::set<int32_t>& indexSet)
 {
@@ -2135,12 +2146,13 @@ void SwiperPattern::InitIndicator()
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
+    auto indicatorType = GetIndicatorType();
     if (!HasIndicatorNode()) {
         if (!IsShowIndicator()) {
             return;
         }
         indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
-            []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+            [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
         swiperNode->AddChild(indicatorNode);
     } else {
         indicatorNode =
@@ -2150,14 +2162,14 @@ void SwiperPattern::InitIndicator()
             RemoveIndicatorNode();
             return;
         }
-        if (GetIndicatorType() == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) {
+        if (indicatorType == SwiperIndicatorType::DIGIT && lastSwiperIndicatorType_ == SwiperIndicatorType::DOT) {
             RemoveIndicatorNode();
             indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
-                []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+                [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
             swiperNode->AddChild(indicatorNode);
         }
     }
-    lastSwiperIndicatorType_ = GetIndicatorType();
+    lastSwiperIndicatorType_ = indicatorType;
     CHECK_NULL_VOID(indicatorNode);
     const auto props = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -2363,6 +2375,23 @@ void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
 void SwiperPattern::HandleFocusInternal()
 {
     currentFocusIndex_ = currentIndex_;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto lastFocusNode = focusHub->GetLastWeakFocusNode().Upgrade();
+    CHECK_NULL_VOID(lastFocusNode);
+    for (const auto& item : itemPosition_) {
+        auto itemNode = GetCurrentFrameNode(item.first);
+        if (!itemNode) {
+            continue;
+        }
+        if (itemNode->GetFirstFocusHubChild() == lastFocusNode) {
+            currentFocusIndex_ = item.first;
+            return;
+        }
+    }
 }
 
 void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
@@ -2738,6 +2767,12 @@ bool SwiperPattern::InsideIndicatorRegion(const TouchLocationInfo& locationInfo)
     return hotRegion.IsInRegion(touchPoint);
 }
 
+void SwiperPattern::UpdateOverlongForceStopPageRate(float forceStopPageRate)
+{
+    CHECK_NULL_VOID(updateOverlongForceStopPageRateFunc_);
+    updateOverlongForceStopPageRateFunc_(forceStopPageRate);
+}
+
 void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
@@ -2754,9 +2789,18 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
-    StopIndicatorAnimation(true);
+    auto isOverlongIndicator = GetMaxDisplayCount() > 0;
+    if (!isOverlongIndicator) {
+        StopIndicatorAnimation(true);
+    }
+
     if (propertyAnimationIsRunning_) {
         StopPropertyTranslateAnimation(isFinishAnimation_);
+    }
+
+    if (isOverlongIndicator) {
+        UpdateOverlongForceStopPageRate(CalcCurrentTurnPageRate());
+        StopIndicatorAnimation(true);
     }
 
     indicatorDoingAnimation_ = false;
@@ -2803,6 +2847,10 @@ void SwiperPattern::HandleTouchUp()
 
     if (!isDragging_) {
         StartAutoPlay();
+    }
+
+    if (GetMaxDisplayCount() > 0) {
+        UpdateOverlongForceStopPageRate(FLT_MAX);
     }
 }
 
@@ -5643,6 +5691,7 @@ bool SwiperPattern::ContentWillChange(int32_t comingIndex)
 
 bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
 {
+#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -5660,6 +5709,7 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     tabBarPattern->ResetTabContentWillChangeFlag();
+#endif
     return true;
 }
 

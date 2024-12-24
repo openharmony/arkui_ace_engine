@@ -925,6 +925,8 @@ private:
 
     bool IsArrowKeyStepOut(FocusStep moveStep);
 
+    bool IsLastWeakNodeFocused() const;
+
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;
     OnBlurReasonFunc onBlurReasonInternal_;

@@ -318,24 +318,80 @@ void ResetCalendarPickerBorder(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
-    static const ArkUICalendarPickerModifier modifier = { SetHintRadius, SetSelectedDate, ResetSelectedDate,
-        SetTextStyleWithWeightEnum, SetTextStyle, ResetTextStyle, SetEdgeAlign, ResetEdgeAlign,
-        SetCalendarPickerPadding, ResetCalendarPickerPadding, SetCalendarPickerBorder, ResetCalendarPickerBorder,
-        GetHintRadius, GetSelectedDate, GetTextStyle, GetEdgeAlign, SetCalendarPickerHeight, ResetCalendarPickerHeight,
-        SetCalendarPickerBorderColor, ResetCalendarPickerBorderColor, SetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderRadius, ResetCalendarPickerBorderWidth };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUICalendarPickerModifier modifier = {
+        SetHintRadius,
+        SetSelectedDate,
+        ResetSelectedDate,
+        SetTextStyleWithWeightEnum,
+        SetTextStyle,
+        ResetTextStyle,
+        SetEdgeAlign,
+        ResetEdgeAlign,
+        SetCalendarPickerPadding,
+        ResetCalendarPickerPadding,
+        SetCalendarPickerBorder,
+        ResetCalendarPickerBorder,
+        GetHintRadius,
+        GetSelectedDate,
+        GetTextStyle,
+        GetEdgeAlign,
+        SetCalendarPickerHeight,
+        ResetCalendarPickerHeight,
+        SetCalendarPickerBorderColor,
+        ResetCalendarPickerBorderColor,
+        SetCalendarPickerBorderRadius,
+        ResetCalendarPickerBorderRadius,
+        ResetCalendarPickerBorderWidth,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier()
 {
-    static const CJUICalendarPickerModifier modifier = { SetHintRadius, SetSelectedDate, ResetSelectedDate,
-        SetTextStyleWithWeightEnum, SetTextStyle, ResetTextStyle, SetEdgeAlign, ResetEdgeAlign,
-        SetCalendarPickerPadding, ResetCalendarPickerPadding, SetCalendarPickerBorder, ResetCalendarPickerBorder,
-        GetHintRadius, GetSelectedDate, GetTextStyle, GetEdgeAlign, SetCalendarPickerHeight, ResetCalendarPickerHeight,
-        SetCalendarPickerBorderColor, ResetCalendarPickerBorderColor, SetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderRadius, ResetCalendarPickerBorderWidth };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUICalendarPickerModifier modifier = {
+        SetHintRadius,
+        SetSelectedDate,
+        ResetSelectedDate,
+        SetTextStyleWithWeightEnum,
+        SetTextStyle,
+        ResetTextStyle,
+        SetEdgeAlign,
+        ResetEdgeAlign,
+        SetCalendarPickerPadding,
+        ResetCalendarPickerPadding,
+        SetCalendarPickerBorder,
+        ResetCalendarPickerBorder,
+        GetHintRadius,
+        GetSelectedDate,
+        GetTextStyle,
+        GetEdgeAlign,
+        SetCalendarPickerHeight,
+        ResetCalendarPickerHeight,
+        SetCalendarPickerBorderColor,
+        ResetCalendarPickerBorderColor,
+        SetCalendarPickerBorderRadius,
+        ResetCalendarPickerBorderRadius,
+        ResetCalendarPickerBorderWidth,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
