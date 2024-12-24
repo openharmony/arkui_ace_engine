@@ -900,18 +900,7 @@ void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::str
     Platform::AceContainer::RunDynamicPage(instanceId_, startUrl_, "", entryPoint);
     auto distributedUI = std::make_shared<NG::DistributedUI>();
     uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    container->SetDistributedUI(distributedUI);
-    ContainerScope scope(instanceId_);
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto stageNode = stageManager->GetStageNode();
-    CHECK_NULL_VOID(stageNode);
-    auto renderContext = stageNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateWindowBlur();
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Initialize(
@@ -2647,15 +2636,15 @@ void UIContentImpl::UpdateWindowBlur()
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
-    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_VOID(pipelineContext);
-    auto stageManager = pipelineContext->GetStageManager();
-    CHECK_NULL_VOID(stageManager);
-    auto stageNode = stageManager->GetStageNode();
-    CHECK_NULL_VOID(stageNode);
-    auto renderContext = stageNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateWindowBlur();
+    auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto manager = context->GetStageManager();
+    CHECK_NULL_VOID(manager);
+    auto node = manager->GetStageNode();
+    CHECK_NULL_VOID(node);
+    auto rosenRenderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(rosenRenderContext);
+    rosenRenderContext->UpdateWindowBlur();
 }
 
 void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDeco)

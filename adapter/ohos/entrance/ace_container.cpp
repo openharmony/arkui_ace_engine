@@ -2566,38 +2566,6 @@ void AceContainer::ReleaseResourceAdapter()
     }
 }
 
-DeviceOrientation AceContainer::ProcessDirectionUpdate(
-    const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
-{
-    if (!parsedConfig.direction.empty()) {
-        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
-        if (parsedConfig.direction == "horizontal") {
-            resDirection = DeviceOrientation::LANDSCAPE;
-        } else if (parsedConfig.direction == "vertical") {
-            resDirection = DeviceOrientation::PORTRAIT;
-        }
-        configurationChange.directionUpdate = true;
-        return resDirection;
-    }
-    return DeviceOrientation::ORIENTATION_UNDEFINED;
-}
-
-void AceContainer::ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange)
-{
-    if (!parsedConfig.themeTag.empty()) {
-        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
-        int fontUpdate = json->GetInt("fonts");
-        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
-        int iconUpdate = json->GetInt("icons");
-        configurationChange.iconUpdate = iconUpdate;
-        int skinUpdate = json->GetInt("skin");
-        configurationChange.skinUpdate = skinUpdate;
-        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
-            CheckAndSetFontFamily();
-        }
-    }
-}
-
 void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
@@ -2629,12 +2597,30 @@ void AceContainer::BuildResConfig(
         fontManager->SetAppCustomFont(parsedConfig.fontFamily);
     }
     if (!parsedConfig.direction.empty()) {
-        resConfig.SetOrientation(ProcessDirectionUpdate(parsedConfig, configurationChange));
+        auto resDirection = DeviceOrientation::ORIENTATION_UNDEFINED;
+        if (parsedConfig.direction == "horizontal") {
+            resDirection = DeviceOrientation::LANDSCAPE;
+        } else if (parsedConfig.direction == "vertical") {
+            resDirection = DeviceOrientation::PORTRAIT;
+        }
+        configurationChange.directionUpdate = true;
+        resConfig.SetOrientation(resDirection);
     }
     if (!parsedConfig.densitydpi.empty()) {
         configurationChange.dpiUpdate = true;
     }
-    ProcessThemeUpdate(parsedConfig, configurationChange);
+    if (!parsedConfig.themeTag.empty()) {
+        std::unique_ptr<JsonValue> json = JsonUtil::ParseJsonString(parsedConfig.themeTag);
+        int fontUpdate = json->GetInt("fonts");
+        configurationChange.fontUpdate = configurationChange.fontUpdate || fontUpdate;
+        int iconUpdate = json->GetInt("icons");
+        configurationChange.iconUpdate = iconUpdate;
+        int skinUpdate = json->GetInt("skin");
+        configurationChange.skinUpdate = skinUpdate;
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
+            CheckAndSetFontFamily();
+        }
+    }
     if (!parsedConfig.colorModeIsSetByApp.empty()) {
         resConfig.SetColorModeIsSetByApp(true);
     }
