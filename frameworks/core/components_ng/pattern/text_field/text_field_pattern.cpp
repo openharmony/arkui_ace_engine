@@ -174,6 +174,7 @@ constexpr int32_t PREVIEW_NO_ERROR = 0;
 constexpr int32_t PREVIEW_NULL_POINTER = 1;
 constexpr int32_t PREVIEW_BAD_PARAMETERS = -1;
 constexpr double MINIMAL_OFFSET = 0.01f;
+constexpr int32_t KEYBOARD_DEFAULT_API = 9;
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
 
@@ -449,7 +450,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 {
     if (PipelineBase::GetCurrentContext() &&
         // for normal app add version protection, enable keyboard as default start from API 10 or higher
-        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9) {
+        PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > KEYBOARD_DEFAULT_API) {
         needToRequestKeyboardOnFocus_ = true;
     }
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
@@ -5697,6 +5698,12 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
     GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+bool TextFieldPattern::SetCaretOffset(int32_t caretPostion)
+{
+    SetCaretPosition(caretPostion);
+    return true;
+}
+
 void TextFieldPattern::SetSelectionFlag(
     int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options, bool isForward)
 {
@@ -5742,6 +5749,12 @@ void TextFieldPattern::SetSelectionFlag(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::SetSelection(int32_t start, int32_t end,
+    const std::optional<SelectionOptions>& options, bool isForward)
+{
+    SetSelectionFlag(start, end, options, isForward);
 }
 
 bool TextFieldPattern::IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue)
@@ -7415,7 +7428,7 @@ void TextFieldPattern::OnAttachToFrameNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode);
+    StylusDetectorMgr::GetInstance()->AddTextFieldFrameNode(frameNode, WeakClaim(this));
 
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -7527,7 +7540,7 @@ void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
     }
 }
 
-int32_t TextFieldPattern::GetLineCount() const
+size_t TextFieldPattern::GetLineCount() const
 {
     return paragraph_ ? paragraph_->GetLineCount() : 0;
 }
@@ -8719,6 +8732,63 @@ bool TextFieldPattern::IsTriggerAutoFillPassword()
 bool TextFieldPattern::IsNeedProcessAutoFill()
 {
     return true;
+}
+
+PositionWithAffinity TextFieldPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
+{
+    PositionWithAffinity finalResult(0, TextAffinity::UPSTREAM);
+    CHECK_NULL_RETURN(paragraph_, finalResult);
+    Offset offset(x, y);
+    return paragraph_->GetGlyphPositionAtCoordinate(ConvertTouchOffsetToTextOffset(offset));
+}
+
+Offset TextFieldPattern::ConvertTouchOffsetToTextOffset(const Offset& touchOffset)
+{
+    return touchOffset - Offset(textRect_.GetX(), textRect_.GetY());
+}
+
+bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
+{
+    // delete or insert space.
+    auto wtext = GetWideText();
+    if (index >= 0 && index < static_cast<int32_t>(wtext.length())) {
+        auto ret = SetCaretOffset(index);
+        if (!ret) {
+            return false;
+        }
+        if (wtext[index] == L' ') {
+            DeleteForward(1);
+        } else if (index > 0 && wtext[index - 1] == L' ') {
+            DeleteBackward(1);
+        } else {
+            InsertValue(" ", true);
+        }
+        return true;
+    }
+    return false;
+}
+
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+{
+    auto length = static_cast<int32_t>(contentController_->GetWideText().length());
+    if (start > end) {
+        std::swap(start, end);
+    }
+    start = std::max(0, start);
+    end = std::min(length, end);
+    if (start > length || end < 0 || start == end) {
+        return;
+    }
+    GetEmojiSubStringRange(start, end);
+    auto value = contentController_->GetSelectedValue(start, end);
+    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+    CHECK_NULL_VOID(isDelete);
+    ResetObscureTickCountDown();
+    CheckAndUpdateRecordBeforeOperation();
+    Delete(start, end);
+    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    showCountBorderStyle_ = false;
+    HandleCountStyle();
 }
 
 bool TextFieldPattern::IsShowAIWrite()

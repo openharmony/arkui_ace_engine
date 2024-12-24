@@ -489,7 +489,7 @@ public:
     void DeleteSpansByRange(int32_t start, int32_t end, SpanPositionInfo startInfo, SpanPositionInfo endInfo);
     void ClearContent(const RefPtr<UINode>& child);
     void CloseSelectionMenu();
-    bool SetCaretOffset(int32_t caretPosition);
+    bool SetCaretOffset(int32_t caretPosition) override;
     void ResetFirstNodeStyle();
     bool DoDeleteActions(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
 
@@ -526,7 +526,7 @@ public:
     int32_t AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options);
     void HandleSelectOverlayWithOptions(const SelectionOptions& options);
     void SetSelection(int32_t start, int32_t end, const std::optional<SelectionOptions>& options = std::nullopt,
-        bool isForward = false);
+        bool isForward = false) override;
     bool ResetOnInvalidSelection(int32_t start, int32_t end);
     void RefreshSelectOverlay(bool isMousePressed, bool selectedTypeChange);
     bool IsShowHandle();
@@ -916,6 +916,10 @@ public:
     {
         isEnableHapticFeedback_ = isEnabled;
     }
+
+    bool InsertOrDeleteSpace(int32_t index) override;
+
+    void DeleteRange(int32_t start, int32_t end) override;
 
     void SetRequestKeyboardOnFocus(bool needToRequest)
     {

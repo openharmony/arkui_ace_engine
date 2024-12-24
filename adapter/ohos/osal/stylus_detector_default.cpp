@@ -71,7 +71,7 @@ void StylusDetectorDefault::ExecuteCommand(const std::vector<std::string>& param
     isEnable_ = isEnable;
     auto command = static_cast<CommandType>(commandId);
     if (defaultCallback_) {
-        defaultCallback_->OnDetector(command, defaultText_, nullptr);
+        defaultCallback_->OnDetector(command, static_cast<void*>(&defaultText_), nullptr);
     }
 }
 } // namespace OHOS::Ace

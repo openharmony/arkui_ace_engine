@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -198,7 +199,8 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextInputClient,
                          public TextBase,
                          public Magnifier,
-                         public TextGestureSelector {
+                         public TextGestureSelector,
+                         public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
         Magnifier, TextGestureSelector);
 
@@ -859,6 +861,8 @@ public:
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
+    void SetSelection(int32_t start, int32_t end,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
     void HandleFocusEvent();
     void ProcessFocusStyle();
@@ -912,7 +916,7 @@ public:
     std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
-    int32_t GetLineCount() const;
+    size_t GetLineCount() const override;
     TextInputType GetKeyboard()
     {
         return keyboard_;
@@ -1396,6 +1400,14 @@ public:
         parentGlobalOffset_ = GetPaintRectGlobalOffset();
     }
 
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+
+    bool InsertOrDeleteSpace(int32_t index) override;
+
+    void DeleteRange(int32_t start, int32_t end) override;
+
+    bool SetCaretOffset(int32_t caretPostion) override;
+
     const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
     {
         return multipleClickRecognizer_;
@@ -1488,6 +1500,7 @@ protected:
     bool isTextChangedAtCreation_ = false;
 
 private:
+    Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
     void AfterIMEInsertValue(const std::string& insertValue);
