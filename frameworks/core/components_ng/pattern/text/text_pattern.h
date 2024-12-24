@@ -570,7 +570,8 @@ public:
     void SetStyledString(const RefPtr<SpanString>& value);
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
-    std::u16string GetSelectedText(int32_t start, int32_t end) const;
+    std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
+        bool includeEndHalf = false) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
@@ -806,7 +807,6 @@ protected:
     void ShowSelectOverlay(const OverlayRequest& = OverlayRequest());
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     virtual void UpdateSelectorOnHandleMove(const OffsetF& localOffset, float handleHeight, bool isFirstHandle);
-    std::wstring GetWideText() const;
     void CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     void UpdateSelectionType(const SelectionInfo& selection);

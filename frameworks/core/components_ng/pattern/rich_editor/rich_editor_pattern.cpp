@@ -400,7 +400,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         start = textSelector_.GetTextStart();
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
-    auto range = TextEmojiProcessor::CalSubU16stringRange(start, length, styledString_->GetU16string(), true);
+    auto range = TextEmojiProcessor::CalSubU16stringRange(start, length, styledString_->GetU16string(), true, true);
     start = range.startIndex;
     length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, u"");
