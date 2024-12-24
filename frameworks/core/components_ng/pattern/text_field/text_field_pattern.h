@@ -336,8 +336,7 @@ public:
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
     void FinishTextPreviewOperation();
-    TextDragInfo CreateRichEditorDragInfo(const SelectOverlayInfo& selectOverlayInfo,
-        const TextFieldPaintProperty& paintProperty, const TextFieldTheme& textFieldTheme) const;
+    TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
     {
