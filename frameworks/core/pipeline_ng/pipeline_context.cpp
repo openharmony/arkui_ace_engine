@@ -527,6 +527,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     auto hasRunningAnimation = FlushModifierAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushDragEvents();
+    FlushFrameCallbackFromCAPI(nanoTimestamp, frameCount);
     FlushBuild();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
@@ -4328,6 +4329,13 @@ void PipelineContext::AddFrameCallback(FrameCallbackFunc&& frameCallbackFunc, Fr
     }
 }
 
+void PipelineContext::AddCAPIFrameCallback(FrameCallbackFuncFromCAPI&& frameCallbackFuncFromCAPI)
+{
+    if (frameCallbackFuncFromCAPI != nullptr) {
+        frameCallbackFuncsFromCAPI_.emplace_back(std::move(frameCallbackFuncFromCAPI));
+    }
+}
+
 void PipelineContext::TriggerIdleCallback(int64_t deadline)
 {
     if (idleCallbackFuncs_.empty()) {
@@ -5035,6 +5043,17 @@ void PipelineContext::FlushFrameCallback(uint64_t nanoTimestamp)
         decltype(frameCallbackFuncs_) tasks(std::move(frameCallbackFuncs_));
         for (const auto& frameCallbackFunc : tasks) {
             frameCallbackFunc(nanoTimestamp);
+        }
+    }
+}
+
+void PipelineContext::FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount)
+{
+    if (!frameCallbackFuncsFromCAPI_.empty()) {
+        decltype(frameCallbackFuncsFromCAPI_) tasks;
+        std::swap(tasks, frameCallbackFuncsFromCAPI_);
+        for (const auto& frameCallbackFuncFromCAPI : tasks) {
+            frameCallbackFuncFromCAPI(nanoTimestamp, frameCount);
         }
     }
 }
