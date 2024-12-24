@@ -724,4 +724,18 @@ RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByKey(const RefPtr<FrameNode>
     }
     return nullptr;
 }
+
+OffsetF DragDropFuncWrapper::GetPointRelativeToMainWindow(const Point& point)
+{
+    OffsetF position (static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
+    auto currentPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(currentPipeline, position);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, position);
+    if (mainPipeline != currentPipeline) {
+        position -= (GetCurrentWindowOffset(mainPipeline) -
+                     GetCurrentWindowOffset(currentPipeline));
+    }
+    return position;
+}
 } // namespace OHOS::Ace
