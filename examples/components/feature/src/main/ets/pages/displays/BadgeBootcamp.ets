@@ -1088,6 +1088,7 @@ export struct BadgeBootcamp{
         .width(50)
         .height(50)
     }
+    /*通用属性和通用事件*/
     .width(useEnabled(this.enableCompWidth, this.compWidth))
     .height(useEnabled(this.enableCompHeight, this.compHeight))
     .padding(useEnabled(this.enableCompPadding, this.compPadding))
