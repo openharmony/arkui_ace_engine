@@ -194,6 +194,16 @@ void ViewAbstract::SetBackgroundAlign(const Alignment& align)
     ACE_UPDATE_RENDER_CONTEXT(BackgroundAlign, align);
 }
 
+void ViewAbstract::SetBackgroundAlign(FrameNode *frameNode, const std::optional<Alignment>& align)
+{
+    if (align.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundAlign, align.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, BackgroundAlign, frameNode);
+    }
+}
+
 void ViewAbstract::SetBackgroundColor(const Color& color)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -3152,9 +3162,14 @@ void ViewAbstract::SetRadialGradient(FrameNode* frameNode, const NG::Gradient& g
     ACE_UPDATE_NODE_RENDER_CONTEXT(RadialGradient, gradient, frameNode);
 }
 
-void ViewAbstract::SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay)
+void ViewAbstract::SetOverlay(FrameNode* frameNode, const std::optional<NG::OverlayOptions>& overlay)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay, frameNode);
+    if (overlay.has_value()) {
+        ACE_UPDATE_NODE_RENDER_CONTEXT(OverlayText, overlay.value(), frameNode);
+    } else {
+        const auto target = frameNode->GetRenderContext();
+        ACE_RESET_NODE_RENDER_CONTEXT(target, OverlayText, frameNode);
+    }
 }
 
 void ViewAbstract::SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage)

@@ -690,6 +690,27 @@ void ViewAbstractModelNG::SetAccessibilityVirtualNode(std::function<void()>&& bu
     accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
 }
 
+void ViewAbstractModelNG::SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<void()>&& buildFunc)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        buildFunc();
+        auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    auto virtualNode = buildNodeFunc();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto virtualFrameNode = AceType::DynamicCast<NG::FrameNode>(virtualNode);
+    CHECK_NULL_VOID(virtualFrameNode);
+    virtualFrameNode->SetAccessibilityNodeVirtual();
+    virtualFrameNode->SetAccessibilityVirtualNodeParent(AceType::Claim(AceType::DynamicCast<NG::UINode>(frameNode)));
+    virtualFrameNode->SetFirstAccessibilityVirtualNode();
+    frameNode->HasAccessibilityVirtualNode(true);
+    accessibilityProperty->SaveAccessibilityVirtualNode(virtualNode);
+}
+
 void ViewAbstractModelNG::SetAccessibilitySelected(bool selected, bool resetValue)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();

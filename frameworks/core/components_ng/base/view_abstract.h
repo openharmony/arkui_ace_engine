@@ -200,6 +200,7 @@ public:
 
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
+    static void SetBackgroundAlign(FrameNode *frameNode, const std::optional<Alignment>& align);
 
     // decoration
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
@@ -513,7 +514,7 @@ public:
     static void SetLinearGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetSweepGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetRadialGradient(FrameNode* frameNode, const NG::Gradient& gradient);
-    static void SetOverlay(FrameNode* frameNode, const NG::OverlayOptions& overlay);
+    static void SetOverlay(FrameNode* frameNode, const std::optional<NG::OverlayOptions>& overlay);
     static void SetBorderImage(FrameNode* frameNode, const RefPtr<BorderImage>& borderImage);
     static void SetBorderImageSource(FrameNode* frameNode, const std::string& bdImageSrc);
     static void SetHasBorderImageSlice(FrameNode* frameNode, bool tag);
