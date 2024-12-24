@@ -43,7 +43,7 @@ ModelPattern::ModelPattern(uint32_t key) : key_(key)
 {
 }
 
-ModelPattern::SetModelViewContext(const ModelViewContext& context)
+void ModelPattern::SetModelViewContext(const ModelViewContext& context)
 {
     modelAdapter_ = MakeRefPtr<ModelAdapterWrapper>(key_, context);
     modelAdapter_->SetPaintFinishCallback([weak = WeakClaim(this)]() {
