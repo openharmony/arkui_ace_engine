@@ -998,6 +998,43 @@ void UIContentImpl::Initialize(
 #endif
 }
 
+void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
+    const std::string &name, napi_value storage, uint32_t focusWindowId)
+{
+    if (window == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s]"
+            "InitializeByName failed, the window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return;
+    }
+
+    auto errorCode = CommonInitialize(window, name, storage, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "CommonInitialize failed when InitializeByName");
+        return;
+    }
+
+    AddWatchSystemParameter();
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: StartUIExtensionByName: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", true);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetContextByContainerId(instanceId_);
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+}
+
 napi_value UIContentImpl::GetUINapiContext()
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
