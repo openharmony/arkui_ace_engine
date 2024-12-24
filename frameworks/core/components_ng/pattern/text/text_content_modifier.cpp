@@ -205,7 +205,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     textShadow.SetBlurRadius(shadow.GetBlurRadius());
     textShadow.SetOffset(shadow.GetOffset());
     textShadow.SetColor(shadow.GetColor());
-    shadows_.emplace_back(ShadowProp {
+    shadows_.emplace_back(ShadowProp { .shadow = textShadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
@@ -640,9 +640,15 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
     ModifyLineHeightInTextStyle(textStyle);
 }
 
+bool TextContentModifier::CheckNeedMeasure(float finalValue, float lastValue, float currentValue)
+{
+    return !NearEqual(finalValue, currentValue) || !NearEqual(lastValue, currentValue);
+}
+
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(lastFontSize_, fontSizeFloat_->Get())) {
+    if (fontSize_.has_value() && fontSizeFloat_ &&
+        CheckNeedMeasure(fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastFontSize_ = fontSizeFloat_->Get();
     }
@@ -651,7 +657,7 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
-        !NearEqual(lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
+        CheckNeedMeasure(adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
     }
@@ -660,7 +666,7 @@ void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& 
 void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
-        !NearEqual(lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
+        CheckNeedMeasure(adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
     }
@@ -668,7 +674,9 @@ void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& 
 
 void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontWeight_.has_value() && fontWeightFloat_ && !NearEqual(lastFontWeight_, fontWeightFloat_->Get())) {
+    if (fontWeight_.has_value() && fontWeightFloat_ &&
+        CheckNeedMeasure(
+            static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastFontWeight_ = fontWeightFloat_->Get();
     }
@@ -677,7 +685,8 @@ void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textColor_.has_value() && animatableTextColor_ &&
-        lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue()) {
+        (textColor_->GetValue() != animatableTextColor_->Get().GetValue() ||
+            lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
@@ -691,7 +700,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto offsetY = shadow.offsetY->Get();
         auto color = shadow.color->Get();
         auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
-        if (shadow.lastShadow != compareShadow) {
+        if (shadow.shadow != compareShadow || shadow.lastShadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
             shadow.lastShadow = compareShadow;
             return;
@@ -704,7 +713,8 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE &&
-            !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_)) {
+            (alpha != textDecorationColor_.value().GetAlpha() ||
+                !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_))) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE &&
                    (alpha != 0.0 || !NearZero(lastTextDecorationColorAlpha_))) {
@@ -717,7 +727,7 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
 void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag)
 {
     if (baselineOffset_.has_value() && baselineOffsetFloat_ &&
-        !NearEqual(lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
+        CheckNeedMeasure(baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
     }
@@ -726,7 +736,7 @@ void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& fl
 void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
 {
     if (lineHeight_.has_value() && lineHeightFloat_ &&
-        !NearEqual(lastLineHeight_, lineHeightFloat_->Get())) {
+        CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
     }
@@ -838,6 +848,7 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
         textShadow.SetBlurRadius(newShadow.GetBlurRadius());
         textShadow.SetOffset(newShadow.GetOffset());
         textShadow.SetColor(newShadow.GetColor());
+        shadows_[i].shadow = textShadow;
         shadows_[i].blurRadius->Set(newShadow.GetBlurRadius());
         shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
         shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
@@ -1070,8 +1081,12 @@ void TextContentModifier::AddDefaultShadow()
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
     auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(emptyShadow.GetBlurRadius());
+    textShadow.SetOffset(emptyShadow.GetOffset());
+    textShadow.SetColor(emptyShadow.GetColor());
     shadows_.emplace_back(ShadowProp {
-        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
+        .shadow = textShadow, .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
     AttachProperty(blurRadius);
     AttachProperty(offsetX);
     AttachProperty(offsetY);

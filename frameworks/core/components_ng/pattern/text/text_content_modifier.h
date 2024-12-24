@@ -137,6 +137,7 @@ private:
     void UpdateTextDecorationMeasureFlag(PropertyChangeFlag& flag);
     void UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag);
     void UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag);
+    bool CheckNeedMeasure(float finalValue, float lastValue, float currentValue);
 
     void ChangeParagraphColor(const RefPtr<Paragraph>& paragraph);
     void DrawObscuration(DrawingContext& drawingContext);
@@ -174,6 +175,7 @@ private:
     bool onlyTextColorAnimation_ = false;
 
     struct ShadowProp {
+        Shadow shadow; // final shadow configuration of the animation
         Shadow lastShadow;
         RefPtr<AnimatablePropertyFloat> blurRadius;
         RefPtr<AnimatablePropertyFloat> offsetX;
