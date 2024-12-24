@@ -2692,6 +2692,9 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
     float currentTurnPageRate = currentPageStatus.first;
     currentFirstIndex_ = currentPageStatus.second;
 
+    groupTurnPageRate_ =
+        (IsSwipeByGroup() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ?
+        CalculateGroupTurnPageRate(additionalOffset) : 0.0f);
     currentFirstIndex_ = nextIndex.value_or(currentFirstIndex_);
     UpdateNextValidIndex();
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
@@ -2730,6 +2733,70 @@ void SwiperPattern::CheckMarkForIndicatorBoundary()
                          (currentFirstIndex_ == endIndex && LessNotEqualCustomPrecision(turnPageRate_, 0.0f)))) {
         return;
     }
+}
+
+float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
+{
+    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto firstItemLength = firstItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
+    auto firstItemIndex = firstItemInfoInVisibleArea.first;
+    auto displayCount = GetDisplayCount();
+    auto itemSpace = GetItemSpace();
+    auto swiperWidth = CalculateVisibleSize();
+    auto totalCount = TotalCount();
+    float groupTurnPageRate = FLT_MAX;
+    float currentStartPos = 0.0f;
+
+    if (swiperWidth == 0 || displayCount == 0 || totalCount == 0) {
+        return 0.0f;
+    }
+    if (itemPosition_.empty() || itemPosition_.find(firstItemIndex) == itemPosition_.end()) {
+        return 0.0f;
+    }
+    if (firstItemIndex >= currentIndex_) {
+        currentStartPos = itemPosition_[firstItemIndex].startPos -
+            (itemSpace + firstItemLength) * (firstItemIndex - currentIndex_);
+
+        if (currentStartPos > 0) {
+            return 0.0f;
+        }
+        if (!IsLoop() && firstItemIndex % totalCount >= totalCount - displayCount) {
+            return 0.0f;
+        }
+
+        groupTurnPageRate = NearZero(swiperWidth) ? 0 : (currentStartPos + additionalOffset) / swiperWidth;
+    } else if (firstItemIndex < currentIndex_) {
+        currentStartPos = itemPosition_[firstItemIndex].startPos - (itemSpace + firstItemLength) *
+            (displayCount - ((currentIndex_ - firstItemIndex) - 1) % displayCount - 1);
+
+        if (currentStartPos > 0) {
+            return 0.0f;
+        }
+
+        groupTurnPageRate = NearZero(swiperWidth) ? 0 :(currentStartPos + additionalOffset) / swiperWidth;
+    } else {
+        groupTurnPageRate = 0.0f;
+    }
+
+    if (IsHorizontalAndRightToLeft()) {
+        groupTurnPageRate = std::abs(groupTurnPageRate) <= 1.0f ? std::abs(groupTurnPageRate) - 1.0f : 0.0f;
+    }
+
+    return (groupTurnPageRate == FLT_MAX ? groupTurnPageRate_ : groupTurnPageRate);
+}
+
+std::pair<int32_t, int32_t> SwiperPattern::CalculateStepAndItemCount() const
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return { RealTotalCount(), 1 };
+    }
+
+    auto displaycount = GetDisplayCount();
+
+    int32_t itemCount = (IsSwipeByGroup() ? TotalCount() : DisplayIndicatorTotalCount());
+    int32_t step = (IsSwipeByGroup() ? displaycount : 1);
+
+    return { itemCount, step };
 }
 
 void SwiperPattern::UpdateAnimationProperty(float velocity)
@@ -4306,6 +4373,32 @@ int32_t SwiperPattern::RealTotalCount() const
     return host->TotalChildCount() - num;
 }
 
+int32_t SwiperPattern::DisplayIndicatorTotalCount() const
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return RealTotalCount();
+    }
+
+    auto displayCount = GetDisplayCount();
+    auto realTotalCount = RealTotalCount();
+    if (IsSwipeByGroup() && displayCount != 0) {
+        int32_t totalPages = 0;
+        totalPages = realTotalCount / displayCount;
+
+        if (realTotalCount % displayCount) {
+            totalPages++;
+        }
+
+        return totalPages;
+    } else {
+        if (IsLoop() || realTotalCount <= displayCount) {
+            return realTotalCount;
+        } else {
+            return realTotalCount - displayCount + 1;
+        }
+    }
+}
+
 std::pair<int32_t, SwiperItemInfo> SwiperPattern::GetFirstItemInfoInVisibleArea() const
 {
     if (itemPosition_.empty()) {
@@ -5754,7 +5847,18 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
     auto currentIndex = GetLoopIndex(currentIndex_);
-    bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
+    auto totalCount = TotalCount();
+    auto displayCount = GetDisplayCount();
+    bool commTouchBottom = (currentFirstIndex == totalCount - 1);
+    bool releaseLeftTouchBottomStart = (currentIndex == totalCount - 1);
+    bool releaseLeftTouchBottomEnd = (currentFirstIndex == 0);
+    bool releaseRightTouchBottom = (currentFirstIndex == totalCount - 1);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSwipeByGroup()) {
+        commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
+        releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
+        releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
+        releaseLeftTouchBottomEnd = (currentFirstIndex <= displayCount);
+    }
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
     if (followTouchBottom) {
@@ -5766,13 +5870,13 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         return;
     }
 
-    if (currentFirstIndex == 0 && currentIndex == TotalCount() - 1 &&
+    if (releaseLeftTouchBottomEnd && releaseLeftTouchBottomStart &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
         return;
     }
 
-    if (currentFirstIndex == TotalCount() - 1 && currentIndex == 0 &&
+    if (releaseRightTouchBottom && currentIndex == 0 &&
         gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         return;
@@ -5789,6 +5893,11 @@ void SwiperPattern::HandleTouchBottomLoop()
     }
 
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
+    bool releaseTouchBottom = (currentIndex == TotalCount() - 1);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && IsSwipeByGroup()) {
+        commTouchBottom = currentFirstIndex >= TotalCount() - GetDisplayCount();
+        releaseTouchBottom = currentIndex >= TotalCount() - GetDisplayCount();
+    }
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
     if (followTouchBottom) {
@@ -5802,13 +5911,13 @@ void SwiperPattern::HandleTouchBottomLoop()
 
     bool leftReleaseTouchBottom =
         (commTouchBottom && (currentIndex == 0 && gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT));
-    bool rightReleaseTouchBottom = ((currentFirstIndex == 0) && (currentIndex == TotalCount() - 1) &&
+    bool rightReleaseTouchBottom = ((currentFirstIndex == 0) && (releaseTouchBottom) &&
                                     gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT);
     if (leftReleaseTouchBottom || rightReleaseTouchBottom) {
         if (currentIndex == 0) {
             // left bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
-        } else if (currentIndex == TotalCount() - 1) {
+        } else if (releaseTouchBottom) {
             // right bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
         }
