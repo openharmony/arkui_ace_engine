@@ -778,6 +778,13 @@ void FormPattern::AddFormComponentUI(bool isTransparencyEnabled, const RequestFo
 
 void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 {
+    if (formManagerBridge_) {
+#if OHOS_STANDARD_SYSTEM
+        AppExecFwk::FormInfo formInfo;
+        FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
+        formManagerBridge_->SetParamForWant(info, formInfo);
+#endif
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
