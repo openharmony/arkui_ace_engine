@@ -50,8 +50,6 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
-constexpr double OPACITY_DISABLED = 0.4;
-constexpr double OPACITY_ENABLED = 1.0;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -144,22 +142,34 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     CHECK_NULL_VOID(frameNode);
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(searchButtonFrameNode);
-    auto searchButtonContext = searchButtonFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(searchButtonContext);
-    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEventHub);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
     auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
-    if (needToDisable) {
-        if (textValue.empty()) {
-            searchButtonContext->UpdateOpacity(OPACITY_DISABLED);
-            buttonEventHub->SetEnabled(false);
-        } else {
-            searchButtonContext->UpdateOpacity(OPACITY_ENABLED);
-            buttonEventHub->SetEnabled(true);
-        }
+    if (!needToDisable) {
+        return;
     }
+    bool isEmptyText = textValue.empty();
+    if (isSearchButtonEnabled_ && isEmptyText) {
+        UpdateEnable(false);
+    } else if (!isSearchButtonEnabled_ && !isEmptyText) {
+        UpdateEnable(true);
+    }
+}
+
+void SearchPattern::UpdateEnable(bool needToenable)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (needToenable) {
+        buttonEventHub->SetEnabled(true);
+    } else {
+        buttonEventHub->SetEnabled(false);
+    }
+    isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
     searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }

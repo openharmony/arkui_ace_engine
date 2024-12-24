@@ -649,7 +649,38 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     caretUpdateType_ = CaretUpdateType::NONE;
     IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
     UpdateGestureHotZone(dirty);
+    if (needSelect_) {
+        UpdateSelectionAndHandleVisibility();
+        needSelect_ = false;
+    }
+    releaseInDrop_ = false;
     return ret;
+}
+
+void RichEditorPattern::UpdateSelectionAndHandleVisibility()
+{
+    auto start = recoverStart_;
+    auto end = recoverEnd_;
+    if (textSelector_.GetStart() == start && textSelector_.GetEnd() == end) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
+        start = lastCaretPosition_;
+        end = insertValueLength_ + lastCaretPosition_;
+    }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]", start, end);
+    textSelector_.Update(start, end);
+
+    if (!isMouseOrTouchPad(sourceTool_)) {
+        if (!selectOverlay_->IsBothHandlesShow() && !selectOverlay_->SelectOverlayIsCreating()) {
+            showSelect_ = true;
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            CalculateHandleOffsetAndShowOverlay();
+            selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
+        }
+    }
 }
 
 void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
@@ -1764,6 +1795,7 @@ bool RichEditorPattern::SetCaretPosition(int32_t pos, bool needNotifyImf)
     CHECK_NULL_RETURN((pos == correctPos), false);
     if (caretPosition_ != correctPos) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "caret:%{public}d->%{public}d", caretPosition_, correctPos);
+        lastCaretPosition_ = caretPosition_;
         caretPosition_ = correctPos;
         FireOnSelectionChange(caretPosition_);
         if (caretChangeListener_) {
@@ -3674,6 +3706,7 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
         isDragSponsor_ = true;
         dragRange_ = { textSelector_.GetTextStart(), textSelector_.GetTextEnd() };
     }
+    sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
     timestamp_ = std::chrono::system_clock::now().time_since_epoch().count();
     auto eventHub = GetEventHub<RichEditorEventHub>();
     CHECK_NULL_RETURN(eventHub, {});
@@ -3697,9 +3730,19 @@ void RichEditorPattern::onDragDropAndLeave()
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<EventHub>();
+        pattern->sourceTool_ = event ? event->GetSourceTool() : SourceTool::UNKNOWN;
         CHECK_NULL_VOID(eventHub && eventHub->IsEnabled());
+        bool isCopy = false;
+        if (pattern->status_ == Status::DRAGGING) {
+            CHECK_NULL_VOID(event);
+            auto gesturePressedCodes = event->GetPressedKeyCodes();
+            if ((gesturePressedCodes.size() == 1) && ((gesturePressedCodes[0] == KeyCode::KEY_CTRL_LEFT) ||
+                (gesturePressedCodes[0] == KeyCode::KEY_CTRL_RIGHT))) {
+                isCopy = true;
+            }
+        }
         pattern->status_ = Status::ON_DROP;
-        pattern->HandleOnDragDrop(event);
+        pattern->HandleOnDragDrop(event, isCopy);
         pattern->status_ = Status::NONE;
     };
     eventHub->SetOnDrop(std::move(onDragDrop));
@@ -3764,6 +3807,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     recoverDragResultObjects_.clear();
     auto focusHub = GetFocusHub();
     if (event && focusHub && event->GetResult() != DragRet::DRAG_SUCCESS && focusHub->IsFocusable()) {
+        needSelect_ = true;
         HandleSelectionChange(recoverStart_, recoverEnd_);
         showSelect_ = true;
         CalculateHandleOffsetAndShowOverlay();
@@ -4148,12 +4192,13 @@ void RichEditorPattern::InsertStyledStringByPaste(const RefPtr<SpanString>& span
     AfterStyledStringChange(changeStart, changeLength, spanString->GetU16string());
 }
 
-void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString)
+void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy)
 {
     CHECK_NULL_VOID(spanString);
     int currentCaretPosition = caretPosition_;
     auto strLength = spanString->GetLength();
-    if (isDragSponsor_) {
+    insertValueLength_ = strLength;
+    if (isDragSponsor_ && !isCopy) {
         bool isInsertForward = currentCaretPosition < dragRange_.first;
         bool isInsertBackward = currentCaretPosition > dragRange_.second;
         CHECK_NULL_VOID(isInsertForward || isInsertBackward);
@@ -4739,6 +4784,7 @@ void RichEditorPattern::DeleteByRange(OperationRecord* const record, int32_t sta
 {
     auto length = end - start;
     CHECK_NULL_VOID(length > 0);
+    lastCaretPosition_ = caretPosition_;
     caretPosition_ = std::clamp(start, 0, GetTextContentLength());
     if (isSpanStringMode_) {
         DeleteValueInStyledString(start, length, true, false);
@@ -5323,6 +5369,7 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 {
     // handle selector
     if (!textSelector_.SelectNothing()) {
+        lastCaretPosition_ = caretPosition_;
         caretPosition_ = isBackward ? textSelector_.GetTextEnd() : textSelector_.GetTextStart();
         return textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
@@ -7095,6 +7142,18 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
             pattern->UpdateTextFieldManager(Offset(pattern->parentGlobalOffset_.GetX(),
                 pattern->parentGlobalOffset_.GetY()), pattern->frameRect_.Height());
             pattern->UpdateCaretInfoToController();
+            if (pattern->HasFocus()) {
+                auto textFieldManager = manager.Upgrade();
+                CHECK_NULL_VOID(textFieldManager);
+                auto container = Container::Current();
+                CHECK_NULL_VOID(container);
+                auto displayInfo = container->GetDisplayInfo();
+                if (displayInfo) {
+                    auto dmRotation = static_cast<int32_t>(displayInfo->GetRotation());
+                    textFieldManager->SetFocusFieldOrientation(dmRotation);
+                    textFieldManager->SetFocusFieldAlreadyTriggerWsCallback(true);
+                }
+            }
         },
         TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation");
 }
@@ -7399,7 +7458,7 @@ void RichEditorPattern::CreateDragNode()
             imageChildren.emplace_back(node);
         }
     }
-    RichEditorDragInfo info;
+    TextDragInfo info;
     auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     if (!boxes.empty()) {
         float startX = boxes.front().Left();
@@ -7461,7 +7520,7 @@ void RichEditorPattern::ShowHandles()
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         CHECK_NULL_VOID(textSelector_.IsValid());
         CalculateHandleOffsetAndShowOverlay();
-        selectOverlay_->ProcessOverlay({.animation = false});
+        selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
     }
 }
 
@@ -9179,7 +9238,7 @@ Color RichEditorPattern::GetSelectedBackgroundColor()
     return selectedBackgroundColor;
 }
 
-void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event)
+void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy)
 {
     CHECK_NULL_VOID(event);
     auto data = event->GetData();
@@ -9189,7 +9248,7 @@ void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::Dra
         auto spanStr = SpanString::DecodeTlv(arr);
         if (!spanStr->GetSpanItems().empty()) {
             if (isSpanStringMode_) {
-                HandleOnDragInsertStyledString(spanStr);
+                HandleOnDragInsertStyledString(spanStr, isCopy);
                 return;
             }
             AddSpanByPasteData(spanStr);
@@ -9212,11 +9271,11 @@ void RichEditorPattern::HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::Dra
     if (isSpanStringMode_) {
         InsertValueInStyledString(str);
     } else {
-        HandleOnDragDropTextOperation(str, isDragSponsor_);
+        HandleOnDragDropTextOperation(str, isDragSponsor_, isCopy);
     }
 }
 
-void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event)
+void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -9229,7 +9288,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
         StartTwinkling();
         return;
     }
-    HandleOnDragDropStyledString(event);
+    HandleOnDragDropStyledString(event, isCopy);
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -9239,6 +9298,8 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     if (focusHub->IsCurrentFocus()) {
         StartTwinkling();
     }
+    needSelect_ = isMouseOrTouchPad(sourceTool_);
+    releaseInDrop_ = true;
 }
 
 void RichEditorPattern::DeleteForward(int32_t currentPosition, int32_t length)
@@ -9273,9 +9334,10 @@ int32_t RichEditorPattern::HandleOnDragDeleteForward()
     return allDelLength;
 }
 
-void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect)
+void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect, bool isCopy)
 {
-    if (!isDeleteSelect) {
+    insertValueLength_ = ConvertStr8toStr16(insertValue).length();
+    if (!isDeleteSelect || isCopy) {
         InsertValueByOperationType(insertValue, OperationType::DRAG);
         return;
     }
@@ -9291,10 +9353,12 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::string& insertV
         dragRange_.first += strLength;
         dragRange_.second += strLength;
         HandleOnDragDeleteForward();
+        lastCaretPosition_ = currentPosition;
     } else if (currentPosition > dragRange_.second) {
         InsertValueByOperationType(insertValue, OperationType::DRAG);
         int32_t delLength = HandleOnDragDeleteForward();
         caretPosition_ -= delLength;
+        lastCaretPosition_ = currentPosition - strLength;
     }
 
     AfterContentChange(changeValue);
@@ -9309,6 +9373,7 @@ void RichEditorPattern::UndoDrag(const OperationRecord& record)
     int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     DeleteForward(record.beforeCaretPosition, length);
 
+    lastCaretPosition_ = caretPosition_;
     caretPosition_ = record.deleteCaretPostion;
     InsertValueOperation(str, nullptr, OperationType::DEFAULT);
 }
@@ -9323,6 +9388,7 @@ void RichEditorPattern::RedoDrag(const OperationRecord& record)
     const std::string& str = record.addText.value();
     int32_t length = static_cast<int32_t>(StringUtils::ToWstring(str).length());
     DeleteForward(record.deleteCaretPostion, length);
+    lastCaretPosition_ = caretPosition_;
     caretPosition_ = record.beforeCaretPosition;
     InsertValueOperation(str, nullptr, OperationType::DRAG);
     AfterContentChange(changeValue);

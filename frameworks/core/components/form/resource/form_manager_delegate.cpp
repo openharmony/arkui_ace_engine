@@ -894,6 +894,13 @@ bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
 }
 
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void FormManagerDelegate::ResetForm()
 {

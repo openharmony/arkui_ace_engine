@@ -319,6 +319,7 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result);
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -497,7 +498,18 @@ public:
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
-        return themeManager->GetTheme<T>();
+        auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        return node ? themeManager->GetTheme<T>(node->GetThemeScopeId()) : themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        auto pipelineContext = GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>(themeScopeId);
     }
 
     /**
@@ -651,6 +663,7 @@ private:
     static bool ParseResourceToDoubleById(
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
+    static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
     static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);

@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 
 struct OptionParam;
 
+const std::string SelectOverlayRrightClickMenuWrapper = "select_overlay_right_click_menuWrapper";
+
 enum class FrameNodeType {
     SELECTMENU,
     EXTENSIONMENU,

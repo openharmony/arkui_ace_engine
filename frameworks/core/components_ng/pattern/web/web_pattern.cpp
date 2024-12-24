@@ -466,7 +466,12 @@ WebPattern::~WebPattern()
     }
     if (isActive_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
-        OnInActive();
+        if (delegate_ && delegate_->IsActivePolicyDisable()) {
+            // if active policy disable, must force it Inactive, otherwise OnInActive will inactive it.
+            delegate_->OnInactive();
+        } else {
+            OnInActive();
+        }
     }
     if (imageAnalyzerManager_) {
         imageAnalyzerManager_->ReleaseImageAnalyzer();
@@ -509,8 +514,10 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = isNewDragStyle_ && IsPreviewImageNodeExist();
-    TAG_LOGI(AceLogTag::ACE_WEB, "IsPreviewMenuNotNeedShowPreview:%{public}d", isNotNeedShowPreview);
+    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
+        isNotNeedShowPreview, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
@@ -748,7 +755,7 @@ void WebPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
 
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
     if (!renderContextForSurface_) {
         renderContextForSurface_ = RenderContext::Create();
         static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
@@ -1356,9 +1363,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
     }
     CHECK_NULL_VOID(delegate_);
     auto localLocation = info.GetLocalLocation();
-    if ((mouseHoveredX_ != localLocation.GetX()) ||
-        (mouseHoveredY_ != localLocation.GetY()) ||
-        (info.GetAction() == MouseAction::PRESS) ||
+    if ((info.GetAction() == MouseAction::PRESS) ||
         (info.GetButton() == MouseButton::LEFT_BUTTON) ||
         (info.GetButton() == MouseButton::RIGHT_BUTTON)) {
         OnTooltip("");
@@ -3356,6 +3361,18 @@ void WebPattern::GetPageContentAsync(const std::string& jsCode)
 #endif
 }
 
+void WebPattern::LoadUrlInOfflineMode()
+{
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webSrc_) {
+            delegate_->LoadUrl();
+        } else if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
+    }
+}
+
 void WebPattern::InitInOfflineMode()
 {
     if (offlineWebInited_) {
@@ -3396,13 +3413,10 @@ void WebPattern::InitInOfflineMode()
         (uint32_t)displayId, drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
 
-    if (!isUrlLoaded_) {
-        isUrlLoaded_ = true;
-        if (webSrc_) {
-            delegate_->LoadUrl();
-        } else if (webData_) {
-            delegate_->LoadDataWithRichText();
-        }
+    LoadUrlInOfflineMode();
+    if (delegate_->IsActivePolicyDisable()) {
+        // if active policy disable, must force it Inactive, otherwise HideWebView will inactive it.
+        delegate_->OnInactive();
     }
     delegate_->HideWebView();
     CloseContextSelectionMenu();
@@ -5241,6 +5255,21 @@ void WebPattern::OnPopupShow(bool show)
     pipeline->RequestFrame();
 }
 
+void WebPattern::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RectF visibleRect;
+    RectF visibleInnerRect;
+    RectF frameRect;
+    host->GetVisibleRectWithClip(visibleRect, visibleInnerRect, frameRect);
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    visibleX = visibleInnerRect.GetX() - offset.GetX();
+    visibleY = visibleInnerRect.GetY() - offset.GetY();
+    visibleWidth = visibleInnerRect.Width();
+    visibleHeight = visibleInnerRect.Height();
+}
+
 void WebPattern::AttachCustomKeyboard()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebCustomKeyboard AttachCustomKeyboard enter");
@@ -5936,27 +5965,35 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (!isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnInactive();
+    if (!policyDisable) {
+        delegate_->OnInactive();
+    }
     isActive_ = false;
 }
 
 void WebPattern::OnActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnActive();
+    if (!policyDisable) {
+        delegate_->OnActive();
+    }
     isActive_ = true;
 }
 

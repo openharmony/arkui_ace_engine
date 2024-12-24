@@ -912,6 +912,9 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
+    if (IsUIExtensionComponent(preTargetFrameNode_) && preTargetFrameNode_ != dragFrameNode) {
+        HandleUIExtensionDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE);
+    }
     if (!dragFrameNode) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);
         TAG_LOGI(AceLogTag::ACE_DRAG,
@@ -1604,6 +1607,7 @@ void DragDropManager::UpdateDragEvent(
     event->SetSummary(summaryMap_);
     event->SetPreviewRect(GetDragWindowRect(point));
     event->SetPressedKeyCodes(pointerEvent.pressedKeyCodes_);
+    event->SetSourceTool(pointerEvent.sourceTool);
 }
 
 std::string DragDropManager::GetExtraInfo()
@@ -2204,6 +2208,7 @@ void DragDropManager::UpdateDragMovePosition(const NG::OffsetF& offset, bool isR
 
 bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
 {
+    CHECK_NULL_RETURN(node, false);
     return (V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() || V2::EMBEDDED_COMPONENT_ETS_TAG == node->GetTag()) &&
            (!IsUIExtensionShowPlaceholder(node));
 }

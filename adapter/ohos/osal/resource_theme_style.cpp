@@ -119,6 +119,7 @@ static const std::unordered_set<std::string> stringAttrs = {
     "textfield_menu_search_is_support",
     "textfield_accessibility_clear",
     "pass_point",
+    "side_length",
     "general_next_year",
     "general_next_month",
     "general_pre_year",

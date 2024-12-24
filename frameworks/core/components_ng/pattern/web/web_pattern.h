@@ -649,6 +649,7 @@ public:
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
@@ -993,6 +994,7 @@ private:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
+    void LoadUrlInOfflineMode();
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(float offset);

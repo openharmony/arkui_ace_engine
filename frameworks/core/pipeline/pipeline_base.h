@@ -1426,6 +1426,11 @@ public:
         return true;
     }
 
+    virtual bool IsDirtyPropertyNodesEmpty() const
+    {
+        return true;
+    }
+
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();

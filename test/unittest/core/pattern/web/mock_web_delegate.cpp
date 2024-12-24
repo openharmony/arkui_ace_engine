@@ -1194,4 +1194,8 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+bool WebDelegate::IsActivePolicyDisable()
+{
+    return false;
+}
 } // namespace OHOS::Ace

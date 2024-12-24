@@ -290,24 +290,87 @@ void SetCheckboxGroup(ArkUINodeHandle node, ArkUI_CharPtr group)
 namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
-    static const ArkUICheckboxModifier modifier = { SetSelect, SetSelectedColor,
-        SetUnSelectedColor, SetCheckboxWidth, SetCheckboxHeight, SetMark,  SetCheckboxPadding,
-        SetCheckboxResponseRegion, ResetSelect, ResetSelectedColor,
-        ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
-        ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion,
-        GetSelect, GetSelectedColor, GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth,
-        GetCheckboxShape, SetCheckboxName, SetCheckboxGroup };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUICheckboxModifier modifier = {
+        SetSelect,
+        SetSelectedColor,
+        SetUnSelectedColor,
+        SetCheckboxWidth,
+        SetCheckboxHeight,
+        SetMark,
+        SetCheckboxPadding,
+        SetCheckboxResponseRegion,
+        ResetSelect,
+        ResetSelectedColor,
+        ResetUnSelectedColor,
+        ResetCheckboxWidth,
+        ResetCheckboxHeight,
+        ResetMark,
+        SetCheckboxShape,
+        ResetCheckboxShape,
+        ResetCheckboxPadding,
+        ResetCheckboxResponseRegion,
+        GetSelect,
+        GetSelectedColor,
+        GetUnSelectedColor,
+        GetCheckMarkColor,
+        GetCheckMarkSize,
+        GetCheckMarkWidth,
+        GetCheckboxShape,
+        SetCheckboxName,
+        SetCheckboxGroup,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUICheckboxModifier* GetCJUICheckboxModifier()
 {
-    static const CJUICheckboxModifier modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor, SetCheckboxWidth,
-        SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect,
-        ResetSelectedColor, ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark, SetCheckboxShape,
-        ResetCheckboxShape, ResetCheckboxPadding, ResetCheckboxResponseRegion, GetSelect, GetSelectedColor,
-        GetUnSelectedColor, GetCheckMarkColor, GetCheckMarkSize, GetCheckMarkWidth, GetCheckboxShape, SetCheckboxName,
-        SetCheckboxGroup };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUICheckboxModifier modifier = {
+        SetSelect,
+        SetSelectedColor,
+        SetUnSelectedColor,
+        SetCheckboxWidth,
+        SetCheckboxHeight,
+        SetMark,
+        SetCheckboxPadding,
+        SetCheckboxResponseRegion,
+        ResetSelect,
+        ResetSelectedColor,
+        ResetUnSelectedColor,
+        ResetCheckboxWidth,
+        ResetCheckboxHeight,
+        ResetMark,
+        SetCheckboxShape,
+        ResetCheckboxShape,
+        ResetCheckboxPadding,
+        ResetCheckboxResponseRegion,
+        GetSelect,
+        GetSelectedColor,
+        GetUnSelectedColor,
+        GetCheckMarkColor,
+        GetCheckMarkSize,
+        GetCheckMarkWidth,
+        GetCheckboxShape,
+        SetCheckboxName,
+        SetCheckboxGroup,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 

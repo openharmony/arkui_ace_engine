@@ -740,6 +740,8 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     textSelectable(value: TextSelectableMode): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    marqueeOptions(value: MarqueeOptions): TextAttribute;
+    onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

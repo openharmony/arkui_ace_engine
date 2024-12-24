@@ -65,6 +65,7 @@ public:
     void SetStrokeRadius(float strokeRaidus);
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
+    void SetCapsuleBorderRadius(float borderRadius);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -88,8 +89,10 @@ private:
     void PaintTrailing(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintMoon(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
-    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
+    void PaintCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
+    void PaintVerticalCapsule(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize,
+        const float borderRadius) const;
     void PaintCapsuleLightSweep(
         RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset, const RSPath& path, bool isVertical) const;
 
@@ -147,6 +150,7 @@ private:
     RefPtr<PropertyBool> smoothEffect_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> isRightToLeft_;
+    RefPtr<PropertyFloat> capsuleBorderRadius_;
 
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;

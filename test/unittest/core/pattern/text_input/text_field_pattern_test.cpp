@@ -2377,6 +2377,42 @@ HWTEST_F(TextFieldPatternTest, TextPattern103, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test testInput text IsShowSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowSearch();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnSearch001
+ * @tc.desc: test testInput text HandleOnSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
+}
+
+/**
  * @tc.name: GetTextOrPlaceHolderFontSize001
  * @tc.desc: test testInput text GetTextOrPlaceHolderFontSize
  * @tc.type: FUNC

@@ -103,4 +103,11 @@ void DynamicComponentRendererImpl::Dump(RendererDumpInfo &rendererDumpInfo) {}
 
 void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>& params,
     std::vector<std::string>& info) {}
+
+void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent) {}
+
+bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

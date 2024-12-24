@@ -132,16 +132,29 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(textFieldWrapper);
 
     UpdateFontFeature(layoutWrapper);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
+
+    auto textFieldWidth = CalculateTextFieldWidth(layoutWrapper, searchWidthMax, searchTheme);
+    auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
+    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
+        SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
+    }
+    textFieldWrapper->Measure(childLayoutConstraint);
+    UpdateTextFieldSize(layoutWrapper);
+}
+
+float SearchLayoutAlgorithm::CalculateTextFieldWidth(
+    LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0f);
     auto buttonWidth = searchButtonSizeMeasure_.Width();
     auto cancelButtonWidth = cancelBtnSizeMeasure_.Width();
     auto iconRenderWidth =
         layoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconSizeMeasure_.Width())).ConvertToPx();
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
-
-    auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
-    auto searchButtonNode = searchWrapper->GetHostNode();
-    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto padding = layoutProperty->CreatePaddingAndBorder();
     float leftPadding = padding.left.value_or(0.0f);
     float rightPadding = padding.right.value_or(0.0f);
@@ -151,7 +164,14 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
         textFieldWidth = searchWidthMax - searchTheme->GetSearchIconLeftSpace().ConvertToPx() - iconRenderWidth -
                          searchTheme->GetSearchIconRightSpace().ConvertToPx();
     }
-    if (searchButtonEvent->IsEnabled()) {
+
+    auto searchWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
+    auto searchButtonNode = searchWrapper->GetHostNode();
+    auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
+    auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_RETURN(searchButtonLayoutProperty, 0.0f);
+    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
+    if (searchButtonEvent->IsEnabled() || needToDisable) {
         textFieldWidth = textFieldWidth - buttonWidth - searchTheme->GetSearchDividerWidth().ConvertToPx() -
                          MULTIPLE_2 * searchTheme->GetDividerSideSpace().ConvertToPx();
     }
@@ -165,14 +185,8 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
         auto rightPadding = searchTheme->GetRightPaddingWithoutButton();
         textFieldWidth = textFieldWidth - rightPadding.ConvertToPx();
     }
-    auto textFieldHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
-    if (LessNotEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
-        SetTextFieldLayoutConstraintHeight(childLayoutConstraint, textFieldHeight, layoutWrapper);
-    }
-    textFieldWrapper->Measure(childLayoutConstraint);
-    UpdateTextFieldSize(layoutWrapper);
+
+    return textFieldWidth;
 }
 
 void SearchLayoutAlgorithm::UpdateFontFeature(LayoutWrapper* layoutWrapper)
@@ -763,17 +777,18 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
     auto searchButtonNode = searchButtonWrapper->GetHostNode();
     auto searchButtonEvent = searchButtonNode->GetEventHub<ButtonEventHub>();
     auto buttonSpace = params.searchTheme->GetSearchButtonSpace().ConvertToPx();
-    auto searchButtonContext = searchButtonNode->GetRenderContext();
-    CHECK_NULL_VOID(searchButtonContext);
+    auto searchButtonLayoutProperty = searchButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(searchButtonLayoutProperty);
+    auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
     if (params.isRTL) {
-        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue(1.0) != 0.0) {
+        if (searchButtonEvent->IsEnabled() || needToDisable) {
             cancelButtonHorizontalOffset =
                 searchButtonHorizontalOffset + (searchButtonFrameSize.Width() + TWO * dividerSideSpace + dividerWidth);
         } else {
             cancelButtonHorizontalOffset = searchButtonHorizontalOffset;
         }
     } else {
-        if (searchButtonEvent->IsEnabled() || searchButtonContext->GetOpacityValue(1.0) != 0.0) {
+        if (searchButtonEvent->IsEnabled() || needToDisable) {
             auto cancelButtonOffsetToSearchButton = cancelButtonFrameWidth + 2 * dividerSideSpace + dividerWidth;
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);

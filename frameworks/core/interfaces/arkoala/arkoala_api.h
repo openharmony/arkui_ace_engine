@@ -435,6 +435,8 @@ struct ArkUIProgressStyle {
     ArkUI_Bool shadow;
     ArkUI_Bool showDefaultPercentage;
     ArkUIFontStruct fontInfo;
+    ArkUI_Float32 borderRadiusValue;
+    ArkUI_Int32 borderRadiusUnit;
 };
 
 struct ArkUIGradientType {
@@ -1588,6 +1590,16 @@ struct ArkUITabBarBackgroundBlurStyle {
     ArkUI_Int32 blurType;
 };
 
+struct ArkUITextMarqueeOptions {
+    ArkUI_Float32 step;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 loop;
+    ArkUI_Int32 marqueeStartPolicy;
+    ArkUI_Bool start;
+    ArkUI_Bool fromStart;
+    ArkUI_Bool fadeout;
+};
+
 struct ArkUITabBarBackgroundEffect {
     ArkUI_Float32 radius;
     ArkUI_Float32 saturation;
@@ -2292,6 +2304,11 @@ struct ArkUITextModifier {
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
     void (*setTextEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value);
+    void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
+    void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
+    void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
 };
 
 struct ArkUIButtonModifier {

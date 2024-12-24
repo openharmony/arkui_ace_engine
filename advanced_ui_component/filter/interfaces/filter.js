@@ -290,12 +290,15 @@ class ListFilterRow extends ViewPU {
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+
     get colorRow() {
         return this.__colorRow.get();
     }
+
     get fontWeightRow() {
         return this.__fontWeightRow.get();
     }
+
     get backgroundColorRow() {
         return this.__backgroundColorRow.get();
     }
@@ -2007,25 +2010,25 @@ export class Filter extends ViewPU {
             this.bundleName = getContext(this)?.abilityInfo?.bundleName;
             let v10 = getContext()?.resourceManager;
             this.filterAccessibilityText.accessibilitySelectedText =
-            v10?.getStringByNameSync('filter_accessibility_selected');
+                v10?.getStringByNameSync('filter_accessibility_selected');
             this.filterAccessibilityText.accessibilityUnselectedText =
-            v10?.getStringByNameSync('filter_accessibility_unselected');
+                v10?.getStringByNameSync('filter_accessibility_unselected');
             this.filterAccessibilityText.accessibilityFilters =
-            v10?.getStringByNameSync('filter_accessibility_filters');
+                v10?.getStringByNameSync('filter_accessibility_filters');
             this.filterAccessibilityText.accessibilitySelectedDesc =
-            v10?.getStringByNameSync('filter_accessibility_select_desc');
+                v10?.getStringByNameSync('filter_accessibility_select_desc');
             this.filterAccessibilityText.accessibilityUnselectedDesc =
-            v10?.getStringByNameSync('filter_accessibility_unselect_desc');
+                v10?.getStringByNameSync('filter_accessibility_unselect_desc');
             this.filterAccessibilityText.accessibilityExpandDesc =
-            v10?.getStringByNameSync('filter_accessibility_expand_desc');
+                v10?.getStringByNameSync('filter_accessibility_expand_desc');
             this.filterAccessibilityText.accessibilityExpanded =
-            v10?.getStringByNameSync('filter_accessibility_expanded');
+                v10?.getStringByNameSync('filter_accessibility_expanded');
             this.filterAccessibilityText.accessibilityCollapsed =
-            v10?.getStringByNameSync('filter_accessibility_collapsed');
+                v10?.getStringByNameSync('filter_accessibility_collapsed');
             this.filterAccessibilityText.accessibilityExpand =
-            v10?.getStringByNameSync('filter_accessibility_expand');
+                v10?.getStringByNameSync('filter_accessibility_expand');
             this.filterAccessibilityText.accessibilityCollapse =
-            v10?.getStringByNameSync('filter_accessibility_collapse');
+                v10?.getStringByNameSync('filter_accessibility_collapse');
         }
         catch (s10) {
             let t10 = s10.code;
@@ -2482,8 +2485,7 @@ export class Filter extends ViewPU {
                                 };
                             };
                             q4.paramsGenerator_ = r4;
-                        }
-                        else {
+                        } else {
                             this.updateStateVarsOfChildByElmtId(o4, {
                                 colorRow: this.colorArr ? this.colorArr[m4] : [],
                                 fontWeightRow: this.fontWeightArr ? this.fontWeightArr[m4] : [],

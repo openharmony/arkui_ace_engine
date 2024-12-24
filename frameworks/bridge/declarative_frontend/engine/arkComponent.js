@@ -4890,6 +4890,11 @@ class UIGestureEvent {
     if (this._weakNodePtr.invalid()) {
       return;
     }
+    if (this._gestures === undefined) {
+      this._gestures = [gesture];
+    } else {
+      this._gestures.push(gesture);
+    }
     switch (gesture.gestureType) {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture = gesture;
@@ -4934,10 +4939,10 @@ class UIGestureEvent {
       }
       case CommonGestureType.GESTURE_GROUP: {
         let gestureGroup = gesture;
-        let groupPtr = getUINativeModule().common.addGestureGroup(
+        let groupPtr = getUINativeModule().common.addGestureGroup(this._nodePtr,
           gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode);
         gestureGroup.gestures.forEach((item) => {
-          addGestureToGroup(item, groupPtr);
+          addGestureToGroup(this._nodePtr, item, groupPtr);
         });
         getUINativeModule().common.attachGestureGroup(this._nodePtr, priority, mask, groupPtr);
         break;
@@ -4960,47 +4965,48 @@ class UIGestureEvent {
       return;
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
+    this._gestures = [];
   }
 }
 
-function addGestureToGroup(gesture, gestureGroupPtr) {
+function addGestureToGroup(nodePtr, gesture, gestureGroupPtr) {
   switch (gesture.gestureType) {
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture = gesture;
-      getUINativeModule().common.addTapGestureToGroup(tapGesture.gestureTag, tapGesture.allowedTypes,
+      getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
         tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture = gesture;
-      getUINativeModule().common.addLongPressGestureToGroup(longPressGesture.gestureTag, longPressGesture.allowedTypes,
+      getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
         longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture = gesture;
-      getUINativeModule().common.addPanGestureToGroup(panGesture.gestureTag, panGesture.allowedTypes,
+      getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
         panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture = gesture;
-      getUINativeModule().common.addSwipeGestureToGroup(swipeGesture.gestureTag, swipeGesture.allowedTypes,
+      getUINativeModule().common.addSwipeGestureToGroup(nodePtr, swipeGesture.gestureTag, swipeGesture.allowedTypes,
         swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture = gesture;
-      getUINativeModule().common.addPinchGestureToGroup(pinchGesture.gestureTag, pinchGesture.allowedTypes,
+      getUINativeModule().common.addPinchGestureToGroup(nodePtr, pinchGesture.gestureTag, pinchGesture.allowedTypes,
         pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture = gesture;
-      getUINativeModule().common.addRotationGestureToGroup(rotationGesture.gestureTag, rotationGesture.allowedTypes,
+      getUINativeModule().common.addRotationGestureToGroup(nodePtr, rotationGesture.gestureTag, rotationGesture.allowedTypes,
         rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
         rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
         rotationGesture.onActionCancelCallback, gestureGroupPtr);
@@ -5008,10 +5014,10 @@ function addGestureToGroup(gesture, gestureGroupPtr) {
     }
     case CommonGestureType.GESTURE_GROUP: {
       let gestureGroup = gesture;
-      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(
+      let groupPtr = getUINativeModule().common.addGestureGroupToGroup(nodePtr,
         gestureGroup.gestureTag, gestureGroup.onCancelCallback, gestureGroup.mode, gestureGroupPtr);
         gestureGroup.gestures.forEach((item) => {
-          addGestureToGroup(item, groupPtr);
+          addGestureToGroup(nodePtr, item, groupPtr);
         });
       break;
     }
@@ -11939,6 +11945,37 @@ class TextOnClickModifier extends ModifierWithKey {
 }
 TextOnClickModifier.identity = Symbol('textOnClick');
 
+class TextMarqueeOptionsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextMarqueeOptionsModifier.identity = Symbol('textMarqueeOptions');
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
+  }
+}
+TextOnMarqueeStateChangeModifier.identity = Symbol('textOnMarqueeStateChange');
+
 class TextResponseRegionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -12186,6 +12223,16 @@ class ArkTextComponent extends ArkComponent {
   onTextSelectionChange(callback) {
     modifierWithKey(this._modifiersWithKeys, TextOnTextSelectionChangeModifier.identity,
       TextOnTextSelectionChangeModifier, callback);
+    return this;
+  }
+  marqueeOptions(value) {
+    modifierWithKey(this._modifiersWithKeys, TextMarqueeOptionsModifier.identity,
+      TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback) {
+    modifierWithKey(this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity,
+      TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
   editMenuOptions(value) {
@@ -24839,10 +24886,11 @@ class ProgressStyleModifier extends ModifierWithKey {
       let shadow = this.value.shadow;
       let status = this.value.status;
       let strokeRadius = this.value.strokeRadius;
+      let borderRadius = this.value.borderRadius;
       getUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount,
         scaleWidth, enableSmoothEffect, borderColor, borderWidth, content, fontSize,
         fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage,
-        shadow, status, strokeRadius);
+        shadow, status, strokeRadius, borderRadius);
     }
   }
   checkObjectDiff() {
@@ -30177,7 +30225,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey {
       getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
     } else {
       getUINativeModule().waterFlow.setWaterFlowInitialize(node,
-        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode, this.value?.footerContent);
     }
   }
 }

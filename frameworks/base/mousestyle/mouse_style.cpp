@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "base/mousestyle/mouse_style.h"
 #include "mouse_style.h"
+
+#include "base/log/log_wrapper.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace {
@@ -24,8 +25,12 @@ constexpr int32_t MOUSESTYLE_LOG_LIMIT = 10;
 bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFormat mouseFormat,
     bool isByPass, MouseStyleChangeReason reason)
 {
-    TAG_LOGD(AceLogTag::ACE_MOUSE, "SetMouseFormat windowId = %{public}d, nodeId = %{public}d, "
-        "mouseFormat = %{public}d, reason = %{public}d", windowId, nodeId, mouseFormat, reason);
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "SetMouseFormat windowId = %{public}d, "
+        "nodeId = " SEC_PLD(%{public}d) ", "
+        "mouseFormat = %{public}d, reason = %{public}d", windowId,
+        SEC_PARAM(nodeId), mouseFormat, reason);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, false);
     if (isByPass) {
         return false;
     }
@@ -37,28 +42,26 @@ bool MouseStyleManager::SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFo
         return false;
     }
     if (!windowId) {
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipelineContext, false);
         windowId = static_cast<int32_t>(pipelineContext->GetFocusWindowId());
     }
 
     MouseStyleChangeLog mouseStyleChangeLog;
     mouseStyleChangeLog.windowId = windowId;
     mouseStyleChangeLog.changeNodeId = nodeId;
-    if (vsyncMouseStyleChange_.empty()) {
+    if (vsyncMouseStyleChanges_.empty()) {
         mouseStyleChangeLog.beforeMouseStyle = mouseFormat_;
     } else {
-        mouseStyleChangeLog.beforeMouseStyle = vsyncMouseStyleChange_.back().afterMouseStyle;
+        mouseStyleChangeLog.beforeMouseStyle = vsyncMouseStyleChanges_.back().afterMouseStyle;
     }
     mouseStyleChangeLog.afterMouseStyle = mouseFormat;
     mouseStyleChangeLog.reason = reason;
-    vsyncMouseStyleChange_.push_back(mouseStyleChangeLog);
+    vsyncMouseStyleChanges_.push_back(mouseStyleChangeLog);
     return true;
 }
     
 void MouseStyleManager::VsyncMouseFormat()
 {
-    if (vsyncMouseStyleChange_.empty()) {
+    if (vsyncMouseStyleChanges_.empty()) {
         return;
     }
 
@@ -68,7 +71,7 @@ void MouseStyleManager::VsyncMouseFormat()
     MouseStyleChangeReason changeReason = MouseStyleChangeReason::INNER_SET_MOUSESTYLE;
     int32_t changeNodeId = -1;
     int32_t windowId = -1;
-    for (const auto& iter : vsyncMouseStyleChange_) {
+    for (const auto& iter : vsyncMouseStyleChanges_) {
         if (iter.reason >= changeReason) {
             mouseFormat_ = iter.afterMouseStyle;
             windowId = iter.windowId;
@@ -83,26 +86,26 @@ void MouseStyleManager::VsyncMouseFormat()
     if (mouseFormat_ == lastVsyncMouseFormat_) {
         TAG_LOGI(AceLogTag::ACE_MOUSE, "VsyncMouseFormat mouseFormat_ and "
             "lastVsyncMouseFormat_ = %{public}d is same.", mouseFormat_);
-        vsyncMouseStyleChange_.clear();
+        vsyncMouseStyleChanges_.clear();
         return;
     }
 
-    TAG_LOGI(AceLogTag::ACE_MOUSE, "VsyncMouseFormat setPointerStyle, windowId is %{public}d, "
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "VsyncMouseFormat setPointerStyle, windowId is %{public}d, "
         "nodeId is %{public}d, last vsync mouseFormat is %{public}d, set mouseFormat is %{public}d",
         windowId, changeNodeId, lastVsyncMouseFormat_, mouseFormat_);
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), mouseFormat_);
 
-    mouseStyleChangeLog_.push_back(mouseStyleChangeLog);
-    if (mouseStyleChangeLog_.size() > MOUSESTYLE_LOG_LIMIT) {
-        mouseStyleChangeLog_.pop_front();
+    mouseStyleChangeLogs_.push_back(mouseStyleChangeLog);
+    if (mouseStyleChangeLogs_.size() > MOUSESTYLE_LOG_LIMIT) {
+        mouseStyleChangeLogs_.pop_front();
     }
-    vsyncMouseStyleChange_.clear();
+    vsyncMouseStyleChanges_.clear();
 }
 
 void MouseStyleManager::DumpMouseStyleChangeLog()
 {
-    for (const auto& iter : mouseStyleChangeLog_) {
+    for (const auto& iter : mouseStyleChangeLogs_) {
         TAG_LOGI(AceLogTag::ACE_MOUSE, "MouseStyleChangeLog: windowId is %{public}d, "
             "nodeId is %{public}d, beforeMouseStyle is %{public}d, afterMouseStyle is %{public}d",
             iter.windowId, iter.changeNodeId,

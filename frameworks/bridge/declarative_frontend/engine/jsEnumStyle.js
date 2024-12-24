@@ -3200,8 +3200,8 @@ let SwiperNestedScrollMode;
 
 let PageFlipMode;
 (function (PageFlipMode) {
-  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = "CONTINUOUS";
-  PageFlipMode[PageFlipMode.SINGLE = 1] = "SINGLE";
+  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = 'CONTINUOUS';
+  PageFlipMode[PageFlipMode.SINGLE = 1] = 'SINGLE';
 })(PageFlipMode || (PageFlipMode = {}));
 
 let CheckBoxStyle;
@@ -3346,6 +3346,19 @@ let TextResponseType;
   TextResponseType[TextResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
+
+let MarqueeState;
+(function (MarqueeState) {
+  MarqueeState[MarqueeState.START = 0] = 'START';
+  MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
+  MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
+})(MarqueeState || (MarqueeState = {}));
+
+let MarqueeStartPolicy;
+(function (MarqueeStartPolicy) {
+  MarqueeStartPolicy[MarqueeStartPolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
+})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {

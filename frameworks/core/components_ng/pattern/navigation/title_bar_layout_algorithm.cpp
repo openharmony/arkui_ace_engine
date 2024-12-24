@@ -753,6 +753,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     if (isCustom) {
+        isInitialTitle_ = false;
         // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
         auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
         auto customOffsetX = 0.0f;

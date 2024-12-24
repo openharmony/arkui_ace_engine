@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include "node_model.h"
 #include "node_transition.h"
 #include "waterflow_section_option.h"
+#include "progress_option.h"
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -3894,6 +3895,22 @@ void ResetFontWeight(ArkUI_NodeHandle node)
     }
 }
 
+int32_t SetImmutableFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || item->value[NUM_0].i32 < 0 ||
+        item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_FONT_WEIGHT_REGULAR)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setImmutableFontWeight(node->uiNodeHandle, item->value[0].i32);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t SetFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -6368,6 +6385,47 @@ void ResetProgressType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getProgressModifier()->resetProgressType(node->uiNodeHandle);
+}
+
+int32_t SetProgressLinearStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    node->progressLinearStyle = item->object;
+
+    auto* fullImpl = GetFullImpl();
+    auto resultValue = fullImpl->getNodeModifiers()->getProgressModifier()->getProgressType(node->uiNodeHandle);
+    if (item->size < 0 || item->object == nullptr || PROGRESS_TYPE_LINEAR != resultValue) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* option = reinterpret_cast<ArkUI_ProgressLinearStyleOption*>(item->object);
+    if (option == nullptr) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    ArkUIProgressStyle progressStyle;
+    progressStyle.enableScanEffect = option->scanEffectEnable;
+    progressStyle.enableSmoothEffect = option->smoothEffectEnable;
+    progressStyle.strokeWidthValue = option->strokeWidth;
+    progressStyle.strokeWidthUnit = static_cast<uint8_t>(DimensionUnit::VP);
+    progressStyle.strokeRadiusValue = option->strokeRadius;
+    progressStyle.strokeRadiusUnit = static_cast<uint8_t>(DimensionUnit::VP);
+
+    fullImpl->getNodeModifiers()->getProgressModifier()->setProgressStyle(node->uiNodeHandle, &progressStyle);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetProgressLinearStyle(ArkUI_NodeHandle node)
+{
+    g_attributeItem.object = node->progressLinearStyle;
+    return &g_attributeItem;
+}
+
+void ResetProgressLinearStyle(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getProgressModifier()->resetProgressStyle(node->uiNodeHandle);
 }
 
 int32_t SetXComponentId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -13168,7 +13226,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextCopyOption, SetBaseLineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
-        SetTextContentWithStyledString, SetHalfLeading };
+        SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13183,7 +13241,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextCopyOption, GetBaseLineOffset, GetTextShadow, GetTextMinFontSize, GetTextMaxFontSize, GetTextFont,
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
-        GetHalfLeading };
+        GetHalfLeading, GetFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -13199,7 +13257,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextOverflow, ResetTextFontFamily, ResetTextCopyOption, ResetBaselineOffset, ResetTextShadow,
         ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy, ResetTextIndent,
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
-        ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString, ResetHalfLeading };
+        ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString,
+        ResetHalfLeading, ResetFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -13501,7 +13560,8 @@ void ResetButtonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetProgressValue, SetProgressTotal, SetProgressColor, SetProgressType };
+    static Setter* setters[] = { SetProgressValue, SetProgressTotal, SetProgressColor, SetProgressType,
+        SetProgressLinearStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "progress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13511,7 +13571,8 @@ int32_t SetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
 
 const ArkUI_AttributeItem* GetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetProgressValue, GetProgressTotal, GetProgressColor, GetProgressType };
+    static Getter* getters[] = { GetProgressValue, GetProgressTotal, GetProgressColor, GetProgressType,
+        GetProgressLinearStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "progress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -13522,7 +13583,8 @@ const ArkUI_AttributeItem* GetProgressAttribute(ArkUI_NodeHandle node, int32_t s
 
 void ResetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* resetters[] = { ResetProgressValue, ResetProgressTotal, ResetProgressColor, ResetProgressType };
+    static Resetter* resetters[] = { ResetProgressValue, ResetProgressTotal, ResetProgressColor, ResetProgressType,
+        ResetProgressLinearStyle };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "progress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

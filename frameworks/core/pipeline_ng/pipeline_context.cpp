@@ -368,7 +368,7 @@ void PipelineContext::FlushDirtyNodeUpdate()
         for (const auto& node : dirtyNodes) {
             if (AceType::InstanceOf<NG::CustomNodeBase>(node)) {
                 auto customNode = AceType::DynamicCast<NG::CustomNodeBase>(node);
-                ACE_SCOPED_TRACE("CustomNodeUpdate %s", customNode->GetJSViewName().c_str());
+                ACE_SCOPED_TRACE("CustomNodeUpdate name:%s,id:%d", customNode->GetJSViewName().c_str(), node->GetId());
                 customNode->Update();
             }
         }
@@ -837,7 +837,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
 void PipelineContext::FlushAfterLayoutCallbackInImplicitAnimationTask()
 {
     if (AnimationUtils::IsImplicitAnimationOpen()) {
-        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+        TAG_LOGD(AceLogTag::ACE_ANIMATION,
             "Can not flush implicit animation task after layout because implicit animation is open.");
         return;
     }
@@ -1428,7 +1428,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             break;
         }
         case WindowSizeChangeReason::ROTATION: {
-            safeAreaManager_->UpdateKeyboardSafeArea(0.0f);
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
             FlushUITasks();
@@ -1490,10 +1489,11 @@ void PipelineContext::PostKeyboardAvoidTask()
             weakManager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto context = weakContext.Upgrade();
             CHECK_NULL_VOID(context);
-            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+            context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, nullptr, true);
             auto manager = weakManager.Upgrade();
             CHECK_NULL_VOID(manager);
             manager->SetLaterAvoid(false);
+            manager->SetFocusFieldAlreadyTriggerWsCallback(false);
         },
         TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaChange");
 }
@@ -2385,6 +2385,10 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
 
 bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
+    if (!SystemProperties::GetFocusCanBeActive()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusActive false");
+        return false;
+    }
     auto containerId = Container::CurrentId();
     auto subWindowContainerId = SubwindowManager::GetInstance()->GetSubContainerId(containerId);
     if (subWindowContainerId >= 0) {
@@ -2407,6 +2411,9 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Pipeline focus turns to %{public}s", isFocusActive ? "active" : "inactive");
     isFocusActive_ = isFocusActive;
+    auto focusManager = GetOrCreateFocusManager();
+    CHECK_NULL_RETURN(focusManager, false);
+    focusManager->TriggerFocusActiveChangeCallback(isFocusActive);
     for (auto& pair : isFocusActiveUpdateEvents_) {
         if (pair.second) {
             pair.second(isFocusActive_);
@@ -4656,10 +4663,6 @@ std::string PipelineContext::GetCurrentExtraInfo()
 void PipelineContext::SetCursor(int32_t cursorValue)
 {
     if (cursorValue >= 0 && cursorValue <= static_cast<int32_t>(MouseFormat::RUNNING)) {
-        auto window = GetWindow();
-        CHECK_NULL_VOID(window);
-        auto mouseStyle = MouseStyle::CreateMouseStyle();
-        CHECK_NULL_VOID(mouseStyle);
         auto mouseFormat = static_cast<MouseFormat>(cursorValue);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         CHECK_NULL_VOID(mouseStyleManager);
@@ -4671,10 +4674,6 @@ void PipelineContext::SetCursor(int32_t cursorValue)
 
 void PipelineContext::RestoreDefault(int32_t windowId)
 {
-    auto window = GetWindow();
-    CHECK_NULL_VOID(window);
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    CHECK_NULL_VOID(mouseStyle);
     ChangeMouseStyle(-1, MouseFormat::DEFAULT, windowId > 0 ? windowId : GetFocusWindowId(),
         false, MouseStyleChangeReason::USER_SET_MOUSESTYLE);
     auto mouseStyleManager = eventManager_->GetMouseStyleManager();

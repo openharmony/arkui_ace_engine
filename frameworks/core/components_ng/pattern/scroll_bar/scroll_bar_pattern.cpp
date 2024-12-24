@@ -251,7 +251,7 @@ void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExte
     scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent));
 }
 
-void ScrollBarPattern::UpdateScrollBarOffset()
+void ScrollBarPattern::UpdateScrollBarOffset(int32_t scrollSource)
 {
     CHECK_NULL_VOID(scrollBar_);
     auto host = GetHost();
@@ -264,10 +264,11 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
     UpdateScrollBarRegion(scrollableNodeOffset_, estimatedHeight,
-        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
+        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f), scrollSource);
 }
 
-void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset)
+void ScrollBarPattern::UpdateScrollBarRegion(
+    float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource)
 {
     // outer scrollbar, viewOffset is padding offset
     if (scrollBar_) {
@@ -284,7 +285,7 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
         }
         Offset scrollOffset = { offset, offset };
         scrollBar_->SetReverse(IsReverse());
-        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, scrollSource);
         scrollBar_->MarkNeedRender();
     }
 }
