@@ -678,6 +678,17 @@ void AssignCast(std::optional<DimensionUnit>& dst, const Ark_LengthUnit& src)
 }
 
 template<>
+void AssignCast(std::optional<Dimension>& dst, const Ark_ArrowPointPosition& src)
+{
+    switch (src) {
+        case ARK_ARROW_POINT_POSITION_START: dst = 0.0_pct; break;
+        case ARK_ARROW_POINT_POSITION_CENTER: dst = 0.5_pct; break;
+        case ARK_ARROW_POINT_POSITION_END: dst = 1.0_pct; break;
+        default: LOGE("Unexpected enum value in Ark_ArrowPointPosition: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src)
 {
     switch (src) {
@@ -1506,6 +1517,26 @@ void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src)
         case ARK_BLEND_MODE_COLOR: dst = BlendMode::COLOR; break;
         case ARK_BLEND_MODE_LUMINOSITY: dst = BlendMode::LUMINOSITY; break;
         default: LOGE("Unknown transition Ark_BlendMode type: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src)
+{
+    switch (src) {
+        case ARK_PLACEMENT_LEFT: dst = Placement::LEFT; break;
+        case ARK_PLACEMENT_RIGHT: dst = Placement::RIGHT; break;
+        case ARK_PLACEMENT_TOP: dst = Placement::TOP; break;
+        case ARK_PLACEMENT_BOTTOM: dst = Placement::BOTTOM; break;
+        case ARK_PLACEMENT_TOP_LEFT: dst = Placement::TOP_LEFT; break;
+        case ARK_PLACEMENT_TOP_RIGHT: dst = Placement::TOP_RIGHT; break;
+        case ARK_PLACEMENT_BOTTOM_LEFT: dst = Placement::BOTTOM_LEFT; break;
+        case ARK_PLACEMENT_BOTTOM_RIGHT: dst = Placement::BOTTOM_RIGHT; break;
+        case ARK_PLACEMENT_LEFT_TOP: dst = Placement::LEFT_TOP; break;
+        case ARK_PLACEMENT_LEFT_BOTTOM: dst = Placement::LEFT_BOTTOM; break;
+        case ARK_PLACEMENT_RIGHT_TOP: dst = Placement::RIGHT_TOP; break;
+        case ARK_PLACEMENT_RIGHT_BOTTOM: dst = Placement::RIGHT_BOTTOM; break;
+        default: LOGE("Unknown transition Ark_Placement type: %{public}d", src);
     }
 }
 

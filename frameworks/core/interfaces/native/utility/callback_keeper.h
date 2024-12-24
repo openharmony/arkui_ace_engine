@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 class CallbackKeeper {
 public:
     using ResultHandler = std::function<void(const void *)>;
+    using ReverseHandler = std::function<void()>;
 
     static void Hold(Ark_Int32 resourceId)
     {
@@ -77,6 +78,24 @@ public:
 
         Release(continuation.resource.resourceId);
     }
+
+    template <typename CallbackType>
+    static CallbackType DefineReverseCallback(ReverseHandler &&handler)
+    {
+        // create continuation
+        CallbackType callback {
+            .resource = GetNextCallbackResource(),
+            .call = &InvokeReverseInternal
+        };
+
+        auto resultHandler = [handler](const void *) {
+            handler();
+        };
+
+        // register handler
+        storage_[callback.resource.resourceId] = { 1, std::move(resultHandler) }; // +1 for automatic Hold
+        return callback;
+    }
 private:
     struct CallbackData {
         int32_t counter = 0;
@@ -90,6 +109,13 @@ private:
     {
         if (auto it = storage_.find(resourceId); it != storage_.end()) {
             it->second.handler(valuePtr);
+        }
+    }
+
+    static void InvokeReverseInternal(const Ark_Int32 resourceId)
+    {
+        if (auto it = storage_.find(resourceId); it != storage_.end()) {
+            it->second.handler(nullptr);
         }
     }
 };

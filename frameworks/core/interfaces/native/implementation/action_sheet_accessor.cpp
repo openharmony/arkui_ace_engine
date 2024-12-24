@@ -31,27 +31,6 @@ DimensionOffset Convert(const Ark_ActionSheetOffset& src)
         OptConvert<Dimension>(src.dy).value_or(Dimension()));
 }
 
-void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src)
-{
-    switch (src) {
-        case BindSheetDismissReason::BACK_PRESSED:
-            dst = Ark_DismissReason::ARK_DISMISS_REASON_PRESS_BACK;
-            break;
-        case BindSheetDismissReason::TOUCH_OUTSIDE:
-            dst = Ark_DismissReason::ARK_DISMISS_REASON_TOUCH_OUTSIDE;
-            break;
-        case BindSheetDismissReason::CLOSE_BUTTON:
-            dst = Ark_DismissReason::ARK_DISMISS_REASON_CLOSE_BUTTON;
-            break;
-        case BindSheetDismissReason::SLIDE_DOWN:
-            dst = Ark_DismissReason::ARK_DISMISS_REASON_SLIDE_DOWN;
-            break;
-        default:
-            dst = static_cast<Ark_DismissReason>(-1);
-            LOGE("Unexpected enum value in BindSheetDismissReason: %{public}d", src);
-    }
-}
-
 template<>
 ActionSheetInfo Convert(const Ark_SheetInfo& src)
 {
