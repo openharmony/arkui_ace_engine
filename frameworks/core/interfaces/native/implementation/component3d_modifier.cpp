@@ -21,6 +21,22 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+namespace Converter {
+#if defined(MODEL_COMPONENT_SUPPORTED)
+template<>
+void AssignCast(std::optional<OHOS::Render3D::SurfaceType>& dst, const Ark_ModelType& src)
+{
+    switch (src) {
+        case ARK_MODEL_TYPE_TEXTURE: dst = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE; break;
+        case ARK_MODEL_TYPE_SURFACE: dst = OHOS::Render3D::SurfaceType::SURFACE_WINDOW; break;
+        default: LOGE("Unexpected enum value in Ark_ModelType: %{public}d", src);
+    }
+}
+#endif // MODEL_COMPONENT_SUPPORTED
+} // Converter
+} // OHOS::Ace::NG
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace Component3DModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -40,11 +56,41 @@ namespace Component3DInterfaceModifier {
 void SetComponent3DOptionsImpl(Ark_NativePointer node,
                                const Opt_SceneOptions* sceneOptions)
 {
-    LOGE("ARKOALA Component3dModifier.SetComponent3DOptionsImpl not implemented -> custom object");
+    #ifdef MODEL_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = sceneOptions ? Converter::OptConvert<type>(*sceneOptions) : std::nullopt;
-    //Component3DModelNG::SetSetComponent3DOptions(frameNode, convValue);
+    std::string bundleName;
+    std::string moduleName;
+    Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+#if defined(KIT_3D_ENABLE)
+    std::shared_ptr<Render3D::ISceneAdapter> scene = nullptr;
+    bool isSceneApi = false;
+#endif
+    auto options = Converter::OptConvert<Ark_SceneOptions>(*sceneOptions);
+    if (options) {
+        auto modelOpt = Converter::OptConvert<Ark_ModelType>(options.value().modelType);
+        if (modelOpt) {
+            auto st = Converter::OptConvert<OHOS::Render3D::SurfaceType>(modelOpt.value());
+            if (st) {
+                surfaceType = st.value();
+            }
+        }
+        Converter::VisitUnion(options.value().scene,
+            [frameNode, surfaceType](const Ark_ResourceStr& value0) {
+                std::string bundleName = Converter::Convert<std::string>(value0.value1.bundleName);
+                std::string moduleName = Converter::Convert<std::string>(value0.value1.moduleName);
+                ModelViewNG::SetModelViewContext(frameNode, { bundleName, moduleName, surfaceType });
+            },
+            [](const Ark_Scene& value) {
+#if defined(KIT_3D_ENABLE)
+                auto sceneStub = Converter::Convert<std::string>(value.__SceneStub);
+                LOGE("Component3DInterfaceModifier::SetComponent3DOptionsImpl scene attribute is stub.");
+#endif
+            },
+            []() {}
+        );
+    }
+#endif
 }
 } // Component3DInterfaceModifier
 namespace Component3DAttributeModifier {
