@@ -3673,6 +3673,11 @@ void PipelineContext::FlushReload(const ConfigurationChange& configurationChange
             pipeline->FlushUITasks();
         }
     });
+    auto stage = stageManager_->GetStageNode();
+    CHECK_NULL_VOID(stage);
+    auto renderContext = stage->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateWindowBlur();
 }
 
 void PipelineContext::Destroy()

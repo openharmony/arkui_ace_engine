@@ -1477,6 +1477,12 @@ var BlurType;
   BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
 })(BlurType || (BlurType = {}));
 
+let EffectType;
+(function (EffectType) {
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
+})(EffectType || (EffectType = {}));
+
 var ThemeColorMode;
 (function (ThemeColorMode) {
   ThemeColorMode[ThemeColorMode["System"] = 0] = "System";

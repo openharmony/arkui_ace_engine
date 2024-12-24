@@ -513,7 +513,8 @@ public:
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
         const std::string& bundle, const std::string& module);
-
+    void BuildResConfig(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
     void UpdateConfigurationSyncForAll(
         const ParsedConfig& parsedConfig, const std::string& configuration);
@@ -724,7 +725,9 @@ private:
     void FillAutoFillViewData(const RefPtr<NG::FrameNode> &node, RefPtr<ViewDataWrap> &viewDataWrap);
 
     void NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration);
-
+    void ProcessThemeUpdate(const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
+    DeviceOrientation ProcessDirectionUpdate(
+        const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -771,7 +774,6 @@ private:
     std::vector<std::string> registerComponents_;
 
     std::unordered_set<std::string> resAdapterRecord_;
-
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;
