@@ -66,6 +66,16 @@ public:
         return textTimerController_;
     }
 
+    void SetJSTextTimerController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextTimerController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextTimerController()
+    {
+        return jsTextTimerController_.Upgrade();
+    }
+
     int32_t GetTextId()
     {
         if (!textId_.has_value()) {
@@ -123,6 +133,7 @@ private:
     std::optional<TextTimerMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
     RefPtr<TextTimerController> textTimerController_;
+    WeakPtr<Referenced> jsTextTimerController_;
     RefPtr<Scheduler> scheduler_;
     RefPtr<FrameNode> textNode_;
     uint64_t elapsedTime_ = 0; // millisecond.

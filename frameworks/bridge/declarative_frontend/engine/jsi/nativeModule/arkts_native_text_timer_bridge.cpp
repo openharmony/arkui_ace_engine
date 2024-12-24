@@ -19,6 +19,8 @@
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_texttimer.h"
+#include "core/components/declaration/texttimer/texttimer_declaration.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 
@@ -32,6 +34,8 @@ constexpr int32_t NUM_4 = 4;
 constexpr int32_t NUM_5 = 5;
 constexpr int32_t NUM_6 = 6;
 constexpr int32_t NUM_7 = 7;
+constexpr bool DEFAULT_COUNT_DOWN = false;
+constexpr double MAX_COUNT_DOWN = 86400000.0;
 const std::string DEFAULT_STR = "-1";
 const char* TEXTTIMER_NODEPTR_OF_UINODE = "nodePtr_";
 } // namespace
@@ -306,6 +310,56 @@ ArkUINativeModuleValue TextTimerBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             CHECK_NULL_RETURN(frameNode, nullptr);
             return AceType::Claim(frameNode);
         });
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextTimerBridge::SetTextTimerOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> isCountDownVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> countVal = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    bool isCountDown = DEFAULT_COUNT_DOWN;
+    double count = TIME_DEFAULT_COUNT;
+    if (isCountDownVal->IsBoolean()) {
+        isCountDown = isCountDownVal->BooleaValue(vm);
+        if (isCountDown && countVal->IsNumber()) {
+            auto tempCount = countVal->ToNumber(vm)->Value();
+            if (tempCount > 0 && tempCount < MAX_COUNT_DOWN) {
+                count = tempCount;
+            }
+        }
+    }
+    GetArkUINodeModifiers()->getTextTimerModifier()->setTextTimerOptions(nativeNode, isCountDown, count);
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (controllerVal->IsObject(vm)) {
+        auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
+                                 ->Unwrap<Framework::JSTextTimerController>();
+        if (jsController) {
+            auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
+            auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
+            if (preController) {
+                preController->SetController(nullptr);
+            }
+            TextTimerModelNG::SetJSTextTimerController(
+                frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
+            auto controller = TextTimerModelNG::InitTextController(frameNode);
+            jsController->SetInstanceId(Container::CurrentId());
+            jsController->SetController(controller);
+        }
+    } else {
+        auto pointer = TextTimerModelNG::GetJSTextTimerController(frameNode);
+        auto preController = static_cast<Framework::JSTextTimerController*>(Referenced::RawPtr(pointer));
+        if (preController) {
+            preController->SetController(nullptr);
+        }
+        TextTimerModelNG::SetJSTextTimerController(frameNode, nullptr);
+    }
+
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

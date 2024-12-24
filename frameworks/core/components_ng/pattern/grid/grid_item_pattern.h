@@ -139,6 +139,7 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void UpdateGridItemStyle(GridItemStyle gridItemStyle);
 
 protected:
     void OnModifyDone() override;

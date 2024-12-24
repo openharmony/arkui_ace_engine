@@ -1140,9 +1140,37 @@ class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaInitializeModifier extends ModifierWithKey<TextAreaOptions> {
+  constructor(value: TextAreaOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.setTextAreaInitialize(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().textArea.setTextAreaInitialize(node, this.value?.placeholder, this.value?.text, this.value?.controller);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.placeholder, this.value?.placeholder) ||
+      !isBaseOrResourceEqual(this.stageValue?.text, this.value?.text) ||
+      !isBaseOrResourceEqual(this.stageValue?.controller, this.value?.controller);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
+  }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): TextAreaAttribute {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, TextAreaInitializeModifier.identity, TextAreaInitializeModifier, value[0]);
+    }
+    return this;
   }
   type(value: TextAreaType): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaTypeModifier.identity, TextAreaTypeModifier, value);

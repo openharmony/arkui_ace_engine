@@ -19,6 +19,17 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, MarqueeInitializeModifier.identity, MarqueeInitializeModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, MarqueeInitializeModifier.identity, MarqueeInitializeModifier, undefined);
+    }
+    return this;
+  }
   fontSize(value: Length): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeFontSizeModifier.identity, MarqueeFontSizeModifier, value);
     return this;
@@ -54,6 +65,29 @@ class ArkMarqueeComponent extends ArkComponent implements MarqueeAttribute {
   marqueeUpdateStrategy(value: MarqueeUpdateStrategy): this {
     modifierWithKey(this._modifiersWithKeys, MarqueeUpdateStrategyModifier.identity, MarqueeUpdateStrategyModifier, value);
     return this;
+  }
+}
+
+class MarqueeInitializeModifier extends ModifierWithKey<Object> {
+  constructor(value: Object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('marqueeInitialize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().marquee.setInitialize(node, undefined, undefined, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().marquee.setInitialize(node, this.value?.start, this.value?.step, this.value?.loop,
+        this.value?.fromStart, this.value?.src);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.start, this.value?.start) ||
+          !isBaseOrResourceEqual(this.stageValue?.step, this.value?.step) ||
+          !isBaseOrResourceEqual(this.stageValue?.loop, this.value?.loop) ||
+          !isBaseOrResourceEqual(this.stageValue?.fromStart, this.value?.fromStart) ||
+          !isBaseOrResourceEqual(this.stageValue?.src, this.value?.src);
   }
 }
 

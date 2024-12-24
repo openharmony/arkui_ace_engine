@@ -219,6 +219,7 @@ template("declarative_js_engine_ark") {
       "modules/jsi_timer_module.cpp",
       "nativeModule/arkts_native_alphabet_indexer_bridge.cpp",
       "nativeModule/arkts_native_api_impl_bridge.cpp",
+      "nativeModule/arkts_native_badge_bridge.cpp",
       "nativeModule/arkts_native_blank_bridge.cpp",
       "nativeModule/arkts_native_button_bridge.cpp",
       "nativeModule/arkts_native_calendar_picker_bridge.cpp",

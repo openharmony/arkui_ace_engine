@@ -283,7 +283,10 @@ ArkUINativeModuleValue FrameNodeBridge::CreateTypedFrameNode(ArkUIRuntimeCallInf
         { "Divider", ARKUI_DIVIDER }, { "LoadingProgress", ARKUI_LOADING_PROGRESS }, { "TextInput", ARKUI_TEXT_INPUT },
         { "Search", ARKUI_SEARCH }, { "Button", ARKUI_BUTTON }, { "XComponent", ARKUI_XCOMPONENT },
         { "ListItemGroup", ARKUI_LIST_ITEM_GROUP }, { "WaterFlow", ARKUI_WATER_FLOW },
-        { "FlowItem", ARKUI_FLOW_ITEM},  { "SymbolGlyph", ARKUI_SYMBOL_GLYPH} };
+        { "FlowItem", ARKUI_FLOW_ITEM},  { "SymbolGlyph", ARKUI_SYMBOL_GLYPH}, { "QRCode", ARKUI_QRCODE },
+        { "Badge", ARKUI_BADGE }, { "Grid", ARKUI_GRID }, { "GridItem", ARKUI_GRID_ITEM },
+        { "TextClock", ARKUI_TEXT_CLOCK }, { "TextTimer", ARKUI_TEXT_TIMER }, { "Marquee", ARKUI_MARQUEE },
+        { "TextArea", ARKUI_TEXTAREA } };
     ArkUINodeType nodeType = ARKUI_CUSTOM;
     RefPtr<FrameNode> node;
     ArkUINodeHandle nodePtr = nullptr;

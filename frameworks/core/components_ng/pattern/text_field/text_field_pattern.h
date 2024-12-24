@@ -337,6 +337,16 @@ public:
         return textFieldController_;
     }
 
+    void SetJSTextEditableController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextEditableController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextEditableController()
+    {
+        return jsTextEditableController_.Upgrade();
+    }
+
     void SetTextEditController(const RefPtr<TextEditController>& textEditController)
     {
         textEditingController_ = textEditController;
@@ -1797,6 +1807,7 @@ private:
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
 
     RefPtr<TextFieldController> textFieldController_;
+    WeakPtr<Referenced> jsTextEditableController_;
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw

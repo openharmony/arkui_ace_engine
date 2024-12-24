@@ -37,6 +37,7 @@ public:
     void SetOnBounce(std::function<void()>&& onChange) override;
     void SetOnFinish(std::function<void()>&& onChange) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetAllowScale(FrameNode* frameNode, const bool allowScale);
     static void SetFontWeight(FrameNode* frameNode, const std::optional<FontWeight>& fontWeight);
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& fontFamilies);
@@ -49,6 +50,16 @@ public:
     static void SetOnFinish(FrameNode* frameNode, std::function<void()>&& onChange);
     static void SetMarqueeFrameRateRange(
         FrameNode* frameNode, const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type);
+    static void SetValue(FrameNode* frameNode, const std::optional<std::string>& value);
+    static void ResetValue(FrameNode* frameNode);
+    static void SetPlayerStatus(FrameNode* frameNode, const std::optional<bool>& playerStatus);
+    static void ResetPlayerStatus(FrameNode* frameNode);
+    static void SetScrollAmount(FrameNode* frameNode, const std::optional<double>& scrollAmount);
+    static void ResetScrollAmount(FrameNode* frameNode);
+    static void SetLoop(FrameNode* frameNode, const std::optional<int32_t>& loop);
+    static void ResetLoop(FrameNode* frameNode);
+    static void SetDirection(FrameNode* frameNode, const std::optional<MarqueeDirection>& direction);
+    static void ResetDirection(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 

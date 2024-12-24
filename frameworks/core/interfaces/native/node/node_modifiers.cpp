@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_api.h"
 
 #include "core/interfaces/native/node/alphabet_indexer_modifier.h"
+#include "core/interfaces/native/node/badge_modifier.h"
 #include "core/interfaces/native/node/blank_modifier.h"
 #include "core/interfaces/native/node/button_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
@@ -225,7 +226,7 @@ const ArkUINodeModifiers impl = {
     nullptr, // TabsControllerModifier
     NodeModifier::GetSwiperControllerModifier,
     NodeModifier::GetGestureModifier, // GestureModifier
-    nullptr, // BadgeModifier
+    NodeModifier::GetBadgeModifier, // BadgeModifier
     nullptr, // WebModifier
     NodeModifier::GetRefreshModifier, // RefreshModifier
     nullptr, // MenuItemGroupModifier

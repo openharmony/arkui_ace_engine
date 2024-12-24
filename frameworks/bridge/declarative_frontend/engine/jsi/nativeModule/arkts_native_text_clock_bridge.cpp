@@ -16,12 +16,14 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_clock_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_text_clock.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,11 +35,46 @@ constexpr int32_t NUM_4 = 4;
 constexpr int32_t NUM_5 = 5;
 constexpr int32_t NUM_6 = 6;
 constexpr int32_t NUM_7 = 7;
+constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
+constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
+constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
 const std::string DEFAULT_STR = "-1";
 const char* TEXTCLOCK_NODEPTR_OF_UINODE = "nodePtr_";
 const std::string TEXTCLOCK_DATE_TIME_OPTIONS_HOUR = "hour";
 const std::string TEXTCLOCK_DATE_TIME_OPTIONS_TWO_DIGIT_VAL = "2-digit";
 const std::string TEXTCLOCK_DATE_TIME_OPTIONS_NUMERIC_VAL = "numeric";
+
+bool HoursWestIsValid(int32_t hoursWest)
+{
+    return !(hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT);
+}
+
+float GetHoursWest(float hoursWest)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_ELEVEN)) {
+        for (float i : HOURS_WEST) {
+            if (NearEqual(hoursWest, i)) {
+                return hoursWest;
+            }
+        }
+    }
+
+    return int32_t(hoursWest);
+}
+
+void RemoveJSController(
+    FrameNode* frameNode, const RefPtr<TextClockController>& controller, Framework::JSTextClockController* jsController)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(controller);
+    CHECK_NULL_VOID(jsController);
+    auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
+    auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+    if (preController) {
+        preController->removeController(controller);
+    }
+    TextClockModelNG::SetJSTextClockController(frameNode, Referenced::Claim(static_cast<Referenced*>(jsController)));
+}
 } // namespace
 
 ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -369,6 +406,63 @@ ArkUINativeModuleValue TextClockBridge::ResetDateTimeOptions(ArkUIRuntimeCallInf
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextClockModifier()->resetDateTimeOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::SetTextClockTimeZoneOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> hourWestVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+    float hourWest = NAN;
+    if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->Int32Value(vm))) {
+        hourWest = GetHoursWest(hourWestVal->ToNumber(vm)->Value());
+    }
+    if (themeColors.has_value()) {
+        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
+            nativeNode, themeColors->FontSecondary().GetValue());
+    }
+    GetArkUINodeModifiers()->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    auto themeColors = Framework::JSThemeUtils::GetThemeColors();
+    if (themeColors.has_value()) {
+        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
+            nativeNode, themeColors->FontSecondary().GetValue());
+    }
+
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    auto controller = TextClockModelNG::InitTextController(frameNode);
+    if (!controllerVal->IsUndefined() && !controllerVal->IsNull() && controllerVal->IsObject(vm)) {
+        auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
+                                 ->Unwrap<Framework::JSTextClockController>();
+        if (jsController) {
+            jsController->SetInstanceId(Container::CurrentId());
+            if (controller) {
+                RemoveJSController(frameNode, controller, jsController);
+                jsController->AddController(controller);
+            }
+        }
+    } else if (controller) {
+        auto pointer = TextClockModelNG::GetJSTextClockController(frameNode);
+        auto preController = static_cast<Framework::JSTextClockController*>(Referenced::RawPtr(pointer));
+        if (preController) {
+            preController->removeController(controller);
+        }
+        TextClockModelNG::SetJSTextClockController(frameNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
