@@ -1888,7 +1888,10 @@ void FrameNode::ThrottledVisibleTask()
     CHECK_NULL_VOID(eventHub_);
     auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
     auto& userCallback = eventHub_->GetThrottledVisibleAreaCallback();
-    CHECK_NULL_VOID(userCallback.callback);
+    if (!userCallback.callback) {
+        throttledCallbackOnTheWay_ = false;
+        return;
+    }
     if (!throttledCallbackOnTheWay_) {
         return;
     }
@@ -6157,5 +6160,26 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
         }
     }
     return list;
+}
+
+void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto& throttledVisibleAreaCallback = eventHub_->GetThrottledVisibleAreaCallback();
+    auto pipeline = GetContext();
+    if (isApproximate) {
+        eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        if (!hasInnerCallback && !hasUserCallback && pipeline) {
+            throttledCallbackOnTheWay_ = false;
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    } else {
+        eventHub_->CleanVisibleAreaCallback(true, false);
+        if (!hasInnerCallback && !throttledVisibleAreaCallback.callback && pipeline) {
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG
