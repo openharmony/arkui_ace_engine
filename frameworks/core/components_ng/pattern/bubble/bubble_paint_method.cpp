@@ -545,7 +545,11 @@ void BubblePaintMethod::BuildTopDoubleBorderPath(RSPath& path, float radius)
         borderOffset = innerBorderWidth_ / HALF;
     }
     float childOffsetY = childOffset_.GetY();
-    if (!(enableArrow_ && showArrow_)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    if (!(enableArrow_ && showArrow_) && !popupTheme->GetPopupDoubleBorderEnable()) {
         path.LineTo(childOffset_.GetX() + childSize_.Width() - radius, childOffsetY + borderOffset);
         return;
     }
@@ -640,7 +644,11 @@ void BubblePaintMethod::BuildRightDoubleBorderPath(RSPath& path, float radius)
 {
     float borderOffset = GetBorderOffset();
     float childOffsetY = childOffset_.GetY();
-    if (enableArrow_ && showArrow_) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    if ((enableArrow_ && showArrow_) || popupTheme->GetPopupDoubleBorderEnable()) {
         float arrowRightOffset = childOffset_.GetY() - BUBBLE_ARROW_HEIGHT.ConvertToPx();
         switch (arrowPlacement_) {
             case Placement::LEFT:
@@ -720,7 +728,11 @@ void BubblePaintMethod::BuildBottomDoubleBorderPath(RSPath& path, float radius)
 {
     float borderOffset = GetBorderOffset();
     float childOffsetY = childOffset_.GetY();
-    if (!(enableArrow_ && showArrow_)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    if (!(enableArrow_ && showArrow_) && !popupTheme->GetPopupDoubleBorderEnable()) {
         path.LineTo(childOffset_.GetX() + radius, childOffsetY + childSize_.Height() - borderOffset);
         return;
     }
@@ -752,7 +764,11 @@ void BubblePaintMethod::BuildLeftDoubleBorderPath(RSPath& path, float radius)
 {
     float borderOffset = GetBorderOffset();
     float childOffsetY = childOffset_.GetY();
-    if (!(enableArrow_ && showArrow_)) {
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto popupTheme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(popupTheme);
+    if (!(enableArrow_ && showArrow_) && !popupTheme->GetPopupDoubleBorderEnable()) {
         path.LineTo(childOffset_.GetX() + borderOffset, childOffsetY + radius + borderOffset);
         return;
     }
