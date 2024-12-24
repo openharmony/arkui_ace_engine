@@ -1032,10 +1032,6 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
-    static bool IsPipelineDestroyed(int32_t instanceId)
-    {
-        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
-    }
 
     void AnimateOnSafeAreaUpdate();
     void RegisterAttachedNode(UINode* uiNode);
@@ -1326,7 +1322,6 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
-    static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
