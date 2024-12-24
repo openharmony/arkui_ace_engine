@@ -131,7 +131,7 @@ void SessionWrapperImpl::InitAllCallback()
 {
     CHECK_NULL_VOID(session_);
     auto sessionCallbacks = session_->GetExtensionSessionEventCallback();
-    auto callSessionId = GetSessionId();
+    int32_t callSessionId = GetSessionId();
     foregroundCallback_ = [weak = hostPattern_, taskExecutor = taskExecutor_](OHOS::Rosen::WSError errcode) {
         if (errcode != OHOS::Rosen::WSError::WS_OK) {
             taskExecutor->PostTask(
