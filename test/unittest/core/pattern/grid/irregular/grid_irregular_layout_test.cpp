@@ -230,7 +230,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->overScroll_ = false;
+    algorithm->canOverScrollStart_ = false;
+    algorithm->canOverScrollEnd_ = false;
     auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
@@ -426,7 +427,8 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
-    algo->overScroll_ = true;
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1774,12 +1776,12 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone();
 
     int32_t targetIndex = 19;
     auto& info = pattern_->info_;
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     ScrollToIndex(targetIndex, false, ScrollAlign::END);
     for (int i = 0; i < 10; ++i) {

@@ -487,6 +487,13 @@ var EdgeEffect;
   EdgeEffect[EdgeEffect.None = 2] = 'None';
 })(EdgeEffect || (EdgeEffect = {}));
 
+let EffectEdge;
+(function (EffectEdge) {
+  EffectEdge[EffectEdge.START = 1] = 'START';
+  EffectEdge[EffectEdge.END = 2] = 'END';
+  EffectEdge[EffectEdge.ALL = 3] = 'ALL';
+})(EffectEdge || (EffectEdge = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';

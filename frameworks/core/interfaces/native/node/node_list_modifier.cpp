@@ -207,18 +207,18 @@ ArkUI_Int32 GetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     return INDEX_2;
 }
 
-void SetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ListModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, static_cast<EffectEdge>(edge));
 }
 
 void ResetListEdgeEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetEdgeEffect(frameNode, DEFAULT_EDGE_EFFECT, false);
+    ListModelNG::SetEdgeEffect(frameNode, DEFAULT_EDGE_EFFECT, false, EffectEdge::ALL);
 }
 
 ArkUI_Int32 GetListDirection(ArkUINodeHandle node)
