@@ -2567,7 +2567,6 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
     auto lastCaretIndex = selectController_->GetCaretIndex();
     if (mouseStatus_ != MouseStatus::MOVE) {
         UpdateCaretByClick(info.GetLocalLocation());
-        UpdateCaretInfoToController();
     }
     StartTwinkling();
     SetIsSingleHandle(true);
@@ -4263,12 +4262,12 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
         if (!HasConnection()) {
             return false;
         }
-        TextEditingValue value;
-        value.text = contentController_->GetTextValue();
-        value.hint = UtfUtils::Str16ToStr8(GetPlaceHolder());
-        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-        connection_->SetEditingState(value, GetInstanceId());
     }
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = UtfUtils::Str16ToStr8(GetPlaceHolder());
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    connection_->SetEditingState(value, GetInstanceId());
     connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     return true;
