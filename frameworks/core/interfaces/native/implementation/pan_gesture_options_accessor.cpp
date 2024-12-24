@@ -142,4 +142,7 @@ const GENERATED_ArkUIPanGestureOptionsAccessor* GetPanGestureOptionsAccessor()
     return &PanGestureOptionsAccessorImpl;
 }
 
+struct PanGestureOptionsPeer {
+    virtual ~PanGestureOptionsPeer() = default;
+};
 }

@@ -34,18 +34,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void SetGestureEventResult0Impl(EventResultPeer* peer,
-                                Ark_Boolean result)
+void SetGestureEventResultImpl(EventResultPeer* peer,
+                               Ark_Boolean result)
 {
     CHECK_NULL_VOID(peer && peer->handler);
     peer->handler->SetGestureEventResult(
         Converter::Convert<bool>(result)
     );
-}
-void SetGestureEventResult1Impl(EventResultPeer* peer,
-                                Ark_Boolean result,
-                                Ark_Boolean stopPropagation)
-{
 }
 } // EventResultAccessor
 const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
@@ -54,8 +49,7 @@ const GENERATED_ArkUIEventResultAccessor* GetEventResultAccessor()
         EventResultAccessor::DestroyPeerImpl,
         EventResultAccessor::CtorImpl,
         EventResultAccessor::GetFinalizerImpl,
-        EventResultAccessor::SetGestureEventResult0Impl,
-        EventResultAccessor::SetGestureEventResult1Impl,
+        EventResultAccessor::SetGestureEventResultImpl,
     };
     return &EventResultAccessorImpl;
 }

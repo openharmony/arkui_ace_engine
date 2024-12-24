@@ -70,4 +70,7 @@ const GENERATED_ArkUIHttpAuthHandlerAccessor* GetHttpAuthHandlerAccessor()
     return &HttpAuthHandlerAccessorImpl;
 }
 
+struct HttpAuthHandlerPeer {
+    virtual ~HttpAuthHandlerPeer() = default;
+};
 }

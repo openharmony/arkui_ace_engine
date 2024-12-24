@@ -30,7 +30,6 @@ namespace {
 class MockGestureEventResult : public GestureEventResult {
 public:
     MOCK_METHOD(void, SetGestureEventResult, (bool));
-    MOCK_METHOD(void, SetGestureEventResult, (bool, bool));
 };
 } // namespace
 
@@ -61,18 +60,18 @@ public:
  */
 HWTEST_F(EventResultAccessorTest, setGestureEventResultTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->setGestureEventResult0, nullptr);
+    ASSERT_NE(accessor_->setGestureEventResult, nullptr);
 
     Ark_Boolean arkTrue = Converter::ArkValue<Ark_Boolean>(true);
     Ark_Boolean arkFalse = Converter::ArkValue<Ark_Boolean>(false);
 
     EXPECT_CALL(*mockHandler_, SetGestureEventResult(true)).Times(2);
-    accessor_->setGestureEventResult0(peer_, arkTrue);
-    accessor_->setGestureEventResult0(peer_, arkTrue);
+    accessor_->setGestureEventResult(peer_, arkTrue);
+    accessor_->setGestureEventResult(peer_, arkTrue);
 
     EXPECT_CALL(*mockHandler_, SetGestureEventResult(false)).Times(2);
-    accessor_->setGestureEventResult0(peer_, arkFalse);
-    accessor_->setGestureEventResult0(peer_, arkFalse);
+    accessor_->setGestureEventResult(peer_, arkFalse);
+    accessor_->setGestureEventResult(peer_, arkFalse);
 }
 
 } // namespace OHOS::Ace::NG

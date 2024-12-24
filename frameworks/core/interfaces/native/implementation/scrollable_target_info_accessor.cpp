@@ -75,4 +75,7 @@ const GENERATED_ArkUIScrollableTargetInfoAccessor* GetScrollableTargetInfoAccess
     return &ScrollableTargetInfoAccessorImpl;
 }
 
+struct ScrollableTargetInfoPeer {
+    virtual ~ScrollableTargetInfoPeer() = default;
+};
 }

@@ -67,4 +67,7 @@ const GENERATED_ArkUIJsResultAccessor* GetJsResultAccessor()
     return &JsResultAccessorImpl;
 }
 
+struct JsResultPeer {
+    virtual ~JsResultPeer() = default;
+};
 }

@@ -165,4 +165,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
     return &CanvasRenderingContext2DAccessorImpl;
 }
 
+struct CanvasRenderingContext2DPeer {
+    virtual ~CanvasRenderingContext2DPeer() = default;
+};
 }

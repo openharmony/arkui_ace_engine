@@ -49,4 +49,7 @@ const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor()
     return &Path2DAccessorImpl;
 }
 
+struct Path2DPeer {
+    virtual ~Path2DPeer() = default;
+};
 }

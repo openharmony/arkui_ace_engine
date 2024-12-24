@@ -338,15 +338,6 @@ void EnhancedImageQualityImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     LOGE("Arkoala: Image.EnhancedImageQualityImpl - method not implemented");
 }
-void OrientationImpl(Ark_NativePointer node,
-                     Ark_ImageRotateOrientation value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //ImageModelNG::SetOrientation(frameNode, convValue);
-}
 } // ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
@@ -380,7 +371,6 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::ResizableImpl,
         ImageAttributeModifier::PrivacySensitiveImpl,
         ImageAttributeModifier::EnhancedImageQualityImpl,
-        ImageAttributeModifier::OrientationImpl,
     };
     return &ArkUIImageModifierImpl;
 }

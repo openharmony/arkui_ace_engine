@@ -104,4 +104,7 @@ const GENERATED_ArkUINavDestinationContextAccessor* GetNavDestinationContextAcce
     return &NavDestinationContextAccessorImpl;
 }
 
+struct NavDestinationContextPeer {
+    virtual ~NavDestinationContextPeer() = default;
+};
 }

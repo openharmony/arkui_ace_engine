@@ -53,4 +53,7 @@ const GENERATED_ArkUIIPropertySubscriberAccessor* GetIPropertySubscriberAccessor
     return &IPropertySubscriberAccessorImpl;
 }
 
+struct IPropertySubscriberPeer {
+    virtual ~IPropertySubscriberPeer() = default;
+};
 }

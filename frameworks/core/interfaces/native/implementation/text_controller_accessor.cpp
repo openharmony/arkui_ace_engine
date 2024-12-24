@@ -63,4 +63,7 @@ const GENERATED_ArkUITextControllerAccessor* GetTextControllerAccessor()
     return &TextControllerAccessorImpl;
 }
 
+struct TextControllerPeer {
+    virtual ~TextControllerPeer() = default;
+};
 }

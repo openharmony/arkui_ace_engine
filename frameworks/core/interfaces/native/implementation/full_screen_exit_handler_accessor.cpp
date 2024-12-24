@@ -51,4 +51,7 @@ const GENERATED_ArkUIFullScreenExitHandlerAccessor* GetFullScreenExitHandlerAcce
     return &FullScreenExitHandlerAccessorImpl;
 }
 
+struct FullScreenExitHandlerPeer {
+    virtual ~FullScreenExitHandlerPeer() = default;
+};
 }

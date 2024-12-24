@@ -64,4 +64,7 @@ const GENERATED_ArkUISubscribaleAbstractAccessor* GetSubscribaleAbstractAccessor
     return &SubscribaleAbstractAccessorImpl;
 }
 
+struct SubscribaleAbstractPeer {
+    virtual ~SubscribaleAbstractPeer() = default;
+};
 }

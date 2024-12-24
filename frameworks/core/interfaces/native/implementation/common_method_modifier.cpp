@@ -2051,14 +2051,6 @@ void FocusableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetFocusable(frameNode, static_cast<bool>(value));
 }
-void TabStopImpl(Ark_NativePointer node,
-                 Ark_Boolean value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetTabStop(frameNode, convValue);
-}
 void OnFocusImpl(Ark_NativePointer node,
                  const Callback_Void* value)
 {
@@ -3814,7 +3806,6 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::OnKeyEventImpl,
         CommonMethodModifier::OnKeyPreImeImpl,
         CommonMethodModifier::FocusableImpl,
-        CommonMethodModifier::TabStopImpl,
         CommonMethodModifier::OnFocusImpl,
         CommonMethodModifier::OnBlurImpl,
         CommonMethodModifier::TabIndexImpl,

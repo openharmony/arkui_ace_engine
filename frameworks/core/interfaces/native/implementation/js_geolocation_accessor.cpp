@@ -59,4 +59,7 @@ const GENERATED_ArkUIJsGeolocationAccessor* GetJsGeolocationAccessor()
     return &JsGeolocationAccessorImpl;
 }
 
+struct JsGeolocationPeer {
+    virtual ~JsGeolocationPeer() = default;
+};
 }

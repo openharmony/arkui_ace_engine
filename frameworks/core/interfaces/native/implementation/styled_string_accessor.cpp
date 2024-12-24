@@ -584,4 +584,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor()
     return &StyledStringAccessorImpl;
 }
 
+struct StyledStringPeer {
+    virtual ~StyledStringPeer() = default;
+};
 }

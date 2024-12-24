@@ -88,4 +88,7 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
     return &CustomDialogControllerAccessorImpl;
 }
 
+struct CustomDialogControllerPeer {
+    virtual ~CustomDialogControllerPeer() = default;
+};
 }

@@ -95,4 +95,7 @@ const GENERATED_ArkUITabsControllerAccessor* GetTabsControllerAccessor()
     return &TabsControllerAccessorImpl;
 }
 
+struct TabsControllerPeer {
+    virtual ~TabsControllerPeer() = default;
+};
 }

@@ -103,4 +103,7 @@ const GENERATED_ArkUIProgressMaskAccessor* GetProgressMaskAccessor()
     return &ProgressMaskAccessorImpl;
 }
 
+struct ProgressMaskPeer {
+    virtual ~ProgressMaskPeer() = default;
+};
 }
