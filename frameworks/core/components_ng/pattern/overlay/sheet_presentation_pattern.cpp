@@ -1154,23 +1154,6 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
     if (!isTransitionIn) {
-        const auto& layoutProp = GetLayoutProperty<SheetPresentationProperty>();
-        CHECK_NULL_VOID(layoutProp);
-        auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
-        if (showInPage) {
-            //set focus null back to page when sheet is going to disappear
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto sheetWrapper = host->GetParent();
-            CHECK_NULL_VOID(sheetWrapper);
-            auto node = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
-            CHECK_NULL_VOID(node);
-            if (node->GetTag() == V2::PAGE_ETS_TAG) {
-                auto focusView = node->GetPattern<FocusView>();
-                CHECK_NULL_VOID(focusView);
-                focusView->SetViewRootScope(nullptr);
-            }
-        }
         OnWillDisappear();
     }
     auto sheetType = GetSheetType();

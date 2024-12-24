@@ -4789,18 +4789,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
     } else {
         PlaySheetTransition(sheetNode, true);
     }
-
-    auto pageNode = AceType::DynamicCast<FrameNode>(maskNode->GetParent());
-    CHECK_NULL_VOID(pageNode);
-    //when sheet shows in page
-    if (pageNode->GetTag() == V2::PAGE_ETS_TAG) {
-        //set focus on sheet when page has more than one child
-        auto focusView = pageNode->GetPattern<FocusView>();
-        CHECK_NULL_VOID(focusView);
-        auto focusHub = sheetNode->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusView->SetViewRootScope(focusHub);
-    }
 }
 
 void OverlayManager::SetSheetProperty(
