@@ -1040,9 +1040,11 @@ export struct CalendarPickerBootcamp {
     Column({ space: 8 }) {
       CalendarPicker({ hintRadius: useEnabled(this.enableHintRadius, this.hintRadius), selected: this.selectedDate })
         .edgeAlign(useEnabled(this.enableEdgeAlignCalendarAlign, this.edgeAlignCalendarAlign),
-          {dx:useEnabled(this.enableEdgeAlignOffsetX,this.alignOffsetX), dy:useEnabled(this.enableEdgeAlignOffsetY,this.alignOffsetY)})
+          {dx:useEnabled(this.enableEdgeAlignOffsetX,this.alignOffsetX),
+            dy:useEnabled(this.enableEdgeAlignOffsetY,this.alignOffsetY)})
         .textStyle({ color: useEnabled(this.enableTextColor,this.textColor),
-          font: { size: useEnabled(this.enableFontSize,this.fontSize), weight: useEnabled(this.enableFontWeight,this.fontWeight) } })
+          font: { size: useEnabled(this.enableFontSize,this.fontSize),
+            weight: useEnabled(this.enableFontWeight,this.fontWeight) } })
         .onChange((value) => {
           console.info('CalendarPicker onChange:' + JSON.stringify(value))
         })
