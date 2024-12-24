@@ -12,13 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H
 
-#include "base/utils/utils.h"
-#include "core/common/container_consts.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 #include "canvas_path_accessor_peer_impl.h"
+#include "matrix2d_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class Path2DPeerImpl : public CanvasPathPeerImpl {
@@ -27,4 +25,4 @@ public:
     ~Path2DPeerImpl() override = default;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
-#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H
+#endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_PATH_2D_ACCESSOR_PEER_IMPL_H

@@ -1565,7 +1565,7 @@ class ACE_FORCE_EXPORT CanvasPath2D : virtual public AceType {
     DECLARE_ACE_TYPE(CanvasPath2D, AceType)
 public:
     CanvasPath2D() = default;
-    virtual ~CanvasPath2D() = default;
+    ~CanvasPath2D() = default;
     explicit CanvasPath2D(const std::string& cmds);
     explicit CanvasPath2D(const RefPtr<CanvasPath2D>& path);
     void AddPath(const RefPtr<CanvasPath2D>& path);
