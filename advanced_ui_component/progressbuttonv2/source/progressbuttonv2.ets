@@ -130,7 +130,8 @@ export struct ProgressButtonV2 {
           .backgroundColor(Color.Transparent)
           .border({
             width: 1,
-            color: this.colorOptions?.borderColor?.color ? this.colorOptions?.borderColor?.color : this.containerBorderColor
+            color: this.colorOptions?.borderColor?.color ?
+              this.colorOptions?.borderColor?.color : this.containerBorderColor
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
@@ -193,10 +194,10 @@ export struct ProgressButtonV2 {
 
 @ObservedV2
 export class ProgressButtonV2Color {
-  @Trace progressColor?: ColorMetrics;
-  @Trace borderColor?: ColorMetrics;
-  @Trace textColor?: ColorMetrics;
-  @Trace backgroundColor?: ColorMetrics;
+  @Trace public progressColor?: ColorMetrics;
+  @Trace public borderColor?: ColorMetrics;
+  @Trace public textColor?: ColorMetrics;
+  @Trace public backgroundColor?: ColorMetrics;
 
   constructor (options: ProgressButtonV2ColorOptions) {
     this.progressColor = options.progressColor;

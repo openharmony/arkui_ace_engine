@@ -92,7 +92,7 @@ group("advanced_ui_component") {
       "filter/interfaces:filter",
       "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
       "progressbutton/interfaces:progressbutton",
-      "progressbuttonv2/interfaces:progressbuttonv2"
+      "progressbuttonv2/interfaces:progressbuttonv2",
       "selectionmenu/interfaces:selectionmenu",
       "selecttitlebar/interfaces:selecttitlebar",
       "splitlayout/interfaces:splitlayout",
