@@ -77,9 +77,9 @@ public:
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);
         ASSERT_NE(mockPatternKeeper_, nullptr);
-        auto peerImpl = reinterpret_cast<CanvasPathPeer*>(peer_);
+        auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasPathPeerImpl*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetHandler(mockPatternKeeper_);
+        peerImpl->path = mockPatternKeeper_;
         ASSERT_NE(mockPattern_, nullptr);
     }
 

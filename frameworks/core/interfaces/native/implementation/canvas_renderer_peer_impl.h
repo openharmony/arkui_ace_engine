@@ -22,6 +22,7 @@
 #include "base/utils/string_utils.h"
 #include "core/common/container_consts.h"
 #include "arkoala_api_generated.h"
+#include "canvas_path_accessor_peer_impl.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/decoration.h"
@@ -30,7 +31,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
-class CanvasRendererPeerImpl : public Referenced {
+class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
     CanvasRendererPeerImpl();
     ~CanvasRendererPeerImpl() override = default;
@@ -121,7 +122,7 @@ public:
         pattern_ = canvasPattern;
     }
 
-protected:
+public:
     RefPtr<CanvasPattern> pattern_;
 
 private:
