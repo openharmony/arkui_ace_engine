@@ -1331,8 +1331,8 @@ HWTEST_F(RichEditorPatternTestTwoNg, OnHover001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
 
     richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    richEditorPattern->scrollBar_->isPressed_ = false;
-    richEditorPattern->scrollBar_->isHover_ = true;
+    richEditorPattern->scrollBar_->isPressed_ = true;
+    richEditorPattern->scrollBar_->isHover_ = false;
     richEditorPattern->OnHover(true);
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::DEFAULT);
 

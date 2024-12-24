@@ -264,7 +264,7 @@ public:
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
-    bool needSelect_ = false;
+    bool afterDragSelect_ = false;
     bool releaseInDrop_ = false;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     std::vector<std::u16string> dragContents_;

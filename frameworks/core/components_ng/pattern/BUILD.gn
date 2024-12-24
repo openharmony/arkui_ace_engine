@@ -533,6 +533,7 @@ build_component_ng("pattern_ng") {
 
   if (!ace_engine_feature_wearable) {
     sources += [
+      "action_sheet/action_sheet_model_ng.cpp",
       "folder_stack/control_parts_stack_node.cpp",
       "folder_stack/folder_stack_group_node.cpp",
       "folder_stack/folder_stack_layout_algorithm.cpp",
@@ -543,6 +544,10 @@ build_component_ng("pattern_ng") {
       "linear_split/linear_split_model_ng.cpp",
       "linear_split/linear_split_paint_method.cpp",
       "linear_split/linear_split_pattern.cpp",
+      "select/select_accessibility_property.cpp",
+      "select/select_layout_algorithm.cpp",
+      "select/select_model_ng.cpp",
+      "select/select_pattern.cpp",
       "tabs/tab_bar_accessibility_property.cpp",
       "tabs/tab_bar_layout_algorithm.cpp",
       "tabs/tab_bar_layout_property.cpp",
@@ -572,11 +577,6 @@ build_component_ng("pattern_ng") {
       "waterflow/water_flow_paint_method.cpp",
       "waterflow/water_flow_pattern.cpp",
       "waterflow/water_flow_sections.cpp",
-      "select/select_accessibility_property.cpp",
-      "select/select_layout_algorithm.cpp",
-      "select/select_model_ng.cpp",
-      "select/select_pattern.cpp",
-      "action_sheet/action_sheet_model_ng.cpp",
     ]
   }
 

@@ -4959,6 +4959,16 @@ class UIGestureEvent {
       return;
     }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
+    for (let index = this._gestures.length - 1; index >= 0; index--) {
+      if (this._gestures[index].gestureTag === tag) {
+        this._gestures.splice(index, 1);
+        continue;
+      }
+      if (this._gestures[index].gestureType === CommonGestureType.GESTURE_GROUP) {
+        let gestureGroup = this._gestures[index];
+        removeGestureByTagInGroup(gestureGroup, tag);
+      }
+    }
   }
   clearGestures() {
     if (this._weakNodePtr.invalid()) {
@@ -4966,6 +4976,18 @@ class UIGestureEvent {
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
     this._gestures = [];
+  }
+}
+
+function removeGestureByTagInGroup(gestureGroup, tag) {
+  for (let index = gestureGroup.gestures.length - 1; index >= 0; index--) {
+    if (gestureGroup.gestures[index].gestureTag === tag) {
+      gestureGroup.gestures.splice(index, 1);
+      continue;
+    }
+    if (gestureGroup.gestures[index].gestureType === CommonGestureType.GESTURE_GROUP) {
+      removeGestureByTagInGroup(gestureGroup.gestures[index], tag);
+    }
   }
 }
 
@@ -16610,6 +16632,16 @@ class ArkDisplayCount {
   }
   isEqual(another) {
     return this.value === another.value && this.swipeByGroup === another.swipeByGroup;
+  }
+}
+
+class ArkSwiperCachedCount {
+  constructor() {
+    this.value = undefined;
+    this.isShown = undefined;
+  }
+  isEqual(another) {
+    return this.value === another.value && this.isShown === another.isShown;
   }
 }
 
@@ -28656,8 +28688,11 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
-  cachedCount(value) {
-    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
+  cachedCount(value, isShown) {
+    let arkCachedCount = new ArkSwiperCachedCount();
+    arkCachedCount.value = value;
+    arkCachedCount.isShown = isShown;
+    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, arkCachedCount);
     return this;
   }
   displayCount(value, swipeByGroup) {
@@ -29062,13 +29097,16 @@ class SwiperCachedCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().swiper.resetSwiperCachedCount(node);
+      getUINativeModule().swiper.resetSwiperIsShown(node);
     }
     else {
-      getUINativeModule().swiper.setSwiperCachedCount(node, this.value);
+      getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
+      getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
   }
 }
 SwiperCachedCountModifier.identity = Symbol('swiperCachedCount');

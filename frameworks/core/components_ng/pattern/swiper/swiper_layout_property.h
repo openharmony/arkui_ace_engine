@@ -44,6 +44,7 @@ public:
         value->propIndex_ = CloneIndex();
         value->propItemSpace_ = CloneItemSpace();
         value->propCachedCount_ = CloneCachedCount();
+        value->propCachedIsShown_ = CloneCachedIsShown();
         value->propDisplayMode_ = CloneDisplayMode();
         value->propDisplayCount_ = CloneDisplayCount();
         value->propMinSize_ = CloneMinSize();
@@ -79,6 +80,7 @@ public:
         ResetIndex();
         ResetItemSpace();
         ResetCachedCount();
+        ResetCachedIsShown();
         ResetDisplayMode();
         ResetDisplayCount();
         ResetMinSize();
@@ -269,6 +271,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedIsShown, bool, PROPERTY_UPDATE_MEASURE_SELF);
 
 private:
     bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might

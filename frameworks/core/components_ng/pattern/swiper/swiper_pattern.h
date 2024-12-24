@@ -137,6 +137,11 @@ public:
         return turnPageRate_;
     }
 
+    float GetGroupTurnPageRate() const
+    {
+        return groupTurnPageRate_;
+    }
+
     GestureState GetGestureState();
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -152,6 +157,11 @@ public:
     void SetTurnPageRate(float turnPageRate)
     {
         turnPageRate_ = turnPageRate;
+    }
+
+    void SetGroupTurnPageRate(float groupTurnPageRate)
+    {
+        groupTurnPageRate_ = groupTurnPageRate;
     }
 
     float GetTouchBottomRate() const
@@ -513,6 +523,8 @@ public:
 
     int32_t RealTotalCount() const;
     bool IsSwipeByGroup() const;
+    int32_t DisplayIndicatorTotalCount() const;
+    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     int32_t GetDisplayCount() const;
     int32_t GetCachedCount() const;
     bool ContentWillChange(int32_t comingIndex);
@@ -745,6 +757,7 @@ private:
     {
         return contentMainSize_ - GetPrevMarginWithItemSpace() - GetNextMarginWithItemSpace();
     }
+    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
@@ -916,6 +929,7 @@ private:
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
     void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child);
     void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
     void InitCapture();
@@ -982,6 +996,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    std::optional<RefPtr<UINode>> FindForEachNode(const RefPtr<UINode>& baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
@@ -1008,6 +1023,7 @@ private:
     int32_t CheckIndexRange(int32_t index) const;
     void CheckAndFireCustomAnimation();
     void UpdateOverlongForceStopPageRate(float forceStopPageRate);
+    bool IsCachedShow() const;
 
     friend class SwiperHelper;
 
@@ -1052,6 +1068,7 @@ private:
     float fadeOffset_ = 0.0f;
     float springOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
+    float groupTurnPageRate_ = 0.0f;
     float translateAnimationEndPos_ = 0.0f;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;

@@ -477,17 +477,20 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentStartByOrder005, 
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     EXPECT_FALSE(webPattern->onDocumentStartScriptItems_.has_value());
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     webPattern->onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnDocumentStartByOrder();
     EXPECT_TRUE(webPattern->onDocumentStartScriptItems_.has_value());
 #endif
@@ -514,17 +517,20 @@ HWTEST_F(WebPatternTestNgSupplement, UpdateJavaScriptOnDocumentEndByOrder005, Te
     ASSERT_NE(webPattern->delegate_, nullptr);
 
     std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
     std::string group = "group";
     std::vector<std::string> vec;
     vec.push_back("main");
     scriptItems.insert(std::make_pair(group, vec));
     webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_FALSE(webPattern->onDocumentEndScriptItems_.has_value());
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     webPattern->delegate_ = nullptr;
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     webPattern->onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
 #endif
