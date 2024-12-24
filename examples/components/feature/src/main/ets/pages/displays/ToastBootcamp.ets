@@ -114,7 +114,7 @@ export struct ToastBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
-          title: '文本数量',
+          title: 'showToastOptions.message',
           isEnabled: $enableMessage,
           value: $compMessage,
           dataSource: [
@@ -125,14 +125,14 @@ export struct ToastBootcamp {
           ]
         })
         SliderBlock({
-          title: '文本显示时间(ms)',
+          title: 'showToastOptions.duration',
           isEnabled: $enableDuration,
           value: $compDuration,
           min: 1500,
           max: 10000
         })
         SliderBlock({
-          title: '距底部位置',
+          title: 'showToastOptions.bottom',
           isEnabled: $enableBottom,
           value: $compBottom,
           min: 80,
@@ -140,7 +140,7 @@ export struct ToastBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowToastOptions.alignment',
+          title: 'showToastOptions.alignment',
           isEnabled: $enableAlignment,
           value: $alignment,
           dataSource: [
@@ -157,7 +157,7 @@ export struct ToastBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowToastOptions.offsetX',
+          title: 'showToastOptions.offset.x',
           isEnabled: $enableOffsetX,
           value: $offsetX,
           min: 0,
@@ -165,7 +165,7 @@ export struct ToastBootcamp {
         })
 
         SliderBlock({
-          title: 'ShowToastOptions.offsetY',
+          title: 'showToastOptions.offset.y',
           isEnabled: $enableOffsetY,
           value: $offsetY,
           min: 0,
@@ -173,19 +173,19 @@ export struct ToastBootcamp {
         })
 
         ColorBlock({
-          title: 'ShowToastOptions.BackgroundColor',
+          title: 'showToastOptions.BackgroundColor',
           isEnabled: $enableToastBackgroundColor,
           color: $toastBackgroundColor
         })
 
         ColorBlock({
-          title: 'ShowToastOptions.TextColor',
+          title: 'showToastOptions.TextColor',
           isEnabled: $enableToastTextColor,
           color: $toastTextColor
         })
 
         RadioBlock({
-          title: 'ShowToastOptions.BackgroundBlurStyle',
+          title: 'showToastOptions.BackgroundBlurStyle',
           isEnabled: $enableToastBackgroundBlurStyle,
           value: $toastBackgroundBlurStyle,
           dataSource: [
@@ -205,7 +205,7 @@ export struct ToastBootcamp {
         })
 
         RadioBlock({
-          title: 'ShowToastOptions.shadow',
+          title: 'showToastOptions.shadow',
           isEnabled: $enableShadowType,
           value: $shadowType,
           dataSource: [
