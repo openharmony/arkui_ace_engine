@@ -780,36 +780,6 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
 }
 
-void SubwindowOhos::ShowMenuNG(std::function<RefPtr<NG::UINode>()>&& buildFunc,
-    std::function<RefPtr<NG::UINode>()>&& previewBuildFunc, const NG::MenuParam& menuParam,
-    const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
-{
-    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
-    if (!targetNode) {
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "targetNode is nullptr");
-        return;
-    }
-    ContainerScope scope(childContainerId_);
-    auto overlay = GetOverlayManager();
-    CHECK_NULL_VOID(overlay);
-    ResizeWindow();
-    ShowWindow();
-    CHECK_NULL_VOID(window_);
-    window_->SetTouchable(true);
-    auto customNode = buildFunc();
-    RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
-        previewCustomNode = previewBuildFunc();
-    }
-    auto menuNode =
-        NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
-    auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
-    menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-    overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
-}
-
 void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");

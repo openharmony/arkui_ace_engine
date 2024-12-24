@@ -1148,6 +1148,17 @@ void AssignCast(std::optional<MenuPolicy>& dst, const Ark_MenuPolicy& src)
 }
 
 template<>
+void AssignCast(std::optional<MenuPreviewMode>& dst, const Ark_MenuPreviewMode& src)
+{
+    switch (src) {
+        case ARK_MENU_PREVIEW_MODE_NONE: dst = MenuPreviewMode::NONE; break;
+        case ARK_MENU_PREVIEW_MODE_IMAGE: dst = MenuPreviewMode::IMAGE; break;
+        default:
+            LOGE("Unexpected enum value in Ark_MenuPreviewMode: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src)
 {
     switch (src) {
@@ -1610,6 +1621,16 @@ void AssignCast(std::optional<RenderMode>& dst, const Ark_RenderMode& src)
         case ARK_RENDER_MODE_ASYNC_RENDER: dst = RenderMode::ASYNC_RENDER; break;
         case ARK_RENDER_MODE_SYNC_RENDER: dst = RenderMode::SYNC_RENDER; break;
         default: LOGE("Unexpected enum value in Ark_RenderMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<ResponseType>& dst, const Ark_ResponseType& src)
+{
+    switch (src) {
+        case ARK_RESPONSE_TYPE_RIGHT_CLICK: dst = ResponseType::RIGHT_CLICK; break;
+        case ARK_RESPONSE_TYPE_LONG_PRESS: dst = ResponseType::LONG_PRESS; break;
+        default: LOGE("Unexpected enum value in Ark_ResponseType: %{public}d", src);
     }
 }
 

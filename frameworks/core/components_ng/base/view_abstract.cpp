@@ -2103,52 +2103,6 @@ void ViewAbstract::BindMenuWithCustomNode(std::function<void()>&& buildFunc, con
     overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
 }
 
-void ViewAbstract::BindMenuWithCustomNode(std::function<RefPtr<UINode>()>&& buildFunc,
-    const RefPtr<FrameNode>& targetNode, const NG::OffsetF& offset, MenuParam menuParam,
-    std::function<RefPtr<UINode>()>&& previewBuildFunc)
-{
-    if (!buildFunc || !targetNode) {
-        return;
-    }
-#ifdef PREVIEW
-    // unable to use the subWindow in the Previewer.
-    menuParam.type = MenuType::MENU;
-#endif
-    TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter %{public}d", menuParam.type);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    auto expandDisplay = theme->GetExpandDisplay();
-    auto pipelineContext = targetNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto overlayManager = pipelineContext->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    if (menuParam.type == MenuType::CONTEXT_MENU) {
-        SubwindowManager::GetInstance()->ShowMenuNG(
-            std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
-        return;
-    }
-    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
-        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
-        SubwindowManager::GetInstance()->ShowMenuNG(
-            std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
-        return;
-    }
-    auto customNode = buildFunc();
-    RefPtr<NG::UINode> previewCustomNode;
-    if (previewBuildFunc && menuParam.previewMode == MenuPreviewMode::CUSTOM) {
-        previewCustomNode = previewBuildFunc();
-    }
-    auto menuNode =
-        NG::MenuView::Create(customNode, targetNode->GetId(), targetNode->GetTag(), menuParam, true, previewCustomNode);
-    auto menuWrapperPattern = menuNode->GetPattern<NG::MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
-    menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
-    overlayManager->ShowMenu(targetNode->GetId(), offset, menuNode);
-}
-
 void ViewAbstract::SetBackdropBlur(const Dimension& radius, const BlurOption& blurOption)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

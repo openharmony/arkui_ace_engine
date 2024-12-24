@@ -1549,17 +1549,22 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
     static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
-
-    static void BindMenu(FrameNode* targetNode,
-        std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
-    
-    static void BindMenuGesture(FrameNode* targetNode,
-        std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
+    static void BindMenu(FrameNode* frameNode,
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindMenuGesture(FrameNode* frameNode,
+        std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const MenuParam& menuParam);
+    static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
+        std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
-    void RegisterContextMenuKeyEvent(
+    static void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
+    static void CreateCustomMenuWithPreview(FrameNode* targetNode,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
+    static void BindContextMenuSingle(FrameNode* targetNode,
+        std::function<void()>&& buildFunc, const MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
 
     void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent) override

@@ -205,7 +205,7 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
 };
 
 auto g_bindMenuOptionsParamCallbacks = [](
-    const Ark_MenuOptions& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
     auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
     if (onAppearValue) {
         auto onAppear = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
@@ -241,8 +241,7 @@ auto g_bindMenuOptionsParamCallbacks = [](
 };
 
 auto g_bindMenuOptionsParam = [](
-    const Ark_MenuOptions& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
-    menuParam.title = OptConvert<std::string>(menuOptions.title).value_or(menuParam.title);
+    const auto& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
     auto offsetVal =
         OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(menuOptions.offset);
     if (offsetVal) {
@@ -259,9 +258,6 @@ auto g_bindMenuOptionsParam = [](
     auto transitionOpt = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(menuOptions.transition);
     menuParam.transition = transitionOpt.value_or(menuParam.transition);
     menuParam.hasTransitionEffect = transitionOpt.has_value();
-    if (menuParam.isShowInSubWindow) {
-        menuParam.isShowInSubWindow = OptConvert<bool>(menuOptions.showInSubWindow).value_or(true);
-    }
     menuParam.enableArrow = OptConvert<bool>(menuOptions.enableArrow);
     menuParam.arrowOffset = OptConvert<CalcDimension>(menuOptions.arrowOffset);
     // if enableArrow is true and placement not set, set placement default value to top.
@@ -270,6 +266,35 @@ auto g_bindMenuOptionsParam = [](
     }
     menuParam.borderRadius = OptConvert<BorderRadiusProperty>(menuOptions.borderRadius);
     menuParam.layoutRegionMargin = OptConvert<PaddingProperty>(menuOptions.layoutRegionMargin);
+};
+
+auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOptions* options,
+    std::function<void()>& previewBuildFunc, Ark_NativePointer node, FrameNode* frameNode) {
+    menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
+    menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.type = NG::MenuType::CONTEXT_MENU;
+    CHECK_NULL_VOID(options);
+    auto menuOption = Converter::OptConvert<Ark_ContextMenuOptions>(*options);
+    CHECK_NULL_VOID(menuOption);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    g_bindMenuOptionsParam(menuOption.value(), menuParam, weakNode);
+    Converter::VisitUnion(menuOption->preview,
+        [&menuParam, menuOption](const Ark_MenuPreviewMode& value) {
+            auto mode = Converter::OptConvert<MenuPreviewMode>(value);
+            if (mode && mode.value() == MenuPreviewMode::IMAGE) {
+                menuParam.previewMode = MenuPreviewMode::IMAGE;
+                LOGE("Ark_ContextMenuAnimationOptions is not supported yet");
+            }
+        },
+        [&menuParam, menuOption, &previewBuildFunc, node, frameNode, weakNode](const CustomNodeBuilder& value) {
+            previewBuildFunc = [callback = CallbackHelper(value, frameNode), node, weakNode]() -> RefPtr<UINode> {
+                PipelineContext::SetCallBackNode(weakNode);
+                return callback.BuildSync(node);
+            };
+            menuParam.previewMode = MenuPreviewMode::CUSTOM;
+            LOGE("Ark_ContextMenuAnimationOptions is not supported yet");
+        },
+        []() {});
 };
 
 namespace Validator {
@@ -4035,8 +4060,12 @@ void BindMenuBase(Ark_NativePointer node,
     menuParam.isShow = Converter::Convert<bool>(isShow);
     auto menuOptions = options ? OptConvert<Ark_MenuOptions>(*options) : std::nullopt;
     if (menuOptions) {
+        menuParam.title = OptConvert<std::string>(menuOptions->title).value_or(menuParam.title);
         auto weakNode = AceType::WeakClaim(frameNode);
         g_bindMenuOptionsParam(menuOptions.value(), menuParam, weakNode);
+        if (menuParam.isShowInSubWindow) {
+            menuParam.isShowInSubWindow = OptConvert<bool>(menuOptions->showInSubWindow).value_or(true);
+        }
     }
     Converter::VisitUnion(*content,
         [frameNode, menuParam](const Array_MenuElement& value) {
@@ -4044,8 +4073,9 @@ void BindMenuBase(Ark_NativePointer node,
             ViewAbstractModelNG::BindMenu(frameNode, std::move(optionsParam), nullptr, menuParam);
         },
         [frameNode, node, menuParam](const CustomNodeBuilder& value) {
-            auto builder = [callback = CallbackHelper(value, frameNode), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
+            auto builder = [callback = CallbackHelper(value, frameNode), node]() {
+                auto uiNode = callback.BuildSync(node);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
             };
             ViewAbstractModelNG::BindMenu(frameNode, {}, std::move(builder), menuParam);
         },
@@ -4071,9 +4101,25 @@ void BindContextMenu0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(content);
-    //auto convValue = Converter::OptConvert<type>(content); // for enums
-    //CommonMethodModelNG::SetBindContextMenu0(frameNode, convValue);
+    CHECK_NULL_VOID(content);
+    MenuParam menuParam;
+    menuParam.isShow = false;
+    auto type = Converter::OptConvert<ResponseType>(responseType).value_or(ResponseType::LONG_PRESS);
+    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+        auto uiNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    std::function<void()> previewBuildFunc = nullptr;
+    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
+    if (type != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    ViewAbstractModelNG::BindContextMenuStatic(
+        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
@@ -4082,9 +4128,25 @@ void BindContextMenu1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(isShown);
-    //auto convValue = Converter::OptConvert<type>(isShown); // for enums
-    //CommonMethodModelNG::SetBindContextMenu1(frameNode, convValue);
+    CHECK_NULL_VOID(content);
+    MenuParam menuParam;
+    menuParam.isShow = Converter::Convert<bool>(isShown);
+    ResponseType type = ResponseType::LONG_PRESS;
+    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+        auto uiNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    menuParam.previewMode = MenuPreviewMode::NONE;
+    std::function<void()> previewBuildFunc = nullptr;
+    g_bindContextMenuParams(menuParam, options, previewBuildFunc, node, frameNode);
+    if (type != ResponseType::LONG_PRESS) {
+        menuParam.previewMode = MenuPreviewMode::NONE;
+        menuParam.isShowHoverImage = false;
+        menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
+    }
+    ViewAbstractModelNG::BindContextMenuStatic(
+        AceType::Claim(frameNode), type, std::move(builder), menuParam, std::move(previewBuildFunc));
+    ViewAbstractModelNG::BindDragWithContextMenuParamsStatic(frameNode, menuParam);
 }
 void BindContentCover0Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
