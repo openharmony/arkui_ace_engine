@@ -306,5 +306,30 @@ bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel& data)
     }
     return true;
 }
+
+int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_CHECK_MANAGER_DELEGATE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return error;
+    }
+
+    int32_t errCode = reply.ReadInt32();
+    if (errCode != ERR_OK) {
+        HILOG_ERROR("return errCode: %{public}d", errCode);
+        return errCode;
+    }
+    reply.ReadBool(checkFlag);
+    return ERR_OK;
+}
 } // namespace Ace
 } // namespace OHOS
