@@ -175,7 +175,9 @@ bool ScrollPattern::ScrollSnapTrigger()
     if (ScrollableIdle() && !AnimateRunning()) {
         SnapAnimationOptions snapAnimationOptions;
         if (StartSnapAnimation(snapAnimationOptions)) {
-            FireOnScrollStart();
+            if (!IsScrolling()) {
+                FireOnScrollStart();
+            }
             return true;
         }
     }
