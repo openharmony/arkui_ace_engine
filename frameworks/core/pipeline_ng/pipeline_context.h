@@ -65,6 +65,11 @@ namespace OHOS::Ace::NG {
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 
+enum class MockFlushEventType : int32_t {
+    REJECT = -1,
+    NONE = 0,
+    EXECUTE = 1,
+};
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -688,9 +693,9 @@ public:
         }
     }
 
-    void MarkNeedFlushMouseEvent()
+    void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
     {
-        isNeedFlushMouseEvent_ = true;
+        isNeedFlushMouseEvent_ = type;
     }
 
     void MarkNeedFlushAnimationStartTime()
@@ -1246,7 +1251,7 @@ private:
     bool isFocusActive_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
-    bool isNeedFlushMouseEvent_ = false;
+    MockFlushEventType isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
     bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
