@@ -75,6 +75,21 @@ public:
             theme->buttonRadius_ = togglePattern->GetAttr<Dimension>("button_radius", Dimension());
             theme->textFontSize_ = togglePattern->GetAttr<Dimension>("text_font_size", Dimension());
             theme->textColor_ = togglePattern->GetAttr<Color>("text_color", Color());
+            theme->shadowNormal_ = static_cast<uint32_t>(
+                togglePattern->GetAttr<double>("shadow_default_status_button", SHADOW_NONE));
+            theme->shadowFocus_ = static_cast<uint32_t>(
+                togglePattern->GetAttr<double>("shadow_focus_status_button", SHADOW_NONE));
+            theme->scaleFocus_ = togglePattern->GetAttr<double>("scale_focus_status_button", 1.0);
+            theme->borderWidth_ = togglePattern->GetAttr<Dimension>("border_width_status_button", Dimension());
+            theme->borderColorChecked_ = togglePattern->GetAttr<Color>("border_color_status_button_checked", Color());
+            theme->borderColorUnchecked_ = togglePattern->GetAttr<Color>(
+                "border_color_status_button_unchecked", Color());
+            theme->bgColorFocusChecked_ = togglePattern->GetAttr<Color>(
+                "bg_color_focus_status_button_checked", Color())
+                .BlendOpacity(togglePattern->GetAttr<double>("bg_color_checked_focus_alpha", 0.0));
+            theme->bgColorFocusUnchecked_ = togglePattern->GetAttr<Color>(
+                "bg_color_focus_status_button_unchecked", Color());
+            theme->textColorFocus_ = togglePattern->GetAttr<Color>("status_button_text_color_focus", Color());
         }
     };
 
@@ -140,9 +155,54 @@ public:
         return textFontSize_;
     }
 
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
     const Color& GetTextColor() const
     {
         return textColor_;
+    }
+
+    const Color& GetTextColorFocus() const
+    {
+        return textColorFocus_;
+    }
+
+    const Color& GetBorderColorChecked() const
+    {
+        return borderColorChecked_;
+    }
+
+    const Color& GetBorderColorUnchecked() const
+    {
+        return borderColorUnchecked_;
+    }
+
+    const Color& GetBackgroundColorFocusChecked() const
+    {
+        return bgColorFocusChecked_;
+    }
+
+    const Color& GetBackgroundColorFocusUnchecked() const
+    {
+        return bgColorFocusUnchecked_;
+    }
+
+    uint32_t GetShadowNormal() const
+    {
+        return shadowNormal_;
+    }
+
+    uint32_t GetShadowFocus() const
+    {
+        return shadowFocus_;
+    }
+
+    float GetScaleFocus() const
+    {
+        return scaleFocus_;
     }
 
 protected:
@@ -161,7 +221,17 @@ private:
     Dimension buttonHeight_;
     Dimension buttonRadius_;
     Dimension textFontSize_;
+    Dimension borderWidth_;
     Color textColor_;
+    Color borderColorUnchecked_;
+    Color borderColorChecked_;
+    Color bgColorFocusChecked_;
+    Color bgColorFocusUnchecked_;
+    Color textColorFocus_;
+    uint32_t shadowNormal_;
+    uint32_t shadowFocus_;
+    float scaleFocus_;
+    static constexpr double SHADOW_NONE = 6.0;
 };
 
 } // namespace OHOS::Ace
