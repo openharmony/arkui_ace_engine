@@ -1142,7 +1142,8 @@ HWTEST_F(ListEventTestNg, EndSnapAnimation001, TestSize.Level1)
     EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
     EXPECT_EQ(pattern_->predictSnapOffset_, snapAnimationOptions.snapDelta);
     EXPECT_EQ(pattern_->scrollSnapVelocity_, snapAnimationOptions.animationVelocity);
-
+    pattern_->predictSnapOffset_.reset();
+    pattern_->scrollSnapVelocity_ = 0.f;
     snapAnimationOptions.snapDirection = SnapDirection::BACKWARD;
     pattern_->StartSnapAnimation(snapAnimationOptions);
     MockAnimationManager::GetInstance().Tick();

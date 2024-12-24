@@ -190,7 +190,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool isNeedUpdateIndex = targetIndex_ ? HandleTargetIndex(isJump) : true;
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
-            !AnimateRunning()) {
+            (!AnimateRunning() || lastSnapTargetIndex_.has_value())) {
             StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
@@ -200,6 +200,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
         scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
+        ResetLastSnapTargetIndex();
         snapTrigOnScrollStart_ = false;
         if (predictSnapEndPos.has_value()) {
             predictSnapEndPos_ = predictSnapEndPos;
@@ -958,7 +959,6 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     predictSnapOffset_ = snapAnimationOptions.snapDelta;
     scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
     snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
-    ResetLastSnapTargetIndex();
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1715,6 +1715,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         extraOffset = GetExtraOffset().value();
         targetPos += extraOffset;
         ResetExtraOffset();
+    }
+    if (lastSnapTargetIndex_.has_value()) {
+        if ((Positive(targetPos) && IsAtBottom()) || (Negative(targetPos) && IsAtTop())) {
+            ResetLastSnapTargetIndex();
+            return true;
+        }
     }
     if (!NearZero(targetPos)) {
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
