@@ -45,7 +45,9 @@ public:
     {
         contentRect_ = contentRect;
     }
-
+    void SetSelectedForegroundColorAndRects(const std::vector<RectF>& selectedUrlRects,
+        uint32_t selectedUrlColor);
+    void ClearSelectedForegroundColorAndRects();
     void SetIsClip(bool isClip)
     {
         CHECK_NULL_VOID(isClip_);
@@ -68,7 +70,8 @@ private:
     RefPtr<PropertyBool> changeSelectedRects_;
     RefPtr<PropertyBool> isClip_;;
     std::vector<RectF> selectedRects_;
-
+    std::vector<RectF> selectedUrlRects_;
+    RefPtr<PropertyInt> selectedUrlColor_;
     ACE_DISALLOW_COPY_AND_MOVE(TextOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

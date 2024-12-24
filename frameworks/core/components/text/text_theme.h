@@ -22,6 +22,7 @@
 
 namespace OHOS::Ace {
 constexpr float DRAG_BACKGROUND_OPACITY = 0.95f;
+constexpr float URL_DISA_OPACITY = 0.4f;
 /**
  * TextTheme defines color and styles of ThemeComponent. TextTheme should be built
  * using TextTheme::Builder.
@@ -72,6 +73,11 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            theme->urlDisabledColor_ = pattern->GetAttr<Color>(
+                "text_url_disabled_color", Color(0xff007dff)).BlendOpacity(URL_DISA_OPACITY);
+            theme->urlDefaultColor_ = pattern->GetAttr<Color>("text_url_default_color", Color(0xff007dff));
+            theme->urlHoverColor_ = pattern->GetAttr<Color>("text_url_hover_color", Color(0x33007dff));
+            theme->urlPressColor_ = pattern->GetAttr<Color>("text_url_press_color", Color(0x19182431));
         }
     };
 
@@ -112,6 +118,26 @@ public:
         return dragBackgroundColor_;
     }
 
+    const Color& GetUrlDisabledColor() const
+    {
+        return urlDisabledColor_;
+    }
+
+    const Color& GetUrlDefaultColor() const
+    {
+        return urlDefaultColor_;
+    }
+
+    const Color& GetUrlHoverColor() const
+    {
+        return urlHoverColor_;
+    }
+
+    const Color& GetUrlPressColor() const
+    {
+        return urlPressColor_;
+    }
+
 protected:
     TextTheme() = default;
 
@@ -123,6 +149,10 @@ private:
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    Color urlDisabledColor_;
+    Color urlDefaultColor_;
+    Color urlHoverColor_;
+    Color urlPressColor_;
 };
 
 } // namespace OHOS::Ace

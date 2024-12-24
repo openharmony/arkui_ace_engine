@@ -256,6 +256,8 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     CHECK_NULL_RETURN(frameNode, -1);
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_RETURN(pipelineContext, -1);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(theme, -1);
     auto textStyle = InheritParentProperties(frameNode, isSpanStringMode);
     UseSelfStyle(fontStyle, textLineStyle, textStyle);
     auto fontManager = pipelineContext->GetFontManager();
@@ -266,6 +268,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     if (NearZero(textStyle.GetFontSize().Value())) {
         return -1;
     }
+    CHECK_NULL_RETURN(frameNode, -1);
     auto textLayoutProp = frameNode->GetLayoutProperty<TextLayoutProperty>();
     if (textLayoutProp && textLayoutProp->HasHalfLeading()) {
         textStyle.SetHalfLeading(textLayoutProp->GetHalfLeadingValue(false));
@@ -277,7 +280,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefP
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
     textStyle.SetTextBackgroundStyle(backgroundStyle);
-    if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
+    if (!fontStyle->HasTextColor() && urlOnRelease) {
+        auto urlSpanColor = pattern->GetUrlSpanColor();
+        textStyle.SetTextColor(urlSpanColor);
+        UpdateTextStyle(spanContent, builder, textStyle, selectedStart, selectedEnd);
+    } else if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         TextStyle aiSpanStyle = textStyle;
         pattern->ModifyAISpanStyle(aiSpanStyle);
         UpdateTextStyleForAISpan(spanContent, builder, textStyle, aiSpanStyle);
@@ -653,11 +660,11 @@ RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
         sameSpan->backgroundStyle = backgroundStyle;
     }
 
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     return sameSpan;
 }
-
 
 #define WRITE_TEXT_STYLE_TLV(group, name, tag, type)                   \
     do {                                                               \
@@ -969,6 +976,7 @@ RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
     sameSpan->SetImageSpanOptions(options);
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     if (backgroundStyle.has_value()) {
@@ -1069,6 +1077,7 @@ RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
     sameSpan->onDraw = onDraw;
+    sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
     sameSpan->onLongPress = onLongPress;
     if (backgroundStyle.has_value()) {

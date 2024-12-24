@@ -349,5 +349,25 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(JSExtSpan);
     JSRef<JSObject> extSpanObj_;
 };
+
+class JSUrlSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(JSUrlSpan, AceType)
+
+public:
+    JSUrlSpan() = default;
+    ~JSUrlSpan() override = default;
+    static void Constructor(const JSCallbackInfo& args);
+    static void Destructor(JSUrlSpan* urlSpan);
+    static void JSBind(BindingTarget globalObj);
+    void GetUrlContext(const JSCallbackInfo& info);
+    void SetUrlContext(const JSCallbackInfo& info);
+
+    const RefPtr<UrlSpan>& GetUrlSpan();
+    void SetUrlSpan(const RefPtr<UrlSpan>& urlSpan);
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(JSUrlSpan);
+    RefPtr<UrlSpan> urlContextSpan_;
+};
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_STYLE_STRING_JS_SPAN_OBJECT_H

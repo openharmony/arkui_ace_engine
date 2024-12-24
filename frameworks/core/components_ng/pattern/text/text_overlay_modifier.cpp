@@ -27,6 +27,7 @@ TextOverlayModifier::TextOverlayModifier()
     cursorColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     AttachProperty(cursorColor_);
     selectedColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    selectedUrlColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     AttachProperty(selectedColor_);
     changeSelectedRects_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(changeSelectedRects_);
@@ -68,6 +69,34 @@ void TextOverlayModifier::onDraw(DrawingContext& drawingContext)
     }
     drawingContext.canvas.DetachBrush();
     drawingContext.canvas.Restore();
+
+    CHECK_NULL_VOID(selectedUrlColor_);
+    brush.SetColor(selectedUrlColor_->Get());
+    drawingContext.canvas.AttachBrush(brush);
+    for (const auto& selectedRect : selectedUrlRects_) {
+        auto rect = selectedRect;
+        if (contentRect_.has_value()) {
+            if (rect.Right() > contentRect_.value().Right()) {
+                rect.SetWidth(std::max(contentRect_.value().Right() - rect.Left(), 0.0f));
+            }
+        }
+        drawingContext.canvas.DrawRect(RSRect(paintOffset.GetX() + rect.Left(), paintOffset.GetY() + rect.Top(),
+            paintOffset.GetX() + rect.Right(), paintOffset.GetY() + rect.Bottom()));
+    }
+    drawingContext.canvas.DetachBrush();
+    drawingContext.canvas.Restore();
+}
+
+void TextOverlayModifier::SetSelectedForegroundColorAndRects(
+    const std::vector<RectF>& selectedUrlRects, uint32_t selectedUrlColor)
+{
+    selectedUrlRects_ = selectedUrlRects;
+    selectedUrlColor_->Set(static_cast<int32_t>(selectedUrlColor));
+}
+
+void TextOverlayModifier::ClearSelectedForegroundColorAndRects()
+{
+    selectedUrlRects_.clear();
 }
 
 void TextOverlayModifier::SetPrintOffset(const OffsetF& paintOffset)
