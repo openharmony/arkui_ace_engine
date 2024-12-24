@@ -1366,6 +1366,7 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
+    SetFloatingCursorVisible(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -9479,6 +9480,7 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     StopContentScroll();
+    StartTwinkling();
 }
 
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const
