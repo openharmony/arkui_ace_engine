@@ -4891,6 +4891,16 @@ class UIGestureEvent {
       return;
     }
     getUINativeModule().common.removeGestureByTag(this._nodePtr, tag);
+    for (let index = this._gestures.length - 1; index >= 0; index--) {
+      if (this._gestures[index].gestureTag === tag) {
+        this._gestures.splice(index, 1);
+        continue;
+      }
+      if (this._gestures[index].gestureType === CommonGestureType.GESTURE_GROUP) {
+        let gestureGroup = this._gestures[index];
+        removeGestureByTagInGroup(gestureGroup, tag);
+      }
+    }
   }
   clearGestures() {
     if (this._weakNodePtr.invalid()) {
@@ -4898,6 +4908,18 @@ class UIGestureEvent {
     }
     getUINativeModule().common.clearGestures(this._nodePtr);
     this._gestures = [];
+  }
+}
+
+function removeGestureByTagInGroup(gestureGroup, tag) {
+  for (let index = gestureGroup.gestures.length - 1; index >= 0; index--) {
+    if (gestureGroup.gestures[index].gestureTag === tag) {
+      gestureGroup.gestures.splice(index, 1);
+      continue;
+    }
+    if (gestureGroup.gestures[index].gestureType === CommonGestureType.GESTURE_GROUP) {
+      removeGestureByTagInGroup(gestureGroup.gestures[index], tag);
+    }
   }
 }
 
