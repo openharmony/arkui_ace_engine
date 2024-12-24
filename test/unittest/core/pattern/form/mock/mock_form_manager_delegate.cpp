@@ -86,6 +86,8 @@ void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}
 
 void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback) {}
 
+void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback) {}
+
 void FormManagerDelegate::ResetForm() {}
 
 void FormManagerDelegate::ReleaseForm() {}
@@ -118,6 +120,11 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
 #endif
 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
+{
+    return false;
+}
+
+bool FormManagerDelegate::IsFormBundleLocked(const std::string &bundleName, int64_t formId)
 {
     return false;
 }
