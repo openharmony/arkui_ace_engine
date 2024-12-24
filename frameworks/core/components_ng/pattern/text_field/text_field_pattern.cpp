@@ -568,7 +568,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         hostLayoutProperty->ResetTextAlignChanged();
     }
     ProcessOverlayAfterLayout(oldParentGlobalOffset);
-    if (inlineSelectAllFlag_ && (requestFocusReason_ != RequestFocusReason::DRAG_SELECT)) {
+    if (inlineSelectAllFlag_) {
         HandleOnSelectAll(false, true);
         inlineSelectAllFlag_ = false;
         showSelect_ = true;
@@ -589,9 +589,9 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     SetAccessibilityClearAction();
     SetAccessibilityPasswordIconAction();
     SetAccessibilityUnitAction();
-    if (needSelect_) {
+    if (afterDragSelect_) {
         UpdateSelectionAndHandleVisibility();
-        needSelect_ = false;
+        afterDragSelect_ = false;
     }
     releaseInDrop_ = false;
     return true;
@@ -999,7 +999,7 @@ void TextFieldPattern::HandleFocusEvent()
     auto globalOffset = host->GetPaintRectOffset() - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
     SetNeedToRequestKeyboardInner(!isLongPress_ && (dragRecipientStatus_ != DragStatus::DRAGGING) &&
-        (dragStatus_ != DragStatus::DRAGGING), RequestKeyboardInnerChangeReason::FOCUS);
+        (dragStatus_ != DragStatus::DRAGGING) && !afterDragSelect_, RequestKeyboardInnerChangeReason::FOCUS);
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -1025,7 +1025,8 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
     auto isIgnoreFocusReason =
         requestFocusReason_ == RequestFocusReason::DRAG_ENTER || requestFocusReason_ == RequestFocusReason::DRAG_MOVE ||
         requestFocusReason_ == RequestFocusReason::DRAG_END || requestFocusReason_ == RequestFocusReason::AUTO_FILL ||
-        requestFocusReason_ == RequestFocusReason::CLICK || requestFocusReason_ == RequestFocusReason::MOUSE;
+        requestFocusReason_ == RequestFocusReason::CLICK || requestFocusReason_ == RequestFocusReason::MOUSE ||
+        requestFocusReason_ == RequestFocusReason::DRAG_SELECT;
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
         DoProcessAutoFill();
     }
@@ -1038,7 +1039,8 @@ void TextFieldPattern::ProcessFocusStyle()
         ApplyInlineTheme();
         inlineFocusState_ = true;
         if (!contentController_->IsEmpty()) {
-            inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
+            inlineSelectAllFlag_ = (blurReason_ != BlurReason::WINDOW_BLUR &&
+            requestFocusReason_ != RequestFocusReason::DRAG_SELECT);
             if (inlineSelectAllFlag_) {
                 needTwinkling = false;
             }
@@ -2237,8 +2239,9 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
-        pattern->needSelect_ = isMouseOrTouchPad(pattern->sourceTool_);
+        pattern->afterDragSelect_ = isMouseOrTouchPad(pattern->sourceTool_);
         pattern->releaseInDrop_ = true;
+        FocusHub::LostFocusToViewRoot();
     };
 }
 
@@ -2392,12 +2395,13 @@ void TextFieldPattern::InitDragDropCallBack()
                 paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE &&
                 focusHub->IsFocusable()) {
                 pattern->ShowSelectAfterDragEvent();
+                pattern->afterDragSelect_ = true;
                 pattern->TextFieldRequestFocus(RequestFocusReason::DRAG_END);
             }
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
         if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
-            pattern->needSelect_ = true;
+            pattern->afterDragSelect_ = true;
         }
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
