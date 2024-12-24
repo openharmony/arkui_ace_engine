@@ -1010,7 +1010,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
 {
-    auto host = GetHost();
     if (!safeAreaPadding_) {
         safeAreaPadding_ = std::make_unique<PaddingProperty>();
     }
