@@ -651,6 +651,7 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        debugBoundaryModifier_->SetNoNeedUICaptured(true);
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
@@ -6256,6 +6257,12 @@ void RosenRenderContext::UpdateWindowBlur()
     WindowBlurModifier::AddOrChangeBrightnessModifier(
         rsNodeTmp, windowBlurModifier_->brightness, windowBlurModifier_->brightnessValue, blurParam->brightness);
     AnimationUtils::CloseImplicitAnimation();
+}
+
+void RosenRenderContext::MarkUiFirstNode(bool isUiFirstNode)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkUifirstNode(isUiFirstNode);
 }
 
 void RosenRenderContext::BuildShadowInfo(std::unique_ptr<JsonValue>& json)

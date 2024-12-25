@@ -696,6 +696,7 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    RectF GetCaretRelativeRect();
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
@@ -766,6 +767,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;

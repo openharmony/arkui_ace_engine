@@ -2634,11 +2634,14 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
         return;
     }
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
+    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIndicator(targetPaintRect);
     if (!changeByClick_) {
         return;
     }
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);
 }
 

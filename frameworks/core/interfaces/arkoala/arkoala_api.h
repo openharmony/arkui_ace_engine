@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 134
+#define ARKUI_FULL_API_VERSION 135
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 134
+#define ARKUI_NODE_API_VERSION 135
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -1590,6 +1590,16 @@ struct ArkUITabBarBackgroundBlurStyle {
     ArkUI_Int32 blurType;
 };
 
+struct ArkUITextMarqueeOptions {
+    ArkUI_Float32 step;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 loop;
+    ArkUI_Int32 marqueeStartPolicy;
+    ArkUI_Bool start;
+    ArkUI_Bool fromStart;
+    ArkUI_Bool fadeout;
+};
+
 struct ArkUITabBarBackgroundEffect {
     ArkUI_Float32 radius;
     ArkUI_Float32 saturation;
@@ -2294,6 +2304,11 @@ struct ArkUITextModifier {
     void (*resetTextResponseRegion)(ArkUINodeHandle node);
     void (*setTextEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetTextEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setTextMarqueeOptions)(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value);
+    void (*resetTextMarqueeOptions)(ArkUINodeHandle node);
+    void (*setOnMarqueeStateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnMarqueeStateChange)(ArkUINodeHandle node);
+    void (*setImmutableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 weight);
 };
 
 struct ArkUIButtonModifier {
@@ -2359,6 +2374,8 @@ struct ArkUIImageModifier {
     void (*resetRenderMode)(ArkUINodeHandle node);
     void (*setSyncLoad)(ArkUINodeHandle node, ArkUI_Bool syncLoadValue);
     void (*resetSyncLoad)(ArkUINodeHandle node);
+    void (*setImageMatrix)(ArkUINodeHandle node, const ArkUI_Float32* matrix);
+    void (*resetImageMatrix)(ArkUINodeHandle node);
     void (*setObjectFit)(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber);
     void (*resetObjectFit)(ArkUINodeHandle node);
     void (*setFitOriginalSize)(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue);
@@ -2638,6 +2655,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperEffectMode)(ArkUINodeHandle node);
     void (*setSwiperCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetSwiperCachedCount)(ArkUINodeHandle node);
+    void (*setSwiperIsShown)(ArkUINodeHandle node, ArkUI_Bool isShown);
+    void (*resetSwiperIsShown)(ArkUINodeHandle node);
     void (*setSwiperDisplayMode)(ArkUINodeHandle node, ArkUI_Int32 displayMode);
     void (*resetSwiperDisplayMode)(ArkUINodeHandle node);
     void (*setSwiperItemSpace)(ArkUINodeHandle node, ArkUI_Float32 itemSpaceValue, ArkUI_Int32 itemSpaceUnit);
@@ -2664,6 +2683,7 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperVertical)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSwiperDuration)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperDisplayCount)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperCachedIsShown)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSwiperInterval)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperCurve)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperDisableSwipe)(ArkUINodeHandle node);
@@ -2873,6 +2893,7 @@ struct ArkUIGridItemModifier {
 };
 
 struct ArkUIScrollableModifier {
+    ArkUI_Int32 (*getContentClip)(ArkUINodeHandle node);
     void (*setContentClip)(ArkUINodeHandle node, ArkUI_Int32 mode);
     /* setContentClip by custom rect not available */
     void (*resetContentClip)(ArkUINodeHandle node);
@@ -3008,6 +3029,8 @@ struct ArkUITabsModifier {
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
     void (*setIsVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
+    void (*setTabsOptionsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
+    void (*setTabsOptionsController)(ArkUINodeHandle node, ArkUINodeHandle tabsController);
     void (*setScrollable)(ArkUINodeHandle node, ArkUI_Bool scrollable);
     void (*setTabBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setTabBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -3023,6 +3046,7 @@ struct ArkUITabsModifier {
     void (*resetBarOverlap)(ArkUINodeHandle node);
     void (*resetIsVertical)(ArkUINodeHandle node);
     void (*resetTabBarPosition)(ArkUINodeHandle node);
+    void (*resetTabsOptionsIndex)(ArkUINodeHandle node);
     void (*resetScrollable)(ArkUINodeHandle node);
     void (*resetTabBarWidth)(ArkUINodeHandle node);
     void (*resetTabBarHeight)(ArkUINodeHandle node);
@@ -3448,6 +3472,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaEnableHapticFeedback)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaLetterSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextAreaEnablePreviewText)(ArkUINodeHandle node);
+    void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
+    void (*resetEllipsisMode)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3652,6 +3678,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputEnableHapticFeedback)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputLetterSpacing)(ArkUINodeHandle node);
     ArkUI_Bool (*getTextInputEnablePreviewText)(ArkUINodeHandle node);
+    void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
+    void (*resetEllipsisMode)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -3850,6 +3878,7 @@ struct ArkUIWaterFlowModifier {
     void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
     ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
+    ArkUI_Int32 (*getWaterFlowLayoutMode)(ArkUINodeHandle node);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, ArkUI_Uint32 layoutMode);
     void (*resetWaterFlowLayoutMode)(ArkUINodeHandle node);
     void (*resetWaterFlowSections)(ArkUINodeHandle node);
@@ -5362,6 +5391,9 @@ struct ArkUIBasicAPI {
     ArkUI_Float64 (*convertLengthMetricsUnit)(ArkUI_Float64 value, ArkUI_Int32 originUnit, ArkUI_Int32 targetUnit);
 
     ArkUI_Int32 (*getContextByNode)(ArkUINodeHandle node);
+
+    ArkUI_Int32 (*postFrameCallback)(ArkUI_Int32 instanceId, void* userData,
+        void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
 };
 
 struct ArkUIDialogAPI {

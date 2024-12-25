@@ -1630,4 +1630,36 @@ bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
     auto fontNames = fontManager->GetFontNames();
     return std::find(fontNames.begin(), fontNames.end(), fontName) != fontNames.end();
 }
+
+bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)
+{
+    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
+    return std::regex_match(letterSpacing, pattern);
+}
+
+// letterSpacing: string | LengthMetrics
+void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
+{
+    std::string letterSpacingStr;
+    if (info.GetStringArg(0, letterSpacingStr) && IsValidLetterSpacing(letterSpacingStr)) {
+        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
+            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
+            return;
+        } else {
+            renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
+            return;
+        }
+    }
+    
+    CalcDimension letterSpacingCal;
+    if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
+        if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
+            letterSpacingCal.Reset();
+        }
+        renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+        return;
+    }
+
+    renderingContext2DModel_->SetLetterSpacing(Dimension(0.0));
+}
 } // namespace OHOS::Ace::Framework

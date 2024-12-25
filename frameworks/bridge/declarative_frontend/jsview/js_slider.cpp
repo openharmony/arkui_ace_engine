@@ -80,6 +80,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("stepSize", &JSSlider::SetStepSize);
     JSClass<JSSlider>::StaticMethod("sliderInteractionMode", &JSSlider::SetSliderInteractionMode);
     JSClass<JSSlider>::StaticMethod("slideRange", &JSSlider::SetValidSlideRange);
+    JSClass<JSSlider>::StaticMethod("digitalCrownSensitivity", &JSSlider::SetDigitalCrownSensitivity);
     JSClass<JSSlider>::StaticMethod("onChange", &JSSlider::OnChange);
     JSClass<JSSlider>::StaticMethod("onAttach", &JSInteractableView::JsOnAttach);
     JSClass<JSSlider>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
@@ -600,6 +601,23 @@ void JSSlider::SetStepSize(const JSCallbackInfo& info)
         stepSize = theme->GetMarkerSize();
     }
     SliderModel::GetInstance()->SetStepSize(stepSize);
+}
+
+void JSSlider::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
+        return;
+    }
+
+    auto sensitivity = info[0]->ToNumber<int32_t>();
+    if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
+        SliderModel::GetInstance()->ResetDigitalCrownSensitivity();
+    } else {
+        SliderModel::GetInstance()->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+    }
+#endif
 }
 
 void JSSlider::OnChange(const JSCallbackInfo& info)

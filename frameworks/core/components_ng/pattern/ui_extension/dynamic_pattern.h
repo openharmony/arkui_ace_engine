@@ -61,6 +61,8 @@ public:
     void InitializeAccessibility();
     void ResetAccessibilityChildTreeCallback();
 
+    void SetBackgroundTransparent(bool backgroundTransparent);
+
 private:
     void InitializeRender(void* runtime);
 
@@ -77,6 +79,7 @@ private:
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;
     bool adaptiveHeight_ = false;
+    bool backgroundTransparent_ = true;
     IsolatedInfo curDynamicInfo_;
     DynamicDumpInfo dynamicDumpInfo_;
     int32_t uiExtensionId_ = 0;

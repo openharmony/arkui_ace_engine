@@ -67,7 +67,7 @@ class StorageHelper {
   protected getConnectedKey<T>(type: TypeConstructorWithArgs<T>,
     keyOrDefaultCreator?: string | StorageDefaultCreator<T>): string | undefined {
     if (keyOrDefaultCreator === null || keyOrDefaultCreator === undefined) {
-      stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY +  ', try to use the type name as key');
+      stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
     }
 
     if (typeof keyOrDefaultCreator === 'string') {
@@ -413,14 +413,16 @@ class PersistenceV2Impl extends StorageHelper {
       return;
     }
 
-    if (this.globalMap_.has(key)) { // find in global path
+    if (this.globalMap_.has(key)) {
+      // find in global path
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
         PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.globalMap_.get(key)), areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
       }
-    } else if (this.map_.has(key)) {  // find in module path
+    } else if (this.map_.has(key)) {
+      // find in module path
       try {
         PersistenceV2Impl.storage_.set(key, JSONCoder.stringify(this.map_.get(key)));
       } catch (err) {
@@ -453,11 +455,11 @@ class PersistenceV2Impl extends StorageHelper {
   private disconnectValue(key: string): void {
     const keyType: MapType = this.getKeyMapType(key);
     let areaMode: number | undefined = undefined;
-    if (keyType == MapType.GLOBAL_MAP) {
+    if (keyType === MapType.GLOBAL_MAP) {
       this.globalMap_.delete(key);
       areaMode = this.globalMapAreaMode_.get(key);
       this.globalMapAreaMode_.delete(key);
-    } else if (keyType == MapType.MODULE_MAP) {
+    } else if (keyType === MapType.MODULE_MAP) {
       this.map_.delete(key);
     }
 
@@ -490,9 +492,17 @@ class PersistenceV2Impl extends StorageHelper {
 
   private getRightGlobalKey<T extends object>(type: TypeConstructorWithArgs<T>,
     key: string | undefined): string {
-    if (typeof key === 'undefined') {
+    if (key === undefined || key === null) {
       stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
       key = this.getTypeName(type);
+      if (key === undefined) {
+        throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      }
+    }
+
+    if (key === PersistenceV2Impl.KEYS_ARR_) {
+      this.errorHelper(key, PersistError.Quota, `The key '${key}' cannot be used`);
+      return undefined;
     }
     return key;
   }
@@ -570,8 +580,8 @@ class PersistenceV2Impl extends StorageHelper {
     ObserveV2.getObserve().stopRecordDependencies();
 
     // Writing to persistence by ref
-    if (keyType == MapType.NOT_IN_MAP) {
-      if (typeof areaMode === 'undefined') {
+    if (keyType === MapType.NOT_IN_MAP) {
+      if (typeof areaMode === 'number') {
         this.connectNewValue(key, observedValue, this.getTypeName(type), areaMode);
       } else {
         this.connectNewValue(key, observedValue, this.getTypeName(type));
@@ -588,8 +598,8 @@ class PersistenceV2Impl extends StorageHelper {
       try {
         const keyType: MapType = this.getKeyMapType(key);
 
-        if (keyType != MapType.NOT_IN_MAP) {
-          const value: object = MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
+        if (keyType !== MapType.NOT_IN_MAP) {
+          const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
           const json: string = JSONCoder.stringify(value);
@@ -599,7 +609,7 @@ class PersistenceV2Impl extends StorageHelper {
             stateMgmtConsole.applicationError(
               `Cannot store the key '${key}'! The length of data must be less than ${PersistenceV2Impl.MAX_DATA_LENGTH_}`);
           } else {
-            if (keyType == MapType.GLOBAL_MAP) {
+            if (keyType === MapType.GLOBAL_MAP) {
               const areaMode = this.globalMapAreaMode_.get(key);
               PersistenceV2Impl.storage_.set(key, json, areaMode);
             } else {
@@ -639,7 +649,7 @@ class PersistenceV2Impl extends StorageHelper {
     return false;
   }
 
-  private storeKeyToPersistenceV2(key: string, areaMode?: number | undefined) {
+  private storeKeyToPersistenceV2(key: string, areaMode?: number | undefined): void {
     try {
       if (typeof areaMode === 'number') {
         if (this.globalKeysArr_[areaMode].has(key)) {
@@ -675,33 +685,47 @@ class PersistenceV2Impl extends StorageHelper {
     }
   }
 
+  private removeForModulePath(key: string): void {
+    PersistenceV2Impl.storage_.delete(key);
+    // The first call for module path
+    if (!this.keysArr_.has(key)) {
+      this.keysArr_ = this.getKeysArrFromStorage();
+    }
+
+    this.keysArr_.delete(key);
+    this.storeKeysArrToStorage(this.keysArr_);
+  }
+
+  private getRemoveFlagForGlobalPath(key: string): boolean {
+    let removeFlag = false;
+    // first call for global path
+    for (let i = 0; i < this.globalKeysArr_.length; i++) {
+      if (PersistenceV2Impl.storage_.has(key, i)) {
+        removeFlag = true;
+        PersistenceV2Impl.storage_.delete(key, i);
+        this.globalKeysArr_[i] = this.getKeysArrFromStorage(i);
+        this.globalKeysArr_[i].delete(key);
+        this.storeKeysArrToStorage(this.globalKeysArr_[i], i);
+      }
+    }
+    return removeFlag;
+  }
+
   private removeFromPersistenceV2(key: string, areaMode: number | undefined): void {
     try {
-      if (typeof areaMode === 'number') { // check for global path
+      // check for global path
+      if (typeof areaMode === 'number') {
         PersistenceV2Impl.storage_.delete(key, areaMode);
         this.globalKeysArr_[areaMode].delete(key);
         this.storeKeysArrToStorage(this.globalKeysArr_[areaMode], areaMode);
       } else {
         let removeFlag: boolean = false;
-        if (PersistenceV2Impl.storage_.has(key)) {  // check for module path
+        // check for module path
+        if (PersistenceV2Impl.storage_.has(key)) {
           removeFlag = true;
-          PersistenceV2Impl.storage_.delete(key);
-          if (!this.keysArr_.has(key)) {  // The first call for module path
-             this.keysArr_ = this.getKeysArrFromStorage();
-          }
-
-          this.keysArr_.delete(key);
-          this.storeKeysArrToStorage(this.keysArr_);
+          this.removeForModulePath(key);
         } else {
-          for (let i = 0; i < this.globalKeysArr_.length; i++) {  // first call for global path
-            if (PersistenceV2Impl.storage_.has(key, i)) {
-              removeFlag = true;
-              PersistenceV2Impl.storage_.delete(key, i);
-              this.globalKeysArr_[i] = this.getKeysArrFromStorage(i);
-              this.globalKeysArr_[i].delete(key);
-              this.storeKeysArrToStorage(this.globalKeysArr_[i], i);
-            }
-          }
+          removeFlag = this.getRemoveFlagForGlobalPath(key);
         }
         if (!removeFlag) {
           stateMgmtConsole.applicationWarn(PersistenceV2Impl.DELETE_NOT_EXIST_KEY + `keys:${key}`);
@@ -716,14 +740,14 @@ class PersistenceV2Impl extends StorageHelper {
     if (typeof areaMode === 'number' && !PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_, areaMode)) {
       return this.globalKeysArr_[areaMode];
     }
-    else if (!PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
+    else if (typeof areaMode === 'undefined' && !PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
       return this.keysArr_;
     }
     const jsonKeysArr: string = PersistenceV2Impl.storage_.get(PersistenceV2Impl.KEYS_ARR_, areaMode);
     return new Set(JSON.parse(jsonKeysArr));
   }
 
-  private storeKeysArrToStorage(keysArr: Set<string>, areaMode?: number | undefined) {
+  private storeKeysArrToStorage(keysArr: Set<string>, areaMode?: number | undefined): void {
     PersistenceV2Impl.storage_.set(PersistenceV2Impl.KEYS_ARR_, JSON.stringify(Array.from(keysArr)), areaMode);
   }
 

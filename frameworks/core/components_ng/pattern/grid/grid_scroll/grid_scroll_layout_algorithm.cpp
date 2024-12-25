@@ -1091,7 +1091,12 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // reset reachEnd_ if any line at bottom is out of viewport
     // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
     info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
-    if (!info_.reachEnd_) {
+    if (info_.reachEnd_) {
+        if (LessNotEqual(info_.GetTotalHeightOfItemsInView(mainGap_) + info_.currentOffset_, mainSize)) {
+            // skip clearing cache if overScrolling
+            return runOutOfRecord;
+        }
+    } else {
         info_.offsetEnd_ = false;
     }
     if (!cacheValid) {
@@ -1965,12 +1970,11 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 info_.endIndex_ = elem.second;
             }
         }
-        if (info_.lineHeightMap_.find(currentLine) != info_.lineHeightMap_.end()) {
-            return info_.lineHeightMap_.find(currentLine)->second;
-        } else {
+        if (NonNegative(cellAveLength_)) {
             info_.lineHeightMap_[currentLine] = cellAveLength_;
             return cellAveLength_;
         }
+        return GetOrDefault(info_.lineHeightMap_, currentLine, -1.f);
     }
 
     lastCross_ = 0;

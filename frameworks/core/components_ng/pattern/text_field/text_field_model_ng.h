@@ -53,10 +53,13 @@ public:
     void SetWordBreak(Ace::WordBreak value) override;
     void SetFontStyle(Ace::FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>&& func) override;
     void SetInputStyle(InputStyle value) override;
     void SetShowPasswordIcon(bool value) override;
     void SetShowPasswordText(bool value) override;
+    void SetEllipsisMode(EllipsisMode modal) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
@@ -287,6 +290,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
+    static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
 
 private:
     void AddDragFrameNodeToManager() const;

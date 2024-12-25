@@ -466,7 +466,12 @@ WebPattern::~WebPattern()
     }
     if (isActive_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern isActive_ start OnInActive");
-        OnInActive();
+        if (delegate_ && delegate_->IsActivePolicyDisable()) {
+            // if active policy disable, must force it Inactive, otherwise OnInActive will inactive it.
+            delegate_->OnInactive();
+        } else {
+            OnInActive();
+        }
     }
     if (imageAnalyzerManager_) {
         imageAnalyzerManager_->ReleaseImageAnalyzer();
@@ -509,8 +514,10 @@ void WebPattern::RemovePreviewMenuNode()
 
 bool WebPattern::IsPreviewMenuNotNeedShowPreview()
 {
-    bool isNotNeedShowPreview = isNewDragStyle_ && IsPreviewImageNodeExist();
-    TAG_LOGI(AceLogTag::ACE_WEB, "IsPreviewMenuNotNeedShowPreview:%{public}d", isNotNeedShowPreview);
+    bool isNotNeedShowPreview = (isNewDragStyle_ && IsPreviewImageNodeExist()) || imageOverlayIsSelected_;
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "IsPreviewMenuNotNeedShowPreview:%{public}d, temporarily for AI entity popup: %{public}d",
+        isNotNeedShowPreview, imageOverlayIsSelected_);
     return isNotNeedShowPreview;
 }
 
@@ -748,7 +755,7 @@ void WebPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
 
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
     if (!renderContextForSurface_) {
         renderContextForSurface_ = RenderContext::Create();
         static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
@@ -3354,6 +3361,18 @@ void WebPattern::GetPageContentAsync(const std::string& jsCode)
 #endif
 }
 
+void WebPattern::LoadUrlInOfflineMode()
+{
+    if (!isUrlLoaded_) {
+        isUrlLoaded_ = true;
+        if (webSrc_) {
+            delegate_->LoadUrl();
+        } else if (webData_) {
+            delegate_->LoadDataWithRichText();
+        }
+    }
+}
+
 void WebPattern::InitInOfflineMode()
 {
     if (offlineWebInited_) {
@@ -3394,13 +3413,10 @@ void WebPattern::InitInOfflineMode()
         (uint32_t)displayId, drawSize_.ToString().c_str());
     delegate_->SetBoundsOrResize(drawSize, offset);
 
-    if (!isUrlLoaded_) {
-        isUrlLoaded_ = true;
-        if (webSrc_) {
-            delegate_->LoadUrl();
-        } else if (webData_) {
-            delegate_->LoadDataWithRichText();
-        }
+    LoadUrlInOfflineMode();
+    if (delegate_->IsActivePolicyDisable()) {
+        // if active policy disable, must force it Inactive, otherwise HideWebView will inactive it.
+        delegate_->OnInactive();
     }
     delegate_->HideWebView();
     CloseContextSelectionMenu();
@@ -5949,27 +5965,35 @@ void WebPattern::SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterE
 
 void WebPattern::OnInActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnInActive webId:%{public}d, isActive:%{public}d policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (!isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnInactive();
+    if (!policyDisable) {
+        delegate_->OnInactive();
+    }
     isActive_ = false;
 }
 
 void WebPattern::OnActive()
 {
+    CHECK_NULL_VOID(delegate_);
+    bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d", GetWebId(), isActive_);
+        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
     }
 
-    CHECK_NULL_VOID(delegate_);
-    delegate_->OnActive();
+    if (!policyDisable) {
+        delegate_->OnActive();
+    }
     isActive_ = true;
 }
 
@@ -6699,8 +6723,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetTransitionalNodeById(in
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId));
+    auto accessNode = delegate_->GetAccessibilityNodeInfoById(accessibilityId);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetFocusedAccessibilityNode(
@@ -6710,8 +6735,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetFocusedAccessibilityNod
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus));
+    auto accessNode = delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 
@@ -6722,8 +6748,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocu
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction));
+    auto accessNode = delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,

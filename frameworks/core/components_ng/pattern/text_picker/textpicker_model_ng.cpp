@@ -361,13 +361,10 @@ void TextPickerModelNG::SetSelectedTextStyle(const RefPtr<PickerTheme>& pickerTh
         TextPickerLayoutProperty, SelectedFontStyle, value.fontStyle.value_or(selectedStyle.GetFontStyle()));
 }
 
-void TextPickerModelNG::SetDefaultTextStyle(const NG::PickerTextStyle& value)
+void TextPickerModelNG::SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipelineContext);
-    auto theme = pipelineContext->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    auto textStyle = theme->GetTextStyle();
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
 
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
@@ -1140,14 +1137,12 @@ void TextPickerModelNG::SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, CanLoop, true, frameNode);
 }
 
-void TextPickerModelNG::SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value)
+void TextPickerModelNG::SetDefaultTextStyle(
+    FrameNode* frameNode, const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    auto textStyle = theme->GetTextStyle();
+    CHECK_NULL_VOID(textTheme);
+    auto textStyle = textTheme->GetTextStyle();
     if (value.fontSize.has_value() && value.fontSize->IsValid()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextPickerLayoutProperty, DefaultFontSize,
             ConvertFontScaleValue(value.fontSize.value()), frameNode);

@@ -111,7 +111,7 @@ class PersistenceV2 extends AppStorageV2 {
    * @returns { T } The value of the existed key or the default value.
    */
   static globalConnect(connectOptions) {
-    return PersistenceV2.persistenceV2Impl_.connect(connectOptions);
+    return PersistenceV2.persistenceV2Impl_.globalConnect(connectOptions);
   }
 
   /**

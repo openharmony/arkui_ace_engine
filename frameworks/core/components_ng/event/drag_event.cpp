@@ -416,7 +416,7 @@ void DragEventActuator::TryTriggerThumbnailCallback()
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG) {
+    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG || gestureHub->GetTextDraggable()) {
         return;
     }
     GetThumbnailPixelMap(true);
@@ -953,7 +953,6 @@ void DragEventActuator::ResetDragStatus()
     overlayManager->RemoveGatherNode();
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
-    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
@@ -1247,6 +1246,11 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->MarkUiFirstNode(false);
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+    }
     MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
         FlushSyncGeometryNodeTasks();

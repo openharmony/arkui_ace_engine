@@ -38,6 +38,7 @@ public:
     // default theme
     void SetDefaultTheme(const RefPtr<NG::TokenTheme>& theme, ColorMode colorMode);
     const RefPtr<TokenTheme>& GetDefaultTheme();
+    void UpdateDefaultThemeBySystemTheme(ColorMode colorMode);
 
     // cache (key: theme id - value: ark theme instance)
     void CacheClear();
@@ -46,10 +47,13 @@ public:
     void CacheRemove(int32_t themeId);
 
     RefPtr<TokenTheme> ObtainSystemTheme();
+    
+    void SetIsThemeColorAvailable(bool isDark, int32_t idx, bool isColorAvailable);
 
 private:
     static constexpr int32_t SYSTEM_THEME_LIGHT_ID = -1;
     static constexpr int32_t SYSTEM_THEME_DARK_ID = -2;
+    bool systemTokenThemeCreated_[3] = {false, false, false}; // 3 means color modes: light, dark, undefined
 
     TokenThemeStorage();
     RefPtr<TokenTheme> CreateSystemTokenTheme(ColorMode colorMode);
@@ -60,6 +64,9 @@ private:
 
     // key: theme id, value: theme instance
     std::map<int32_t, RefPtr<TokenTheme>> themeCache_;
+
+    std::vector<bool> darkThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
+    std::vector<bool> lightThemeColorsAvailable_ = std::vector<bool> (TokenColors::TOTAL_NUMBER, false);
 
     inline static RefPtr<TokenTheme> defaultLightTheme_ = nullptr;
     inline static RefPtr<TokenTheme> defaultDarkTheme_ = nullptr;

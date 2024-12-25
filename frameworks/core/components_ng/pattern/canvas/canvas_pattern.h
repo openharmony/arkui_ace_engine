@@ -169,6 +169,7 @@ public:
     void UpdateFontStyle(FontStyle style);
     void UpdateFontFamilies(const std::vector<std::string>& families);
     void UpdateFontSize(const Dimension& size);
+    void UpdateLetterSpacing(const Dimension& letterSpacing);
     void UpdateLineJoin(LineJoinStyle join);
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);

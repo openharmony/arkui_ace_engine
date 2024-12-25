@@ -262,60 +262,78 @@ int32_t GetImagesSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIImageAnimatorModifier modifier = {
-        ImageAnimatorModifier::SetState,
-        ImageAnimatorModifier::ResetState,
-        ImageAnimatorModifier::SetDuration,
-        ImageAnimatorModifier::SetFixedSize,
-        ImageAnimatorModifier::ResetFixedSize,
-        ImageAnimatorModifier::SetFillMode,
-        ImageAnimatorModifier::ResetFillMode,
-        ImageAnimatorModifier::SetReverse,
-        ImageAnimatorModifier::ResetReverse,
-        ImageAnimatorModifier::SetImages,
-        ImageAnimatorModifier::ResetImages,
-        ImageAnimatorModifier::SetImageAnimatorIteration,
-        ImageAnimatorModifier::ResetImageAnimatorIteration,
-        ImageAnimatorModifier::SetImageAnimatorSrc,
-        ImageAnimatorModifier::ResetDuration,
-        ImageAnimatorModifier::GetIsReverse,
-        ImageAnimatorModifier::GetDuration,
-        ImageAnimatorModifier::GetState,
-        ImageAnimatorModifier::GetIsFixedSize,
-        ImageAnimatorModifier::GetFillMode,
-        ImageAnimatorModifier::GetIteration,
-        ImageAnimatorModifier::GetImagesSize
+        .setState = ImageAnimatorModifier::SetState,
+        .resetState = ImageAnimatorModifier::ResetState,
+        .setDuration = ImageAnimatorModifier::SetDuration,
+        .setFixedSize = ImageAnimatorModifier::SetFixedSize,
+        .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
+        .setFillMode = ImageAnimatorModifier::SetFillMode,
+        .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setReverse = ImageAnimatorModifier::SetReverse,
+        .resetReverse = ImageAnimatorModifier::ResetReverse,
+        .setImages = ImageAnimatorModifier::SetImages,
+        .resetImages = ImageAnimatorModifier::ResetImages,
+        .setImageAnimatorIteration = ImageAnimatorModifier::SetImageAnimatorIteration,
+        .resetImageAnimatorIteration = ImageAnimatorModifier::ResetImageAnimatorIteration,
+        .setImageAnimatorSrc = ImageAnimatorModifier::SetImageAnimatorSrc,
+        .resetDuration = ImageAnimatorModifier::ResetDuration,
+        .getIsReverse = ImageAnimatorModifier::GetIsReverse,
+        .getDuration = ImageAnimatorModifier::GetDuration,
+        .getState = ImageAnimatorModifier::GetState,
+        .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
+        .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getIteration = ImageAnimatorModifier::GetIteration,
+        .getImagesSize = ImageAnimatorModifier::GetImagesSize,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIImageAnimatorModifier modifier = {
-        ImageAnimatorModifier::SetState,
-        ImageAnimatorModifier::ResetState,
-        ImageAnimatorModifier::SetDuration,
-        ImageAnimatorModifier::SetFixedSize,
-        ImageAnimatorModifier::ResetFixedSize,
-        ImageAnimatorModifier::SetFillMode,
-        ImageAnimatorModifier::ResetFillMode,
-        ImageAnimatorModifier::SetReverse,
-        ImageAnimatorModifier::ResetReverse,
-        ImageAnimatorModifier::SetImages,
-        ImageAnimatorModifier::ResetImages,
-        ImageAnimatorModifier::SetImageAnimatorIteration,
-        ImageAnimatorModifier::ResetImageAnimatorIteration,
-        ImageAnimatorModifier::SetImageAnimatorSrc,
-        ImageAnimatorModifier::ResetDuration,
-        ImageAnimatorModifier::GetIsReverse,
-        ImageAnimatorModifier::GetDuration,
-        ImageAnimatorModifier::GetState,
-        ImageAnimatorModifier::GetIsFixedSize,
-        ImageAnimatorModifier::GetFillMode,
-        ImageAnimatorModifier::GetIteration,
-        ImageAnimatorModifier::GetImagesSize
+        .setState = ImageAnimatorModifier::SetState,
+        .resetState = ImageAnimatorModifier::ResetState,
+        .setDuration = ImageAnimatorModifier::SetDuration,
+        .setFixedSize = ImageAnimatorModifier::SetFixedSize,
+        .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
+        .setFillMode = ImageAnimatorModifier::SetFillMode,
+        .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setReverse = ImageAnimatorModifier::SetReverse,
+        .resetReverse = ImageAnimatorModifier::ResetReverse,
+        .setImages = ImageAnimatorModifier::SetImages,
+        .resetImages = ImageAnimatorModifier::ResetImages,
+        .setImageAnimatorIteration = ImageAnimatorModifier::SetImageAnimatorIteration,
+        .resetImageAnimatorIteration = ImageAnimatorModifier::ResetImageAnimatorIteration,
+        .setImageAnimatorSrc = ImageAnimatorModifier::SetImageAnimatorSrc,
+        .resetDuration = ImageAnimatorModifier::ResetDuration,
+        .getIsReverse = ImageAnimatorModifier::GetIsReverse,
+        .getDuration = ImageAnimatorModifier::GetDuration,
+        .getState = ImageAnimatorModifier::GetState,
+        .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
+        .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getIteration = ImageAnimatorModifier::GetIteration,
+        .getImagesSize = ImageAnimatorModifier::GetImagesSize,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

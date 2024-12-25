@@ -62,9 +62,13 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
+#endif
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
@@ -165,6 +169,8 @@ const char* DEBUG_LINE_INFO_PACKAGE_NAME = "$packageName";
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_ONE_HUNDRED_PERCENT_VALUE = 1.0_pct;
+
+enum class OperationType { COPY, PASTE, CUT, SELECT_ALL, UNKNOWN };
 
 void ParseJsScale(const JSRef<JSVal>& jsValue, float& scaleX, float& scaleY, float& scaleZ,
     CalcDimension& centerX, CalcDimension& centerY)
@@ -1620,6 +1626,49 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+OperationType StringToOperationType(const std::string& id)
+{
+    if (id == "OH_DEFAULT_COPY") {
+        return OperationType::COPY;
+    } else if (id == "OH_DEFAULT_PASTE") {
+        return OperationType::PASTE;
+    } else if (id == "OH_DEFAULT_CUT") {
+        return OperationType::CUT;
+    } else if (id == "OH_DEFAULT_SELECT_ALL") {
+        return OperationType::SELECT_ALL;
+    } else {
+        return OperationType::UNKNOWN;
+    }
+}
+
+void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
+{
+    for (auto& param : params) {
+        auto opType = StringToOperationType(param.menuOptionsParam.id);
+        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<TextOverlayTheme>();
+        CHECK_NULL_VOID(theme);
+        switch (opType) {
+            case OperationType::COPY:
+                param.menuOptionsParam.labelInfo = theme->GetCopyLabelInfo();
+                break;
+            case OperationType::PASTE:
+                param.menuOptionsParam.labelInfo = theme->GetPasteLabelInfo();
+                break;
+            case OperationType::CUT:
+                param.menuOptionsParam.labelInfo = theme->GetCutLabelInfo();
+                break;
+            case OperationType::SELECT_ALL:
+                param.menuOptionsParam.labelInfo = theme->GetSelectAllLabelInfo();
+                break;
+            default:
+                param.menuOptionsParam.labelInfo = "";
+                break;
+        }
+    }
 }
 
 void JSViewAbstract::JsScale(const JSCallbackInfo& info)
@@ -6751,8 +6800,8 @@ void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     if (onWillDismissFunc->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        auto jsFunc =
+            AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
         onWillDismiss = [func = std::move(jsFunc)](const int32_t& info, const int32_t& instanceId) {
             JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
             objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
@@ -7437,6 +7486,31 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
         return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
+}
+
+void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (args.Length() <= 0) {
+        return;
+    }
+    JSRef<JSVal> arg = args[0];
+    if (args[0]->IsFunction()) {
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
+            GetMainFrameNode());
+        auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
+            node = frameNode](CrownEventInfo& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onCrown");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute(info);
+            };
+        ViewAbstractModel::GetInstance()->SetOnCrownEvent(std::move(onCrownEvent));
+    } else {
+        ViewAbstractModel::GetInstance()->DisableOnCrownEvent();
+    }
+#endif
 }
 
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
@@ -8873,6 +8947,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
+    JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);
@@ -11036,6 +11111,44 @@ void JSViewAbstract::JsCompositingFilter(const JSCallbackInfo& info)
     auto compositingFilter = CreateRSFilterFromNapiValue(info[0]);
     ViewAbstractModel::GetInstance()->SetCompositingFilter(compositingFilter);
 }
+
+std::vector<NG::MenuOptionsParam> JSViewAbstract::ParseMenuItems(const JSRef<JSArray>& menuItemsArray)
+{
+    std::vector<NG::MenuOptionsParam> menuParams;
+    for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
+        auto menuItem = menuItemsArray->GetValueAt(i);
+        if (!menuItem->IsObject()) {
+            continue;
+        }
+        auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
+        NG::MenuOptionsParam menuOptionsParam;
+        auto jsContent = menuItemObject->GetProperty("content");
+        std::string content;
+        ParseJsString(jsContent, content);
+        menuOptionsParam.content = content;
+        auto jsStartIcon = menuItemObject->GetProperty("icon");
+        std::string icon;
+        ParseJsMedia(jsStartIcon, icon);
+        menuOptionsParam.icon = icon;
+        auto jsTextMenuId = menuItemObject->GetProperty("id");
+        std::string id;
+        if (jsTextMenuId->IsObject()) {
+            auto textMenuIdObject = JSRef<JSObject>::Cast(jsTextMenuId);
+            auto jsId = textMenuIdObject->GetProperty("id_");
+            ParseJsString(jsId, id);
+        }
+        menuOptionsParam.id = id;
+        auto jsLabelInfo = menuItemObject->GetProperty("labelInfo");
+        std::string labelInfo;
+        ParseJsString(jsLabelInfo, labelInfo);
+        if (jsLabelInfo->IsString() || jsLabelInfo->IsObject()) {
+            menuOptionsParam.labelInfo = labelInfo;
+        }
+        menuParams.emplace_back(menuOptionsParam);
+    }
+    return menuParams;
+}
+
 void JSViewAbstract::ParseOnCreateMenu(
     const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback)
 {
@@ -11054,36 +11167,14 @@ void JSViewAbstract::ParseOnCreateMenu(
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, menuParams);
         pipelineContext->UpdateCurrentActiveNode(node);
-        auto menuItem = func->ExecuteWithValue(systemMenuItems);
+        auto modifiedSystemMenuItems = systemMenuItems;
+        UpdateOptionsLabelInfo(modifiedSystemMenuItems);
+        auto menuItem = func->ExecuteWithValue(modifiedSystemMenuItems);
         if (!menuItem->IsArray()) {
             return menuParams;
         }
         auto menuItemsArray = JSRef<JSArray>::Cast(menuItem);
-        for (size_t i = 0; i <= menuItemsArray->Length(); i++) {
-            auto menuItem = menuItemsArray->GetValueAt(i);
-            if (!menuItem->IsObject()) {
-                continue;
-            }
-            auto menuItemObject = JSRef<JSObject>::Cast(menuItem);
-            NG::MenuOptionsParam menuOptionsParam;
-            auto jsContent = menuItemObject->GetProperty("content");
-            std::string content;
-            ParseJsString(jsContent, content);
-            menuOptionsParam.content = content;
-            auto jsStartIcon = menuItemObject->GetProperty("icon");
-            std::string icon;
-            ParseJsMedia(jsStartIcon, icon);
-            menuOptionsParam.icon = icon;
-            auto jsTextMenuId = menuItemObject->GetProperty("id");
-            std::string id;
-            if (jsTextMenuId->IsObject()) {
-                auto textMenuIdObject = JSRef<JSObject>::Cast(jsTextMenuId);
-                auto jsId = textMenuIdObject->GetProperty("id_");
-                ParseJsString(jsId, id);
-            }
-            menuOptionsParam.id = id;
-            menuParams.emplace_back(menuOptionsParam);
-        }
+        menuParams = ParseMenuItems(menuItemsArray);
         return menuParams;
     };
     onCreateMenuCallback = jsCallback;
@@ -11195,6 +11286,7 @@ JSRef<JSVal> JSViewAbstract::CreateJsTextMenuItem(const NG::MenuItemParam& menuI
     TextMenuItem->SetProperty<std::string>("content", menuItemParam.menuOptionsParam.content.value_or(""));
     JSRef<JSObject> obj = CreateJsTextMenuId(menuItemParam.menuOptionsParam.id);
     TextMenuItem->SetPropertyObject("id", obj);
+    TextMenuItem->SetProperty<std::string>("labelInfo", menuItemParam.menuOptionsParam.labelInfo.value_or(""));
     return JSRef<JSVal>::Cast(TextMenuItem);
 }
 

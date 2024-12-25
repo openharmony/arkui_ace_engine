@@ -284,6 +284,9 @@ public:
     virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
+
     virtual void SetInputFilter(const std::string& value,
         const std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetInputStyle(InputStyle value) = 0;
@@ -307,6 +310,7 @@ public:
     virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};
     virtual void SetBackBorder() {};
+    virtual void SetEllipsisMode(EllipsisMode modal) {};
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;
     virtual void SetShowPasswordText(bool value) = 0;
     virtual void SetOnClick(std::function<void(const ClickInfo&)>&& func) {};

@@ -312,6 +312,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
 
+    if (layoutProperty->GetBadgeCount().has_value()) {
+        textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    }
+
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);
     auto childGeometryNode = childWrapper->GetGeometryNode();

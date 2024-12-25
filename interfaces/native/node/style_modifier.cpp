@@ -3895,6 +3895,22 @@ void ResetFontWeight(ArkUI_NodeHandle node)
     }
 }
 
+int32_t SetImmutableFontWeight(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0 || item->value[NUM_0].i32 < 0 ||
+        item->value[NUM_0].i32 > static_cast<int32_t>(ARKUI_FONT_WEIGHT_REGULAR)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setImmutableFontWeight(node->uiNodeHandle, item->value[0].i32);
+        return ERROR_CODE_NO_ERROR;
+    }
+    return ERROR_CODE_PARAM_INVALID;
+}
+
 int32_t SetFontSize(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
@@ -5720,6 +5736,31 @@ const ArkUI_AttributeItem* GetScrollContentSize(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+void ResetScrollContentClip(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->resetContentClip(node->uiNodeHandle);
+}
+
+int32_t SetScrollContentClip(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setContentClip(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetScrollContentClip(ArkUI_NodeHandle node)
+{
+    auto value = GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getContentClip(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetListDirection(ArkUI_NodeHandle node)
 {
     auto value = GetFullImpl()->getNodeModifiers()->getListModifier()->getListDirection(node->uiNodeHandle);
@@ -7304,7 +7345,7 @@ const ArkUI_AttributeItem* GetSwiperNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
@@ -7312,6 +7353,12 @@ int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
     }
     GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperCachedCount(
         node->uiNodeHandle, item->value[0].i32);
+
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperIsShown(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7321,12 +7368,16 @@ void ResetSwiperCachedCount(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperIsShown(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown =
+        GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getSwiperCachedIsShown(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
     return &g_attributeItem;
 }
 
@@ -12264,6 +12315,33 @@ void ResetItemConstraintSize(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(node->uiNodeHandle);
 }
 
+int32_t SetWaterFlowLayoutMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowLayoutMode(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowLayoutMode(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value =
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowLayoutMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetItemConstraintSize(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 unit = GetDefaultUnit(node, UNIT_VP);
@@ -13210,7 +13288,7 @@ int32_t SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_A
         SetTextCopyOption, SetBaseLineOffset, SetTextShadow, SetTextMinFontSize, SetTextMaxFontSize, SetTextFont,
         SetTextHeightAdaptivePolicy, SetTextIndent, SetTextWordBreak, SetTextEllipsisMode, SetLineSpacing,
         SetFontFeature, SetTextEnableDateDetector, SetTextDataDetectorConfig, SetTextSelectedBackgroundColor,
-        SetTextContentWithStyledString, SetHalfLeading };
+        SetTextContentWithStyledString, SetHalfLeading, SetImmutableFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13225,7 +13303,7 @@ const ArkUI_AttributeItem* GetTextAttribute(ArkUI_NodeHandle node, int32_t subTy
         GetTextCopyOption, GetBaseLineOffset, GetTextShadow, GetTextMinFontSize, GetTextMaxFontSize, GetTextFont,
         GetTextHeightAdaptivePolicy, GetTextIndent, GetTextWordBreak, GetTextEllipsisMode, GetLineSpacing,
         GetFontFeature, GetTextEnableDateDetector, GetTextDataDetectorConfig, GetTextSelectedBackgroundColor, nullptr,
-        GetHalfLeading };
+        GetHalfLeading, GetFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*) || !getters[subTypeId]) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -13241,7 +13319,8 @@ void ResetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextOverflow, ResetTextFontFamily, ResetTextCopyOption, ResetBaselineOffset, ResetTextShadow,
         ResetTextMinFontSize, ResetTextMaxFontSize, ResetTextFont, ResetTextHeightAdaptivePolicy, ResetTextIndent,
         ResetTextWordBreak, ResetTextEllipsisMode, ResetLineSpacing, ResetFontFeature, ResetTextEnableDateDetector,
-        ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString, ResetHalfLeading };
+        ResetTextDataDetectorConfig, ResetTextSelectedBackgroundColor, ResetTextContentWithStyledString,
+        ResetHalfLeading, ResetFontWeight };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14000,7 +14079,8 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging,
-        SetScrollPage, SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr };
+        SetScrollPage, SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr,
+        nullptr, nullptr, nullptr, SetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14013,7 +14093,8 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
     static Getter* getters[] = { GetScrollScrollBar, GetScrollScrollBarWidth, GetScrollScrollBarColor,
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging,
-        nullptr, nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize };
+        nullptr, nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, nullptr,
+        nullptr, nullptr, GetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14027,7 +14108,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetScrollScrollBar, ResetScrollScrollBarWidth, ResetScrollScrollBarColor,
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
-        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr };
+        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, nullptr, nullptr, nullptr, ResetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14261,7 +14342,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
-        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize };
+        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14273,7 +14354,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
-        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize };
+        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14284,8 +14365,8 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
-        GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount,
-        nullptr, nullptr, GetItemConstraintSize };
+        GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount, nullptr,
+        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

@@ -327,7 +327,7 @@ HWTEST_F(RichEditorDragTestNG, RichEditorDragOverlayModifierTestNG004, TestSize.
     auto dragOverlayModifier1 = AceType::MakeRefPtr<RichEditorDragOverlayModifier>(pattern1, hostPattern1);
     ASSERT_NE(dragOverlayModifier1, nullptr);
     dragOverlayModifier1->StartFloatingAnimate();
-    EXPECT_EQ(dragOverlayModifier1->type_, DragAnimType::DEFAULT);
+    EXPECT_EQ(dragOverlayModifier1->type_, DragAnimType::FLOATING);
 
     WeakPtr<RichEditorDragPattern> pattern2 = richEditorDragPattern;
     WeakPtr<TextPattern> hostPattern2 = std::move(richEditorPattern);

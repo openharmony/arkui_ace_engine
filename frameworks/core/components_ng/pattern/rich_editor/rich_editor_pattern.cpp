@@ -400,7 +400,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         start = textSelector_.GetTextStart();
         length = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
-    auto range = TextEmojiProcessor::CalSubU16stringRange(start, length, styledString_->GetU16string(), true);
+    auto range = TextEmojiProcessor::CalSubU16stringRange(start, length, styledString_->GetU16string(), true, true);
     start = range.startIndex;
     length = range.endIndex - range.startIndex;
     bool isPreventChange = isIME && !BeforeStyledStringChange(start, length, u"");
@@ -525,6 +525,7 @@ void RichEditorPattern::OnModifyDone()
     ProcessInnerPadding();
     InitScrollablePattern();
     SetAccessibilityAction();
+    selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     if (host->IsDraggable()) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
@@ -649,9 +650,9 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     caretUpdateType_ = CaretUpdateType::NONE;
     IF_PRESENT(oneStepDragController_, HandleDirtyNodes());
     UpdateGestureHotZone(dirty);
-    if (needSelect_) {
+    if (afterDragSelect_) {
         UpdateSelectionAndHandleVisibility();
-        needSelect_ = false;
+        afterDragSelect_ = false;
     }
     releaseInDrop_ = false;
     return ret;
@@ -3496,8 +3497,8 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     CalculateHandleOffsetAndShowOverlay();
     if (selectOverlay_->IsUsingMouse()) {
         CloseSelectOverlay();
-        StopTwinkling();
     }
+    IF_TRUE(IsSelected(), StopTwinkling());
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
     if (selectOverlayInfo && selectOverlay_->IsUsingMouse()) {
         textResponseType_ = static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0));
@@ -3807,7 +3808,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     recoverDragResultObjects_.clear();
     auto focusHub = GetFocusHub();
     if (event && focusHub && event->GetResult() != DragRet::DRAG_SUCCESS && focusHub->IsFocusable()) {
-        needSelect_ = true;
+        afterDragSelect_ = true;
         HandleSelectionChange(recoverStart_, recoverEnd_);
         showSelect_ = true;
         CalculateHandleOffsetAndShowOverlay();
@@ -4392,7 +4393,7 @@ void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
     auto scrollBar = GetScrollBar();
-    if (isHover && (!scrollBar || (!scrollBar->IsPressed() && !scrollBar->IsHover()))) {
+    if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
         ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
     } else {
         ChangeMouseStyle(MouseFormat::DEFAULT, true);
@@ -7674,7 +7675,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    CHECK_NULL_RETURN(range.first > 0 && range.second > 0, false);
+    CHECK_NULL_RETURN(0 <= range.first && range.first < range.second, false);
     auto offset = host->GetPaintRectOffsetNG();
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
@@ -9298,7 +9299,7 @@ void RichEditorPattern::HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& eve
     if (focusHub->IsCurrentFocus()) {
         StartTwinkling();
     }
-    needSelect_ = isMouseOrTouchPad(sourceTool_);
+    afterDragSelect_ = isMouseOrTouchPad(sourceTool_);
     releaseInDrop_ = true;
 }
 
@@ -11042,6 +11043,13 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
     return style;
 }
 
+bool RichEditorPattern::IsShowSearch()
+{
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, false);
+    return richEditorTheme->GetSearchIsSupport();
+}
+
 bool RichEditorPattern::IsShowAIWrite()
 {
     CHECK_NULL_RETURN(!textSelector_.SelectNothing(), false);
@@ -11340,5 +11348,14 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
     CHECK_NULL_VOID(selectOverlayInfo);
     json->Put("selectOverlay info", selectOverlayInfo->ToString().c_str());
+}
+
+RectF RichEditorPattern::GetCaretRelativeRect()
+{
+    CHECK_NULL_RETURN(caretTwinkling_, RectF(-1, -1, -1, -1));
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    CHECK_NULL_RETURN(overlayMod_, RectF(0, 0, 0, 0));
+    auto caretWidth = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretWidth();
+    return RectF(caretOffset.GetX(), caretOffset.GetY(), caretWidth, caretHeight);
 }
 } // namespace OHOS::Ace::NG

@@ -688,6 +688,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     arkExtraInfoJson->Put("scale", scale);
     arkExtraInfoJson->Put("dip_scale", dipScale);
     arkExtraInfoJson->Put("drag_node_gray_scale", dragNodeGrayscale);
+    arkExtraInfoJson->Put("event_id", info.GetPointerEventId());
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

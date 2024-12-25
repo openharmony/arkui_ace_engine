@@ -432,6 +432,7 @@ public:
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
     static void JsOnFocusAxisEvent(const JSCallbackInfo& args);
+    static void JsOnCrownEvent(const JSCallbackInfo& args);
 
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
@@ -498,7 +499,18 @@ public:
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
-        return themeManager->GetTheme<T>();
+        auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        return node ? themeManager->GetTheme<T>(node->GetThemeScopeId()) : themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        auto pipelineContext = GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>(themeScopeId);
     }
 
     /**
@@ -652,6 +664,7 @@ private:
     static bool ParseResourceToDoubleById(
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
+    static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
     static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);

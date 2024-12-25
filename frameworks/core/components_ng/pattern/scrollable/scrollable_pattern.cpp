@@ -47,6 +47,7 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
+constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -59,7 +60,6 @@ using std::chrono::milliseconds;
 
 ScrollablePattern::~ScrollablePattern()
 {
-    UnRegister2DragDropManager();
     if (AnimateRunning()) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
         auto scrollable = GetScrollable();
@@ -132,7 +132,8 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(false);
+    bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
     if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
         paint->SetFadingInfo(false, false, prevHasFadingEdge_);
@@ -164,7 +165,7 @@ void ScrollablePattern::UpdateFadeInfo(
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value_or(LIST_FADINGEDGE);
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
@@ -790,7 +791,9 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto context = GetContext();
+    CHECK_NULL_VOID(frameNode);
+    UnRegister2DragDropManager(frameNode);
+    auto context = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
@@ -3056,15 +3059,14 @@ void ScrollablePattern::HandleOnDragStatusCallback(
  * @description: Cancel registration with the drag drop manager
  * @return None
  */
-void ScrollablePattern::UnRegister2DragDropManager()
+void ScrollablePattern::UnRegister2DragDropManager(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->UnRegisterDragStatusListener(host->GetId());
+    dragDropManager->UnRegisterDragStatusListener(frameNode->GetId());
 }
 
 bool ScrollablePattern::NeedCoordinateScrollWithNavigation(

@@ -26,6 +26,7 @@ ace_unittest("overlay_manager_test_ng") {
     "overlay_manager_test_update_ng.cpp",
     "overlay_manager_testone_ng.cpp",
     "overlay_manager_testtwo_ng.cpp",
+    "overlay_manager_toast_test_ng.cpp",
     "overlay_new_test_ng.cpp",
     "overlay_test_ng.cpp",
     "overlay_test_update.cpp",
