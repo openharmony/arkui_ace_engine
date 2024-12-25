@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -1350,5 +1351,52 @@ HWTEST_F(GridOptionLayoutTestNg, ChangingHeight001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::AUTO);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+}
+
+/**
+ * @tc.name: NestedScrollTo001
+ * @tc.desc: Test nested grid calling scrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, NestedScrollTo001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t listStart = 0;
+    int32_t listStop = 0;
+    model.SetOnScrollStart([&listStart]() { ++listStart; });
+    model.SetOnScrollStop([&listStop]() { ++listStop; });
+    GridModelNG grid = CreateGrid();
+    grid.SetColumnsTemplate("1fr 1fr 1fr");
+    grid.SetLayoutOptions({});
+    grid.SetEdgeEffect(EdgeEffect::SPRING, true);
+    grid.SetNestedScroll(
+        NestedScrollOptions { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST });
+    int32_t scrollStart = 0;
+    int32_t scrollStop = 0;
+    grid.SetOnScrollStart([&scrollStart]() { ++scrollStart; });
+    grid.SetOnScrollStop([&scrollStop]() { ++scrollStop; });
+    CreateFixedItems(20);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(scrollStart, 0);
+    EXPECT_EQ(scrollStop, 0);
+    pattern_->AnimateTo(600, 1000, Curves::EASE_OUT, false, true);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+    EXPECT_TRUE(pattern_->curveAnimation_);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetScrollable()->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetScrollable()->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(scrollStart, 1);
+    EXPECT_EQ(scrollStop, 1);
+    EXPECT_EQ(listStart, 0);
+    EXPECT_EQ(listStop, 0);
 }
 } // namespace OHOS::Ace::NG
