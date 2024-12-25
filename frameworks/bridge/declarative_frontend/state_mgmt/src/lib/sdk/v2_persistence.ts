@@ -740,7 +740,7 @@ class PersistenceV2Impl extends StorageHelper {
     if (typeof areaMode === 'number' && !PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_, areaMode)) {
       return this.globalKeysArr_[areaMode];
     }
-    else if (!PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
+    else if (typeof areaMode === 'undefined' && !PersistenceV2Impl.storage_.has(PersistenceV2Impl.KEYS_ARR_)) {
       return this.keysArr_;
     }
     const jsonKeysArr: string = PersistenceV2Impl.storage_.get(PersistenceV2Impl.KEYS_ARR_, areaMode);
