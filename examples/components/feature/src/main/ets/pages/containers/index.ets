@@ -25,6 +25,7 @@ import { FlexBootcamp } from './FlexBootcamp';
 import { ColumnBootcamp } from './ColumnBootcamp';
 import { ScrollBootcamp } from './ScrollBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
+import { SwiperBootcamp } from './SwiperBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -34,13 +35,14 @@ export const containersRoute: RouteGroup = {
     { name: 'time-picker-dialog', label: '时间选择器弹窗/TimepickerDialog' },
     { name: 'date-picker-dialog', label: '日期选择器弹窗/DatepickerDialog' },
     { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' },
-    { name: 'list-item-group', label: '分组列表/ListItemGroup'},
-    { name: 'list', label: '列表/List'},
+    { name: 'list-item-group', label: '分组列表/ListItemGroup' },
+    { name: 'list', label: '列表/List' },
     { name: 'grid', label: '网格/Grid' },
     { name: 'flex', label: '弹性布局/Flex' },
     { name: 'column', label: '纵向布局/Column' },
     { name: 'scroll', label: '滚动容器/Scroll' },
-    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' }
+    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    { name: 'swiper', label: '轮播容器/Swiper' },
   ]
 };
 
@@ -68,5 +70,7 @@ export function ContainersDestination(name: string, route: Route) {
     ScrollBootcamp({ title: route.label })
   } else if (name === 'containers/waterFlow') {
     WaterFlowBootcamp({ title: route.label })
+  } else if (name === 'containers/swiper') {
+    SwiperBootcamp({ title: route.label })
   }
 }
