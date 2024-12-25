@@ -73,6 +73,44 @@ void ResetOnReachEndCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnReachEnd(frameNode, nullptr);
 }
 
+void SetOnWillScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onWillScroll = reinterpret_cast<OnWillScrollEvent*>(extraParam);
+        ScrollableModelNG::SetOnWillScroll(frameNode, std::move(*onWillScroll));
+    } else {
+        ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnWillScrollCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnWillScroll(frameNode, nullptr);
+}
+
+void SetOnDidScrollCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onDidScroll = reinterpret_cast<OnScrollEvent*>(extraParam);
+        ScrollableModelNG::SetOnDidScroll(frameNode, std::move(*onDidScroll));
+    } else {
+        ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+    }
+}
+
+void ResetOnDidScrollCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
+}
+
 ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -140,6 +178,10 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnReachStartCallBack = ResetOnReachStartCallBack,
         .setOnReachEndCallBack = SetOnReachEndCallBack,
         .resetOnReachEndCallBack = ResetOnReachEndCallBack,
+        .setOnWillScrollCallBack = SetOnWillScrollCallBack,
+        .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
+        .setOnDidScrollCallBack = SetOnDidScrollCallBack,
+        .resetOnDidScrollCallBack = ResetOnDidScrollCallBack,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
