@@ -1261,11 +1261,6 @@ void AssignCast(std::optional<ClickEffectLevel>& dst, const Ark_ClickEffectLevel
         std::optional<ClickEffectLevel>(arkVal);
 }
 template<>
-void AssignCast(std::optional<DragDropInfo>& dst, const CustomNodeBuilder& src)
-{
-    LOGE("ARKOALA: Convert to [DragDropInfo] from [CustomNodeBuilder] is not supported\n");
-}
-template<>
 void AssignCast(std::optional<DragDropInfo>& dst, const Ark_DragItemInfo& src)
 {
     LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
@@ -1408,6 +1403,28 @@ RefPtr<PopupParam> Convert(const Ark_CustomPopupOptions& src)
     popupParam->SetTransitionEffects(OptConvert<RefPtr<NG::ChainedTransitionEffect>>(src.transition));
     g_popupCommonParam(src, popupParam);
     return popupParam;
+}
+template<>
+void AssignCast(std::optional<Alignment>& dst, const Ark_Literal_Alignment_align& src)
+{
+    auto optAlign = Converter::OptConvert<Ark_Alignment>(src.align);
+    if (!optAlign.has_value()) {
+        dst = std::nullopt;
+        return;
+    }
+    switch (optAlign.value()) {
+        case ARK_ALIGNMENT_TOP_START: dst = Alignment::TOP_LEFT; break;
+        case ARK_ALIGNMENT_TOP: dst = Alignment::TOP_CENTER; break;
+        case ARK_ALIGNMENT_TOP_END: dst = Alignment::TOP_RIGHT; break;
+        case ARK_ALIGNMENT_START: dst = Alignment::CENTER_LEFT; break;
+        case ARK_ALIGNMENT_CENTER: dst = Alignment::CENTER; break;
+        case ARK_ALIGNMENT_END: dst = Alignment::CENTER_RIGHT; break;
+        case ARK_ALIGNMENT_BOTTOM_START: dst = Alignment::BOTTOM_LEFT; break;
+        case ARK_ALIGNMENT_BOTTOM: dst = Alignment::BOTTOM_CENTER; break;
+        case ARK_ALIGNMENT_BOTTOM_END: dst = Alignment::BOTTOM_RIGHT; break;
+        default:
+            dst = std::nullopt;
+    }
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -3123,7 +3140,22 @@ void DragPreviewImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<DragDropInfo>(*value) : std::nullopt;
+    CHECK_NULL_VOID(value);
+    std::optional<DragDropInfo> convValue = {};
+    Converter::VisitUnion(*value,
+        [&convValue](const Ark_String& val) {
+            convValue->extraInfo = Converter::Convert<std::string>(val);
+        },
+        [node, frameNode, &convValue](const CustomNodeBuilder& val) {
+            convValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
+        },
+        [frameNode, &convValue](const Ark_DragItemInfo& value) {
+            LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
+            convValue = std::nullopt;
+        },
+        []() {
+            LOGE("DragPreviewImpl(): Invalid union argument");
+        });
     ViewAbstract::SetDragPreview(frameNode, convValue);
 }
 void OnPreDragImpl(Ark_NativePointer node,
@@ -3478,9 +3510,10 @@ void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetAccessibilityVirtualNode(frameNode, convValue);
-    LOGE("Callback_Any contained not supported Custom_Object");
+    auto builder = [callback = CallbackHelper(*value, frameNode), node]() -> RefPtr<UINode> {
+        return callback.BuildSync(node);
+    };
+    ViewAbstractModelNG::SetAccessibilityVirtualNode(frameNode, std::move(builder));
 }
 void AccessibilityCheckedImpl(Ark_NativePointer node,
                               Ark_Boolean value)
@@ -3666,10 +3699,11 @@ void BackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(builder);
-    //auto convValue = Converter::OptConvert<type>(builder); // for enums
-    //CommonMethodModelNG::SetBackground(frameNode, convValue);
-    LOGE("CommonMethodModifier::BackgroundImpl, not implemented due to no the CustomBuilder");
+    auto customNode = CallbackHelper(*builder, frameNode).BuildSync(node);
+    CHECK_NULL_VOID(customNode);
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+    auto optAlign = options ? Converter::OptConvert<Alignment>(*options) : std::nullopt;
+    ViewAbstract::SetBackgroundAlign(customFrameNode, optAlign);
 }
 void BackgroundImageImpl(Ark_NativePointer node,
                          const Ark_Union_ResourceStr_PixelMap* src,
@@ -3893,17 +3927,26 @@ void OverlayImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto overlay = Converter::OptConvert<OverlayOptions>(*options);
-    if (overlay) {
+    if (options) {
+        auto overlay = Converter::OptConvert<OverlayOptions>(*options);
+        if (!overlay.has_value()) {
+            ViewAbstract::SetOverlay(frameNode, overlay);
+            return;
+        }
         Converter::VisitUnion(*value,
-            [&overlay](const Ark_String& src) {overlay->content = Converter::Convert<std::string>(src);},
-            [](const auto& src) {
-                LOGE("OverlayImpl() CustomBuilder & ComponentContent not implemented");
+            [&overlay](const Ark_String& src) {
+                overlay->content = Converter::Convert<std::string>(src);
+            },
+            [node, frameNode, &overlay](const CustomNodeBuilder& src) {
+                overlay->content = CallbackHelper(src, frameNode).BuildSync(node);
+            },
+            [](const Ark_ComponentContent& src) {
+                LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
             },
             []() {
                 LOGE("OverlayImpl(): Invalid union argument");
             });
-        ViewAbstract::SetOverlay(frameNode, overlay.value());
+        ViewAbstract::SetOverlay(frameNode, overlay);
     }
 }
 void BlendModeImpl(Ark_NativePointer node,

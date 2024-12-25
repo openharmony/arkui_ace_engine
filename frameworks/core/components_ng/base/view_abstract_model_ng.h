@@ -1548,6 +1548,7 @@ public:
         CHECK_NULL_VOID(targetNode);
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
+    static void SetAccessibilityVirtualNode(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& buildFunc);
 
     static void BindMenu(FrameNode* targetNode,
         std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
