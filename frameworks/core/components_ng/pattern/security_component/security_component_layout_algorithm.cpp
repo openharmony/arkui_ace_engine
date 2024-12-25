@@ -804,6 +804,13 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
+
+    // has value and less equal 0.0
+    if (LessOrEqual(constraint_->selfIdealSize.Width().value_or(1.0), 0.0) &&
+        LessOrEqual(constraint_->selfIdealSize.Height().value_or(1.0), 0.0)) {
+        return;
+    }
+
     isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
         SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
     isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(
