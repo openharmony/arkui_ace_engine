@@ -76,7 +76,7 @@ public:
     {
         UnRegister2DragDropManager();
         if (scrollBarProxy_) {
-            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+            scrollBarProxy_->UnRegisterNestScrollableNode(AceType::WeakClaim(this));
         }
     }
 
@@ -163,12 +163,19 @@ public:
     void SetScrollEnabled(bool enabled)
     {
         CHECK_NULL_VOID(scrollableEvent_);
-        scrollableEvent_->SetEnabled(enabled);
-        if (!enabled) {
-            scrollableEvent_->SetAxis(Axis::NONE);
-        } else {
-            scrollableEvent_->SetAxis(axis_);
+        bool bNest = false;
+        if (scrollBarProxy_) {
+            bNest = scrollBarProxy_->IsNestScroller();
         }
+
+        if (enabled || bNest) {
+            enabled = true;
+            scrollableEvent_->SetAxis(axis_);
+        } else {
+            scrollableEvent_->SetAxis(Axis::NONE);
+        }
+        scrollableEvent_->SetEnabled(enabled);
+
         if (scrollBarProxy_) {
             scrollBarProxy_->SetScrollEnabled(enabled, AceType::WeakClaim(this));
         }
@@ -298,12 +305,24 @@ public:
         if (scrollBarProxy_) {
             scrollBarProxy_->StartScrollBarAnimator();
         }
+
+        for (auto proxy : nestScrollBarProxy_) {
+            auto scrollBarProxy = proxy.Upgrade();
+            CHECK_NULL_CONTINUE(scrollBarProxy);
+            scrollBarProxy->StartScrollBarAnimator();
+        }
     }
 
     void StopScrollBarAnimatorByProxy()
     {
         if (scrollBarProxy_) {
             scrollBarProxy_->StopScrollBarAnimator();
+        }
+
+        for (auto proxy : nestScrollBarProxy_) {
+            auto scrollBarProxy = proxy.Upgrade();
+            CHECK_NULL_CONTINUE(scrollBarProxy);
+            scrollBarProxy->StopScrollBarAnimator();
         }
     }
 
@@ -658,6 +677,25 @@ public:
         useTotalOffset_ = useTotalOffset;
     }
 
+    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
+    {
+        return scrollBarProxy_;
+    }
+
+    virtual void OnAttachToMainTree() override;
+
+    void AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
+    void SetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndSetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void UnsetParentNestedScroll(RefPtr<ScrollablePattern>& parentPattern);
+
+    void SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>& node);
+
+    void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
+
     bool GetNestedScrolling() const
     {
         CHECK_NULL_RETURN(scrollableEvent_, false);
@@ -672,6 +710,7 @@ public:
     }
 
     SizeF GetViewSizeMinusPadding();
+    void ScrollEndCallback(bool nestedScroll, float velocity);
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -683,10 +722,6 @@ protected:
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
-    }
-    RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
-    {
-        return scrollBarProxy_;
     }
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
@@ -894,6 +929,7 @@ private:
     // scrollBar
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<NG::ScrollBarProxy> scrollBarProxy_;
+    std::list<WeakPtr<NG::ScrollBarProxy>> nestScrollBarProxy_;
     RefPtr<ScrollBarOverlayModifier> scrollBarOverlayModifier_;
     float barOffset_ = 0.0f;
     float estimatedHeight_ = 0.0f;

@@ -111,7 +111,9 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        controlDistanceChanged_ = Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance);
+        if (Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance)) {
+            controlDistanceChanged_ = true;
+        }
         controlDistance_ = controlDistance;
     }
 
@@ -314,6 +316,22 @@ public:
 
     void OnColorConfigurationUpdate() override;
 
+    RefPtr<ScrollBarProxy> GetScrollBarProxy()
+    {
+        return scrollBarProxy_;
+    }
+
+    void SetEnableNestedSorll(bool enableNestedSorll)
+    {
+        enableNestedSorll_ = enableNestedSorll;
+    }
+
+    bool GetEnableNestedSorll() const
+    {
+        return enableNestedSorll_;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 private:
     void OnModifyDone() override;
     void SetBarCollectClickAndLongPressTargetCallback();
@@ -371,6 +389,7 @@ private:
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
+    bool enableNestedSorll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -338,6 +338,10 @@ public:
 
     uint32_t GetSCBSystemWindowId();
 
+    void OnAttachToMainTree() override
+    {
+        TextPattern::OnAttachToMainTree();
+    }
     void RegisiterCaretChangeListener(std::function<void(int32_t)>&& listener);
     void SetStyledString(const RefPtr<SpanString>& value);
 

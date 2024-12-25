@@ -511,6 +511,8 @@ void ScrollBarPattern::DumpAdvanceInfo()
     hasChild_ ? DumpLog::GetInstance().AddDesc("hasChild: true") : DumpLog::GetInstance().AddDesc("hasChild: false");
     preFrameChildState_ ? DumpLog::GetInstance().AddDesc("preFrameChildState: true")
                         : DumpLog::GetInstance().AddDesc("preFrameChildState: false");
+    enableNestedSorll_ ? DumpLog::GetInstance().AddDesc("enableNestedSorll: true")
+                       : DumpLog::GetInstance().AddDesc("enableNestedSorll: false");
     if (!hasChild_ && scrollBar_) {
         scrollBar_->DumpAdvanceInfo();
     }
@@ -946,5 +948,15 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
+}
+
+void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("enableNestedScroll", enableNestedSorll_ ? "true" : "false", filter);
 }
 } // namespace OHOS::Ace::NG

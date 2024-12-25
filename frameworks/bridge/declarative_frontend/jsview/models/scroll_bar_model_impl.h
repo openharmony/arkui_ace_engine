@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ public:
     RefPtr<ScrollProxy> GetScrollBarProxy(const RefPtr<ScrollProxy>& scrollProxy) override;
     void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
         int directionValue, int stateValue) override;
+    void SetEnableNestedScroll(bool enableNestedSroll) override{};
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SCROLL_BAR_MODEL_IMPL_H
