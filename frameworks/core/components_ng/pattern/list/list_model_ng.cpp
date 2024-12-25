@@ -507,18 +507,6 @@ void ListModelNG::SetOnItemDrop(OnItemDropFunc&& onItemDrop)
     ListModelNG::AddDragFrameNodeToManager(frameNode);
 }
 
-/*
-void ListModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
-}
-*/
-
 void ListModelNG::SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex)
 {
     if (initialIndex.has_value()) {
@@ -990,6 +978,15 @@ void ListModelNG::SetOnScrollVisibleContentChange(FrameNode* frameNode, OnScroll
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollVisibleContentChange(std::move(onScrollVisibleContentChange));
+}
+
+void ListModelNG::SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    LOGE("ListModelNG::SetOnItemDelete, the ListEventHub does not support 'OnItemDelete' yet");
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void ListModelNG::SetOnItemMove(FrameNode* frameNode, OnItemMoveEvent&& onItemMove)
