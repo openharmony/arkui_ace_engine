@@ -185,7 +185,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
     #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetTabsModifier,
@@ -283,7 +287,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 11; // modify this line accordingly
+    constexpr auto ifdefs = 12; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
         "ensure all fields are explicitly initialized");
@@ -352,7 +356,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
     #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
@@ -453,7 +461,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 11; // modify this line accordingly
+    constexpr auto ifdefs = 12; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
         "ensure all fields are explicitly initialized");

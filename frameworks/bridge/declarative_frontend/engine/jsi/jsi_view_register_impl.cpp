@@ -442,7 +442,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -533,7 +535,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -566,7 +570,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
+#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -581,10 +587,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "TimePickerDialog", JSTimePickerDialog::JSBind },
+#endif
     { "DatePicker", JSDatePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "DatePickerDialog", JSDatePickerDialog::JSBind },
+#endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
 #ifndef ARKUI_WEARABLE
