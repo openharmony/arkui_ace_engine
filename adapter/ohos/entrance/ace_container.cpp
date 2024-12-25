@@ -91,6 +91,10 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "base/ressched/ressched_report.h"
+#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -109,6 +113,9 @@ const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.s
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 std::mutex g_mutexFormRenderFontFamily;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
+#endif
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -972,6 +979,34 @@ void AceContainer::InitializeCallback()
         return result;
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess) {
+        if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_CROWN_ROTATION_STATUS,
+                static_cast<int32_t>(event.action), mapPayload);
+        }
+        ContainerScope scope(id);
+        bool result = false;
+        auto crownTask = [context, event, &result, markProcess, id]() {
+            ContainerScope scope(id);
+            result = context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            crownTask();
+            return result;
+        }
+        context->GetTaskExecutor()->PostTask(
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+        return result;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);

@@ -62,6 +62,9 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
+#endif
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -7485,6 +7488,31 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (args.Length() <= 0) {
+        return;
+    }
+    JSRef<JSVal> arg = args[0];
+    if (args[0]->IsFunction()) {
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
+            GetMainFrameNode());
+        auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
+            node = frameNode](CrownEventInfo& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onCrown");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute(info);
+            };
+        ViewAbstractModel::GetInstance()->SetOnCrownEvent(std::move(onCrownEvent));
+    } else {
+        ViewAbstractModel::GetInstance()->DisableOnCrownEvent();
+    }
+#endif
+}
+
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -8919,6 +8947,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
+    JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);

@@ -514,6 +514,10 @@ template("declarative_js_engine") {
       ]
     }
 
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
       external_deps += [ "hilog:libhilog" ]
@@ -948,6 +952,10 @@ template("declarative_js_engine_ng") {
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
       ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
     sources += [
