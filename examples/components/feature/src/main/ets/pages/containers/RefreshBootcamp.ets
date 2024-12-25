@@ -1093,7 +1093,7 @@ export struct RefreshBootcamp {
     Stack() {
       Row() {
         LoadingProgress().height(32)
-        Text("Refreshing...").fontSize(16).margin({ left: 20 })
+        Text('Refreshing...').fontSize(16).margin({ left: 20 })
       }
       .alignItems(VerticalAlign.Center)
     }
@@ -1101,7 +1101,7 @@ export struct RefreshBootcamp {
     .clip(true)
     // 设置最小高度约束保证自定义组件高度随刷新区域高度变化时自定义组件高度不会低于minHeight
     .constraintSize({ minHeight: 32 })
-    .width("100%")
+    .width('100%')
   }
 
   build() {
