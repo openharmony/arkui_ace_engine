@@ -22,6 +22,7 @@
 #include "base/window/foldable_window.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curve.h"
+#include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1064,7 +1065,7 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
 void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
 {
     option.SetFillMode(FillMode::FORWARDS);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         option.SetDuration(SHEET_ANIMATION_DURATION);
     }
 }
