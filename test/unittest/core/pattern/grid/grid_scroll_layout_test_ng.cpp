@@ -1830,4 +1830,29 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Le
     }
     EXPECT_NE(pattern_->info_.gridMatrix_[0][0], pattern_->info_.gridMatrix_[1][0]);
 }
+
+/**
+ * @tc.name: TestLayoutColumn001
+ * @tc.desc: Test whether the Grid can be normally laid out when its child node is Column.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, TestLayoutColumn001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    GridLayoutOptions option;
+    model.SetLayoutOptions(option);
+    CreateColumns(30);
+    CreateDone();
+
+    int32_t colsNumber = 4;
+    float itemWidth = 60;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index % colsNumber * itemWidth;
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -492,8 +492,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
     info_.prevHeight_ = info_.currentHeight_;
     info_.extraOffset_.reset();
-    SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
+    SetScrollSource(SCROLL_FROM_NONE);
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
