@@ -660,6 +660,10 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             CHECK_NULL_RETURN(item, false);
             item->GetGeometryNode()->SetParentLayoutConstraint(constraint);
             item->Layout();
+            auto pipeline = pattern->GetContext();
+            if (pipeline) {
+                pipeline->FlushSyncGeometryNodeTasks();
+            }
             item->SetActive(false);
             return false;
         });
