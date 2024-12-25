@@ -1052,10 +1052,13 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     bool isPercent = realSideBarWidth_.Unit() == DimensionUnit::PERCENT;
     auto preSidebarWidthPx = DimensionConvertToPx(preSidebarWidth_).value_or(0.0);
     auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? xOffset : -xOffset);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
 
     if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
         realSideBarWidth_ = isPercent ? ConvertPxToPercent(sideBarLine) : Dimension(sideBarLine, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
 
@@ -1063,6 +1066,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         realSideBarWidth_ =
             isPercent ? ConvertPxToPercent(maxSideBarWidth_) : Dimension(maxSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
 
@@ -1071,10 +1075,12 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         realSideBarWidth_ =
             isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
     realSideBarWidth_ =
         isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
+    FireSideBarWidthChangeEvent();
 
     auto autoHideProperty = layoutProperty->GetAutoHide().value_or(true);
     if (autoHideProperty) {
@@ -1090,6 +1096,22 @@ void SideBarContainerPattern::HandleDragEnd()
         return;
     }
     preSidebarWidth_ = realSideBarWidth_;
+}
+
+void SideBarContainerPattern::FireSideBarWidthChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto userSetDimensionUnit = layoutProperty->GetSideBarWidthValue(DEFAULT_SIDE_BAR_WIDTH).Unit();
+    auto realSideBarWidthPx = DimensionConvertToPx(realSideBarWidth_).value_or(0.0);
+    Dimension usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
+        ConvertPxToPercent(realSideBarWidthPx) :
+        Dimension(realSideBarWidth_.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
+    eventHub->FireSideBarWidthChangeEvent(usrSetUnitWidth);
 }
 
 void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -1307,6 +1329,11 @@ void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height,
 {
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
     MarkNeedInitRealSideBarWidth(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    FireSideBarWidthChangeEvent();
 }
 
 void SideBarContainerPattern::RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode)

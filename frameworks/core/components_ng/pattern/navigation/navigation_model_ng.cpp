@@ -225,6 +225,7 @@ void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
     titleBarPattern->SetNeedResetSubTitleProperty(true);
 }
 } // namespace
+bool NavigationModelNG::navBarWidthDoubleBind_ = false;
 
 void NavigationModelNG::Create()
 {
@@ -915,6 +916,15 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
+void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNavBarWidthChangeEvent(std::move(event));
+}
+
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode);
@@ -925,7 +935,7 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarPosition, static_cast<NG::NavBarPosition>(mode));
 }
 
-void NavigationModelNG::SetNavBarWidth(const Dimension& value)
+void NavigationModelNG::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -933,6 +943,10 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    navBarWidthDoubleBind_ = isDoubleBind;
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
@@ -947,6 +961,9 @@ void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value);
 }
@@ -959,6 +976,9 @@ void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value);
 }
@@ -1115,6 +1135,9 @@ void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension&
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
 }
@@ -1125,6 +1148,9 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension&
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
 }
@@ -1137,6 +1163,9 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
@@ -1670,5 +1699,10 @@ void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
         menuItems.at(index).iconSymbol = symbol;
         navBarPattern->SetTitleBarMenuItems(menuItems);
     }
+}
+
+bool NavigationModelNG::IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern)
+{
+    return navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag();
 }
 } // namespace OHOS::Ace::NG
