@@ -33,6 +33,7 @@ const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+constexpr uint32_t PIXEL_SIZE = 4;
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -52,9 +53,51 @@ const std::unordered_map<std::string, CompositeOperation> COMPOSITE_TABLE = {
     { "COPY", CompositeOperation::COPY },
     { "XOR", CompositeOperation::XOR }
 };
+std::optional<double> ConvertDimension(
+    GeneratedModifier::CanvasRendererPeerImpl* peerImpl, const Ark_Union_Number_String& src)
+{
+    std::optional<double> dst = std::nullopt;
+    Converter::VisitUnion(
+        src,
+        [&dst, peerImpl](const Ark_String& value) {
+            auto opt = Converter::OptConvert<Dimension>(value);
+            if (opt) {
+                dst = peerImpl->GetDimension(*opt, true);
+            }
+        },
+        [&dst, peerImpl](const Ark_Number& value) {
+            auto opt = Converter::OptConvert<Dimension>(value);
+            if (opt) {
+                dst = peerImpl->GetDimension(*opt);
+            }
+        },
+        []() {});
+    return dst;
+}
 } // namespace
 namespace Converter {
-
+template<>
+std::vector<uint32_t> Convert(const Ark_Buffer& src)
+{
+    std::vector<uint32_t> dst;
+    auto array = (src.data != nullptr) ? static_cast<uint32_t*>(src.data) : nullptr;
+    auto size = static_cast<int64_t>(src.length);
+    if (array && size > 0) {
+        for (int64_t i = 0; i < size; i++) {
+            dst.push_back(array[i]);
+        }
+    }
+    return dst;
+}
+template<>
+Ace::ImageData Convert(const Ark_ImageData& src)
+{
+    Ace::ImageData dst;
+    dst.dirtyWidth = Converter::Convert<uint32_t>(src.width);
+    dst.dirtyHeight = Converter::Convert<uint32_t>(src.height);
+    dst.data = Converter::Convert<std::vector<uint32_t>>(src.data);
+    return dst;
+}
 template<>
 void AssignCast(std::optional<CompositeOperation>& dst, const Ark_String& src)
 {
@@ -299,11 +342,12 @@ Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
 Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
                                        const Ark_ImageData* imagedata)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData1Impl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for ImageData.");
-    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData1Impl Ark_ImageData includes Ark_ArrayBuffer "
-        "which is partially implemented.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(imagedata, nullptr);
+    peerImpl->imageData = Converter::Convert<Ace::ImageData>(*imagedata);
+    return reinterpret_cast<Ark_NativePointer>(peerImpl);
 }
 Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sx,
@@ -311,9 +355,31 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
                                    const Ark_Number* sw,
                                    const Ark_Number* sh)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetImageDataImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for ImageData.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(sx, nullptr);
+    CHECK_NULL_RETURN(sy, nullptr);
+    CHECK_NULL_RETURN(sw, nullptr);
+    CHECK_NULL_RETURN(sh, nullptr);
+    auto x = static_cast<double>(Converter::Convert<float>(*sx));
+    auto y = static_cast<double>(Converter::Convert<float>(*sy));
+    auto width = static_cast<double>(Converter::Convert<float>(*sw));
+    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
+    auto finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    auto finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    peerImpl->ClearImageData();
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageDataImpl Integer Overflow!!! "
+             "The product of finalHeight and finalWidth is too big.");
+        return reinterpret_cast<Ark_NativePointer>(peerImpl);
+    }
+    auto canvasData = peerImpl->GetImageData(imageSize);
+    if (canvasData) {
+        peerImpl->imageData = *canvasData;
+    }
+    return reinterpret_cast<Ark_NativePointer>(peerImpl);
 }
 Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sx,
@@ -321,17 +387,74 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
                                   const Ark_Number* sw,
                                   const Ark_Number* sh)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for PixelMap.");
+#ifdef PIXEL_MAP_SUPPORTED
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(sx, nullptr);
+    CHECK_NULL_RETURN(sy, nullptr);
+    CHECK_NULL_RETURN(sw, nullptr);
+    CHECK_NULL_RETURN(sh, nullptr);
+    auto x = static_cast<double>(Converter::Convert<float>(*sx));
+    auto y = static_cast<double>(Converter::Convert<float>(*sy));
+    auto width = static_cast<double>(Converter::Convert<float>(*sw));
+    auto height = static_cast<double>(Converter::Convert<float>(*sh));
+    ImageSize imageSize = peerImpl->GetImageSize(x, y, width, height);
+    peerImpl->ClearImageData();
+    peerImpl->GetPixelMap(imageSize);
+    return reinterpret_cast<Ark_NativePointer>(peerImpl);
+#else
+    LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl PixelMap is not supported on current platform.");
     return nullptr;
+#endif
 }
 void PutImageData0Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
                        const Ark_Union_Number_String* dx,
                        const Ark_Union_Number_String* dy)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::PutImageData0Impl Ark_ImageData includes Ark_ArrayBuffer "
-        "which is partially implemented.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(imagedata);
+    CHECK_NULL_VOID(dx);
+    CHECK_NULL_VOID(dy);
+    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
+    auto optX = ConvertDimension(peerImpl, *dx);
+    auto optY = ConvertDimension(peerImpl, *dy);
+    auto finalWidth = static_cast<int32_t>(std::abs(src.dirtyWidth));
+    auto finalHeight = static_cast<int32_t>(std::abs(src.dirtyHeight));
+    peerImpl->ClearImageData();
+    peerImpl->imageData.dirtyWidth = finalWidth;
+    peerImpl->imageData.dirtyHeight = finalHeight;
+    // parse
+    if (optX) {
+        peerImpl->imageData.x = static_cast<uint32_t>(*optX);
+    }
+    if (optY) {
+        peerImpl->imageData.y = static_cast<uint32_t>(*optY);
+    }
+    // parse
+    peerImpl->imageData.dirtyWidth =
+        peerImpl->imageData.dirtyX < 0
+            ? std::min(peerImpl->imageData.dirtyX + peerImpl->imageData.dirtyWidth, finalWidth)
+            : std::min(finalWidth - peerImpl->imageData.dirtyX, peerImpl->imageData.dirtyWidth);
+    peerImpl->imageData.dirtyHeight =
+        peerImpl->imageData.dirtyY < 0
+            ? std::min(peerImpl->imageData.dirtyY + peerImpl->imageData.dirtyHeight, finalHeight)
+            : std::min(finalHeight - peerImpl->imageData.dirtyY, peerImpl->imageData.dirtyHeight);
+    auto size = static_cast<uint32_t>(src.data.size());
+    for (int32_t i = std::max(peerImpl->imageData.dirtyY, 0);
+        i < peerImpl->imageData.dirtyY + peerImpl->imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(peerImpl->imageData.dirtyX, 0);
+            j < peerImpl->imageData.dirtyX + peerImpl->imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(PIXEL_SIZE * (j + finalWidth * i));
+            if (size > idx) {
+                peerImpl->imageData.data.emplace_back(src.data[idx]);
+            }
+        }
+    }
+    peerImpl->TriggerPutImageDataImpl(peerImpl->imageData);
 }
 void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
@@ -819,9 +942,12 @@ void SetLineCapImpl(CanvasRendererPeer* peer,
 }
 Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl there is no implementation in controller "
-        "for getter method of LineDashOffset.");
-    return 0;
+    CHECK_NULL_RETURN(peer, 0);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, 0);
+
+    double offset = peerImpl->TriggerGetLineDashOffsetImpl();
+    return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(offset));
 }
 void SetLineDashOffsetImpl(CanvasRendererPeer* peer,
                            const Ark_Number* lineDashOffset)

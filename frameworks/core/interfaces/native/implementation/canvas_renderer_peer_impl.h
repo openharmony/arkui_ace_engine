@@ -15,8 +15,10 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
+
 #include "base/geometry/animatable_dimension.h"
 #include "base/geometry/rect.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
@@ -29,9 +31,13 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
+struct ImageSizeExtended {
+    double x;
+    double y;
+};
 class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
     CanvasRendererPeerImpl();
@@ -61,6 +67,7 @@ public:
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
     void TriggerSetImageSmoothingEnabledImpl(bool imageSmoothingEnabled);
+    double TriggerGetLineDashOffsetImpl();
     void TriggerSetLineDashOffsetImpl(double dash);
     void TriggerSetLineWidthImpl(double width);
     void TriggerSetMiterLimitImpl(double limit);
@@ -68,7 +75,7 @@ public:
     void TriggerSetShadowColorImpl(Color& color);
     void TriggerSetShadowOffsetXImpl(double offsetX);
     void TriggerSetShadowOffsetYImpl(double offsetY);
-
+    void TriggerPutImageDataImpl(const Ace::ImageData& imageData);
     void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
     #ifdef PIXEL_MAP_SUPPORTED
     void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
@@ -87,11 +94,11 @@ public:
     std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const std::vector<double> params);
     std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
     void ClearImageData();
-    OHOS::Ace::ImageSize GetImageSize(const double& x, const double& y, const double& width, const double& height);
+    ImageSize GetImageSize(const double& x, const double& y, const double& width, const double& height);
     std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize);
     void GetPixelMap(const ImageSize& imageSize);
-    double GetDimemsion(const Dimension& value, const bool force = false);
-  
+    double GetDimension(const Dimension& value, const bool force = false);
+
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -129,8 +136,10 @@ public:
     }
 
 public:
-    RefPtr<CanvasPattern> pattern_;
     Ace::ImageData imageData;
+
+protected:
+    RefPtr<CanvasPattern> pattern_;
 
 private:
     Dimension GetDimensionValue(const std::string& str);

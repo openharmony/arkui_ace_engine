@@ -260,6 +260,15 @@ void CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl(bool enabled)
     }
     pattern_->UpdateSmoothingEnabled(enabled);
 }
+double CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl()
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl pattern "
+             "not bound to component.");
+        return 0;
+    }
+    return pattern_->GetLineDash().dashOffset;
+}
 void CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl(double dash)
 {
     if (!pattern_) {
@@ -409,6 +418,15 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
     }
     pattern_->UpdateStrokePattern(pattern);
 }
+void CanvasRendererPeerImpl::TriggerPutImageDataImpl(const Ace::ImageData& imageData)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl pattern "
+             "not bound to component.");
+        return;
+    }
+    pattern_->PutImageData(imageData);
+}
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
     Dimension dimension = StringUtils::StringToDimension(str);
@@ -516,15 +534,66 @@ void CanvasRendererPeerImpl::ClearImageData(){
     imageData.data.clear();
     imageData.pixelMap = nullptr;
 }
-OHOS::Ace::ImageSize CanvasRendererPeerImpl::GetImageSize(
+Ace::ImageSize CanvasRendererPeerImpl::GetImageSize(
     const double& x, const double& y, const double& width, const double& height)
 {
-    ImageSize imageSize;
+    Ace::ImageSize imageSize;
     double density = GetDensity();
     imageSize.left = x * density + DIFF;
     imageSize.top = y * density + DIFF;
     imageSize.width = width * density + DIFF;
     imageSize.height = height * density + DIFF;
     return imageSize;
+}
+std::unique_ptr<Ace::ImageData> CanvasRendererPeerImpl::GetImageData(const ImageSize& imageSize)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageData pattern not bound to component.");
+        return nullptr;
+    }
+    return pattern_->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
+}
+void CanvasRendererPeerImpl::GetPixelMap(const ImageSize& imageSize)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    uint32_t finalWidth = static_cast<uint32_t>(std::abs(imageSize.width));
+    uint32_t finalHeight = static_cast<uint32_t>(std::abs(imageSize.height));
+    if (finalHeight > 0 && finalWidth > (UINT32_MAX / finalHeight)) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap Integer Overflow!!! "
+             "The product of finalHeight and finalWidth is too big.");
+        return;
+    }
+    auto canvasData = GetImageData(imageSize);
+    CHECK_NULL_VOID(canvasData);
+    imageData = *canvasData;
+
+    uint32_t length = finalHeight * finalWidth;
+    uint32_t* data = new uint32_t[length];
+    for (uint32_t i = 0; i < finalHeight; i++) {
+        for (uint32_t j = 0; j < finalWidth; j++) {
+            uint32_t idx = i * finalWidth + j;
+            data[idx] = canvasData->data[idx];
+        }
+    }
+    OHOS::Media::InitializationOptions options;
+    options.alphaType = OHOS::Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+    options.pixelFormat = OHOS::Media::PixelFormat::RGBA_8888;
+    options.scaleMode = OHOS::Media::ScaleMode::CENTER_CROP;
+    options.size.width = static_cast<int32_t>(finalWidth);
+    options.size.height = static_cast<int32_t>(finalHeight);
+    options.editable = true;
+    auto pixelmap = Ace::PixelMap::Create(OHOS::Media::PixelMap::Create(data, length, options));
+    delete[] data;
+    imageData.pixelMap = pixelmap;
+#endif
+}
+double CanvasRendererPeerImpl::GetDimension(const Dimension& dimension, const bool force)
+{
+    auto value = dimension.Value();
+    if (force) {
+        return value;
+    }
+    double density = GetDensity();
+    return value * density + DIFF;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
