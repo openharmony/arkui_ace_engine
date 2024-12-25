@@ -3369,14 +3369,14 @@ void ArkUINativeModule::RegisterNavigationAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetBackButtonIcon));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackButtonIcon"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetBackButtonIcon));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetEnableDragBar));
+    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDragBar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetEnableDragBar));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetIgnoreLayoutSafeArea));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIgnoreLayoutSafeArea"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetIgnoreLayoutSafeArea));
-    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDragBar"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetEnableDragBar));
-    navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDragBar"),
-    panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::ResetEnableDragBar));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTitle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NavigationBridge::SetTitle));
     navigation->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTitle"),
