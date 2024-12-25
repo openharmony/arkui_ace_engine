@@ -410,6 +410,8 @@ public:
 
     bool IsInResponseLinkRecognizers();
 
+    bool IsAllowedType(SourceTool type);
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -433,10 +435,13 @@ protected:
     virtual void OnResetStatus() = 0;
 
     virtual void OnSucceedCancel() {}
+    virtual void RemoveUnsupportEvent(int32_t touchId) {}
     bool ShouldResponse() override;
 
     void HandleWillAccept();
     void HandleDidAccept();
+    
+    void ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer);
     bool ProcessTouchEvent(const TouchEvent& point);
     void HandleTouchDown(const TouchEvent& point);
     void HandleTouchUp(const TouchEvent& point);

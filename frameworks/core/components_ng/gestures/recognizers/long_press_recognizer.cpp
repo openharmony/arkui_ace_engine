@@ -414,7 +414,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     onAction_ = std::move(curr->onAction_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -446,7 +446,8 @@ RefPtr<GestureSnapshot> LongPressRecognizer::Dump() const
     oss << "duration: " << duration_ << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "repeat: " << repeat_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

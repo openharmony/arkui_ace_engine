@@ -65,6 +65,17 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::IsAllowedType(SourceTool type)
+{
+    // allow all types by default
+    if (!gestureInfo_) {
+        return true;
+    }
+
+    auto allowedTypes = gestureInfo_->GetAllowedTypes();
+    return allowedTypes.empty() || allowedTypes.find(type) != allowedTypes.end();
+}
+
 void NGGestureRecognizer::OnRejectBridgeObj()
 {
     if (bridgeObjList_.empty()) {
@@ -81,10 +92,13 @@ void NGGestureRecognizer::OnRejectBridgeObj()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(point.sourceTool) && point.type != TouchType::CANCEL) {
+        if (point.type == TouchType::DOWN) {
+            RemoveUnsupportEvent(point.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
     auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
@@ -151,10 +165,13 @@ void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
 
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(event.sourceTool) && event.action != AxisAction::CANCEL) {
+        if (event.action == AxisAction::BEGIN) {
+            RemoveUnsupportEvent(event.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
     switch (event.action) {
@@ -389,6 +406,15 @@ void NGGestureRecognizer::HandleDidAccept()
         GestureEvent gestureEventInfo = clickRecognizer->GetGestureEventInfo();
         ClickInfo clickInfo = clickRecognizer->GetClickInfo();
         UIObserverHandler::GetInstance().NotifyDidClick(gestureEventInfo, clickInfo, node);
+    }
+}
+
+void NGGestureRecognizer::ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+    auto currGestureInfo = recognizer->GetGestureInfo();
+    if (gestureInfo_ && currGestureInfo) {
+        gestureInfo_->SetAllowedTypes(currGestureInfo->GetAllowedTypes());
     }
 }
 
