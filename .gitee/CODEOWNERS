@@ -1990,7 +1990,7 @@ frameworks/core/components/panel/ @arkui_superman
 frameworks/core/components_part_upd/foreach/ @arkuistatemgmt
 frameworks/core/components/picker/ @arkuipopupwindow
 frameworks/core/components/piece/ @arkui_image
-frameworks/core/components/plugin/ @arkuilayout
+frameworks/core/components/plugin/ @arkuiabilitygroup
 frameworks/core/components/popup/ @arkuipopupwindow
 frameworks/core/components/positioned/ @arkuilayout
 frameworks/core/components/progress/ @arkui_image
