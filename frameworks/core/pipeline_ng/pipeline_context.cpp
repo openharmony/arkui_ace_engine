@@ -2012,8 +2012,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             height = rootSize.Height() - positionY;
         }
         auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
-        float newKeyboardOffset = context->CalcNewKeyboardOffset(
-            keyboardHeight, positionYWithOffset, height, rootSize);
+        float newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight,
+            positionYWithOffset, height, rootSize, onFocusField && manager->GetIfFocusTextFieldIsInline());
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId()) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
@@ -2157,9 +2157,10 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
 }
 
 float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
-    float height, SizeF& rootSize)
+    float height, SizeF& rootSize, bool isInline)
 {
     auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
+    CHECK_NULL_RETURN(!isInline, newKeyboardOffset);
     CHECK_NULL_RETURN(safeAreaManager_, newKeyboardOffset);
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_RETURN(manager, newKeyboardOffset);
