@@ -3079,10 +3079,7 @@ void DragPreviewImpl(Ark_NativePointer node,
             convValue->extraInfo = Converter::Convert<std::string>(val);
         },
         [node, frameNode, &convValue](const CustomNodeBuilder& val) {
-            auto customNodeBuilder = [callback = CallbackHelper(val, frameNode), node]() -> RefPtr<UINode> {
-                return callback.BuildSync(node);
-            };
-            convValue->customNode = customNodeBuilder();
+            convValue->customNode = CallbackHelper(val, frameNode).BuildSync(node);
         },
         [frameNode, &convValue](const Ark_DragItemInfo& value) {
             LOGE("ARKOALA: Convert to [DragDropInfo.PixelMap] from [Ark_DragItemInfo] is not supported\n");
@@ -3634,13 +3631,9 @@ void BackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto customNodeBuilder = [callback = CallbackHelper(*builder, frameNode), node]() -> RefPtr<UINode> {
-        return callback.BuildSync(node);
-    };
-    auto customNode = customNodeBuilder();
-    RefPtr<FrameNode> customFrameNodeRefPtr = AceType::DynamicCast<FrameNode>(customNode);
-    FrameNode* customFrameNode = customFrameNodeRefPtr.GetRawPtr();
-    CHECK_NULL_VOID(customFrameNode);
+    auto customNode = CallbackHelper(*builder, frameNode).BuildSync(node);
+    CHECK_NULL_VOID(customNode);
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
     auto optAlign = options ? Converter::OptConvert<Alignment>(*options) : std::nullopt;
     ViewAbstract::SetBackgroundAlign(customFrameNode, optAlign);
 }
@@ -3877,10 +3870,7 @@ void OverlayImpl(Ark_NativePointer node,
                 overlay->content = Converter::Convert<std::string>(src);
             },
             [node, frameNode, &overlay](const CustomNodeBuilder& src) {
-                auto builder = [callback = CallbackHelper(src, frameNode), node]() -> RefPtr<UINode> {
-                    return callback.BuildSync(node);
-                };
-                overlay->content = builder();
+                overlay->content = CallbackHelper(src, frameNode).BuildSync(node);
             },
             [](const Ark_ComponentContent& src) {
                 LOGE("OverlayImpl() Ark_ComponentContent.ComponentContentStub not implemented");
