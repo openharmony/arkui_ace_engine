@@ -7913,8 +7913,17 @@ class ImageSpanBorderRadiusModifier extends ModifierWithKey {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
         getUINativeModule().imageSpan.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        getUINativeModule().imageSpan.setBorderRadius(node, this.value.topLeft, this.value.topRight,
-          this.value.bottomLeft, this.value.bottomRight);
+        let keys = Object.keys(this.value);
+        if (Utils.isApiVersionEQAbove(16) &&
+          (keys.indexOf('topStart') >= 0 || keys.indexOf('topEnd') >= 0 ||
+          keys.indexOf('bottomStart') >= 0 || keys.indexOf('bottomEnd') >= 0)) {
+          let localizedBorderRadius = this.value;
+          getUINativeModule().imageSpan.setBorderRadius(node, localizedBorderRadius.topStart,
+            localizedBorderRadius.topEnd, localizedBorderRadius.bottomStart, localizedBorderRadius.bottomEnd);
+        } else {
+          getUINativeModule().imageSpan.setBorderRadius(node, this.value.topLeft, this.value.topRight,
+            this.value.bottomLeft, this.value.bottomRight);
+        }
       }
     }
   }
