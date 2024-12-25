@@ -1540,6 +1540,12 @@ HWTEST_F(NativeNodeTest, NativeNodeTest008, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_SELECTED_BACKGROUND_COLOR), nullptr);
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_TEXT_CONTENT_WITH_STYLED_STRING), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_TEXT_HALF_LEADING), nullptr);
+
+    value[0].i32 = ARKUI_FONT_WEIGHT_W100;
+    nodeAPI->setAttribute(rootNode, NODE_IMMUTABLE_FONT_WEIGHT, &item);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMMUTABLE_FONT_WEIGHT), nullptr);
+    nodeAPI->resetAttribute(rootNode, NODE_IMMUTABLE_FONT_WEIGHT);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_IMMUTABLE_FONT_WEIGHT), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 

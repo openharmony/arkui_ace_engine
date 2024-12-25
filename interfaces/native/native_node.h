@@ -2058,7 +2058,7 @@ typedef enum {
 
     /**
      * @brief Defines the font weight attribute, which can be set, reset, and obtained as required through APIs.
-     * The font weight set through this interface does not support adaptive adjustment.
+     * The font weight specified by this API is not affected by any changes in the system font weight settings.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: font weight {@link ArkUI_FontWeight}. The default value is <b>ARKUI_FONT_WEIGHT_NORMAL</b>.\n
