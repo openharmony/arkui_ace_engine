@@ -3137,5 +3137,5 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
-test/unittest/interfaces/ @arkui_architecture
+test/unittest/interfaces/ @arkuiframework
 
