@@ -1111,28 +1111,28 @@ export struct FlexBootcamp {
         y: useEnabled(this.enableCompBackgroundImagePositionY, this.compBackgroundImagePositionY)
       })
       .backgroundBlurStyle(useEnabled(this.enableCompBackgroundBlurStyle, this.compBackgroundBlurStyle),
-        this.enableCompBackgroundBlurStyleOptions ? {
+        this.enableCompBackgroundBlurStyleParams ? {
           colorMode: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsColorMode,
-            this.compBackgroundBlurStyleOptionsColorMode
+            this.enableCompBackgroundBlurStyleParamsColorMode,
+            this.compBackgroundBlurStyleParamsColorMode
           ),
           adaptiveColor: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsAdaptiveColor,
-            this.compBackgroundBlurStyleOptionsAdaptiveColor
+            this.enableCompBackgroundBlurStyleParamsAdaptiveColor,
+            this.compBackgroundBlurStyleParamsAdaptiveColor
           ),
           scale: useEnabled(
-            this.enableCompBackgroundBlurStyleOptionsScale,
-            this.compBackgroundBlurStyleOptionsScale
+            this.enableCompBackgroundBlurStyleParamsScale,
+            this.compBackgroundBlurStyleParamsScale
           ),
           blurOptions: {
             grayscale: [
               useEnabled(
-                this.enableCompBackgroundBlurStyleOptionsBlurOptionsLeft,
-                this.compBackgroundBlurStyleOptionsBlurOptionsLeft
+                this.enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+                this.compBackgroundBlurStyleParamsBlurOptionsLeft
               ),
               useEnabled(
-                this.enableCompBackgroundBlurStyleOptionsBlurOptionsRight,
-                this.compBackgroundBlurStyleOptionsBlurOptionsRight
+                this.enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+                this.compBackgroundBlurStyleParamsBlurOptionsRight
               )
             ]
           }
