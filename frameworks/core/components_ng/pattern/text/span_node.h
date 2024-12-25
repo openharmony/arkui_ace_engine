@@ -399,6 +399,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
@@ -724,6 +729,7 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+    OnHoverFunc onHover_;
 private:
     ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
     ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;

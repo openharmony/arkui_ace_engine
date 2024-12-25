@@ -619,7 +619,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString006, TestSize.Level1)
 
 /**
  * @tc.name: MutableSpanString007
- * @tc.desc: Test some edge case of InsertString/ReplaceString/RemoveString 
+ * @tc.desc: Test some edge case of InsertString/ReplaceString/RemoveString
  * @tc.type: FUNC
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString007, TestSize.Level1)
@@ -1220,7 +1220,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     spanStr->EncodeTlv(buff);
     auto spanString2 = SpanString::DecodeTlv(buff);
     std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
-    
+
     EXPECT_EQ(spans.size(), 10);
     EXPECT_EQ(spanStr->GetString(), "dddd当地经的123456");
     auto it = spans.begin();
@@ -1349,7 +1349,7 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     buffer = letterSpacingSpan->ToString();
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
-   
+
     Shadow textShadow;
     textShadow.SetBlurRadius(1.0);
     textShadow.SetColor(Color::BLACK);
@@ -1493,6 +1493,247 @@ HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
     EXPECT_EQ(backgroundColorSpan->GetStartIndex(), 8);
     EXPECT_EQ(backgroundColorSpan->GetEndIndex(), 9);
     EXPECT_TRUE(backgroundColorSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString013
+ * @tc.desc: Test insert spanstring between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString013, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+    auto insertString = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 8));
+    // insert span string
+    spanString->InsertSpanString(2, insertString);
+
+    // check range start->end [0, 13]
+    auto backgroundSpans = spanString->GetSpans(0, 13);
+    EXPECT_EQ(backgroundSpans.size(), 2);
+    auto firstBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(firstBackgroundSpan, nullptr);
+    EXPECT_EQ(firstBackgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(firstBackgroundSpan->GetEndIndex(), 2);
+    EXPECT_TRUE(firstBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    auto secondBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[1]);
+    EXPECT_NE(secondBackgroundSpan, nullptr);
+    EXPECT_EQ(secondBackgroundSpan->GetStartIndex(), 5);
+    EXPECT_EQ(secondBackgroundSpan->GetEndIndex(), 11);
+    EXPECT_TRUE(secondBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    // check range [0, 10]
+    backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 2);
+
+    auto secondBackgroundSpan2 = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[1]);
+    EXPECT_NE(secondBackgroundSpan2, nullptr);
+    EXPECT_EQ(secondBackgroundSpan2->GetStartIndex(), 5);
+    EXPECT_EQ(secondBackgroundSpan2->GetEndIndex(), 10);
+    EXPECT_TRUE(secondBackgroundSpan2->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString014
+ * @tc.desc: Test append spanstring after BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString014, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+    auto appendString = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 10));
+    // append span string
+    spanString->AppendSpanString(appendString);
+
+    // check range
+    auto backgroundSpans = spanString->GetSpans(0, 13);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto firstBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(firstBackgroundSpan, nullptr);
+    EXPECT_EQ(firstBackgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(firstBackgroundSpan->GetEndIndex(), 10);
+    EXPECT_TRUE(firstBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString015
+ * @tc.desc: Test insert string between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString015, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+
+    // insert value
+    spanString->InsertString(2, u"abc");
+
+    // check range of span
+    auto backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 8);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString016
+ * @tc.desc: Test remove string between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString016, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveString(2, 1);
+
+    // check range of span
+    auto backgroundSpans = spanString->GetSpans(0, 7);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 4);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    // remove multi times
+    spanString->RemoveString(2, 2);
+    backgroundSpans = spanString->GetSpans(0, 7);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 2);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString017
+ * @tc.desc: Test remove span of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString017, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveSpan(0, 5, SpanType::BackgroundColor);
+
+    // check span count
+    auto backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 0);
+
+    // add again
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: SpanString018
+ * @tc.desc: Test remove span of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString018, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveSpan(0, 5, SpanType::BackgroundColor);
+
+    // check span count
+    auto spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 0);
+
+    // add again
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 1);
+
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(spans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 5);
+
+    // remove all spans
+    spanString->ClearAllSpans();
+    spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 0);
 }
 
 /**

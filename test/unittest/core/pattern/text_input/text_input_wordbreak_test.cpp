@@ -563,4 +563,112 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);
 }
+
+/**
+ * @tc.name: textInputLayout006
+ * @tc.desc: test textStyle, set the value to HEAD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout006, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::HEAD);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: textInputLayout007
+ * @tc.desc: test textStyle, set the value to MIDDLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout007, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::MIDDLE);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::MIDDLE);
+}
+
+/**
+ * @tc.name: textInputLayout008
+ * @tc.desc: test textStyle, set the value to TAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout008, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::TAIL);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::TAIL);
+}
 } // namespace OHOS::Ace::NG

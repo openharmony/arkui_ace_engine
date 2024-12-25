@@ -499,9 +499,7 @@ public:
         return false;
     }
 
-    virtual bool GetCurPointerEventInfo(
-        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+    virtual bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
     {
         return false;
     }

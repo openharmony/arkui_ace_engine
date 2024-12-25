@@ -369,7 +369,7 @@ std::optional<float> GetContainerModalTitleHeightIfNeeded(
     CHECK_NULL_RETURN(navigationNode, titleHeight);
     auto pipeline = navigationNode->GetContext();
     CHECK_NULL_RETURN(pipeline, titleHeight);
-    if (pipeline->GetContainerCustomTitleVisible()) {
+    if (!NavigationTitleUtil::NeedAvoidContainerModal(pipeline)) {
         return titleHeight;
     }
     auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();

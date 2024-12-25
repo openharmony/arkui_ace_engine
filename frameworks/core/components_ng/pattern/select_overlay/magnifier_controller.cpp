@@ -34,12 +34,8 @@ void MagnifierController::UpdateShowMagnifier(bool isShowMagnifier)
 }
 
 bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
-    const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
+    const OffsetF& basePaintOffset)
 {
-    if (localOffset_.GetX() < 0 || localOffset_.GetX() > GetViewPort(host).Width()) {
-        UpdateShowMagnifier();
-        return false;
-    }
     float left = basePaintOffset.GetX() + localOffset_.GetX() - magnifierNodeWidth_.ConvertToPx() / 2;
     auto rootUINode = GetRootNode();
     CHECK_NULL_RETURN(rootUINode, false);
@@ -54,7 +50,7 @@ bool MagnifierController::UpdateMagnifierOffsetX(OffsetF& magnifierPaintOffset, 
 }
 
 bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, VectorF& magnifierOffset,
-    const OffsetF& basePaintOffset, const RefPtr<FrameNode>& host)
+    const OffsetF& basePaintOffset)
 {
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, false);
@@ -66,10 +62,6 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     float offsetY_ = 0.f;
 
     if (hasKeyboard && basePaintOffset.GetY() + localOffset_.GetY() >= keyboardInsert.start) {
-        UpdateShowMagnifier();
-        return false;
-    }
-    if (localOffset_.GetY() < 0 || localOffset_.GetY() > GetViewPort(host).Height()) {
         UpdateShowMagnifier();
         return false;
     }
@@ -105,8 +97,12 @@ bool MagnifierController::UpdateMagnifierOffset()
     ViewAbstract::SetBackgroundColor(AceType::RawPtr(magnifierFrameNode_), colorMagnifier);
     OffsetF magnifierPaintOffset;
     VectorF magnifierOffset(0.f, 0.f);
-    CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, paintOffset, host), false);
-    CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, paintOffset, host), false);
+    if (!IsLocalOffsetInHostRange(host)) {
+        UpdateShowMagnifier(false);
+        return false;
+    }
+    CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, paintOffset), false);
+    CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
     geometryNode->SetFrameOffset(magnifierPaintOffset);
     childContext->UpdatePosition(
@@ -120,6 +116,15 @@ bool MagnifierController::UpdateMagnifierOffset()
     magnifierFrameNode_->ForceSyncGeometryNode();
     magnifierFrameNode_->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
+}
+
+bool MagnifierController::IsLocalOffsetInHostRange(const RefPtr<FrameNode>& host)
+{
+    CHECK_NULL_RETURN(host, false);
+    auto localOffset = localOffsetWithoutTrans_.value_or(localOffset_);
+    auto viewPort = GetViewPort(host);
+    viewPort.SetOffset({ 0, 0 });
+    return viewPort.IsInRegion(PointF{ localOffset.GetX(), localOffset.GetY() });
 }
 
 void MagnifierController::OpenMagnifier()

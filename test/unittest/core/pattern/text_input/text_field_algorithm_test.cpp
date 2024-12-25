@@ -228,6 +228,30 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRectTest001
+ * @tc.desc: Test the function LayoutRectTest001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldAlgorithmTest, LayoutRectTest001, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT);
+    LayoutConstraintF constraint;
+    constraint.minSize = SizeF(100, 100);
+    constraint.maxSize = SizeF(100, 100);
+    constraint.percentReference = SizeF(100, 100);
+    frameNode_->GetLayoutProperty()->SetLayoutRect(RectF(0, 0, 100, 100));
+    frameNode_->GetLayoutProperty()->UpdateCalcMinSize(CalcSize(CalcLength(200), CalcLength(200)));
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
+    TextStyle textStyle;
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
+    float width = textInputLayoutAlgorithm->CalculateContentWidth(constraint, AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(width, 100);
+}
+
+/**
  * @tc.name: CounterLayout001
  * @tc.desc: Test the function CounterLayout.
  * @tc.type: FUNC

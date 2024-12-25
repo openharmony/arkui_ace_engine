@@ -241,14 +241,7 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback(bool isApproximate = false)
-    {
-        if (isApproximate) {
-            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
-        } else {
-            eventHub_->CleanVisibleAreaCallback(true, false);
-        }
-    }
+    void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
         bool isCalculateInnerClip = false)
@@ -1161,6 +1154,8 @@ public:
             visibleAreaChangeTriggerReason_ = triggerReason;
         }
     }
+
+    void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 protected:
     void DumpInfo() override;

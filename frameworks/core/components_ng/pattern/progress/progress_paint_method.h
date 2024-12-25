@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -99,6 +99,7 @@ public:
             paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth_ / 2.0f, DimensionUnit::VP)).ConvertToPx());
         strokeRadius = std::min(strokeWidth_ / 2, strokeRadius);
         progressModifier_->SetStrokeRadius(strokeRadius);
+        SetCapsuleBorderRadius(paintWrapper);
     }
 
     void GetThemeData();
@@ -106,6 +107,7 @@ public:
 
 private:
     Gradient GenerateRingProgressColor(PaintWrapper* paintWrapper);
+    void SetCapsuleBorderRadius(PaintWrapper* paintWrapper);
 
     Color color_ = Color::BLUE;
     Color bgColor_ = Color::GRAY;

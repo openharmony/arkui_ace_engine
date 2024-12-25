@@ -104,7 +104,7 @@ BarDirection ScrollBar::CheckBarDirection(const Point& point)
 void ScrollBar::FlushBarWidth()
 {
     if (shapeMode_ == ShapeMode::RECT) {
-        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_, SCROLL_FROM_NONE);
     } else {
         SetRoundTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
     }
@@ -112,7 +112,7 @@ void ScrollBar::FlushBarWidth()
 }
 
 void ScrollBar::UpdateScrollBarRegion(
-    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
+    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     // return if nothing changes to avoid changing opacity
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
@@ -128,7 +128,7 @@ void ScrollBar::UpdateScrollBarRegion(
         lastOffset_ = lastOffset;
         estimatedHeight_ = estimatedHeight;
         if (shapeMode_ == ShapeMode::RECT) {
-            SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
+            SetRectTrickRegion(offset, size, lastOffset, estimatedHeight, scrollSource);
         } else {
             SetRoundTrickRegion(offset, size, lastOffset, estimatedHeight);
         }
@@ -189,7 +189,7 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 }
 
 void ScrollBar::SetRectTrickRegion(
-    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
+    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
     barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_), 0.0);
@@ -223,7 +223,7 @@ void ScrollBar::SetRectTrickRegion(
     double activeMainOffset =
         std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) + NormalizeToPx(startReservedHeight_);
     activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
-    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
+    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
     scrollableOffset_ = activeMainOffset;

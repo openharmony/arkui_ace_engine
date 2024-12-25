@@ -27,6 +27,7 @@ constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
 
 std::shared_mutex mutex_;
 std::set<int32_t> containerSet_;
+thread_local int32_t currentLocalId_(DEFAULT_ID);
 thread_local int32_t currentId_(DEFAULT_ID);
 std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
 std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
@@ -35,6 +36,16 @@ std::atomic<int32_t> recentForegroundId_(DEFAULT_ID);
 int32_t ContainerScope::CurrentId()
 {
     return currentId_;
+}
+
+void ContainerScope::UpdateLocalCurrent(int32_t id)
+{
+    currentLocalId_ = id;
+}
+
+int32_t ContainerScope::CurrentLocalId()
+{
+    return currentLocalId_;
 }
 
 int32_t ContainerScope::DefaultId()

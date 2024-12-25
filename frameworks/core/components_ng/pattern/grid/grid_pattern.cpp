@@ -66,7 +66,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
-    const bool overScroll = CanOverScroll(GetScrollSource()) || forceOverScroll_;
+    const bool overScroll = CanOverScroll(GetScrollSource()) || preSpring_;
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, overScroll);
         algo->SetEnableSkip(!disableSkip);
@@ -499,7 +499,9 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    CheckRestartSpring(false);
+    if (!preSpring_) {
+        CheckRestartSpring(false);
+    }
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
@@ -978,7 +980,7 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && LessNotEqual(GetTotalHeight(), contentHeight)) {
+    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
@@ -1037,13 +1039,13 @@ void GridPattern::SyncLayoutBeforeSpring()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    forceOverScroll_ = true;
+    preSpring_ = true;
     host->SetActive();
     auto context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
-    forceOverScroll_ = false;
+    preSpring_ = false;
 }
 
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const

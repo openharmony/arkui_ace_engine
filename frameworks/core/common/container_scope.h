@@ -54,6 +54,7 @@ public:
     }
 
     static int32_t CurrentId();
+    static int32_t CurrentLocalId();
     static int32_t DefaultId();
     static int32_t SingletonId();
     static int32_t RecentActiveId();
@@ -67,6 +68,7 @@ public:
     static uint32_t ContainerCount();
 
     static void UpdateCurrent(int32_t id);
+    static void UpdateLocalCurrent(int32_t id);
     static void UpdateSingleton(int32_t id);
     static void UpdateRecentActive(int32_t id);
     static void UpdateRecentForeground(int32_t id);

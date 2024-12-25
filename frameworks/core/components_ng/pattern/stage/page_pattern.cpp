@@ -352,7 +352,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -825,7 +825,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -862,7 +862,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -938,7 +938,7 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         const float defaultAmplitudePx = 0.005f;
         springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
     }

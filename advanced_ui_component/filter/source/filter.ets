@@ -46,10 +46,10 @@ const TRANS_COLOR: string = '#00FFFFFF'
 const GRADIENT_WIDTH: number = 16
 const MAX_FONT_SCALE: number = 2;
 const ERROR_CODE: number = 0x3900;
-const SYMBOL_SIZE: number = 24
-const MAX_SYMBOL_FONT_SCALE: number = 1.45
-const MIN_SYMBOL_FONT_SCALE: number = 1
-const DEFAULT_SYMBOL_FONT_SCALE: number = 1
+const SYMBOL_SIZE: number = 24;
+const MAX_SYMBOL_FONT_SCALE: number = 1.45;
+const MIN_SYMBOL_FONT_SCALE: number = 1;
+const DEFAULT_SYMBOL_FONT_SCALE: number = 1;
 
 export enum FilterType {
   MULTI_LINE_FILTER,
@@ -103,6 +103,20 @@ class ObservedNumber {
   }
 }
 
+@Observed
+class FilterAccessibilityText {
+  public accessibilitySelectedText: string = '';
+  public accessibilityExpand: string = '';
+  public accessibilityCollapse: string = '';
+  public accessibilityExpanded: string = '';
+  public accessibilityCollapsed: string = '';
+  public accessibilityUnselectedText: string = '';
+  public accessibilityFilters: string = '';
+  public accessibilitySelectedDesc: string = '';
+  public accessibilityUnselectedDesc: string = '';
+  public accessibilityExpandDesc: string = '';
+}
+
 @Component
 struct GradientMask {
   x0: number = 0;
@@ -138,17 +152,15 @@ struct ListFilterRow {
   @ObjectLink backgroundColorRow: ResourceArray
   @ObjectLink isBackgroundHoverRow: BooleanArray
   @ObjectLink isSelectedRow: BooleanArray;
-  private accessibilitySelectedText: string = '';
+  @ObjectLink filterAccessibilityText: FilterAccessibilityText;
   filterRow: FilterParams = { name: '', options: [] };
-  onItemClick: (colIndex: number) => void = () => {
-  }
+  onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
   bundleName: string = '';
 
   aboutToAppear() {
-    this.initAccessibilityResource();
     try {
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
@@ -158,18 +170,7 @@ struct ListFilterRow {
       let message: string = (err as BusinessError).message;
       hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
-  }
-
-  private initAccessibilityResource(): void {
-    try {
-      this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
-      let resourceManager = getContext()?.resourceManager;
-      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
-    } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
-      hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
-    }
+    this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
   }
 
   updateFontScale(): number {
@@ -192,13 +193,14 @@ struct ListFilterRow {
       }
       switch (type) {
         case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-          accessibilityText = selected ? this.accessibilitySelectedText : resourceString;
+          accessibilityText = selected ? this.filterAccessibilityText.accessibilitySelectedText : resourceString;
           break;
         case FilterAccessibilityType.ACCESSIBILITY_DESC:
           accessibilityText = selected ? resourceString : '';
           break;
         case FilterAccessibilityType.SEND_ACCESSIBILITY:
-          accessibilityText = selected ? `${this.accessibilitySelectedText},${resourceString}` : '';
+          accessibilityText =
+            selected ? `${this.filterAccessibilityText.accessibilitySelectedText},${resourceString}` : '';
           break;
         default:
           break;
@@ -344,29 +346,23 @@ struct MultiFilterRow {
   @ObjectLink arrowShowStateRow: ObservedBoolean
   @ObjectLink isArrowIconDown: ObservedBoolean
   @ObjectLink isSelectedRow: BooleanArray;
+  @ObjectLink filterAccessibilityText: FilterAccessibilityText;
   filterRow: FilterParams | null = null
-  onItemClick: (colIndex: number) => void = () => {
-  }
+  onItemClick: (colIndex: number) => void = () => {}
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
-  @Prop fontSizeScale: number | undefined
-  @State replaceEffect: number = 0
+  @Prop fontSizeScale: number | undefined;
+  @State replaceEffect: number = 0;
   @State isSendArrowAccessibility: boolean = false;
   private filterColumnWidth: number = 0
   private lastFilterColumnWidth: number = 0
   private rowIndex: number = 0
-  private accessibilityExpand: string = '';
-  private accessibilitySelectedText: string = '';
-  private accessibilityCollapse: string = '';
-  private accessibilityExpanded: string = '';
-  private accessibilityCollapsed: string = '';
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
   bundleName: string = '';
   filterId: number = this.getUniqueId();
 
   aboutToAppear() {
-    this.initAccessibilityResource();
     try {
       let uiContent: UIContext = this.getUIContext();
       this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
@@ -376,6 +372,7 @@ struct MultiFilterRow {
       let message: string = (err as BusinessError).message;
       hilog.error(ERROR_CODE, 'Ace', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
+    this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
   }
 
   updateFontScale(): number {
@@ -385,22 +382,6 @@ struct MultiFilterRow {
       return 1;
     }
     return Math.min(systemFontScale, this.maxAppFontScale);
-  }
-
-  private initAccessibilityResource(): void {
-    try {
-      this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
-      let resourceManager = getContext()?.resourceManager;
-      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
-      this.accessibilityExpand = resourceManager?.getStringByNameSync('filter_accessibility_expand');
-      this.accessibilityCollapse = resourceManager?.getStringByNameSync('filter_accessibility_collapse');
-      this.accessibilityExpanded = resourceManager?.getStringByNameSync('filter_accessibility_expanded');
-      this.accessibilityCollapsed = resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
-    } catch (err) {
-      let code: number = (err as BusinessError).code;
-      let message: string = (err as BusinessError).message;
-      hilog.error(ERROR_CODE, 'Ace', `Filter failed to initAccessibilityResource, code: ${code}, message: ${message}`);
-    }
   }
 
   private calcMultiFilterRowItemNum() {
@@ -452,13 +433,14 @@ struct MultiFilterRow {
       }
       switch (type) {
         case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-          accessibilityText = selected ? this.accessibilitySelectedText : resourceString;
+          accessibilityText = selected ? this.filterAccessibilityText.accessibilitySelectedText : resourceString;
           break;
         case FilterAccessibilityType.ACCESSIBILITY_DESC:
           accessibilityText = selected ? resourceString : '';
           break;
         case FilterAccessibilityType.SEND_ACCESSIBILITY:
-          accessibilityText = selected ? `${this.accessibilitySelectedText},${resourceString}` : '';
+          accessibilityText =
+            selected ? `${this.filterAccessibilityText.accessibilitySelectedText},${resourceString}` : '';
           break;
         default:
           break;
@@ -536,9 +518,11 @@ struct MultiFilterRow {
       .focusable(true)
       .accessibilityGroup(true)
       .accessibilityText(this.isSendArrowAccessibility ?
-        (this.isArrowIconDown?.value ? this.accessibilityCollapsed : this.accessibilityExpanded) :
-        (this.isArrowIconDown?.value ? this.accessibilityExpand : this.accessibilityCollapse))
-      .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : undefined)
+        (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityCollapsed :
+        this.filterAccessibilityText.accessibilityExpanded) :
+        (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityExpand :
+        this.filterAccessibilityText.accessibilityCollapse))
+      .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '')
       .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
       .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
       .onHover((isHover: boolean) => {
@@ -712,7 +696,7 @@ struct MultiFilterRow {
                   .accessibilityDescription(this.getAccessibilityText(option,
                     this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC))
                   .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
-                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                  this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
                     this.sendAccessibility(option, true);
@@ -853,25 +837,19 @@ export struct Filter {
   @State floatFilterBarText: string = ''
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
-  @State fontSizeScale: number | undefined = undefined
-  private callbackId: number | undefined = undefined
+  @State fontSizeScale: number | undefined = undefined;
+  private callbackId: number | undefined = undefined;
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
       this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
       this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
+      this.initAccessibilityResource();
     }, onMemoryLevel() {
     }
-  }
+  };
   @State additionFiltersSelectedIndex?: number = -1;
   @State floatFilterBarAccessibilityText: string = '';
-  private accessibilityUnselectedText: string = '';
-  private accessibilitySelectedText: string = '';
-  private accessibilityExpanded: string = '';
-  private accessibilityCollapsed: string = '';
-  private accessibilityFilters: string = '';
-  private accessibilitySelectedDesc: string = '';
-  private accessibilityUnselectedDesc: string = '';
-  private accessibilityExpandDesc: string = '';
+  @State filterAccessibilityText: FilterAccessibilityText = new FilterAccessibilityText();
   bundleName: string = '';
   private filterId: number = this.getUniqueId();
 
@@ -906,7 +884,7 @@ export struct Filter {
         .getHostContext()
       ?.getApplicationContext()
       ?.off('environment', this.callbackId);
-      this.callbackId = void (0)
+      this.callbackId = void (0);
     }
   }
 
@@ -914,14 +892,26 @@ export struct Filter {
     try {
       this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
       let resourceManager = getContext()?.resourceManager;
-      this.accessibilitySelectedText = resourceManager?.getStringByNameSync('filter_accessibility_selected');
-      this.accessibilityUnselectedText = resourceManager?.getStringByNameSync('filter_accessibility_unselected');
-      this.accessibilityFilters = resourceManager?.getStringByNameSync('filter_accessibility_filters');
-      this.accessibilitySelectedDesc = resourceManager?.getStringByNameSync('filter_accessibility_select_desc');
-      this.accessibilityUnselectedDesc = resourceManager?.getStringByNameSync('filter_accessibility_unselect_desc');
-      this.accessibilityExpandDesc = resourceManager?.getStringByNameSync('filter_accessibility_expand_desc');
-      this.accessibilityExpanded = resourceManager?.getStringByNameSync('filter_accessibility_expanded');
-      this.accessibilityCollapsed = resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
+      this.filterAccessibilityText.accessibilitySelectedText =
+        resourceManager?.getStringByNameSync('filter_accessibility_selected');
+      this.filterAccessibilityText.accessibilityUnselectedText =
+        resourceManager?.getStringByNameSync('filter_accessibility_unselected');
+      this.filterAccessibilityText.accessibilityFilters =
+        resourceManager?.getStringByNameSync('filter_accessibility_filters');
+      this.filterAccessibilityText.accessibilitySelectedDesc =
+        resourceManager?.getStringByNameSync('filter_accessibility_select_desc');
+      this.filterAccessibilityText.accessibilityUnselectedDesc =
+        resourceManager?.getStringByNameSync('filter_accessibility_unselect_desc');
+      this.filterAccessibilityText.accessibilityExpandDesc =
+        resourceManager?.getStringByNameSync('filter_accessibility_expand_desc');
+      this.filterAccessibilityText.accessibilityExpanded =
+        resourceManager?.getStringByNameSync('filter_accessibility_expanded');
+      this.filterAccessibilityText.accessibilityCollapsed =
+        resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
+      this.filterAccessibilityText.accessibilityExpand =
+        resourceManager?.getStringByNameSync('filter_accessibility_expand');
+      this.filterAccessibilityText.accessibilityCollapse =
+        resourceManager?.getStringByNameSync('filter_accessibility_collapse');
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;
@@ -961,14 +951,16 @@ export struct Filter {
       }
       switch (type) {
         case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-          accessibilityText = selected ? `${this.accessibilitySelectedText},${resourceString}` : resourceString;
+          accessibilityText = selected ? `${this.filterAccessibilityText.accessibilitySelectedText},${resourceString}` :
+            resourceString;
           break;
         case FilterAccessibilityType.ACCESSIBILITY_DESC:
-          accessibilityText = selected ? this.accessibilityUnselectedDesc : this.accessibilitySelectedDesc;
+          accessibilityText = selected ? this.filterAccessibilityText.accessibilityUnselectedDesc :
+          this.filterAccessibilityText.accessibilitySelectedDesc;
           break;
         case FilterAccessibilityType.SEND_ACCESSIBILITY:
-          accessibilityText = selected ? `${this.accessibilitySelectedText},${resourceString}` :
-            `${this.accessibilityUnselectedText},${resourceString}`;
+          accessibilityText = selected ? `${this.filterAccessibilityText.accessibilitySelectedText},${resourceString}` :
+            `${this.filterAccessibilityText.accessibilityUnselectedText},${resourceString}`;
           break;
         default:
           break;
@@ -1036,6 +1028,8 @@ export struct Filter {
 
   private getFloatAccessibilityText(resource: ResourceStr | undefined, type: FilterAccessibilityType): string {
     let accessibilityText: string = '';
+    let accessibilityFilters: string = this.filterAccessibilityText.accessibilityFilters;
+    let accessibilityCollapsed: string = this.filterAccessibilityText.accessibilityCollapsed;
     try {
       let resourceString: string = '';
       if (typeof resource === 'string') {
@@ -1045,13 +1039,14 @@ export struct Filter {
       }
       switch (type) {
         case FilterAccessibilityType.ACCESSIBILITY_TEXT:
-          accessibilityText = `${this.accessibilityFilters},${this.accessibilityCollapsed},${resourceString}`;
+          accessibilityText =
+            `${accessibilityFilters},${accessibilityCollapsed},${resourceString}`;
           break;
         case FilterAccessibilityType.ACCESSIBILITY_DESC:
-          accessibilityText = this.accessibilityExpandDesc;
+          accessibilityText = this.filterAccessibilityText.accessibilityExpandDesc;
           break;
         case FilterAccessibilityType.SEND_ACCESSIBILITY:
-          accessibilityText = this.accessibilityExpanded;
+          accessibilityText = this.filterAccessibilityText.accessibilityExpanded;
           break;
         default:
           break;
@@ -1182,6 +1177,7 @@ export struct Filter {
             this.filterItemClick(rowIndex, colIndex);
           },
           rowIndex: rowIndex,
+          filterAccessibilityText: this.filterAccessibilityText,
         })
       })
     }.width(PERCENT_100)
@@ -1220,6 +1216,7 @@ export struct Filter {
           rowIndex: rowIndex,
           fontSizeScale: this.fontSizeScale,
           filterId: this.filterId,
+          filterAccessibilityText: this.filterAccessibilityText,
         })
       })
     }.width(PERCENT_100)
