@@ -60,7 +60,6 @@ using std::chrono::milliseconds;
 
 ScrollablePattern::~ScrollablePattern()
 {
-    UnRegister2DragDropManager();
     if (AnimateRunning()) {
         PerfMonitor::GetPerfMonitor()->End(PerfConstants::SCROLLER_ANIMATION, false);
         auto scrollable = GetScrollable();
@@ -792,7 +791,9 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
 
 void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto context = GetContext();
+    CHECK_NULL_VOID(frameNode);
+    UnRegister2DragDropManager(frameNode);
+    auto context = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
@@ -3058,15 +3059,14 @@ void ScrollablePattern::HandleOnDragStatusCallback(
  * @description: Cancel registration with the drag drop manager
  * @return None
  */
-void ScrollablePattern::UnRegister2DragDropManager()
+void ScrollablePattern::UnRegister2DragDropManager(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = GetContext();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->UnRegisterDragStatusListener(host->GetId());
+    dragDropManager->UnRegisterDragStatusListener(frameNode->GetId());
 }
 
 bool ScrollablePattern::NeedCoordinateScrollWithNavigation(
