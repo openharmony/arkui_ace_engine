@@ -1500,8 +1500,6 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
             ASSERT_NE(gradient, nullptr);
             auto o1 = gradient->GetBeginOffset();
             auto o2 = gradient->GetEndOffset();
-            std::printf("linear: const o1: %.2f=%.2f %.2f=%.2f o2: %.2f=%.2f %.2f=%.2f\n", o1.GetX(), expectedX,
-                o1.GetY(), expectedY, o2.GetX(), valD, o2.GetY(), valD);
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), expectedY));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), valD));
@@ -1522,8 +1520,6 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
             ASSERT_NE(gradient, nullptr);
             auto o1 = gradient->GetBeginOffset();
             auto o2 = gradient->GetEndOffset();
-            std::printf("linear: const2 o1: %.2f=%.2f %.2f=%.2f o2: %.2f=%.2f %.2f=%.2f\n", o1.GetX(), valD, o1.GetY(),
-                valD, o2.GetX(), expectedX, o2.GetY(), expectedY);
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), expectedX));
@@ -1560,9 +1556,6 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
             auto o2 = gradient->GetEndOffset();
             auto ri = gradient->GetInnerRadius();
             auto ro = gradient->GetOuterRadius();
-            std::printf(
-                "radial: const o1: [%.2f=%.2f %.2f=%.2f] o2: [%.2f=%.2f %.2f=%.2f] ri: [%.2f=%.2f] ro: [%.2f=%.2f]\n",
-                o1.GetX(), expectedX, o1.GetY(), valD, o2.GetX(), valD, o2.GetY(), valD, ri, expectedR, ro, valR);
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), valD));
@@ -1589,9 +1582,6 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
             auto o2 = gradient->GetEndOffset();
             auto ri = gradient->GetInnerRadius();
             auto ro = gradient->GetOuterRadius();
-            std::printf(
-                "radial: const2 o1: [%.2f=%.2f %.2f=%.2f] o2: [%.2f=%.2f %.2f %.2f] ri: [%.2f=%.2f] ro: [%.2f=%.2f]\n",
-                o1.GetX(), valD, o1.GetY(), valD, o2.GetX(), valD, o2.GetY(), expectedY, ri, valR, ro, expectedR);
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), valD));
@@ -1618,9 +1608,6 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
             auto o2 = gradient->GetEndOffset();
             auto ri = gradient->GetInnerRadius();
             auto ro = gradient->GetOuterRadius();
-            std::printf(
-                "radial: const3 o1: [%.2f=%.2f %.2f=%.2f] o2: [%.2f=%.2f %.2f=%.2f] ri: [%.2f=%.2f] or: [%.2f=%.2f]\n",
-                o1.GetX(), valD, o1.GetY(), expectedY, o2.GetX(), expectedX, o2.GetY(), valD, ri, valR, ro, valR);
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), expectedY));
             EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), expectedX));
@@ -1657,8 +1644,6 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
             ASSERT_TRUE(optX);
             ASSERT_TRUE(optY);
             ASSERT_TRUE(optA);
-            std::printf("conic: const x: [%.2f=%.2f] y: [ %.2f=%.2f] sa: [%.2f=%.2f]\n", (*optX).Value(), expectedX,
-                (*optY).Value(), expectedY, (*optA).Value(), valR);
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optX).Value(), expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optY).Value(), expectedY));
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optA).Value(), valR));
@@ -1682,17 +1667,15 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
             ASSERT_TRUE(optX);
             ASSERT_TRUE(optY);
             ASSERT_TRUE(optA);
-            std::printf("conic: const x: [%.2f=%.2f] y: [ %.2f=%.2f] sa: [%.2f=%.2f]\n", (*optX).Value(), expectedX,
-                (*optY).Value(), valD, (*optA).Value(), expectedA);
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optX).Value(), expectedX));
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optY).Value(), valD));
             EXPECT_TRUE(LessOrEqualCustomPrecision((*optA).Value(), expectedA));
         }
     }
 }
-HWTEST_F(CanvasRendererAccessorTest, bottleNeckTest, TestSize.Level1)
-{
-    char* p = nullptr;
-    p[0] = '\0';
-}
+// HWTEST_F(CanvasRendererAccessorTest, bottleNeckTest, TestSize.Level1)
+// {
+//     char* p = nullptr;
+//     p[0] = '\0';
+// }
 } // namespace OHOS::Ace::NG

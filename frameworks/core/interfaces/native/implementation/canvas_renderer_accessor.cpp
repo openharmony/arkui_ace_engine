@@ -215,12 +215,6 @@ void Stroke0Impl(CanvasRendererPeer* peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStroke0Impl();
-
-    ImageSizeExt ext;
-    ext.x = 1;
-    ext.y = 2;
-    std::printf("struct: %.2f, %.2f, %d %d %d %d %d %d\n", *ext.x, *ext.y, ext.x ? 1 : 0, ext.y ? 1 : 0,
-        ext.dirtyX ? 1 : 0, ext.dirtyY ? 1 : 0, ext.dirtyWidth ? 1 : 0, ext.dirtyHeight ? 1 : 0);
 }
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Path2D* path)

@@ -620,7 +620,6 @@ void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const Image
     imageData.dirtyWidth = finalWidth;
     imageData.dirtyHeight = finalHeight;
     ParseImageData(ext);
-        
     imageData.dirtyWidth =
         imageData.dirtyX < 0
             ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
