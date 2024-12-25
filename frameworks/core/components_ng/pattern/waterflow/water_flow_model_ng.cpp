@@ -85,14 +85,9 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
     pattern->AddFooter(footerNode);
 }
 
-void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<void()>&& footer)
+void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& footer)
 {
-    RefPtr<NG::UINode> footerNode;
-    if (footer) {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        footer();
-        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
-    }
+    RefPtr<NG::UINode> footerNode = footer();
     CHECK_NULL_VOID(footerNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
