@@ -396,7 +396,18 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
         return;
     }
 
-    formRendererDelegate_ = renderRemoteObj;
+    if (!formRendererDelegate_) {
+        formRendererDelegate_ = renderRemoteObj;
+    } else {
+        auto formRendererDelegate = renderRemoteObj;
+        bool checkFlag = true;
+        formRendererDelegate->OnCheckManagerDelegate(checkFlag);
+        if (checkFlag) {
+            formRendererDelegate_ = renderRemoteObj;
+        } else {
+            HILOG_ERROR("EventHandle - SetRenderDelegate error  checkFlag is false");
+        }
+    }
 
     if (renderDelegateDeathRecipient_ == nullptr) {
         renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient(

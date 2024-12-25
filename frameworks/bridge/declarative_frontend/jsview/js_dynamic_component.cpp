@@ -68,6 +68,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
+    auto backgroundTransparentValue = dynamicComponentArg->GetProperty("backgroundTransparent");
     if (!entryPointValue->IsString()) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
@@ -88,8 +89,13 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
     auto entryPoint = entryPointValue->ToString();
+    bool backgroundTransparent = false;
+    if (backgroundTransparentValue->IsBoolean()) {
+        backgroundTransparent = backgroundTransparentValue->ToBoolean();
+    }
     NG::UIExtensionConfig config;
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
+    config.backgroundTransparent = backgroundTransparent;
     UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

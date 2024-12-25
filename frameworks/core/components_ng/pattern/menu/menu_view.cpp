@@ -146,6 +146,13 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+        auto pipeLineContext = menuNode->GetContextWithCheck();
+        if (pipeLineContext) {
+            auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+            if (selectTheme) {
+                styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
+            }
+        }
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackBlurStyle(styleOption);
     }
@@ -1306,9 +1313,13 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         menuNodeRenderContext->IsUniRenderEnabled()) {
+        auto pipeLineContext = menuNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeLineContext);
+        auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+        CHECK_NULL_VOID(menuTheme);
         BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        styleOption.blurStyle =
+            static_cast<BlurStyle>(menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
     } else if (menuParam.backgroundColor.has_value()) {

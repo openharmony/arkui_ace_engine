@@ -116,6 +116,7 @@ public:
     virtual void SetShowIndicator(bool showIndicator);
     virtual void SetItemSpace(const Dimension& itemSpace);
     virtual void SetCachedCount(int32_t cachedCount);
+    virtual void SetCachedIsShown(bool isShown) {}
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
     virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}

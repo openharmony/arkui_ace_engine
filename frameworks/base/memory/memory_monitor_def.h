@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/memory_monitor_def.h"
+#include "ui/base/memory_monitor_def.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H

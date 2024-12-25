@@ -374,14 +374,23 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -389,8 +398,13 @@ void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, con
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -398,23 +412,36 @@ void FrontendDelegateDeclarativeNG::PushNamedRoute(const std::string& uri, const
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->PushNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    pageRouterManager_->Replace(routerPageInfo);
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    pageRouterManager_->Replace(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -422,8 +449,13 @@ void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, 
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->Replace(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -431,15 +463,23 @@ void FrontendDelegateDeclarativeNG::ReplaceNamedRoute(const std::string& uri, co
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->ReplaceNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
 }
 
 void FrontendDelegateDeclarativeNG::BackToIndex(int32_t index, const std::string& params)
@@ -917,7 +957,7 @@ void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::OnLayoutCompleted(const std::string& componentId)

@@ -26,7 +26,7 @@ class StorageInterface {
 public:
     virtual ~StorageInterface() = default;
 
-    virtual RefPtr<Storage> GetStorage() const
+    virtual RefPtr<Storage> GetStorage(int areaMode = -1) const
     {
         return nullptr;
     }

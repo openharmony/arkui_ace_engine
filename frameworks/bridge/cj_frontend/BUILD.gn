@@ -91,7 +91,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_circle_ffi.cpp",
       "interfaces/cj_ffi/cj_collection_ffi.cpp",
       "interfaces/cj_ffi/cj_column_ffi.cpp",
-      "interfaces/cj_ffi/cj_column_split_ffi.cpp",
       "interfaces/cj_ffi/cj_common_ffi.cpp",
       "interfaces/cj_ffi/cj_component_id_ffi.cpp",
       "interfaces/cj_ffi/cj_container_base_ffi.cpp",
@@ -148,7 +147,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
-      "interfaces/cj_ffi/cj_row_split_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
@@ -187,6 +185,13 @@ template("cj_frontend") {
       "interfaces/cj_ffi/utils.cpp",
       "runtime/cj_runtime_delegate.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "interfaces/cj_ffi/cj_column_split_ffi.cpp",
+        "interfaces/cj_ffi/cj_row_split_ffi.cpp",
+      ]
+    }
 
     deps += [ "$ace_root/build:libace_compatible" ]
 

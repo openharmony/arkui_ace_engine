@@ -412,7 +412,11 @@ void DragEventActuator::GetThumbnailPixelMapForCustomNode()
 
 void DragEventActuator::TryTriggerThumbnailCallback()
 {
-    if (isThumbnailCallbackTriggered_) {
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG || gestureHub->GetTextDraggable()) {
         return;
     }
     GetThumbnailPixelMap(true);
@@ -445,7 +449,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     
-    auto actionStart = [weak = WeakClaim(this)](GestureEvent& info) {
+    auto actionStart = [weak = WeakClaim(this), touchRestrict](GestureEvent& info) {
         auto containerId = Container::CurrentId();
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action start.");
         ACE_SCOPED_TRACE("drag: pan successed, start handling");
@@ -524,7 +528,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::TEXT_NOT_SELECT);
                     return;
                 }
-                actuator->HandleTextDragCallback(info);
+                actuator->HandleTextDragCallback(Offset(touchRestrict.touchEvent.x, touchRestrict.touchEvent.y));
             } else {
                 actuator->HideEventColumn();
                 actuator->HidePixelMap(true, info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
@@ -949,7 +953,6 @@ void DragEventActuator::ResetDragStatus()
     overlayManager->RemoveGatherNode();
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
-    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
@@ -1243,6 +1246,10 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->MarkUiFirstNode(false);
+    }
     MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
         FlushSyncGeometryNodeTasks();
@@ -2724,16 +2731,16 @@ BorderRadiusProperty DragEventActuator::GetDragFrameNodeBorderRadius(const RefPt
     return borderRadius;
 }
 
-void DragEventActuator::HandleTextDragCallback(GestureEvent& info)
+void DragEventActuator::HandleTextDragCallback(Offset offset)
 {
     auto gestureHub = gestureEventHub_.Upgrade();
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextBase>();
-    if (pattern->BetweenSelectedPosition(info.GetGlobalLocation())) {
+    if (pattern->BetweenSelectedPosition(offset)) {
         if (textDragCallback_) {
-            textDragCallback_(info.GetGlobalLocation());
+            textDragCallback_(offset);
         }
     } else if (!gestureHub->GetIsTextDraggable()) {
         gestureHub->SetPixelMap(nullptr);

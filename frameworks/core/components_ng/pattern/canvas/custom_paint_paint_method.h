@@ -271,6 +271,12 @@ public:
         state_.strokeState.SetFontSize(size);
     }
 
+    void SetLetterSpacing(const Dimension& letterSpacing)
+    {
+        state_.fillState.SetLetterSpacing(letterSpacing);
+        state_.strokeState.SetLetterSpacing(letterSpacing);
+    }
+
     void SetMeasureFontSize(const Dimension& size)
     {
         measureTextState_.SetFontSize(size);

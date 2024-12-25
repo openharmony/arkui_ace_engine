@@ -559,8 +559,23 @@ void SetWaterFlowSections(ArkUIRuntimeCallInfo* runtimeCallInfo)
     if (!sectionsArgs->IsNull() && sectionsArgs->IsObject()) {
         auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
         Framework::JSWaterFlow::UpdateWaterFlowSectionsByFrameNode(frameNode, info, sectionsArgs);
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterflowFooter(nativeNode);
     } else {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
+    }
+}
+
+void SetWaterFlowFooter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    Framework::JSRef<Framework::JSVal> footerContentArgs = info[4]; // 4 is the index of footerContent
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (!footerContentArgs->IsNull() && footerContentArgs->IsObject()) {
+        Framework::JSWaterFlow::UpdateWaterFlowFooter(frameNode, footerContentArgs);
     }
 }
 
@@ -577,6 +592,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
 
     if (layoutModeArgs->IsUndefined() || layoutModeArgs->IsNull() || !layoutModeArgs->IsNumber()) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
+        SetWaterFlowFooter(runtimeCallInfo);
         SetWaterFlowSections(runtimeCallInfo);
     } else {
         uint32_t layoutMode = layoutModeArgs->Uint32Value(vm);
@@ -586,6 +602,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
         }
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(nativeNode, layoutMode);
         if (layoutMode != static_cast<uint32_t>(NG::WaterFlowLayoutMode::SLIDING_WINDOW)) {
+            SetWaterFlowFooter(runtimeCallInfo);
             SetWaterFlowSections(runtimeCallInfo);
         }
     }
@@ -609,6 +626,7 @@ ArkUINativeModuleValue WaterFlowBridge::ResetWaterFlowInitialize(ArkUIRuntimeCal
         nativeNode, controller, proxyPtr);
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterflowFooter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

@@ -205,9 +205,10 @@ public:
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
-    void UpdateScrollBarOffset();
+    void UpdateScrollBarOffset(int32_t scrollSource);
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
-    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+    void UpdateScrollBarRegion(
+        float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource);
     void RegisterScrollBarEventTask();
     void InitScrollBarGestureEvent();
     bool UpdateScrollBarDisplay();

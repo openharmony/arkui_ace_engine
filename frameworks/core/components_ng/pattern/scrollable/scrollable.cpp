@@ -133,13 +133,18 @@ void Scrollable::InitAxisAnimator()
         CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollMotion(offset, SCROLL_FROM_AXIS);
     };
+    auto axisAnimationStartCallback = [weak = WeakClaim(this)](float position) {
+        auto scrollable = weak.Upgrade();
+        CHECK_NULL_VOID(scrollable && scrollable->onScrollStartRec_);
+        scrollable->onScrollStartRec_(position);
+    };
     auto axisAnimationFinishCallback = [weak = WeakClaim(this)]() {
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollMotionStop();
     };
-    axisAnimator_ =
-        AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback), std::move(axisAnimationFinishCallback));
+    axisAnimator_ = AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback),
+        std::move(axisAnimationStartCallback), std::move(axisAnimationFinishCallback));
     axisAnimator_->Initialize(context_);
 }
 
@@ -166,7 +171,6 @@ void Scrollable::SetOnActionStart()
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
-        scroll->isDragging_ = true;
         scroll->HandleDragStart(info);
     };
     panRecognizerNG_->SetOnActionStart(actionStart);
@@ -383,14 +387,14 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
     if (IsMouseWheelScroll(info)) {
         InitAxisAnimator();
-        if (IsAxisAnimationRunning() || IsSnapAnimationRunning()) {
-            return;
-        } else {
+        if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
         }
+        return;
     } else if (IsAxisAnimationRunning()) {
         StopAxisAnimation();
     }
+    isDragging_ = true;
     if (onScrollStartRec_) {
         onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
@@ -457,14 +461,15 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto currentVsyncTime = context->GetVsyncTime();
-    CHECK_NULL_VOID(lastVsyncTime_ != currentVsyncTime);
-    lastVsyncTime_ = currentVsyncTime;
+    CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
+    lastAxisVsyncTime_ = currentVsyncTime;
     auto snapType = GetSnapType();
     if (snapType != SnapType::NONE_SNAP && startSnapAnimationCallback_) {
         auto snapDelta = 0.f;
         auto snapDirection = SnapDirection::NONE;
-        if ((snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
-            (snapType == SnapType::SCROLL_SNAP && state_ == AnimationState::IDLE)) {
+        auto isInitScroll = (snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
+                            (snapType == SnapType::SCROLL_SNAP && state_ == AnimationState::IDLE);
+        if (isInitScroll) {
             snapDelta = 0.f;
             snapDirection = Positive(mainDelta) ? SnapDirection::FORWARD : SnapDirection::BACKWARD;
         } else {
@@ -488,7 +493,12 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
             .snapDirection = snapDirection,
         };
         startSnapAnimationCallback_(snapAnimationOptions);
-        snapDirection_ = snapDirection;
+        auto isNeedAdjustDirection = (snapType == SnapType::SCROLL_SNAP && snapDirection == SnapDirection::NONE);
+        if (isNeedAdjustDirection) {
+            snapDirection_ = Positive(mainDelta) ? SnapDirection::FORWARD : SnapDirection::BACKWARD;
+        } else {
+            snapDirection_ = snapDirection;
+        }
         return;
     }
     if (axisAnimator_) {

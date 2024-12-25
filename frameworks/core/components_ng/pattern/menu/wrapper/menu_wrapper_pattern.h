@@ -257,6 +257,26 @@ public:
         return isShowHoverImagePreviewStartDrag_;
     }
 
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
+    }
+
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
 
     void RegisterMenuAppearCallback(const std::function<void()>& onAppear)
@@ -391,28 +411,7 @@ public:
         return dumpInfo_;
     }
 
-    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
-    {
-        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
-        dumpInfo_.menuType = dumpInfo.menuType;
-        dumpInfo_.enableArrow = dumpInfo.enableArrow;
-        dumpInfo_.targetNode = dumpInfo.targetNode;
-        dumpInfo_.targetOffset = dumpInfo.targetOffset;
-        dumpInfo_.targetSize = dumpInfo.targetSize;
-        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
-        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
-        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
-        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
-        dumpInfo_.top = dumpInfo.top;
-        dumpInfo_.bottom = dumpInfo.bottom;
-        dumpInfo_.left = dumpInfo.left;
-        dumpInfo_.right = dumpInfo.right;
-        dumpInfo_.globalLocation = dumpInfo.globalLocation;
-        dumpInfo_.originPlacement = dumpInfo.originPlacement;
-        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
-        dumpInfo_.finalPosition = dumpInfo.finalPosition;
-        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
-    }
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo);
 
     bool GetHasCustomRadius() const
     {
@@ -586,6 +585,8 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;

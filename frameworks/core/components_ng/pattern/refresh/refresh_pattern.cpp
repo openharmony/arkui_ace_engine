@@ -52,11 +52,9 @@ constexpr float LOADING_ANIMATION_DURATION = 350.0f;
 constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
-constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
-constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
@@ -123,13 +121,19 @@ void RefreshPattern::OnModifyDone()
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
     InitChildNode();
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
     } else {
         triggerLoadingDistance_ = static_cast<float>(
-            std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(),
-                -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
+            std::clamp(layoutProperty->GetIndicatorOffset().value_or(triggerLoadingDistanceTheme_).ConvertToPx(),
+                -1.0f * triggerLoadingDistanceTheme_.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
         InitLowVersionOffset();
     }
     RefreshStatusChangeEffect();
@@ -229,7 +233,8 @@ void RefreshPattern::InitProgressNode()
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
+        CalcSize(CalcLength(loadingProgressSizeTheme_.ConvertToPx()),
+            CalcLength(loadingProgressSizeTheme_.ConvertToPx())));
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
@@ -281,7 +286,7 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
 
     PaddingProperty textpadding;
-    textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    textpadding.top = CalcLength(triggerLoadingDistanceTheme_.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
     prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);
@@ -615,7 +620,7 @@ void RefreshPattern::SetAccessibilityAction()
         }
         pattern->HandleDragStart(true, 0.0f);
         for (float delta = 0.0f; LessNotEqual(delta, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
-             delta += TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
+             delta += pattern->triggerLoadingDistanceTheme_.ConvertToPx()) {
             pattern->HandleDragUpdate(delta, 0.0f);
         }
         pattern->HandleDragEnd(0.0f);
@@ -786,7 +791,7 @@ void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
             auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
             CHECK_NULL_VOID(loadingTextRenderContext);
             loadingTextRenderContext->UpdateTransformTranslate({ 0.0f,
-                scrollOffset_ - TRIGGER_LOADING_DISTANCE.ConvertToPx() - LOADING_PROGRESS_SIZE.ConvertToPx() -
+                scrollOffset_ - triggerLoadingDistanceTheme_.ConvertToPx() - loadingProgressSizeTheme_.ConvertToPx() -
                     LOADING_TEXT_TOP_MARGIN.ConvertToPx(),
                 0.0f });
         }
