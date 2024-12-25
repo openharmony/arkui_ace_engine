@@ -147,12 +147,14 @@ export class SubHeaderV2OperationItem {
   }
 }
 
-//
 class ContentIconOption {
   public content?: ResourceStr;
   public subContent?: ResourceStr;
   public iconOptions?: SubHeaderV2IconType;
   public action?: () => void;
+  public accessibilityLevel?: string;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
 }
 
 class FontStyle {
@@ -524,11 +526,11 @@ export struct SubHeaderV2 {
     })
     .flexShrink(0)
     .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON || this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?
-      'yes' : 'no')
+    this.getRightAreaAccessibilityLevel() : 'no')
   }
 
-  private getRightAreaAccessibilityText(): string {
-    if (this.operationType !== SubHeaderV2OperationType.TEXT_ARROW || !this.operationItems || this.operationItems.length <= 0) {
+  private getAccessibilityDescription(): string | undefined {
+    if (!this.operationItems || this.operationItems.length <= 0) {
       return '';
     }
     if (this.operationItems
@@ -760,6 +762,9 @@ export struct SubHeaderV2 {
               item: {
                 iconOptions: this.operationItems?.[index].content,
                 action: this.operationItems?.[index].action,
+                accessibilityLevel: item.accessibilityLevel,
+                accessibilityText: item.accessibilityText,
+                accessibilityDescription: item.accessibilityDescription,
               },
               isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
             })
@@ -810,6 +815,7 @@ export struct SubHeaderV2 {
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -858,7 +864,22 @@ export struct SubHeaderV2 {
       end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
     })
     .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON ||
-      this.operationType === SubHeaderV2OperationType.TEXT_ARROW ? 'yes' : 'no')
+      this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?  this.getRightAreaAccessibilityLevel() : 'no')
+  }
+
+  private getRightAreaAccessibilityText(): string | undefined {
+    if (!this.operationItems || this.operationItems.length <= 0) {
+      return '';
+    }
+    if (this.operationItems[0].accessibilityText && this.operationItems[0].accessibilityText !== '') {
+      return this.toStringFormat(this.operationItems[0].accessibilityText);
+    } else {
+      if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW && this.operationItems[0].accessibilityDescription
+        && this.operationItems[0].accessibilityDescription !== '') {
+        return this.toStringFormat(this.operationItems[0].accessibilityDescription)
+      }
+    }
+    return '';
   }
 
   private getMinHeight(): Length {
@@ -905,6 +926,7 @@ export struct SubHeaderV2 {
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -925,6 +947,7 @@ export struct SubHeaderV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -934,6 +957,29 @@ export struct SubHeaderV2 {
       .margin(this.subHeaderMargin)
       .padding(this.getAreaPadding())
     }
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+      }
+      return resourceString;
+    }
+  }
+
+  private getRightAreaAccessibilityLevel(): string {
+    if (this.operationItems![0].accessibilityLevel && this.operationItems![0].accessibilityLevel !== '') {
+      return this.operationItems![0].accessibilityLevel;
+    }
+    return 'yes';
   }
 
   @Builder
@@ -1003,6 +1049,45 @@ struct SingleIconStyle {
   @Consumer('subHeaderV2Theme') subHeaderTheme: SubHeaderTheme = new SubHeaderTheme();
   @Param isSingleIcon: boolean = true;
 
+  private getRightIconAccessibilityText(): string | undefined {
+    if (this.item?.accessibilityText) {
+      let iconAccessibilityText = typeof this.item.accessibilityText === 'string' ? this.item.accessibilityText :
+      getContext()?.resourceManager?.getStringSync(this.item.accessibilityText)
+      return iconAccessibilityText;
+    }
+    return '';
+  }
+
+  private getRightIconAccessibilityLevel(): string {
+    if (this.item?.accessibilityLevel && this.item?.accessibilityLevel !== '') {
+      return this.item.accessibilityLevel;
+    }
+    return 'auto';
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+      }
+      return resourceString;
+    }
+  }
+
+  private  getRightIconAccessibilityDescription(): string | undefined {
+    if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
+      return this.toStringFormat(this.item?.accessibilityDescription);
+    }
+    return '';
+  }
+
   build() {
     if (this.item && this.item.iconOptions) {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
@@ -1014,6 +1099,9 @@ struct SingleIconStyle {
       .align(Alignment.Center)
       .backgroundColor(this.bgColor)
       .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+      .accessibilityLevel(this.getRightIconAccessibilityLevel())
+      .accessibilityText(this.getRightIconAccessibilityText())
+      .accessibilityDescription(this.getRightIconAccessibilityDescription())
       .focusBox({
         margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
         strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),
