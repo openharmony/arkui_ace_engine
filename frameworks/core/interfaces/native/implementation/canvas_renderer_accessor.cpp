@@ -33,7 +33,6 @@ const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
-constexpr uint32_t PIXEL_SIZE = 4;
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -216,6 +215,12 @@ void Stroke0Impl(CanvasRendererPeer* peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     peerImpl->TriggerStroke0Impl();
+
+    ImageSizeExt ext;
+    ext.x = 1;
+    ext.y = 2;
+    std::printf("struct: %.2f, %.2f, %d %d %d %d %d %d\n", *ext.x, *ext.y, ext.x ? 1 : 0, ext.y ? 1 : 0,
+        ext.dirtyX ? 1 : 0, ext.dirtyY ? 1 : 0, ext.dirtyWidth ? 1 : 0, ext.dirtyHeight ? 1 : 0);
 }
 void Stroke1Impl(CanvasRendererPeer* peer,
                  const Ark_Path2D* path)
@@ -419,42 +424,11 @@ void PutImageData0Impl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(imagedata);
     CHECK_NULL_VOID(dx);
     CHECK_NULL_VOID(dy);
+    ImageSizeExt ext;
     auto src = Converter::Convert<Ace::ImageData>(*imagedata);
-    auto optX = ConvertDimension(peerImpl, *dx);
-    auto optY = ConvertDimension(peerImpl, *dy);
-    auto finalWidth = static_cast<int32_t>(std::abs(src.dirtyWidth));
-    auto finalHeight = static_cast<int32_t>(std::abs(src.dirtyHeight));
-    peerImpl->ClearImageData();
-    peerImpl->imageData.dirtyWidth = finalWidth;
-    peerImpl->imageData.dirtyHeight = finalHeight;
-    // parse
-    if (optX) {
-        peerImpl->imageData.x = static_cast<uint32_t>(*optX);
-    }
-    if (optY) {
-        peerImpl->imageData.y = static_cast<uint32_t>(*optY);
-    }
-    // parse
-    peerImpl->imageData.dirtyWidth =
-        peerImpl->imageData.dirtyX < 0
-            ? std::min(peerImpl->imageData.dirtyX + peerImpl->imageData.dirtyWidth, finalWidth)
-            : std::min(finalWidth - peerImpl->imageData.dirtyX, peerImpl->imageData.dirtyWidth);
-    peerImpl->imageData.dirtyHeight =
-        peerImpl->imageData.dirtyY < 0
-            ? std::min(peerImpl->imageData.dirtyY + peerImpl->imageData.dirtyHeight, finalHeight)
-            : std::min(finalHeight - peerImpl->imageData.dirtyY, peerImpl->imageData.dirtyHeight);
-    auto size = static_cast<uint32_t>(src.data.size());
-    for (int32_t i = std::max(peerImpl->imageData.dirtyY, 0);
-        i < peerImpl->imageData.dirtyY + peerImpl->imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(peerImpl->imageData.dirtyX, 0);
-            j < peerImpl->imageData.dirtyX + peerImpl->imageData.dirtyWidth; ++j) {
-            uint32_t idx = static_cast<uint32_t>(PIXEL_SIZE * (j + finalWidth * i));
-            if (size > idx) {
-                peerImpl->imageData.data.emplace_back(src.data[idx]);
-            }
-        }
-    }
-    peerImpl->TriggerPutImageDataImpl(peerImpl->imageData);
+    ext.x = ConvertDimension(peerImpl, *dx);
+    ext.y = ConvertDimension(peerImpl, *dy);
+    peerImpl->PutImageData(src, ext);
 }
 void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_ImageData* imagedata,
@@ -465,8 +439,25 @@ void PutImageData1Impl(CanvasRendererPeer* peer,
                        const Ark_Union_Number_String* dirtyWidth,
                        const Ark_Union_Number_String* dirtyHeight)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::PutImageData1Impl Ark_ImageData includes Ark_ArrayBuffer "
-        "which is partially implemented.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(imagedata);
+    CHECK_NULL_VOID(dx);
+    CHECK_NULL_VOID(dy);
+    CHECK_NULL_VOID(dirtyX);
+    CHECK_NULL_VOID(dirtyY);
+    CHECK_NULL_VOID(dirtyWidth);
+    CHECK_NULL_VOID(dirtyHeight);
+    ImageSizeExt ext;
+    auto src = Converter::Convert<Ace::ImageData>(*imagedata);
+    ext.x = ConvertDimension(peerImpl, *dx);
+    ext.y = ConvertDimension(peerImpl, *dy);
+    ext.dirtyX = ConvertDimension(peerImpl, *dirtyX);
+    ext.dirtyY = ConvertDimension(peerImpl, *dirtyY);
+    ext.dirtyWidth = ConvertDimension(peerImpl, *dirtyWidth);
+    ext.dirtyHeight = ConvertDimension(peerImpl, *dirtyHeight);
+    peerImpl->PutImageData(src, ext);
 }
 void GetLineDashImpl(CanvasRendererPeer* peer)
 {

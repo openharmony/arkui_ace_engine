@@ -34,9 +34,23 @@
 #include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-struct ImageSizeExtended {
-    double x;
-    double y;
+struct ImageSizeExt {
+    ImageSizeExt()
+    {
+        x = std::nullopt;
+        y = std::nullopt;
+        dirtyX = std::nullopt;
+        dirtyY = std::nullopt;
+        dirtyWidth = std::nullopt;
+        dirtyHeight = std::nullopt;
+    }
+    ~ImageSizeExt() = default;
+    std::optional<double> x;
+    std::optional<double> y;
+    std::optional<double> dirtyX;
+    std::optional<double> dirtyY;
+    std::optional<double> dirtyWidth;
+    std::optional<double> dirtyHeight;
 };
 class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
@@ -75,7 +89,6 @@ public:
     void TriggerSetShadowColorImpl(Color& color);
     void TriggerSetShadowOffsetXImpl(double offsetX);
     void TriggerSetShadowOffsetYImpl(double offsetY);
-    void TriggerPutImageDataImpl(const Ace::ImageData& imageData);
     void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
     #ifdef PIXEL_MAP_SUPPORTED
     void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
@@ -98,7 +111,7 @@ public:
     std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize);
     void GetPixelMap(const ImageSize& imageSize);
     double GetDimension(const Dimension& value, const bool force = false);
-
+    void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -142,7 +155,9 @@ protected:
     RefPtr<CanvasPattern> pattern_;
 
 private:
+    void ParseImageData(const ImageSizeExt& ext);
     Dimension GetDimensionValue(const std::string& str);
+
     CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;

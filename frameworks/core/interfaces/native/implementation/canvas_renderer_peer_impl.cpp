@@ -418,15 +418,6 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
     }
     pattern_->UpdateStrokePattern(pattern);
 }
-void CanvasRendererPeerImpl::TriggerPutImageDataImpl(const Ace::ImageData& imageData)
-{
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->PutImageData(imageData);
-}
 Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
     Dimension dimension = StringUtils::StringToDimension(str);
@@ -595,5 +586,60 @@ double CanvasRendererPeerImpl::GetDimension(const Dimension& dimension, const bo
     }
     double density = GetDensity();
     return value * density + DIFF;
+}
+void CanvasRendererPeerImpl::ParseImageData(const ImageSizeExt& ext)
+{
+    if (ext.x) {
+        imageData.x = static_cast<int32_t>(*ext.x);
+    }
+    if (ext.y) {
+        imageData.y = static_cast<int32_t>(*ext.y);
+    }
+    if (ext.dirtyX) {
+        imageData.dirtyX = static_cast<int32_t>(*ext.dirtyX);
+    }
+    if (ext.dirtyY) {
+        imageData.dirtyY = static_cast<int32_t>(*ext.dirtyY);
+    }
+    if (ext.dirtyWidth) {
+        imageData.dirtyWidth = static_cast<int32_t>(*ext.dirtyWidth);
+    }
+    if (ext.dirtyHeight) {
+        imageData.dirtyHeight = static_cast<int32_t>(*ext.dirtyHeight);
+    }
+}
+void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageData pattern not bound to component.");
+        return;
+    }
+    auto finalWidth = static_cast<int32_t>(std::abs(src.dirtyWidth));
+    auto finalHeight = static_cast<int32_t>(std::abs(src.dirtyHeight));
+    ClearImageData();
+    imageData.dirtyWidth = finalWidth;
+    imageData.dirtyHeight = finalHeight;
+    ParseImageData(ext);
+        
+    imageData.dirtyWidth =
+        imageData.dirtyX < 0
+            ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
+            : std::min(finalWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight =
+        imageData.dirtyY < 0
+            ? std::min(imageData.dirtyY + imageData.dirtyHeight, finalHeight)
+            : std::min(finalHeight - imageData.dirtyY, imageData.dirtyHeight);
+    auto size = static_cast<uint32_t>(src.data.size());
+    for (int32_t i = std::max(imageData.dirtyY, 0);
+        i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0);
+            j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(j + finalWidth * i);
+            if (size > idx) {
+                imageData.data.emplace_back(src.data[idx]);
+            }
+        }
+    }
+    pattern_->PutImageData(imageData);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
