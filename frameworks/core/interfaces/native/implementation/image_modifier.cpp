@@ -46,6 +46,10 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
         dst = std::make_pair(calcWidth, calcHeight);
     }
 }
+template<>
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src) {
+    dst.reset();
+}
 } // Converter
 } // OHOS::Ace::NG
 
@@ -79,9 +83,14 @@ void SetImageOptions1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(src);
-    //auto convValue = Converter::OptConvert<type_name>(*src);
-    //ImageModelNG::SetSetImageOptions1(frameNode, convValue);
-    LOGE("Arkoala: Image.SetImageOptions1Impl - method not implemented");
+    auto info = Converter::OptConvert<ImageSourceInfo>(*src);
+    // Note.
+    // This function should skip InitImage invocation if info's optinal is empty.
+    if (info) {
+        auto frameNode = reinterpret_cast<FrameNode*>(node);
+        CHECK_NULL_VOID(frameNode);
+        ImageModelNG::InitImage(frameNode, info->GetSrc());
+    }
 }
 void SetImageOptions2Impl(Ark_NativePointer node,
                           const Ark_Union_PixelMap_ResourceStr_DrawableDescriptor* src,
