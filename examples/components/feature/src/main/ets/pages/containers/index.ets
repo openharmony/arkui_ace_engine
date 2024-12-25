@@ -25,6 +25,7 @@ import { FlexBootcamp } from './FlexBootcamp';
 import { ColumnBootcamp } from './ColumnBootcamp';
 import { ScrollBootcamp } from './ScrollBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
+import { GridRowBootcamp } from './GridRowBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -40,7 +41,8 @@ export const containersRoute: RouteGroup = {
     { name: 'flex', label: '弹性布局/Flex' },
     { name: 'column', label: '纵向布局/Column' },
     { name: 'scroll', label: '滚动容器/Scroll' },
-    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' }
+    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    { name: 'gridRow', label: '栅格容器/GridRow' }
   ]
 };
 
@@ -68,5 +70,7 @@ export function ContainersDestination(name: string, route: Route) {
     ScrollBootcamp({ title: route.label })
   } else if (name === 'containers/waterFlow') {
     WaterFlowBootcamp({ title: route.label })
+  }else if (name === 'containers/gridRow') {
+    GridRowBootcamp({ title: route.label })
   }
 }
