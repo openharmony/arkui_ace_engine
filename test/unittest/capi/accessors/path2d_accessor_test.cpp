@@ -26,50 +26,28 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace {
-const auto TRANSFORM_UNITY_VALUE = 1.00;
-const auto TRANSFORM_ZERO_VALUE = 0.00;
-
-std::vector<std::vector<double>>
-    ARRAY_NUMBER_TEST_PLAN = {
-        { 100, 10.25, 2.35, 5.42, 12.34, 56.73 },
-        { 100, 10.25, 0, 5.42, 12.34, 56.73 },
-        { 100, -10.25, 0, -5.42, 12.34, -56.73 },
-        { 0, 0, 0, 0, 0, 0 },
-        { -100, -10.25, -2.35, -5.42, -12.34, -56.73 },
-    };
 std::vector<double> NUMBER_TEST_PLAN = {
-    100, 0, -100, 12.34, -56.73,
+    100, 10.25, 2.35, 5.42, 12.34, 56.73
 };
 
-std::vector<int32_t> INT32_TEST_PLAN = {
-    100, 0, -100, 12, -56,
-};
-
-class StubCanvasPath : public CanvasPath2D {
-public:
-    StubCanvasPath() = default;
-    ~StubCanvasPath() override = default;
-    virtual void CanvasPath2D::AddPath(const RefPtr<CanvasPath2D>& path) {
-          std::printf("path: stub exec\n")  
-    }
-};
-class MockCanvasPath : public StubCanvasPath {
+class MockCanvasPath : public CanvasPath2D {
 public:
     MockCanvasPath() = default;
     ~MockCanvasPath() override = default;
     MOCK_METHOD(void, AddPath, (const RefPtr<CanvasPath2D>&));
+    MOCK_METHOD(void, SetTransform, (double, double, double, double, double, double));
 };
 } // namespace
 
 class Path2DAccessorTest
     : public AccessorTestBase<GENERATED_ArkUIPath2DAccessor,
-        &GENERATED_ArkUIAccessors::getCanvasPathAccessor, Path2DPeer> {
+        &GENERATED_ArkUIAccessors::getPath2DAccessor, Path2DPeer> {
 public:
     void SetUp(void) override
     {
         AccessorTestBase::SetUp();
         mockPath_ = new MockCanvasPath();
-        mockPathKeeper_ = AceType::Claim(mockPattern_);
+        mockPathKeeper_ = AceType::Claim(mockPath_);
         ASSERT_NE(mockPathKeeper_, nullptr);
         auto peerImpl = reinterpret_cast<GeneratedModifier::Path2DPeerImpl*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
@@ -83,9 +61,8 @@ public:
         mockPathKeeper_ = nullptr;
         mockPath_ = nullptr;
     }
-
-    MockCanvasPath* mockPattern_ = nullptr;
-    RefPtr<MockCanvasPath> mockPatternKeeper_ = nullptr;
+    MockCanvasPath* mockPath_ = nullptr;
+    RefPtr<MockCanvasPath> mockPathKeeper_ = nullptr;
 };
 
 /**
@@ -96,30 +73,26 @@ public:
 HWTEST_F(Path2DAccessorTest, addPathTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addPath, nullptr);
-
-    auto path = new StubCanvasPath();
-
     Ark_Path2D arkPath;
     auto peerPathImpl = Referenced::MakeRefPtr<GeneratedModifier::Path2DPeerImpl>();
     arkPath.ptr = reinterpret_cast<Path2DPeer*>(Referenced::RawPtr(peerPathImpl));
-    peerPathImpl->path = AceType::MakeRefPtr<StubCanvasPath>();
-
+    peerPathImpl->path = AceType::MakeRefPtr<MockCanvasPath>();
     Ark_Matrix2D arkMatrix;
     auto peerMatrix = new Matrix2DPeer();
     arkMatrix.ptr = peerMatrix;
     auto optMatrix = Converter::ArkValue<Opt_Matrix2D>(arkMatrix);
-
-
-
-    // auto x = Converter::ArkValue<Ark_Number>(FIRST_X_VALUE);
-    // auto y = Converter::ArkValue<Ark_Number>(FIRST_Y_VALUE);
-    // auto radius = Converter::ArkValue<Ark_Number>(static_cast<float>(DEFAULT_DOUBLE_VALUE));
-    // auto startAngle = Converter::ArkValue<Ark_Number>(DEFAULT_START_VALUE);
-    // auto endAngle = Converter::ArkValue<Ark_Number>(TWO_PI_VALUE);
-    // auto clockwise = Converter::ArkValue<Opt_Boolean>(DEFAULT_BOOL_VALUE);
-
-    // EXPECT_CALL(*mockPath_, AddPath(_, _, _, _, _, _)).Times(EXPECTED_NUMBER_OF_CALLS);
-    // accessor_->addPath(peer_, &x, &y, &radius, &startAngle, &endAngle, &clockwise);
-    
+    peerMatrix->transform.scaleX = NUMBER_TEST_PLAN[0];
+    peerMatrix->transform.scaleY = NUMBER_TEST_PLAN[1];
+    peerMatrix->transform.skewX = NUMBER_TEST_PLAN[2];
+    peerMatrix->transform.skewY = NUMBER_TEST_PLAN[3];
+    peerMatrix->transform.translateX = NUMBER_TEST_PLAN[4];
+    peerMatrix->transform.translateY = NUMBER_TEST_PLAN[5];
+    auto tr = peerMatrix->transform;
+    EXPECT_CALL(*mockPath_, AddPath(peerPathImpl->path)).Times(3);
+    EXPECT_CALL(*mockPath_, SetTransform(tr.scaleX, tr.skewX, tr.skewY, tr.scaleY, tr.translateX, tr.translateY))
+        .Times(3);
+    accessor_->addPath(peer_, &arkPath, &optMatrix);
+    accessor_->addPath(peer_, &arkPath, &optMatrix);
+    accessor_->addPath(peer_, &arkPath, &optMatrix);
 }
 } // namespace OHOS::Ace::NG
