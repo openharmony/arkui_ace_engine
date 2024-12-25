@@ -133,10 +133,10 @@ void EllipseImpl(CanvasPathPeer* peer,
                  const Opt_Boolean* counterclockwise)
 {
     CHECK_NULL_VOID(peer);
-     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
+    auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
     CHECK_NULL_VOID(peerImpl->path);
-   CHECK_NULL_VOID(x);
+    CHECK_NULL_VOID(x);
     CHECK_NULL_VOID(y);
     CHECK_NULL_VOID(radiusX);
     CHECK_NULL_VOID(radiusY);

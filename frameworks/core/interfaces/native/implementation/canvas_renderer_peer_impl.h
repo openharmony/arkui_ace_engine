@@ -31,7 +31,6 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "interfaces/inner_api/drawable_descriptor/image_source_preview.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 struct ImageSizeExt {

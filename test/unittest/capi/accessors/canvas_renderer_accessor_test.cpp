@@ -1531,11 +1531,11 @@ HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: createRadialGradientTest
+ * @tc.name: createRadialGradientXRTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXRTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->createRadialGradient, nullptr);
     auto valD = DEFAULT_DOUBLE_VALUE;
@@ -1566,6 +1566,18 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
             EXPECT_TRUE(LessOrEqualCustomPrecision(ro, valR));
         }
     }
+}
+
+/**
+ * @tc.name: createRadialGradientYRTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientYRTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createRadialGradient, nullptr);
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    auto valR = DEFAULT_SCALE_VALUE;
     for (const auto& expectedY : NUMBER_TEST_PLAN) {
         for (const auto& expectedR : NUMBER_ALPHA_TEST_PLAN) {
             auto x0 = Converter::ArkValue<Ark_Number>(valD);
@@ -1592,6 +1604,18 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
             EXPECT_TRUE(LessOrEqualCustomPrecision(ro, expectedR));
         }
     }
+}
+
+/**
+ * @tc.name: createRadialGradientXYTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientXYTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createRadialGradient, nullptr);
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    auto valR = DEFAULT_SCALE_VALUE;
     for (const auto& expectedX : NUMBER_TEST_PLAN) {
         for (const auto& expectedY : NUMBER_TEST_PLAN) {
             auto x0 = Converter::ArkValue<Ark_Number>(valD);

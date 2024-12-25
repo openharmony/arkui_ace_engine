@@ -515,7 +515,8 @@ std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient
     gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
     return gradient;
 }
-void CanvasRendererPeerImpl::ClearImageData(){
+void CanvasRendererPeerImpl::ClearImageData()
+{
     imageData.x = 0;
     imageData.y = 0;
     imageData.dirtyX = 0;
