@@ -1072,6 +1072,14 @@ void WebClientImpl::OnPopupSize(int x, int y, int width, int height)
     delegate->OnPopupSize(x, y, width, height);
 }
 
+void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 void WebClientImpl::OnPopupShow(bool show)
 {
     auto delegate = webDelegate_.Upgrade();

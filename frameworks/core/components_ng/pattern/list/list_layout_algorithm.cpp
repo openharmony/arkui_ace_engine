@@ -959,7 +959,7 @@ LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper
 
 void ListLayoutAlgorithm::RecycleGroupItem(LayoutWrapper* layoutWrapper) const
 {
-    if (scrollSnapAlign_ != ScrollSnapAlign::CENTER || childrenSize_) {
+    if (scrollSnapAlign_ == ScrollSnapAlign::NONE || childrenSize_) {
         return;
     }
     auto startChild = itemPosition_.begin();
@@ -1587,7 +1587,8 @@ void ListLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetFadingEdge().value_or(false)) {
+    bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    if (!paintProperty->GetFadingEdge().value_or(defaultFadingEdge)) {
         return;
     }
     auto overlayNode = frameNode->GetOverlayNode();

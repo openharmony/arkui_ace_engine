@@ -557,7 +557,7 @@ HWTEST_F(WaterFlowSegmentTest, MeasureOnJump004, TestSize.Level1)
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 27);
-    EXPECT_EQ(info->currentOffset_, -0.0f);
+    EXPECT_EQ(info->currentOffset_, 0.0f);
 
     info->jumpIndex_ = 99;
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1498,8 +1498,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump001, TestSize.Level1)
     secObj->ChangeData(1, 1, newSection);
     AddItems(5);
     MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1531,8 +1530,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump002, TestSize.Level1)
     EXPECT_EQ(info->childrenCount_, 60);
 
     frameNode_->ChildrenUpdatedFrom(10);
-    pattern_->ScrollToIndex(0);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(0, false, ScrollAlign::START);
 
     EXPECT_EQ(info->currentOffset_, 0);
     EXPECT_EQ(info->startIndex_, 0);
@@ -1568,8 +1566,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
         { {0, { {14, {1100, 100}}, {15, {1200, 200}} }} }, { {0, {}} } };
     EXPECT_EQ(info->items_, itemsMap);
 
-    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(19, false, ScrollAlign::START);
     EXPECT_EQ(info->currentOffset_, -1800.0f);
     EXPECT_EQ(info->startIndex_, 19);
     EXPECT_EQ(info->endIndex_, 27);
@@ -1581,8 +1578,7 @@ HWTEST_F(WaterFlowSegmentTest, Jump003, TestSize.Level1)
         {24, {2600, 100}}, {25, {2700, 200}}, {26, {2900, 100}}, {27, {3000, 200}} }} }, { {0, {}} } };
     EXPECT_EQ(info->items_, itemsMap_1);
 
-    pattern_->ScrollToIndex(28, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(28, false, ScrollAlign::START);
     EXPECT_EQ(info->currentOffset_, -3200.0f);
     EXPECT_EQ(info->startIndex_, 28);
     EXPECT_EQ(info->endIndex_, 36);
@@ -1774,5 +1770,54 @@ HWTEST_F(WaterFlowSegmentTest, WaterFlowGetChildrenExpandedSize001, TestSize.Lev
 
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(estimatedHeight, WATER_FLOW_HEIGHT - padding));
+}
+
+/**
+ * @tc.name: Illegal005
+ * @tc.desc: test in the middle When the notification of Lazyforeach and section update doesn't come in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, Illegal005, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(37, [](int32_t) { return 100.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 14);
+
+    // test in the middle position.
+    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 26);
+    DeleteItemInLazyForEach(16);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    mockLazy->SetTotalCount(36);
+    FlushUITasks();
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 26);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(info->segmentTails_.size(), 3);
+    EXPECT_EQ(info->segmentTails_.back(), 36);
+
+    std::vector<WaterFlowSections::Section> newSection = {
+        WaterFlowSections::Section{.itemsCount = 19, .crossCount = 1}};
+    secObj->ChangeData(1, 1, newSection);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info->segmentTails_.back(), 35);
+
+    EXPECT_EQ(info->startIndex_, 19);
+    EXPECT_EQ(info->endIndex_, 26);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(secObj->GetSectionInfo()[1].itemsCount, 19);
+    EXPECT_EQ(info->itemInfos_.size(), 27);
 }
 } // namespace OHOS::Ace::NG

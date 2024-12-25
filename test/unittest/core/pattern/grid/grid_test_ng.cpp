@@ -51,7 +51,6 @@ void GridTestNg::SetUpTestSuite()
 #ifndef TEST_IRREGULAR_GRID
     g_irregularGrid = false;
 #endif
-    testing::FLAGS_gmock_verbose = "error";
 }
 
 void GridTestNg::CheckPreloadListEqual(const std::list<int32_t>& expectedList) const
@@ -222,18 +221,6 @@ void GridTestNg::AddFixedHeightItems(int32_t cnt, float height)
     }
 }
 
-void GridTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushUITasks();
-}
-
-void GridTestNg::ScrollTo(float position)
-{
-    pattern_->ScrollTo(position);
-    FlushUITasks();
-}
-
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
@@ -328,35 +315,5 @@ void GridTestNg::CreateItemsInLazyForEach(int32_t itemNumber, std::function<floa
 RefPtr<FrameNode> GridTestNg::GetItem(int32_t idx, bool asCache)
 {
     return AceType::DynamicCast<FrameNode>(frameNode_->GetChildByIndex(idx, asCache));
-}
-
-void GridTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
-{
-    positionController_->ScrollToIndex(index, smooth, align, extraOffset);
-    FlushUITasks();
-}
-
-bool GridTestNg::AnimateTo(
-    const Dimension& position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll)
-{
-    bool result = positionController_->AnimateTo(position, duration, curve, smooth, canOverScroll);
-    FlushUITasks();
-    return result;
-}
-
-AssertionResult GridTestNg::Position(float expectOffset)
-{
-    if (!MockAnimationManager::GetInstance().AllFinished()) {
-        MockAnimationManager::GetInstance().Tick();
-        FlushUITasks();
-    }
-    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
-}
-
-AssertionResult GridTestNg::VelocityPosition(float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushUITasks();
-    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
 }
 } // namespace OHOS::Ace::NG

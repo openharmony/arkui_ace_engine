@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 #define private public
 #define protected public
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
@@ -58,11 +58,11 @@ const Color PRESS_COLOR = Color::BLACK;
 constexpr double DISABLED_ALPHA = 0.4;
 constexpr int32_t TICK = 2;
 
-class ListTestNg : public TestNG {
+class ListTestNg : public ScrollableUtilsTestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
-    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag);
+    static RefPtr<FrameNode> CreateCustomNode(const std::string& tag, float crossSize, float mainSize);
     void SetUp() override;
     void TearDown() override;
     void GetList();
@@ -85,30 +85,25 @@ public:
     void CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc);
     std::function<void()> GetRowOrColBuilder(float crossSize, float mainSize);
     std::function<void()> GetRowOrColBuilder(Dimension crossSize, Dimension mainSize);
+    void CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+        const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber = TOTAL_ITEM_NUMBER);
 
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
     void FlushIdleTask(const RefPtr<ListPattern>& listPattern);
     void SetChildrenMainSize(
         const RefPtr<FrameNode>& frameNode, int32_t startIndex, const std::vector<float>& newChildrenSize);
-    void ScrollTo(float position);
-    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset);
-    AssertionResult VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
-    AssertionResult Position(float expectOffset);
-    AssertionResult VelocityPosition(float velocity, float expectOffset);
-    void ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset = std::nullopt);
+    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset) override;
+    AssertionResult Position(float expectOffset) override;
     void JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
     void CreateItemsInLazyForEach(
         int32_t itemNumber, float itemMainSize, std::function<void(int32_t, int32_t)> onMove = nullptr);
     void CreateItemGroupsInLazyForEach(int32_t itemNumber, std::function<void(int32_t, int32_t)> onMove = nullptr);
 
-    RefPtr<FrameNode> frameNode_;
     RefPtr<ListPattern> pattern_;
     RefPtr<ListEventHub> eventHub_;
     RefPtr<ListLayoutProperty> layoutProperty_;
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ListAccessibilityProperty> accessibilityProperty_;
-    RefPtr<ScrollableController> positionController_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_LIST_LIST_TEST_NG_H

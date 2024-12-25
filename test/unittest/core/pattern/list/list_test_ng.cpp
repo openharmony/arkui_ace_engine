@@ -276,18 +276,6 @@ void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushUITasks();
 }
 
-void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushUITasks();
-}
-
-void ListTestNg::ScrollTo(float position)
-{
-    pattern_->ScrollTo(position);
-    FlushUITasks();
-}
-
 void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
 {
     RepeatVirtualScrollModelNG repeatModel;
@@ -340,30 +328,48 @@ void ListTestNg::CreateGroupWithSettingWithComponentContent(
     for (int32_t index = 0; index < groupNumber; index++) {
         ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
         groupModel.SetSpace(Dimension(SPACE));
-        groupModel.SetDivider(ITEM_DIVIDER);
-        groupModel.SetHeaderComponent(CreateCustomNode("Header"));
-        groupModel.SetFooterComponent(CreateCustomNode("Footer"));
+        groupModel.SetHeaderComponent(CreateCustomNode("Header", LIST_WIDTH, LIST_HEIGHT));
+        groupModel.SetFooterComponent(CreateCustomNode("Footer", LIST_WIDTH, LIST_HEIGHT));
         CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
-RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
+void ListTestNg::CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+    const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                startBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                endBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag, float crossSize, float mainSize)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(
         tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(LIST_WIDTH), CalcLength(LIST_HEIGHT)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(crossSize), CalcLength(mainSize)));
     return frameNode;
 }
 
 AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float expectOffset)
 {
-    if (!MockAnimationManager::GetInstance().AllFinished()) {
-        MockAnimationManager::GetInstance().Tick();
-        FlushUITasks();
-    }
     Axis axis = layoutProperty_->GetListDirection().value_or(Axis::VERTICAL);
     if (AceType::InstanceOf<ListItemPattern>(frameNode->GetPattern())) {
         auto pattern = frameNode->GetPattern<ListItemPattern>();
@@ -377,27 +383,9 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
 }
 
-AssertionResult ListTestNg::VelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushUITasks();
-    return IsEqual(-(pattern_->GetTotalOffset()), expectOffset);
-}
-
 AssertionResult ListTestNg::Position(float expectOffset)
 {
     return Position(frameNode_, expectOffset);
-}
-
-AssertionResult ListTestNg::VelocityPosition(float velocity, float expectOffset)
-{
-    return VelocityPosition(frameNode_, velocity, expectOffset);
-}
-
-void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset)
-{
-    positionController_->ScrollToIndex(index, smooth, align, extraOffset);
-    FlushUITasks();
 }
 
 void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)

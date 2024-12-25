@@ -410,9 +410,18 @@ public:
 
     virtual void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) {}
 
-    virtual int32_t GetLastSnapTargetIndex()
+    virtual std::optional<int32_t> GetLastSnapTargetIndex()
     {
-        return -1;
+        return std::nullopt;
+    }
+
+    virtual void ResetLastSnapTargetIndex() {}
+
+    void ResetScrollableSnapDirection()
+    {
+        auto scrollable = GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->ResetSnapDirection();
     }
 
     void SetScrollableCurrentPos(float currentPos)
@@ -801,6 +810,7 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
+    float selectScrollOffset_ = 0.0f;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
     bool animateOverScroll_ = false;
@@ -880,6 +890,8 @@ private:
     float GetOutOfScrollableOffset() const;
     virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
+    void UpdateMouseStartOffset();
+
     void UpdateBorderRadius();
 
     /******************************************************************************
@@ -986,6 +998,7 @@ private:
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
     bool isAnimateOverScroll_ = false;
+    bool isScrollToOverAnimation_ = false;
     bool isScrollToSafeAreaHelper_ = true;
     bool inScrollingStatus_ = false;
     bool switchOnStatus_ = false;

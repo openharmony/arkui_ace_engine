@@ -305,6 +305,24 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageState(ArkUI_NodeHandle node, ArkUI_RouterP
 ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
     ArkUI_NodeHandle node, char* buffer, int32_t bufferSize, int32_t* writeLength);
 
+/**
+ * @brief Register a callback to be executed when rendering in the next frame.
+ *
+ * @param uiContext ArkUI_ContextHandle.
+ * @param userData Indicates the custom data to be saved.
+ * @param callback Custom callback function.
+ * @param nanoTimestamp Timestamp of frame signal.
+ * @param frameCount Frame count.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ *         Returns {@link ARKUI_ERROR_CODE_UI_CONTEXT_INVALID} if the uiContext is invalid.
+ *         Returns {@link ARKUI_ERROR_CODE_CALLBACK_INVALID} if the callback function is invalid.
+ * @since 16
+ */
+int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData));
+
 #ifdef __cplusplus
 };
 #endif

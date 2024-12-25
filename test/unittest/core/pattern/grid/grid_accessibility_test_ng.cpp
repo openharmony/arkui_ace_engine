@@ -85,7 +85,7 @@ HWTEST_F(GridAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Level1)
      * @tc.steps: step3. Grid is at bottom.
      * @tc.expected: Check actions value
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_FALSE(pattern_->IsAtTop());
     EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
@@ -162,14 +162,14 @@ HWTEST_F(GridAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Trigger ScrollPage down
      */
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(Position(-GRID_HEIGHT));
+    EXPECT_TRUE(TickPosition(-GRID_HEIGHT));
 
     /**
      * @tc.steps: step2. Call ActActionScrollForward
      * @tc.expected: Trigger ScrollPage up
      */
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(0));
 }
 
 /**

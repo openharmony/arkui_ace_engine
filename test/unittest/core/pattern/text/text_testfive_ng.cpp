@@ -500,6 +500,22 @@ HWTEST_F(TextTestFiveNg, GetTextHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test text_pattern.cpp IsShowSearch function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsShowSearch001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    textPattern->IsShowSearch();
+    EXPECT_NE(textPattern, nullptr);
+}
+
+/**
  * @tc.name: CheckHandleIsVisibleWithTransform001
  * @tc.desc: test base_text_select_overlay.cpp CheckHandleIsVisibleWithTransform function
  * @tc.type: FUNC
@@ -1451,11 +1467,64 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     pattern->AttachToFrameNode(frameNode);
     auto textSelectOverlay = pattern->selectOverlay_;
     ASSERT_NE(textSelectOverlay, nullptr);
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    textSelectOverlay->OnBind(manager);
 
     auto shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
-    SelectOverlayDirtyFlag flag = UPDATE_HANDLE_COLOR_FLAG;
+    SelectOverlayDirtyFlag flag = DIRTY_HANDLE_COLOR_FLAG;
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
+
+    flag = DIRTY_FIRST_HANDLE;
+    shareOverlayInfo->menuInfo.showSearch = false;
+    textSelectOverlay->SetIsSupportMenuSearch(false);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    flag = DIRTY_SECOND_HANDLE;
+    shareOverlayInfo->menuInfo.showSearch = true;
+    textSelectOverlay->SetIsSupportMenuSearch(true);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+}
+
+/**
+ * @tc.name: IsNeedMenuSearch001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuSearch function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuSearch001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuSearch(), false);
+}
+
+/**
+ * @tc.name: HandleOnSearch001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnSearch function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnSearch001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }
 
 /**

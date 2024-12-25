@@ -72,8 +72,7 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge003, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     CreateRandomWaterFlowItems(100);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->endIndex_, 99);
     EXPECT_EQ(GetChildRect(frameNode_, 100).Bottom(), 750.0f);
@@ -94,8 +93,7 @@ HWTEST_F(WaterFlowSWTest, Reset001, TestSize.Level1)
     model.SetFooter(GetDefaultHeaderBuilder());
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 9);
     for (int i = 0; i < 5; i++) {
@@ -125,8 +123,7 @@ HWTEST_F(WaterFlowSWTest, Reset002, TestSize.Level1)
     CreateWaterFlowItems(100);
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info_->startIndex_, 99);
     EXPECT_EQ(info_->endIndex_, 109);
     for (int i = 0; i < 5; i++) {
@@ -172,8 +169,7 @@ HWTEST_F(WaterFlowSWTest, Jump001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr 1fr");
     CreateWaterFlowItems();
     CreateDone();
-    pattern_->ScrollToIndex(8);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(8, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 9);
     EXPECT_EQ(info_->idxToLane_.at(8), 2);
@@ -237,8 +233,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     CreateWaterFlowItems(80);
     CreateDone();
 
-    pattern_->ScrollToIndex(50, false, ScrollAlign::CENTER);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(50, false, ScrollAlign::CENTER);
     EXPECT_EQ(info_->startIndex_, 44);
     EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
     EXPECT_EQ(GetChildY(frameNode_, 46), -100.0f);
@@ -264,8 +259,7 @@ HWTEST_F(WaterFlowSWTest, ModifyItem002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 40), 10.0f); // changed after refill
 
     // update footer
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(GetChildY(frameNode_, 80), 550.0f);
     EXPECT_EQ(info_->startIndex_, 69);
     EXPECT_EQ(GetChildY(frameNode_, 70), -150.0f);
@@ -353,8 +347,7 @@ HWTEST_F(WaterFlowSWTest, Update001, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildY(frameNode_, 3), -40.0f);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
 
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(GetChildY(frameNode_, 3), 320.0f);
@@ -409,8 +402,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll002, TestSize.Level1)
     CreateWaterFlowItems(50);
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     UpdateCurrentOffset(-30000.0f);
     const float endPos = info_->EndPos();
@@ -486,8 +478,7 @@ HWTEST_F(WaterFlowSWTest, OverScroll004, TestSize.Level1)
     CreateRandomWaterFlowItems(50);
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     for (int i = 1; i <= 10; ++i) {
         info_->delta_ = -100.0f;
         frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -548,11 +539,9 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     CreateWaterFlowItems(50);
     CreateDone();
     EXPECT_FALSE(info_->IsMisaligned());
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
-    pattern_->ScrollToIndex(2, true, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(2, true, ScrollAlign::START);
     EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -2850.0f);
     UpdateCurrentOffset(2800.0f + 101.0f);
     // should mark misaligned
@@ -589,10 +578,8 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     CreateDone();
 
     EXPECT_FALSE(info_->IsMisaligned());
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
-    pattern_->ScrollToIndex(15, true, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    ScrollToIndex(15, true, ScrollAlign::START);
     EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -575.0f);
     UpdateCurrentOffset(550.0f);
 
@@ -620,7 +607,7 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
 
 /**
  * @tc.name: PositionController100
- * @tc.desc: Test PositionController AnimateTo and ScrollTo, should be disabled
+ * @tc.desc: Test PositionController AnimateTo and ScrollTo
  * @tc.type: FUNC
  */
 HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
@@ -635,14 +622,16 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
     auto controller = pattern_->positionController_;
     /**
      * @tc.steps: step8. Test AnimateTo function
-     * @tc.expected: pattern_->isAnimationStop_ is false
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false, false);
-    EXPECT_TRUE(pattern_->isAnimationStop_);
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -1.5);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -1.5);
 
     /**
      * @tc.steps: step8. test event
-     * @tc.expected: return the scroll event is ture.
      */
     bool isOnWillScrollCallBack = false;
     Dimension willScrollOffset;
@@ -659,7 +648,12 @@ HWTEST_F(WaterFlowSWTest, PositionController100, TestSize.Level1)
 
     eventHub_->SetOnWillScroll(std::move(onWillScroll));
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    EXPECT_FALSE(isOnWillScrollCallBack);
+    EXPECT_TRUE(isOnWillScrollCallBack);
+    FlushLayoutTask(frameNode_);
+    const auto &info = pattern_->layoutInfo_;
+    EXPECT_EQ(info->Offset(), -ITEM_MAIN_SIZE * 5);
+    EXPECT_EQ(info->startIndex_, 7);
+    EXPECT_EQ(GetChildY(frameNode_, 7), 0);
 }
 
 /**
@@ -675,8 +669,7 @@ HWTEST_F(WaterFlowSWTest, ScrollToEdge002, TestSize.Level1)
     model.SetRowsGap(Dimension(5.0f));
     CreateRandomWaterFlowItems(100);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->endIndex_, 99);
     EXPECT_EQ(GetChildOffset(frameNode_, info->footerIndex_), OffsetF(0.0f, 750.0f));
@@ -810,15 +803,13 @@ HWTEST_F(WaterFlowTestNg, ScrollToEdge008, TestSize.Level1)
     /**
      * @tc.steps: step2. scrollEdge to end
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     /**
      * @tc.steps: step3. scrollEdge to start
      * @tc.expected: Trigger reachstart
      */
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
-    FlushLayoutTask(frameNode_);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_TRUE(isReachStartCalled);
 }
 
@@ -1655,8 +1646,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
                  {lanes_[0]: {0, 1, 2}, lanes_[1]: {3, 4}} -> {lanes_[0]: {0, 1, 2, 3, 4}}.
      * @tc.expected: newStartIndex_ should be set to 5, keep content unchanged.
      */
-    pattern_->ScrollToIndex(5, false, ScrollAlign::START);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(5, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 5);
     EXPECT_EQ(info_->endIndex_, 10);
     EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
@@ -1664,7 +1654,6 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
     EXPECT_TRUE(info_->lanes_[1][1].items_.empty());
     EXPECT_TRUE(info_->lanes_[2][0].items_.empty());
     EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 0.000000 EndPos: 610.000000 Items [5 6 7 8 9 10 ] }");
-
 
     std::vector<WaterFlowSections::Section> newSection = {
         WaterFlowSections::Section { .itemsCount = 5,
@@ -1710,8 +1699,7 @@ HWTEST_F(WaterFlowSWTest, Cache002, TestSize.Level1)
     model.SetRowsGap(Dimension(10));
     model.SetColumnsGap(Dimension(10));
     CreateDone();
-    pattern_->ScrollToIndex(30);
-    FlushLayoutTask(frameNode_);
+    ScrollToIndex(30, false, ScrollAlign::START);
     EXPECT_EQ(info_->startIndex_, 30);
     EXPECT_EQ(info_->endIndex_, 40);
     const std::list<int32_t> preloadList = { 41, 42, 43, 29, 28, 27 };
@@ -1894,7 +1882,7 @@ HWTEST_F(WaterFlowSWTest, DataChange001, TestSize.Level1)
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(gesture);
     FlushLayoutTask(frameNode_);
-    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0),  -31.510389);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -31.510389);
 
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
@@ -1986,15 +1974,63 @@ HWTEST_F(WaterFlowSWTest, Illegal004, TestSize.Level1)
     EXPECT_EQ(info_->startIndex_, 0);
     EXPECT_EQ(info_->endIndex_, 2);
     EXPECT_EQ(info_->maxHeight_, 300);
-    EXPECT_EQ(
-        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
-    EXPECT_EQ(
-        info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
-    EXPECT_EQ(
-        info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
-    EXPECT_EQ(
-        info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 200.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 200.000000 empty}");
     EXPECT_EQ(info_->idxToLane_.size(), 3);
     EXPECT_FALSE(info_->idxToLane_.count(3));
+}
+
+/**
+ * @tc.name: Illegal005
+ * @tc.desc: test in the middle When the notification of Lazyforeach and section update doesn't come in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Illegal005, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(37, [](int32_t) { return 100.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 14);
+
+    // test in the middle position.
+    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 19);
+    EXPECT_EQ(info_->endIndex_, 26);
+    DeleteItemInLazyForEach(16);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    mockLazy->SetTotalCount(36);
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, 19);
+    EXPECT_EQ(info_->endIndex_, 26);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(info_->segmentTails_.size(), 3);
+    EXPECT_EQ(info_->segmentTails_.back(), 36);
+
+    std::vector<WaterFlowSections::Section> newSection = {
+        WaterFlowSections::Section{.itemsCount = 19, .crossCount = 1}};
+    secObj->ChangeData(1, 1, newSection);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info_->startIndex_, 18);
+    EXPECT_EQ(info_->endIndex_, 25);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(secObj->GetSectionInfo()[1].itemsCount, 19);
+    EXPECT_EQ(info_->segmentTails_.back(), 35);
+
+    EXPECT_EQ(
+        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 0.000000 empty}");
+    EXPECT_EQ(
+        info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 800.000000 Items [18 19 20 21 22 23 24 25 ] }");
+    EXPECT_EQ(info_->idxToLane_.size(), 8);
 }
 } // namespace OHOS::Ace::NG

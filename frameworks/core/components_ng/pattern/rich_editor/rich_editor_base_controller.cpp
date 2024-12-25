@@ -38,6 +38,13 @@ int32_t RichEditorBaseController::GetCaretOffset()
     return position;
 }
 
+RectF RichEditorBaseController::GetCaretRect()
+{
+    auto richEditorPattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(richEditorPattern, RectF(-1, -1, -1, -1));
+    return richEditorPattern->GetCaretRelativeRect();
+}
+
 bool RichEditorBaseController::SetCaretOffset(int32_t caretPosition)
 {
     auto richEditorPattern = pattern_.Upgrade();

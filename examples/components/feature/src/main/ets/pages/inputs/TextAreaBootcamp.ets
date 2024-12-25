@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, useEnabled,RadioBlock,SliderBlock } from 'common';
-import { LengthMetrics, LengthUnit } from '@kit.ArkUI';
+import { RadioBlock, ColorBlock, useEnabled } from 'common';
+import { LengthMetrics } from '@kit.ArkUI';
+import UTD from '@ohos.data.uniformTypeDescriptor';
 
 @Component
 export struct TextAreaBootcamp {
@@ -136,16 +137,20 @@ export struct TextAreaBootcamp {
   @Builder
   Content() {
     Row() {
-      TextArea({
-        text: this.text,
-        placeholder: 'The text area can hold an unlimited amount of text. input your word...',
-        controller: this.controller
-      })
-        .placeholderColor(useEnabled(this.enablePlaceholderColor,this.placeholderColor))
-        .placeholderFont({
-          size: useEnabled(this.enablePlaceholderFontSize, this.placeholderFontSize),
-          weight: useEnabled(this.enablePlaceholderFontWeight, this.placeholderFontWeight),
-          style: useEnabled(this.enablePlaceholderFontStyle, this.placeholderFontStyle)
+      TextArea({ text: this.message1 })
+        .onChange((value: string) => {
+          this.message1 = value
+        })
+        .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
+        .selectedBackgroundColor(useEnabled(this.enableBackgroundColor, this.compBackgroundColor))
+        .textAlign(useEnabled(this.enableTextAlign, this.textAlign))
+        .style(useEnabled(this.enableTextStyle, this.textStyle))
+        .type(useEnabled(this.enableTextareaType, this.textareaType))
+        .allowDrop([UTD.UniformDataType.TEXT, UTD.UniformDataType.PLAIN_TEXT])
+        .draggable(true)
+        .margin({
+          start: LengthMetrics.vp(24),
+          end: LengthMetrics.vp(24)
         })
         .textAlign(useEnabled(this.enableTextAlign,this.textAlign))
         .caretColor(useEnabled(this.enableCaretColor,this.caretColor))

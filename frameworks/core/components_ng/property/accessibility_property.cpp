@@ -313,6 +313,7 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
     V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::WEB_ETS_TAG,
 };
 
@@ -427,6 +428,7 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::XCOMPONENT_ETS_TAG,
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
 
@@ -816,6 +818,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     }
     accessibilityText_ = text;
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
+{
+    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+        return;
+    }
+    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)

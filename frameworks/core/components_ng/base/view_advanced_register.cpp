@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/core/components_ng/base/view_advanced_register.h"
+#include "frameworks/core/components_ng/pattern/root/root_pattern.h"
 
 namespace OHOS::Ace::NG {
 thread_local ViewAdvancedRegister* ViewAdvancedRegister::instance_ = nullptr;
@@ -35,6 +36,9 @@ RefPtr<Pattern> ViewAdvancedRegister::GeneratePattern(const std::string& pattern
 {
     if (patternName == V2::STAGE_ETS_TAG) {
         return AceType::MakeRefPtr<StagePattern>();
+    }
+    if (patternName == V2::ROOT_ETS_TAG) {
+        return AceType::MakeRefPtr<RootPattern>();
     }
     return nullptr;
 }

@@ -59,6 +59,7 @@ constexpr char CLICK[] = "click";
 constexpr char KEY_EVENT[] = "key_event";
 constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
+constexpr char PAGE_END_FLUSH[] = "page_end_flush";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char SLIDE_OFF[] = "slide_off";
@@ -129,6 +130,11 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
                     reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
+                }
+            },
+            { PAGE_END_FLUSH,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT);
                 }
             },
             { WEB_GESTURE,
@@ -325,12 +331,16 @@ double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
 
 void ResSchedReport::LoadPageEvent(int32_t value)
 {
-    if (LIKELY(value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)) {
+    if (LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
+        || (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == false))) {
         return;
     } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {
         loadPageOn_ = false;
+    } else if (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == true) {
+        loadPageRequestFrameOn_ = false;
     } else if (value == ResDefine::LOAD_PAGE_START_EVENT) {
         loadPageOn_ = true;
+        loadPageRequestFrameOn_ = true;
     }
 
     std::unordered_map<std::string, std::string> payload;

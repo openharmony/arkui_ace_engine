@@ -49,6 +49,8 @@ public:
 
     double width_ = 0.0;
     double height_ = 0.0;
+    double defaultWidth_ = 0.0;
+    double defaultHeight_ = 0.0;
     bool isSetSize_ = false;
 };
 
@@ -79,8 +81,10 @@ public:
         minPadddingSize_ = minSize;
         if (isVertical) {
             height_ = size;
+            defaultHeight_ = size;
         } else {
             width_ = size;
+            defaultWidth_ = size;
         }
     };
 

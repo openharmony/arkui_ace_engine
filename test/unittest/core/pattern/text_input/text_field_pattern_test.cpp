@@ -647,6 +647,28 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
     pattern->GetFocusHub()->focusType_ = FocusType::NODE;
     pattern->hasPreviewText_ = true;
     pattern->HandleLongPress(info);
+
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.SetLocalLocation(Offset(10, 10));
+    pattern->hasPreviewText_ = false;
+    std::list<FingerInfo> fingerList;
+    fingerList.push_back({ .fingerId_ = 0 });
+    info.SetFingerList(fingerList);
+    pattern->HandleLongPress(info);
+
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo moveLocationInfo(0);
+    moveLocationInfo.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo.SetTouchType(TouchType::MOVE);
+    touchInfo.AddChangedTouchLocationInfo(std::move(moveLocationInfo));
+
+    TouchLocationInfo moveLocationInfo0(0);
+    moveLocationInfo0.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo0.SetTouchType(TouchType::MOVE);
+    touchInfo.AddTouchLocationInfo(std::move(moveLocationInfo0));
+    pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16("Hello"));
+    pattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(pattern->GetMagnifierController()->magnifierNodeExist_);
 }
 
 /**
@@ -1937,7 +1959,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
-    EXPECT_TRUE(controller->GetShowMagnifier());
+    EXPECT_FALSE(controller->GetShowMagnifier());
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
@@ -2352,6 +2374,42 @@ HWTEST_F(TextFieldPatternTest, TextPattern103, TestSize.Level0)
     pattern->selectController_->secondHandleInfo_.index = 2;
     pattern->HandleSelectionEnd();
     EXPECT_TRUE(pattern->showSelect_);
+}
+
+/**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test testInput text IsShowSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowSearch();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnSearch001
+ * @tc.desc: test testInput text HandleOnSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
 }
 
 /**

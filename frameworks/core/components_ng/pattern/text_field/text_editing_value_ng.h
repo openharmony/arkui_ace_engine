@@ -120,6 +120,7 @@ struct TextEditingValueNG {
 
     std::u16string text;
     int32_t caretPosition = 0;
+    int32_t beforeCaretPosition = 0;
 };
 
 } // namespace OHOS::Ace::NG

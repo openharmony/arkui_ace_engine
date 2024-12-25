@@ -33,9 +33,8 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
-#include "core/pipeline/pipeline_base.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +47,7 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
+constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -133,7 +133,8 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(false);
+    bool defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
     if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
         paint->SetFadingInfo(false, false, prevHasFadingEdge_);
@@ -165,7 +166,7 @@ void ScrollablePattern::UpdateFadeInfo(
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value_or(LIST_FADINGEDGE);
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
@@ -1089,7 +1090,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         UpdateBorderRadius();
         scrollBar_->SetReverse(IsReverse());
         scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
-        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, GetScrollSource());
         scrollBar_->MarkNeedRender();
     }
 
@@ -1099,7 +1100,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         auto estimatedHeightItem = estimatedHeight - height;
         estimatedHeight_ = (estimatedHeightItem < 0 ? 0 : estimatedHeightItem);
         barOffset_ = -offset;
-        scrollBarProxy_->NotifyScrollBar();
+        scrollBarProxy_->NotifyScrollBar(scrollSource_);
     }
 
     for (auto nestbar : nestScrollBarProxy_) {
@@ -1107,7 +1108,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         if (!scrollBarProxy) {
             continue;
         }
-        scrollBarProxy->NotifyScrollBar();
+        scrollBarProxy->NotifyScrollBar(scrollSource_);
     }
 }
 
@@ -1453,7 +1454,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
         bool stopAnimation = false;
         auto delta = pattern->GetScrollDelta(offset, stopAnimation);
         auto source = SCROLL_FROM_ANIMATION_CONTROLLER;
-        if (pattern->GetLastSnapTargetIndex() >= 0) {
+        if (pattern->GetLastSnapTargetIndex().has_value()) {
             source = SCROLL_FROM_ANIMATION;
         }
         if (!pattern->UpdateCurrentOffset(delta, source) || stopAnimation) {
@@ -1482,6 +1483,7 @@ void ScrollablePattern::InitCurveOffsetProperty()
             stopAnimation || pattern->isAnimateOverScroll_) {
             if (pattern->isAnimateOverScroll_) {
                 pattern->isAnimateOverScroll_ = false;
+                pattern->isScrollToOverAnimation_  = true;
                 auto pauseVelocity = -pattern->currentVelocity_;
                 auto context = pattern->GetContext();
                 CHECK_NULL_VOID(context);
@@ -1765,6 +1767,7 @@ void ScrollablePattern::SelectWithScroll()
 void ScrollablePattern::ClearSelectedZone()
 {
     DrawSelectedZone(RectF());
+    selectScrollOffset_ = 0.0f;
 }
 
 RectF ScrollablePattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
@@ -1807,6 +1810,7 @@ void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone)
 void ScrollablePattern::MarkSelectedItems()
 {
     if (multiSelectable_ && mousePressed_) {
+        UpdateMouseStartOffset();
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
@@ -1833,11 +1837,7 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
 
 void ScrollablePattern::UpdateMouseStart(float offset)
 {
-    if (axis_ == Axis::VERTICAL) {
-        mouseStartOffset_.AddY(offset);
-    } else {
-        mouseStartOffset_.AddX(offset);
-    }
+    selectScrollOffset_ += offset;
 }
 
 float ScrollablePattern::GetOutOfScrollableOffset() const
@@ -1914,6 +1914,22 @@ void ScrollablePattern::LimitMouseEndOffset()
         mouseEndOffset_.SetX(LessNotEqual(limitedMainOffset, 0.0f) ? mouseEndOffset_.GetX() : limitedMainOffset);
         mouseEndOffset_.SetY(LessNotEqual(limitedCrossOffset, 0.0f) ? mouseEndOffset_.GetY() : limitedCrossOffset);
     }
+}
+
+void ScrollablePattern::UpdateMouseStartOffset()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context->GetVsyncTime();
+    if (currentVsync > lastVsyncTime_) {
+        if (axis_ == Axis::VERTICAL) {
+            mouseStartOffset_.AddY(selectScrollOffset_);
+        } else {
+            mouseStartOffset_.AddX(selectScrollOffset_);
+        }
+        selectScrollOffset_ = 0.0f;
+    }
+    lastVsyncTime_ = currentVsync;
 }
 
 bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
@@ -2423,9 +2439,10 @@ void ScrollablePattern::OnScrollEndRecursiveInner(const std::optional<float>& ve
     OnScrollEnd();
     auto parent = GetNestedScrollParent();
     auto nestedScroll = GetNestedScroll();
-    if (parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
+    if (!isScrollToOverAnimation_ && parent && (nestedScroll.NeedParent() || GetIsNestedInterrupt())) {
         parent->OnScrollEndRecursive(velocity);
     }
+    isScrollToOverAnimation_ = false;
     SetIsNestedInterrupt(false);
 }
 
@@ -2704,7 +2721,8 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
             onScrollStop();
             AddEventsFiredInfo(ScrollableEventType::ON_SCROLL_STOP);
             SetScrollSource(SCROLL_FROM_NONE);
-            SetLastSnapTargetIndex(-1);
+            ResetLastSnapTargetIndex();
+            ResetScrollableSnapDirection();
         }
         auto scrollBar = GetScrollBar();
         if (scrollBar) {

@@ -64,6 +64,7 @@ namespace OHOS::Ace::NG {
 
 using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
+using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
@@ -122,6 +123,21 @@ public:
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
     {
         sizeChangeByRotateCallback_ = callback;
+    }
+
+    void SetLinkJumpCallback(const std::function<void(const std::string& link)>& callback)
+    {
+        linkJumpCallback_ = callback;
+    }
+
+    void ExecuteLinkJumpCallback(const std::string& link)
+    {
+        linkJumpCallback_(link);
+    }
+
+    bool GetIsLinkJumpOpen()
+    {
+        return linkJumpCallback_ != nullptr;
     }
 
     void FireSizeChangeByRotateCallback(bool isRotate,
@@ -937,6 +953,9 @@ public:
     void FlushFrameCallback(uint64_t nanoTimestamp);
     void TriggerIdleCallback(int64_t deadline);
 
+    void AddCAPIFrameCallback(FrameCallbackFuncFromCAPI&& frameCallbackFuncFromCAPI);
+    void FlushFrameCallbackFromCAPI(uint64_t nanoTimestamp, uint32_t frameCount);
+
     void RegisterTouchEventListener(const std::shared_ptr<ITouchEventCallback>& listener);
     void UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern);
 
@@ -999,6 +1018,11 @@ public:
         return taskScheduler_->IsDirtyLayoutNodesEmpty();
     }
 
+    bool IsDirtyPropertyNodesEmpty() const override
+    {
+        return dirtyPropertyNodes_.empty();
+    }
+
     void SyncSafeArea(SafeAreaSyncType syncType = SafeAreaSyncType::SYNC_TYPE_NONE);
     bool CheckThreadSafe();
 
@@ -1008,10 +1032,6 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
-    static bool IsPipelineDestroyed(int32_t instanceId)
-    {
-        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
-    }
 
     void AnimateOnSafeAreaUpdate();
     void RegisterAttachedNode(UINode* uiNode);
@@ -1025,6 +1045,8 @@ public:
 
     std::string GetBundleName();
     std::string GetModuleName();
+
+    void SetEnableSwipeBack(bool isEnable) override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1109,6 +1131,8 @@ private:
     bool CompensatePointerMoveEventFromUnhandledEvents(const DragPointerEvent& event, const RefPtr<FrameNode>& node);
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
+
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1237,6 +1261,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
     std::function<void(bool isRotate,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
+    std::function<void(const std::string&)> linkJumpCallback_ = nullptr;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1286,6 +1311,7 @@ private:
     bool isForceSplit_ = false;
     std::string homePageConfig_;
 
+    std::list<FrameCallbackFuncFromCAPI> frameCallbackFuncsFromCAPI_;
     std::list<FrameCallbackFunc> frameCallbackFuncs_;
     std::list<FrameCallbackFunc> idleCallbackFuncs_;
     uint32_t transform_ = 0;
@@ -1296,11 +1322,10 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
-    static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
-    
+
     friend class ScopedLayout;
     friend class FormGestureManager;
 };

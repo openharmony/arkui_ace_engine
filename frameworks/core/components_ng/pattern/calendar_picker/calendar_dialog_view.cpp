@@ -170,7 +170,7 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
             renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
         }
     }
-    UpdateBackgroundStyle(renderContext, dialogProperties);
+    UpdateBackgroundStyle(renderContext, dialogProperties, theme);
 }
 
 void CalendarDialogView::OperationsToPattern(
@@ -1005,13 +1005,13 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }
 
-void CalendarDialogView::UpdateBackgroundStyle(
-    const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties)
+void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
+    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
-            dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+            dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
         renderContext->UpdateBackBlurStyle(styleOption);
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
     }

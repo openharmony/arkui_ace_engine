@@ -41,7 +41,6 @@ public:
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
-    std::string GetIconPath(const std::string& abilityType);
     uint32_t GetSymbolId(const std::string& abilityType);
     RefPtr<FrameNode> CreateMainMenuItem(
         const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon);

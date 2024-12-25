@@ -132,7 +132,6 @@ CounterResource.BUTTON_ARROW_DOWN = {
 };
 CounterResource.BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
 CounterResource.BUTTON_BORDER_BLUR_WIDTH = '0vp';
-CounterResource.COUNTER_BORDER_WIDTH = '1vp';
 CounterResource.COUNTER_BORDER_WIDTH_NUMBER = 1;
 CounterResource.COUNTER_LIST_LABEL_SIZE = {
     "id": -1,
@@ -176,6 +175,48 @@ CounterResource.COUNTER_LIST_RIGHT_PADDING = {
     "bundleName": "__harDefaultBundleName__",
     "moduleName": "__harDefaultModuleName__"
 };
+CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.button_icon_size'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
+CounterResource.COUNTER_COMPACT_CONTAINER_HEIGHT = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.container_height'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
+CounterResource.COUNTER_BORDER_WIDTH = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.border_width'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
+CounterResource.COUNTER_COMPACT_BUTTON_SIZE = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.button_size'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
+CounterResource.COUNTER_COMPACT_CONTAINER_RADIUS = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.container_radius'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
+CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN = {
+    "id": -1,
+    "type": 10002,
+    params: ['sys.float.button_container_margin'],
+    "bundleName": "__harDefaultBundleName__",
+    "moduleName": "__harDefaultModuleName__"
+};
 CounterResource.COUNTER_LIST_PADDING = 12;
 CounterResource.COUNTER_LIST_HEIGHT = '48vp';
 CounterResource.COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
@@ -187,13 +228,9 @@ CounterResource.COUNTER_LIST_FOCUS_BORDER_SIZE = '30vp';
 CounterResource.COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
 CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
 CounterResource.COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
-CounterResource.COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
-CounterResource.COUNTER_COMPACT_BUTTON_SIZE = '24vp';
 CounterResource.COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
 CounterResource.COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
 CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN = 10;
-CounterResource.COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
-CounterResource.COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
 CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
 CounterResource.COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
 CounterResource.COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
@@ -1065,7 +1102,7 @@ export class CounterComponent extends ViewPU {
                 this.step = 1;
             }
             else {
-                this.step = this.dateStyleOptions.step;
+                this.step = Math.floor(this.dateStyleOptions.step);
             }
         }
         if (this.dateStyleOptions.onHoverIncrease !== undefined) {
@@ -1889,7 +1926,9 @@ export class CounterComponent extends ViewPU {
                         Stack.borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS);
                         Stack.borderWidth(this.subBtnFocusWidh);
                         Stack.borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
-                        Stack.margin({ start: LengthMetrics.vp(1) });
+                        Stack.margin({ 
+                            start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN)) 
+                        });
                         Stack.clip(true);
                     }, Stack);
                     this.observeComponentCreation2((c16, d16) => {
@@ -2019,7 +2058,9 @@ export class CounterComponent extends ViewPU {
                         Stack.borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS);
                         Stack.borderWidth(this.addBtnFocusWidh);
                         Stack.borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR);
-                        Stack.margin({ end: LengthMetrics.vp(1) });
+                        Stack.margin({ 
+                            end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN)) 
+                        });
                         Stack.clip(true);
                     }, Stack);
                     this.observeComponentCreation2((c15, d15) => {

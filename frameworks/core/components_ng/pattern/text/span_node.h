@@ -399,6 +399,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
@@ -411,7 +416,7 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateContent(const std::u16string& content)
@@ -420,7 +425,7 @@ public:
             return;
         }
         spanItem_->content = content;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -495,12 +500,12 @@ public:
         spanItem_->ToTreeJson(json, config);
     }
 
-    void RequestTextFlushDirty();
-    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
+    void RequestTextFlushDirty(bool markModifyDone = false);
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModifyDone = true);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void SetPropertyInfoContainer();
@@ -583,48 +588,6 @@ public:
     {
         return false;
     }
-
-    void OnModifyDone() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-        CHECK_NULL_VOID(!IsInitHoverEvent_);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto inputHub = eventHub->GetOrCreateInputEventHub();
-        CHECK_NULL_VOID(inputHub);
-        auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "placeholder, on hover event isHover=%{public}d", isHover);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHover(isHover);
-        };
-        auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
-        inputHub->AddOnHoverEvent(hoverEvent);
-        IsInitHoverEvent_ = true;
-    }
-
-    void OnHover(bool isHover)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-        auto pipelineContext = parent->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto frameId = parent->GetId();
-        if (isHover) {
-            pipelineContext->FreeMouseStyleHoldNode(frameId);
-        } else {
-            pipelineContext->FreeMouseStyleHoldNode();
-            pipelineContext->SetMouseStyleHoldNode(frameId);
-            pipelineContext->ChangeMouseStyle(frameId, OHOS::Ace::MouseFormat::TEXT_CURSOR);
-        }
-    }
-
-    bool IsInitHoverEvent_ = false;
 };
 
 class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
@@ -766,6 +729,7 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+    OnHoverFunc onHover_;
 private:
     ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
     ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;

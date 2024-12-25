@@ -20,7 +20,7 @@ declare type ViewPuInternal = Object;
 declare class ArkThemeScopeManager {
     static getInstance() : ArkThemeScopeManager;
     setDefaultTheme(customTheme: CustomThemeInternal): void;
-    getFinalTheme(elmtId: number): Theme;
+    getFinalTheme(ownerComponent: ViewPuInternal): Theme;
     onComponentCreateEnter(componentName: string, elmtId: number, isFirstRender: boolean, ownerComponent: ViewPuInternal): void;
     onComponentCreateExit(elmtId: number): void;
     onViewPUCreate(ownerComponent: ViewPuInternal): void;

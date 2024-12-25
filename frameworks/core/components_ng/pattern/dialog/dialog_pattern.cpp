@@ -30,6 +30,7 @@
 #include "core/components/button/button_theme.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/theme/icon_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/ui_node.h"
@@ -308,7 +309,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
-            props.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+            props.backgroundBlurStyle.value_or(dialogTheme_->GetDialogBackgroundBlurStyle()));
         contentRenderContext->UpdateBackBlurStyle(styleOption);
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(Color::TRANSPARENT));
     } else {
@@ -1137,18 +1138,30 @@ void DialogPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(std::move(onBlur));
 }
 
+Shadow GetDefaultShadow(ShadowStyle style)
+{
+    Shadow shadow = Shadow::CreateShadow(ShadowStyle::None);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, shadow);
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, shadow);
+    auto colorMode = SystemProperties::GetColorMode();
+    shadow = shadowTheme->GetShadow(style, colorMode);
+    return shadow;
+}
+
 void DialogPattern::HandleBlurEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOff = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOff());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOff)));
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOff)));
 }
 
 void DialogPattern::HandleFocusEvent()
 {
     CHECK_NULL_VOID(contentRenderContext_ && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE));
     auto defaultShadowOn = static_cast<ShadowStyle>(dialogTheme_->GetDefaultShadowOn());
-    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(Shadow::CreateShadow(defaultShadowOn)));
+    contentRenderContext_->UpdateBackShadow(dialogProperties_.shadow.value_or(GetDefaultShadow(defaultShadowOn)));
 }
 
 // XTS inspector
@@ -1873,14 +1886,16 @@ void DialogPattern::DumpSimplifyBorderProperty(std::unique_ptr<JsonValue>& json)
         DimensionUnit unit = border.leftDimen.value_or(
             border.topDimen.value_or(border.rightDimen.value_or(border.bottomDimen.value_or(Dimension())))).Unit();
         Dimension defaultValue(0, unit);
-        BorderWidthProperty defaultBorder = { defaultValue, defaultValue, defaultValue, defaultValue };
+        BorderWidthProperty defaultBorder = { defaultValue, defaultValue, defaultValue, defaultValue, std::nullopt,
+            std::nullopt };
         if (!(border == defaultBorder)) {
             json->Put("BorderWidth", border.ToString().c_str());
         }
     }
     if (dialogProperties_.borderColor.has_value()) {
         auto color = dialogProperties_.borderColor.value();
-        BorderColorProperty defaultValue = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
+        BorderColorProperty defaultValue = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK, std::nullopt,
+            std::nullopt };
         if (!(color == defaultValue)) {
             json->Put("BorderColor", color.ToString().c_str());
         }

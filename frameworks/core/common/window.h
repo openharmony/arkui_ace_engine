@@ -216,6 +216,11 @@ public:
     }
 
     virtual void NotifyExtensionTimeout(int32_t errorCode) {}
+
+    virtual bool GetIsRequestFrame()
+    {
+        return false;
+    }
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;

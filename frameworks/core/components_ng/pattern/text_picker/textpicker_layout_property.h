@@ -49,6 +49,9 @@ public:
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
         value->propCanLoop_ = CloneCanLoop();
         value->propDivider_ = CloneDivider();
+        value->propDisableTextStyleAnimation_ = CloneDisableTextStyleAnimation();
+        value->propDefaultTextStyle_ = CloneDefaultTextStyle();
+        value->propDefaultTextOverflow_ = CloneDefaultTextOverflow();
         return value;
     }
 
@@ -67,6 +70,9 @@ public:
         ResetSelectedTextStyle();
         ResetCanLoop();
         ResetDivider();
+        ResetDisableTextStyleAnimation();
+        ResetDefaultTextStyle();
+        ResetDefaultTextOverflow();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -144,6 +150,22 @@ public:
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
         auto canLoop = GetCanLoopValue();
         json->PutExtAttr("canLoop", canLoop ? "true" : "false", filter);
+
+        auto isDisableTextStyleAnimation = GetDisableTextStyleAnimation().value_or(false);
+        json->PutExtAttr("disableTextStyleAnimation", isDisableTextStyleAnimation ? "true" : "false", filter);
+
+        auto defaultFont = JsonUtil::Create(true);
+        defaultFont->Put("size", GetDefaultFontSizeValue(Dimension(0)).ToString().c_str());
+        defaultFont->Put("weight", V2::ConvertWrapFontWeightToStirng(
+            GetDefaultWeight().value_or(FontWeight::NORMAL)).c_str());
+        auto defaultTextStyle = JsonUtil::Create(true);
+        defaultTextStyle->Put("color", GetDefaultColor().value_or(Color::BLACK).ColorToString().c_str());
+        defaultTextStyle->Put("minFontSize", GetDefaultMinFontSize().value_or(Dimension()).ToString().c_str());
+        defaultTextStyle->Put("maxFontSize", GetDefaultMaxFontSize().value_or(Dimension()).ToString().c_str());
+        defaultTextStyle->Put("overflow",
+            V2::ConvertWrapTextOverflowToString(GetDefaultTextOverflow().value_or(TextOverflow::CLIP)).c_str());
+        defaultTextStyle->Put("font", defaultFont);
+        json->PutExtAttr("defaultTextStyle", defaultTextStyle, filter);
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultPickerItemHeight, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -155,6 +177,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Values, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedIndex, std::vector<uint32_t>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Divider, ItemDivider, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableTextStyleAnimation, bool, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
@@ -188,6 +211,24 @@ public:
         SelectedTextStyle, FontFamily, SelectedFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         SelectedTextStyle, ItalicFontStyle, SelectedFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_GROUP(DefaultTextStyle, FontStyle);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, FontSize, DefaultFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, TextColor, DefaultColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, FontWeight, DefaultWeight, FontWeight, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, FontFamily, DefaultFontFamily, std::vector<std::string>, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, ItalicFontStyle, DefaultFontStyle, Ace::FontStyle, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, AdaptMinFontSize, DefaultMinFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
+        DefaultTextStyle, AdaptMaxFontSize, DefaultMaxFontSize, Dimension, PROPERTY_UPDATE_MEASURE);
+    
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DefaultTextOverflow, TextOverflow, PROPERTY_UPDATE_MEASURE);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutProperty);
 };

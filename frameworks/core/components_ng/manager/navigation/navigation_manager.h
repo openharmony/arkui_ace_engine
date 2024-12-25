@@ -51,7 +51,14 @@ class NavigationManager : public virtual AceType {
 public:
     using DumpLogDepth = int;
     using DumpCallback = std::function<void(DumpLogDepth)>;
-    NavigationManager();
+    NavigationManager()
+    {
+#ifdef PREVIEW
+        hasCacheNavigationNodeEnable_ = false;
+#else
+        hasCacheNavigationNodeEnable_ = SystemProperties::GetCacheNavigationNodeEnable();
+#endif
+    }
     ~NavigationManager() = default;
 
     void SetPipelineContext(const WeakPtr<PipelineContext>& pipeline)
@@ -88,18 +95,29 @@ public:
         isInteractive_ = false;
     }
 
+    void SetNodeAddAnimation(bool isNodeAddAnimation)
+    {
+        isNodeAddAnimation_ = isNodeAddAnimation;
+    }
+
     void SetCurNodeAnimationCached(bool curNodeAnimationCached)
     {
         curNodeAnimationCached_ = curNodeAnimationCached;
     }
+
     void SetCurrentNodeNeverSet(bool currentNodeNeverSet)
     {
         currentNodeNeverSet_ = currentNodeNeverSet;
     }
 
-    void SetPreNodeHasAnimation(bool preNodeHasAnimation)
+    void SetPreNodeNeverSet(bool preNodeNeverSet)
     {
-        preNodeHasAnimation_ = preNodeHasAnimation;
+        preNodeNeverSet_ = preNodeNeverSet;
+    }
+
+    void SetPreNodeAnimationCached(bool preNodeAnimationCached)
+    {
+        preNodeAnimationCached_ = preNodeAnimationCached;
     }
 
     void SetNavNodeInTransition(const RefPtr<FrameNode>& curNode, const RefPtr<FrameNode>& preNode)
@@ -165,8 +183,10 @@ private:
     RefPtr<FrameNode> preNavNode_;
     bool currentNodeNeverSet_ = true;
     bool curNodeAnimationCached_ = false;
-    bool preNodeHasAnimation_ = false;
+    bool preNodeNeverSet_ = true;
+    bool preNodeAnimationCached_ = false;
     bool isInAnimation_ = false;
+    bool isNodeAddAnimation_ = false;
     bool hasCacheNavigationNodeEnable_ = false;
     int32_t interactiveAnimationId_ = -1;
 

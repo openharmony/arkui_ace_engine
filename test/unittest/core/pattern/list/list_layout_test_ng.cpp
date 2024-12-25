@@ -269,7 +269,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset001, TestSize.Level1)
      * @tc.steps: step2. scroll to bottom
      * @tc.expected: Bottom content offset equal to contentEndOffset.
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     offset = pattern_->GetTotalOffset();
     EXPECT_FLOAT_EQ(offset, itemNumber * ITEM_MAIN_SIZE - LIST_HEIGHT + contentEndOffset);
 
@@ -277,7 +277,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset001, TestSize.Level1)
      * @tc.steps: step3. scroll to top
      * @tc.expected: Bottom content offset equal to contentEndOffset.
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     offset = pattern_->GetTotalOffset();
     EXPECT_FLOAT_EQ(offset, -contentStartOffset);
 }
@@ -312,11 +312,11 @@ HWTEST_F(ListLayoutTestNg, ContentOffset002, TestSize.Level1)
     ScrollToIndex(2, false, ScrollAlign::START);
     EXPECT_TRUE(Position(-(ITEM_MAIN_SIZE * 2 - contentStartOffset)));
     ScrollToIndex(0, true, ScrollAlign::START);
-    EXPECT_TRUE(Position(contentStartOffset));
+    EXPECT_TRUE(TickPosition(contentStartOffset));
     ScrollToIndex(1, true, ScrollAlign::START);
-    EXPECT_TRUE(Position(ITEM_MAIN_SIZE - contentStartOffset));
+    EXPECT_TRUE(TickPosition(ITEM_MAIN_SIZE - contentStartOffset));
     ScrollToIndex(2, true, ScrollAlign::START);
-    EXPECT_TRUE(Position(-(ITEM_MAIN_SIZE * 2 - contentStartOffset)));
+    EXPECT_TRUE(TickPosition(-(ITEM_MAIN_SIZE * 2 - contentStartOffset)));
 
     /**
      * @tc.steps: step3. scroll to target item align end.
@@ -330,11 +330,11 @@ HWTEST_F(ListLayoutTestNg, ContentOffset002, TestSize.Level1)
     ScrollToIndex(itemNumber - 3, false, ScrollAlign::END);
     EXPECT_TRUE(Position(-(MAX_OFFSET - ITEM_MAIN_SIZE * 2)));
     ScrollToIndex(itemNumber - 1, true, ScrollAlign::END);
-    EXPECT_TRUE(Position(-MAX_OFFSET));
+    EXPECT_TRUE(TickPosition(-MAX_OFFSET));
     ScrollToIndex(itemNumber - 2, true, ScrollAlign::END);
-    EXPECT_TRUE(Position(-(MAX_OFFSET - ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(TickPosition(-(MAX_OFFSET - ITEM_MAIN_SIZE)));
     ScrollToIndex(itemNumber - 3, true, ScrollAlign::END);
-    EXPECT_TRUE(Position(-(MAX_OFFSET - ITEM_MAIN_SIZE * 2)));
+    EXPECT_TRUE(TickPosition(-(MAX_OFFSET - ITEM_MAIN_SIZE * 2)));
 }
 
 /**
@@ -543,12 +543,12 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     float velocity = 0;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, -120, velocity);
-    EXPECT_TRUE(Position(-10));
-    EXPECT_TRUE(Position(0));
+    EXPECT_TRUE(TickPosition(-10.0f));
+    EXPECT_TRUE(TickPosition(0));
 
     DragAction(frameNode_, startOffset, -80, velocity);
-    EXPECT_TRUE(Position(-90));
-    EXPECT_TRUE(Position(-100));
+    EXPECT_TRUE(TickPosition(-90.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 }
 
 /**
@@ -1440,8 +1440,7 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndexInGroup001, TestSize.Level1)
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 2);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 2);
 
     /**
      * @tc.steps: step2. Get invalid group item index.
@@ -1471,8 +1470,7 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 2);
-    FlushUITasks();
+    ScrollTo(ITEM_MAIN_SIZE * 2);
 
     /**
      * @tc.steps: step2. Get invalid group item Rect.
@@ -1914,8 +1912,8 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
      */
     bool headerResult = false;
     bool footerResult = false;
-    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
-    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader", LIST_WIDTH, LIST_HEIGHT));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter", LIST_WIDTH, LIST_HEIGHT));
     const char newFooter[] = "NewFooter";
     const char newHeader[] = "NewHeader";
     auto children = group0->GetChildren();

@@ -126,6 +126,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -576,6 +577,15 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(parentRectInfo);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
+        auto formManagerDelegate = weak.Upgrade();
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            checkFlag = false;
+        }
+    };
+    renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -893,6 +903,13 @@ bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
 }
 
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
+}
+
 #ifdef OHOS_STANDARD_SYSTEM
 void FormManagerDelegate::ResetForm()
 {
@@ -956,7 +973,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJs
 
 void FormManagerDelegate::ReleaseRenderer()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseRenderer. formId: %{public}" PRId64 ", %{public}s",
         runningCardId_, runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;

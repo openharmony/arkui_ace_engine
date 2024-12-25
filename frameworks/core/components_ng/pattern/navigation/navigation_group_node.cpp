@@ -515,7 +515,8 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
         navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
-        navigationManager->SetPreNodeHasAnimation(false);
+        navigationManager->SetPreNodeAnimationCached(false);
+        navigationManager->SetPreNodeNeverSet(true);
     }
     navigationManager->SetNavNodeInTransition(nullptr, nullptr);
     navigationManager->SetIsNavigationOnAnimation(false);
@@ -602,9 +603,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            if (curNavDesNode) {
-                navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
-            }
+            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -647,7 +646,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode]() {
+        preNode, curNode]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
@@ -761,6 +760,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     if (AceChecker::IsPerformanceCheckEnabled()) {
         int64_t startTime = GetSysTimestamp();
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
+        CHECK_NULL_VOID(pipeline);
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
                                          path = curNavDestination->GetNavDestinationPathInfo()]() {
@@ -846,9 +846,7 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        if (curNode) {
-            navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
-        }
+        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();

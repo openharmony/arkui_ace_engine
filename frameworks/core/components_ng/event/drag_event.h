@@ -150,7 +150,8 @@ public:
     static void MountPixelMap(const RefPtr<OverlayManager>& overlayManager, const RefPtr<GestureEventHub>& manager,
         const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode, bool isDragPixelMap = false);
     static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
-    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(const std::string& inspectorId);
+    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(
+        const std::string& inspectorId, const RefPtr<FrameNode>& frameNode);
     static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
     static void ExecutePreDragAction(const PreDragStatus preDragStatus, const RefPtr<FrameNode>& frameNode = nullptr);
     void SetPixelMap(const RefPtr<DragEventActuator>& actuator);
@@ -169,7 +170,8 @@ public:
     void HandleDragDampingMove(const Point& point, int32_t pointerId, bool isRedragStart = false);
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     void RestartDragTask(const GestureEvent& info);
-    static OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
+    static void UpdateDragNodePosition(
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     PanDirection GetDirection() const
     {
         return direction_;
@@ -271,8 +273,7 @@ public:
 
     void ShowPreviewBadgeAnimation(
         const RefPtr<DragEventActuator>& dragEventActuator, const RefPtr<OverlayManager>& manager);
-    static RefPtr<FrameNode> CreateBadgeTextNode(const RefPtr<FrameNode>& frameNode, int32_t childSize,
-        float previewScale, bool isUsePixelMapOffset = false, OffsetF previewOffset = { 0.0f, 0.0f });
+    static RefPtr<FrameNode> CreateBadgeTextNode(int32_t childSize);
 
     void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
     void SetResponseRegionFull();
@@ -292,9 +293,13 @@ public:
 
     void TryTriggerThumbnailCallback();
 
+    bool CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode);
     void GetThumbnailPixelMap(bool isSync);
     void GetThumbnailPixelMapForCustomNode();
     void GetThumbnailPixelMapForCustomNodeSync();
+
+    static void UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& textNode,
+        int32_t childSize, float previewScale, OffsetF previewOffset = { 0.0f, 0.0f });
 
 private:
     void UpdatePreviewOptionFromModifier(const RefPtr<FrameNode>& frameNode);
@@ -312,7 +317,7 @@ private:
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
-    void HandleTextDragCallback(GestureEvent& info);
+    void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
 
 private:
@@ -353,6 +358,7 @@ private:
     float distance_ = 0.0f;
     float preScaleValue_ = 1.0f;
     bool isRedragStart_ = false;
+    int32_t lastTouchFingerId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

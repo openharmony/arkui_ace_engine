@@ -57,6 +57,8 @@ private:
     void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     float MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper);
+    void InitPadding(const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
+    float CalcItemHeight(float leftRowHeight, float rightRowHeight);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
@@ -70,6 +72,7 @@ private:
     double iconSize_ = 0.0f;
     bool needExpandContent_ = false;
     bool isOption_ = false;
+    PaddingPropertyF padding_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };

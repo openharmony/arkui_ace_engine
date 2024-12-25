@@ -777,4 +777,39 @@ HWTEST_F(SwiperIndicatorCommon, UpdateTextContentSub002, TestSize.Level1)
     ASSERT_NE(firstTextLayoutProperty, nullptr);
     EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
 }
+
+/**
+ * @tc.name: SwiperIndicatorPattern020
+ * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    TouchEventInfo touchEventInfo("default");
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetLocalLocation(Offset(18.0f, 1.0f));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(0.0f, 1.0f));
+    indicatorPattern->HandleTouchDown();
+    indicatorPattern->HandleDragStart(info);
+    indicatorPattern->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern_->jumpIndex_.value(), 2);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
 } // namespace OHOS::Ace::NG

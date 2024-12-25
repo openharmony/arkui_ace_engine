@@ -51,6 +51,8 @@ public:
     int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
 
     int32_t OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) override;
+
+    int32_t OnCheckManagerDelegate(bool &checkFlag) override;
 private:
     static bool WriteInterfaceToken(MessageParcel& data);
 

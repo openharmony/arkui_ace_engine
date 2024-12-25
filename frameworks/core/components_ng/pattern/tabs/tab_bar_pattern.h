@@ -112,11 +112,27 @@ public:
         node_ = node;
     }
 
+    bool HasContent() const
+    {
+        return !content_.Invalid();
+    }
+
+    void SetContent(const WeakPtr<NG::UINode>& content)
+    {
+        content_ = content;
+    }
+
+    const WeakPtr<NG::UINode>& GetContent() const
+    {
+        return content_;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
+    WeakPtr<NG::UINode> content_ = nullptr;
     TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };
@@ -507,6 +523,7 @@ public:
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
     void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+    void AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem);
 
     void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
@@ -603,14 +620,14 @@ private:
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
     void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
-    void StopTranslateAnimation();
+    void StopTranslateAnimation(bool isImmediately = false);
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
-    void FocusCurrentOffset();
+    void FocusCurrentOffset(int32_t index);
     void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
@@ -739,6 +756,7 @@ private:
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
+    bool accessibilityScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

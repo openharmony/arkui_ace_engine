@@ -54,6 +54,7 @@ namespace OHOS::Ace::NG {
 struct OptionParam {
     std::string value;
     std::string icon;
+    std::string labelInfo;
     bool enabled = true;
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
@@ -81,6 +82,14 @@ struct OptionParam {
     OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
         const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
         : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
+    {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::string& labelInfo,
+        const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), labelInfo(labelInfo), enabled(true), action(actionParam)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
@@ -658,6 +667,8 @@ public:
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
+    static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
+    static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);

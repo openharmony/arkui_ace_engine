@@ -16,118 +16,156 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
-if (PUV2ViewBase.contextStack === undefined) {
-  Reflect.set(PUV2ViewBase, 'contextStack', []);
-}
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const hilog = requireNapi('ohos.hilog');
-const r5 = { 'id': -1, 'type': 40000, params: ['sys.symbol.dot_grid_2x2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const s5 = { 'id': -1, 'type': 40000, params: ['sys.symbol.arrow_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const t5 = '18.3fp';
-const u5 = '64vp';
-const v5 = '256vp';
-const w5 = '216vp';
-const k5 = 40000;
+const PUBLIC_MORE = { 'id': -1, 'type': 40000, params: ['sys.symbol.dot_grid_2x2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const PUBLIC_BACK = { 'id': -1, 'type': 40000, params: ['sys.symbol.arrow_left'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const TEXT_EDITABLE_DIALOG = '18.3fp';
+const IMAGE_SIZE = '64vp';
+const MAX_DIALOG = '256vp';
+const MIN_DIALOG = '216vp';
+const RESOURCE_TYPE_SYMBOL = 40000;
 class Util {
-    static l5(l5) {
-        if (!Util.m5(l5)) {
+    static isSymbolResource(t8) {
+        if (!Util.isResourceType(t8)) {
             return false;
         }
-        let resource = l5;
-        return resource.type === k5;
+        let u8 = t8;
+        return u8.type === RESOURCE_TYPE_SYMBOL;
     }
-    static m5(resource) {
-        if (!resource) {
+    static isResourceType(s8) {
+        if (!s8) {
             return false;
         }
-        if (typeof resource === 'string' || typeof resource === 'undefined') {
+        if (typeof s8 === 'string' || typeof s8 === 'undefined') {
             return false;
         }
         return true;
     }
 }
+class ButtonGestureModifier {
+    constructor(r8) {
+        this.fontSize = 1;
+        this.controller = null;
+        this.controller = r8;
+    }
+    applyGesture(q8) {
+        if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+            q8.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+                .onAction(() => {
+                if (q8) {
+                    this.controller?.open();
+                }
+            })
+                .onActionEnd(() => {
+                this.controller?.close();
+            }));
+        }
+        else {
+            q8.clearGestures();
+        }
+    }
+}
+ButtonGestureModifier.longPressTime = 500;
+ButtonGestureModifier.minFontSize = 1.75;
 class ComposeTitleBar extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
+        super(k8, m8, n8, p8);
+        if (typeof o8 === 'function') {
+            this.paramsGenerator_ = o8;
         }
         this.item = undefined;
         this.title = '';
         this.subtitle = '';
         this.menuItems = [];
-        this.q5 = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
-        this.b6 = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.setInitiallyProvidedValue(params);
+        this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
+        this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__uniqueId = new ObservedPropertySimplePU(-1, this, 'uniqueId');
+        this.addProvidedVar('uniqueId', this.__uniqueId, false);
+        this.setInitiallyProvidedValue(l8);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(params) {
-        if (params.item !== undefined) {
-            this.item = params.item;
+    setInitiallyProvidedValue(j8) {
+        if (j8.item !== undefined) {
+            this.item = j8.item;
         }
-        if (params.title !== undefined) {
-            this.title = params.title;
+        if (j8.title !== undefined) {
+            this.title = j8.title;
         }
-        if (params.subtitle !== undefined) {
-            this.subtitle = params.subtitle;
+        if (j8.subtitle !== undefined) {
+            this.subtitle = j8.subtitle;
         }
-        if (params.menuItems !== undefined) {
-            this.menuItems = params.menuItems;
+        if (j8.menuItems !== undefined) {
+            this.menuItems = j8.menuItems;
         }
-        if (params.titleMaxWidth !== undefined) {
-            this.titleMaxWidth = params.titleMaxWidth;
+        if (j8.titleMaxWidth !== undefined) {
+            this.titleMaxWidth = j8.titleMaxWidth;
         }
-        if (params.fontSize !== undefined) {
-            this.fontSize = params.fontSize;
+        if (j8.fontSize !== undefined) {
+            this.fontSize = j8.fontSize;
+        }
+        if (j8.uniqueId !== undefined) {
+            this.uniqueId = j8.uniqueId;
         }
     }
-    updateStateVars(params) {
+    updateStateVars(i8) {
     }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.q5.purgeDependencyOnElmtId(rmElmtId);
-        this.b6.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(h8) {
+        this.__titleMaxWidth.purgeDependencyOnElmtId(h8);
+        this.__fontSize.purgeDependencyOnElmtId(h8);
+        this.__uniqueId.purgeDependencyOnElmtId(h8);
     }
     aboutToBeDeleted() {
-        this.q5.aboutToBeDeleted();
-        this.b6.aboutToBeDeleted();
+        this.__titleMaxWidth.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__uniqueId.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get titleMaxWidth() {
-        return this.q5.get();
+        return this.__titleMaxWidth.get();
     }
-    set titleMaxWidth(newValue) {
-        this.q5.set(newValue);
+    set titleMaxWidth(g8) {
+        this.__titleMaxWidth.set(g8);
     }
     get fontSize() {
-        return this.b6.get();
+        return this.__fontSize.get();
     }
-    set fontSize(newValue) {
-        this.b6.set(newValue);
+    set fontSize(f8) {
+        this.__fontSize.set(f8);
+    }
+    get uniqueId() {
+        return this.__uniqueId.get();
+    }
+    set uniqueId(e8) {
+        this.__uniqueId.set(e8);
     }
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((y7, z7) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
             });
+            Flex.onAppear(() => {
+                this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+            });
             Flex.width('100%');
             Flex.height(ComposeTitleBar.totalHeight);
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Flex.onAreaChange((c3, newValue) => {
-                let d3 = Number(newValue.width);
+            Flex.onAreaChange((a8, b8) => {
+                let c8 = Number(b8.width);
                 if (this.menuItems !== undefined) {
-                    let e3 = this.menuItems.length;
-                    if (e3 >= y5.maxCountOfVisibleItems) {
-                        d3 = d3 - z5.imageHotZoneWidth * y5.maxCountOfVisibleItems;
+                    let d8 = this.menuItems.length;
+                    if (d8 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+                        c8 = c8 - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
                     }
-                    else if (e3 > 0) {
-                        d3 = d3 - z5.imageHotZoneWidth * e3;
+                    else if (d8 > 0) {
+                        c8 = c8 - ImageMenuItem.imageHotZoneWidth * d8;
                     }
                 }
-                this.titleMaxWidth = d3;
+                this.titleMaxWidth = c8;
                 this.titleMaxWidth -= ComposeTitleBar.leftPadding;
-                this.titleMaxWidth -= z5.imageHotZoneWidth;
+                this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth;
                 if (this.item !== undefined) {
                     this.titleMaxWidth -= ComposeTitleBar.portraitImageLeftPadding +
                         ComposeTitleBar.portraitImageSize +
@@ -136,47 +174,50 @@ class ComposeTitleBar extends ViewPU {
                 this.titleMaxWidth -= ComposeTitleBar.rightPadding;
             });
         }, Flex);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((w7, x7) => {
             Row.create();
             Row.margin({ left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
         }, Row);
         {
-            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                if (isInitialRender) {
-                    let componentCall = new z5(this, {
+            this.observeComponentCreation2((s7, t7) => {
+                if (t7) {
+                    let u7 = new ImageMenuItem(this, {
                         item: {
-                            value: s5,
+                            value: PUBLIC_BACK,
                             isEnabled: true,
                             action: () => this.getUIContext()?.getRouter()?.back()
                         },
-                        index: -1
-                    }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 80, d3: 9 });
-                    ViewPU.create(componentCall);
-                    let paramsLambda = () => {
+                        index: -1,
+                        itemIndex: -1
+                    }, undefined, s7, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 113, col: 9 });
+                    ViewPU.create(u7);
+                    let v7 = () => {
                         return {
                             item: {
-                                value: s5,
+                                value: PUBLIC_BACK,
                                 isEnabled: true,
                                 action: () => this.getUIContext()?.getRouter()?.back()
                             },
-                            index: -1
+                            index: -1,
+                            itemIndex: -1
                         };
                     };
-                    componentCall.paramsGenerator_ = paramsLambda;
+                    u7.paramsGenerator_ = v7;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                    this.updateStateVarsOfChildByElmtId(s7, {});
                 }
             }, { name: 'ImageMenuItem' });
         }
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((q7, r7) => {
             Row.create();
+            Row.accessibilityGroup(true);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((m7, n7) => {
             If.create();
             if (this.item !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((o7, p7) => {
                         Image.create(this.item.value);
                         Image.width(ComposeTitleBar.portraitImageSize);
                         Image.height(ComposeTitleBar.portraitImageSize);
@@ -185,7 +226,7 @@ class ComposeTitleBar extends ViewPU {
                             right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
                         });
                         Image.focusable(false);
-                        Image.borderRadius(z5.buttonBorderRadius);
+                        Image.borderRadius(ImageMenuItem.buttonBorderRadius);
                     }, Image);
                 });
             }
@@ -195,21 +236,21 @@ class ComposeTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((k7, l7) => {
             Column.create();
             Column.justifyContent(FlexAlign.Start);
             Column.alignItems(HorizontalAlign.Start);
             Column.constraintSize({ maxWidth: this.titleMaxWidth });
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((e7, f7) => {
             If.create();
             if (this.title !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((i7, j7) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((g7, h7) => {
                         Text.create(this.title);
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -228,15 +269,15 @@ class ComposeTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((y6, z6) => {
             If.create();
             if (this.subtitle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((c7, d7) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((a7, b7) => {
                         Text.create(this.subtitle);
                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -257,25 +298,25 @@ class ComposeTitleBar extends ViewPU {
         Column.pop();
         Row.pop();
         Row.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((s6, t6) => {
             If.create();
             if (this.menuItems !== undefined && this.menuItems.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new y5(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 134, d3: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
+                        this.observeComponentCreation2((u6, v6) => {
+                            if (v6) {
+                                let w6 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, u6, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 170, col: 9 });
+                                ViewPU.create(w6);
+                                let x6 = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + ComposeTitleBar.instanceCount++
                                     };
                                 };
-                                componentCall.paramsGenerator_ = paramsLambda;
+                                w6.paramsGenerator_ = x6;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                this.updateStateVarsOfChildByElmtId(u6, {});
                             }
                         }, { name: 'CollapsibleMenuSection' });
                     }
@@ -300,32 +341,31 @@ ComposeTitleBar.portraitImageSize = 40;
 ComposeTitleBar.portraitImageLeftPadding = 4;
 ComposeTitleBar.portraitImageRightPadding = 16;
 ComposeTitleBar.instanceCount = 0;
-class y5 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+class CollapsibleMenuSection extends ViewPU {
+    constructor(k6, l6, m6, n6 = -1, o6 = undefined, p6) {
+        super(k6, m6, n6, p6);
+        if (typeof o6 === 'function') {
+            this.paramsGenerator_ = o6;
         }
         this.menuItems = [];
         this.item = {
-            value: r5,
+            value: PUBLIC_MORE,
             label: { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
         };
         this.index = 0;
-        this.longPressTime = 500;
         this.minFontSize = 1.75;
         this.isFollowingSystemFontScale = false;
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.firstFocusableIndex = -1;
-        this.c6 = new ObservedPropertySimplePU(false, this, 'isPopupShown');
-        this.d6 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
-        this.e6 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
-        this.f6 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-        this.b6 = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+        this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+        this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+        this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(l6.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let jsDialog = new a6(this, {
+                let q6 = new ComposeTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -333,10 +373,10 @@ class y5 extends ViewPU {
                     itemComposeTitleDialog: this.item,
                     composeTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 186, d3: 14 });
-                jsDialog.setController(this.dialogController);
-                ViewPU.create(jsDialog);
-                let paramsLambda = () => {
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 221, col: 14 });
+                q6.setController(this.dialogController);
+                ViewPU.create(q6);
+                let r6 = () => {
                     return {
                         cancel: () => {
                         },
@@ -347,109 +387,120 @@ class y5 extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                jsDialog.paramsGenerator_ = paramsLambda;
+                q6.paramsGenerator_ = r6;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
-        this.setInitiallyProvidedValue(params);
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
+        this.setInitiallyProvidedValue(l6);
+        this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(params) {
-        if (params.menuItems !== undefined) {
-            this.menuItems = params.menuItems;
+    setInitiallyProvidedValue(j6) {
+        if (j6.menuItems !== undefined) {
+            this.menuItems = j6.menuItems;
         }
-        if (params.item !== undefined) {
-            this.item = params.item;
+        if (j6.item !== undefined) {
+            this.item = j6.item;
         }
-        if (params.index !== undefined) {
-            this.index = params.index;
+        if (j6.index !== undefined) {
+            this.index = j6.index;
         }
-        if (params.longPressTime !== undefined) {
-            this.longPressTime = params.longPressTime;
+        if (j6.minFontSize !== undefined) {
+            this.minFontSize = j6.minFontSize;
         }
-        if (params.minFontSize !== undefined) {
-            this.minFontSize = params.minFontSize;
+        if (j6.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = j6.isFollowingSystemFontScale;
         }
-        if (params.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
+        if (j6.maxFontScale !== undefined) {
+            this.maxFontScale = j6.maxFontScale;
         }
-        if (params.maxFontScale !== undefined) {
-            this.maxFontScale = params.maxFontScale;
+        if (j6.systemFontScale !== undefined) {
+            this.systemFontScale = j6.systemFontScale;
         }
-        if (params.systemFontScale !== undefined) {
-            this.systemFontScale = params.systemFontScale;
+        if (j6.firstFocusableIndex !== undefined) {
+            this.firstFocusableIndex = j6.firstFocusableIndex;
         }
-        if (params.firstFocusableIndex !== undefined) {
-            this.firstFocusableIndex = params.firstFocusableIndex;
+        if (j6.isPopupShown !== undefined) {
+            this.isPopupShown = j6.isPopupShown;
         }
-        if (params.isPopupShown !== undefined) {
-            this.isPopupShown = params.isPopupShown;
+        if (j6.isMoreIconOnFocus !== undefined) {
+            this.isMoreIconOnFocus = j6.isMoreIconOnFocus;
         }
-        if (params.isMoreIconOnFocus !== undefined) {
-            this.isMoreIconOnFocus = params.isMoreIconOnFocus;
+        if (j6.isMoreIconOnHover !== undefined) {
+            this.isMoreIconOnHover = j6.isMoreIconOnHover;
         }
-        if (params.isMoreIconOnHover !== undefined) {
-            this.isMoreIconOnHover = params.isMoreIconOnHover;
+        if (j6.isMoreIconOnClick !== undefined) {
+            this.isMoreIconOnClick = j6.isMoreIconOnClick;
         }
-        if (params.isMoreIconOnClick !== undefined) {
-            this.isMoreIconOnClick = params.isMoreIconOnClick;
+        if (j6.fontSize === undefined) {
+            this.__fontSize.set(1);
         }
-        if (params.fontSize !== undefined) {
-            this.fontSize = params.fontSize;
+        if (j6.dialogController !== undefined) {
+            this.dialogController = j6.dialogController;
         }
-        if (params.dialogController !== undefined) {
-            this.dialogController = params.dialogController;
+        if (j6.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = j6.buttonGestureModifier;
         }
     }
-    updateStateVars(params) {
+    updateStateVars(i6) {
+        this.__fontSize.reset(i6.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.c6.purgeDependencyOnElmtId(rmElmtId);
-        this.d6.purgeDependencyOnElmtId(rmElmtId);
-        this.e6.purgeDependencyOnElmtId(rmElmtId);
-        this.f6.purgeDependencyOnElmtId(rmElmtId);
-        this.b6.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(h6) {
+        this.__isPopupShown.purgeDependencyOnElmtId(h6);
+        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(h6);
+        this.__isMoreIconOnHover.purgeDependencyOnElmtId(h6);
+        this.__isMoreIconOnClick.purgeDependencyOnElmtId(h6);
+        this.__fontSize.purgeDependencyOnElmtId(h6);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(h6);
     }
     aboutToBeDeleted() {
-        this.c6.aboutToBeDeleted();
-        this.d6.aboutToBeDeleted();
-        this.e6.aboutToBeDeleted();
-        this.f6.aboutToBeDeleted();
-        this.b6.aboutToBeDeleted();
+        this.__isPopupShown.aboutToBeDeleted();
+        this.__isMoreIconOnFocus.aboutToBeDeleted();
+        this.__isMoreIconOnHover.aboutToBeDeleted();
+        this.__isMoreIconOnClick.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__buttonGestureModifier.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get isPopupShown() {
-        return this.c6.get();
+        return this.__isPopupShown.get();
     }
-    set isPopupShown(newValue) {
-        this.c6.set(newValue);
+    set isPopupShown(g6) {
+        this.__isPopupShown.set(g6);
     }
     get isMoreIconOnFocus() {
-        return this.d6.get();
+        return this.__isMoreIconOnFocus.get();
     }
-    set isMoreIconOnFocus(newValue) {
-        this.d6.set(newValue);
+    set isMoreIconOnFocus(f6) {
+        this.__isMoreIconOnFocus.set(f6);
     }
     get isMoreIconOnHover() {
-        return this.e6.get();
+        return this.__isMoreIconOnHover.get();
     }
-    set isMoreIconOnHover(newValue) {
-        this.e6.set(newValue);
+    set isMoreIconOnHover(e6) {
+        this.__isMoreIconOnHover.set(e6);
     }
     get isMoreIconOnClick() {
-        return this.f6.get();
+        return this.__isMoreIconOnClick.get();
     }
-    set isMoreIconOnClick(newValue) {
-        this.f6.set(newValue);
+    set isMoreIconOnClick(d6) {
+        this.__isMoreIconOnClick.set(d6);
     }
     get fontSize() {
-        return this.b6.get();
+        return this.__fontSize.get();
     }
-    set fontSize(newValue) {
-        this.b6.set(newValue);
+    set fontSize(c6) {
+        this.__fontSize.set(c6);
+    }
+    get buttonGestureModifier() {
+        return this.__buttonGestureModifier.get();
+    }
+    set buttonGestureModifier(b6) {
+        this.__buttonGestureModifier.set(b6);
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
@@ -467,125 +518,132 @@ class y5 extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let r2 = this.getUIContext();
-            this.isFollowingSystemFontScale = r2.isFollowingSystemFontScale();
-            this.maxFontScale = r2.getMaxFontScale();
+            let a6 = this.getUIContext();
+            this.isFollowingSystemFontScale = a6.isFollowingSystemFontScale();
+            this.maxFontScale = a6.getMaxFontScale();
         }
-        catch (err) {
-            let code = err.code;
-            let message = err.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+        catch (x5) {
+            let y5 = x5.code;
+            let z5 = x5.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${y5}, message: ${z5}`);
         }
         if (this.menuItems) {
-            this.menuItems.forEach((item, index) => {
-                if (item.isEnabled && this.firstFocusableIndex == -1 &&
-                    index > y5.maxCountOfVisibleItems - 2) {
-                    this.firstFocusableIndex = this.index * 1000 + index + 1;
+            this.menuItems.forEach((v5, w5) => {
+                if (v5.isEnabled && this.firstFocusableIndex == -1 &&
+                    w5 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+                    this.firstFocusableIndex = this.index * 1000 + w5 + 1;
                 }
             });
         }
+        this.fontSize = this.decideFontScale();
     }
     decideFontScale() {
         try {
-            let k2 = this.getUIContext();
-            this.systemFontScale = k2.getHostContext()?.config?.fontSizeScale ?? 1;
+            let u5 = this.getUIContext();
+            this.systemFontScale = u5.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (p1) {
-            let code = p1.code;
-            let message = p1.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+        catch (r5) {
+            let s5 = r5.code;
+            let t5 = r5.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${s5}, message: ${t5}`);
             return 1;
         }
     }
+    onFontSizeUpdated() {
+        this.buttonGestureModifier.fontSize = this.fontSize;
+    }
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((p5, q5) => {
             Column.create();
             Column.height('100%');
             Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((n5, o5) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((h4, i4) => {
             If.create();
             if (this.menuItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((j4, k4) => {
                         If.create();
-                        if (this.menuItems.length <= y5.maxCountOfVisibleItems) {
+                        if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((d5, e5) => {
                                     ForEach.create();
-                                    const forEachItemGenFunction = (_item, index) => {
-                                        const item = _item;
+                                    const f5 = (g5, h5) => {
+                                        const i5 = g5;
                                         {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                if (isInitialRender) {
-                                                    let componentCall = new z5(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 259, d3: 15 });
-                                                    ViewPU.create(componentCall);
-                                                    let paramsLambda = () => {
+                                            this.observeComponentCreation2((j5, k5) => {
+                                                if (k5) {
+                                                    let l5 = new ImageMenuItem(this, { item: i5, index: this.index * 1000 + h5 + 1, itemIndex: h5 }, undefined, j5, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 301, col: 15 });
+                                                    ViewPU.create(l5);
+                                                    let m5 = () => {
                                                         return {
-                                                            item: item,
-                                                            index: this.index * 1000 + index + 1
+                                                            item: i5,
+                                                            index: this.index * 1000 + h5 + 1,
+                                                            itemIndex: h5
                                                         };
                                                     };
-                                                    componentCall.paramsGenerator_ = paramsLambda;
+                                                    l5.paramsGenerator_ = m5;
                                                 }
                                                 else {
-                                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                                    this.updateStateVarsOfChildByElmtId(j5, {});
                                                 }
                                             }, { name: 'ImageMenuItem' });
                                         }
                                     };
-                                    this.forEachUpdateFunction(elmtId, this.menuItems, forEachItemGenFunction, undefined, true, false);
+                                    this.forEachUpdateFunction(d5, this.menuItems, f5, undefined, true, false);
                                 }, ForEach);
                                 ForEach.pop();
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((t4, u4) => {
                                     ForEach.create();
-                                    const forEachItemGenFunction = (_item, index) => {
-                                        const item = _item;
+                                    const v4 = (w4, x4) => {
+                                        const y4 = w4;
                                         {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                if (isInitialRender) {
-                                                    let componentCall = new z5(this, { item: item, index: this.index * 1000 + index + 1 }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 264, d3: 17 });
-                                                    ViewPU.create(componentCall);
-                                                    let paramsLambda = () => {
+                                            this.observeComponentCreation2((z4, a5) => {
+                                                if (a5) {
+                                                    let b5 = new ImageMenuItem(this, { item: y4, index: this.index * 1000 + x4 + 1, itemIndex: x4 }, undefined, z4, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 306, col: 17 });
+                                                    ViewPU.create(b5);
+                                                    let c5 = () => {
                                                         return {
-                                                            item: item,
-                                                            index: this.index * 1000 + index + 1
+                                                            item: y4,
+                                                            index: this.index * 1000 + x4 + 1,
+                                                            itemIndex: x4
                                                         };
                                                     };
-                                                    componentCall.paramsGenerator_ = paramsLambda;
+                                                    b5.paramsGenerator_ = c5;
                                                 }
                                                 else {
-                                                    this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                                    this.updateStateVarsOfChildByElmtId(z4, {});
                                                 }
                                             }, { name: 'ImageMenuItem' });
                                         }
                                     };
-                                    this.forEachUpdateFunction(elmtId, this.menuItems.slice(0, y5.maxCountOfVisibleItems - 1), forEachItemGenFunction, undefined, true, false);
+                                    this.forEachUpdateFunction(t4, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), v4, undefined, true, false);
                                 }, ForEach);
                                 ForEach.pop();
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((n4, o4) => {
                                     Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
-                                    Button.width(z5.imageHotZoneWidth);
-                                    Button.height(z5.imageHotZoneWidth);
-                                    Button.borderRadius(z5.buttonBorderRadius);
+                                    Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                    Button.width(ImageMenuItem.imageHotZoneWidth);
+                                    Button.height(ImageMenuItem.imageHotZoneWidth);
+                                    Button.borderRadius(ImageMenuItem.buttonBorderRadius);
                                     Button.foregroundColor(this.getMoreIconFgColor());
                                     Button.backgroundColor(this.getMoreIconBgColor());
                                     ViewStackProcessor.visualState('focused');
                                     Button.border({
                                         radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                        width: z5.focusBorderWidth,
+                                        width: ImageMenuItem.focusBorderWidth,
                                         color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                         style: BorderStyle.Solid
                                     });
@@ -597,24 +655,24 @@ class y5 extends ViewPU {
                                     ViewStackProcessor.visualState();
                                     Button.onFocus(() => this.isMoreIconOnFocus = true);
                                     Button.onBlur(() => this.isMoreIconOnFocus = false);
-                                    Button.onHover((isOn) => this.isMoreIconOnHover = isOn);
-                                    Button.onKeyEvent((event) => {
-                                        if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
-                                            event.keyCode !== KeyCode.KEYCODE_SPACE) {
+                                    Button.onHover((s4) => this.isMoreIconOnHover = s4);
+                                    Button.onKeyEvent((r4) => {
+                                        if (r4.keyCode !== KeyCode.KEYCODE_ENTER &&
+                                            r4.keyCode !== KeyCode.KEYCODE_SPACE) {
                                             return;
                                         }
-                                        if (event.type === KeyType.Down) {
+                                        if (r4.type === KeyType.Down) {
                                             this.isMoreIconOnClick = true;
                                         }
-                                        if (event.type === KeyType.Up) {
+                                        if (r4.type === KeyType.Up) {
                                             this.isMoreIconOnClick = false;
                                         }
                                     });
-                                    Button.onTouch((event) => {
-                                        if (event.type === TouchType.Down) {
+                                    Button.onTouch((q4) => {
+                                        if (q4.type === TouchType.Down) {
                                             this.isMoreIconOnClick = true;
                                         }
-                                        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                                        if (q4.type === TouchType.Up || q4.type === TouchType.Cancel) {
                                             this.isMoreIconOnClick = false;
                                             if (this.fontSize >= this.minFontSize) {
                                                 this.dialogController?.close();
@@ -622,34 +680,23 @@ class y5 extends ViewPU {
                                         }
                                     });
                                     Button.onClick(() => this.isPopupShown = true);
-                                    Gesture.create(GesturePriority.Low);
-                                    LongPressGesture.create({ repeat: false, duration: this.longPressTime });
-                                    LongPressGesture.onAction((event) => {
-                                        this.fontSize = this.decideFontScale();
-                                        if (event) {
-                                            if (this.fontSize >= this.minFontSize) {
-                                                this.dialogController?.open();
-                                            }
-                                        }
-                                    });
-                                    LongPressGesture.pop();
-                                    Gesture.pop();
+                                    Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
                                     Button.bindPopup(this.isPopupShown, {
                                         builder: { builder: this.popupBuilder.bind(this) },
                                         placement: Placement.Bottom,
                                         popupColor: Color.White,
                                         enableArrow: false,
-                                        onStateChange: (e) => {
-                                            this.isPopupShown = e.isVisible;
-                                            if (!e.isVisible) {
+                                        onStateChange: (p4) => {
+                                            this.isPopupShown = p4.isVisible;
+                                            if (!p4.isVisible) {
                                                 this.isMoreIconOnClick = false;
                                             }
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    SymbolGlyph.create(r5);
-                                    SymbolGlyph.fontSize(`${z5.imageSize}vp`);
+                                this.observeComponentCreation2((l4, m4) => {
+                                    SymbolGlyph.create(PUBLIC_MORE);
+                                    SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(true);
@@ -670,52 +717,51 @@ class y5 extends ViewPU {
         Row.pop();
         Column.pop();
     }
-    popupBuilder(parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    popupBuilder(s3 = null) {
+        this.observeComponentCreation2((f4, g4) => {
             Column.create();
-            Column.width(z5.imageHotZoneWidth +
-                y5.focusPadding * y5.marginsNum);
-            Column.margin({ top: y5.focusPadding, bottom: y5.focusPadding });
+            Column.width(ImageMenuItem.imageHotZoneWidth +
+                CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
+            Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
             Column.onAppear(() => {
-                focusControl.requestFocus(z5.focusablePrefix +
+                focusControl.requestFocus(ImageMenuItem.focusablePrefix +
                     this.firstFocusableIndex);
             });
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((t3, u3) => {
             If.create();
             if (this.menuItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((v3, w3) => {
                         ForEach.create();
-                        const forEachItemGenFunction = (_item, index) => {
-                            const item = _item;
+                        const x3 = (y3, z3) => {
+                            const a4 = y3;
                             {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    if (isInitialRender) {
-                                        let componentCall = new z5(this, {
-                                            item: item,
-                                            index: this.index * 1000 +
-                                                y5.maxCountOfVisibleItems + index,
+                                this.observeComponentCreation2((b4, c4) => {
+                                    if (c4) {
+                                        let d4 = new ImageMenuItem(this, {
+                                            item: a4, index: this.index * 1000 +
+                                                CollapsibleMenuSection.maxCountOfVisibleItems + z3,
                                             isPopup: true
-                                        }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 360, d3: 13 });
-                                        ViewPU.create(componentCall);
-                                        let paramsLambda = () => {
+                                        }, undefined, b4, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 394, col: 13 });
+                                        ViewPU.create(d4);
+                                        let e4 = () => {
                                             return {
-                                                item: item,
+                                                item: a4,
                                                 index: this.index * 1000 +
-                                                    y5.maxCountOfVisibleItems + index,
+                                                    CollapsibleMenuSection.maxCountOfVisibleItems + z3,
                                                 isPopup: true
                                             };
                                         };
-                                        componentCall.paramsGenerator_ = paramsLambda;
+                                        d4.paramsGenerator_ = e4;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(elmtId, {});
+                                        this.updateStateVarsOfChildByElmtId(b4, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(elmtId, this.menuItems.slice(y5.maxCountOfVisibleItems - 1, this.menuItems.length), forEachItemGenFunction, undefined, true, false);
+                        this.forEachUpdateFunction(v3, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), x3, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                 });
@@ -732,30 +778,31 @@ class y5 extends ViewPU {
         this.updateDirtyElements();
     }
 }
-y5.maxCountOfVisibleItems = 3;
-y5.focusPadding = 4;
-y5.marginsNum = 2;
-class z5 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+CollapsibleMenuSection.maxCountOfVisibleItems = 3;
+CollapsibleMenuSection.focusPadding = 4;
+CollapsibleMenuSection.marginsNum = 2;
+class ImageMenuItem extends ViewPU {
+    constructor(k3, l3, m3, n3 = -1, o3 = undefined, p3) {
+        super(k3, m3, n3, p3);
+        if (typeof o3 === 'function') {
+            this.paramsGenerator_ = o3;
         }
         this.item = {};
         this.index = 0;
-        this.longPressTime = 500;
+        this.itemIndex = 0;
         this.minFontSize = 1.75;
         this.isFollowingSystemFontScale = false;
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.isPopup = false;
-        this.h6 = new ObservedPropertySimplePU(false, this, 'isOnFocus');
-        this.i6 = new ObservedPropertySimplePU(false, this, 'isOnHover');
-        this.j6 = new ObservedPropertySimplePU(false, this, 'isOnClick');
-        this.b6 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
+        this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+        this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+        this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(l3.fontSize, this, 'fontSize');
+        this.__parentParentUniqueId = this.initializeConsume('uniqueId', 'parentParentUniqueId');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let jsDialog = new a6(this, {
+                let q3 = new ComposeTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -763,10 +810,10 @@ class z5 extends ViewPU {
                     itemComposeTitleDialog: this.item,
                     composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 397, d3: 14 });
-                jsDialog.setController(this.dialogController);
-                ViewPU.create(jsDialog);
-                let paramsLambda = () => {
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 432, col: 14 });
+                q3.setController(this.dialogController);
+                ViewPU.create(q3);
+                let r3 = () => {
                     return {
                         cancel: () => {
                         },
@@ -777,107 +824,169 @@ class z5 extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                jsDialog.paramsGenerator_ = paramsLambda;
+                q3.paramsGenerator_ = r3;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
-        this.setInitiallyProvidedValue(params);
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
+        this.setInitiallyProvidedValue(l3);
+        this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(params) {
-        if (params.item !== undefined) {
-            this.item = params.item;
+    setInitiallyProvidedValue(j3) {
+        if (j3.item !== undefined) {
+            this.item = j3.item;
         }
-        if (params.index !== undefined) {
-            this.index = params.index;
+        if (j3.index !== undefined) {
+            this.index = j3.index;
         }
-        if (params.longPressTime !== undefined) {
-            this.longPressTime = params.longPressTime;
+        if (j3.itemIndex !== undefined) {
+            this.itemIndex = j3.itemIndex;
         }
-        if (params.minFontSize !== undefined) {
-            this.minFontSize = params.minFontSize;
+        if (j3.minFontSize !== undefined) {
+            this.minFontSize = j3.minFontSize;
         }
-        if (params.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = params.isFollowingSystemFontScale;
+        if (j3.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = j3.isFollowingSystemFontScale;
         }
-        if (params.maxFontScale !== undefined) {
-            this.maxFontScale = params.maxFontScale;
+        if (j3.maxFontScale !== undefined) {
+            this.maxFontScale = j3.maxFontScale;
         }
-        if (params.systemFontScale !== undefined) {
-            this.systemFontScale = params.systemFontScale;
+        if (j3.systemFontScale !== undefined) {
+            this.systemFontScale = j3.systemFontScale;
         }
-        if (params.isPopup !== undefined) {
-            this.isPopup = params.isPopup;
+        if (j3.isPopup !== undefined) {
+            this.isPopup = j3.isPopup;
         }
-        if (params.isOnFocus !== undefined) {
-            this.isOnFocus = params.isOnFocus;
+        if (j3.isOnFocus !== undefined) {
+            this.isOnFocus = j3.isOnFocus;
         }
-        if (params.isOnHover !== undefined) {
-            this.isOnHover = params.isOnHover;
+        if (j3.isOnHover !== undefined) {
+            this.isOnHover = j3.isOnHover;
         }
-        if (params.isOnClick !== undefined) {
-            this.isOnClick = params.isOnClick;
+        if (j3.isOnClick !== undefined) {
+            this.isOnClick = j3.isOnClick;
         }
-        if (params.fontSize === undefined) {
-            this.b6.set(1);
+        if (j3.fontSize === undefined) {
+            this.__fontSize.set(1);
         }
-        if (params.dialogController !== undefined) {
-            this.dialogController = params.dialogController;
+        if (j3.dialogController !== undefined) {
+            this.dialogController = j3.dialogController;
+        }
+        if (j3.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = j3.buttonGestureModifier;
         }
     }
-    updateStateVars(params) {
-        this.b6.reset(params.fontSize);
+    updateStateVars(i3) {
+        this.__fontSize.reset(i3.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.h6.purgeDependencyOnElmtId(rmElmtId);
-        this.i6.purgeDependencyOnElmtId(rmElmtId);
-        this.j6.purgeDependencyOnElmtId(rmElmtId);
-        this.b6.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(h3) {
+        this.__isOnFocus.purgeDependencyOnElmtId(h3);
+        this.__isOnHover.purgeDependencyOnElmtId(h3);
+        this.__isOnClick.purgeDependencyOnElmtId(h3);
+        this.__fontSize.purgeDependencyOnElmtId(h3);
+        this.__parentParentUniqueId.purgeDependencyOnElmtId(h3);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(h3);
     }
     aboutToBeDeleted() {
-        this.h6.aboutToBeDeleted();
-        this.i6.aboutToBeDeleted();
-        this.j6.aboutToBeDeleted();
-        this.b6.aboutToBeDeleted();
+        this.__isOnFocus.aboutToBeDeleted();
+        this.__isOnHover.aboutToBeDeleted();
+        this.__isOnClick.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__parentParentUniqueId.aboutToBeDeleted();
+        this.__buttonGestureModifier.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get isOnFocus() {
-        return this.h6.get();
+        return this.__isOnFocus.get();
     }
-    set isOnFocus(newValue) {
-        this.h6.set(newValue);
+    set isOnFocus(g3) {
+        this.__isOnFocus.set(g3);
     }
     get isOnHover() {
-        return this.i6.get();
+        return this.__isOnHover.get();
     }
-    set isOnHover(newValue) {
-        this.i6.set(newValue);
+    set isOnHover(f3) {
+        this.__isOnHover.set(f3);
     }
     get isOnClick() {
-        return this.j6.get();
+        return this.__isOnClick.get();
     }
-    set isOnClick(newValue) {
-        this.j6.set(newValue);
+    set isOnClick(e3) {
+        this.__isOnClick.set(e3);
     }
     get fontSize() {
-        return this.b6.get();
+        return this.__fontSize.get();
     }
-    set fontSize(newValue) {
-        this.b6.set(newValue);
+    set fontSize(d3) {
+        this.__fontSize.set(d3);
+    }
+    get parentParentUniqueId() {
+        return this.__parentParentUniqueId.get();
+    }
+    set parentParentUniqueId(c3) {
+        this.__parentParentUniqueId.set(c3);
+    }
+    get buttonGestureModifier() {
+        return this.__buttonGestureModifier.get();
+    }
+    set buttonGestureModifier(b3) {
+        this.__buttonGestureModifier.set(b3);
     }
     textDialog() {
-        if (this.item.value === r5) {
+        if (this.item.value === PUBLIC_MORE) {
             return { 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
-        else if (this.item.value === s5) {
+        else if (this.item.value === PUBLIC_BACK) {
             return { 'id': -1, 'type': 10003, params: ['sys.string.icon_back'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else {
             return this.item.label ? this.item.label : '';
         }
+    }
+    toStringFormat(w2) {
+        if (typeof w2 === 'string') {
+            return w2;
+        }
+        else if (typeof w2 === 'undefined') {
+            return '';
+        }
+        else {
+            let x2 = '';
+            try {
+                x2 = getContext()?.resourceManager?.getStringSync(w2);
+            }
+            catch (y2) {
+                let z2 = y2?.code;
+                let a3 = y2?.message;
+                hilog.error(0x3900, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${z2},message:${a3}`);
+            }
+            return x2;
+        }
+    }
+    getAccessibilityReadText() {
+        if (this.item.value === PUBLIC_BACK) {
+            return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+        }
+        else if (this.item.value === PUBLIC_MORE) {
+            return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+        }
+        else if (this.item.accessibilityText) {
+            return this.toStringFormat(this.item.accessibilityText);
+        }
+        else if (this.item.label) {
+            return this.toStringFormat(this.item.label);
+        }
+        return ' ';
+    }
+    onPlaceChildren(s2, t2, u2) {
+        t2.forEach((v2) => {
+            v2.layout({ x: 0, y: 0 });
+        });
+        this.fontSize = this.decideFontScale();
     }
     getFgColor() {
         return this.isOnClick
@@ -896,45 +1005,53 @@ class z5 extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let k1 = this.getUIContext();
-            this.isFollowingSystemFontScale = k1.isFollowingSystemFontScale();
-            this.maxFontScale = k1.getMaxFontScale();
+            let r2 = this.getUIContext();
+            this.isFollowingSystemFontScale = r2.isFollowingSystemFontScale();
+            this.maxFontScale = r2.getMaxFontScale();
         }
-        catch (err) {
-            let code = err.code;
-            let message = err.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
+        catch (o2) {
+            let p2 = o2.code;
+            let q2 = o2.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${p2}, message: ${q2}`);
         }
+        this.fontSize = this.decideFontScale();
+    }
+    onFontSizeUpdated() {
+        this.buttonGestureModifier.fontSize = this.fontSize;
     }
     decideFontScale() {
         try {
-            let b1 = this.getUIContext();
-            this.systemFontScale = b1.getHostContext()?.config?.fontSizeScale ?? 1;
+            let n2 = this.getUIContext();
+            this.systemFontScale = n2.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (t) {
-            let code = t.code;
-            let message = t.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+        catch (k2) {
+            let l2 = k2.code;
+            let m2 = k2.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${l2}, message: ${m2}`);
             return 1;
         }
     }
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((f2, g2) => {
             Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
+            Button.id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`);
+            Button.accessibilityText(this.getAccessibilityReadText());
+            Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
+            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
             Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
-            Button.width(z5.imageHotZoneWidth);
-            Button.height(z5.imageHotZoneWidth);
-            Button.borderRadius(z5.buttonBorderRadius);
+            Button.width(ImageMenuItem.imageHotZoneWidth);
+            Button.height(ImageMenuItem.imageHotZoneWidth);
+            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
             Button.foregroundColor(this.getFgColor());
             Button.backgroundColor(this.getBgColor());
             ViewStackProcessor.visualState('focused');
             Button.border({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: z5.focusBorderWidth,
+                width: ImageMenuItem.focusBorderWidth,
                 color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 style: BorderStyle.Solid
             });
@@ -951,35 +1068,35 @@ class z5 extends ViewPU {
                 this.isOnFocus = true;
             });
             Button.onBlur(() => this.isOnFocus = false);
-            Button.onHover((isOn) => {
+            Button.onHover((j2) => {
                 if (!this.item?.isEnabled) {
                     return;
                 }
-                this.isOnHover = isOn;
+                this.isOnHover = j2;
             });
-            Button.onKeyEvent((event) => {
+            Button.onKeyEvent((i2) => {
                 if (!this.item?.isEnabled) {
                     return;
                 }
-                if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
-                    event.keyCode !== KeyCode.KEYCODE_SPACE) {
+                if (i2.keyCode !== KeyCode.KEYCODE_ENTER &&
+                    i2.keyCode !== KeyCode.KEYCODE_SPACE) {
                     return;
                 }
-                if (event.type === KeyType.Down) {
+                if (i2.type === KeyType.Down) {
                     this.isOnClick = true;
                 }
-                if (event.type === KeyType.Up) {
+                if (i2.type === KeyType.Up) {
                     this.isOnClick = false;
                 }
             });
-            Button.onTouch((event) => {
+            Button.onTouch((h2) => {
                 if (!this.item?.isEnabled) {
                     return;
                 }
-                if (event.type === TouchType.Down) {
+                if (h2.type === TouchType.Down) {
                     this.isOnClick = true;
                 }
-                if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+                if (h2.type === TouchType.Up || h2.type === TouchType.Cancel) {
                     this.isOnClick = false;
                     if (this.fontSize >= this.minFontSize && this.isPopup === false) {
                         this.dialogController?.close();
@@ -991,61 +1108,50 @@ class z5 extends ViewPU {
                     return this.item.isEnabled && this.item.action?.();
                 }
             });
-            Gesture.create(GesturePriority.Low);
-            LongPressGesture.create({ repeat: false, duration: this.longPressTime });
-            LongPressGesture.onAction((event) => {
-                this.fontSize = this.decideFontScale();
-                if (event) {
-                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-                        this.dialogController?.open();
-                    }
-                }
-            });
-            LongPressGesture.pop();
-            Gesture.pop();
+            Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
         }, Button);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((v1, w1) => {
             If.create();
             if (this.item?.symbolStyle) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((d2, e2) => {
                         SymbolGlyph.create();
                         SymbolGlyph.attributeModifier.bind(this)(this.item?.symbolStyle);
-                        SymbolGlyph.fontSize(`${z5.imageSize}vp`);
+                        SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
                         SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                         SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                         SymbolGlyph.draggable(false);
                         SymbolGlyph.focusable(this.item?.isEnabled);
-                        SymbolGlyph.key(z5.focusablePrefix + this.index);
+                        SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
                     }, SymbolGlyph);
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((x1, y1) => {
                         If.create();
-                        if (Util.l5(this.item.value)) {
+                        if (Util.isSymbolResource(this.item.value)) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((b2, c2) => {
                                     SymbolGlyph.create(this.item.value);
-                                    SymbolGlyph.fontSize(`${z5.imageSize}vp`);
+                                    SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.item?.isEnabled);
-                                    SymbolGlyph.key(z5.focusablePrefix + this.index);
+                                    SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
                                 }, SymbolGlyph);
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((z1, a2) => {
                                     Image.create(this.item?.value);
-                                    Image.matchTextDirection(this.item?.value === s5 ? true : false);
-                                    Image.width(z5.imageSize);
+                                    Image.matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false);
+                                    Image.width(ImageMenuItem.imageSize);
                                     Image.draggable(false);
-                                    Image.height(z5.imageSize);
+                                    Image.height(ImageMenuItem.imageSize);
                                     Image.focusable(this.item?.isEnabled);
-                                    Image.key(z5.focusablePrefix + this.index);
+                                    Image.key(ImageMenuItem.focusablePrefix + this.index);
                                     Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                 }, Image);
                             });
@@ -1062,16 +1168,16 @@ class z5 extends ViewPU {
         this.updateDirtyElements();
     }
 }
-z5.imageSize = 24;
-z5.imageHotZoneWidth = 48;
-z5.buttonBorderRadius = 8;
-z5.focusBorderWidth = 2;
-z5.focusablePrefix = 'Id-ComposeTitleBar-ImageMenuItem-';
-class a6 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
-            this.paramsGenerator_ = paramsLambda;
+ImageMenuItem.imageSize = 24;
+ImageMenuItem.imageHotZoneWidth = 48;
+ImageMenuItem.buttonBorderRadius = 8;
+ImageMenuItem.focusBorderWidth = 2;
+ImageMenuItem.focusablePrefix = 'Id-ComposeTitleBar-ImageMenuItem-';
+class ComposeTitleBarDialog extends ViewPU {
+    constructor(p1, q1, r1, s1 = -1, t1 = undefined, u1) {
+        super(p1, r1, s1, u1);
+        if (typeof t1 === 'function') {
+            this.paramsGenerator_ = t1;
         }
         this.itemComposeTitleDialog = {};
         this.callbackId = undefined;
@@ -1083,125 +1189,125 @@ class a6 extends ViewPU {
         this.screenWidth = 640;
         this.verticalScreenLines = 6;
         this.horizontalsScreenLines = 1;
-        this.k6 = this.createStorageLink('mainWindow', undefined, 'mainWindow');
-        this.b6 = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.l6 = new ObservedPropertySimplePU(1, this, 'maxLines');
-        this.m6 = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
+        this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+        this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
+        this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
         this.cancel = () => {
         };
         this.confirm = () => {
         };
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(q1);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(params) {
-        if (params.itemComposeTitleDialog !== undefined) {
-            this.itemComposeTitleDialog = params.itemComposeTitleDialog;
+    setInitiallyProvidedValue(o1) {
+        if (o1.itemComposeTitleDialog !== undefined) {
+            this.itemComposeTitleDialog = o1.itemComposeTitleDialog;
         }
-        if (params.callbackId !== undefined) {
-            this.callbackId = params.callbackId;
+        if (o1.callbackId !== undefined) {
+            this.callbackId = o1.callbackId;
         }
-        if (params.composeTitleBarDialog !== undefined) {
-            this.composeTitleBarDialog = params.composeTitleBarDialog;
+        if (o1.composeTitleBarDialog !== undefined) {
+            this.composeTitleBarDialog = o1.composeTitleBarDialog;
         }
-        if (params.mainWindowStage !== undefined) {
-            this.mainWindowStage = params.mainWindowStage;
+        if (o1.mainWindowStage !== undefined) {
+            this.mainWindowStage = o1.mainWindowStage;
         }
-        if (params.controller !== undefined) {
-            this.controller = params.controller;
+        if (o1.controller !== undefined) {
+            this.controller = o1.controller;
         }
-        if (params.minFontSize !== undefined) {
-            this.minFontSize = params.minFontSize;
+        if (o1.minFontSize !== undefined) {
+            this.minFontSize = o1.minFontSize;
         }
-        if (params.maxFontSize !== undefined) {
-            this.maxFontSize = params.maxFontSize;
+        if (o1.maxFontSize !== undefined) {
+            this.maxFontSize = o1.maxFontSize;
         }
-        if (params.screenWidth !== undefined) {
-            this.screenWidth = params.screenWidth;
+        if (o1.screenWidth !== undefined) {
+            this.screenWidth = o1.screenWidth;
         }
-        if (params.verticalScreenLines !== undefined) {
-            this.verticalScreenLines = params.verticalScreenLines;
+        if (o1.verticalScreenLines !== undefined) {
+            this.verticalScreenLines = o1.verticalScreenLines;
         }
-        if (params.horizontalsScreenLines !== undefined) {
-            this.horizontalsScreenLines = params.horizontalsScreenLines;
+        if (o1.horizontalsScreenLines !== undefined) {
+            this.horizontalsScreenLines = o1.horizontalsScreenLines;
         }
-        if (params.fontSize !== undefined) {
-            this.fontSize = params.fontSize;
+        if (o1.fontSize !== undefined) {
+            this.fontSize = o1.fontSize;
         }
-        if (params.maxLines !== undefined) {
-            this.maxLines = params.maxLines;
+        if (o1.maxLines !== undefined) {
+            this.maxLines = o1.maxLines;
         }
-        if (params.cancel !== undefined) {
-            this.cancel = params.cancel;
+        if (o1.cancel !== undefined) {
+            this.cancel = o1.cancel;
         }
-        if (params.confirm !== undefined) {
-            this.confirm = params.confirm;
+        if (o1.confirm !== undefined) {
+            this.confirm = o1.confirm;
         }
     }
-    updateStateVars(params) {
+    updateStateVars(n1) {
     }
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.k6.purgeDependencyOnElmtId(rmElmtId);
-        this.b6.purgeDependencyOnElmtId(rmElmtId);
-        this.l6.purgeDependencyOnElmtId(rmElmtId);
-        this.m6.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(m1) {
+        this.__mainWindow.purgeDependencyOnElmtId(m1);
+        this.__fontSize.purgeDependencyOnElmtId(m1);
+        this.__maxLines.purgeDependencyOnElmtId(m1);
+        this.__windowStandardHeight.purgeDependencyOnElmtId(m1);
     }
     aboutToBeDeleted() {
-        this.k6.aboutToBeDeleted();
-        this.b6.aboutToBeDeleted();
-        this.l6.aboutToBeDeleted();
-        this.m6.aboutToBeDeleted();
+        this.__mainWindow.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__maxLines.aboutToBeDeleted();
+        this.__windowStandardHeight.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    setController(ctr) {
-        this.controller = ctr;
+    setController(l1) {
+        this.controller = l1;
     }
     get mainWindow() {
-        return this.k6.get();
+        return this.__mainWindow.get();
     }
-    set mainWindow(newValue) {
-        this.k6.set(newValue);
+    set mainWindow(k1) {
+        this.__mainWindow.set(k1);
     }
     get fontSize() {
-        return this.b6.get();
+        return this.__fontSize.get();
     }
-    set fontSize(newValue) {
-        this.b6.set(newValue);
+    set fontSize(j1) {
+        this.__fontSize.set(j1);
     }
     get maxLines() {
-        return this.l6.get();
+        return this.__maxLines.get();
     }
-    set maxLines(newValue) {
-        this.l6.set(newValue);
+    set maxLines(i1) {
+        this.__maxLines.set(i1);
     }
     get windowStandardHeight() {
-        return this.m6.get();
+        return this.__windowStandardHeight.get();
     }
-    set windowStandardHeight(newValue) {
-        this.m6.set(newValue);
+    set windowStandardHeight(h1) {
+        this.__windowStandardHeight.set(h1);
     }
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((d, e) => {
             If.create();
             if (this.composeTitleBarDialog) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((f1, g1) => {
                         Column.create();
-                        Column.width(this.fontSize === this.maxFontSize ? v5 : w5);
-                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? v5 : w5 });
+                        Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                     }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((v, w) => {
                         If.create();
                         if (this.itemComposeTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((d1, e1) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${u5}vp`);
+                                    SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.margin({
@@ -1213,13 +1319,13 @@ class a6 extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((x, y) => {
                                     If.create();
-                                    if (Util.l5(this.itemComposeTitleDialog.value)) {
+                                    if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            this.observeComponentCreation2((b1, c1) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${u5}vp`);
+                                                SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.margin({
                                                     top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1230,10 +1336,10 @@ class a6 extends ViewPU {
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            this.observeComponentCreation2((z, a1) => {
                                                 Image.create(this.itemComposeTitleDialog.value);
-                                                Image.width(u5);
-                                                Image.height(u5);
+                                                Image.width(IMAGE_SIZE);
+                                                Image.height(IMAGE_SIZE);
                                                 Image.margin({
                                                     top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                                                     bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1248,7 +1354,7 @@ class a6 extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((t, u) => {
                         Column.create();
                         Column.width('100%');
                         Column.padding({
@@ -1257,9 +1363,9 @@ class a6 extends ViewPU {
                             bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                         });
                     }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((r, s) => {
                         Text.create(this.composeTitleBarDialog);
-                        Text.fontSize(t5);
+                        Text.fontSize(TEXT_EDITABLE_DIALOG);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                         Text.maxLines(this.maxLines);
                         Text.width('100%');
@@ -1273,23 +1379,23 @@ class a6 extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((p, q) => {
                         Column.create();
-                        Column.width(this.fontSize === this.maxFontSize ? v5 : w5);
-                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? v5 : w5 });
+                        Column.width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG);
+                        Column.constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG });
                         Column.backgroundBlurStyle(BlurStyle.COMPONENT_ULTRA_THICK);
                         Column.shadow(ShadowStyle.OUTER_DEFAULT_LG);
                         Column.borderRadius({ 'id': -1, 'type': 10002, params: ['sys.float.corner_radius_level10'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Column.justifyContent(FlexAlign.Center);
                     }, Column);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((f, g) => {
                         If.create();
                         if (this.itemComposeTitleDialog.symbolStyle) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((n, o) => {
                                     SymbolGlyph.create();
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${u5}vp`);
+                                    SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
@@ -1297,23 +1403,23 @@ class a6 extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((h, i) => {
                                     If.create();
-                                    if (Util.l5(this.itemComposeTitleDialog.value)) {
+                                    if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            this.observeComponentCreation2((l, m) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${u5}vp`);
+                                                SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                             }, SymbolGlyph);
                                         });
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                            this.observeComponentCreation2((j, k) => {
                                                 Image.create(this.itemComposeTitleDialog.value);
-                                                Image.width(u5);
-                                                Image.height(u5);
+                                                Image.width(IMAGE_SIZE);
+                                                Image.height(IMAGE_SIZE);
                                                 Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                             }, Image);
                                         });
@@ -1331,11 +1437,11 @@ class a6 extends ViewPU {
         If.pop();
     }
     async aboutToAppear() {
-        let context = this.getUIContext().getHostContext();
-        this.mainWindowStage = context.windowStage.getMainWindowSync();
-        let properties = this.mainWindowStage.getWindowProperties();
-        let rect = properties.windowRect;
-        if (px2vp(rect.height) > this.screenWidth) {
+        let a = this.getUIContext().getHostContext();
+        this.mainWindowStage = a.windowStage.getMainWindowSync();
+        let b = this.mainWindowStage.getWindowProperties();
+        let c = b.windowRect;
+        if (px2vp(c.height) > this.screenWidth) {
             this.maxLines = this.verticalScreenLines;
         }
         else {
@@ -1346,5 +1452,4 @@ class a6 extends ViewPU {
         this.updateDirtyElements();
     }
 }
-
 export default { ComposeTitleBar };

@@ -224,61 +224,75 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIXComponentModifier modifier = {
-        nullptr, // loadXComponent
-        nullptr, // setXComponentOptions
-        nullptr, // getXComponentSurfaceId
-        nullptr, // getXComponentController
-        SetXComponentEnableAnalyzer,
-        ResetXComponentEnableAnalyzer,
-        SetXComponentBackgroundColor,
-        ResetXComponentBackgroundColor,
-        SetXComponentOpacity,
-        ResetXComponentOpacity,
-        SetXComponentId,
-        SetXComponentType,
-        SetXComponentSurfaceSize,
-        GetXComponentId,
-        GetXComponentType,
-        GetXComponentSurfaceWidth,
-        GetXComponentSurfaceHeight,
-        GetNativeXComponent,
-        SetXComponentLibraryname,
-        SetImageAIOptions,
-        InitXComponent,
-        SetXComponentEnableSecure,
-        ResetXComponentEnableSecure,
-        SetXComponentHdrBrightness,
-        ResetXComponentHdrBrightness,
-        SetXComponentRenderFit,
-        ResetXComponentRenderFit,
+        .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzer,
+        .resetXComponentEnableAnalyzer = ResetXComponentEnableAnalyzer,
+        .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
+        .setXComponentOpacity = SetXComponentOpacity,
+        .resetXComponentOpacity = ResetXComponentOpacity,
+        .setXComponentId = SetXComponentId,
+        .setXComponentType = SetXComponentType,
+        .setXComponentSurfaceSize = SetXComponentSurfaceSize,
+        .getXComponentId = GetXComponentId,
+        .getXComponentType = GetXComponentType,
+        .getXComponentSurfaceWidth = GetXComponentSurfaceWidth,
+        .getXComponentSurfaceHeight = GetXComponentSurfaceHeight,
+        .getNativeXComponent = GetNativeXComponent,
+        .setXComponentLibraryname = SetXComponentLibraryname,
+        .setImageAIOptions = SetImageAIOptions,
+        .initXComponent = InitXComponent,
+        .setXComponentEnableSecure = SetXComponentEnableSecure,
+        .resetXComponentEnableSecure = ResetXComponentEnableSecure,
+        .setXComponentHdrBrightness = SetXComponentHdrBrightness,
+        .resetXComponentHdrBrightness = ResetXComponentHdrBrightness,
+        .setXComponentRenderFit = SetXComponentRenderFit,
+        .resetXComponentRenderFit = ResetXComponentRenderFit,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIXComponentModifier* GetCJUIXComponentModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIXComponentModifier modifier = {
-        nullptr, // loadXComponent
-        nullptr, // setXComponentOptions
-        nullptr, // getXComponentSurfaceId
-        nullptr, // getXComponentController
-        SetXComponentBackgroundColor,
-        ResetXComponentBackgroundColor,
-        SetXComponentOpacity,
-        ResetXComponentOpacity,
-        SetXComponentId,
-        SetXComponentType,
-        SetXComponentSurfaceSize,
-        GetXComponentId,
-        GetXComponentType,
-        GetXComponentSurfaceWidth,
-        GetXComponentSurfaceHeight,
-        GetNativeXComponent,
-        SetXComponentLibraryname,
-        SetImageAIOptions,
+        .loadXComponent = nullptr, // loadXComponent
+        .setXComponentOptions = nullptr, // setXComponentOptions
+        .getXComponentSurfaceId = nullptr, // getXComponentSurfaceId
+        .getXComponentController = nullptr, // getXComponentController
+        .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
+        .setXComponentOpacity = SetXComponentOpacity,
+        .resetXComponentOpacity = ResetXComponentOpacity,
+        .setXComponentId = SetXComponentId,
+        .setXComponentType = SetXComponentType,
+        .setXComponentSurfaceSize = SetXComponentSurfaceSize,
+        .getXComponentId = GetXComponentId,
+        .getXComponentType = GetXComponentType,
+        .getXComponentSurfaceWidth = GetXComponentSurfaceWidth,
+        .getXComponentSurfaceHeight = GetXComponentSurfaceHeight,
+        .getNativeXComponent = GetNativeXComponent,
+        .setXComponentLibraryname = SetXComponentLibraryname,
+        .setImageAIOptions = SetImageAIOptions,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

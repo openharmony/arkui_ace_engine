@@ -22,6 +22,8 @@ constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
 constexpr size_t MAX_FRAME_NODE_CNT = 256;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
 constexpr int32_t MAX_EVENT_TREE_TOUCH_POINT_CNT = 20;
+constexpr int32_t MAX_EVENT_TREE_AXIS_UPDATE_CNT = 20;
+constexpr int32_t MAX_EVENT_TREE_AXIS_CNT = 20;
 constexpr int32_t MAX_EVENT_TREE_GESTURE_CNT = 100;
 } // end of namespace
 
@@ -61,6 +63,16 @@ TouchPointSnapshot::TouchPointSnapshot(const TouchEvent& event)
     downFingerIds = eventManager->GetDownFingerIds();
 }
 
+AxisSnapshot::AxisSnapshot(const AxisEvent& event)
+{
+    id = event.id;
+    point = OffsetF(event.x, event.y);
+    screenPoint = OffsetF(event.screenX, event.screenY);
+    action = event.action;
+    timestamp = GetCurrentTimestamp();
+    isInjected = event.isInjected;
+}
+
 void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
 {
     std::string downFingerIdStr = "";
@@ -84,6 +96,75 @@ void TouchPointSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLi
         << "downFingerIds: " << downFingerIdStr;
 #endif
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
+}
+
+void AxisSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
+{
+    std::stringstream oss;
+    std::string strAction = std::string("Node");
+    switch (action) {
+        case AxisAction::BEGIN:
+            strAction = std::string("BEGIN");
+            break;
+        case AxisAction::UPDATE:
+            strAction = std::string("UPDATE");
+            break;
+        case AxisAction::END:
+            strAction = std::string("END");
+            break;
+        default:
+            LOGW("AxisAction: Unknown AxisAction action %{public}d", action);
+            break;
+    }
+#ifdef IS_RELEASE_VERSION
+    oss << "id: " << id << ", "
+        << "action: " << strAction << ", "
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
+#else
+    oss << "id: " << id << ", "
+        << "point: " << point.ToString() << ", "
+        << "screenPoint: " << screenPoint.ToString() << ", "
+        << "action: " << strAction << ", "
+        << "timestamp: " << ConvertTimestampToStr(timestamp) << ", "
+        << "isInjected: " << isInjected;
+#endif
+    dumpList.emplace_back(std::make_pair(depth, oss.str()));
+}
+
+void EventTreeRecord::AddAxis(const AxisEvent& event)
+{
+    if (!eventTreeList.empty() && eventTreeList.back().axis.size() > MAX_EVENT_TREE_AXIS_CNT) {
+        eventTreeList.pop_back();
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "EventTreeList last record axis size is over limit! Last record is cleaned.");
+    }
+    if (!eventTreeList.empty() && event.action == Ace::AxisAction::BEGIN &&
+        eventTreeList.back().updateAxisIds_.count(event.id) > 0) {
+        eventTreeList.pop_back();
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING,
+            "EventTreeList last record receive BEGIN event twice. Last record is cleaned.");
+    }
+    AxisAction action = event.action;
+    if (action == Ace::AxisAction::BEGIN) {
+        if (eventTreeList.empty() || eventTreeList.back().axisUpdateCount <= 0 ||
+            eventTreeList.back().axisUpdateCount >= MAX_EVENT_TREE_AXIS_UPDATE_CNT) {
+            eventTreeList.emplace_back(EventTree());
+            if (eventTreeList.size() > MAX_EVENT_TREE_RECORD_CNT) {
+                eventTreeList.erase(eventTreeList.begin());
+            }
+        }
+        eventTreeList.back().axisUpdateCount++;
+        eventTreeList.back().updateAxisIds_.insert(event.id);
+    }
+    if (eventTreeList.empty()) {
+        return;
+    }
+    if (action == AxisAction::END || action == AxisAction::CANCEL) {
+        eventTreeList.back().axisUpdateCount--;
+        eventTreeList.back().updateAxisIds_.erase(event.id);
+    }
+    eventTreeList.back().axis.emplace_back(AxisSnapshot(event));
 }
 
 void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
@@ -224,6 +305,12 @@ void EventTreeRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList,
             item.Dump(dumpList, detailDepth);
         }
 
+        // dump needful axis:
+        dumpList.emplace_back(std::make_pair(listDepth, "axis:"));
+        for (auto& item : tree.axis) {
+            item.Dump(dumpList, detailDepth);
+        }
+
         // dump hit test frame nodes:
         dumpList.emplace_back(std::make_pair(listDepth, "hittest:"));
         for (auto& item : tree.hitTestTree) {
@@ -275,6 +362,28 @@ void TouchPointSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
     json->Put("downFingerIds", downFingerIdStr.c_str());
 }
 
+void AxisSnapshot::Dump(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("point", point.ToString().c_str());
+    json->Put("screenPoint", screenPoint.ToString().c_str());
+    switch (action) {
+        case AxisAction::BEGIN:
+            json->Put("action", "BEGIN");
+            break;
+        case AxisAction::UPDATE:
+            json->Put("action", "UPDATE");
+            break;
+        case AxisAction::END:
+            json->Put("action", "END");
+            break;
+        default:
+            LOGW("AxisAction: Unknown AxisAction action %{public}d", action);
+            break;
+    }
+    json->Put("timestamp", ConvertTimestampToStr(timestamp).c_str());
+    json->Put("isInjected", isInjected);
+}
+
 void EventTreeRecord::BuildTouchPoints(
     std::list<TouchPointSnapshot> touchPoints, std::unique_ptr<JsonValue>& json) const
 {
@@ -285,6 +394,18 @@ void EventTreeRecord::BuildTouchPoints(
         touch->Put(child);
     }
     json->Put("touch points", touch);
+}
+
+void EventTreeRecord::BuildAxis(
+    std::list<AxisSnapshot> axis, std::unique_ptr<JsonValue>& json) const
+{
+    std::unique_ptr<JsonValue> axisEvent = JsonUtil::CreateArray(true);
+    for (auto& item : axis) {
+        std::unique_ptr<JsonValue> child = JsonUtil::Create(true);
+        item.Dump(child);
+        axisEvent->Put(child);
+    }
+    json->Put("axis", axisEvent);
 }
 
 void EventTreeRecord::BuildHitTestTree(std::list<FrameNodeSnapshot> hitTestTree, std::unique_ptr<JsonValue>& json) const
@@ -357,6 +478,7 @@ void EventTreeRecord::Dump(std::unique_ptr<JsonValue>& json, int32_t depth, int3
         }
         std::unique_ptr<JsonValue> children = JsonUtil::Create(true);
         BuildTouchPoints(tree.touchPoints, children);
+        BuildAxis(tree.axis, children);
         BuildHitTestTree(tree.hitTestTree, children);
         BuildGestureTree(tree.gestureTree, children);
         std::string header = "event tree_" + std::to_string(index);
