@@ -1476,4 +1476,159 @@ HWTEST_F(CanvasRendererAccessorTest, setFontFamiliesTest, TestSize.Level1)
     holder->TearDown();
 }
 
+
+
+/**
+ * @tc.name: createLinearGradientTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createLinearGradientTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createLinearGradient, nullptr);
+
+    auto valD = DEFAULT_DOUBLE_VALUE;
+
+    for (const auto& expectedX : NUMBER_TEST_PLAN) {
+        for (const auto& expectedY : NUMBER_TEST_PLAN) {
+            auto x = Converter::ArkValue<Ark_Number>(expectedX);
+            auto y = Converter::ArkValue<Ark_Number>(expectedY);
+            auto x1 = Converter::ArkValue<Ark_Number>(valD);
+            auto y1 = Converter::ArkValue<Ark_Number>(valD);
+            auto ptr = accessor_->createLinearGradient(peer_, &x, &y, &x1, &y1);
+            ASSERT_NE(ptr, nullptr);
+            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            ASSERT_NE(peer, nullptr);
+            std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
+            ASSERT_NE(gradient, nullptr);
+            auto o1 = gradient->GetBeginOffset();
+            auto o2 = gradient->GetEndOffset();
+            std::printf("linear: const o1: %.2f=%.2f %.2f=%.2f o2: %.2f=%.2f %.2f=%.2f\n", o1.GetX(), expectedX,
+                o1.GetY(), expectedY, o2.GetX(), valD, o2.GetY(), valD);
+
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), expectedX));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), expectedY));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), valD));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetY(), valD));
+        }
+    }
+    for (const auto& expectedX : NUMBER_TEST_PLAN) {
+        for (const auto& expectedY : NUMBER_TEST_PLAN) {
+            auto x = Converter::ArkValue<Ark_Number>(valD);
+            auto y = Converter::ArkValue<Ark_Number>(valD);
+            auto x1 = Converter::ArkValue<Ark_Number>(expectedX);
+            auto y1 = Converter::ArkValue<Ark_Number>(expectedY);
+            auto ptr = accessor_->createLinearGradient(peer_, &x, &y, &x1, &y1);
+            ASSERT_NE(ptr, nullptr);
+            auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+            ASSERT_NE(peer, nullptr);
+            std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
+            ASSERT_NE(gradient, nullptr);
+            auto o1 = gradient->GetBeginOffset();
+            auto o2 = gradient->GetEndOffset();
+            std::printf("linear: const2 o1: %.2f=%.2f %.2f=%.2f o2: %.2f=%.2f %.2f=%.2f\n", o1.GetX(), valD,
+                o1.GetY(), valD, o2.GetX(), expectedX, o2.GetY(), expectedY);
+
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetX(), valD));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o1.GetY(), valD));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetX(), expectedX));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(o2.GetY(), expectedY));
+        }
+    }
+}
+/**
+ * @tc.name: createRadialGradientTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createRadialGradient, nullptr);
+
+    // auto valD = DEFAULT_DOUBLE_VALUE;
+
+    // for (const auto& expectedX : NUMBER_TEST_PLAN) {
+    //     for (const auto& expectedY : NUMBER_TEST_PLAN) {
+    //         auto x = Converter::ArkValue<Ark_Number>(expectedX);
+    //         auto y = Converter::ArkValue<Ark_Number>(expectedY);
+    //         auto x1 = Converter::ArkValue<Ark_Number>(valD);
+    //         auto y1 = Converter::ArkValue<Ark_Number>(valD);
+
+    //         std::printf("linear: const x: %.2f y: %.2f x1: %.2f y1: %.2f\n", expectedX, expectedY, valD, valD);
+    //         auto ptr = accessor_->createRadialGradient(peer_, &x, &y, &x1, &y1);
+
+    //         // ASSERT_NE(ptr, nullptr);
+    //         if (!ptr) {
+    //             std::printf("linear: ptr nullptr\n");
+    //         }
+    //         auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+    //         // ASSERT_NE(peer, nullptr);
+    //         if (!peer) {
+    //             std::printf("linear: peer nullptr\n");
+    //         }
+    //         std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
+    //         // ASSERT_NE(gradient, nullptr);
+    //         if (!gradient) {
+    //             std::printf("linear: gradient nullptr\n");
+    //         }
+    //         auto o1 = gradient->GetBeginOffset();
+    //         auto o2 = gradient->GetEndOffset();
+    //         std::printf("linear: const o1: %.2f %.2f o2: %.2f %.2f\n", o1.GetX(), o1.GetY(), o2.GetX(), o2.GetY());
+
+    //         // EXPECT_TRUE(holder->isCalled);Qq20240725@
+    //         // EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
+    //         // EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+    //     }
+    // }
+}
+/**
+ * @tc.name: createConicGradientTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createConicGradient, nullptr);
+
+    // auto valD = DEFAULT_DOUBLE_VALUE;
+
+    // for (const auto& expectedX : NUMBER_TEST_PLAN) {
+    //     for (const auto& expectedY : NUMBER_TEST_PLAN) {
+    //         auto x = Converter::ArkValue<Ark_Number>(expectedX);
+    //         auto y = Converter::ArkValue<Ark_Number>(expectedY);
+    //         auto x1 = Converter::ArkValue<Ark_Number>(valD);
+    //         auto y1 = Converter::ArkValue<Ark_Number>(valD);
+
+    //         std::printf("linear: const x: %.2f y: %.2f x1: %.2f y1: %.2f\n", expectedX, expectedY, valD, valD);
+    //         auto ptr = accessor_->createConicGradient(peer_, &x, &y, &x1, &y1);
+
+    //         // ASSERT_NE(ptr, nullptr);
+    //         if (!ptr) {
+    //             std::printf("linear: ptr nullptr\n");
+    //         }
+    //         auto peer = reinterpret_cast<CanvasGradientPeer*>(ptr);
+    //         // ASSERT_NE(peer, nullptr);
+    //         if (!peer) {
+    //             std::printf("linear: peer nullptr\n");
+    //         }
+    //         std::shared_ptr<OHOS::Ace::Gradient> gradient = peer->GetGradient();
+    //         // ASSERT_NE(gradient, nullptr);
+    //         if (!gradient) {
+    //             std::printf("linear: gradient nullptr\n");
+    //         }
+    //         auto o1 = gradient->GetBeginOffset();
+    //         auto o2 = gradient->GetEndOffset();
+    //         std::printf("linear: const o1: %.2f %.2f o2: %.2f %.2f\n", o1.GetX(), o1.GetY(), o2.GetX(), o2.GetY());
+
+    //         // EXPECT_TRUE(holder->isCalled);Qq20240725@
+    //         // EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewX, expectedX));
+    //         // EXPECT_TRUE(LessOrEqualCustomPrecision(holder->skewY, expectedY));
+    //     }
+    // }
+}
+HWTEST_F(CanvasRendererAccessorTest, bottleNeckTest, TestSize.Level1)
+{
+    char *p = nullptr;
+    p[0] = '\0';
+}
 } // namespace OHOS::Ace::NG
