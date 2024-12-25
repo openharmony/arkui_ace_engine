@@ -126,6 +126,7 @@ extern const char SVG_FE_K4[];
 extern const char SVG_FE_OPERATOR_TYPE[];
 extern const char SVG_TRANSFORM[];
 extern const char SVG_CLIP_PATH[];
+extern const char SVG_PRESERVE_ASPECT_RATIO[];
 
 } // namespace OHOS::Ace::NG
 
