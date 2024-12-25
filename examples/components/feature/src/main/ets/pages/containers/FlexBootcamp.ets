@@ -30,7 +30,6 @@ import { pointer } from '@kit.InputKit';
 import { CompSizeBlocks } from './../../components/CompSizeBlocks'
 import { CompLocationBlocks } from './../../components/CompLocationBlocks'
 import { CompLayoutConstraintsBlocks } from './../../components/CompLayoutConstraintsBlocks'
-import { CompFlexLayoutBlocks } from '../../components/CompFlexLayoutBlocks'
 import { CompBorderBlocks } from './../../components/CompBorderBlocks'
 import { CompBorderImageBlocks } from './../../components/CompBorderImageBlocks'
 import { CompBackgroundBlocks } from './../../components/CompBackgroundBlocks'
@@ -70,20 +69,24 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 
-class MyModifier implements AttributeModifier<FlexAttribute> {
-  applyNormalAttribute(instance: FlexAttribute) {
+class MyModifier implements AttributeModifier<CheckboxGroupAttribute> {
+  applyNormalAttribute(instance: CheckboxGroupAttribute) {
     instance.backgroundColor('#0A59F7')
   }
-  applyPressedAttribute(instance: FlexAttribute) {
+
+  applyPressedAttribute(instance: CheckboxGroupAttribute) {
     instance.backgroundColor('#ED6F21')
   }
-  applyFocusedAttribute(instance: FlexAttribute) {
+
+  applyFocusedAttribute(instance: CheckboxGroupAttribute) {
     instance.backgroundColor(Color.Gray)
   }
-  applyDisabledAttribute(instance: FlexAttribute) {
+
+  applyDisabledAttribute(instance: CheckboxGroupAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
-  applySelectedAttribute(instance: FlexAttribute) {
+
+  applySelectedAttribute(instance: CheckboxGroupAttribute) {
     instance.backgroundColor('#ffedea21')
   }
 }
@@ -181,15 +184,6 @@ export struct FlexBootcamp {
   @State compPixelRoundEnd: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
   @State enableCompPixelRoundBottom: boolean = false;
   @State compPixelRoundBottom: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
-  // FlexLayout
-  @State enableCompFlexBasis: boolean = false;
-  @State compFlexBasis: number | string = 0;
-  @State enableCompFlexGrow: boolean = false;
-  @State compFlexGrow: number = 0;
-  @State enableCompFlexShrink: boolean = false;
-  @State compFlexShrink: number = 0;
-  @State enableCompAlignSelf: boolean = false;
-  @State compAlignSelf: ItemAlign = ItemAlign.Auto
   // border
   @State enableCompBorderWidth: boolean = false;
   @State compBorderWidth: Length = 0;
@@ -265,17 +259,17 @@ export struct FlexBootcamp {
   @State compBackgroundImagePositionY: Length = 0;
   @State enableCompBackgroundBlurStyle: boolean = false;
   @State compBackgroundBlurStyle: BlurStyle = BlurStyle.NONE;
-  @State enableCompBackgroundBlurStyleOptions: boolean = false;
-  @State enableCompBackgroundBlurStyleOptionsColorMode: boolean = false;
-  @State compBackgroundBlurStyleOptionsColorMode: ThemeColorMode = ThemeColorMode.SYSTEM;
-  @State enableCompBackgroundBlurStyleOptionsAdaptiveColor: boolean = false;
-  @State compBackgroundBlurStyleOptionsAdaptiveColor: AdaptiveColor = AdaptiveColor.DEFAULT;
-  @State enableCompBackgroundBlurStyleOptionsBlurOptionsLeft: boolean = false;
-  @State compBackgroundBlurStyleOptionsBlurOptionsLeft: number = 0;
-  @State enableCompBackgroundBlurStyleOptionsBlurOptionsRight: boolean = false;
-  @State compBackgroundBlurStyleOptionsBlurOptionsRight: number = 0;
-  @State enableCompBackgroundBlurStyleOptionsScale: boolean = false;
-  @State compBackgroundBlurStyleOptionsScale: number = 1;
+  @State enableCompBackgroundBlurStyleParams: boolean = false;
+  @State enableCompBackgroundBlurStyleParamsColorMode: boolean = false;
+  @State compBackgroundBlurStyleParamsColorMode: ThemeColorMode = ThemeColorMode.SYSTEM;
+  @State enableCompBackgroundBlurStyleParamsAdaptiveColor: boolean = false;
+  @State compBackgroundBlurStyleParamsAdaptiveColor: AdaptiveColor = AdaptiveColor.DEFAULT;
+  @State enableCompBackgroundBlurStyleParamsBlurOptionsLeft: boolean = false;
+  @State compBackgroundBlurStyleParamsBlurOptionsLeft: number = 0;
+  @State enableCompBackgroundBlurStyleParamsBlurOptionsRight: boolean = false;
+  @State compBackgroundBlurStyleParamsBlurOptionsRight: number = 0;
+  @State enableCompBackgroundBlurStyleParamsScale: boolean = false;
+  @State compBackgroundBlurStyleParamsScale: number = 1;
   @State enableCompBackdropBlur: boolean = false;
   @State compBackdropBlur: number = 0;
   @State enableCompBackdropBlurGrayscale: boolean = false;
@@ -1057,10 +1051,6 @@ export struct FlexBootcamp {
         bottom: useEnabled(this.enableCompPixelRoundBottom, this.compPixelRoundBottom),
         top: useEnabled(this.enableCompPixelRoundTop, this.compPixelRoundTop)
       } : null)
-      .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
-      .flexGrow(useEnabled(this.enableCompFlexGrow, this.compFlexGrow))
-      .flexShrink(useEnabled(this.enableCompFlexShrink, this.compFlexShrink))
-      .alignSelf(useEnabled(this.enableCompAlignSelf, this.compAlignSelf))
       .border({
         width: useEnabled(this.enableCompBorderWidth, this.compBorderWidth),
         color: useEnabled(this.enableCompBorderColor, this.compBorderColor),
@@ -2133,17 +2123,6 @@ export struct FlexBootcamp {
           compPixelRoundEnd: $compPixelRoundEnd,
           enableCompPixelRoundBottom: $enableCompPixelRoundBottom,
           compPixelRoundBottom: $compPixelRoundBottom
-        })
-
-        CompFlexLayoutBlocks({
-          enableCompFlexBasis: $enableCompFlexBasis,
-          compFlexBasis: $compFlexBasis,
-          enableCompFlexGrow: $enableCompFlexGrow,
-          compFlexGrow: $compFlexGrow,
-          enableCompFlexShrink: $enableCompFlexShrink,
-          compFlexShrink: $compFlexShrink,
-          enableCompAlignSelf: $enableCompAlignSelf,
-          compAlignSelf: $compAlignSelf
         })
 
         CompBorderBlocks({
