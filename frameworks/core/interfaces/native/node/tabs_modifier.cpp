@@ -149,6 +149,19 @@ void SetTabBarPosition(ArkUINodeHandle node, ArkUI_Int32 barVal)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarPosition(frameNode, static_cast<BarPosition>(barVal));
 }
+void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarIndex(frameNode, indexVal);
+}
+void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabsController(frameNode,
+        AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(tabsController)));
+}
 void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -262,6 +275,13 @@ void ResetTabBarPosition(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarPosition(frameNode, BarPosition::START);
+}
+
+void ResetTabsOptionsIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarIndex(frameNode, 0);
 }
 
 void ResetScrollable(ArkUINodeHandle node)
@@ -445,6 +465,8 @@ const ArkUITabsModifier* GetTabsModifier()
         .setBarOverlap = SetBarOverlap,
         .setIsVertical = SetIsVertical,
         .setTabBarPosition = SetTabBarPosition,
+        .setTabsOptionsIndex = SetTabsOptionsIndex,
+        .setTabsOptionsController = SetTabsOptionsController,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -460,6 +482,7 @@ const ArkUITabsModifier* GetTabsModifier()
         .resetBarOverlap = ResetBarOverlap,
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
+        .resetTabsOptionsIndex = ResetTabsOptionsIndex,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,
@@ -506,6 +529,8 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .setBarOverlap = SetBarOverlap,
         .setIsVertical = SetIsVertical,
         .setTabBarPosition = SetTabBarPosition,
+        .setTabsOptionsIndex = SetTabsOptionsIndex,
+        .setTabsOptionsController = SetTabsOptionsController,
         .setScrollable = SetScrollable,
         .setTabBarWidth = SetTabBarWidth,
         .setTabBarHeight = SetTabBarHeight,
@@ -521,6 +546,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .resetBarOverlap = ResetBarOverlap,
         .resetIsVertical = ResetIsVertical,
         .resetTabBarPosition = ResetTabBarPosition,
+        .resetTabsOptionsIndex = ResetTabsOptionsIndex,
         .resetScrollable = ResetScrollable,
         .resetTabBarWidth = ResetTabBarWidth,
         .resetTabBarHeight = ResetTabBarHeight,

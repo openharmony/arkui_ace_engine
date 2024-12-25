@@ -4155,6 +4155,14 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabBarPosition));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabBarPosition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabBarPosition));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOptionsIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOptionsIndex));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOptionsIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOptionsIndex));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTabsOptionsController"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetTabsOptionsController));
+    tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsOptionsController"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsOptionsController));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScrollable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::SetScrollable));
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollable"),
