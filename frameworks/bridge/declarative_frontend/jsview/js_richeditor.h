@@ -197,6 +197,12 @@ public:
     void FromStyledString(const JSCallbackInfo& args);
 
 private:
+    static void ParseUserGesture(
+        const JSCallbackInfo& args, UserGestureOptions& gestureOption, const std::string& spanType);
+    static void ParseUserClickEvent(const JSCallbackInfo& args, const JSRef<JSObject>& gestureObj,
+        UserGestureOptions& gestureOption, const std::string& spanType);
+    static void ParseUserMouseOption(
+        const JSCallbackInfo& args, UserMouseOptions& mouseOption, const std::string& spanType);
     bool ParseParagraphStyle(const JSRef<JSObject>& styleObject, struct UpdateParagraphStyle& style);
     bool IsPixelMap(const JSRef<JSVal>& jsValue);
     bool IsDrawable(const JSRef<JSVal>& jsValue);
