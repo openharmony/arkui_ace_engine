@@ -595,11 +595,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     if (!mouseEvents_.empty()) {
         FlushMouseEvent();
-        isNeedFlushMouseEvent_ = false;
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
         mouseEvents_.clear();
-    } else if (isNeedFlushMouseEvent_) {
+    } else if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT ||
+               isNeedFlushMouseEvent_ == MockFlushEventType::EXECUTE) {
         FlushMouseEventVoluntarily();
-        isNeedFlushMouseEvent_ = false;
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
     }
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -630,6 +631,9 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
 
     MouseEvent event;
+    if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
+        event.mockFlushEvent = true;
+    }
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
     event.time = lastMouseEvent_->time;
