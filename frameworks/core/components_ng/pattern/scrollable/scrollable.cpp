@@ -211,13 +211,12 @@ void Scrollable::SetOnActionEnd()
 void Scrollable::SetOnActionCancel()
 {
     CHECK_NULL_VOID(panRecognizerNG_);
-    auto actionCancel = [weakScroll = AceType::WeakClaim(this)]() {
+    auto actionCancel = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
         if (scroll->dragCancelCallback_) {
             scroll->dragCancelCallback_();
         }
-        GestureEvent info;
         scroll->HandleDragEnd(info);
         if (scroll->panActionEndEvents_.empty()) {
             scroll->isDragging_ = false;

@@ -52,7 +52,7 @@ void DragDropEvent::CreateDragDropRecognizer(const WeakPtr<PipelineContext>& pip
     panRecognizer->SetOnActionStart(std::bind(&DragDropEvent::PanOnActionStart, this, std::placeholders::_1));
     panRecognizer->SetOnActionUpdate(std::bind(&DragDropEvent::PanOnActionUpdate, this, std::placeholders::_1));
     panRecognizer->SetOnActionEnd(std::bind(&DragDropEvent::PanOnActionEnd, this, std::placeholders::_1));
-    panRecognizer->SetOnActionCancel(std::bind(&DragDropEvent::PanOnActionCancel, this));
+    panRecognizer->SetOnActionCancel(std::bind(&DragDropEvent::PanOnActionCancel, this, std::placeholders::_1));
 
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(pipelineContext, recognizers);

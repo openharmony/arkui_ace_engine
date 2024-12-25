@@ -405,9 +405,9 @@ public:
     {
         onActionEndId_ = std::make_unique<GestureEventFunc>(onActionEndId);
     }
-    void SetOnActionCancelId(const GestureEventNoParameter& onActionCancelId)
+    void SetOnActionCancelId(const GestureEventFunc& onActionCancelId)
     {
-        onActionCancelId_ = std::make_unique<GestureEventNoParameter>(onActionCancelId);
+        onActionCancelId_ = std::make_unique<GestureEventFunc>(onActionCancelId);
     }
     void SetPriority(GesturePriority priority)
     {
@@ -438,7 +438,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionStartId_;
     std::unique_ptr<GestureEventFunc> onActionUpdateId_;
     std::unique_ptr<GestureEventFunc> onActionEndId_;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
+    std::unique_ptr<GestureEventFunc> onActionCancelId_;
 };
 
 } // namespace OHOS::Ace

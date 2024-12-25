@@ -161,6 +161,8 @@ enum {
     UI_MOUSE_EVENT_ACTION_RELEASE = 2,
     /** 鼠标移动。 */
     UI_MOUSE_EVENT_ACTION_MOVE = 3,
+    /** 鼠标按键被取消。 */
+    UI_MOUSE_EVENT_ACTION_CANCEL = 13,
 };
 
 /**

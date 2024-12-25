@@ -232,7 +232,7 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_, false);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -400,7 +400,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
         curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_, false);
         }
         ResetStatus();
         return false;

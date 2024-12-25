@@ -134,7 +134,7 @@ RefPtr<GestureProcessor> TimeoutGestureModelImpl::GetGestureProcessor()
     return gestureProcessor;
 }
 
-void GestureModelImpl::SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter)
+void GestureModelImpl::SetOnGestureEvent(const GestureEventFunc& gestureEventFunc)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -146,12 +146,11 @@ void GestureModelImpl::SetOnGestureEvent(const GestureEventNoParameter& gestureE
     CHECK_NULL_VOID(inspector);
     impl = inspector->GetInspectorFunctionImpl();
 
-    gesture->SetOnActionCancelId([func = std::move(gestureEventNoParameter), impl]() {
-        auto info = GestureEvent();
+    gesture->SetOnActionCancelId([func = std::move(gestureEventFunc), impl](GestureEvent& info) {
         if (impl) {
             impl->UpdateEventInfo(info);
         }
-        func();
+        func(info);
     });
 }
 

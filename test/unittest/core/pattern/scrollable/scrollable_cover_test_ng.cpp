@@ -1251,7 +1251,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
     scrollable->panActionEndEvents_.clear();
     scrollable->dragCancelCallback_ = nullptr;
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
-    (*panRecognizerNG->onActionCancel_)();
+    (*panRecognizerNG->onActionCancel_)(gestureEvent);
     EXPECT_FALSE(scrollable->isDragging_);
 
     /**
@@ -1261,7 +1261,7 @@ HWTEST_F(ScrollableCoverTestNg, InitializeTest002, TestSize.Level1)
     scrollable->dragCancelCallback_ = [&isDragCancelCalled]() { isDragCancelCalled = true; };
     scrollable->panActionEndEvents_.emplace_back(
         [&isActionEndCalled](GestureEvent gestureEvent) { isActionEndCalled = true; });
-    (*panRecognizerNG->onActionCancel_)();
+    (*panRecognizerNG->onActionCancel_)(gestureEvent);
     (*panRecognizerNG->onActionEnd_)(gestureEvent);
     EXPECT_TRUE(isDragCancelCalled);
     EXPECT_TRUE(isActionEndCalled);

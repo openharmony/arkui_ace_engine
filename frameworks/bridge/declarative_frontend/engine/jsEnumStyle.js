@@ -537,6 +537,7 @@ let MouseAction;
   MouseAction[MouseAction.Release = 2] = 'Release';
   MouseAction[MouseAction.Move = 3] = 'Move';
   MouseAction[MouseAction.Hover = 4] = 'Hover';
+  MouseAction[MouseAction.CANCEL = 13] = 'CANCEL';
 })(MouseAction || (MouseAction = {}));
 
 let KeyType;
