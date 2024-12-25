@@ -1430,6 +1430,9 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     if (accessibilityProperty->HasAccessibilityRole()) {
         nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
     }
+    if (accessibilityProperty->HasAccessibilityCustomRole()) {
+        nodeInfo.SetCustomComponentType(accessibilityProperty->GetAccessibilityCustomRole());
+    }
 
     UpdateAccessibilityTextValueInfo(accessibilityProperty, nodeInfo);
 
@@ -2474,6 +2477,7 @@ void JsAccessibilityManager::DumpCommonPropertyNG(const AccessibilityElementInfo
     DumpLog::GetInstance().AddDesc("parent ID: ", parentId);
     DumpLog::GetInstance().AddDesc("child IDs: ", ChildrenToString(nodeInfo.GetChildIds(), treeId));
     DumpLog::GetInstance().AddDesc("component type: ", nodeInfo.GetComponentType());
+    DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + nodeInfo.GetCustomComponentType());
     DumpLog::GetInstance().AddDesc("text: ", nodeInfo.GetContent());
     DumpLog::GetInstance().AddDesc("window id: " + std::to_string(nodeInfo.GetWindowId()));
     DumpRectNG(nodeInfo.GetRectInScreen());
@@ -3463,6 +3467,7 @@ static void DumpAccessibilityElementInfosTreeNG(
         DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityInfo.GetContent());
         DumpLog::GetInstance().AddDesc("accessibilityGroup: ");
         DumpLog::GetInstance().AddDesc("accessibilityLevel: ");
+        DumpLog::GetInstance().AddDesc("accessibilityCustomRole: " + accessibilityInfo.GetCustomComponentType());
         DumpLog::GetInstance().AddDesc("top: " +
             std::to_string(accessibilityInfo.GetRectInScreen().GetLeftTopYScreenPostion()));
         DumpLog::GetInstance().AddDesc("left: " +
@@ -3504,6 +3509,9 @@ static void DumpTreeNodeInfoNG(
         std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsAccessibilityGroup()));
     DumpLog::GetInstance().AddDesc(
         "accessibilityLevel: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityLevel());
+    DumpLog::GetInstance().AddDesc(
+        "accessibilityCustomRole: " +
+        node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityCustomRole());
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(rect.Top() + commonProperty.windowTop));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(rect.Left() + commonProperty.windowLeft));
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));

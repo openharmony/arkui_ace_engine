@@ -580,6 +580,26 @@ std::string AccessibilityProperty::GetAccessibilityRole() const
     return accessibilityRole_.value_or("");
 }
 
+void AccessibilityProperty::SetAccessibilityCustomRole(const std::string& role)
+{
+    accessibilityCustomRole_ = role;
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomRole()
+{
+    accessibilityCustomRole_ = "";
+}
+
+bool AccessibilityProperty::HasAccessibilityCustomRole()
+{
+    return accessibilityCustomRole_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilityCustomRole() const
+{
+    return accessibilityCustomRole_.value_or("");
+}
+
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
 {
     actionsImpl_ = actionsImpl;
@@ -946,6 +966,9 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     if (onAccessibilityFocusCallbackImpl_) {
         onAccessibilityFocusCallbackImpl_(isFocus);
     }
+    if (onUserAccessibilityFocusCallbackImpl_) {
+        onUserAccessibilityFocusCallbackImpl_(isFocus);
+    }
 }
 
 void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
@@ -965,6 +988,17 @@ void AccessibilityProperty::SetOnAccessibilityFocusCallback(
     const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
 {
     onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::SetUserOnAccessibilityFocusCallback(
+    const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl)
+{
+    onUserAccessibilityFocusCallbackImpl_ = onUserAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::ResetUserOnAccessibilityFocusCallback()
+{
+    onUserAccessibilityFocusCallbackImpl_ = nullptr;
 }
 
 bool AccessibilityProperty::ActActionClearSelection()
