@@ -1568,7 +1568,7 @@ public:
     ~CanvasPath2D() = default;
     explicit CanvasPath2D(const std::string& cmds);
     explicit CanvasPath2D(const RefPtr<CanvasPath2D>& path);
-    void AddPath(const RefPtr<CanvasPath2D>& path);
+    virtual void AddPath(const RefPtr<CanvasPath2D>& path);
     void SetTransform(double a, double b, double c, double d, double e, double f);
     virtual void MoveTo(double x, double y);
     virtual void LineTo(double x, double y);
