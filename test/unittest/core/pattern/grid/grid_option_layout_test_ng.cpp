@@ -815,7 +815,7 @@ HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
     pattern_->SyncLayoutBeforeSpring();
     EXPECT_EQ(GetChildY(frameNode_, 9), 100);
     EXPECT_TRUE(pattern_->info_.synced_);
-    EXPECT_FALSE(pattern_->forceOverScroll_);
+    EXPECT_FALSE(pattern_->preSpring_);
 }
 
 /**
