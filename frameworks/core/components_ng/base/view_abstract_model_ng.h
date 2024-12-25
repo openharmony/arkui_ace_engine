@@ -1556,6 +1556,12 @@ public:
     static void BindMenuGesture(FrameNode* targetNode,
         std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
 
+    static void BindContentCover(FrameNode* targetNode, bool isShow,
+        std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+        NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        const NG::ContentCoverParam& contentCoverParam);
+
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(

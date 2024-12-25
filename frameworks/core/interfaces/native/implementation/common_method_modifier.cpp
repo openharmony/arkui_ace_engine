@@ -204,6 +204,57 @@ auto g_popupCommonParam = [](const auto& src, RefPtr<PopupParam>& popupParam) {
     popupParam->SetBlurStyle(Converter::OptConvert<BlurStyle>(src.backgroundBlurStyle));
 };
 
+auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_ContentCoverOptions& options,
+    std::function<void()>& onShowCallback, std::function<void()>& onDismissCallback,
+    std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,
+    std::function<void(const int32_t& info)>& onWillDismissFunc) {
+    auto onAppearValue = OptConvert<Callback_Void>(options.onAppear);
+    if (onAppearValue) {
+        onShowCallback = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+    }
+    auto onDisappearValue = OptConvert<Callback_Void>(options.onDisappear);
+    if (onDisappearValue) {
+        onDismissCallback = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+    }
+    auto onWillAppearValue = OptConvert<Callback_Void>(options.onWillAppear);
+    if (onWillAppearValue) {
+        onWillShowCallback = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+    }
+    auto onWillDisappearValue = OptConvert<Callback_Void>(options.onWillDisappear);
+    if (onWillDisappearValue) {
+        onWillDismissCallback = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+    }
+    auto onWillDismissValue = OptConvert<Callback_DismissContentCoverAction_Void>(options.onWillDismiss);
+    if (onWillDismissValue) {
+        onWillDismissFunc = [arkCallback = CallbackHelper(onWillDismissValue.value()), weakNode](int32_t reason) {
+            PipelineContext::SetCallBackNode(weakNode);
+            Ark_DismissContentCoverAction parameter;
+            auto reasonOpt = Converter::ArkValue<Opt_DismissReason>(
+                static_cast<BindSheetDismissReason>(reason));
+            parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
+                .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+            auto dismiss = []() {
+                ViewAbstract::DismissPopup();
+            };
+            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            arkCallback.Invoke(parameter);
+            parameter.dismiss.resource.release(parameter.dismiss.resource.resourceId); // release reverse callback
+        };
+    }
+};
+
 auto g_bindMenuOptionsParamCallbacks = [](
     const Ark_MenuOptions& menuOptions, MenuParam& menuParam, WeakPtr<FrameNode> weakNode) {
     auto onAppearValue = OptConvert<Callback_Void>(menuOptions.onAppear);
@@ -4093,9 +4144,18 @@ void BindContentCover0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(isShow);
-    //auto convValue = Converter::OptConvert<type>(isShow); // for enums
-    //CommonMethodModelNG::SetBindContentCover0(frameNode, convValue);
+    bool isShowValue = (isShow ? Converter::OptConvert<bool>(*isShow) : std::nullopt).value_or(false);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
+        PipelineContext::SetCallBackNode(weakNode);
+        return arkCallback.BuildSync(node);
+    };
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = (type ? Converter::OptConvert<ModalTransition>(*type) : std::nullopt)
+        .value_or(ModalTransition::DEFAULT);
+    ContentCoverParam contentCoverParam;
+    ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, std::move(buildFunc), modalStyle,
+        nullptr, nullptr, nullptr, nullptr, contentCoverParam);
 }
 void BindContentCover1Impl(Ark_NativePointer node,
                            const Opt_Boolean* isShow,
@@ -4104,9 +4164,34 @@ void BindContentCover1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(isShow);
-    //auto convValue = Converter::OptConvert<type>(isShow); // for enums
-    //CommonMethodModelNG::SetBindContentCover1(frameNode, convValue);
+    bool isShowValue = (isShow ? Converter::OptConvert<bool>(*isShow) : std::nullopt).value_or(false);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
+        PipelineContext::SetCallBackNode(weakNode);
+        return arkCallback.BuildSync(node);
+    };
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = ModalTransition::DEFAULT;
+    std::function<void()> onShowCallback;
+    std::function<void()> onDismissCallback;
+    std::function<void()> onWillShowCallback;
+    std::function<void()> onWillDismissCallback;
+    std::function<void(const int32_t&)> onWillDismissFunc;
+    ContentCoverParam contentCoverParam;
+    auto coverOption = options ? Converter::OptConvert<Ark_ContentCoverOptions>(*options) : std::nullopt;
+    if (coverOption) {
+        g_contentCoverCallbacks(weakNode, coverOption.value(), onShowCallback, onDismissCallback, onWillShowCallback,
+            onWillDismissCallback, onWillDismissFunc);
+        modalStyle.modalTransition = Converter::OptConvert<ModalTransition>(coverOption->modalTransition)
+            .value_or(ModalTransition::DEFAULT);
+        modalStyle.backgroundColor = Converter::OptConvert<Color>(coverOption->backgroundColor);
+        contentCoverParam.transitionEffect = OptConvert<RefPtr<NG::ChainedTransitionEffect>>(coverOption->transition)
+            .value_or(contentCoverParam.transitionEffect);
+    }
+    contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+    ViewAbstractModelNG::BindContentCover(frameNode, isShowValue, nullptr, std::move(buildFunc), modalStyle,
+        std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
+        std::move(onWillDismissCallback), contentCoverParam);
 }
 void BindSheetImpl(Ark_NativePointer node,
                    const Opt_Boolean* isShow,

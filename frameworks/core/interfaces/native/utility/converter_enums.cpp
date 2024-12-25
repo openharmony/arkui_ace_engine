@@ -1428,6 +1428,17 @@ void AssignCast(std::optional<MixedModeContent>& dst, const Ark_MixedMode& src)
 }
 
 template<>
+void AssignCast(std::optional<ModalTransition>& dst, const Ark_ModalTransition& src)
+{
+    switch (src) {
+        case ARK_MODAL_TRANSITION_DEFAULT: dst = ModalTransition::DEFAULT; break;
+        case ARK_MODAL_TRANSITION_NONE: dst = ModalTransition::NONE; break;
+        case ARK_MODAL_TRANSITION_ALPHA: dst = ModalTransition::ALPHA; break;
+        default: LOGE("Unexpected enum value in Ark_ModalTransition: %{public}d", src);
+    }
+}
+
+template<>
 void AssignCast(std::optional<ModifierKey>& dst, const Ark_ModifierKey& src)
 {
     switch (src) {
