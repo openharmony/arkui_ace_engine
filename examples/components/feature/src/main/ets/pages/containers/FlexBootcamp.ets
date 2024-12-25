@@ -904,27 +904,6 @@ export struct FlexBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-
-  // Drag and Drop Control
-  @State enableCompDraggable: boolean = false
-  @State compDraggable: boolean = false
-  @State enableCompDragPreview: boolean = false
-  @State compDragPreview: string = '默认'
-  @State enableCompDragPreviewOptionsValueMode: boolean = false
-  @State compDragPreviewOptionsValueMode: DragPreviewMode = DragPreviewMode.AUTO
-  @State enableCompDragPreviewOptionsValueNumberBadge: boolean = false
-  @State compDragPreviewOptionsValueNumberBadge: number = 1
-  @State enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  // Safe Area
-  @State enableCompExpandSafeAreaTypes: boolean = false
-  @State compExpandSafeAreaTypes: Array<SafeAreaType> =
-    [SafeAreaType.SYSTEM, SafeAreaType.CUTOUT, SafeAreaType.KEYBOARD]
-  @State enableCompExpandSafeAreaEdges: boolean = false
-  @State compExpandSafeAreaEdges: Array<SafeAreaEdge> =
-    [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM, SafeAreaEdge.START, SafeAreaEdge.END]
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -1864,21 +1843,6 @@ export struct FlexBootcamp {
         }
       )
       .obscured(useEnabled(this.enableCompObscured, this.compObscured))
-      .draggable(useEnabled(this.enableCompDraggable, this.compDraggable))
-      .dragPreview(useEnabled(this.enableCompDragPreview, this.compDragPreview))
-      .dragPreviewOptions({
-        mode: useEnabled(this.enableCompDragPreviewOptionsValueMode, this.compDragPreviewOptionsValueMode),
-        numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
-          this.compDragPreviewOptionsValueNumberBadge),
-      }, {
-        isMultiSelectionEnabled: useEnabled(this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
-        defaultAnimationBeforeLifting: useEnabled(this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-          this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
-      })
-      .expandSafeArea(
-        useEnabled(this.enableCompExpandSafeAreaTypes, this.compExpandSafeAreaTypes),
-        useEnabled(this.enableCompExpandSafeAreaEdges, this.compExpandSafeAreaEdges))
       .renderFit(useEnabled(this.enableCompRenderFit, this.compRenderFit))
       .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
       .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
