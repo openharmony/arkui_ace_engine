@@ -58,6 +58,14 @@ void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
 {
     dst.reset();
 }
+
+template<>
+void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
+{
+    ScrollFrameResult ret;
+    ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
+    dst = ret;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -231,8 +239,19 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnScrollFrameBegin(frameNode, convValue);
+
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+        Dimension dimension, ScrollState state) -> ScrollFrameResult {
+        ScrollFrameResult result;
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
+            Callback_OnScrollFrameBeginHandlerResult_Void>(arkValue, arkState)
+            .value_or(result);
+    };
+
+    ScrollModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)

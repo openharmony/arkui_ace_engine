@@ -17,6 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
@@ -27,7 +28,16 @@ using namespace testing;
 using namespace testing::ext;
 using namespace Converter;
 
+namespace Converter {
+inline void AssignArkValue(Ark_Literal_Number_offsetRemain& dst, const ScrollFrameResult& src,
+    ConvContext *ctx)
+{
+    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+}
+} // Converter
+
 namespace {
+    const float TEST_OFFSET = 10.0f;
     struct EventsTracker {
         static inline GENERATED_ArkUIWaterFlowEventsReceiver waterFlowEventReceiver {};
         static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
@@ -178,4 +188,34 @@ HWTEST_F(WaterFlowModifierTest, setOnScrollIndexTestCachedCountValidValues, Test
     EXPECT_EQ(checkEvent->lastIndex, 0);
 }
 
+/*
+ * @tc.name: setOnScrollFrameBeginTest
+ * @tc.desc: test function of setOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowModifierTest, setOnScrollFrameBeginTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<WaterFlowEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
+    static const Ark_Int32 expectedResId = 123;
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
+        ScrollFrameResult result;
+        result.offset = Converter::Convert<Dimension>(offset);
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Literal_Number_offsetRemain>(result));
+    };
+    auto arkFunc = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
+        nullptr, onScrollFrameBegin, expectedResId);
+    modifier_->setOnScrollFrameBegin(node_, &arkFunc);
+
+    Dimension dimension(TEST_OFFSET);
+    ScrollState state = ScrollState::SCROLL;
+    ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
+    EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
+}
 } // namespace OHOS::Ace::NG

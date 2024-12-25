@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
@@ -30,7 +31,17 @@ namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
 
+namespace Converter {
+inline void AssignArkValue(Ark_OnScrollFrameBeginHandlerResult& dst, const ScrollFrameResult& src,
+    ConvContext *ctx)
+{
+    dst.offsetRemain = Converter::ArkValue<Ark_Number>(src.offset);
+}
+} // Converter
+
 namespace {
+const float TEST_OFFSET = 10.0f;
+
 struct EventsTracker {
     static inline GENERATED_ArkUIScrollEventsReceiver eventsReceiver {};
 
@@ -1276,4 +1287,38 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSiz
     ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
 }
 
+/**
+ * @tc.name: setOnScrollFrameBeginTest
+ * @tc.desc: Test for setOnScrollFrameBegin
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_NE(modifier_->setOnScrollFrameBegin, nullptr);
+    modifier_->setOnScrollFrameBegin(node_, nullptr);
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number offset, Ark_ScrollState state,
+        const Callback_OnScrollFrameBeginHandlerResult_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<float>(offset), TEST_OFFSET);
+        ScrollFrameResult result;
+        result.offset = Converter::Convert<Dimension>(offset);
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_OnScrollFrameBeginHandlerResult>(result));
+    };
+    auto arkFunc = Converter::ArkValue<OnScrollFrameBeginCallback>(
+        nullptr, onScrollFrameBegin, expectedResId);
+    modifier_->setOnScrollFrameBegin(node_, &arkFunc);
+
+    Dimension dimension(TEST_OFFSET);
+    ScrollState state = ScrollState::SCROLL;
+    ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
+    EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
+}
 } // namespace OHOS::Ace::NG

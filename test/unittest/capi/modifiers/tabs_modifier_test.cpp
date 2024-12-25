@@ -21,6 +21,7 @@
 
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
@@ -31,6 +32,14 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+
+namespace Converter {
+inline void AssignArkValue(Ark_TabContentAnimatedTransition& dst, const TabContentAnimatedTransition& src,
+    ConvContext *ctx)
+{
+    dst.timeout.value = Converter::ArkValue<Ark_Number>(src.timeout);
+}
+} // Converter
 
 namespace {
 const auto ATTRIBUTE_BAR_WIDTH_NAME = "barWidthAttr";
@@ -734,21 +743,26 @@ HWTEST_F(TabsModifierTest, setOnGestureSwipeTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    TabsCustomContentTransitionCallback func{};
-    modifier_->setCustomContentTransition(node_, &func);
-
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     ASSERT_NE(tabsNode, nullptr);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     ASSERT_NE(swiperNode, nullptr);
-    EXPECT_EQ(g_toValue, 0);
-    EXPECT_EQ(g_fromValue, 0);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     ASSERT_NE(swiperPattern, nullptr);
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onTransition = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number from, const Ark_Number to,
+        const Callback_Opt_TabContentAnimatedTransition_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<int32_t>(to), TO);
+        TabContentAnimatedTransition result;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Opt_TabContentAnimatedTransition>(result));
+    };
+    auto arkFunc = Converter::ArkValue<TabsCustomContentTransitionCallback>(
+        nullptr, onTransition, expectedResId);
+    modifier_->setCustomContentTransition(node_, &arkFunc);
     swiperPattern->OnCustomContentTransition(TO);
-    EXPECT_EQ(g_toValue, TO);
-    EXPECT_EQ(g_fromValue, 0);
-    g_toValue = 0;
 }
 
 /**
@@ -759,20 +773,29 @@ HWTEST_F(TabsModifierTest, setCustomContentTransitionTest, TestSize.Level1)
 HWTEST_F(TabsModifierTest, setOnContentWillChangeTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    OnTabsContentWillChangeCallback func{};
-    modifier_->setOnContentWillChange(node_, &func);
-
+    ASSERT_NE(frameNode, nullptr);
     auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
     ASSERT_NE(tabsNode, nullptr);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
     ASSERT_NE(tabPattern, nullptr);
-    EXPECT_EQ(g_comingIndexValue, 0);
-    EXPECT_EQ(g_currentIndexValue, 0);
-    tabPattern->OnContentWillChange(CURRENT_INDEX, COMING_INDEX);
-    EXPECT_EQ(g_comingIndexValue, COMING_INDEX);
-    EXPECT_EQ(g_currentIndexValue, CURRENT_INDEX);
-    g_comingIndexValue = 0;
-    g_currentIndexValue = 0;
+    ASSERT_NE(modifier_->setOnContentWillChange, nullptr);
+    modifier_->setOnContentWillChange(node_, nullptr);
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onContentWillChange = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number currentIndex, const Ark_Number comingIndex, const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<int32_t>(currentIndex), CURRENT_INDEX);
+        EXPECT_EQ(Converter::Convert<int32_t>(comingIndex), COMING_INDEX);
+        bool result = Converter::Convert<int32_t>(comingIndex) > 0;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+    };
+    auto arkFunc = Converter::ArkValue<OnTabsContentWillChangeCallback>(
+        nullptr, onContentWillChange, expectedResId);
+    modifier_->setOnContentWillChange(node_, &arkFunc);
+
+    auto called = tabPattern->OnContentWillChange(CURRENT_INDEX, COMING_INDEX);
+    EXPECT_TRUE(called);
 }
 
 /**
