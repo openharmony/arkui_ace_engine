@@ -132,6 +132,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
+    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
@@ -145,8 +146,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
+    void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
+    void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
+    void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
     void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
@@ -529,6 +533,17 @@ namespace OHOS::Ace::NG::Converter {
         }
         template<typename P>
         explicit ArkArrayHolder(std::initializer_list<P> data)
+        {
+            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
+                if constexpr (std::is_void_v<U>) {
+                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
+                } else {
+                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
+                }
+            });
+        }
+        template<typename P>
+        explicit ArkArrayHolder(const std::list<P>& data)
         {
             std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
                 if constexpr (std::is_void_v<U>) {

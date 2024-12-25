@@ -1460,6 +1460,75 @@ RefPtr<NG::NGGestureRecognizer> Convert(const Ark_GestureRecognizer &src)
     }
     return nullptr;
 }
+
+void AssignArkValue(Ark_RectResult& dst, const RectF& src)
+{
+    dst.x = ArkValue<Ark_Number>(src.GetX());
+    dst.y = ArkValue<Ark_Number>(src.GetY());
+    dst.width = ArkValue<Ark_Number>(src.Width());
+    dst.height = ArkValue<Ark_Number>(src.Height());
+}
+void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src)
+{
+    dst.windowX = ArkValue<Ark_Number>(src.windowPoint.GetX());
+    dst.windowY = ArkValue<Ark_Number>(src.windowPoint.GetY());
+    dst.parentX = ArkValue<Ark_Number>(src.currentCmpPoint.GetX());
+    dst.parentY = ArkValue<Ark_Number>(src.currentCmpPoint.GetY());
+    dst.x = ArkValue<Ark_Number>(src.subCmpPoint.GetX());
+    dst.y = ArkValue<Ark_Number>(src.subCmpPoint.GetY());
+    dst.rect = ArkValue<Ark_RectResult>(src.subRect);
+    dst.id = ArkValue<Ark_String>(src.id);
+}
+void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
+{
+    if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
+        peer->SetRecognizer(src);
+    }
+}
+void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src)
+{
+    auto tagOpt = src.GetTag();
+    dst.tag = ArkValue<Opt_String>(tagOpt);
+    dst.type = ArkValue<Ark_GestureControl_GestureType>(src.GetType());
+    dst.isSystemGesture = ArkValue<Ark_Boolean>(src.IsSystemGesture());
+}
+
+template<>
+void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeResult& src)
+{
+    switch (src) {
+        case ARK_GESTURE_JUDGE_RESULT_CONTINUE: dst = GestureJudgeResult::CONTINUE; break;
+        case ARK_GESTURE_JUDGE_RESULT_REJECT: dst = GestureJudgeResult::REJECT; break;
+        default: LOGE("Unexpected enum value in Ark_GestureJudgeResult: %{public}d", src);
+    }
+}
+
+void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
+{
+    dst.tiltX = ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
+    dst.tiltY = ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
+    dst.deviceId = ArkValue<Opt_Number>(src.GetDeviceId());
+    dst.target = ArkValue<Ark_EventTarget>(src.GetTarget());
+    dst.source = ArkValue<Ark_SourceType>(src.GetSourceDevice());
+    dst.sourceTool = ArkValue<Ark_SourceTool>(src.GetSourceTool());
+    dst.axisHorizontal = ArkValue<Opt_Number>();
+    dst.axisVertical = ArkValue<Opt_Number>();
+    auto tstamp = std::chrono::duration_cast<std::chrono::milliseconds>(src.GetTimeStamp().time_since_epoch()).count();
+    dst.timestamp = ArkValue<Ark_Number>(tstamp);
+    dst.pressure = ArkValue<Ark_Number>(src.GetForce());
+    ArkArrayHolder<Array_FingerInfo> holder(src.GetFingerList());
+    dst.fingerList = holder.ArkValue();
+}
+void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
+{
+   dst.id = ArkValue<Ark_Number>(src.fingerId_);
+   dst.globalX = ArkValue<Ark_Number>(src.globalLocation_.GetX());
+   dst.globalY = ArkValue<Ark_Number>(src.globalLocation_.GetY());
+   dst.localX = ArkValue<Ark_Number>(src.localLocation_.GetX());
+   dst.localY = ArkValue<Ark_Number>(src.localLocation_.GetY());
+   dst.displayX = ArkValue<Ark_Number>(src.screenLocation_.GetX());
+   dst.displayY = ArkValue<Ark_Number>(src.screenLocation_.GetY());
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -2911,9 +2980,10 @@ void OnAreaChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onEvent = [frameNode, node = weakNode](
         const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         auto previousOffset = oldRect.GetOffset();
 
         Ark_Area previous;
@@ -3767,17 +3837,28 @@ void OnGestureJudgeBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnGestureJudgeBegin(frameNode, convValue);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onGestureJudgefunc = [callback = CallbackHelper(*value, frameNode), node = weakNode](
+            const RefPtr<NG::GestureInfo>& gestureInfo, const std::shared_ptr<BaseGestureEvent>& info
+        ) -> GestureJudgeResult {
+        GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
+        CHECK_NULL_RETURN(gestureInfo && info, defVal);
+        PipelineContext::SetCallBackNode(node);
+        auto arkGestInfo = Converter::ArkValue<Ark_GestureInfo>(*gestureInfo);
+        auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(*info);
+        auto resultOpt = callback.InvokeWithOptConvertResult
+            <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(arkGestInfo, arkGestEvent);
+        return resultOpt.value_or(defVal);
+    };
+    ViewAbstract::SetOnGestureJudgeBegin(frameNode, std::move(onGestureJudgefunc));
 }
+void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
+                                        const GestureRecognizerJudgeBeginCallback* callback,
+                                        Ark_Boolean exposeInnerGesture);
 void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
                                         const GestureRecognizerJudgeBeginCallback* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin0(frameNode, convValue);
+    OnGestureRecognizerJudgeBegin1Impl(node, value, false);
 }
 void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                         const GestureRecognizerJudgeBeginCallback* callback,
@@ -3785,9 +3866,29 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(callback);
-    //auto convValue = Converter::OptConvert<type>(callback); // for enums
-    //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin1(frameNode, convValue);
+    CHECK_NULL_VOID(callback);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*callback, frameNode), node = weakNode](
+            const std::shared_ptr<BaseGestureEvent>& info,
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::list<RefPtr<NG::NGGestureRecognizer>>& others
+        ) -> GestureJudgeResult {
+        GestureJudgeResult defVal = GestureJudgeResult::CONTINUE;
+        CHECK_NULL_RETURN(info && current, defVal);
+        PipelineContext::SetCallBackNode(node);
+
+        auto arkGestEvent = Converter::ArkValue<Ark_BaseGestureEvent>(*info);
+        auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
+        Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
+        auto arkValOthers = holderOthers.ArkValue();
+        auto resultOpt = callback.InvokeWithOptConvertResult
+            <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(
+                arkGestEvent, arkValCurrent, arkValOthers
+            );
+        return resultOpt.value_or(defVal);
+    };
+    ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
+        std::move(onGestureRecognizerJudgefunc), Converter::Convert<bool>(exposeInnerGesture));    
 }
 
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
@@ -3796,10 +3897,11 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto shouldBuiltInRecognizerParallelWithFunc = [callback = CallbackHelper(*value, frameNode), node = frameNode](
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto shouldBuiltInRecognizerParallelWithFunc = [callback = CallbackHelper(*value, frameNode), node = weakNode](
         const RefPtr<NG::NGGestureRecognizer>& current, const std::vector<RefPtr<NG::NGGestureRecognizer>>& others
     ) -> RefPtr<NG::NGGestureRecognizer> {
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(node));
+        PipelineContext::SetCallBackNode(node);
 
         auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
         Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
@@ -4371,11 +4473,11 @@ void OnVisibleAreaChangeImpl(Ark_NativePointer node,
         }
         ratioVec.push_back(ratio);
     }
-
-    auto onVisibleAreaChange = [frameNode](bool visible, double ratio) {
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onVisibleAreaChange = [frameNode, node = weakNode](bool visible, double ratio) {
         Ark_Boolean isExpanding = Converter::ArkValue<Ark_Boolean>(visible);
         Ark_Number currentRatio = Converter::ArkValue<Ark_Number>(static_cast<float>(ratio));
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onVisibleAreaChange(
             frameNode->GetId(), isExpanding, currentRatio);
     };

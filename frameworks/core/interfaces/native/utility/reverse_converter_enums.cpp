@@ -196,6 +196,23 @@ void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src)
     }
 }
 
+void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src)
+{
+    switch (src) {
+        case GestureTypeName::TAP_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_TAP_GESTURE; break;
+        case GestureTypeName::LONG_PRESS_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_LONG_PRESS_GESTURE; break;
+        case GestureTypeName::PAN_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PAN_GESTURE; break;
+        case GestureTypeName::PINCH_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_PINCH_GESTURE; break;
+        case GestureTypeName::SWIPE_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_SWIPE_GESTURE; break;
+        case GestureTypeName::ROTATION_GESTURE: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_ROTATION_GESTURE; break;
+        case GestureTypeName::DRAG: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_DRAG; break;
+        case GestureTypeName::CLICK: dst = ARK_GESTURE_CONTROL_GESTURE_TYPE_CLICK; break;
+        default:
+            LOGE("Unexpected enum value in GestureTypeName: %{public}d", src);
+            dst = static_cast<Ark_GestureControl_GestureType>(-1);
+    }
+}
+
 void AssignArkValue(Ark_LayoutStyle& dst, const LayoutStyle& src)
 {
     switch (src) {
