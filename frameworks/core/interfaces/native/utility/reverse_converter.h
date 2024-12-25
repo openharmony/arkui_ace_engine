@@ -134,10 +134,11 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
+    void AssignArkValue(Ark_Date& dst, const std::string& src);
+    void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src);
+    void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
     void AssignArkValue(Ark_DismissReason& dst, const DialogDismissReason& src);
-    void AssignArkValue(Ark_DismissReason& dst, const BindSheetDismissReason& src);
-    void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpanResult& src);
     void AssignArkValue(Ark_Edge& dst, const ScrollEdge& src);
     void AssignArkValue(Ark_EdgeEffect& dst, const EdgeEffect& src);
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
