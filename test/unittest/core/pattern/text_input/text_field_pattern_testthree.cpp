@@ -15,12 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
