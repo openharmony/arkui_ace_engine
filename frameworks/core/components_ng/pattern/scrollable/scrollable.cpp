@@ -520,8 +520,8 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
-        info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s, "
+        "dragCnt:%{public}d", info.GetMainVelocity(), nodeId_, nodeTag_.c_str(), dragCount_);
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     auto isAxisEvent = IsMouseWheelScroll(info);
     if (isAxisEvent) {
@@ -540,6 +540,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (!moved_ || isAxisEvent) {
         LayoutDirectionEst(lastGestureVelocity_, flingVelocityScale_, isScrollFromTouchPad);
+        ResetContinueDragCount();
         if (GetSnapType() == SnapType::SCROLL_SNAP) {
             currentPos_ = mainPosition;
             SnapAnimationOptions snapAnimationOptions = { .animationVelocity = currentVelocity_ };
@@ -1171,6 +1172,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
     source = snapAnimationFromScrollBar_ && state_ == AnimationState::SNAP ? SCROLL_FROM_BAR_FLING : source;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
     if (!moved_) {
+        ResetContinueDragCount();
         StopFrictionAnimation();
     }
     currentPos_ = position;
@@ -1185,6 +1187,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
             skipRestartSpring_ = true;
             MarkNeedFlushAnimationStartTime();
         }
+        ResetContinueDragCount();
         StopFrictionAnimation();
         StopSnapAnimation();
     }
