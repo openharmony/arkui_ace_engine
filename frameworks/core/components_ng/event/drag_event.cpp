@@ -1249,6 +1249,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->MarkUiFirstNode(false);
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
     }
     MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
