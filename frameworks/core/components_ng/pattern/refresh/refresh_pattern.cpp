@@ -286,7 +286,7 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
 
     PaddingProperty textpadding;
-    textpadding.top = CalcLength(triggerLoadingDistanceTheme_.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
     prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);
