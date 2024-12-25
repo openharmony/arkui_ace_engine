@@ -3450,7 +3450,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 pattern->StartTwinkling();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::IMMEDIATE);
     return true;
 }
 
@@ -8524,7 +8524,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation");
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
@@ -8844,8 +8844,8 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSelected()) {
-            uint32_t startIndex = selectController_->GetStartIndex();
-            uint32_t endIndex = selectController_->GetEndIndex();
+            uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
+            uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex < fullStr.length()) {
                 fullStr.erase(startIndex, endIndex - startIndex);
             }
