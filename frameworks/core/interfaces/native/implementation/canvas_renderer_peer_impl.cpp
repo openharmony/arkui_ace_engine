@@ -620,19 +620,13 @@ void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const Image
     imageData.dirtyWidth = finalWidth;
     imageData.dirtyHeight = finalHeight;
     ParseImageData(ext);
-    imageData.dirtyWidth =
-        imageData.dirtyX < 0
-            ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
-            : std::min(finalWidth - imageData.dirtyX, imageData.dirtyWidth);
-    imageData.dirtyHeight =
-        imageData.dirtyY < 0
-            ? std::min(imageData.dirtyY + imageData.dirtyHeight, finalHeight)
-            : std::min(finalHeight - imageData.dirtyY, imageData.dirtyHeight);
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
+                                                : std::min(finalWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, finalHeight)
+                                                 : std::min(finalHeight - imageData.dirtyY, imageData.dirtyHeight);
     auto size = static_cast<uint32_t>(src.data.size());
-    for (int32_t i = std::max(imageData.dirtyY, 0);
-        i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
-        for (int32_t j = std::max(imageData.dirtyX, 0);
-            j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
             uint32_t idx = static_cast<uint32_t>(j + finalWidth * i);
             if (size > idx) {
                 imageData.data.emplace_back(src.data[idx]);

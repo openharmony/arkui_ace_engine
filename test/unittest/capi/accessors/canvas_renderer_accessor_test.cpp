@@ -46,6 +46,8 @@ const std::string DEFAULT_STRING_VALUE = "text";
 const std::string INVALID_STRING_VALUE = "";
 const auto INVALID_COMPOSITE_VALUE = static_cast<CompositeOperation>(-1);
 constexpr double MATH_2_PI = 2 * M_PI;
+constexpr double DIFF = 1e-10;
+const int32_t DEFAULT_ZERO_VALUE = 0;
 
 // test plan
 std::vector<std::tuple<Ark_Number, double>> ARK_NUMBER_TEST_PLAN = {
@@ -1617,6 +1619,7 @@ HWTEST_F(CanvasRendererAccessorTest, createRadialGradientTest, TestSize.Level1)
         }
     }
 }
+
 /**
  * @tc.name: createConicGradientTest
  * @tc.desc:
@@ -1673,9 +1676,256 @@ HWTEST_F(CanvasRendererAccessorTest, createConicGradientTest, TestSize.Level1)
         }
     }
 }
-// HWTEST_F(CanvasRendererAccessorTest, bottleNeckTest, TestSize.Level1)
-// {
-//     char* p = nullptr;
-//     p[0] = '\0';
-// }
+
+/**
+ * @tc.name: createImageData0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createImageData0Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createImageData0, nullptr);
+    for (const auto& actualW : NUMBER_TEST_PLAN) {
+        for (const auto& actualH : NUMBER_TEST_PLAN) {
+            auto sw = Converter::ArkValue<Ark_Number>(actualW);
+            auto sh = Converter::ArkValue<Ark_Number>(actualH);
+
+            auto ptr = accessor_->createImageData0(peer_, &sw, &sh);
+            ASSERT_NE(ptr, nullptr);
+            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
+            ASSERT_NE(peerImpl, nullptr);
+
+            auto imageData = peerImpl->imageData;
+            auto expectedW = static_cast<uint32_t>(std::abs(actualW + DIFF));
+            auto expectedH = static_cast<uint32_t>(std::abs(actualH + DIFF));
+
+            std::printf("image: holder  w:%.2f h:%.2f w: %d=%d h: %d=%d\n", actualW, actualH, imageData.dirtyWidth,
+                expectedW, imageData.dirtyHeight, expectedH);
+
+            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData.dirtyWidth, expectedW));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(imageData.dirtyHeight, expectedH));
+        }
+    }
+}
+
+/**
+ * @tc.name: createImageData1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createImageData1Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->createImageData1, nullptr);
+    for (const auto& actualW : NUMBER_TEST_PLAN) {
+        for (const auto& actualH : NUMBER_TEST_PLAN) {
+            auto sw = Converter::ArkValue<Ark_Number>(actualW);
+            auto sh = Converter::ArkValue<Ark_Number>(actualH);
+            Ark_ImageData arkImage = { .width = sw, .height = sh };
+            auto ptr = accessor_->createImageData1(peer_, &arkImage);
+            ASSERT_NE(ptr, nullptr);
+            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
+            ASSERT_NE(peerImpl, nullptr);
+            auto imageData = peerImpl->imageData;
+            auto expectedW = static_cast<int32_t>(actualW);
+            auto expectedH = static_cast<int32_t>(actualH);
+
+            std::printf("image: holder  w:%.2f h:%.2f w: %d=%d h: %d=%d\n", actualW, actualH, imageData.dirtyWidth,
+                expectedW, imageData.dirtyHeight, expectedH);
+
+            EXPECT_EQ(imageData.dirtyWidth, expectedW);
+            EXPECT_EQ(imageData.dirtyHeight, expectedH);
+        }
+    }
+}
+
+/**
+ * @tc.name: getImageDataTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, getImageDataTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    ASSERT_NE(accessor_->getImageData, nullptr);
+    for (const auto& actualX : NUMBER_TEST_PLAN) {
+        for (const auto& actualY : NUMBER_TEST_PLAN) {
+            auto sx = Converter::ArkValue<Ark_Number>(actualX);
+            auto sy = Converter::ArkValue<Ark_Number>(actualY);
+            auto sw = Converter::ArkValue<Ark_Number>(valD);
+            auto sh = Converter::ArkValue<Ark_Number>(valD);
+            holder->SetUp();
+            auto ptr = accessor_->getImageData(peer_, &sx, &sy, &sw, &sh);
+            ASSERT_NE(ptr, nullptr);
+            auto peerImpl = reinterpret_cast<GeneratedModifier::CanvasRendererPeerImpl*>(ptr);
+            ASSERT_NE(peerImpl, nullptr);
+            ASSERT_TRUE(holder->isCalled);
+            ASSERT_NE(holder->imageData, nullptr);
+            auto imageData = peerImpl->imageData;
+            auto expected = holder->imageData;
+            std::printf("image: holder  x:%.2f y:%.2f w: %d=%d h: %d=%d\n", actualX, actualY, imageData.dirtyWidth,
+                expected->dirtyWidth, imageData.dirtyHeight, expected->dirtyHeight);
+
+            EXPECT_EQ(imageData.dirtyWidth, expected->dirtyWidth);
+            EXPECT_EQ(imageData.dirtyHeight, expected->dirtyHeight);
+        }
+    }
+    holder->TearDown();
+}
+
+#ifdef PIXEL_MAP_SUPPORTED
+/**
+ * @tc.name: getPixelMapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, DISABLED_getPixelMapTest, TestSize.Level1) {}
+#else
+
+/**
+ * @tc.name: getPixelMapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, getPixelMapTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->getPixelMap, nullptr);
+    auto arkD = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
+    auto arkR = Converter::ArkValue<Ark_Number>(DEFAULT_SCALE_VALUE);
+    auto ptr = accessor_->getPixelMap(peer_, &arkD, &arkR, &arkD, &arkR);
+    std::printf("image: ptr %s\n", ptr == nullptr ? "null" : "ok");
+    EXPECT_EQ(ptr, nullptr);
+    ptr = accessor_->getPixelMap(peer_, &arkR, &arkD, &arkR, &arkD);
+    std::printf("image: ptr %s\n", ptr == nullptr ? "null" : "ok");
+    EXPECT_EQ(ptr, nullptr);
+}
+#endif
+
+/**
+ * @tc.name: putImageData0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, putImageData0Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    auto width = valD;
+    auto height = valD;
+    auto length = width * height;
+    std::vector<uint32_t> vector(length);
+    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
+    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
+    auto arkLength = length;
+    auto arkBuffer = Ark_Buffer { .data = reinterpret_cast<void*>(vector.data()), .length = arkLength };
+    auto arkData = Ark_ImageData { .data = arkBuffer, .width = arkWidth, .height = arkHeight };
+    ASSERT_NE(accessor_->putImageData0, nullptr);
+    for (const auto& actualX : NUMBER_TEST_PLAN) {
+        for (const auto& actualY : NUMBER_TEST_PLAN) {
+            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
+            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
+            holder->SetUp();
+            accessor_->putImageData0(peer_, &arkData, &dx, &dy);
+            ASSERT_TRUE(holder->isCalled);
+            ASSERT_NE(holder->imageData, nullptr);
+            Ace::ImageData imageData = *holder->imageData;
+
+            std::printf(
+                "image: holder  x:%.2f y:%.2f w: %.2f h: %.2f length: %.2f\n", actualX, actualY, width, height, length);
+            std::printf("image: holder2  x:%d y:%d dx: %d dy: %d w: %d h: %d length: %zu \n", imageData.x, imageData.y,
+                imageData.dirtyX, imageData.dirtyY, imageData.dirtyWidth, imageData.dirtyHeight, imageData.data.size());
+
+            auto expectedX = static_cast<uint32_t>(actualX + DIFF);
+            auto expectedY = static_cast<uint32_t>(actualY + DIFF);
+            auto expectedW = static_cast<uint32_t>(std::abs(width + DIFF));
+            auto expectedH = static_cast<uint32_t>(std::abs(height + DIFF));
+            EXPECT_EQ(imageData.x, expectedX);
+            EXPECT_EQ(imageData.y, expectedY);
+            EXPECT_EQ(imageData.dirtyX, DEFAULT_ZERO_VALUE);
+            EXPECT_EQ(imageData.dirtyY, DEFAULT_ZERO_VALUE);
+            EXPECT_EQ(imageData.dirtyWidth, expectedW);
+            EXPECT_EQ(imageData.dirtyHeight, expectedH);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: putImageData1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, putImageData1Test, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->putImageData1, nullptr);
+    auto holder = TestHolder::GetInstance();
+    auto valD = DEFAULT_DOUBLE_VALUE;
+    auto width = valD;
+    auto height = valD;
+    auto length = width * height;
+    std::vector<uint32_t> vector(length);
+    auto arkWidth = Converter::ArkValue<Ark_Number>(width);
+    auto arkHeight = Converter::ArkValue<Ark_Number>(height);
+    auto arkLength = length;
+    auto arkBuffer = Ark_Buffer { .data = reinterpret_cast<void*>(vector.data()), .length = arkLength };
+    auto arkData = Ark_ImageData { .data = arkBuffer, .width = arkWidth, .height = arkHeight };
+    ASSERT_NE(accessor_->putImageData1, nullptr);
+    for (const auto& actualX : NUMBER_TEST_PLAN) {
+        for (const auto& actualY : NUMBER_TEST_PLAN) {
+            auto dx = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualX);
+            auto dy = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(actualY);
+            auto dirtyX = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD);
+            auto dirtyY = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD);
+            auto dirtyWidth = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD * valD);
+            auto dirtyHeight = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(valD * valD);
+
+            holder->SetUp();
+            accessor_->putImageData1(peer_, &arkData, &dx, &dy, &dirtyX, &dirtyY, &dirtyWidth, &dirtyHeight);
+            ASSERT_TRUE(holder->isCalled);
+            ASSERT_NE(holder->imageData, nullptr);
+            Ace::ImageData imageData = *holder->imageData;
+
+            std::printf(
+                "image: holder  x:%.2f y:%.2f w: %.2f h: %.2f length: %.2f\n", actualX, actualY, width, height, length);
+            std::printf("image: holder2  x:%d y:%d dx: %d dy: %d w: %d h: %d length: %zu \n", imageData.x, imageData.y,
+                imageData.dirtyX, imageData.dirtyY, imageData.dirtyWidth, imageData.dirtyHeight, imageData.data.size());
+
+            auto expectedX = static_cast<uint32_t>(actualX + DIFF);
+            auto expectedY = static_cast<uint32_t>(actualY + DIFF);
+            auto expectedDX = static_cast<uint32_t>(valD + DIFF);
+            auto expectedDY = static_cast<uint32_t>(valD + DIFF);
+
+            std::printf("image: holder3  x:%d y:%d dx: %d dy: %d \n", expectedX, expectedY, expectedDX, expectedDY);
+
+            EXPECT_EQ(imageData.x, expectedX);
+            EXPECT_EQ(imageData.y, expectedY);
+            EXPECT_EQ(imageData.dirtyX, expectedDX);
+            EXPECT_EQ(imageData.dirtyY, expectedDY);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: getLineDashOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->getLineDashOffset, nullptr);
+    for (const auto& actual : NUMBER_TEST_PLAN) {
+        holder->SetUp();
+        LineDashParam lineDash = { .dashOffset = actual };
+        holder->lineDash = std::make_shared<LineDashParam>(lineDash);
+        auto result = accessor_->getLineDashOffset(peer_);
+        auto offset = Converter::Convert<int32_t>(result);
+        auto expected = static_cast<int32_t>(actual);
+        std::printf("lineDash: holder actual: %.2f offset: %d=%d\n", actual, offset, expected);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(offset, expected);
+    }
+    holder->TearDown();
+}
 } // namespace OHOS::Ace::NG

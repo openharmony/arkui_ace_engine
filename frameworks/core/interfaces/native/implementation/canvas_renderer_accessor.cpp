@@ -374,7 +374,8 @@ Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
              "The product of finalHeight and finalWidth is too big.");
         return reinterpret_cast<Ark_NativePointer>(peerImpl);
     }
-    auto canvasData = peerImpl->GetImageData(imageSize);
+    std::unique_ptr<Ace::ImageData> canvasData = peerImpl->GetImageData(imageSize);
+    CHECK_NULL_RETURN(canvasData, nullptr);
     if (canvasData) {
         peerImpl->imageData = *canvasData;
     }
@@ -404,7 +405,7 @@ Ark_NativePointer GetPixelMapImpl(CanvasRendererPeer* peer,
     return reinterpret_cast<Ark_NativePointer>(peerImpl);
 #else
     LOGE("ARKOALA CanvasRendererAccessor::GetPixelMapImpl PixelMap is not supported on current platform.");
-    return nullptr;
+    return 0;
 #endif
 }
 void PutImageData0Impl(CanvasRendererPeer* peer,
@@ -932,6 +933,8 @@ Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
     CHECK_NULL_RETURN(peerImpl, 0);
 
     double offset = peerImpl->TriggerGetLineDashOffsetImpl();
+    LOGE("ARKOALA CanvasRendererAccessor::GetLineDashOffsetImpl return type Ark_Int32 "
+         "should be replaced with a valid Ark_Number for LineDashParam offset double type.");
     return Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(offset));
 }
 void SetLineDashOffsetImpl(CanvasRendererPeer* peer,

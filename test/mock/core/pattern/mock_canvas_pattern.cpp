@@ -536,8 +536,12 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
     auto holder = TestHolder::GetInstance();
     if (holder->request) {
         std::unique_ptr<Ace::ImageData> data = std::make_unique<Ace::ImageData>();
+        data->x = left;
+        data->y = top;
         data->dirtyWidth = width;
         data->dirtyHeight = height;
+        holder->imageData = std::make_shared<Ace::ImageData>(*data);
+        holder->isCalled = true;
         return data;
     }
 
@@ -561,6 +565,13 @@ void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageDat
 
 void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->imageData = std::make_shared<Ace::ImageData>(imageData);
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
@@ -1058,6 +1069,11 @@ void CanvasPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 
 LineDashParam CanvasPattern::GetLineDash() const
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        return *holder->lineDash;
+    }
     return paintMethod_->GetLineDash();
 }
 
