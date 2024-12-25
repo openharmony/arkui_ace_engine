@@ -1549,8 +1549,14 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
+    static void BindMenu(FrameNode* targetNode,
+        std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
+    
+    static void BindMenuGesture(FrameNode* targetNode,
+        std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam);
+
 private:
-    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
+    static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

@@ -434,6 +434,7 @@ namespace Converter {
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> NestedScrollOptions Convert(const Ark_NestedScrollOptions& src);
+    template<> OptionParam Convert(const Ark_MenuElement& src);
     template<> PaddingProperty Convert(const Ark_LengthMetrics& src);
     template<> PaddingProperty Convert(const Ark_LocalizedPadding& src);
     template<> PaddingProperty Convert(const Ark_Padding& src);

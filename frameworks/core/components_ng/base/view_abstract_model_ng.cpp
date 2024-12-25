@@ -110,7 +110,7 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    if (CheckMenuIsShow(menuParam, targetId)) {
+    if (ViewAbstractModelNG::CheckMenuIsShow(menuParam, targetId)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
         if (!params.empty()) {
@@ -876,6 +876,91 @@ void ViewAbstractModelNG::SetLightColor(FrameNode* frameNode, const std::optiona
     } else {
         ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, LightColor, frameNode);
     }
+}
+
+void ViewAbstractModelNG::BindMenu(FrameNode* frameNode,
+    std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto targetNode = AceType::Claim(frameNode);
+    auto targetId = targetNode->GetId();
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
+    if (ViewAbstractModelNG::CheckMenuIsShow(menuParam, targetId)) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
+    } else if (menuParam.isShow) {
+        if (!params.empty()) {
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuParam.positionOffset, menuParam);
+        } else if (buildFunc) {
+            std::function<RefPtr<UINode>()> previewBuildFunc;
+            NG::ViewAbstract::BindMenuWithCustomNode(
+                std::move(buildFunc), targetNode, menuParam.positionOffset, menuParam, std::move(previewBuildFunc));
+        }
+    }
+    if (!menuParam.setShow) {
+        ViewAbstractModelNG::BindMenuGesture(frameNode, std::move(params), std::move(buildFunc), menuParam);
+    }
+    // delete menu when target node destroy
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!theme->GetExpandDisplay() || !menuParam.isShowInSubWindow) {
+        auto destructor = [id = targetNode->GetId(), params]() mutable {
+            params.clear();
+            auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(id);
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
+    } else {
+        auto destructor = [id = targetNode->GetId(), containerId = Container::CurrentId(), params]() mutable {
+            params.clear();
+            auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+            CHECK_NULL_VOID(subwindow);
+            auto childContainerId = subwindow->GetChildContainerId();
+            auto childContainer = AceEngine::Get().GetContainer(childContainerId);
+            CHECK_NULL_VOID(childContainer);
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto overlayManager = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            overlayManager->DeleteMenu(id);
+        };
+        targetNode->PushDestroyCallbackWithTag(destructor, KEY_MENU);
+    }
+}
+
+void ViewAbstractModelNG::BindMenuGesture(FrameNode* targetNode,
+    std::vector<NG::OptionParam>&& params, std::function<RefPtr<UINode>()>&& buildFunc, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(targetNode);
+    GestureEventFunc showMenu;
+    auto weakTarget = AceType::WeakClaim(targetNode);
+    if (!params.empty()) {
+        showMenu = [params, weakTarget, menuParam](GestureEvent& info) mutable {
+            auto targetNode = weakTarget.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
+        };
+    } else if (buildFunc) {
+        showMenu = [builderFunc = std::move(buildFunc), weakTarget, menuParam](const GestureEvent& info) mutable {
+            auto targetNode = weakTarget.Upgrade();
+            CHECK_NULL_VOID(targetNode);
+            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+            std::function<RefPtr<UINode>()> previewBuildFunc;
+            NG::ViewAbstract::BindMenuWithCustomNode(
+                std::move(builderFunc), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
+        };
+    } else {
+        return;
+    }
+    auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+    gestureHub->BindMenu(std::move(showMenu));
 }
 
 } // namespace OHOS::Ace::NG

@@ -36,6 +36,9 @@ public:
     MOCK_METHOD5(ShowMenuNG,
         void(std::function<void()>&& buildFunc, std::function<void()>&& previewBuildFunc,
             const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
+    MOCK_METHOD5(ShowMenuNG,
+        void(std::function<RefPtr<NG::UINode>()>&& buildFunc, std::function<RefPtr<NG::UINode>()>&& previewBuildFunc,
+            const NG::MenuParam& menuParam, const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset));
     MOCK_METHOD1(ShowPreviewNG, bool(bool isStartDraggingFromSubWindow));
     MOCK_METHOD0(HidePreviewNG, void());
     MOCK_METHOD2(HideMenuNG, void(const RefPtr<NG::FrameNode>& menu, int32_t targetId));
