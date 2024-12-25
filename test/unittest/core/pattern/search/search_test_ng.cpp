@@ -1357,6 +1357,7 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     });
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(u"SetOnSubmit", event);
+    EXPECT_EQ(event.GetText(), u"SetOnSubmit");
 }
 
 /**
