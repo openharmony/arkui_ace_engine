@@ -71,7 +71,6 @@ public:
             theme->toastLimitHeightRatio_ =
                 toastPattern->GetAttr<double>("toast_limit_height_ratio", toastLimitHeightRatio);
 
-            theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>("toast_background_blur_style", 0);
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
                     toastPattern->GetAttr<Dimension>("toast_padding_level4", 0.0_vp).Value(),
@@ -276,7 +275,7 @@ private:
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
     ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
-    Color defaultBGColor_ = Color{};
+    Color defaultBGColor_ = Color::TRANSPARENT;
     TextAlign multiLineTextAlign_ = TextAlign::START;
     int32_t toastAlign_ = 0;
     double toastLimitHeightRatio_ = 0.0;

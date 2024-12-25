@@ -1620,7 +1620,6 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
 {
     Edge edge;
     double arrowOffset;
-    double edgeValue = 0.0;
     double maxMotionRange = 0.0;
     double minMotionRange = 0.0;
     double targetOffsetXOrY = 0.0;
@@ -1634,24 +1633,20 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            edgeValue = edge.Top().Value();
             bHorizontal = true;
             break;
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            edgeValue = edge.Bottom().Value();
             bHorizontal = true;
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            edgeValue = edge.Left().Value();
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            edgeValue = edge.Right().Value();
             break;
         default:
             break;

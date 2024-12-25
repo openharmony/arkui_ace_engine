@@ -244,7 +244,8 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     CHECK_NULL_VOID(dialogTheme);
     auto scrollPropery = scroll->GetLayoutProperty();
     CHECK_NULL_VOID(scrollPropery);
-    if (dialogTheme->GetTextAlignContent() == TEXT_ALIGN_CONTENT_CENTER) {
+    if ((dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) ||
+        dialogTheme->GetTextAlignContent() == TEXT_ALIGN_CONTENT_CENTER) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
             GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
             scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
@@ -252,16 +253,7 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
             scrollPropery->UpdateAlignment(Alignment::CENTER);
         }
     } else {
-        if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-                GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
-                scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-            } else {
-                scrollPropery->UpdateAlignment(Alignment::CENTER);
-            }
-        } else {
-            scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
-        }
+        scrollPropery->UpdateAlignment(Alignment::CENTER_LEFT);
     }
 }
 
