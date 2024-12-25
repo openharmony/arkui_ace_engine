@@ -2093,8 +2093,8 @@ void OnHoverImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstract::DisableOnHover(frameNode);
     }
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onHover = [arkCallback = CallbackHelper(*value), node = weakeNode](bool isHover, HoverInfo& hoverInfo) {
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onHover = [arkCallback = CallbackHelper(*value), node = weakNode](bool isHover, HoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
         Ark_HoverEvent event;
@@ -2128,8 +2128,8 @@ void OnAccessibilityHoverImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstract::DisableOnAccessibilityHover(frameNode);
     }
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakeNode](
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onAccessibilityHover = [arkCallback = CallbackHelper(*value), node = weakNode](
         bool isHover, AccessibilityHoverInfo& hoverInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_Boolean arkIsHover = Converter::ArkValue<Ark_Boolean>(isHover);
@@ -2179,8 +2179,8 @@ void OnMouseImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstract::DisableOnMouse(frameNode);
     }
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onMouse = [arkCallback = CallbackHelper(*value), node = weakeNode](MouseInfo& mouseInfo) {
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onMouse = [arkCallback = CallbackHelper(*value), node = weakNode](MouseInfo& mouseInfo) {
         PipelineContext::SetCallBackNode(node);
         Ark_MouseEvent event;
         event.button = Converter::ArkValue<Ark_MouseButton>(mouseInfo.GetButton());
@@ -2286,8 +2286,8 @@ void OnKeyEventImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstract::DisableOnKeyEvent(frameNode);
     }
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakeNode](KeyEventInfo& info) -> bool {
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onKeyEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
         PipelineContext::SetCallBackNode(node);
         Ark_KeyEvent event;
         event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
@@ -2320,8 +2320,8 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     if (!value) {
         ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
     }
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value), node = weakeNode](KeyEventInfo& info) -> bool {
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
         PipelineContext::SetCallBackNode(node);
         Ark_KeyEvent event;
         event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
@@ -3652,8 +3652,8 @@ void OnTouchInterceptImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto weakeNode = AceType::WeakClaim(frameNode);
-    auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakeNode](
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onTouchIntercept = [arkCallback = CallbackHelper(*value), node = weakNode](
         TouchEventInfo& info) -> HitTestMode {
         PipelineContext::SetCallBackNode(node);
         Ark_TouchEvent event;
