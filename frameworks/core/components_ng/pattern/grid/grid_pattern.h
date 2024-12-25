@@ -297,7 +297,7 @@ private:
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
-    bool forceOverScroll_ = false;
+    bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 
