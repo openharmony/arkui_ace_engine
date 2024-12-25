@@ -533,11 +533,8 @@ export struct SubHeaderV2 {
     if (!this.operationItems || this.operationItems.length <= 0) {
       return '';
     }
-    if (this.operationItems
-      && this.operationItems[0]?.content?.toString().length
-      &&  this.operationItems[0]?.content?.toString().length <= 0) {
-      // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
-      return Util.getStringByResource(125833704, '');
+    if (this.operationItems[0]?.accessibilityDescription && this.operationItems[0]?.accessibilityDescription !== '') {
+      return this.toStringFormat(this.operationItems[0]?.accessibilityDescription)
     }
     return '';
   }
