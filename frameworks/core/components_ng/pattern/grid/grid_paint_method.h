@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT GridPaintMethod : public ScrollablePaintMethod {
@@ -63,6 +64,11 @@ public:
     }
 
 private:
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::BOUNDARY;
+    }
+
     RefPtr<GridContentModifier> gridContentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

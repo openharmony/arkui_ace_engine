@@ -51,11 +51,17 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         frameSize.MinusPadding(*padding->left, *padding->right, *padding->top, *padding->bottom);
     }
     UpdateFadingGradient(renderContext);
-    bool hasPadding = padding && padding->HasValue();
-    bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
-    listContentModifier_->SetClipOffset(paddingOffset);
-    listContentModifier_->SetClipSize(frameSize);
-    listContentModifier_->SetClip(clip);
+
+    if (TryContentClip(paintWrapper)) {
+        listContentModifier_->SetClip(false);
+    } else {
+        const bool hasPadding = padding && padding->HasValue();
+        bool clip = hasPadding && (!renderContext || renderContext->GetClipEdge().value_or(true));
+        listContentModifier_->SetClipOffset(paddingOffset);
+        listContentModifier_->SetClipSize(frameSize);
+        listContentModifier_->SetClip(clip);
+    }
+
     float contentSize = vertical_ ? frameSize.Width() : frameSize.Height();
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||

@@ -4780,6 +4780,30 @@ void RosenRenderContext::ClipWithRRect(const RectF& rectF, const RadiusF& radius
     RequestNextFrame();
 }
 
+void RosenRenderContext::SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    if (std::holds_alternative<RectF>(rect)) {
+        const auto& rectF = std::get<RectF>(rect);
+        rsNode_->SetCustomClipToFrame(
+            { rectF.GetX(), rectF.GetY(), rectF.GetX() + rectF.Width(), rectF.GetY() + rectF.Height() });
+    } else if (std::holds_alternative<RefPtr<ShapeRect>>(rect)) {
+        auto shape = std::get<RefPtr<ShapeRect>>(rect);
+        CHECK_NULL_VOID(shape);
+        using helper = DrawingDecorationPainter;
+
+        const float x =
+            helper::DrawingDimensionToPx(shape->GetOffset().GetX(), paintRect_.GetSize(), LengthMode::HORIZONTAL);
+        const float y =
+            helper::DrawingDimensionToPx(shape->GetOffset().GetY(), paintRect_.GetSize(), LengthMode::VERTICAL);
+        const float width =
+            helper::DrawingDimensionToPx(shape->GetWidth(), paintRect_.GetSize(), LengthMode::HORIZONTAL);
+        const float height =
+            helper::DrawingDimensionToPx(shape->GetHeight(), paintRect_.GetSize(), LengthMode::VERTICAL);
+        rsNode_->SetCustomClipToFrame({ x, y, x + width, y + height });
+    }
+}
+
 void RosenRenderContext::RemoveClipWithRRect()
 {
     std::weak_ptr<Rosen::RSNode> weakRsNode = rsNode_;
