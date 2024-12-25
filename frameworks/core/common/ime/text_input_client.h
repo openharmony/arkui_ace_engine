@@ -238,6 +238,8 @@ public:
         return false;
     }
     virtual void DeleteRange(int32_t start, int32_t end) {}
+    virtual void HandleOnPageUp() {};
+    virtual void HandleOnPageDown() {};
 protected:
     int32_t instanceId_ = -1;
     bool shiftFlag_ = false;

@@ -108,6 +108,15 @@ protected:
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
     virtual void OnTextGenstureSelectionEnd() {}
     virtual void DoTextSelectionTouchCancel() {}
+    int32_t GetSelectingFingerId()
+    {
+        return selectingFingerId_;
+    }
+
+    bool IsGestureSelectingText()
+    {
+        return isSelecting_;
+    }
 private:
     void ResetGestureSelection()
     {
@@ -116,6 +125,7 @@ private:
         isStarted_ = false;
         startOffset_.Reset();
         isSelecting_ = false;
+        selectingFingerId_ = -1;
     }
     void DoTextSelectionTouchMove(const TouchEventInfo& info);
     int32_t start_ = -1;
@@ -124,6 +134,7 @@ private:
     bool isSelecting_ = false;
     Dimension minMoveDistance_ = 5.0_vp;
     Offset startOffset_;
+    int32_t selectingFingerId_ = -1;
 };
 
 class TextBase : public SelectOverlayClient {
@@ -245,9 +256,17 @@ public:
         return false;
     }
     static std::u16string ConvertStr8toStr16(const std::string& value);
+    static bool isMouseOrTouchPad(SourceTool sourceTool)
+    {
+        return (sourceTool == SourceTool::MOUSE || sourceTool == SourceTool::TOUCHPAD);
+    }
+
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
+    bool afterDragSelect_ = false;
+    bool releaseInDrop_ = false;
+    SourceTool sourceTool_ = SourceTool::UNKNOWN;
     std::vector<std::u16string> dragContents_;
     MouseStatus mouseStatus_ = MouseStatus::NONE;
     RectF contentRect_;

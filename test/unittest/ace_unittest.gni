@@ -134,6 +134,7 @@ template("ace_unittest") {
         "$ace_root/test/unittest:ace_components_property",
         "$ace_root/test/unittest:ace_components_render",
         "$ace_root/test/unittest:ace_components_syntax",
+        "$ace_root/test/unittest:ace_components_token_theme",
         "$ace_root/test/unittest:ace_core_animation",
         "$ace_root/test/unittest:ace_core_extra",
       ]

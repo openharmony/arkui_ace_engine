@@ -50,6 +50,16 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
         TAG_LOGE(AceLogTag::ACE_FORM, "pointerEvent is nullptr");
         return nullptr;
     }
+    if (point.pointerEvent) {
+        pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL,
+            point.pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_HORIZONTAL));
+        pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL,
+            point.pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_SCROLL_VERTICAL));
+        pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH,
+            point.pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_PINCH));
+        pointerEvent->SetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE,
+            point.pointerEvent->GetAxisValue(OHOS::MMI::PointerEvent::AxisType::AXIS_TYPE_ROTATE));
+    }
 
     OHOS::MMI::PointerEvent::PointerItem item;
     PointF transformPoint(point.x, point.y);
@@ -80,7 +90,6 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     return pointerEvent;
 }
 
-#ifdef FORM_MOUSE_AXIS_SUPPORT
 std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const AxisEvent& point,
     const WeakPtr<FrameNode>& node)
 {
@@ -122,7 +131,6 @@ std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, co
     pointerEvent->SetTargetDisplayId(point.targetDisplayId);
     return pointerEvent;
 }
-#endif
 
 class FormAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
@@ -203,7 +211,6 @@ FormNode::~FormNode()
     accessibilityManager->DeregisterAccessibilityChildTreeCallback(GetAccessibilityId());
 }
 
-#ifdef FORM_MOUSE_AXIS_SUPPORT
 HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
 {
@@ -234,7 +241,6 @@ HitTestResult FormNode::AxisTest(const PointF& globalPoint, const PointF& parent
     }
     return testResult;
 }
-#endif
 
 HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
@@ -293,7 +299,6 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
-#ifdef FORM_MOUSE_AXIS_SUPPORT
 void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     SerializedGesture& serializedGesture)
 {
@@ -304,7 +309,6 @@ void FormNode::DispatchPointerEvent(const AxisEvent& axisEvent,
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, axisEvent, WeakClaim(this));
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
-#endif
 
 OffsetF FormNode::GetFormOffset() const
 {

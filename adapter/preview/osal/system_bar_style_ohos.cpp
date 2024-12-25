@@ -15,6 +15,8 @@
 
 #include "adapter/preview/osal/system_bar_style_ohos.h"
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace {
 RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* value)
 {

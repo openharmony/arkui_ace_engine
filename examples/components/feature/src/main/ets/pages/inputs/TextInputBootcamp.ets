@@ -15,6 +15,8 @@
 //单行文本框
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, useEnabled, RadioBlock, SliderBlock } from 'common';
+import { LengthMetrics } from '@kit.ArkUI';
+import UTD from '@ohos.data.uniformTypeDescriptor';
 
 
 @Component
@@ -206,6 +208,11 @@ export struct TextInputBootcamp {
           type: useEnabled(this.enableDecorationType, this.decorationType),
           color: useEnabled(this.enableDecorationColor, this.decorationColor),
           style: useEnabled(this.enableDecorationStyle, this.decorationStyle),
+        .allowDrop([UTD.UniformDataType.TEXT, UTD.UniformDataType.PLAIN_TEXT])
+        .draggable(true)
+        .margin({
+          start: LengthMetrics.vp(24),
+          end: LengthMetrics.vp(24)
         })
         .letterSpacing(useEnabled(this.enableLetterSpacing, this.letterSpacing))
         .fontFeature(useEnabled(this.enableFontFeature, this.fontFeature))
@@ -218,8 +225,6 @@ export struct TextInputBootcamp {
         .showPassword(useEnabled(this.enableShowPassword, this.showPassword))
         .lineBreakStrategy(useEnabled(this.enableLineBreakStrategy, this.lineBreakStrategy))
         .enablePreviewText(useEnabled(this.enableEnablePreviewText, this.enablePreviewText))
-      // .enableHapticFeedback
-      // .cancelButton(useEnabled(this.enableCancelButton,this.cancelButton))
     }.justifyContent(FlexAlign.Start)
   }
 

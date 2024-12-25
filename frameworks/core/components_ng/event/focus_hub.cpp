@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -31,45 +32,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint32_t DELAY_TIME_FOR_RESET_UEC = 50;
-Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 namespace {
-float GetMoveOffset(const RefPtr<FrameNode>& parentFrameNode, const RefPtr<FrameNode>& curFrameNode, bool isVertical,
-    float contentStartOffset, float contentEndOffset)
-{
-    constexpr float notMove = 0.0f;
-    CHECK_NULL_RETURN(parentFrameNode, notMove);
-    CHECK_NULL_RETURN(curFrameNode, notMove);
-    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(parentGeometryNode, notMove);
-    auto parentFrameSize = parentGeometryNode->GetFrameSize();
-    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
-    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
-    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
-    auto curGeometry = curFrameNode->GetGeometryNode();
-    CHECK_NULL_RETURN(curGeometry, notMove);
-    auto curFrameSize = curGeometry->GetFrameSize();
-
-    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
-    if (NearZero(diffToTarFrame)) {
-        return notMove;
-    }
-    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
-    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
-    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
-    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
-
-    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
-    float startAlignOffset = -diffToTarFrame + focusMarginStart;
-    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
-    bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
-    bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
-                      (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
-    if (needScroll) {
-        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
-    }
-    return notMove;
-}
-
 template <bool isReverse>
 bool AnyOfUINode(const RefPtr<UINode>& node, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
 {
@@ -233,13 +196,6 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 
 bool FocusHub::HandleEvent(const NonPointerEvent& event)
 {
-    if (!IsCurrentFocus()) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
-            GetFrameName().c_str(), GetFrameId());
-        return false;
-    }
-
     FocusEvent focusEvent(event);
     bool shiftTabPressed = focusEvent.intension == FocusIntension::SHIFT_TAB;
     bool leftArrowPressed = focusEvent.intension == FocusIntension::LEFT;
@@ -1238,7 +1194,10 @@ bool FocusHub::CalculatePosition()
         return false;
     }
 
-    if (lastFocusNode->IsChild()) {
+    // relative position and width/height need to be calculated.
+    // 1. lastFocusNode is node
+    // 2. lastFocusNode do not have focusing child
+    if (lastFocusNode->IsChild() || !lastFocusNode->IsLastWeakNodeFocused()) {
         auto lastFocusGeometryNode = lastFocusNode->GetGeometryNode();
         CHECK_NULL_RETURN(lastFocusGeometryNode, false);
         RectF rect(childRect.GetOffset(), lastFocusGeometryNode->GetFrameSize());
@@ -1284,7 +1243,7 @@ void FocusHub::ScrollToLastFocusIndex() const
 void FocusHub::OnFocus()
 {
     if (focusType_ == FocusType::NODE) {
-        OnFocusNode();
+        OnFocusNode(false);
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
@@ -1305,8 +1264,11 @@ void FocusHub::OnBlur()
     }
 }
 
-void FocusHub::OnFocusNode()
+void FocusHub::OnFocusNode(bool currentHasFocused)
 {
+    if (currentHasFocused) {
+        return;
+    }
     TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
         GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
@@ -1409,7 +1371,6 @@ bool FocusHub::IsLeafFocusScope()
         return true;
     }
     if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
@@ -1419,9 +1380,7 @@ bool FocusHub::IsLeafFocusScope()
 void FocusHub::OnFocusScope(bool currentHasFocused)
 {
     if (IsLeafFocusScope()) {
-        if (!currentHasFocused) {
-            OnFocusNode();
-        }
+        OnFocusNode(currentHasFocused);
         return;
     }
 
@@ -1436,7 +1395,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) has no focusable child.", GetFrameName().c_str(),
             GetFrameId());
         lastWeakFocusNode_ = nullptr;
-        OnFocusNode();
+        OnFocusNode(currentHasFocused);
         auto focusManager = GetFocusManager();
         CHECK_NULL_VOID(focusManager);
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::NO_FOCUSABLE_CHILD);
@@ -1446,9 +1405,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
     if ((focusDepend_ == FocusDependence::AUTO || focusDepend_ == FocusDependence::CHILD) && isAnyChildFocusable) {
         auto itFocusNode = itLastFocusNode;
         if (RequestFocusByPriorityInScope()) {
-            if (!currentHasFocused) {
-                OnFocusNode();
-            }
+            OnFocusNode(currentHasFocused);
             return;
         }
         do {
@@ -1461,9 +1418,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
             }
             lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(*itLastFocusNode));
             if ((*itLastFocusNode)->RequestFocusImmediatelyInner()) {
-                if (!currentHasFocused) {
-                    OnFocusNode();
-                }
+                OnFocusNode(currentHasFocused);
                 return;
             }
         } while ((++itLastFocusNode) != itFocusNode);
@@ -1600,16 +1555,23 @@ bool FocusHub::PaintFocusStateToRenderContext()
         if (!HasPaintRect()) {
             return false;
         }
-        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
+        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
         return true;
     }
 
     Dimension focusPaddingVp;
     GetPaintPaddingVp(focusPaddingVp);
     if (HasPaintRect()) {
-        renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(GetPaintRect(),
+                                       focusPaddingVp,
+                                       paintColor,
+                                       paintWidth,
+                                       {false, appTheme->IsFocusBoxGlow()});
     } else {
-        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(focusPaddingVp,
+                                       paintColor,
+                                       paintWidth,
+                                       appTheme->IsFocusBoxGlow());
     }
     return true;
 }
@@ -1695,7 +1657,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
+    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
     return true;
 }
 
@@ -1773,9 +1735,9 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
         return true;
     }
 
-    auto operation = [this, step](const RefPtr<FocusHub>& focusHub) {
+    auto operation = [&lastfocus = lastWeakFocusNode_, step](const RefPtr<FocusHub>& focusHub) {
         if (focusHub && focusHub->AcceptFocusOfSpecifyChild(step)) {
-            lastWeakFocusNode_ = focusHub;
+            lastfocus = focusHub;
             return true;
         }
         return false;
@@ -2004,7 +1966,11 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
         return false;
     }
     if (nodeNeedToFocus->RequestFocusImmediatelyInner()) {
-        lastTabIndexNodeId_ = nodeIdNeedToFocus;
+        auto curFocusHub = Claim(this);
+        while (curFocusHub) {
+            curFocusHub->lastTabIndexNodeId_ = nodeIdNeedToFocus;
+            curFocusHub = curFocusHub->GetParentFocusHub();
+        }
         return true;
     }
     return false;
@@ -2126,7 +2092,7 @@ bool FocusHub::ScrollByOffsetToParent(const RefPtr<FrameNode>& parentFrameNode) 
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
-    auto moveOffset = GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
+    auto moveOffset = ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
         scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
     if (!NearZero(moveOffset)) {
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Scroll offset: %{public}f on %{public}s/%{public}d, axis: %{public}d",
@@ -2366,9 +2332,11 @@ bool FocusHub::UpdateFocusView()
     CHECK_NULL_RETURN(frameNode, false);
     auto focusView = frameNode->GetPattern<FocusView>();
     if (!focusView) {
-        auto focusManager = GetFocusManager();
-        CHECK_NULL_RETURN(focusManager, false);
-        focusManager->FlushFocusView();
+        if (frameNode->IsOnMainTree()) {
+            auto focusManager = GetFocusManager();
+            CHECK_NULL_RETURN(focusManager, false);
+            focusManager->FlushFocusView();
+        }
         return true;
     }
     auto focusedChild = lastWeakFocusNode_.Upgrade();
@@ -2849,5 +2817,12 @@ void FocusHub::DumpFocusUieInJson(std::unique_ptr<JsonValue>& json)
     if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern->DumpInfo(json);
     }
+}
+
+bool FocusHub::IsLastWeakNodeFocused() const
+{
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    CHECK_NULL_RETURN(lastFocusNode, false);
+    return lastFocusNode->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

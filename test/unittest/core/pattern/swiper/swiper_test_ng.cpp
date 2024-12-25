@@ -846,7 +846,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level
                     continue;
                 }
                 pattern_->jumpIndex_ = -1;
-                pattern_->usePropertyAnimation_ = true;
+                pattern_->propertyAnimationIsRunning_ = true;
             }
             pattern_->jumpIndex_ = 10;
             pattern_->rightButtonId_.reset();

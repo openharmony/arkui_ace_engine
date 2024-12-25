@@ -485,33 +485,140 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
-    static const ArkUIGridModifier modifier = { SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate,
-        ResetGridRowsTemplate, SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
-        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
-        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetShowCached, ResetShowCached,
-        GetShowCached, SetGridEditMode, ResetGridEditMode, SetGridMultiSelectable, ResetGridMultiSelectable,
-        SetGridMaxCount, ResetGridMaxCount, SetGridMinCount, ResetGridMinCount, SetGridCellLength, ResetGridCellLength,
-        SetGridLayoutDirection, ResetGridLayoutDirection, SetGridSupportAnimation, ResetGridSupportAnimation,
-        SetEdgeEffect, ResetEdgeEffect, SetNestedScroll, ResetNestedScroll, SetEnableScroll, ResetEnableScroll,
-        SetFriction, ResetFriction, GetColumnsTemplate, GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter,
-        ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount, GetCachedCount, SetFlingSpeedLimit,
-        ResetFlingSpeedLimit, SetGridAlignItems, ResetGridAlignItems, SetGridFadingEdge, ResetGridFadingEdge };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIGridModifier modifier = {
+        .setGridColumnsTemplate = SetGridColumnsTemplate,
+        .resetGridColumnsTemplate = ResetGridColumnsTemplate,
+        .setGridRowsTemplate = SetGridRowsTemplate,
+        .resetGridRowsTemplate = ResetGridRowsTemplate,
+        .setGridColumnsGap = SetGridColumnsGap,
+        .resetGridColumnsGap = ResetGridColumnsGap,
+        .setGridRowsGap = SetGridRowsGap,
+        .resetGridRowsGap = ResetGridRowsGap,
+        .setGridScrollBar = SetGridScrollBar,
+        .resetGridScrollBar = ResetGridScrollBar,
+        .setGridScrollBarWidth = SetGridScrollBarWidth,
+        .resetGridScrollBarWidth = ResetGridScrollBarWidth,
+        .setGridScrollBarColor = SetGridScrollBarColor,
+        .resetGridScrollBarColor = ResetGridScrollBarColor,
+        .setGridCachedCount = SetGridCachedCount,
+        .resetGridCachedCount = ResetGridCachedCount,
+        .setShowCached = SetShowCached,
+        .resetShowCached = ResetShowCached,
+        .getShowCached = GetShowCached,
+        .setGridEditMode = SetGridEditMode,
+        .resetGridEditMode = ResetGridEditMode,
+        .setGridMultiSelectable = SetGridMultiSelectable,
+        .resetGridMultiSelectable = ResetGridMultiSelectable,
+        .setGridMaxCount = SetGridMaxCount,
+        .resetGridMaxCount = ResetGridMaxCount,
+        .setGridMinCount = SetGridMinCount,
+        .resetGridMinCount = ResetGridMinCount,
+        .setGridCellLength = SetGridCellLength,
+        .resetGridCellLength = ResetGridCellLength,
+        .setGridLayoutDirection = SetGridLayoutDirection,
+        .resetGridLayoutDirection = ResetGridLayoutDirection,
+        .setGridSupportAnimation = SetGridSupportAnimation,
+        .resetGridSupportAnimation = ResetGridSupportAnimation,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setNestedScroll = SetNestedScroll,
+        .resetNestedScroll = ResetNestedScroll,
+        .setEnableScroll = SetEnableScroll,
+        .resetEnableScroll = ResetEnableScroll,
+        .setFriction = SetFriction,
+        .resetFriction = ResetFriction,
+        .getGridColumnsTemplate = GetColumnsTemplate,
+        .getGridRowsTemplate = GetRowsTemplate,
+        .getGridColumnsGap = GetColumnsGap,
+        .getGridRowsGap = GetRowsGap,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
+        .setGridAlignItems = SetGridAlignItems,
+        .resetGridAlignItems = ResetGridAlignItems,
+        .setGridFadingEdge = SetGridFadingEdge,
+        .resetGridFadingEdge = ResetGridFadingEdge,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIGridModifier* GetCJUIGridModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIGridModifier modifier = {
-        SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate, ResetGridRowsTemplate,
-        SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
-        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
-        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
-        SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,
-        ResetGridMinCount, SetGridCellLength, ResetGridCellLength, SetGridLayoutDirection, ResetGridLayoutDirection,
-        SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
-        ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
-        GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
-        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit };
+        .setGridColumnsTemplate = SetGridColumnsTemplate,
+        .resetGridColumnsTemplate = ResetGridColumnsTemplate,
+        .setGridRowsTemplate = SetGridRowsTemplate,
+        .resetGridRowsTemplate = ResetGridRowsTemplate,
+        .setGridColumnsGap = SetGridColumnsGap,
+        .resetGridColumnsGap = ResetGridColumnsGap,
+        .setGridRowsGap = SetGridRowsGap,
+        .resetGridRowsGap = ResetGridRowsGap,
+        .setGridScrollBar = SetGridScrollBar,
+        .resetGridScrollBar = ResetGridScrollBar,
+        .setGridScrollBarWidth = SetGridScrollBarWidth,
+        .resetGridScrollBarWidth = ResetGridScrollBarWidth,
+        .setGridScrollBarColor = SetGridScrollBarColor,
+        .resetGridScrollBarColor = ResetGridScrollBarColor,
+        .setGridCachedCount = SetGridCachedCount,
+        .resetGridCachedCount = ResetGridCachedCount,
+        .setGridEditMode = SetGridEditMode,
+        .resetGridEditMode = ResetGridEditMode,
+        .setGridMultiSelectable = SetGridMultiSelectable,
+        .resetGridMultiSelectable = ResetGridMultiSelectable,
+        .setGridMaxCount = SetGridMaxCount,
+        .resetGridMaxCount = ResetGridMaxCount,
+        .setGridMinCount = SetGridMinCount,
+        .resetGridMinCount = ResetGridMinCount,
+        .setGridCellLength = SetGridCellLength,
+        .resetGridCellLength = ResetGridCellLength,
+        .setGridLayoutDirection = SetGridLayoutDirection,
+        .resetGridLayoutDirection = ResetGridLayoutDirection,
+        .setGridSupportAnimation = SetGridSupportAnimation,
+        .resetGridSupportAnimation = ResetGridSupportAnimation,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setNestedScroll = SetNestedScroll,
+        .resetNestedScroll = ResetNestedScroll,
+        .setEnableScroll = SetEnableScroll,
+        .resetEnableScroll = ResetEnableScroll,
+        .setFriction = SetFriction,
+        .resetFriction = ResetFriction,
+        .getGridColumnsTemplate = GetColumnsTemplate,
+        .getGridRowsTemplate = GetRowsTemplate,
+        .getGridColumnsGap = GetColumnsGap,
+        .getGridRowsGap = GetRowsGap,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
@@ -526,7 +633,7 @@ void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_GRID_SCROLL_TO_INDEX;
         event.componentAsyncEvent.data[0].i32 = first;
         event.componentAsyncEvent.data[1].i32 = last;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     GridModelNG::SetOnScrollIndex(frameNode, std::move(onEvent));
 }

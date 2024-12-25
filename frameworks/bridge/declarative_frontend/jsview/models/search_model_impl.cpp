@@ -202,6 +202,10 @@ void SearchModelImpl::SetHeight(const Dimension& value)
     textFieldComponent->SetHeight(value);
 }
 
+void SearchModelImpl::SetMinFontScale(const float value) {}
+
+void SearchModelImpl::SetMaxFontScale(const float value) {}
+
 void SearchModelImpl::SetBackBorder()
 {
     auto stack = ViewStackProcessor::GetInstance();

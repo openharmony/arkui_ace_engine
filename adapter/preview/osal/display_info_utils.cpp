@@ -28,7 +28,7 @@ DisplayInfoUtils& DisplayInfoUtils::GetInstance()
     return instance;
 }
 
-RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo()
+RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
 {
     return AceType::MakeRefPtr<DisplayInfo>();
 }

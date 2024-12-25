@@ -966,6 +966,9 @@ void PatternLockModifier::UpdateBoundsRect()
     auto pathStrokeWidth = pathStrokeWidth_->Get();
     auto sideLength = sideLength_->Get();
 
+    float handleStrokeWidth = std::min(pathStrokeWidth, sideLength / PATTERN_LOCK_COL_COUNT);
+    pathStrokeWidth = std::max(handleStrokeWidth, 0.0f);
+
     auto addDistance = circleRadius_->Get() * scaleLightRingRadiusEnd_ -
                        sideLength_->Get() / PATTERN_LOCK_COL_COUNT / RADIUS_TO_DIAMETER;
     if (pathStrokeWidth / 2.0f > addDistance) {

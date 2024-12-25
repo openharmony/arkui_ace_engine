@@ -141,4 +141,72 @@ HWTEST_F(FrameNodeTestNg, ResetLayoutAlgorithmTest4, TestSize.Level1)
     EXPECT_FALSE(frameNode2->HasLayoutAlgorithm());
     EXPECT_FALSE(frameNode3->HasLayoutAlgorithm());
 }
+/**
+ * @tc.name: FrameNodeGetExtraCustomProperty001
+ * @tc.desc: Test GetExtraCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetExtraCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    char value[7]= "value1";
+    /**
+     * @tc.steps: step2. set key is value1
+     * @tc.expected: expect result value.
+     */
+    frameNode->setIsCNode(true);
+    frameNode->AddExtraCustomProperty("key", value);
+    bool result = frameNode->GetExtraCustomProperty("key1");
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeGetExtraCustomProperty002
+ * @tc.desc: Test GetExtraCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetExtraCustomProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set key is value
+     * @tc.expected: expect result value.
+     */
+    char value[7]= "value1";
+    frameNode->setIsCNode(true);
+    frameNode->AddExtraCustomProperty("key", value);
+    bool result = frameNode->GetExtraCustomProperty("key");
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: FrameNodeRemoveExtraCustomProperty001
+ * @tc.desc: Test RemoveExtraCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeRemoveExtraCustomProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set key is value1, remove key.
+     * @tc.expected: expect result false.
+     */
+    char value[7]= "value1";
+    frameNode->setIsCNode(true);
+    frameNode->AddExtraCustomProperty("key", value);
+    frameNode->RemoveExtraCustomProperty("key");
+    bool result = frameNode->GetExtraCustomProperty("key");
+    EXPECT_EQ(result, false);
+}
 } // namespace OHOS::Ace::NG

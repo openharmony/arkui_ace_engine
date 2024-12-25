@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -66,7 +66,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     std::string ProgressOptions() const;
-    void ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     std::string ToJsonGradientColor() const;
 
     ACE_DEFINE_PROPERTY_GROUP(ProgressPaintDate, ProgressDate);
@@ -87,6 +86,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableLinearScanEffect, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, EnableShowText, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, StrokeRadius, Dimension, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ProgressPaintDate, BorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Color, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BackgroundColor, Color, PROPERTY_UPDATE_MEASURE);

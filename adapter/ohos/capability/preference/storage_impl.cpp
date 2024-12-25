@@ -14,8 +14,33 @@
  */
 
 #include "storage_impl.h"
+#include "application_context.h"
 
 namespace OHOS::Ace {
+StorageImpl::StorageImpl(int areaMode) : Storage()
+{
+    std::string fileName = "";
+    // areaMode >= 0 means using global path
+    if (areaMode >= 0) {
+        auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        if (appContext != nullptr) {
+            auto defaultAreaMode = appContext->GetArea();
+            appContext->SwitchArea(areaMode);
+            fileName = appContext->GetFilesDir();
+            appContext->SwitchArea(defaultAreaMode);
+        } else {
+            LOGE("appContext get failed in StorageImpl.");
+        }
+    } else {
+        // areaMode < 0 means using module path
+        fileName = AceApplicationInfo::GetInstance().GetDataFileDirPath();
+    }
+    if (fileName.empty()) {
+        LOGE("Cannot get storage date file path.");
+    }
+    fileName_ = fileName + "/persistent_storage";
+};
+
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
 {
     auto it = preferences_.find(fileName);
@@ -59,8 +84,8 @@ void StorageImpl::Delete(const std::string& key)
     pref->FlushSync();
 }
 
-RefPtr<Storage> StorageProxyImpl::GetStorage() const
+RefPtr<Storage> StorageProxyImpl::GetStorage(int areaMode) const
 {
-    return AceType::MakeRefPtr<StorageImpl>();
+    return AceType::MakeRefPtr<StorageImpl>(areaMode);
 }
 } // namespace OHOS::Ace

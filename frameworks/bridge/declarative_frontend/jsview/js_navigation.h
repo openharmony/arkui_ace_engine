@@ -30,6 +30,7 @@ public:
     static void SetTitleMode(int32_t value);
     static void SetTitle(const JSCallbackInfo& info);
     static void SetSubTitle(const std::string& subTitle);
+    static void SetEnableModeChangeAnimation(const JSCallbackInfo& info);
     static void SetHideTitleBar(const JSCallbackInfo& info);
     static void SetHideBackButton(bool hide);
     static void SetHideToolBar(const JSCallbackInfo& info);

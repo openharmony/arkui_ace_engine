@@ -56,6 +56,8 @@ public:
 protected:
     Alignment GetStackAlignment(const TextDirection& userDirection);
     void LayoutChild(LayoutWrapper* layoutWrapper, int32_t index, float& nodeWidth);
+    virtual RefPtr<FrameNode> CreateResponseAreaImageNode(const ImageSourceInfo& imageSourceInfo, ImageFit imageFit,
+        const CalcSize& userDefinedIdealSize);
     WeakPtr<Pattern> hostPattern_;
     RectF areaRect_;
 };
@@ -92,17 +94,7 @@ public:
 
     void Refresh() override;
 
-    void ClearArea() override
-    {
-        auto hostPattern = hostPattern_.Upgrade();
-        CHECK_NULL_VOID(hostPattern);
-        auto host = hostPattern->GetHost();
-        CHECK_NULL_VOID(host);
-        CHECK_NULL_VOID(stackNode_);
-        host->RemoveChildAndReturnIndex(stackNode_);
-        passwordNode_.Reset();
-        areaRect_.Reset();
-    }
+    void ClearArea() override;
 
     const RefPtr<FrameNode> GetFrameNode() override;
 
@@ -205,9 +197,9 @@ public:
     bool CheckUpdateCleanNode();
 
 private:
-    bool IsShowClean();
-    bool IsShowSymbol();
-    bool IsSymbolIcon();
+    bool IsShowClean() const;
+    bool IsShowSymbol() const;
+    bool IsSymbolIcon() const;
     void ReplaceNode();
     void UpdateSymbolSource();
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);

@@ -925,6 +925,20 @@ void ViewAbstract::DisableOnBlur()
     focusHub->ClearOnBlurCallback();
 }
 
+void ViewAbstract::DisableOnFocusAxisEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
+}
+
+void ViewAbstract::DisableOnFocusAxisEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnFocusAxisCallback();
+}
+
 void ViewAbstract::DisableOnClick(FrameNode* frameNode)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
@@ -1349,6 +1363,20 @@ void ViewAbstract::SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTes
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
+}
+
+void ViewAbstract::SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisCallback));
 }
 
 void ViewAbstract::AddDragFrameNodeToManager()
@@ -2570,12 +2598,27 @@ void ViewAbstract::SetBorderImageGradient(const Gradient& gradient)
     ACE_UPDATE_RENDER_CONTEXT(BorderSourceFromImage, false);
 }
 
+std::mutex ViewAbstract::visualEffectMutex_;
+OEMVisualEffectFunc ViewAbstract::oemVisualEffectFunc = nullptr;
+void ViewAbstract::RegisterOEMVisualEffect(OEMVisualEffectFunc func)
+{
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    ViewAbstract::oemVisualEffectFunc = func;
+}
+
 void ViewAbstract::SetVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
-    ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+
+    std::lock_guard<std::mutex> lock(visualEffectMutex_);
+    if (!oemVisualEffectFunc) {
+        ACE_UPDATE_RENDER_CONTEXT(VisualEffect, visualEffect);
+    } else {
+        Rosen::VisualEffect* graphicVisualEffect = oemVisualEffectFunc(visualEffect);
+        ACE_UPDATE_RENDER_CONTEXT(VisualEffect, graphicVisualEffect);
+    }
 }
 
 void ViewAbstract::SetBackgroundFilter(const OHOS::Rosen::Filter* backgroundFilter)
@@ -5137,6 +5180,24 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
+}
+
+void ViewAbstract::SetDrawCompleteEvent(
+    FrameNode* frameNode, std::function<void()>&& onDraw)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKDrawCompletedCallback(std::move(onDraw));
+}
+
+void ViewAbstract::SetLayoutEvent(
+    FrameNode* frameNode, std::function<void()>&& onLayout)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKLayoutCallback(std::move(onLayout));
 }
 
 void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)

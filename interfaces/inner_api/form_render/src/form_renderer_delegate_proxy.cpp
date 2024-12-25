@@ -15,6 +15,7 @@
 #include "form_renderer_delegate_proxy.h"
 
 #include "form_renderer_hilog.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -268,7 +269,7 @@ int32_t FormRendererDelegateProxy::OnFormLinkInfoUpdate(const std::vector<std::s
     return reply.ReadInt32();
 }
 
-int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     MessageParcel data;
     if (!WriteInterfaceToken(data)) {
@@ -290,8 +291,10 @@ int32_t FormRendererDelegateProxy::OnGetRectRelativeToWindow(int32_t &top, int32
         HILOG_ERROR("return errCode: %{public}d", errCode);
         return errCode;
     }
-    reply.ReadInt32(top);
-    reply.ReadInt32(left);
+    reply.ReadInt32(parentRectInfo.top);
+    reply.ReadInt32(parentRectInfo.left);
+    reply.ReadFloat(parentRectInfo.scaleX);
+    reply.ReadFloat(parentRectInfo.scaleY);
     return ERR_OK;
 }
 
@@ -302,6 +305,31 @@ bool FormRendererDelegateProxy::WriteInterfaceToken(MessageParcel& data)
         return false;
     }
     return true;
+}
+
+int32_t FormRendererDelegateProxy::OnCheckManagerDelegate(bool &checkFlag)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return ERR_INVALID_VALUE;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_CHECK_MANAGER_DELEGATE), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return error;
+    }
+
+    int32_t errCode = reply.ReadInt32();
+    if (errCode != ERR_OK) {
+        HILOG_ERROR("return errCode: %{public}d", errCode);
+        return errCode;
+    }
+    reply.ReadBool(checkFlag);
+    return ERR_OK;
 }
 } // namespace Ace
 } // namespace OHOS

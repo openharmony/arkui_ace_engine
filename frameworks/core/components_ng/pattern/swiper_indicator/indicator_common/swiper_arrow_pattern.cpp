@@ -347,12 +347,12 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     if (swiperPattern->IsHorizontalAndRightToLeft()) {
         std::swap(leftArrowIsHidden, rightArrowIsHidden);
     }
-
     auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
     auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
-    auto needHideArrow = (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop) ||
-                         (swiperPattern->RealTotalCount() <= displayCount);
+    auto needHideArrow =
+        (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop) ||
+        (swiperPattern->RealTotalCount() <= displayCount);
     if (needHideArrow) {
         renderContext->SetVisible(false);
         // Set hit test mode NONE to make sure button not respond to the touch events when invisible.

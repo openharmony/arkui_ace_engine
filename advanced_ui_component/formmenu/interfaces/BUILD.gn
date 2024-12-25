@@ -18,11 +18,19 @@ import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_formmenu_abc") {
-  src_js = rebase_path("formmenu.js")
-  dst_file = rebase_path(target_out_dir + "/formmenu.abc")
-  in_puts = [ "formmenu.js" ]
-  out_puts = [ target_out_dir + "/formmenu.abc" ]
-  extra_args = [ "--module" ]
+  if (ace_engine_feature_form_menu_enable) {
+    src_js = rebase_path("formmenu.js")
+    dst_file = rebase_path(target_out_dir + "/formmenu.abc")
+    in_puts = [ "formmenu.js" ]
+    out_puts = [ target_out_dir + "/formmenu.abc" ]
+    extra_args = [ "--module" ]
+  } else {
+    src_js = rebase_path("formmenu_wear.js")
+    dst_file = rebase_path(target_out_dir + "/formmenu.abc")
+    in_puts = [ "formmenu_wear.js" ]
+    out_puts = [ target_out_dir + "/formmenu.abc" ]
+    extra_args = [ "--module" ]
+  }
 }
 
 gen_js_obj("formmenu_abc") {

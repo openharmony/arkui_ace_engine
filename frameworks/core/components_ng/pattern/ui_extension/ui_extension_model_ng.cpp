@@ -132,13 +132,14 @@ void UIExtensionModelNG::Create(const UIExtensionConfig& config)
 
 void UIExtensionModelNG::CreateDynamicComponent(const UIExtensionConfig& config)
 {
-    TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "CreateDynamicComponent");
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "CreateDynamicComponent");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::ISOLATED_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
     auto pattern = frameNode->GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetBackgroundTransparent(config.backgroundTransparent);
     stack->Push(frameNode);
 }
 
@@ -182,7 +183,7 @@ void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& conf
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
     const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    auto pattern = frameNode->GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
 }

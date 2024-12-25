@@ -2105,4 +2105,192 @@ HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0061, TestSize.Level1)
     imagePattern->UpdateDragEvent(dragEvent);
     EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
 }
+
+/**
+ * @tc.name: ImagePatternUpdateDragEvent0062
+ * @tc.desc: call UpdateDragEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImagePatternUpdateDragEvent0062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    imagePattern->loadingCtx_->src_.srcType_ = SrcType::DATA_ABILITY_DECODED;
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(dragEvent->unifiedData_, nullptr);
+    imagePattern->OnRecycle();
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateDragEvent.
+     * @tc.expected: Returned color value is BLUE.
+     */
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    for (auto& image : imagePattern->images_) {
+        image.pixelMap = pixelMap;
+    }
+    imagePattern->UpdateDragEvent(dragEvent);
+    EXPECT_EQ(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: ImageCreator0063
+ * @tc.desc: call Creat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImageCreator0063, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call Create.
+     * @tc.expected: GetImageType value is not BASE.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto imageType = ImagePattern::ImageType::BASE;
+    auto res = imagePattern->GetImageType();
+    EXPECT_EQ(res, imageType);
+    imageType = ImagePattern::ImageType::ANIMATION;
+    imagePattern->SetImageType(imageType);
+    imagePattern->hasSizeChanged = false;
+    image.Create(imageInfoConfig, pixMap);
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ImageCreator0064
+ * @tc.desc: call Creat.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ImageCreator0064, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call Create.
+     * @tc.expected: GetImageType value is not BASE and pattern has changed.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto res = imagePattern->GetImageType();
+    auto imageType = ImagePattern::ImageType::ANIMATION;
+    imagePattern->SetImageType(imageType);
+    imagePattern->hasSizeChanged = true;
+    image.Create(imageInfoConfig, pixMap);
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ResetImage0065
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ResetImage0065, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call ResetImage.
+     * @tc.expected: GetImageType value is UNDEFINED.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.src = std::make_shared<std::string>(IMAGE_SRC_URL);
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    auto imageType = ImagePattern::ImageType::UNDEFINED;
+    auto res = imagePattern->GetImageType();
+    imagePattern->SetImageType(imageType);
+    imagePattern->hasSizeChanged = false;
+    image.ResetImage();
+    /**
+     * @tc.steps: step3. call ResetImage.
+     * @tc.expected: GetImageType value is ANIMATION.
+     */
+    imageType = ImagePattern::ImageType::ANIMATION;
+    imagePattern->SetImageType(imageType);
+    image.ResetImage();
+    EXPECT_NE(res, imageType);
+}
+
+/**
+ * @tc.name: ResetImage0066
+ * @tc.desc: call ResetImage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestThreeNg, ResetImage0066, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    auto frameNode = ImageTestThreeNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    EXPECT_NE(frameNode, nullptr);
+    ImageModelNG image;
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    EXPECT_NE(imagePattern, nullptr);
+    imagePattern->loadingCtx_->srcRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->dstRect_ = { 0, 0, IMAGE_SOURCESIZE_WIDTH, IMAGE_SOURCESIZE_HEIGHT };
+    imagePattern->loadingCtx_->SuccessCallback(nullptr);
+    EXPECT_NE(imagePattern->image_, nullptr);
+    /**
+     * @tc.steps: step2. call ResetImage.
+     * @tc.expected: GetImageType value is ANIMATION and pattern has changed.
+     */
+    RefPtr<PixelMap> pixMap = nullptr;
+    auto res = imagePattern->GetImageType();
+    auto imageType = ImagePattern::ImageType::ANIMATION;
+    imagePattern->SetImageType(imageType);
+    imagePattern->hasSizeChanged = true;
+    image.ResetImage();
+    EXPECT_NE(res, imageType);
+}
 } // namespace OHOS::Ace::NG

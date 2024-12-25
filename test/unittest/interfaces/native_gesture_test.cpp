@@ -14,15 +14,16 @@
  */
 
 #include "gtest/gtest.h"
-#include "native_interface.h"
+#include "gesture_impl.cpp"
 #include "native_gesture.h"
-#include "event_converter.h"
+#include "native_interface.h"
 #include "native_node.h"
 #include "native_type.h"
 
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
+
 using namespace testing;
 using namespace testing::ext;
-
 class NativeGestureTest : public testing::Test {
 public:
     static void SetUpTestCase() {};
@@ -95,3 +96,29 @@ HWTEST_F(NativeGestureTest, NativeGestureTest002, TestSize.Level1)
     EXPECT_NE(gestureAPI, nullptr);
 }
 
+/**
+ * @tc.name: NativeGestureIssueTest001
+ * @tc.desc: Test the OH_ArkUI_GestureInterruptInfo_GetGestureEvent functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeGestureTest, NativeGestureIssueTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_GestureInterruptInfo, related function is called.
+     */
+    ArkUI_GestureInterruptInfo interruptInfo;
+    ArkUI_GestureEvent gestureEvent;
+    ArkUIGestureInterruptInfo interruptData;
+    auto* nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto* gestureNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    interruptData.userData = reinterpret_cast<void*>(gestureNode);
+    interruptData.gestureEvent = &gestureEvent;
+    interruptInfo.interruptData = interruptData;
+
+    auto* event = OH_ArkUI_GestureInterruptInfo_GetGestureEvent(&interruptInfo);
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_NE(event, nullptr);
+}

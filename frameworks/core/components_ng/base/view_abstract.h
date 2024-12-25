@@ -54,6 +54,7 @@ namespace OHOS::Ace::NG {
 struct OptionParam {
     std::string value;
     std::string icon;
+    std::string labelInfo;
     bool enabled = true;
     std::function<void()> action;
     std::function<void(WeakPtr<NG::FrameNode>)> symbol = nullptr;
@@ -81,6 +82,14 @@ struct OptionParam {
     OptionParam(const std::string& valueParam, const std::string& iconParam, bool enabledParam,
         const std::function<void()>& actionParam, const std::function<void(WeakPtr<NG::FrameNode>)> symbol)
         : value(valueParam), icon(iconParam), enabled(enabledParam), action(actionParam), symbol(symbol)
+    {}
+    OptionParam(const std::string& valueParam, const std::string& iconParam, const std::string& labelInfo,
+        const std::function<void()>& actionParam)
+        : value(valueParam), icon(iconParam), labelInfo(labelInfo), enabled(true), action(actionParam)
+    {}
+    OptionParam(const std::string& valueParam, const std::function<void()>& actionParam, const std::string& labelInfo,
+        bool enabledParam)
+        : value(valueParam), icon(""), labelInfo(labelInfo), enabled(enabledParam), action(actionParam)
     {}
 
     void SetSymbolUserDefinedIdealFontSize(const Dimension& dimension)
@@ -110,6 +119,8 @@ enum class OverlayType {
     COMPONENT_CONTENT = 2,
     RESET = 3,
 };
+
+typedef Rosen::VisualEffect* (*OEMVisualEffectFunc)(const Rosen::VisualEffect* effect);
 
 class ACE_FORCE_EXPORT ViewAbstract {
 public:
@@ -303,6 +314,7 @@ public:
     static void SetTouchable(bool touchable);
     static void SetHitTestMode(HitTestMode hitTestMode);
     static void SetOnTouchTestFunc(NG::OnChildTouchTestFunc&& onChildTouchTest);
+    static void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback);
     static void SetDraggable(bool draggable);
     static void SetDragPreviewOptions(const DragPreviewOption& previewOption);
     static void SetOnDragStart(
@@ -400,6 +412,8 @@ public:
     static void DisableOnAreaChange();
     static void DisableOnFocus();
     static void DisableOnBlur();
+    static void DisableOnFocusAxisEvent();
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode);
     static void DisableOnClick(FrameNode* frameNode);
     static void DisableOnDragStart(FrameNode* frameNode);
     static void DisableOnDragEnter(FrameNode* frameNode);
@@ -653,8 +667,11 @@ public:
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);
     static void SetSystemFontChangeEvent(FrameNode* frameNode, std::function<void(float, float)>&& onFontChange);
+    static void SetDrawCompleteEvent(FrameNode* frameNode, std::function<void()>&& onDraw);
+    static void SetLayoutEvent(FrameNode* frameNode, std::function<void()>&& onLayout);
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
+    static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
@@ -781,6 +798,7 @@ public:
     static void SetOffsetLocalizedEdges(bool needLocalized);
     static void AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value);
     static void RemoveCustomProperty(UINode* frameNode, const std::string& key);
+    static void RegisterOEMVisualEffect(OEMVisualEffectFunc func);
 
 private:
     static void AddDragFrameNodeToManager();
@@ -789,6 +807,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+
+    static OEMVisualEffectFunc oemVisualEffectFunc;
+    static std::mutex visualEffectMutex_;
 };
 } // namespace OHOS::Ace::NG
 

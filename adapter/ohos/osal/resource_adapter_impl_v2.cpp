@@ -210,11 +210,18 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         auto manager = GetResourceManager();
         if (manager) {
             auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
+            if (ret != Global::Resource::SUCCESS) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get theme by id error, id=%{public}d", themeId);
+            }
             for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
                 ResourceThemeStyle::RawAttrMap attrMap;
                 std::string patternTag = PATTERN_MAP[i];
                 std::string patternName = std::string(flag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
+                if (ret != Global::Resource::SUCCESS) {
+                    TAG_LOGW(
+                        AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+                }
                 if (attrMap.empty()) {
                     continue;
                 }
@@ -244,8 +251,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(taskExecutor);
 
     // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
-        weak = WeakClaim(this)]() -> void {
+    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme), weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
         auto adapter = weak.Upgrade();

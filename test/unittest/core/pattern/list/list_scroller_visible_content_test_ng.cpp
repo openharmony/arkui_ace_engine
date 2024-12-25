@@ -48,8 +48,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange001, TestSi
      * @tc.steps: step2. scroll to 100
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(100);
-    FlushUITasks();
+    ScrollTo(100);
     EXPECT_TRUE(IsEqual(startInfo, { 1 }));
     EXPECT_TRUE(IsEqual(endInfo, { 4 }));
 
@@ -72,8 +71,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange001, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -94,8 +92,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange001, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -128,8 +125,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange002, TestSi
      * @tc.steps: step2. scroll to 200
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 2 }));
     EXPECT_TRUE(IsEqual(endInfo, { 5 }));
 
@@ -152,8 +148,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange002, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -174,8 +169,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange002, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -208,8 +202,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange003, TestSi
      * @tc.steps: step2. scroll to 300
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(300);
-    FlushUITasks();
+    ScrollTo(300);
     EXPECT_TRUE(IsEqual(startInfo, { 3 }));
     EXPECT_TRUE(IsEqual(endInfo, { 6 }));
 
@@ -232,8 +225,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange003, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -254,8 +246,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange003, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -288,8 +279,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange004, TestSi
      * @tc.steps: step2. scroll to 400
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(400);
-    FlushUITasks();
+    ScrollTo(400);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
@@ -312,8 +302,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange004, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -334,8 +323,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange004, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -368,8 +356,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange005, TestSi
      * @tc.steps: step2. scroll to 500
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(500);
-    FlushUITasks();
+    ScrollTo(500);
     EXPECT_TRUE(IsEqual(startInfo, { 5 }));
     EXPECT_TRUE(IsEqual(endInfo, { 8 }));
 
@@ -392,8 +379,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange005, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -414,8 +400,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange005, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -448,8 +433,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange006, TestSi
      * @tc.steps: step2. scroll to 600
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(600);
-    FlushUITasks();
+    ScrollTo(600);
     EXPECT_TRUE(IsEqual(startInfo, { 6 }));
     EXPECT_TRUE(IsEqual(endInfo, { 9 }));
 
@@ -472,8 +456,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange006, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -494,8 +477,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange006, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -528,8 +510,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange007, TestSi
      * @tc.steps: step2. scroll to 700
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(700);
-    FlushUITasks();
+    ScrollTo(700);
     EXPECT_TRUE(IsEqual(startInfo, { 7 }));
     EXPECT_TRUE(IsEqual(endInfo, { 10 }));
 
@@ -552,8 +533,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange007, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -574,8 +554,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange007, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -608,8 +587,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange008, TestSi
      * @tc.steps: step2. scroll to 800
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(800);
-    FlushUITasks();
+    ScrollTo(800);
     EXPECT_TRUE(IsEqual(startInfo, { 8 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 
@@ -632,8 +610,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange008, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -654,8 +631,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange008, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -688,8 +664,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange009, TestSi
      * @tc.steps: step2. scroll to 900
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(900);
-    FlushUITasks();
+    ScrollTo(900);
     EXPECT_TRUE(IsEqual(startInfo, { 9 }));
     EXPECT_TRUE(IsEqual(endInfo, { 12 }));
 
@@ -712,8 +687,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange009, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -734,8 +708,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange009, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -768,8 +741,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange010, TestSi
      * @tc.steps: step2. scroll to 1000
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1000);
-    FlushUITasks();
+    ScrollTo(1000);
     EXPECT_TRUE(IsEqual(startInfo, { 10 }));
     EXPECT_TRUE(IsEqual(endInfo, { 13 }));
 
@@ -792,8 +764,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange010, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -814,8 +785,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange010, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -848,8 +818,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange011, TestSi
      * @tc.steps: step2. scroll to 1100
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1100);
-    FlushUITasks();
+    ScrollTo(1100);
     EXPECT_TRUE(IsEqual(startInfo, { 11 }));
     EXPECT_TRUE(IsEqual(endInfo, { 14 }));
 
@@ -872,8 +841,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange011, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -894,8 +862,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange011, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -928,8 +895,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange012, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -952,8 +918,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange012, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -974,8 +939,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange012, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1008,8 +972,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange013, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1032,8 +995,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange013, TestSi
      * @tc.steps: step4. scroll to 100
      * @tc.expected: startBottom.index = 1
      */
-    pattern_->ScrollTo(100);
-    FlushUITasks();
+    ScrollTo(100);
     EXPECT_TRUE(IsEqual(startInfo, { 1 }));
     EXPECT_TRUE(IsEqual(endInfo, { 4 }));
 
@@ -1054,8 +1016,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange013, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1088,8 +1049,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange014, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1112,8 +1072,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange014, TestSi
      * @tc.steps: step4. scroll to 200
      * @tc.expected: endTop.index = 5
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 1 }));
     EXPECT_TRUE(IsEqual(endInfo, { 5 }));
 
@@ -1134,8 +1093,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange014, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1168,8 +1126,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange015, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1192,8 +1149,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange015, TestSi
      * @tc.steps: step4. scroll to 300
      * @tc.expected: startBottom.index = 2
      */
-    pattern_->ScrollTo(300);
-    FlushUITasks();
+    ScrollTo(300);
     EXPECT_TRUE(IsEqual(startInfo, { 2 }));
     EXPECT_TRUE(IsEqual(endInfo, { 6 }));
 
@@ -1214,8 +1170,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange015, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1248,8 +1203,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange016, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1272,8 +1226,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange016, TestSi
      * @tc.steps: step4. scroll to 400
      * @tc.expected: startBottom.index = 3
      */
-    pattern_->ScrollTo(400);
-    FlushUITasks();
+    ScrollTo(400);
     EXPECT_TRUE(IsEqual(startInfo, { 3 }));
     EXPECT_TRUE(IsEqual(endInfo, { 7 }));
 
@@ -1294,8 +1247,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange016, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1328,8 +1280,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange017, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1352,8 +1303,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange017, TestSi
      * @tc.steps: step4. scroll to 500
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(500);
-    FlushUITasks();
+    ScrollTo(500);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 8 }));
 
@@ -1374,8 +1324,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange017, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1408,8 +1357,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange018, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1432,8 +1380,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange018, TestSi
      * @tc.steps: step4. scroll to 600
      * @tc.expected: startBottom.index = 5
      */
-    pattern_->ScrollTo(600);
-    FlushUITasks();
+    ScrollTo(600);
     EXPECT_TRUE(IsEqual(startInfo, { 5 }));
     EXPECT_TRUE(IsEqual(endInfo, { 9 }));
 
@@ -1454,8 +1401,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange018, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1488,8 +1434,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange019, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1512,8 +1457,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange019, TestSi
      * @tc.steps: step4. scroll to 700
      * @tc.expected: startBottom.index = 6
      */
-    pattern_->ScrollTo(700);
-    FlushUITasks();
+    ScrollTo(700);
     EXPECT_TRUE(IsEqual(startInfo, { 6 }));
     EXPECT_TRUE(IsEqual(endInfo, { 9 }));
 
@@ -1534,8 +1478,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange019, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1568,8 +1511,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange020, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1592,8 +1534,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange020, TestSi
      * @tc.steps: step4. scroll to 800
      * @tc.expected: startBottom.index = 7
      */
-    pattern_->ScrollTo(800);
-    FlushUITasks();
+    ScrollTo(800);
     EXPECT_TRUE(IsEqual(startInfo, { 7 }));
     EXPECT_TRUE(IsEqual(endInfo, { 10 }));
 
@@ -1614,8 +1555,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange020, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1648,8 +1588,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange021, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1672,8 +1611,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange021, TestSi
      * @tc.steps: step4. scroll to 900
      * @tc.expected: startBottom.index = 8
      */
-    pattern_->ScrollTo(900);
-    FlushUITasks();
+    ScrollTo(900);
     EXPECT_TRUE(IsEqual(startInfo, { 8 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 
@@ -1694,8 +1632,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange021, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1728,8 +1665,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange022, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1752,8 +1688,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange022, TestSi
      * @tc.steps: step4. scroll to 1000
      * @tc.expected: startBottom.index = 10
      */
-    pattern_->ScrollTo(1100);
-    FlushUITasks();
+    ScrollTo(1100);
     EXPECT_TRUE(IsEqual(startInfo, { 10 }));
     EXPECT_TRUE(IsEqual(endInfo, { 13 }));
 
@@ -1774,8 +1709,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange022, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1808,8 +1742,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange023, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1832,8 +1765,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange023, TestSi
      * @tc.steps: step4. scroll to 1300
      * @tc.expected: startBottom.index = 11
      */
-    pattern_->ScrollTo(1300);
-    FlushUITasks();
+    ScrollTo(1300);
     EXPECT_TRUE(IsEqual(startInfo, { 11 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1854,8 +1786,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange023, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -1888,8 +1819,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange024, TestSi
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -1912,8 +1842,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange024, TestSi
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -1934,8 +1863,7 @@ HWTEST_F(ListScrollVisibleContentTestNg, OnScrollVisibleContentChange024, TestSi
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }

@@ -19,6 +19,7 @@ config("ace_config") {
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$root_out_dir/arkui/framework",
   ]
 
@@ -100,6 +101,7 @@ config("ace_test_config") {
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$root_out_dir/arkui/framework",
   ]
 

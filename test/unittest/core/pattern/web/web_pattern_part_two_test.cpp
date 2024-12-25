@@ -25,6 +25,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "nweb_autofill.h"
 
 using namespace testing;
 using namespace testing::ext;

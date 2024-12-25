@@ -240,10 +240,10 @@ HWTEST_F(ScrollableFlingTestNg, Fling003, TestSize.Level1)
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     scrollPn->SetAxis(Axis::VERTICAL);
     localLocation.SetX(-1.0f);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
     scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
 
     /**
      * @tc.steps: step5. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is false
@@ -527,9 +527,9 @@ HWTEST_F(ScrollableFlingTestNg, Fling006, TestSize.Level1)
      * @tc.expected: The result is true
      */
     scrollPn->SetAxis(Axis::VERTICAL);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
     result = scrollPn->ShouldSelectScrollBeStopped();
     EXPECT_TRUE(result);
 
@@ -1155,10 +1155,10 @@ HWTEST_F(ScrollableFlingTestNg, Fling014, TestSize.Level1)
     EXPECT_CALL(*scrollPn, IsScrollable).Times(1).WillOnce(Return(true));
     scrollPn->SetAxis(Axis::VERTICAL);
     localLocation.SetX(-1.0f);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
     scrollPn->SelectWithScroll();
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
 
     /**
      * @tc.steps: step5. Call the SelectWithScroll method, Set the parameter isAnimationStop_ is false
@@ -1442,9 +1442,9 @@ HWTEST_F(ScrollableFlingTestNg, Fling017, TestSize.Level1)
      * @tc.expected: The result is true
      */
     scrollPn->SetAxis(Axis::VERTICAL);
-    localLocation.SetY(-0.0f);
+    localLocation.SetY(0.0f);
     scrollPn->lastMouseMove_.SetLocalLocation(localLocation);
-    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), -0.0f);
+    EXPECT_EQ(scrollPn->lastMouseMove_.GetLocalLocation().GetY(), 0.0f);
     result = scrollPn->ShouldSelectScrollBeStopped();
     EXPECT_TRUE(result);
 

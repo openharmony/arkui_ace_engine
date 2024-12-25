@@ -78,6 +78,11 @@ void NavigationModelImpl::SetSubtitle(const std::string& subtitle)
     navigationContainer->GetDeclaration()->subTitle = subtitle;
 }
 
+void NavigationModelImpl::SetEnableModeChangeAnimation(bool isEnable)
+{
+    return;
+}
+
 void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();

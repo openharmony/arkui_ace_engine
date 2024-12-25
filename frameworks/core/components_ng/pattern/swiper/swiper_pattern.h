@@ -428,6 +428,11 @@ public:
         stopIndicatorAnimationFunc_ = std::move(stopCallback);
     }
 
+    void SetUpdateOverlongForceStopPageRateCb(const std::function<void(float)>& updateCallback)
+    {
+        updateOverlongForceStopPageRateFunc_ = std::move(updateCallback);
+    }
+
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
@@ -617,7 +622,7 @@ public:
 
     bool IsPropertyAnimationRunning() const
     {
-        return usePropertyAnimation_;
+        return propertyAnimationIsRunning_;
     }
 
     bool IsTranslateAnimationRunning() const
@@ -644,6 +649,9 @@ public:
         return static_cast<int32_t>(pageFlipMode_);
     }
 
+    float CalcCurrentTurnPageRate() const;
+    int32_t GetFirstIndexInVisibleArea() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -653,7 +661,14 @@ private:
     void OnDetachFromMainTree() override;
     void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void HandleTargetIndex(const RefPtr<LayoutWrapper>& dirty, const RefPtr<SwiperLayoutAlgorithm>& algo);
+    void HandleRunningTranslateAnimation();
+    void HandleTargetItemNotFound(
+        const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue, const RefPtr<SwiperLayoutAlgorithm>& algo);
+    bool IsNeedForwardTranslate(const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue);
+    bool IsNeedBackwardTranslate(const RefPtr<SwiperLayoutProperty>& props, int32_t targetIndexValue);
+    void HandleTabsAncestor();
+    void UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& algo);
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
@@ -824,8 +839,9 @@ private:
      * @brief Stops animations when the scroll starts.
      *
      * @param flushImmediately Whether to flush layout immediately.
+     * @param stopLongPointAnimation Whether to stop indicator long point animation immediately.
      */
-    void StopAnimationOnScrollStart(bool flushImmediately);
+    void StopAnimationOnScrollStart(bool flushImmediately, bool stopLongPointAnimation = false);
     /**
      * @return true if any translate animation (switching page / spring) is running, false otherwise.
      */
@@ -913,6 +929,7 @@ private:
     void PreloadItems(const std::set<int32_t>& indexSet);
     void DoTabsPreloadItems(const std::set<int32_t>& indexSet);
     void DoSwiperPreloadItems(const std::set<int32_t>& indexSet);
+    void BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child);
     void FirePreloadFinishEvent(int32_t errorCode, std::string message = "");
     // capture node start
     void InitCapture();
@@ -979,6 +996,7 @@ private:
     void CreateSpringProperty();
 
     std::optional<RefPtr<UINode>> FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode = true) const;
+    std::optional<RefPtr<UINode>> FindForEachNode(const RefPtr<UINode>& baseNode, bool isSelfNode = true) const;
     bool NeedForceMeasure() const;
     void SetIndicatorChangeIndexStatus(bool withAnimation, std::optional<int32_t> startIndex = std::nullopt);
     void SetIndicatorJumpIndex(std::optional<int32_t> jumpIndex);
@@ -990,6 +1008,10 @@ private:
     // overSrollDirection is true means over start boundary, false means over end boundary.
     void UpdateIgnoreBlankOffsetWithDrag(bool overSrollDirection);
     void UpdateIgnoreBlankOffsetInMap(float lastIgnoreBlankOffset);
+    bool NeedEnableIgnoreBlankOffset() const
+    {
+        return !IsLoop() && (prevMarginIgnoreBlank_ || nextMarginIgnoreBlank_) && TotalCount() > GetDisplayCount();
+    }
 
     std::set<int32_t> CalcVisibleIndex(float offset = 0.0f) const;
 
@@ -1000,6 +1022,8 @@ private:
     void CheckSpecialItemCount() const;
     int32_t CheckIndexRange(int32_t index) const;
     void CheckAndFireCustomAnimation();
+    void UpdateOverlongForceStopPageRate(float forceStopPageRate);
+    bool IsCachedShow() const;
 
     friend class SwiperHelper;
 
@@ -1026,6 +1050,7 @@ private:
 
     // stop indicator animation callback
     std::function<void(bool)> stopIndicatorAnimationFunc_;
+    std::function<void(float)> updateOverlongForceStopPageRateFunc_;
 
     RefPtr<SwiperController> swiperController_;
     RefPtr<InputEvent> mouseEvent_;
@@ -1120,7 +1145,7 @@ private:
     float motionVelocity_ = 0.0f;
     bool isFinishAnimation_ = false;
     bool mainSizeIsMeasured_ = false;
-    bool usePropertyAnimation_ = false;
+    bool propertyAnimationIsRunning_ = false;
     bool syncCancelAniIsFailed_ = false;
     bool springAnimationIsRunning_ = false;
     bool isTouchDownSpringAnimation_ = false;
@@ -1132,7 +1157,7 @@ private:
     bool stopIndicatorAnimation_ = true;
     bool isTouchPad_ = false;
     bool fadeAnimationIsRunning_ = false;
-    bool autoLinearReachBoundary = false;
+    bool autoLinearReachBoundary_ = false;
     bool needAdjustIndex_ = false;
     bool hasTabsAncestor_ = false;
     bool isIndicatorInteractive_ = true;
