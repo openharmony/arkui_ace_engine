@@ -492,9 +492,17 @@ class PersistenceV2Impl extends StorageHelper {
 
   private getRightGlobalKey<T extends object>(type: TypeConstructorWithArgs<T>,
     key: string | undefined): string {
-    if (typeof key === 'undefined') {
+    if (key === undefined || key === null) {
       stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
       key = this.getTypeName(type);
+      if (key === undefined) {
+        throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      }
+    }
+
+    if (key === PersistenceV2Impl.KEYS_ARR_) {
+      this.errorHelper(key, PersistError.Quota, `The key '${key}' cannot be used`);
+      return undefined;
     }
     return key;
   }
@@ -590,7 +598,7 @@ class PersistenceV2Impl extends StorageHelper {
       try {
         const keyType: MapType = this.getKeyMapType(key);
 
-        if (keyType != MapType.NOT_IN_MAP) {
+        if (keyType !== MapType.NOT_IN_MAP) {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
@@ -681,7 +689,7 @@ class PersistenceV2Impl extends StorageHelper {
     PersistenceV2Impl.storage_.delete(key);
     // The first call for module path
     if (!this.keysArr_.has(key)) {
-       this.keysArr_ = this.getKeysArrFromStorage();
+      this.keysArr_ = this.getKeysArrFromStorage();
     }
 
     this.keysArr_.delete(key);
@@ -690,8 +698,8 @@ class PersistenceV2Impl extends StorageHelper {
 
   private getRemoveFlagForGlobalPath(key: string): boolean {
     let removeFlag = false;
+    // first call for global path
     for (let i = 0; i < this.globalKeysArr_.length; i++) {
-      // first call for global path
       if (PersistenceV2Impl.storage_.has(key, i)) {
         removeFlag = true;
         PersistenceV2Impl.storage_.delete(key, i);
