@@ -478,7 +478,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
-        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false);
+        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false, true);
         pattern->ShowCaretAndStopTwinkling();
         pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
