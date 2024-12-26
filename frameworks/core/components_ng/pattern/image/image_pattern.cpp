@@ -451,6 +451,22 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
+void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (externalDecodeFormat_ != externalDecodeFormat);
+    switch (externalDecodeFormat) {
+        case PixelFormat::NV21:
+        case PixelFormat::RGBA_8888:
+        case PixelFormat::RGBA_1010102:
+        case PixelFormat::YCBCR_P010:
+        case PixelFormat::YCRCB_P010:
+            externalDecodeFormat_ = externalDecodeFormat;
+            break;
+        default:
+            externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    }
+}
+
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
     // if layout size has not decided yet, resize target can not be calculated
