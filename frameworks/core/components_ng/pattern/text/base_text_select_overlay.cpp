@@ -1067,7 +1067,7 @@ bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto framePaintRect = RectF(host->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
-    auto changed = globalPaintRect_ != framePaintRect;
+    auto changed = globalPaintRect_.GetOffset() != framePaintRect.GetOffset();
     globalPaintRect_ = framePaintRect;
     return changed;
 }

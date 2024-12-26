@@ -860,7 +860,8 @@ struct CJUIListModifier {
     void (*setSticky)(ArkUINodeHandle node, ArkUI_Int32 stickyStyle);
     void (*resetSticky)(ArkUINodeHandle node);
     ArkUI_Int32 (*getListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
-    void (*setListEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*setListEdgeEffect)(
+        ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetListEdgeEffect)(ArkUINodeHandle node);
     ArkUI_Int32 (*getListDirection)(ArkUINodeHandle node);
     void (*setListDirection)(ArkUINodeHandle node, ArkUI_Int32 axis);
@@ -1130,7 +1131,8 @@ struct CJUIGridModifier {
     void (*setGridSupportAnimation)(ArkUINodeHandle node, ArkUI_Bool supportAnimation);
     void (*resetGridSupportAnimation)(ArkUINodeHandle node);
 
-    void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*setEdgeEffect)(
+        ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
     void (*setNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward);
     void (*resetNestedScroll)(ArkUINodeHandle node);
@@ -1193,7 +1195,8 @@ struct CJUIScrollModifier {
     void (*setScrollScrollBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
     ArkUI_Int32 (*getScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 (*values)[2]);
-    void (*setScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*setScrollEdgeEffect)(
+        ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
     ArkUI_Bool (*getEnableScrollInteraction)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction);
@@ -1264,6 +1267,8 @@ struct CJUITabsModifier {
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
     void (*setIsVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
     void (*setTabBarPosition)(ArkUINodeHandle node, ArkUI_Int32 barVal);
+    void (*setTabsOptionsIndex)(ArkUINodeHandle node, ArkUI_Int32 indexVal);
+    void (*setTabsOptionsController)(ArkUINodeHandle node, ArkUINodeHandle tabsController);
     void (*setScrollable)(ArkUINodeHandle node, ArkUI_Bool scrollable);
     void (*setTabBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*setTabBarHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
@@ -1279,6 +1284,7 @@ struct CJUITabsModifier {
     void (*resetBarOverlap)(ArkUINodeHandle node);
     void (*resetIsVertical)(ArkUINodeHandle node);
     void (*resetTabBarPosition)(ArkUINodeHandle node);
+    void (*resetTabsOptionsIndex)(ArkUINodeHandle node);
     void (*resetScrollable)(ArkUINodeHandle node);
     void (*resetTabBarWidth)(ArkUINodeHandle node);
     void (*resetTabBarHeight)(ArkUINodeHandle node);
@@ -1973,7 +1979,8 @@ struct CJUIWaterFlowModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
-    void (*setEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled);
+    void (*setEdgeEffect)(
+        ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 effectEdge);
     void (*resetEdgeEffect)(ArkUINodeHandle node);
     void (*setWaterFlowScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetWaterFlowScrollBar)(ArkUINodeHandle node);

@@ -13,17 +13,12 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "text_base.h"
 
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "core/components_ng/pattern/text/typed_text.h"
-#define private public
-#define protected public
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#undef protected
-#undef private
 
 namespace OHOS::Ace::NG {
 

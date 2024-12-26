@@ -14,11 +14,8 @@
  */
 
 #include "text_base.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
+
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 

@@ -146,6 +146,9 @@ struct UpdateSpanStyle {
             auto& colors = updateSymbolColor.value();
             std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
         }
+        if (updateTextBackgroundStyle) {
+            updateTextBackgroundStyle->UpdateColorByResourceId();
+        }
     }
 
     std::string ToString() const

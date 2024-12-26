@@ -651,7 +651,11 @@ void GaugeModifier::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, Re
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
+        } else {
+            DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);
+        }
     }
     canvas.Restore();
 }

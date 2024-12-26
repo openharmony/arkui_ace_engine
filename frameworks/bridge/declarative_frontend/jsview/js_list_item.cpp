@@ -325,14 +325,14 @@ void JSListItem::ParseSwiperAction(const JSRef<JSObject>& obj, const JsiExecutio
 void JSListItem::ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDelete,
     OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
     OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node)
-    {
-if (obj->HasProperty("builderComponent")) {
+{
+    if (obj->HasProperty("builderComponent")) {
         auto builderComponentObject = obj->GetProperty("builderComponent");
         RefPtr<NG::FrameNode> builderNode;
         ParseBuilderComponentContent(builderComponentObject, builderNode);
         ListItemModel::GetInstance()->SetDeleteAreaWithFrameNode(builderNode, std::move(onDelete),
-            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange),
-            length, isStartArea, node);
+            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange), length, isStartArea,
+            node);
     } else {
         std::function<void()> builderAction;
         auto builderObject = obj->GetProperty("builder");
@@ -341,11 +341,10 @@ if (obj->HasProperty("builderComponent")) {
             builderAction = [builderFunc]() { builderFunc->Execute(); };
         }
         ListItemModel::GetInstance()->SetDeleteArea(std::move(builderAction), std::move(onDelete),
-            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange),
-            length, isStartArea, node);
+            std::move(onEnterDeleteArea), std::move(onExitDeleteArea), std::move(onStateChange), length, isStartArea,
+            node);
     }
-    }
-
+}
 
 void JSListItem::SelectCallback(const JSCallbackInfo& args)
 {
