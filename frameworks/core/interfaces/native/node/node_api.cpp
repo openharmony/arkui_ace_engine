@@ -1927,6 +1927,11 @@ ArkUI_Int32 RegisterOnWillDismissWithUserData(
     return CustomDialog::RegisterOnWillDialogDismissWithUserData(handler, userData, callback);
 }
 
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit)
+{
+    return CustomDialog::SetKeyboardAvoidDistance(handle, distance, unit);
+}
+
 const ArkUIDialogAPI* GetDialogAPI()
 {
     static const ArkUIDialogAPI dialogImpl = {
@@ -1947,7 +1952,8 @@ const ArkUIDialogAPI* GetDialogAPI()
         ShowDialog,
         CloseDialog,
         RegisterOnWillDialogDismiss,
-        RegisterOnWillDismissWithUserData
+        RegisterOnWillDismissWithUserData,
+        SetKeyboardAvoidDistance
     };
     return &dialogImpl;
 }

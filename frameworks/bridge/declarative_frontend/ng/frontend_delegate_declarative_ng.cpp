@@ -778,7 +778,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
