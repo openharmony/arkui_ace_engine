@@ -459,11 +459,11 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     CHECK_NULL_VOID(dataPickerLayoutProperty);
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty {
             .left = CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX),
-            .bottom = CalcLength(),
+            .right = CalcLength(),
             .top = CalcLength(),
+            .bottom = CalcLength(),
             .start = CalcLength(),
-            .end = CalcLength(),
-            .right = CalcLength()});
+            .end = CalcLength()});
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
