@@ -1017,6 +1017,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
