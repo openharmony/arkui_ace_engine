@@ -73,6 +73,9 @@ declare_args() {
 
   # Enalbe form menu default, wearable product is not supported
   ace_engine_feature_form_menu_enable = true
+
+  # Enable ace_engine circular screen
+  ace_engine_feature_enable_digital_crown = false
 }
 
 enable_dump_drawcmd = false

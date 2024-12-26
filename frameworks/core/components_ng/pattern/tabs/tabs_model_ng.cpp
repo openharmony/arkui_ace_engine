@@ -45,10 +45,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -962,6 +962,31 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
+}
+
+void TabsModelNG::SetTabBarIndex(FrameNode* frameNode, int32_t index)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (tabsLayoutProperty->GetIndex().has_value()) {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == index || index < 0) {
+            return;
+        }
+    }
+    tabsLayoutProperty->UpdateIndexSetByUser(index);
+}
+
+void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto nodeId = frameNode->GetId();
+    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    CHECK_NULL_VOID(tabsNode);
+    InitTabsNode(tabsNode, tabsController);
 }
 
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)

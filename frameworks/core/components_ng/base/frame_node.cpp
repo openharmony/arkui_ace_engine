@@ -444,6 +444,7 @@ FrameNode::FrameNode(
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
+    paintProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
@@ -1237,6 +1238,7 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     TriggerRsProfilerNodeMountCallbackIfExist();
     eventHub_->FireOnAttach();
     eventHub_->FireOnAppear();
+    eventHub_->FireEnabledTask();
     renderContext_->OnNodeAppear(recursive);
     pattern_->OnAttachToMainTree();
 
@@ -1886,7 +1888,10 @@ void FrameNode::ThrottledVisibleTask()
     CHECK_NULL_VOID(eventHub_);
     auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
     auto& userCallback = eventHub_->GetThrottledVisibleAreaCallback();
-    CHECK_NULL_VOID(userCallback.callback);
+    if (!userCallback.callback) {
+        throttledCallbackOnTheWay_ = false;
+        return;
+    }
     if (!throttledCallbackOnTheWay_) {
         return;
     }
@@ -5150,7 +5155,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(touchEvent.time);
     event.SetDeviceId(touchEvent.deviceId);
-    event.SetPointerEvent(touchEvent.pointerEvent);
+    event.SetPointerEvent(touchEvent.GetTouchEventPointerEvent());
     TouchLocationInfo changedInfo("onTouch", touchEvent.originalId);
     PointF lastLocalPoint(touchEvent.x, touchEvent.y);
     NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
@@ -5845,6 +5850,13 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
+void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
@@ -6148,5 +6160,26 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
         }
     }
     return list;
+}
+
+void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto& throttledVisibleAreaCallback = eventHub_->GetThrottledVisibleAreaCallback();
+    auto pipeline = GetContext();
+    if (isApproximate) {
+        eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        if (!hasInnerCallback && !hasUserCallback && pipeline) {
+            throttledCallbackOnTheWay_ = false;
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    } else {
+        eventHub_->CleanVisibleAreaCallback(true, false);
+        if (!hasInnerCallback && !throttledVisibleAreaCallback.callback && pipeline) {
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

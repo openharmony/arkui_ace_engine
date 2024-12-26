@@ -241,4 +241,9 @@ bool SystemProperties::GetResourceDecoupling()
 {
     return true;
 }
+
+bool SystemProperties::GetFocusCanBeActive()
+{
+    return true;
+}
 } // namespace OHOS::Ace

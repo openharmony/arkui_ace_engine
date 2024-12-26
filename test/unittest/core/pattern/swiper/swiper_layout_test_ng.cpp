@@ -1829,4 +1829,41 @@ HWTEST_F(SwiperLayoutTestNg, SelectedItemHeight002, TestSize.Level1)
         LayoutWrapperNode(indicatorNode_, geometryNode, indicatorNode_->GetLayoutProperty());
     algorithm->Measure(&layoutWrapper);
 }
+
+/**
+ * @tc.name: SwiperLayoutSkipMeasure001
+ * @tc.desc: Test skip measure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperLayoutTestNg, SwiperLayoutSkipMeasure001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create default swiper
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    /**
+     * @tc.steps: step2. contentMainSize need to be transmitted back to the pattern
+     */
+    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
+
+    LayoutConstraintF layoutConstraint;
+    float sizeTmp = 720.f;
+    layoutConstraint.selfIdealSize = OptionalSizeF(sizeTmp, sizeTmp);
+    layoutConstraint.maxSize = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.percentReference = SizeF(sizeTmp, sizeTmp);
+    layoutConstraint.parentIdealSize.SetSize(SizeF(sizeTmp, sizeTmp));
+
+    layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+    swiperLayoutAlgorithm->mainSizeIsMeasured_ = false;
+    swiperLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(pattern_->contentMainSize_, sizeTmp);
+}
 } // namespace OHOS::Ace::NG

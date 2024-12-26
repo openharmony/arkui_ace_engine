@@ -605,32 +605,130 @@ void ResetSelectDividerNull(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
-    static const ArkUISelectModifier modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
-        SetSelectedOptionBgColor, SetOptionBgColor, SetOptionFontColor, SetSelectedOptionFontColor, SetArrowPosition,
-        SetMenuAlign, SetFont, SetOptionFont, SetSelectedOptionFont, ResetSpace, ResetValue, ResetSelected,
-        ResetSelectFontColor, ResetSelectedOptionBgColor, ResetOptionBgColor, ResetOptionFontColor,
-        ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
-        ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
-        ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
-        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetSelectValue,
-        ResetSelectValue, SetMenuBgColor, ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectDivider,
-        ResetSelectDivider, ResetSelectDividerNull };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUISelectModifier modifier = {
+        .setSpace = SetSpace,
+        .setValue = SetValue,
+        .setSelected = SetSelected,
+        .setSelectFontColor = SetSelectFontColor,
+        .setSelectedOptionBgColor = SetSelectedOptionBgColor,
+        .setOptionBgColor = SetOptionBgColor,
+        .setOptionFontColor = SetOptionFontColor,
+        .setSelectedOptionFontColor = SetSelectedOptionFontColor,
+        .setArrowPosition = SetArrowPosition,
+        .setMenuAlign = SetMenuAlign,
+        .setFont = SetFont,
+        .setOptionFont = SetOptionFont,
+        .setSelectedOptionFont = SetSelectedOptionFont,
+        .resetSpace = ResetSpace,
+        .resetValue = ResetValue,
+        .resetSelected = ResetSelected,
+        .resetSelectFontColor = ResetSelectFontColor,
+        .resetSelectedOptionBgColor = ResetSelectedOptionBgColor,
+        .resetOptionBgColor = ResetOptionBgColor,
+        .resetOptionFontColor = ResetOptionFontColor,
+        .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
+        .resetArrowPosition = ResetArrowPosition,
+        .resetMenuAlign = ResetMenuAlign,
+        .resetFont = ResetFont,
+        .resetOptionFont = ResetOptionFont,
+        .resetSelectedOptionFont = ResetSelectedOptionFont,
+        .setSelectWidth = SetSelectWidth,
+        .resetSelectWidth = ResetSelectWidth,
+        .setSelectHeight = SetSelectHeight,
+        .resetSelectHeight = ResetSelectHeight,
+        .setSelectSize = SetSelectSize,
+        .resetSelectSize = ResetSelectSize,
+        .setOptionWidthFitTrigger = SetSelectOptionWidthFitTrigger,
+        .setSelectOptionWidth = SetSelectOptionWidth,
+        .resetSelectOptionWidth = ResetSelectOptionWidth,
+        .setSelectOptionHeight = SetSelectOptionHeight,
+        .resetSelectOptionHeight = ResetSelectOptionHeight,
+        .setControlSize = SetControlSize,
+        .resetControlSize = ResetControlSize,
+        .setSelectValue = SetSelectValue,
+        .resetSelectValue = ResetSelectValue,
+        .setMenuBgColor = SetMenuBgColor,
+        .resetMenuBgColor = ResetMenuBgColor,
+        .setMenuBgBlurStyle = SetMenuBgBlurStyle,
+        .resetMenuBgBlurStyle = ResetMenuBgBlurStyle,
+        .setSelectDivider = SetSelectDivider,
+        .resetSelectDivider = ResetSelectDivider,
+        .resetSelectDividerNull = ResetSelectDividerNull,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUISelectModifier* GetCJUISelectModifier()
 {
-    static const CJUISelectModifier modifier = { SetSpace, SetValue, SetSelected, SetSelectFontColor,
-        SetSelectedOptionBgColor, SetOptionBgColor, SetOptionFontColor, SetSelectedOptionFontColor, SetArrowPosition,
-        SetMenuAlign, SetFont, SetOptionFont, SetSelectedOptionFont, ResetSpace, ResetValue, ResetSelected,
-        ResetSelectFontColor, ResetSelectedOptionBgColor, ResetOptionBgColor, ResetOptionFontColor,
-        ResetSelectedOptionFontColor, ResetArrowPosition, ResetMenuAlign, ResetFont, ResetOptionFont,
-        ResetSelectedOptionFont, SetSelectWidth, ResetSelectWidth, SetSelectHeight, ResetSelectHeight, SetSelectSize,
-        ResetSelectSize, SetSelectOptionWidthFitTrigger, SetSelectOptionWidth, ResetSelectOptionWidth,
-        SetSelectOptionHeight, ResetSelectOptionHeight, SetControlSize, ResetControlSize, SetMenuBgColor,
-        ResetMenuBgColor, SetMenuBgBlurStyle, ResetMenuBgBlurStyle, SetSelectValue, ResetSelectValue, SetSelectDivider,
-        ResetSelectDivider, ResetSelectDividerNull };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUISelectModifier modifier = {
+        .setSpace = SetSpace,
+        .setValue = SetValue,
+        .setSelected = SetSelected,
+        .setSelectFontColor = SetSelectFontColor,
+        .setSelectedOptionBgColor = SetSelectedOptionBgColor,
+        .setOptionBgColor = SetOptionBgColor,
+        .setOptionFontColor = SetOptionFontColor,
+        .setSelectedOptionFontColor = SetSelectedOptionFontColor,
+        .setArrowPosition = SetArrowPosition,
+        .setMenuAlign = SetMenuAlign,
+        .setFont = SetFont,
+        .setOptionFont = SetOptionFont,
+        .setSelectedOptionFont = SetSelectedOptionFont,
+        .resetSpace = ResetSpace,
+        .resetValue = ResetValue,
+        .resetSelected = ResetSelected,
+        .resetSelectFontColor = ResetSelectFontColor,
+        .resetSelectedOptionBgColor = ResetSelectedOptionBgColor,
+        .resetOptionBgColor = ResetOptionBgColor,
+        .resetOptionFontColor = ResetOptionFontColor,
+        .resetSelectedOptionFontColor = ResetSelectedOptionFontColor,
+        .resetArrowPosition = ResetArrowPosition,
+        .resetMenuAlign = ResetMenuAlign,
+        .resetFont = ResetFont,
+        .resetOptionFont = ResetOptionFont,
+        .resetSelectedOptionFont = ResetSelectedOptionFont,
+        .setSelectWidth = SetSelectWidth,
+        .resetSelectWidth = ResetSelectWidth,
+        .setSelectHeight = SetSelectHeight,
+        .resetSelectHeight = ResetSelectHeight,
+        .setSelectSize = SetSelectSize,
+        .resetSelectSize = ResetSelectSize,
+        .setOptionWidthFitTrigger = SetSelectOptionWidthFitTrigger,
+        .setSelectOptionWidth = SetSelectOptionWidth,
+        .resetSelectOptionWidth = ResetSelectOptionWidth,
+        .setSelectOptionHeight = SetSelectOptionHeight,
+        .resetSelectOptionHeight = ResetSelectOptionHeight,
+        .setControlSize = SetControlSize,
+        .resetControlSize = ResetControlSize,
+        .setMenuBgColor = SetMenuBgColor,
+        .resetMenuBgColor = ResetMenuBgColor,
+        .setMenuBgBlurStyle = SetMenuBgBlurStyle,
+        .resetMenuBgBlurStyle = ResetMenuBgBlurStyle,
+        .setSelectValue = SetSelectValue,
+        .resetSelectValue = ResetSelectValue,
+        .setSelectDivider = SetSelectDivider,
+        .resetSelectDivider = ResetSelectDivider,
+        .resetSelectDividerNull = ResetSelectDividerNull,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

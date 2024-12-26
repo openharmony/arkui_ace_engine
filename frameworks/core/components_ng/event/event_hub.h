@@ -241,6 +241,7 @@ public:
     bool IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
     void PostEnabledTask();
+    void FireEnabledTask();
     void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
     void RemoveInnerOnAreaChangedCallback(int32_t id);
     void ClearOnAreaChangedInnerCallbacks();
@@ -263,11 +264,23 @@ public:
     bool HasVisibleAreaCallback(bool isUser);
     void SetOnAttach(std::function<void()>&& onAttach);
     void ClearOnAttach();
-    void FireOnAttach();
+    virtual void FireOnAttach();
     void SetOnDetach(std::function<void()>&& onDetach);
     void ClearOnDetach();
     void ClearOnPreDrag();
-    void FireOnDetach();
+    virtual void FireOnDetach();
+    void SetOnWillBind(std::function<void(int32_t)>&& onWillBind);
+    void ClearOnWillBind();
+    virtual void FireOnWillBind(int32_t containerId);
+    void SetOnWillUnbind(std::function<void(int32_t)>&& onWillUnbind);
+    void ClearOnWillUnbind();
+    virtual void FireOnWillUnbind(int32_t containerId);
+    void SetOnBind(std::function<void(int32_t)>&& onBind);
+    void ClearOnBind();
+    virtual void FireOnBind(int32_t containerId);
+    void SetOnUnbind(std::function<void(int32_t)>&& onUnbind);
+    void ClearOnUnbind();
+    virtual void FireOnUnbind(int32_t containerId);
     void ClearStateStyle();
     void OnDetachClear();
     void HandleOnAreaChange(const std::unique_ptr<RectF>& lastFrameRect,
@@ -313,6 +326,10 @@ private:
 
     std::function<void()> onAttach_;
     std::function<void()> onDetach_;
+    std::function<void(int32_t)> onWillBind_;
+    std::function<void(int32_t)> onWillUnbind_;
+    std::function<void(int32_t)> onBind_;
+    std::function<void(int32_t)> onUnbind_;
 
     OnPreDragFunc onPreDragFunc_;
     OnDragStartFunc onDragStart_;
@@ -342,6 +359,7 @@ private:
     VisibleCallbackInfo throttledVisibleAreaCallback_;
     std::function<void()> ndkDrawCompletedCallback_;
     std::function<void()> ndkLayoutCallback_;
+    std::function<void()> enabledFunc_;
 
     ACE_DISALLOW_COPY_AND_MOVE(EventHub);
 };

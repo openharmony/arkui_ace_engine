@@ -61,6 +61,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -133,16 +134,37 @@ void SetSupportedUIState(ArkUINodeHandle node, ArkUI_Int64 state)
 namespace NodeModifier {
 const ArkUIStateModifier* GetUIStateModifier()
 {
-    static const ArkUIStateModifier modifier = { GetUIState, SetSupportedUIState };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIStateModifier modifier = {
+        .getUIState = GetUIState,
+        .setSupportedUIState = SetSupportedUIState,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIStateModifier* GetCJUIStateModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIStateModifier modifier = {
-        GetUIState,
-        SetSupportedUIState
+        .getUIState = GetUIState,
+        .setSupportedUIState = SetSupportedUIState,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 } // namespace NodeModifier
@@ -405,6 +427,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextInputOnDidInsert,
     NodeModifier::SetTextInputOnWillDelete,
     NodeModifier::SetTextInputOnDidDelete,
+    NodeModifier::SetOnTextInputChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
@@ -421,6 +444,7 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
     NodeModifier::SetTextAreaOnDidInsertValue,
     NodeModifier::SetTextAreaOnWillDeleteValue,
     NodeModifier::SetTextAreaOnDidDeleteValue,
+    NodeModifier::SetOnTextAreaChangeWithPreviewText,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -467,6 +491,10 @@ const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
 };
 
+const ComponentAsyncEventHandler CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxGroupChange,
+};
+
 const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
@@ -499,6 +527,7 @@ const ComponentAsyncEventHandler LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetListItemOnSelect,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWillScroll,
     NodeModifier::SetOnWaterFlowReachEnd,
@@ -509,6 +538,7 @@ const ComponentAsyncEventHandler WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnWaterFlowScrollIndex,
     NodeModifier::SetOnWaterFlowReachStart,
 };
+#endif
 
 const ComponentAsyncEventHandler GRID_NODE_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -603,6 +633,11 @@ const ResetComponentAsyncEventHandler TEXT_INPUT_NODE_RESET_ASYNC_EVENT_HANDLERS
     NodeModifier::ResetOnTextInputContentSizeChange,
     NodeModifier::ResetOnTextInputInputFilterError,
     NodeModifier::ResetTextInputOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextInputChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -615,6 +650,11 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnTextAreaContentSizeChange,
     NodeModifier::ResetOnTextAreaInputFilterError,
     NodeModifier::ResetTextAreaOnTextContentScroll,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::ResetOnTextAreaChangeWithPreviewText,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -655,6 +695,10 @@ const ResetComponentAsyncEventHandler CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[]
     nullptr,
 };
 
+const ResetComponentAsyncEventHandler CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetCheckboxGroupChange,
+};
+
 const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
 };
@@ -687,6 +731,7 @@ const ResetComponentAsyncEventHandler LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetListItemOnSelect,
 };
 
+#ifndef ARKUI_WEARABLE
 const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::ResetOnWillScroll,
     NodeModifier::ResetOnWaterFlowReachEnd,
@@ -697,6 +742,7 @@ const ResetComponentAsyncEventHandler WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[
     NodeModifier::ResetOnWaterFlowScrollIndex,
     NodeModifier::ResetOnWaterFlowReachStart,
 };
+#endif
 
 const ResetComponentAsyncEventHandler GRID_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
@@ -851,11 +897,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
+#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+#endif
             break;
         }
         case ARKUI_CHECKBOX: {
@@ -911,6 +959,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = LIST_ITEM_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >= sizeof(WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -920,6 +969,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = WATER_FLOW_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -972,6 +1022,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >= sizeof(CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1176,6 +1234,7 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = LIST_ITEM_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_WATER_FLOW: {
             // swiper event type.
             if (subKind >=
@@ -1187,6 +1246,7 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
             eventHandle = WATERFLOW_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_GRID: {
             // grid event type.
             if (subKind >= sizeof(GRID_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
@@ -1247,6 +1307,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >=
+                sizeof(CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1660,6 +1730,25 @@ int32_t GetContextByNode(ArkUINodeHandle node)
     return instanceId;
 }
 
+ArkUI_Int32 PostFrameCallback(ArkUI_Int32 instanceId, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+{
+    auto pipeline = PipelineContext::GetContextByContainerId(instanceId);
+    if (pipeline == nullptr) {
+        LOGW("Cannot find pipeline context by contextHandle ID");
+        return ARKUI_ERROR_CODE_UI_CONTEXT_INVALID;
+    }
+    if (!pipeline->CheckThreadSafe()) {
+        return ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD;
+    }
+    auto onframeCallbackFuncFromCAPI = [userData, callback](uint64_t nanoTimestamp, uint32_t frameCount) -> void {
+        callback(nanoTimestamp, frameCount, userData);
+    };
+
+    pipeline->AddCAPIFrameCallback(std::move(onframeCallbackFuncFromCAPI));
+    return ERROR_CODE_NO_ERROR;
+}
+
 const ArkUIBasicAPI* GetBasicAPI()
 {
     /* clang-format off */
@@ -1693,6 +1782,8 @@ const ArkUIBasicAPI* GetBasicAPI()
         ConvertLengthMetricsUnit,
 
         GetContextByNode,
+
+        PostFrameCallback,
     };
     /* clang-format on */
 

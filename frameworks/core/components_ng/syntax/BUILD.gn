@@ -16,8 +16,6 @@ import(
 
 build_component_ng("syntax_ng") {
   sources = [
-    "content_slot_model_ng.cpp",
-    "content_slot_node.cpp",
     "for_each_model_ng.cpp",
     "for_each_node.cpp",
     "if_else_model_ng.cpp",
@@ -25,11 +23,19 @@ build_component_ng("syntax_ng") {
     "lazy_for_each_builder.cpp",
     "lazy_for_each_node.cpp",
     "lazy_layout_wrapper_builder.cpp",
-    "node_content.cpp",
     "repeat_model_ng.cpp",
     "repeat_node.cpp",
     "repeat_virtual_scroll_caches.cpp",
     "repeat_virtual_scroll_model_ng.cpp",
     "repeat_virtual_scroll_node.cpp",
+    "with_theme_node.cpp",
   ]
+
+  if (!ace_engine_feature_wearable) {
+    sources += [
+      "content_slot_model_ng.cpp",
+      "content_slot_node.cpp",
+      "node_content.cpp",
+    ]
+  }
 }

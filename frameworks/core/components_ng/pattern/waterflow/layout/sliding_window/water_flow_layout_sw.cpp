@@ -43,6 +43,9 @@ void WaterFlowLayoutSW::Measure(LayoutWrapper* wrapper)
         FillBack(mainLen_, change, itemCnt_ - 1);
     }
 
+    if (canSkip_) {
+        info_->TryConvertLargeDeltaToJump(mainLen_, itemCnt_);
+    }
     if (info_->jumpIndex_ != EMPTY_JUMP_INDEX) {
         MeasureOnJump(info_->jumpIndex_, info_->align_);
     } else if (info_->targetIndex_) {
@@ -85,7 +88,6 @@ void WaterFlowLayoutSW::Layout(LayoutWrapper* wrapper)
 
     auto padding = props_->CreatePaddingAndBorder();
     OffsetF paddingOffset { padding.left.value_or(0.0f), padding.top.value_or(0.0f) };
-
     const bool reverse = props_->IsReverse();
     for (size_t idx = 0; idx < info_->lanes_.size(); ++idx) {
         LayoutSection(idx, paddingOffset, wrapper->GetGeometryNode()->GetContentSize().CrossSize(axis_), reverse,
@@ -407,7 +409,7 @@ bool WaterFlowLayoutSW::FillFrontSection(float viewportBound, int32_t& idx, int3
 float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
@@ -423,7 +425,7 @@ float WaterFlowLayoutSW::FillBackHelper(float itemLen, int32_t idx, size_t laneI
 float WaterFlowLayoutSW::FillFrontHelper(float itemLen, int32_t idx, size_t laneIdx)
 {
     int32_t secIdx = info_->GetSegment(idx);
-    if (info_->LaneOutOfBounds(laneIdx, secIdx)) {
+    if (info_->LaneOutOfRange(laneIdx, secIdx)) {
         return 0.0f;
     }
 
@@ -552,7 +554,8 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         info_->delta_ = -Infinity<float>();
     }
     jumpIdx = std::min(itemCnt_ - 1, jumpIdx);
-    SetCanOverScroll(false);
+    canOverScrollStart_ = false;
+    canOverScrollEnd_ = false;
 
     bool inView = info_->ItemInView(jumpIdx);
     if (align == ScrollAlign::AUTO) {
@@ -648,16 +651,19 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         maxEnd += info_->footerHeight_;
     }
 
-    if (CanOverScroll()) {
-        return;
-    }
     maxEnd += info_->BotMargin();
     minStart -= info_->TopMargin();
 
     int32_t startIdx = info_->StartIndex();
     if (startIdx == 0 && Positive(minStart)) {
+        if (canOverScrollStart_) {
+            return;
+        }
         ApplyDelta(-minStart);
     } else if (info_->EndIndex() == itemCnt_ - 1 && LessNotEqual(maxEnd, mainLen_)) {
+        if (canOverScrollEnd_) {
+            return;
+        }
         float delta = mainLen_ - maxEnd;
         if (startIdx == 0) {
             delta = std::min(-minStart, delta);
@@ -714,8 +720,7 @@ void WaterFlowLayoutSW::LayoutSection(
         const auto& lane = info_->lanes_[idx][i];
         float mainPos = lane.startPos;
         for (const auto& item : lane.items_) {
-            const bool isCache = !props_->GetShowCachedItemsValue(false) &&
-                                 (item.idx < info_->startIndex_ || item.idx > info_->endIndex_);
+            const bool isCache = IsCache(info_, item.idx);
             auto child = wrapper_->GetChildByIndex(nodeIdx(item.idx), isCache);
             if (!child) {
                 mainPos += item.mainSize + mainGaps_[idx];
@@ -729,10 +734,7 @@ void WaterFlowLayoutSW::LayoutSection(
             childNode->SetMarginFrameOffset(offset + paddingOffset);
 
             mainPos += item.mainSize + mainGaps_[idx];
-            if (isCache) {
-                continue;
-            }
-            if (child->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && child->CheckNeedForceMeasureAndLayout()) {
                 child->Layout();
             } else {
                 child->GetHostNode()->ForceSyncGeometryNode();

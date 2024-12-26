@@ -52,6 +52,7 @@ public:
     void SetIsIndicatorCustomSize(bool isCustomSize) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
+    void SetCachedIsShown(bool isShown) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
@@ -86,6 +87,8 @@ public:
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
+    static bool GetCachedIsShown(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);

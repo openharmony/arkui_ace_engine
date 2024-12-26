@@ -14,11 +14,21 @@
  */
 
 #include "text_base.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
+} // namespace
 
 class TextTestThreeNg : public TextBases {
 public:
@@ -702,6 +712,46 @@ HWTEST_F(TextTestThreeNg, HandleClickEventTest001, TestSize.Level1)
     EXPECT_TRUE(isSpanPhoneClicked);
     EXPECT_TRUE(!pattern->textSelector_.IsValid());
     pattern->pManager_->Reset();
+}
+
+/**
+ * @tc.name: TryLinkJump001
+ * @tc.desc: test test_pattern.h TryLinkJump function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TryLinkJump001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    auto pipeline = frameNode->GetContext();
+
+    /**
+     * @tc.steps: step2. construct spanItem
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = SPAN_HTTP_URL_U16;
+
+    /**
+     * @tc.steps: step3. call TryLinkJump with linkJumpCallback_ is nullptr
+     * @tc.expected: return false
+     */
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
+
+    /**
+     * @tc.steps: step4. call TryLinkJump with linkJumpCallback_ not nullptr
+     * @tc.expected: return true
+     */
+    pipeline->SetLinkJumpCallback([] (const std::string& link) {});
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), true);
+
+    /**
+     * @tc.steps: step5. call TryLinkJump with spanContent is not http link
+     * @tc.expected: return false
+     */
+    spanItem->content = SPAN_PHONE_U16;
+    EXPECT_EQ(pattern->TryLinkJump(spanItem), false);
 }
 
 /**

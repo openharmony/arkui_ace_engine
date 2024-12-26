@@ -123,9 +123,9 @@ void ListModelNG::SetScrollBarWidth(const std::string& value)
     ScrollableModelNG::SetScrollBarWidth(value);
 }
 
-void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ListModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void ListModelNG::SetEditMode(bool editMode)
@@ -528,9 +528,10 @@ void ListModelNG::SetSticky(FrameNode* frameNode, int32_t stickyStyle)
         static_cast<V2::StickyStyle>(stickyStyle), frameNode);
 }
 
-void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled)
+void ListModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(
+        frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, edge);
 }
 
 int32_t ListModelNG::GetListDirection(FrameNode* frameNode)

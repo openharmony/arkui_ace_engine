@@ -827,6 +827,38 @@ class TextEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextMarqueeOptionsModifier extends ModifierWithKey<MarqueeOptions> {
+  constructor(value: MarqueeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textMarqueeOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetMarqueeOptions(node);
+    } else {
+      getUINativeModule().text.setMarqueeOptions(node, this.value.start, this.value.fromStart, this.value.step,
+        this.value.loop, this.value.delay, this.value.fadeout, this.value.marqueeStartPolicy);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextOnMarqueeStateChangeModifier extends ModifierWithKey<(state: MarqueeState) => void> {
+  constructor(value: (state: MarqueeState) => void) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textOnMarqueeStateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetOnMarqueeStateChange(node);
+    } else {
+      getUINativeModule().text.setOnMarqueeStateChange(node, this.value);
+    }
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1024,6 +1056,16 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   enableHapticFeedback(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, TextEnableHapticFeedbackModifier.identity, TextEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  marqueeOptions(value: MarqueeOptions): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextMarqueeOptionsModifier.identity, TextMarqueeOptionsModifier, value);
+    return this;
+  }
+  onMarqueeStateChange(callback: (state: MarqueeState) => void): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextOnMarqueeStateChangeModifier.identity, TextOnMarqueeStateChangeModifier, callback);
     return this;
   }
 }

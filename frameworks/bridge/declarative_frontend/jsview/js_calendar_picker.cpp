@@ -161,7 +161,7 @@ double GetMSByDate(const std::string& date)
         return 0.0f;
     }
 
-    std::tm dateTime = { 0 };
+    std::tm dateTime {};
     auto year = json->GetValue("year");
     if (year && year->IsNumber()) {
         dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
