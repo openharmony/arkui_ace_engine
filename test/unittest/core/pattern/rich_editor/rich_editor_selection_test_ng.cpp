@@ -369,8 +369,6 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection005, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
 }
 
-
-
 /**
  * @tc.name: SetSelection006
  * @tc.desc: test SetSelection
