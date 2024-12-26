@@ -619,6 +619,7 @@ public:
     }
 
     RectF GetCaretRect() const override;
+    void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);

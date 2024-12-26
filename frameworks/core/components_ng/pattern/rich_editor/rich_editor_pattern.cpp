@@ -6606,6 +6606,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleUrlSpanShowShadow(touchInfo.GetLocalLocation(), touchInfo.GetGlobalLocation(), GetUrlPressColor());
         }
     } else if (touchType == TouchType::UP) {
+        isDragging_ = false;
         HandleTouchUp();
         if (hasUrlSpan_) {
             HandleUrlSpanForegroundClear();
@@ -7577,6 +7578,11 @@ void RichEditorPattern::CloseSelectionMenu()
     // used by sdk
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseSelectionMenu");
     CloseSelectOverlay();
+}
+
+void RichEditorPattern::OnDragNodeFloating()
+{
+    isDragging_ = true;
 }
 
 void RichEditorPattern::CloseSelectOverlay()
