@@ -93,6 +93,7 @@ public:
         node->UpdateInspectorId(id);
     }
 
+    static bool IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode);
     static void CreateOrUpdateMainTitle(const RefPtr<TitleBarNode>& titleBarNode,
         const NG::NavigationTitleInfo& titleInfo, bool ignoreMainTitle);
     static void CreateOrUpdateSubtitle(const RefPtr<TitleBarNode>& titleBarNode,

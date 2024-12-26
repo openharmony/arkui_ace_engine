@@ -433,18 +433,11 @@ void NavBarPattern::OnModifyDone()
     NavigationToolbarUtil::MountToolBar(hostNode, needRunToolBarAnimation);
     HandleTitleBarAndToolBarAnimation(
         hostNode, needRunTitleBarAnimation, needRunToolBarAnimation);
+    UpdateHideBarProperty();
+    ExpandContentSafeAreaIfNeeded();
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-
-    isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
-    isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
-    auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
-    auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-    if (opts && navBarContentNode) {
-        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navBarContentNode->MarkModifyDone();
-    }
 
     auto parent = hostNode->GetParent();
     CHECK_NULL_VOID(parent);

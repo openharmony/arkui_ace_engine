@@ -948,4 +948,9 @@ float NavigationTitleUtil::CalculateTitlebarOffset(const RefPtr<UINode>& titleBa
     // offsetY = The Y of the foldCrease + Adapt vertical displacement of hover state - the height of the status bar.
     return foldCrease.GetOffset().GetY() + TITLEBAR_VERTICAL_PADDING.ConvertToPx() - length;
 }
+
+bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
+{
+    return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
+}
 } // namespace OHOS::Ace::NG

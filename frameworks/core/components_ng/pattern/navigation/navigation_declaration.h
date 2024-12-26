@@ -201,6 +201,7 @@ enum class ChildNodeOperation {
 enum class BarStyle {
     STANDARD = 0,
     STACK,
+    SAFE_AREA_PADDING,
 };
 
 enum class TitleBarParentType { NAVBAR, NAV_DESTINATION };

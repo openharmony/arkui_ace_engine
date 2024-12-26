@@ -87,10 +87,12 @@ struct NavigationTitlebarOptions {
 
 struct NavigationToolbarOptions {
     NavigationBackgroundOptions bgOptions;
+    // toolBar not support paddingStart and paddingEnd of NavigationBarOptions now
+    NavigationBarOptions brOptions;
 
     bool operator== (const NavigationToolbarOptions& other) const
     {
-        return bgOptions == other.bgOptions;
+        return bgOptions == other.bgOptions && brOptions == other.brOptions;
     }
 
     bool operator!= (const NavigationToolbarOptions& other) const
