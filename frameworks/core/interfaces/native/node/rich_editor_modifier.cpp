@@ -557,35 +557,101 @@ void ResetRichEditorBarState(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
-    static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorDataDetectorConfigWithEvent, ResetRichEditorDataDetectorConfigWithEvent,
-        SetRichEditorOnIMEInputComplete, ResetRichEditorOnIMEInputComplete,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorOnSelectionChange,
-        ResetRichEditorOnSelectionChange, SetRichEditorCaretColor, ResetRichEditorCaretColor,
-        SetRichEditorOnSelect, ResetRichEditorOnSelect,
-        SetRichEditorOnSubmit, ResetRichEditorOnSubmit, SetRichEditorAboutToIMEInput, ResetRichEditorAboutToIMEInput,
-        SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
-        SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,
-        ResetRichEditorOnPaste, SetRichEditorOnCut, ResetRichEditorOnCut, SetRichEditorOnCopy, ResetRichEditorOnCopy,
-        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType,
-        SetRichEditorEnableKeyboardOnFocus, ResetRichEditorEnableKeyboardOnFocus,
-        SetRichEditorEnablePreviewText, ResetRichEditorEnablePreviewText,
-        SetRichEditorEditMenuOptions, ResetRichEditorEditMenuOptions,
-        SetRichEditorOnWillChange, ResetRichEditorOnWillChange, SetRichEditorOnDidChange, ResetRichEditorOnDidChange,
-        SetRichEditorPlaceholder, ResetRichEditorPlaceholder,
-        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete, SetRichEditorBarState, ResetRichEditorBarState };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRichEditorModifier modifier = {
+        .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
+        .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .setRichEditorDataDetectorConfigWithEvent = SetRichEditorDataDetectorConfigWithEvent,
+        .resetRichEditorDataDetectorConfigWithEvent = ResetRichEditorDataDetectorConfigWithEvent,
+        .setRichEditorOnIMEInputComplete = SetRichEditorOnIMEInputComplete,
+        .resetRichEditorOnIMEInputComplete = ResetRichEditorOnIMEInputComplete,
+        .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
+        .setRichEditorOnSelectionChange = SetRichEditorOnSelectionChange,
+        .resetRichEditorOnSelectionChange = ResetRichEditorOnSelectionChange,
+        .setRichEditorCaretColor = SetRichEditorCaretColor,
+        .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .setRichEditorOnSelect = SetRichEditorOnSelect,
+        .resetRichEditorOnSelect = ResetRichEditorOnSelect,
+        .setRichEditorOnSubmit = SetRichEditorOnSubmit,
+        .resetRichEditorOnSubmit = ResetRichEditorOnSubmit,
+        .setRichEditorAboutToIMEInput = SetRichEditorAboutToIMEInput,
+        .resetRichEditorAboutToIMEInput = ResetRichEditorAboutToIMEInput,
+        .setOnReady = SetRichEditorOnReady,
+        .resetOnReady = ResetRichEditorOnReady,
+        .setOnDeleteComplete = SetRichEditorOnDeleteComplete,
+        .resetOnDeleteComplete = ResetRichEditorOnDeleteComplete,
+        .setOnEditingChange = SetRichEditorOnEditingChange,
+        .resetOnEditingChange = ResetRichEditorOnEditingChange,
+        .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
+        .setRichEditorOnPaste = SetRichEditorOnPaste,
+        .resetRichEditorOnPaste = ResetRichEditorOnPaste,
+        .setRichEditorOnCut = SetRichEditorOnCut,
+        .resetRichEditorOnCut = ResetRichEditorOnCut,
+        .setRichEditorOnCopy = SetRichEditorOnCopy,
+        .resetRichEditorOnCopy = ResetRichEditorOnCopy,
+        .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
+        .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .setRichEditorEnableKeyboardOnFocus = SetRichEditorEnableKeyboardOnFocus,
+        .resetRichEditorEnableKeyboardOnFocus = ResetRichEditorEnableKeyboardOnFocus,
+        .setRichEditorEnablePreviewText = SetRichEditorEnablePreviewText,
+        .resetRichEditorEnablePreviewText = ResetRichEditorEnablePreviewText,
+        .setRichEditorEditMenuOptions = SetRichEditorEditMenuOptions,
+        .resetRichEditorEditMenuOptions = ResetRichEditorEditMenuOptions,
+        .setRichEditorOnWillChange = SetRichEditorOnWillChange,
+        .resetRichEditorOnWillChange = ResetRichEditorOnWillChange,
+        .setRichEditorOnDidChange = SetRichEditorOnDidChange,
+        .resetRichEditorOnDidChange = ResetRichEditorOnDidChange,
+        .setRichEditorPlaceholder = SetRichEditorPlaceholder,
+        .resetRichEditorPlaceholder = ResetRichEditorPlaceholder,
+        .setRichEditorAboutToDelete = SetRichEditorAboutToDelete,
+        .resetRichEditorAboutToDelete = ResetRichEditorAboutToDelete,
+        .setRichEditorBarState = SetRichEditorBarState,
+        .resetRichEditorBarState = ResetRichEditorBarState,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
 {
-    static const CJUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
-        SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
-        SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
-        ResetRichEditorEnterKeyType, SetRichEditorBarState, ResetRichEditorBarState };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRichEditorModifier modifier = {
+        .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
+        .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
+        .setRichEditorCaretColor = SetRichEditorCaretColor,
+        .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .setOnReady = SetRichEditorOnReady,
+        .resetOnReady = ResetRichEditorOnReady,
+        .setOnDeleteComplete = SetRichEditorOnDeleteComplete,
+        .resetOnDeleteComplete = ResetRichEditorOnDeleteComplete,
+        .setOnEditingChange = SetRichEditorOnEditingChange,
+        .resetOnEditingChange = ResetRichEditorOnEditingChange,
+        .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
+        .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
+        .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .setRichEditorBarState = SetRichEditorBarState,
+        .resetRichEditorBarState = ResetRichEditorBarState,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

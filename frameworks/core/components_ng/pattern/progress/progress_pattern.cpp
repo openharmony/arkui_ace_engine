@@ -121,6 +121,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     if (filter.IsFastFilter()) {
         ToJsonValueForRingStyleOptions(json, filter);
         ToJsonValueForLinearStyleOptions(json, filter);
+        ToJsonValueForCapsuleStyleOptions(json, filter);
         return;
     }
     auto layoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
@@ -138,6 +139,7 @@ void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspec
     json->PutExtAttr("style", jsonValue->ToString().c_str(), filter);
     ToJsonValueForRingStyleOptions(json, filter);
     ToJsonValueForLinearStyleOptions(json, filter);
+    ToJsonValueForCapsuleStyleOptions(json, filter);
     json->PutExtAttr("enableSmoothEffect",
         paintProperty->GetEnableSmoothEffectValue(true) ? "true" : "false", filter);
 }
@@ -332,6 +334,68 @@ void ProgressPattern::OnVisibleChange(bool isVisible)
     CHECK_NULL_VOID(host);
     visibilityProp_ = isVisible;
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressPattern::ToJsonValueForCapsuleStyleOptions(
+    std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(progressTheme);
+    auto capsuleStyle = JsonUtil::Create(true);
+    auto font = JsonUtil::Create(true);
+    capsuleStyle->Put("borderWidth",
+        (paintProperty->GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
+    capsuleStyle->Put("borderColor",
+        (paintProperty->GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
+    capsuleStyle->Put("fontColor",
+        (paintProperty->GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
+    capsuleStyle->Put("content", (paintProperty->GetText().value_or("")).c_str());
+    capsuleStyle->Put("enableScanEffect", (paintProperty->GetEnableScanEffect().value_or(false)) ? "true" : "false");
+    capsuleStyle->Put("showDefaultPercentage",
+        (paintProperty->GetEnableShowText().value_or(false)) ? "true" : "false");
+    font->Put("size", (paintProperty->GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
+    font->Put("style", paintProperty->GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL ?
+        "FontStyle.Normal" : "FontStyle.Italic");
+    font->Put("weight",
+        V2::ConvertWrapFontWeightToStirng(paintProperty->GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
+    std::vector<std::string> defaultFamily = { "Sans" };
+    std::vector<std::string> fontFamilyVector = paintProperty->GetFontFamily().value_or(defaultFamily);
+    if (fontFamilyVector.empty()) {
+        fontFamilyVector = defaultFamily;
+    }
+    std::string fontFamily = fontFamilyVector.at(0);
+    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+        fontFamily += ',' + fontFamilyVector.at(i);
+    }
+    font->Put("family", fontFamily.c_str());
+    capsuleStyle->Put("font", font);
+    capsuleStyle->Put("borderRadius", (Dimension(GetBorderRadiusValues(), DimensionUnit::PX)).ToString().c_str());
+
+    json->PutExtAttr("capsuleStyle", capsuleStyle, filter);
+}
+
+float ProgressPattern::GetBorderRadiusValues() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, -1);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, -1);
+    auto contentSize = geometryNode->GetContentSize();
+    constexpr float HALF = 2.0f;
+    float contentMinHalf = std::min(contentSize.Height(), contentSize.Width()) / HALF;
+    auto paintProperty = GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, -1);
+    auto borderRadiusRet = static_cast<float>(
+        paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
+    return std::min(contentMinHalf, borderRadiusRet);
 }
 
 void ProgressPattern::ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json,

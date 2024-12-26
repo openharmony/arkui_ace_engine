@@ -1052,6 +1052,8 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
+void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const

@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/property/property.h"
 
 #ifndef ACE_UNITTEST
@@ -162,7 +163,8 @@ enum class RequestFocusReason {
     CLEAN_NODE,
     MOUSE,
     SYSTEM,
-    DRAG_ENTER
+    DRAG_ENTER,
+    DRAG_SELECT
 };
 
 
@@ -192,6 +194,12 @@ struct TouchAndMoveCaretState {
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
     int32_t touchFingerId = -1;
+};
+
+struct FloatingCaretState {
+    bool FloatingCursorVisible = false;
+    bool ShowOriginCursor = false;
+    Color OriginCursorColor = Color(0x4D000000);
 };
 
 struct ContentScroller {
@@ -315,6 +323,11 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
+    bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
+    void HandleOnPageUp() override;
+    void HandleOnPageDown() override;
     void CreateHandles() override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
@@ -323,6 +336,7 @@ public:
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
     void FinishTextPreviewOperation();
+    TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
     {
@@ -460,6 +474,41 @@ public:
     {
         return cursorVisible_;
     }
+
+    bool GetFloatingCursorVisible() const
+    {
+        return floatCaretState_.FloatingCursorVisible;
+    }
+
+    void SetFloatingCursorVisible(bool floatingCursorVisible)
+    {
+        floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
+    }
+
+    bool GetShowOriginCursor() const
+    {
+        return floatCaretState_.ShowOriginCursor;
+    }
+
+    void SetShowOriginCursor(bool showOriginCursor)
+    {
+        floatCaretState_.ShowOriginCursor = showOriginCursor;
+    }
+
+    Color GetOriginCursorColor() const
+    {
+        return floatCaretState_.OriginCursorColor;
+    }
+
+    void SetOriginCursorColor(Color originCursorColor)
+    {
+        floatCaretState_.OriginCursorColor = originCursorColor;
+    }
+
+    virtual void AdjustFloatingCaretInfo(const Offset& localOffset,
+        const HandleInfoNG& caretInfo, HandleInfoNG& floatingCaretInfo);
+
+    void FloatingCaretLand();
 
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool GetImeAttached() const
@@ -700,6 +749,11 @@ public:
         return selectController_->GetCaretRect();
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return selectController_->GetFloatingCaretRect();
+    }
+
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
@@ -741,7 +795,7 @@ public:
         return mouseStatus_;
     }
 
-    void UpdateEditingValueToRecord();
+    void UpdateEditingValueToRecord(int32_t beforeCaretPosition = -1);
 
     void UpdateScrollBarOffset() override;
 
@@ -948,6 +1002,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1816,6 +1871,7 @@ private:
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
+    void UpdateSelectionAndHandleVisibility();
     void ResetFirstClickAfterGetFocus();
     void ProcessAutoFillOnFocus();
 
@@ -1962,10 +2018,10 @@ private:
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
-    bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
     bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;

@@ -303,6 +303,8 @@ public:
             theme->menuMinWidth_ = pattern->GetAttr<Dimension>("menu_min_width", 64.0_vp);
             theme->menuMaxWidth_ = pattern->GetAttr<Dimension>("menu_max_width", 224.0_vp);
             theme->menuMaxWidthRatio_ = pattern->GetAttr<double>("menu_max_width_ratio", 0.67f);
+            theme->menuBackgroundBlurStyle_ =
+                pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
         }
     };
 
@@ -431,6 +433,7 @@ public:
         theme->menuMinWidth_ = menuMinWidth_;
         theme->menuMaxWidth_ = menuMaxWidth_;
         theme->menuMaxWidthRatio_ = menuMaxWidthRatio_;
+        theme->menuBackgroundBlurStyle_ = menuBackgroundBlurStyle_;
     }
 
     const Color& GetSelectedColorText() const
@@ -1140,6 +1143,11 @@ public:
         return menuItemContentAlign_;
     }
 
+    const int& GetMenuBackgroundBlurStyle() const
+    {
+        return menuBackgroundBlurStyle_;
+    }
+    
 private:
     Color disabledColor_;
     Color clickedColor_;
@@ -1265,6 +1273,7 @@ private:
     double menuMaxWidthRatio_;
     Color menuTextColor_;
     uint32_t menuItemContentAlign_ = CONTENT_ALIGN_LEFT;
+    int menuBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace

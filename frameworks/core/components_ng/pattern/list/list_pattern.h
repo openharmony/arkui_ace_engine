@@ -366,17 +366,6 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-    bool CanOverScroll(int32_t source) override
-    {
-        auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_) &&
-            (IsAtBottom() || IsAtTop()));
-        if (canOverScroll != lastCanOverScroll_) {
-            lastCanOverScroll_ = canOverScroll;
-            AddScrollableFrameInfo(source);
-        }
-        return canOverScroll;
-    }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
@@ -408,6 +397,7 @@ private:
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
         int32_t moveStep, FocusStep step, bool isScrollIndex);
+    void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
@@ -430,6 +420,7 @@ private:
         ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
         ScrollAlign align, float& targetPos);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     // multiSelectable
     void ClearMultiSelect() override;

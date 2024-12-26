@@ -56,7 +56,10 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
-    int32_t substrLength = u16.length() - startIndex;
+    if (startIndex < 0 || length < 0) {
+        return 0;
+    }
+    int32_t substrLength = u16.length() - unsigned(startIndex);
     if (substrLength < 0) {
         return 0;
     }
@@ -245,9 +248,9 @@ bool TextEmojiProcessor::IsIndexAfterOrInEmoji(int32_t index, const std::u16stri
 }
 
 std::u16string TextEmojiProcessor::SubU16string(
-    int32_t index, int32_t length, const std::u16string& content, bool includeHalf)
+    int32_t index, int32_t length, const std::u16string& content, bool includeStartHalf, bool includeEndHalf)
 {
-    TextEmojiSubStringRange range = CalSubU16stringRange(index, length, content, includeHalf);
+    TextEmojiSubStringRange range = CalSubU16stringRange(index, length, content, includeStartHalf, includeEndHalf);
     int32_t rangeLength = range.endIndex - range.startIndex;
     if (rangeLength == 0) {
         return u"";
@@ -256,7 +259,7 @@ std::u16string TextEmojiProcessor::SubU16string(
 }
 
 TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
-    int32_t index, int32_t length, const std::u16string& content, bool includeHalf)
+    int32_t index, int32_t length, const std::u16string& content, bool includeStartHalf, bool includeEndHalf)
 {
     int32_t startIndex = index;
     int32_t endIndex = index + length;
@@ -265,7 +268,7 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
     // need to be converted to string for processing
     // IsIndexBeforeOrInEmoji and IsIndexAfterOrInEmoji is working for string
     // exclude right overflow emoji
-    if (!includeHalf && IsIndexInEmoji(endIndex - 1, content, emojiStartIndex, emojiEndIndex) &&
+    if (!includeEndHalf && IsIndexInEmoji(endIndex - 1, content, emojiStartIndex, emojiEndIndex) &&
         emojiEndIndex > index + length) {
         emojiEndIndex = emojiStartIndex;
         length = emojiEndIndex - index;
@@ -274,19 +277,19 @@ TextEmojiSubStringRange TextEmojiProcessor::CalSubU16stringRange(
     }
     // process left emoji
     if (IsIndexBeforeOrInEmoji(startIndex, content, emojiStartIndex, emojiEndIndex)) {
-        if (startIndex != emojiStartIndex && !includeHalf) {
+        if (startIndex != emojiStartIndex && !includeStartHalf) {
             startIndex = emojiEndIndex; // exclude current emoji
         }
-        if (startIndex != emojiStartIndex && includeHalf) {
+        if (startIndex != emojiStartIndex && includeStartHalf) {
             startIndex = emojiStartIndex; // include current emoji
         }
     }
     // process right emoji
     if (IsIndexAfterOrInEmoji(endIndex, content, emojiStartIndex, emojiEndIndex)) {
-        if (endIndex != emojiEndIndex && !includeHalf) {
+        if (endIndex != emojiEndIndex && !includeEndHalf) {
             endIndex = emojiStartIndex; // exclude current emoji
         }
-        if (endIndex != emojiEndIndex && includeHalf) {
+        if (endIndex != emojiEndIndex && includeEndHalf) {
             endIndex = emojiEndIndex; // include current emoji
         }
     }

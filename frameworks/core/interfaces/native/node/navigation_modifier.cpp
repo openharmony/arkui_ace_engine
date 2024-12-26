@@ -405,82 +405,100 @@ void ResetEnableDragBar(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUINavigationModifier modifier = {
-        SetHideToolBar,
-        ResetHideToolBar,
-        SetEnableModeChangeAnimation,
-        ResetEnableModeChangeAnimation,
-        SetHideNavBar,
-        ResetHideNavBar,
-        SetTitleMode,
-        ResetTitleMode,
-        SetHideBackButton,
-        ResetHideBackButton,
-        SetSubtitle,
-        ResetSubtitle,
-        ResetUsrNavigationMode,
-        SetUsrNavigationMode,
-        SetNavHideTitleBar,
-        ResetNavHideTitleBar,
-        SetNavBarPosition,
-        ResetNavBarPosition,
-        SetMinContentWidth,
-        ResetMinContentWidth,
-        SetMaxNavBarWidth,
-        ResetMaxNavBarWidth,
-        SetMinNavBarWidth,
-        ResetMinNavBarWidth,
-        SetNavBarWidth,
-        ResetNavBarWidth,
-        SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea,
-        SetNavTitle,
-        ResetNavTitle,
-        SetNavMenus,
-        ResetNavMenus,
-        SetNavMenuItemAction,
-        SetNavMenuItemSymbol,
-        SetNavigationRecoverable,
-        ResetNavigationRecoverable,
-        SetEnableDragBar,
-        ResetEnableDragBar,
+        .setHideToolBar = SetHideToolBar,
+        .resetHideToolBar = ResetHideToolBar,
+        .setEnableModeChangeAnimation = SetEnableModeChangeAnimation,
+        .resetEnableModeChangeAnimation = ResetEnableModeChangeAnimation,
+        .setHideNavBar = SetHideNavBar,
+        .resetHideNavBar = ResetHideNavBar,
+        .setTitleMode = SetTitleMode,
+        .resetTitleMode = ResetTitleMode,
+        .setHideBackButton = SetHideBackButton,
+        .resetHideBackButton = ResetHideBackButton,
+        .setSubtitle = SetSubtitle,
+        .resetSubtitle = ResetSubtitle,
+        .resetUsrNavigationMode = ResetUsrNavigationMode,
+        .setUsrNavigationMode = SetUsrNavigationMode,
+        .setNavHideTitleBar = SetNavHideTitleBar,
+        .resetNavHideTitleBar = ResetNavHideTitleBar,
+        .setNavBarPosition = SetNavBarPosition,
+        .resetNavBarPosition = ResetNavBarPosition,
+        .setMinContentWidth = SetMinContentWidth,
+        .resetMinContentWidth = ResetMinContentWidth,
+        .setMaxNavBarWidth = SetMaxNavBarWidth,
+        .resetMaxNavBarWidth = ResetMaxNavBarWidth,
+        .setMinNavBarWidth = SetMinNavBarWidth,
+        .resetMinNavBarWidth = ResetMinNavBarWidth,
+        .setNavBarWidth = SetNavBarWidth,
+        .resetNavBarWidth = ResetNavBarWidth,
+        .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
+        .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
+        .setNavTitle = SetNavTitle,
+        .resetNavTitle = ResetNavTitle,
+        .setNavMenus = SetNavMenus,
+        .resetNavMenus = ResetNavMenus,
+        .setNavMenuItemAction = SetNavMenuItemAction,
+        .setNavMenuItemSymbol = SetNavMenuItemSymbol,
+        .setRecoverable = SetNavigationRecoverable,
+        .resetRecoverable = ResetNavigationRecoverable,
+        .setEnableDragBar = SetEnableDragBar,
+        .resetEnableDragBar = ResetEnableDragBar,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUINavigationModifier* GetCJUINavigationModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUINavigationModifier modifier = {
-        SetHideToolBar,
-        ResetHideToolBar,
-        SetEnableModeChangeAnimation,
-        ResetEnableModeChangeAnimation,
-        SetHideNavBar,
-        ResetHideNavBar,
-        SetTitleMode,
-        ResetTitleMode,
-        SetHideBackButton,
-        ResetHideBackButton,
-        SetSubtitle,
-        ResetSubtitle,
-        ResetUsrNavigationMode,
-        SetUsrNavigationMode,
-        SetNavHideTitleBar,
-        ResetNavHideTitleBar,
-        SetNavBarPosition,
-        ResetNavBarPosition,
-        SetMinContentWidth,
-        ResetMinContentWidth,
-        SetMaxNavBarWidth,
-        ResetMaxNavBarWidth,
-        SetMinNavBarWidth,
-        ResetMinNavBarWidth,
-        SetNavBarWidth,
-        ResetNavBarWidth,
-        SetNavIgnoreLayoutSafeArea,
-        ResetNavIgnoreLayoutSafeArea
+        .setHideToolBar = SetHideToolBar,
+        .resetHideToolBar = ResetHideToolBar,
+        .setEnableModeChangeAnimation = SetEnableModeChangeAnimation,
+        .resetEnableModeChangeAnimation = ResetEnableModeChangeAnimation,
+        .setHideNavBar = SetHideNavBar,
+        .resetHideNavBar = ResetHideNavBar,
+        .setTitleMode = SetTitleMode,
+        .resetTitleMode = ResetTitleMode,
+        .setHideBackButton = SetHideBackButton,
+        .resetHideBackButton = ResetHideBackButton,
+        .setSubtitle = SetSubtitle,
+        .resetSubtitle = ResetSubtitle,
+        .resetUsrNavigationMode = ResetUsrNavigationMode,
+        .setUsrNavigationMode = SetUsrNavigationMode,
+        .setNavHideTitleBar = SetNavHideTitleBar,
+        .resetNavHideTitleBar = ResetNavHideTitleBar,
+        .setNavBarPosition = SetNavBarPosition,
+        .resetNavBarPosition = ResetNavBarPosition,
+        .setMinContentWidth = SetMinContentWidth,
+        .resetMinContentWidth = ResetMinContentWidth,
+        .setMaxNavBarWidth = SetMaxNavBarWidth,
+        .resetMaxNavBarWidth = ResetMaxNavBarWidth,
+        .setMinNavBarWidth = SetMinNavBarWidth,
+        .resetMinNavBarWidth = ResetMinNavBarWidth,
+        .setNavBarWidth = SetNavBarWidth,
+        .resetNavBarWidth = ResetNavBarWidth,
+        .setNavIgnoreLayoutSafeArea = SetNavIgnoreLayoutSafeArea,
+        .resetNavIgnoreLayoutSafeArea = ResetNavIgnoreLayoutSafeArea,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

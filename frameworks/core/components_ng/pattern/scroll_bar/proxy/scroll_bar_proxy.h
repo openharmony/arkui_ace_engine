@@ -72,9 +72,8 @@ public:
     void NotifyScrollStop() const;
     /*
      * Notify scroll bar to update state, called by scrollable node.
-     * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar() const;
+    void NotifyScrollBar(int32_t scrollSource) const;
 
     /*
      * Start animation of ScrollBar.

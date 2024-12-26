@@ -1785,4 +1785,25 @@ HWTEST_F(TextPickerPatternTestNg, GetOverScrollDeltaIndex001, TestSize.Level1)
     int32_t index = textPickerColumnPattern_->GetOverScrollDeltaIndex();
     ASSERT_FALSE(index > 0);
 }
+
+/**
+ * @tc.name: SetDisableTextStyleAnimation001
+ * @tc.desc: Test SetDisableTextStyleAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerPatternTestNg, SetDisableTextStyleAnimation001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    EXPECT_FALSE(textPickerPattern->GetDisableTextStyleAnimation());
+
+    textPickerPattern->SetDisableTextStyleAnimation(true);
+    EXPECT_TRUE(textPickerPattern->GetDisableTextStyleAnimation());
+}
 } // namespace OHOS::Ace::NG

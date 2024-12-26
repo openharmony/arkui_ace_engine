@@ -36,6 +36,8 @@ public:
     ~DynamicComponentRendererImpl() override = default;
 
     void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) override;
+    void SetBackgroundTransparent(bool backgroundTransparent) override;
+    bool GetBackgroundTransparent() const override;
     void CreateContent() override;
     void DestroyContent() override;
 
@@ -67,6 +69,11 @@ public:
         int32_t action, int64_t offset) override;
     void TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType, int32_t eventType,
         int64_t timeMs) override;
+    void TransferAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) override;
+    void TransferAccessibilityChildTreeDeregister() override;
+    void TransferAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
@@ -86,6 +93,7 @@ private:
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
+    void InitializeDynamicAccessibility();
 
     bool contentReady_ = false;
     std::function<void()> contentReadyCallback_;
@@ -101,6 +109,7 @@ private:
     SizeT<int32_t> viewport_;
     bool adaptiveWidth_ = true;
     bool adaptiveHeight_ = true;
+    bool backgroundTransparent_ = true;
     static std::set<void *> usingWorkers_;
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;

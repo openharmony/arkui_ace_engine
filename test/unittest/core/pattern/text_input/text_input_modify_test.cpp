@@ -1458,7 +1458,6 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
      * @tc.steps: step2.call OnColorConfigurationUpdate.
      */
     pattern_->OnColorConfigurationUpdate();
-    EXPECT_TRUE(pattern_->colorModeChange_);
 }
 
 /**

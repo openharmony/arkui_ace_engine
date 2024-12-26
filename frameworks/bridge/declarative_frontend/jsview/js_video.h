@@ -25,12 +25,14 @@ class JSVideo : public JSViewAbstract, public JSInteractableView {
 public:
     using EventCallback = std::function<void(const std::string&)>;
     static void Create(const JSCallbackInfo& info);
+    static bool ParseJsPosterOptions(const JSRef<JSVal>& jsValue, bool& result);
     static void JsMuted(const JSCallbackInfo& info);
     static void JsAutoPlay(const JSCallbackInfo& info);
     static void JsControls(const JSCallbackInfo& info);
     static void JsLoop(const JSCallbackInfo& info);
     static void JsObjectFit(const JSCallbackInfo& info);
     static void JsSurfaceBackgroundColor(const JSCallbackInfo& info);
+    static void JsSetShortcutKeyEnabled(const JSCallbackInfo& info);
 
     static void JsOnStart(const JSCallbackInfo& info);
     static void JsOnPause(const JSCallbackInfo& info);

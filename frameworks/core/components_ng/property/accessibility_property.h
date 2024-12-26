@@ -435,6 +435,8 @@ public:
 
     void SetAccessibilityText(const std::string& text);
 
+    void SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey);
+
     void SetAccessibilityTextWithEvent(const std::string& text);
 
     void SetAccessibilityTextHint(const std::string& text);
@@ -464,6 +466,11 @@ public:
     virtual std::string GetAccessibilityText() const
     {
         return accessibilityText_.value_or("");
+    }
+
+    virtual std::string GetAccessibilityNextFocusInspectorKey() const
+    {
+        return accessibilityNextFocusInspectorKey_.value_or("");
     }
 
     std::string GetAccessibilityDescription() const;
@@ -672,6 +679,7 @@ protected:
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
+    std::optional<std::string> accessibilityNextFocusInspectorKey_;
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);

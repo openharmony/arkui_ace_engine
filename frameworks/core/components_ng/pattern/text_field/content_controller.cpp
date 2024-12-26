@@ -73,6 +73,7 @@ std::u16string ContentController::PreprocessString(int32_t startIndex, int32_t e
         return tmp;
     }
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(property, value);
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     bool hasInputFilter =
         property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
@@ -143,6 +144,7 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::u16string& 
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(property);
     if (!property->GetTextInputType().has_value()) {
         return;
     }
@@ -196,6 +198,7 @@ bool ContentController::FilterValue()
     }
 
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(property, false);
 
     bool hasInputFilter =
         property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
@@ -230,6 +233,7 @@ void ContentController::FilterValueType(std::u16string& value)
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(property);
 
     bool hasInputFilter = property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty();
     if (!hasInputFilter) {
@@ -359,6 +363,7 @@ bool ContentController::FilterWithEvent(const std::u16string& filter, std::u16st
         auto host = textField->GetHost();
         CHECK_NULL_RETURN(host, false);
         auto eventHub = host->GetEventHub<TextFieldEventHub>();
+        CHECK_NULL_RETURN(eventHub, false);
         eventHub->FireOnInputFilterError(errorValue);
         auto textFieldAccessibilityProperty = host->GetAccessibilityProperty<TextFieldAccessibilityProperty>();
         CHECK_NULL_RETURN(textFieldAccessibilityProperty, false);
@@ -382,12 +387,12 @@ int32_t ContentController::Delete(int32_t startIndex, int32_t length, bool isBac
         // try delete whole emoji
         if (isBackward) {
             TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-                startIndex - length, length, content_, true);
+                startIndex - length, length, content_, true, true);
             result = TextEmojiProcessor::Delete(range.endIndex,
                 length, content_, true);
         } else {
             TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-                startIndex, length, content_, true);
+                startIndex, length, content_, true, true);
             result = TextEmojiProcessor::Delete(range.startIndex,
                 length, content_, true);
         }
@@ -412,6 +417,7 @@ bool ContentController::IsIndexBeforeOrInEmoji(int32_t index)
 
 std::u16string ContentController::GetValueBeforeIndex(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(content_.length()));
     return content_.substr(0, index);
 }
 

@@ -518,6 +518,7 @@ frameworks/bridge/declarative_frontend/ark_component/src/ArkImageAnimator.ts @ar
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImageSpan.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkImage.ts @arkui_image
 frameworks/bridge/declarative_frontend/ark_component/src/ArkLine.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_component/src/ArkLinearIndicator.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItemGroup.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkListItem.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/src/ArkList.ts @arkuiscroll
@@ -610,6 +611,7 @@ frameworks/bridge/declarative_frontend/ark_modifier/src/image_modifier.ts @arkui
 frameworks/bridge/declarative_frontend/ark_modifier/src/image_span_modifier.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_modifier/src/import.ts @arkuiframework
 frameworks/bridge/declarative_frontend/ark_modifier/src/line_modifier.ts @arkuilayout
+frameworks/bridge/declarative_frontend/ark_modifier/src/linear_indicator_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_group_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_item_modifier.ts @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_modifier/src/list_modifier.ts @arkuiscroll
@@ -839,6 +841,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_imag
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h @arkuilayout
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.cpp @arkuiscroll
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_linear_indicator.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h @arkuilayout
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.cpp @arkuilayout
@@ -2006,7 +2010,7 @@ frameworks/core/components/panel/ @arkui_superman
 frameworks/core/components_part_upd/foreach/ @arkuistatemgmt
 frameworks/core/components/picker/ @arkuipopupwindow
 frameworks/core/components/piece/ @arkui_image
-frameworks/core/components/plugin/ @arkuilayout
+frameworks/core/components/plugin/ @arkuiabilitygroup
 frameworks/core/components/popup/ @arkuipopupwindow
 frameworks/core/components/positioned/ @arkuilayout
 frameworks/core/components/progress/ @arkui_image
@@ -2709,6 +2713,8 @@ frameworks/core/interfaces/native/node/image_animator_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/image_animator_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/line_modifier.cpp @arkuilayout
 frameworks/core/interfaces/native/node/line_modifier.h @arkuilayout
+frameworks/core/interfaces/native/node/linear_indicator_modifier.cpp @arkuiscroll
+frameworks/core/interfaces/native/node/linear_indicator_modifier.h @arkuiscroll
 frameworks/core/interfaces/native/node/marquee_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/marquee_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/menu_item_modifier.cpp @arkuipopupwindow
@@ -2914,6 +2920,8 @@ interfaces/native/node/node_transition.cpp @arkui_superman
 interfaces/native/node/node_transition.h @arkui_superman
 interfaces/native/node/node_transition_imp.cpp @arkui_superman
 interfaces/native/node/node_utils.cpp @arkuiframework
+interfaces/native/node/progress_option.cpp @arkui_image
+interfaces/native/node/progress_option.h @arkui_image
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
@@ -3135,5 +3143,5 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
-test/unittest/interfaces/ @arkui_architecture
+test/unittest/interfaces/ @arkuiframework
 

@@ -148,6 +148,8 @@ public:
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
+            theme->errorTextStyle_.SetTextAlign(
+                static_cast<TextAlign>(pattern->GetAttr<double>("textfield_error_text_align", 0.0)));
 
             theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
             theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
@@ -220,6 +222,8 @@ public:
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
+            auto supportSearch = pattern->GetAttr<std::string>("textfield_menu_search_is_support", "0");
+            theme->supportSearch_ = StringUtils::StringToInt(supportSearch);
         }
     };
 
@@ -670,6 +674,11 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetIsSupportSearch() const
+    {
+        return supportSearch_;
+    }
+
     const std::string& GetAIWriteIsSupport() const
     {
         return aiWriteIsSupport_;
@@ -822,6 +831,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool supportSearch_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 
     // cancelButton

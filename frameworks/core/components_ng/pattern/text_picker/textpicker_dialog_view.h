@@ -147,6 +147,8 @@ private:
     static bool NeedAdaptForAging();
     static void SetTextDisappearProperties(const RefPtr<PickerTheme>& pickerTheme,
         const PickerTextProperties& properties);
+    static void SetDefaultTextStyle(const NG::PickerTextStyle& value);
+
     static WeakPtr<FrameNode> dialogNode_;
     static uint32_t dialogNodePage_;
     static Dimension selectedTextStyleFont_;
