@@ -24,8 +24,9 @@ const tag = 'AddFormMenuItem::ets::';
 
 const querySnapshotAsync = async (want: Want, componentId: string): Promise<void> => {
   let compInfo = componentUtils.getRectangleById(componentId);
+  let imagePackageApi = null;
   try {
-    const imagePackageApi: image.ImagePacker = image.createImagePacker();
+    imagePackageApi: image.ImagePacker = image.createImagePacker();
     const packOpts: image.PackingOption = {
       format: 'image/webp',
       quality: 50,
