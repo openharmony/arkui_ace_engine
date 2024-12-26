@@ -254,11 +254,7 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
     res.screenId_ = screenId;
     UpdateGeometry(screenNode, nullptr, false);
     TraverseInfo parentInfo = {
-        .isAncestorRecent = 0,
-        .isAncestorDirty = IsNodeDirty(screenNode),
-        .notSyncPosition = 0,
-        .transScenePosX  = 0,
-        .transScenePosY  = 0
+        .isAncestorDirty = IsNodeDirty(screenNode)
     };
     TraverseTree(screenNode, res, parentInfo);
     if (isCoreDebugEnable_) {
@@ -349,13 +345,13 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         // process recent and child node
         if (!ancestorInfo.isAncestorRecent) {
             if (ancestorInfo.isAncestorDirty || IsNodeDirty(node)) {
-                ancestorInfo.isAncestorDirty = 1;
+                ancestorInfo.isAncestorDirty = true;
                 UpdateGeometry(node, rootNode, WindowSceneHelper::IsTransformScene(parentType));
             }
         }
         // only scenepanel can change recent state
         if (IsRecentContainerState(node)) {
-            ancestorInfo.isAncestorRecent = 1;
+            ancestorInfo.isAncestorRecent = true;
         }
 
         // basedd on transform scene coordinate system to compute trans pos

@@ -34,12 +34,11 @@ struct TraverseResult {
 };
 
 struct TraverseInfo {
-    uint8_t isAncestorRecent : 1;
-    uint8_t isAncestorDirty : 1;
-    uint8_t notSyncPosition : 1;
-    uint8_t rsv : 5;
-    int32_t transScenePosX;
-    int32_t transScenePosY;
+    bool isAncestorRecent = false;
+    bool isAncestorDirty = false;
+    bool notSyncPosition = false;
+    int32_t transScenePosX = 0;
+    int32_t transScenePosY = 0;
 };
 
 class WindowSceneLayoutManager {
