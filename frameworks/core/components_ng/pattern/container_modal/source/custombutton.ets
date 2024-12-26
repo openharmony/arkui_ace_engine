@@ -11,7 +11,7 @@ const MENU_ICON_SIZE: string = '24vp'
 const MENU_MARGIN_V: string = '8vp'
 const MENU_MARGIN_H: string = '12vp'
 const MENU_TITLE_MARGIN_V: string = '10vp'
-const MENU_TITLE_TEXT_FONT_SIZE: string = '16fp'
+const MENU_TITLE_TEXT_FONT_SIZE: string = '16vp'
 const HOVER_TIME: number = 1000; // Hover time: 1000ms
 const MENU_AUTO_DISAPPEAR_TIME: number = 2000; // Menu auto-disappear: 2000ms
 const MENU_MOUSEOUT_DISAPPEAR_TIME: number = 1000; // Menu mouseout disappear: 1000ms
@@ -145,10 +145,6 @@ const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
 @Entry
 @Component
 struct custombutton {
-  // 0 represents move
-  // 1 represents down
-  // 2 represents up
-  @State maxBtnTouchState: number = 0
   @State maximizeResource: Resource = maximizeNormalResource
   @State minimizeResource: Resource = {
     bundleName: '',
@@ -595,10 +591,6 @@ struct custombutton {
           this.onMaximizeButtonClick()
         })))
         .onHover((isHover: boolean, event: HoverEvent) => {
-          if (isHover && this.maxBtnTouchState == 2) {
-            isHover = false
-            this.maxBtnTouchState = 0
-          }
           this.onHoverMaximizeButton(isHover)
           if (isHover) {
             this.onMenuWidthChange()
@@ -613,26 +605,6 @@ struct custombutton {
               this.maximizeScale = 1.0
             }
           })
-        })
-        .onTouch((event?: TouchEvent) => {
-          if(event){
-            if (event.type === TouchType.Move) {
-              this.maxBtnTouchState = 0;
-            }
-            if (event.type === TouchType.Down) {
-              this.maxBtnTouchState = 1;
-            }
-            if (event.type === TouchType.Up) {
-              this.maxBtnTouchState = 2;
-            }
-          }
-        })
-        .onMouse((event?: MouseEvent) => {
-          if (event) {
-            if (this.maxBtnTouchState == 0) {
-              this.onHoverMaximizeButton(true)
-            }
-          }
         })
 
         Button() {
@@ -663,10 +635,6 @@ struct custombutton {
           this.onMinimizeButtonClick()
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
-          if (isHover && this.maxBtnTouchState == 2) {
-            isHover = false
-            this.maxBtnTouchState = 0
-          }
           this.onHoverMinimizeButton(isHover)
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -675,13 +643,6 @@ struct custombutton {
               this.minimizeScale = 1.0
             }
           })
-        })
-        .onMouse((event?: MouseEvent) => {
-          if (event) {
-            if (this.maxBtnTouchState == 0) {
-              this.onHoverMinimizeButton(true)
-            }
-          }
         })
 
         Button() {
@@ -713,10 +674,6 @@ struct custombutton {
           this.onCloseButtonClick()
         }))
         .onHover((isHover: boolean, event: HoverEvent) => {
-          if (isHover && this.maxBtnTouchState == 2) {
-            isHover = false
-            this.maxBtnTouchState = 0
-          }
           this.onHoverCloseButton(isHover)
           this.getUIContext()?.animateTo({ duration: 0 }, () => {
             if (isHover) {
@@ -725,13 +682,6 @@ struct custombutton {
               this.closeScale = 1.0
             }
           })
-        })
-        .onMouse((event?: MouseEvent) => {
-          if (event) {
-            if (this.maxBtnTouchState == 0) {
-              this.onHoverCloseButton(true)
-            }
-          }
         })
 
       }.id('containerModalButtonRowId')
