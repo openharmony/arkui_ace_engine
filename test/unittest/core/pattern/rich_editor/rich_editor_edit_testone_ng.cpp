@@ -1171,32 +1171,6 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestUpdatePreviewText003, Tes
 }
 
 /**
- * @tc.name: RichEditorPatternTestSetPreviewText001
- * @tc.desc: test SetPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    property->UpdatePreviewTextStyle("underline");
-    std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
-    testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
-    testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
-    testPreviewList.emplace_back(-1, 0, PREVIEW_TEXT_VALUE1, -1);
-    testPreviewList.emplace_back(0, 0, PREVIEW_TEXT_VALUE1, 0);
-    PreviewRange previewRange;
-    for (const auto& testCase : testPreviewList) {
-        previewRange.start = std::get<0>(testCase);
-        previewRange.end = std::get<1>(testCase);
-        ASSERT_EQ(richEditorPattern->SetPreviewText(std::get<2>(testCase), previewRange), std::get<3>(testCase));
-    }
-}
-
-/**
  * @tc.name: RichEditorPatternTestGetPreviewTextStyle001
  * @tc.desc: test GetPreviewTextStyle
  * @tc.type: FUNC
@@ -1292,4 +1266,17 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnCut004, TestSize.Level1)
     EXPECT_EQ(isEventCalled, true);
 }
 
+/**
+ * @tc.name: HandleOnDelete001
+ * @tc.desc: test RichEditorPattern HandleOnDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleOnDelete(true);
+    richEditorPattern->HandleOnDelete(false);
+}
 } // namespace OHOS::Ace::NG

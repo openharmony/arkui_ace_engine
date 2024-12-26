@@ -30,7 +30,15 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
+    RefPtr<RichEditorPattern> GetRichEditorPattern();
 };
+
+RefPtr<RichEditorPattern> RichEditorDoubleClickOrLongPressTestNg::GetRichEditorPattern()
+{
+    CHECK_NULL_RETURN(richEditorNode_, nullptr);
+    return richEditorNode_->GetPattern<RichEditorPattern>();
+}
 
 void RichEditorDoubleClickOrLongPressTestNg::SetUp()
 {
@@ -300,4 +308,83 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress007
     richEditorPattern->HandleDoubleClickOrLongPress(info);
     EXPECT_FALSE(richEditorController->IsEditing());
 }
+
+/**
+ * @tc.name: HandleLongPress001
+ * @tc.desc: test RichEditorPattern HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    richEditorPattern->HandleLongPress(info);
+    focusHub->focusType_ = FocusType::DISABLE;
+    richEditorPattern->HandleLongPress(info);
+    ASSERT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
+}
+
+/**
+ * @tc.name: HandleLongPress002
+ * @tc.desc: test
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress002, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    FingerInfo fingerInfo1;
+    FingerInfo fingerInfo2;
+    std::list<FingerInfo> fingerList;
+    fingerList.push_back(fingerInfo1);
+    fingerList.push_back(fingerInfo2);
+    info.SetFingerList(fingerList);
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
+}
+
+/**
+ * @tc.name: HandleLongPress003
+ * @tc.desc: test HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress003, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->hasUrlSpan_ = true;
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
+}
+
+/**
+ * @tc.name: HandleLongPress004
+ * @tc.desc: test HandleLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleLongPress004, TestSize.Level1)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    GestureEvent info;
+    info.SetOffsetX(0.0);
+    info.SetOffsetY(0.0);
+    richEditorPattern->sourceType_ = SourceType::MOUSE;
+    richEditorPattern->HandleLongPress(info);
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
+    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
+}
+
 } // namespace OHOS::Ace::NG

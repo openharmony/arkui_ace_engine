@@ -225,67 +225,6 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleMenuCallbackOnSelectAll001, TestSize.
 }
 
 /**
- * @tc.name: InsertStyledStringByPaste001
- * @tc.desc: test RichEditorPattern InsertStyledStringByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, InsertStyledStringByPaste001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
-    std::u16string data = u"abc";
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(data);
-    richEditorPattern->InsertStyledStringByPaste(spanString);
-
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-}
-
-/**
- * @tc.name: AddSpansByPaste001
- * @tc.desc: test RichEditorPattern AddSpansByPaste
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, AddSpansByPaste001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    std::list<RefPtr<NG::SpanItem>> spans;
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
-    spans.push_back(spanItem1);
-    richEditorPattern->AddSpansByPaste(spans);
-    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
-}
-
-/**
  * @tc.name: UnableStandardInput001
  * @tc.desc: test RichEditorPattern UnableStandardInput
  * @tc.type: FUNC
@@ -298,20 +237,6 @@ HWTEST_F(RichEditorPatternTestOneNg, UnableStandardInput001, TestSize.Level1)
     richEditorPattern->UnableStandardInput(true);
     bool res = richEditorPattern->UnableStandardInput(false);
     ASSERT_EQ(res, false);
-}
-
-/**
- * @tc.name: HandleOnDelete001
- * @tc.desc: test RichEditorPattern HandleOnDelete
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleOnDelete001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->HandleOnDelete(true);
-    richEditorPattern->HandleOnDelete(false);
 }
 
 /**

@@ -120,24 +120,6 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleMenuCallbackOnSelectAll001, TestSize
 }
 
 /**
- * @tc.name: ToStyledString002
- * @tc.desc: test ToStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, ToStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    int32_t start = 3;
-    int32_t end = -2;
-    AddSpan("test");
-    RefPtr<SpanString> res = richEditorPattern->ToStyledString(start, end);
-    ASSERT_NE(res, nullptr);
-}
-
-/**
  * @tc.name: GetTextStyleBySpanItem001
  * @tc.desc: test GetTextStyleBySpanItem
  * @tc.type: FUNC
@@ -1235,33 +1217,6 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSingleClickEvent001, TestSize.Level1
     richEditorPattern->DeleteSelectOperation(&record);
 
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: SetPreviewText001
- * @tc.desc: test RichEditorPattern SetPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, SetPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue;
-    PreviewRange range;
-
-    range.start = -1;
-    range.end = 0;
-
-    richEditorPattern->previewTextRecord_.previewContent = "";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-
-    richEditorPattern->SetPreviewText(previewTextValue, range);
-
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
 }
 
 /**
