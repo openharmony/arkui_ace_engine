@@ -15,22 +15,45 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_RENDERER_PEER_IMPL_H
 
+
+#include "base/geometry/animatable_dimension.h"
 #include "base/geometry/rect.h"
+#include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "base/utils/string_utils.h"
+#include "core/common/container_consts.h"
 #include "arkoala_api_generated.h"
+#include "canvas_path_accessor_peer_impl.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-
-class CanvasRendererPeerImpl : public Referenced {
+struct ImageSizeExt {
+    ImageSizeExt()
+    {
+        x = std::nullopt;
+        y = std::nullopt;
+        dirtyX = std::nullopt;
+        dirtyY = std::nullopt;
+        dirtyWidth = std::nullopt;
+        dirtyHeight = std::nullopt;
+    }
+    ~ImageSizeExt() = default;
+    std::optional<double> x;
+    std::optional<double> y;
+    std::optional<double> dirtyX;
+    std::optional<double> dirtyY;
+    std::optional<double> dirtyWidth;
+    std::optional<double> dirtyHeight;
+};
+class CanvasRendererPeerImpl : public CanvasPathPeerImpl {
 public:
-    CanvasRendererPeerImpl() = default;
+    CanvasRendererPeerImpl();
     ~CanvasRendererPeerImpl() override = default;
 
     void TriggerBeginPathImpl();
@@ -57,6 +80,7 @@ public:
     void TriggerSetGlobalCompositeOperationImpl(CompositeOperation& type);
     void TriggerSetFilterImpl(const std::string& filterStr);
     void TriggerSetImageSmoothingEnabledImpl(bool imageSmoothingEnabled);
+    double TriggerGetLineDashOffsetImpl();
     void TriggerSetLineDashOffsetImpl(double dash);
     void TriggerSetLineWidthImpl(double width);
     void TriggerSetMiterLimitImpl(double limit);
@@ -64,7 +88,6 @@ public:
     void TriggerSetShadowColorImpl(Color& color);
     void TriggerSetShadowOffsetXImpl(double offsetX);
     void TriggerSetShadowOffsetYImpl(double offsetY);
-
     void TriggerStroke1Impl(const RefPtr<CanvasPath2D>& path);
     #ifdef PIXEL_MAP_SUPPORTED
     void TriggerTransferFromImageBitmapImpl(const RefPtr<PixelMap>& pixelMap);
@@ -77,11 +100,42 @@ public:
     void TriggerSetStrokeStyleImpl(const Color& color);
     void TriggerSetStrokeStyleImpl(const std::shared_ptr<Ace::Gradient>& gradient);
     void TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::Pattern>& pattern);
-    void TriggerUpdateFontWeight(Ace::FontWeight weight);
-    void TriggerUpdateFontStyle(Ace::FontStyle style);
-    void TriggerUpdateFontFamilies(const std::vector<std::string>& families);
-    void TriggerUpdateFontSize(const Dimension& size);
-
+    void SetFont(std::string fontStr);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateLinearGradient(
+        const double x0, const double y0, const double x1, const double y1);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateRadialGradient(const std::vector<double> params);
+    std::shared_ptr<OHOS::Ace::Gradient> CreateConicGradient(const double startAngle, const double x, const double y);
+    void ClearImageData();
+    ImageSize GetImageSize(const double& x, const double& y, const double& width, const double& height);
+    std::unique_ptr<Ace::ImageData> GetImageData(const ImageSize& imageSize);
+    void GetPixelMap(const ImageSize& imageSize);
+    double GetDimension(const Dimension& value, const bool force = false);
+    void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+    void SetDensity()
+    {
+        double density = GetDensity(true);
+        if (!pattern_) {
+            LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern not bound to component.");
+            return;
+        }
+        pattern_->SetDensity(density);
+    }
+    inline double GetDensity(bool useSystemDensity = false)
+    {
+        if (useSystemDensity) {
+            return !NearZero(density_) ? density_ : 1.0;
+        } else {
+            return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
+        }
+    }
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
@@ -93,8 +147,19 @@ public:
         pattern_ = canvasPattern;
     }
 
-private:
+public:
+    Ace::ImageData imageData;
+
+protected:
     RefPtr<CanvasPattern> pattern_;
+
+private:
+    void ParseImageData(const ImageSizeExt& ext);
+    Dimension GetDimensionValue(const std::string& str);
+
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    double density_ = 1.0;
+    int32_t densityCallbackId_ = 0;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

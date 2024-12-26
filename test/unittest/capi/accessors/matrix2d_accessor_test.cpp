@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/canvas/canvas_paint_method.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
-#include "core/interfaces/native/implementation/canvas_path_peer.h"
 #include "core/interfaces/native/implementation/canvas_pattern_peer.h"
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer.h"

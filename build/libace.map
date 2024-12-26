@@ -304,6 +304,7 @@
       vtable?for?OHOS::Ace::ComponentGroupElement;
       vtable?for?OHOS::Ace::NG::PagePattern;
       vtable?for?OHOS::Ace::StackElement;
+      vtable?for?OHOS::Ace::CanvasPath2D;
       vtable?for?OHOS::Ace::ComposedComponent;
       vtable?for?OHOS::Ace::BoxComponent;
       vtable?for?OHOS::Ace::PageTransitionComponent;
@@ -327,6 +328,7 @@
       VTT?for?OHOS::Ace::StackElement;
       VTT?for?OHOS::Ace::ComponentGroupElement;
       VTT?for?OHOS::Ace::NG::PagePattern;
+      VTT?for?OHOS::Ace::CanvasPath2D;
       VTT?for?OHOS::Ace::ComposedComponent;
       VTT?for?OHOS::Ace::BoxComponent;
       VTT?for?OHOS::Ace::PageTransitionComponent;

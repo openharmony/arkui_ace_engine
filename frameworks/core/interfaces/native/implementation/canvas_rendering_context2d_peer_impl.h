@@ -19,7 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_ng/pattern/canvas/canvas_pattern.h"
-
+#include "canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 
-class CanvasRenderingContext2DPeerImpl : public Referenced {
+class CanvasRenderingContext2DPeerImpl : public CanvasRendererPeerImpl {
 public:
     enum class CanvasCallbackType {
         ON_ATTACH = 0,
@@ -79,8 +79,7 @@ public:
         return instanceId_;
     }
 
-protected:
-    RefPtr<CanvasPattern> pattern_;
+public:
     bool antialias_ = false;
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
