@@ -151,6 +151,16 @@ public:
         return info_.offsetEnd_;
     }
 
+    bool IsAtTopWithDelta() const override
+    {
+        return info_.reachStart_ || EstimateHeight() < 0;
+    }
+
+    bool IsAtBottomWithDelta() const override
+    {
+        return info_.offsetEnd_ || (EstimateHeight() + info_.lastMainSize_ > GetTotalHeight());
+    }
+
     bool IsFadingBottom() const override;
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;

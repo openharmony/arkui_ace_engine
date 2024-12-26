@@ -28,6 +28,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateWaterFlowItems(100);
     CreateDone();
 
@@ -49,7 +50,6 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     EXPECT_EQ(info->Offset(), 0.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5200.0f, 100.0f);
 
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->GetScrollable()->HandleTouchDown();
 
     UpdateCurrentOffset(300.0f);

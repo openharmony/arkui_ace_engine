@@ -5955,13 +5955,14 @@ class EdgeEffectModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    let _a;
+    let _a, _b;
     if (reset) {
       getUINativeModule().scrollable.resetEdgeEffect(node);
     }
     else {
       getUINativeModule().scrollable.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
-      void 0 ? void 0 : _a.alwaysEnabled);
+        void 0 ? void 0 : _a.alwaysEnabled, (_b = this.value.options) === null ||
+          _b === void 0 ? void 0 : _b.effectEdge);
     }
   }
   checkObjectDiff() {
