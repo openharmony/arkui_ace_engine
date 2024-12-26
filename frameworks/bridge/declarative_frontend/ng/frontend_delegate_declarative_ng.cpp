@@ -766,30 +766,20 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
-    DialogProperties dialogProperties = { .autoCancel = dialogAttr.autoCancel,
-        .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss,
-        .maskColor = dialogAttr.maskColor,
-        .backgroundColor = dialogAttr.backgroundColor,
-        .borderRadius = dialogAttr.borderRadius,
-        .isShowInSubWindow = dialogAttr.showInSubWindow,
-        .isModal = dialogAttr.isModal,
-        .enableHoverMode = dialogAttr.enableHoverMode,
-        .customBuilder = dialogAttr.customBuilder,
-        .borderWidth = dialogAttr.borderWidth,
-        .borderColor = dialogAttr.borderColor,
-        .borderStyle = dialogAttr.borderStyle,
-        .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width,
-        .height = dialogAttr.height,
-        .maskRect = dialogAttr.maskRect,
-        .transitionEffect = dialogAttr.transitionEffect,
-        .contentNode = dialogAttr.contentNode,
-        .onDidAppear = dialogAttr.onDidAppear,
-        .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode };
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
+        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
+        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
+        .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
+        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback
+    };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "

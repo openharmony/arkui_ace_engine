@@ -800,6 +800,8 @@ private:
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
+    void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
+        const RefPtr<FrameNode> dialog, bool showComponentContent);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
