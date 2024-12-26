@@ -5721,7 +5721,7 @@ void TextFieldPattern::HandleOnPageDown()
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 {
     TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-        start, end - start, GetTextUtf16Value(), true, true);
+        start, end - start, GetTextUtf16Value(), false, true);
     start = range.startIndex;
     end = range.endIndex;
 }
