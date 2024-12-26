@@ -87,6 +87,8 @@ extern const char THEME_PATTERN_CONTAINER_MODAL[];
 extern const char THEME_PATTERN_AGING_ADAPATION_DIALOG[];
 extern const char THEME_PATTERN_SCROLLABLE[];
 extern const char THEME_PATTERN_APP[];
+extern const char THEME_PATTERN_LINEAR_INDICATOR[];
+ 
 
 // pattern general attributes
 extern const char PATTERN_FG_COLOR[];

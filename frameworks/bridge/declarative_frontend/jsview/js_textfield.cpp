@@ -1804,6 +1804,16 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    TextFieldModel::GetInstance()->SetHalfLeading(halfLeading);
+}
+
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;

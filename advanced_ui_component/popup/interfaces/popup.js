@@ -536,13 +536,7 @@ export class g1 extends ViewPU {
         };
     }
     getButtonTextMargin() {
-        if ((this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
-            (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
-            return { top: LengthMetrics.vp(this.theme.button.h1.bottom.value) };
-        }
-        else {
-            return { top: LengthMetrics.vp(0), bottom: LengthMetrics.vp(0) };
-        }
+        return { top: LengthMetrics.vp(this.theme.button.h1.bottom.value) };
     }
     getButtonTextPadding() {
         return this.theme.button.padding;
