@@ -994,7 +994,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex002, TestSize.Level1)
 
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
-    expectVal = std::pair<int32_t, int32_t>(index, index);
+    expectVal = std::pair<int32_t, int32_t>(1, 1);
     EXPECT_EQ(paintMethod->GetStartAndEndIndex(1), expectVal);
 
     paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
@@ -1026,11 +1026,13 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushUITasks();
+    FlushLayoutTask(frameNode_);
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
 
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, indicatorIndex);
@@ -1048,6 +1050,7 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(2);
     model.SetSwipeByGroup(true);
+    model.SetLoop(true);
     model.SetIndicatorType(SwiperIndicatorType::DOT);
     CreateSwiperItems(6);
     CreateSwiperDone();
@@ -1061,11 +1064,13 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
     // change last page
     ChangeIndex(4);
     pattern_->UpdateCurrentOffset(40.0f);
-    FlushUITasks();
+    FlushLayoutTask(frameNode_);
 
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
     auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
 
     int32_t indicatorIndex = displayIndicatorCount - 1;
     auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, 0);

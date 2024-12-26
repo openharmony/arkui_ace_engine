@@ -200,6 +200,7 @@ public:
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
+    void UpdateEnable(bool needToenable);
 
 private:
     void OnModifyDone() override;

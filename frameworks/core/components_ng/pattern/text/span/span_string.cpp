@@ -18,59 +18,54 @@
 #include <cstdint>
 
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace {
 
 const std::unordered_set<SpanType> specailTypes = { SpanType::Image, SpanType::CustomSpan };
 
-std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start, int32_t length)
+std::u16string SpanString::GetWideStringSubstr(const std::u16string& content, int32_t start, int32_t length)
 {
     if (start >= static_cast<int32_t>(content.length())) {
-        return StringUtils::ToWstring("");
+        return u"";
     }
     return content.substr(start, length);
 }
 
-std::wstring SpanString::GetWideStringSubstr(const std::wstring& content, int32_t start)
+std::u16string SpanString::GetWideStringSubstr(const std::u16string& content, int32_t start)
 {
     if (start >= static_cast<int32_t>(content.length())) {
-        return StringUtils::ToWstring("");
+        return u"";
     }
     return content.substr(start);
 }
 
-SpanString::SpanString(const std::string& text)
+SpanString::SpanString(const std::u16string& text) : text_(text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
-    std::wstring wideText = StringUtils::ToWstring(text);
-    if (wideText.length() == 0 && text.length() != 0) {
-        text_ = TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(text);
-        wideText = StringUtils::ToWstring(text_);
-    } else {
-        text_ = text;
-    }
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(text_.data()), text_.length(), 0);
     spanItem->content = text_;
-    spanItem->interval = { 0, wideText.length() };
+    spanItem->interval = { 0, text_.length() };
     spans_.emplace_back(spanItem);
     auto it = spans_.begin();
     SplitSpansAndForward(it);
 }
 
-SpanString::SpanString(const ImageSpanOptions& options) : text_(" ")
+SpanString::SpanString(const ImageSpanOptions& options) : text_(u" ")
 {
     auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
     spanItem->options = options;
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->interval = { 0, 1 };
     spans_.emplace_back(spanItem);
     spansMap_[SpanType::Image].emplace_back(MakeRefPtr<ImageSpan>(options));
 }
 
-SpanString::SpanString(RefPtr<CustomSpan>& span) : text_(" ")
+SpanString::SpanString(RefPtr<CustomSpan>& span) : text_(u" ")
 {
     auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->interval = { 0, 1 };
     spanItem->onMeasure = span->GetOnMeasure();
     spanItem->onDraw = span->GetOnDraw();
@@ -128,17 +123,17 @@ SpanString::~SpanString()
 std::list<RefPtr<NG::SpanItem>>::iterator SpanString::SplitSpansAndForward(
     std::list<RefPtr<NG::SpanItem>>::iterator& it)
 {
-    auto wString = StringUtils::ToWstring((*it)->content);
-    auto newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
+    auto wString = (*it)->content;
+    auto newlineIndex = static_cast<int32_t>(wString.find(u'\n'));
     int32_t offset = (*it)->interval.first;
     while (newlineIndex != -1 && newlineIndex != static_cast<int32_t>(wString.size()) - 1) {
         auto newSpan = (*it)->GetSameStyleSpanItem();
         newSpan->interval = { offset + newlineIndex + 1, (*it)->interval.second };
         (*it)->interval = { offset, offset + newlineIndex + 1 };
-        (*it)->content = StringUtils::ToString(GetWideStringSubstr(wString, 0, newlineIndex + 1));
+        (*it)->content = GetWideStringSubstr(wString, 0, newlineIndex + 1);
         wString = GetWideStringSubstr(wString, newlineIndex + 1);
-        newSpan->content = StringUtils::ToString(wString);
-        newlineIndex = static_cast<int32_t>(wString.find(L'\n'));
+        newSpan->content = wString;
+        newlineIndex = static_cast<int32_t>(wString.find(u'\n'));
 
         offset = newSpan->interval.first;
         ++it;
@@ -164,40 +159,40 @@ void SpanString::ApplyToSpans(
             continue;
         }
 
-        auto wContent = StringUtils::ToWstring((*it)->content);
+        auto wContent = (*it)->content;
         auto newSpan = (*it)->GetSameStyleSpanItem();
         if (oldStart < intersection->first && intersection->second < oldEnd) {
             (*it)->interval = { oldStart, intersection->first };
-            (*it)->content = StringUtils::ToString(wContent.substr(0, intersection->first - oldStart));
+            (*it)->content = wContent.substr(0, intersection->first - oldStart);
 
             newSpan->interval = { intersection->first, intersection->second };
-            newSpan->content = StringUtils::ToString(
-                wContent.substr(intersection->first - oldStart, intersection->second - intersection->first));
+            newSpan->content = wContent.substr(intersection->first - oldStart,
+                intersection->second - intersection->first);
             span->ApplyToSpanItem(newSpan, operation);
 
             auto newSpan2 = (*it)->GetSameStyleSpanItem();
             newSpan2->interval = { intersection->second, oldEnd };
-            newSpan2->content = StringUtils::ToString(wContent.substr(intersection->second - oldStart));
+            newSpan2->content = wContent.substr(intersection->second - oldStart);
             it = spans_.insert(std::next(it), newSpan);
             it = spans_.insert(std::next(it), newSpan2);
             continue;
         }
 
         if (oldEnd > intersection->second) {
-            (*it)->content = StringUtils::ToString(wContent.substr(0, intersection->second - oldStart));
+            (*it)->content = wContent.substr(0, intersection->second - oldStart);
             (*it)->interval = { oldStart, intersection->second };
             span->ApplyToSpanItem(*it, operation);
             newSpan->interval = { intersection->second, oldEnd };
-            newSpan->content = StringUtils::ToString(wContent.substr(intersection->second - oldStart));
+            newSpan->content = wContent.substr(intersection->second - oldStart);
             it = spans_.insert(std::next(it), newSpan);
             continue;
         }
 
         if (intersection->first > oldStart) {
-            (*it)->content = StringUtils::ToString(wContent.substr(0, intersection->first - oldStart));
+            (*it)->content = wContent.substr(0, intersection->first - oldStart);
             (*it)->interval = { oldStart, intersection->first };
             newSpan->interval = { intersection->first, oldEnd };
-            newSpan->content = StringUtils::ToString(wContent.substr(intersection->first - oldStart));
+            newSpan->content = wContent.substr(intersection->first - oldStart);
             span->ApplyToSpanItem(newSpan, operation);
             it = spans_.insert(std::next(it), newSpan);
         }
@@ -284,12 +279,12 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
             auto spanItem = (*iter)->GetSameStyleSpanItem();
             spanItem->interval.first = pos;
             spanItem->interval.second = (*iter)->interval.second;
-            auto wStr = StringUtils::ToWstring(spanItem->content);
+            auto wStr = spanItem->content;
             auto start = (*iter)->interval.first;
-            spanItem->content = StringUtils::ToString(wStr.substr(pos - start));
+            spanItem->content = wStr.substr(pos - start);
             spans_.insert(std::next(iter), spanItem);
             (*iter)->interval.second = pos;
-            (*iter)->content = StringUtils::ToString(wStr.substr(0, pos - start));
+            (*iter)->content = wStr.substr(0, pos - start);
             return step;
         }
         step++;
@@ -299,9 +294,7 @@ int32_t SpanString::GetStepsByPosition(int32_t pos)
 
 void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int32_t start)
 {
-    auto wStr = GetWideString();
-    text_ = StringUtils::ToString(
-        wStr.substr(0, start) + StringUtils::ToWstring(" ") + wStr.substr(start));
+    text_ = GetU16string().substr(0, start) + u" " + GetU16string().substr(start);
     auto iter = spans_.begin();
     auto step = GetStepsByPosition(start);
     std::advance(iter, step);
@@ -343,7 +336,7 @@ void SpanString::AddSpecialSpan(const RefPtr<SpanBase>& span, SpanType type, int
 RefPtr<NG::ImageSpanItem> SpanString::MakeImageSpanItem(const RefPtr<ImageSpan>& imageSpan)
 {
     auto spanItem = MakeRefPtr<NG::ImageSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->interval.first = imageSpan->GetStartIndex();
     spanItem->interval.second = imageSpan->GetEndIndex();
     spanItem->SetImageSpanOptions(imageSpan->GetImageSpanOptions());
@@ -353,94 +346,12 @@ RefPtr<NG::ImageSpanItem> SpanString::MakeImageSpanItem(const RefPtr<ImageSpan>&
 RefPtr<NG::CustomSpanItem> SpanString::MakeCustomSpanItem(const RefPtr<CustomSpan>& customSpan)
 {
     auto spanItem = MakeRefPtr<NG::CustomSpanItem>();
-    spanItem->content = " ";
+    spanItem->content = u" ";
     spanItem->interval.first = customSpan->GetStartIndex();
     spanItem->interval.second = customSpan->GetEndIndex();
     spanItem->onDraw = customSpan->GetOnDraw();
     spanItem->onMeasure = customSpan->GetOnMeasure();
     return spanItem;
-}
-
-void SpanString::ChangeStartAndEndToCorrectNum(int32_t& start, int32_t& end)
-{
-    auto text = GetU16string();
-    TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-        start, end-start, text, true);
-    int startIndex = range.startIndex;
-    int endIndex = range.endIndex;
-
-    if (start == startIndex) {
-        ChangeStartToCorrectNum(start);
-    } else {
-        LOGI("SpanString: Get Emoji, Change Start %{public}d to %{public}d",
-            start, startIndex);
-        start = startIndex;
-    }
-
-    if (end == endIndex) {
-        ChangeEndToCorrectNum(end);
-    } else {
-        LOGI("SpanString: Get Emoji, Change End %{public}d to %{public}d",
-            end, endIndex);
-        end = endIndex;
-    }
-
-    if (end < start) {
-        std::swap(start, end);
-    }
-}
-
-void SpanString::ChangeStartToCorrectNum(int32_t& start)
-{
-    if (start == 0) {
-        return;
-    }
-    auto text = GetWideString();
-    auto textLen = static_cast<int32_t>(text.length());
-    if (textLen == 0) {
-        return;
-    }
-    auto tmpStart = start;
-    auto substr = StringUtils::ToString(GetWideStringSubstr(text, 0, tmpStart));
-    while (substr.length() == 0) {
-        if (tmpStart == textLen) {
-            break;
-        }
-        tmpStart --;
-        if (tmpStart <= 0) {
-            break;
-        }
-        substr = StringUtils::ToString(GetWideStringSubstr(text, 0, tmpStart));
-    }
-    if (tmpStart != start) {
-        LOGI("SpanString: Get Complex Char, Change Start %{public}d to %{public}d", start, tmpStart);
-        start = tmpStart;
-    }
-}
-
-void SpanString::ChangeEndToCorrectNum(int32_t& end)
-{
-    auto text = GetWideString();
-    auto textLen = static_cast<int32_t>(text.length());
-    if (textLen == 0) {
-        return;
-    }
-    auto tmpEnd = end;
-    auto substr = StringUtils::ToString(GetWideStringSubstr(text, end));
-    while (substr.length() == 0) {
-        if (tmpEnd == textLen) {
-            break;
-        }
-        tmpEnd ++;
-        if (tmpEnd >= textLen) {
-            break;
-        }
-        substr = StringUtils::ToString(GetWideStringSubstr(text, tmpEnd));
-    }
-    if (tmpEnd != end) {
-        LOGI("SpanString: Get Complex Char, Change End %{public}d to %{public}d", end, tmpEnd);
-        end = tmpEnd;
-    }
 }
 
 void SpanString::AddSpan(const RefPtr<SpanBase>& span)
@@ -450,7 +361,6 @@ void SpanString::AddSpan(const RefPtr<SpanBase>& span)
     }
     auto start = span->GetStartIndex();
     auto end = span->GetEndIndex();
-    ChangeStartAndEndToCorrectNum(start, end);
     if (span->GetSpanType() == SpanType::Image || span->GetSpanType() == SpanType::CustomSpan) {
         AddSpecialSpan(span, span->GetSpanType(), start);
         return;
@@ -476,7 +386,6 @@ void SpanString::RemoveSpan(int32_t start, int32_t length, SpanType key)
         return;
     }
     auto end = start + length;
-    ChangeStartAndEndToCorrectNum(start, end);
     length = end - start;
     auto it = spansMap_.find(key);
     if (it == spansMap_.end()) {
@@ -578,15 +487,15 @@ bool SpanString::CheckRange(int32_t start, int32_t length, bool allowLengthZero)
     return true;
 }
 
-RefPtr<NG::SpanItem> SpanString::GetDefaultSpanItem(const std::string& text)
+RefPtr<NG::SpanItem> SpanString::GetDefaultSpanItem(const std::u16string& text)
 {
     auto spanItem = MakeRefPtr<NG::SpanItem>();
     spanItem->content = text;
-    spanItem->interval = { 0, StringUtils::ToWstring(text).length() };
+    spanItem->interval = { 0, text.length() };
     return spanItem;
 }
 
-void SpanString::SetString(const std::string& text)
+void SpanString::SetString(const std::u16string& text)
 {
     text_ = text;
 }
@@ -609,24 +518,19 @@ void SpanString::SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBa
     spansMap_ = spansMap;
 }
 
-const std::string& SpanString::GetString() const
+const std::string SpanString::GetString() const
+{
+    return UtfUtils::Str16ToStr8(text_);
+}
+
+const std::u16string& SpanString::GetU16string() const
 {
     return text_;
 }
 
-std::wstring SpanString::GetWideString()
-{
-    return StringUtils::ToWstring(text_);
-}
-
-std::u16string SpanString::GetU16string()
-{
-    return StringUtils::Str8ToStr16(text_);
-}
-
 int32_t SpanString::GetLength() const
 {
-    return StringUtils::ToWstring(text_).length();
+    return text_.length();
 }
 
 bool SpanString::IsEqualToSpanString(const RefPtr<SpanString>& other) const
@@ -637,12 +541,12 @@ bool SpanString::IsEqualToSpanString(const RefPtr<SpanString>& other) const
 RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) const
 {
     if (!CheckRange(start, length)) {
-        RefPtr<SpanString> span = AceType::MakeRefPtr<SpanString>("");
+        RefPtr<SpanString> span = AceType::MakeRefPtr<SpanString>(u"");
         return span;
     }
     int32_t end = start + length;
     RefPtr<SpanString> span =
-        AceType::MakeRefPtr<SpanString>(StringUtils::ToString(StringUtils::ToWstring(text_).substr(start, length)));
+        AceType::MakeRefPtr<SpanString>(text_.substr(start, length));
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
     for (const auto& map : spansMap_) {
         auto subList = GetSubSpanList(start, length, map.second);
@@ -662,9 +566,8 @@ RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) c
             auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
             auto newSpanItem = spanItem->GetSameStyleSpanItem();
             newSpanItem->interval = { spanStart, spanEnd };
-            newSpanItem->content = StringUtils::ToString(
-                StringUtils::ToWstring(spanItem->content)
-                    .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart)));
+            newSpanItem->content = spanItem->content
+                    .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart));
             subSpans_.emplace_back(newSpanItem);
         }
     }
@@ -845,9 +748,7 @@ void SpanString::RemoveSpecialSpan(int32_t start, int32_t end, SpanType type)
     int32_t count = 0;
     for (auto iter = spans.begin(); iter != spans.end();) {
         if ((*iter)->GetStartIndex() >= start && (*iter)->GetStartIndex() < end - count) {
-            auto wStr = GetWideString();
-            wStr.erase((*iter)->GetStartIndex(), 1);
-            text_ = StringUtils::ToString(wStr);
+            text_.erase((*iter)->GetStartIndex(), 1);
             UpdateSpanMapWithOffset((*iter)->GetStartIndex(), -1);
             iter = spans.erase(iter);
             ++count;
@@ -954,7 +855,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
         if (spanItem->spanItemType == NG::SpanItemType::CustomSpan) {
             TLVUtil::WriteInt32(buff, static_cast<int32_t>(NG::SpanItemType::NORMAL));
             auto placeHolderSpan = AceType::MakeRefPtr<NG::SpanItem>();
-            placeHolderSpan->content = " ";
+            placeHolderSpan->content = u" ";
             placeHolderSpan->interval = spanItem->interval;
             placeHolderSpan->EncodeTlv(buff);
             continue;
@@ -963,14 +864,14 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
         spanItem->EncodeTlv(buff);
     }
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(buff, text_);
+    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(text_));
     TLVUtil::WriteUint8(buff, TLV_END);
     return true;
 }
 
 RefPtr<SpanString> SpanString::DecodeTlv(std::vector<uint8_t>& buff)
 {
-    RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>("");
+    RefPtr<SpanString> spanStr = MakeRefPtr<SpanString>(u"");
     SpanString* spanString = spanStr.GetRawPtr();
     DecodeTlvExt(buff, spanString);
     return spanStr;
@@ -984,7 +885,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
-                auto str = TLVUtil::ReadString(buff, cursor);
+                auto str = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
                 spanString->SetString(str);
                 break;
             }
@@ -1061,7 +962,7 @@ std::string SpanString::ToString()
     std::stringstream ss;
     for (auto span: spans_) {
         ss << "Get spanItem [" << span->interval.first << ":"
-            << span->interval.second << "] " << span->content << std::endl;
+            << span->interval.second << "] " << UtfUtils::Str16ToStr8(span->content) << std::endl;
     }
     for (auto& iter : spansMap_) {
         auto spans = spansMap_[iter.first];

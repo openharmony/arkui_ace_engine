@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 struct MenuOptionsParam {
     std::optional<std::string> content;
     std::optional<std::string> icon;
+    std::optional<std::string> labelInfo;
     std::string id;
     std::function<void(const std::string&)> action;
 

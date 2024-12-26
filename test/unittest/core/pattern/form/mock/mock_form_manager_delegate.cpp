@@ -94,7 +94,7 @@ void FormManagerDelegate::ReleaseRenderer() {}
 
 void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) {}
 
-void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left) {}
+void FormManagerDelegate::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) {}
 
 void FormManagerDelegate::SetObscured(bool isObscured) {}
 
@@ -105,7 +105,8 @@ void FormManagerDelegate::OnAccessibilityDumpChildInfo(
     const std::vector<std::string>& params, std::vector<std::string>& info) {}
 void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs) {}
-
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info) {}
 void FormManagerDelegate::HandleCachedClickEvents() {}
 
 #if OHOS_STANDARD_SYSTEM

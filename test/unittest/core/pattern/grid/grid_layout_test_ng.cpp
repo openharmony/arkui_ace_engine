@@ -115,47 +115,48 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSiz
     CreateFocusableGridItems(10, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
+    auto& focus = pattern_->focusHandler_;
     /**
      * @tc.steps: step2. Find target child with specified index parameters.
      * @tc.expected: Can find the target focus child.
      */
     int32_t tarMainIndex = 1;
     int32_t tarCrossIndex = 1;
-    pattern_->isLeftStep_ = true;
-    auto IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isLeftStep_ = true;
+    auto IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     RefPtr<FocusHub> result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isLeftStep_ = false;
+    focus.isLeftStep_ = false;
 
     /**
      * @tc.steps: step3. Call the function when isRightStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isRightStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isRightStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isRightStep_ = false;
+    focus.isRightStep_ = false;
 
     /**
      * @tc.steps: step4. Call the function when isUpStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isUpStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isUpStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isUpStep_ = false;
+    focus.isUpStep_ = false;
 
     /**
      * @tc.steps: step5. Call the function when isDownStep_ is true.
      * @tc.expected: Can find the target focus child.
      */
-    pattern_->isDownStep_ = true;
-    IrregularFocusableChild = pattern_->SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
+    focus.isDownStep_ = true;
+    IrregularFocusableChild = focus.SearchIrregularFocusableChild(tarMainIndex, tarCrossIndex);
     result = IrregularFocusableChild.Upgrade();
     EXPECT_NE(result, nullptr);
-    pattern_->isDownStep_ = false;
+    focus.isDownStep_ = false;
 }
 
 /**
@@ -456,5 +457,130 @@ HWTEST_F(GridLayoutTestNg, GridGetChildrenExpandedSize001, TestSize.Level1)
 
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 5 + 10 * 4, GRID_HEIGHT - padding));
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest001
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest001, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::COLUMN);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest002
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest002, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::ROW);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest003
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest003, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+/**
+ * @tc.name: AdaptiveLayoutCrossCountTest004
+ * @tc.desc: Test AdaptiveLayout crossCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, AdaptiveLayoutCrossCountTest004, TestSize.Level1)
+{
+    GridModelNG model;
+    RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
+    RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
+    model.Create(positionController, scrollBarProxy);
+    ViewAbstract::SetHeight(CalcLength(Infinity<float>()));
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
+    GridTestNg::GetGrid();
+    CreateFixedItems(1);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->GetCrossCount(), 1);
+}
+
+namespace {
+int32_t EstimateIndex(float pos)
+{
+    auto lines = std::floor((pos - 105.0f) / 105.0f);
+    return lines * 3 + 1;
+}
+} // namespace
+
+/**
+ * @tc.name: LargeDelta001
+ * @tc.desc: Test Grid Scrolling with large delta.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, LargeDelta001, TestSize.Level1)
+{
+    // Move to OptionTestNg later when Irregular layout is fixed
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetColumnsGap(Dimension(COL_GAP));
+    model.SetRowsGap(Dimension(ROW_GAP));
+    CreateFixedItems(4000);
+    CreateDone();
+
+    const auto& info = pattern_->info_;
+    UpdateCurrentOffset(-30000.0f);
+    EXPECT_EQ(info.startIndex_, 853);
+    EXPECT_EQ(EstimateIndex(30000.0f), 853);
+    UpdateCurrentOffset(-300.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(30300.0f));
+    UpdateCurrentOffset(20000.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(10300.0f));
+    UpdateCurrentOffset(250.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(10050.0f));
+
+    UpdateCurrentOffset(-35000.0f);
+    EXPECT_EQ(info.startIndex_, EstimateIndex(45050.0f));
 }
 } // namespace OHOS::Ace::NG

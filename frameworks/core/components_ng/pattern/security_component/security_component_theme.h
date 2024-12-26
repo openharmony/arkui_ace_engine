@@ -100,6 +100,11 @@ public:
         return paddingWithoutBg_;
     }
 
+    const Dimension& GetDefaultBorderRadius() const
+    {
+        return defaultBorderRadius_;
+    }
+
     const Dimension& GetBorderRadius() const
     {
         return borderRadius_;
@@ -232,6 +237,8 @@ private:
             securityComponentPattern->GetAttr<std::string>("description_quick_save_to_gallery", ""));
         theme->saveDescriptions_.emplace_back(
             securityComponentPattern->GetAttr<std::string>("description_quick_resave_to_gallery", ""));
+        theme->saveDescriptions_.emplace_back(
+            securityComponentPattern->GetAttr<std::string>("description_save_all", ""));
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SecurityComponentTheme>& theme)
@@ -256,6 +263,7 @@ private:
         theme->textIconSpace_ = securityComponentPattern->GetAttr<Dimension>("text_icon_padding", 0.0_vp);
         theme->paddingWithoutBg_ = securityComponentPattern->GetAttr<Dimension>("padding_without_background", 0.0_vp);
         theme->borderRadius_ = securityComponentPattern->GetAttr<Dimension>("border_radius", 0.0_vp);
+        theme->defaultBorderRadius_ = securityComponentPattern->GetAttr<Dimension>("default_border_radius", 0.0_vp);
         theme->borderWidth_ = securityComponentPattern->GetAttr<Dimension>("border_width", 0.0_vp);
         theme->iconColor_ = securityComponentPattern->GetAttr<Color>("icon_color", Color());
         theme->fontColor_ = securityComponentPattern->GetAttr<Color>("font_color", Color());
@@ -278,6 +286,7 @@ private:
     Dimension backgroundLeftPadding_;
     Dimension textIconSpace_;
     Dimension borderRadius_;
+    Dimension defaultBorderRadius_;
     Dimension borderWidth_;
     Dimension paddingWithoutBg_;
 

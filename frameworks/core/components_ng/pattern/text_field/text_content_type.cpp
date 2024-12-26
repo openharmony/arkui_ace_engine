@@ -23,4 +23,4 @@ TextContentType CastToTextContentType(int32_t value)
     }
     return static_cast<TextContentType>(value);
 }
-}  // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace::NG

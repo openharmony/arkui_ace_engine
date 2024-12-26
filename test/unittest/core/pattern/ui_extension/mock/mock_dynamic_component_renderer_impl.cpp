@@ -47,6 +47,31 @@ bool DynamicComponentRendererImpl::TransferKeyEvent(const KeyEvent& event)
     return true;
 }
 
+void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType) {}
+
+bool DynamicComponentRendererImpl::IsRestrictedWorkerThread() { return false; }
+
+bool DynamicComponentRendererImpl::HasWorkerUsing(void *worker) { return false; }
+
+void DynamicComponentRendererImpl::AddWorkerUsing(void *worker) {}
+
+void DynamicComponentRendererImpl::DeleteWorkerUsing(void *worker) {}
+
+void DynamicComponentRendererImpl::CreateIsolatedContent() {}
+
+void DynamicComponentRendererImpl::CreateDynamicContent() {}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId) {}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeDeregister() {}
+
+void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info) {}
+
+void DynamicComponentRendererImpl::SetUIContentJsContext(
+    const std::shared_ptr<Framework::JsValue>& jsContext) {}
+
 void DynamicComponentRendererImpl::TransferFocusState(bool isFocus) {}
 
 void DynamicComponentRendererImpl::TransferFocusActiveEvent(bool isFocus) {}
@@ -72,5 +97,17 @@ bool DynamicComponentRendererImpl::NotifyExecuteAction(int64_t elementId,
 void DynamicComponentRendererImpl::TransferAccessibilityHoverEvent(float pointX, float pointY, int32_t sourceType,
     int32_t eventType, int64_t timeMs) {}
 
+void DynamicComponentRendererImpl::InitializeDynamicAccessibility() {}
+
 void DynamicComponentRendererImpl::Dump(RendererDumpInfo &rendererDumpInfo) {}
+
+void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info) {}
+
+void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent) {}
+
+bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

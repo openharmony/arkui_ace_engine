@@ -548,36 +548,138 @@ void ResetEnableHapticFeedback(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerModifier()
 {
-    static const ArkUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
-        ResetSelectedFont, SetPopupFont, ResetPopupFont, SetAlphabetIndexerFont, ResetAlphabetIndexerFont,
-        SetPopupItemBackgroundColor, ResetPopupItemBackgroundColor, SetAlphabetIndexerColor, ResetAlphabetIndexerColor,
-        SetPopupColor, ResetPopupColor, SetAlphabetIndexerSelectedColor, ResetAlphabetIndexerSelectedColor,
-        SetPopupBackground, ResetPopupBackground, SetSelectedBackgroundColor, ResetSelectedBackgroundColor,
-        SetPopupUnselectedColor, ResetPopupUnselectedColor, SetAlignStyle, ResetAlignStyle, SetUsingPopup,
-        ResetUsingPopup, SetAlphabetIndexerSelected, ResetAlphabetIndexerSelected, SetPopupHorizontalSpace,
-        ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
-        SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
-        ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetArrayValue, ResetArrayValue,
-        SetAutoCollapse, ResetAutoCollapse, SetEnableHapticFeedback, ResetEnableHapticFeedback };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIAlphabetIndexerModifier modifier = {
+        .setPopupItemFont = SetPopupItemFont,
+        .resetPopupItemFont = ResetPopupItemFont,
+        .setSelectedFont = SetSelectedFont,
+        .resetSelectedFont = ResetSelectedFont,
+        .setPopupFont = SetPopupFont,
+        .resetPopupFont = ResetPopupFont,
+        .setAlphabetIndexerFont = SetAlphabetIndexerFont,
+        .resetAlphabetIndexerFont = ResetAlphabetIndexerFont,
+        .setPopupItemBackgroundColor = SetPopupItemBackgroundColor,
+        .resetPopupItemBackgroundColor = ResetPopupItemBackgroundColor,
+        .setAlphabetIndexerColor = SetAlphabetIndexerColor,
+        .resetAlphabetIndexerColor = ResetAlphabetIndexerColor,
+        .setPopupColor = SetPopupColor,
+        .resetPopupColor = ResetPopupColor,
+        .setAlphabetIndexerSelectedColor = SetAlphabetIndexerSelectedColor,
+        .resetAlphabetIndexerSelectedColor = ResetAlphabetIndexerSelectedColor,
+        .setPopupBackground = SetPopupBackground,
+        .resetPopupBackground = ResetPopupBackground,
+        .setSelectedBackgroundColor = SetSelectedBackgroundColor,
+        .resetSelectedBackgroundColor = ResetSelectedBackgroundColor,
+        .setPopupUnselectedColor = SetPopupUnselectedColor,
+        .resetPopupUnselectedColor = ResetPopupUnselectedColor,
+        .setAlignStyle = SetAlignStyle,
+        .resetAlignStyle = ResetAlignStyle,
+        .setUsingPopup = SetUsingPopup,
+        .resetUsingPopup = ResetUsingPopup,
+        .setAlphabetIndexerSelected = SetAlphabetIndexerSelected,
+        .resetAlphabetIndexerSelected = ResetAlphabetIndexerSelected,
+        .setPopupHorizontalSpace = SetPopupHorizontalSpace,
+        .resetPopupHorizontalSpace = ResetPopupHorizontalSpace,
+        .setPopupSelectedColor = SetPopupSelectedColor,
+        .resetPopupSelectedColor = ResetPopupSelectedColor,
+        .setItemSize = SetItemSize,
+        .resetItemSize = ResetItemSize,
+        .setPopupPosition = SetPopupPosition,
+        .resetPopupPosition = ResetPopupPosition,
+        .setPopupItemBorderRadius = SetPopupItemBorderRadius,
+        .resetPopupItemBorderRadius = ResetPopupItemBorderRadius,
+        .setItemBorderRadius = SetItemBorderRadius,
+        .resetItemBorderRadius = ResetItemBorderRadius,
+        .setPopupBackgroundBlurStyle = SetPopupBackgroundBlurStyle,
+        .resetPopupBackgroundBlurStyle = ResetPopupBackgroundBlurStyle,
+        .setPopupTitleBackground = SetPopupTitleBackground,
+        .resetPopupTitleBackground = ResetPopupTitleBackground,
+        .setAdaptiveWidth = SetAdaptiveWidth,
+        .resetAdaptiveWidth = ResetAdaptiveWidth,
+        .setArrayValue = SetArrayValue,
+        .resetArrayValue = ResetArrayValue,
+        .setAutoCollapse = SetAutoCollapse,
+        .resetAutoCollapse = ResetAutoCollapse,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIAlphabetIndexerModifier* GetCJUIAlphabetIndexerModifier()
 {
-    static const CJUIAlphabetIndexerModifier modifier = { SetPopupItemFont, ResetPopupItemFont, SetSelectedFont,
-        ResetSelectedFont, SetPopupFont, ResetPopupFont, SetAlphabetIndexerFont, ResetAlphabetIndexerFont,
-        SetPopupItemBackgroundColor, ResetPopupItemBackgroundColor, SetAlphabetIndexerColor, ResetAlphabetIndexerColor,
-        SetPopupColor, ResetPopupColor, SetAlphabetIndexerSelectedColor, ResetAlphabetIndexerSelectedColor,
-        SetPopupBackground, ResetPopupBackground, SetSelectedBackgroundColor, ResetSelectedBackgroundColor,
-        SetPopupUnselectedColor, ResetPopupUnselectedColor, SetAlignStyle, ResetAlignStyle, SetUsingPopup,
-        ResetUsingPopup, SetAlphabetIndexerSelected, ResetAlphabetIndexerSelected, SetPopupHorizontalSpace,
-        ResetPopupHorizontalSpace, SetPopupSelectedColor, ResetPopupSelectedColor, SetItemSize, ResetItemSize,
-        SetPopupPosition, ResetPopupPosition, SetPopupItemBorderRadius, ResetPopupItemBorderRadius, SetItemBorderRadius,
-        ResetItemBorderRadius, SetPopupBackgroundBlurStyle, ResetPopupBackgroundBlurStyle, SetPopupTitleBackground,
-        ResetPopupTitleBackground, SetAdaptiveWidth, ResetAdaptiveWidth, SetAutoCollapse, ResetAutoCollapse,
-        SetEnableHapticFeedback, ResetEnableHapticFeedback, SetArrayValue, ResetArrayValue };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIAlphabetIndexerModifier modifier = {
+        .setPopupItemFont = SetPopupItemFont,
+        .resetPopupItemFont = ResetPopupItemFont,
+        .setSelectedFont = SetSelectedFont,
+        .resetSelectedFont = ResetSelectedFont,
+        .setPopupFont = SetPopupFont,
+        .resetPopupFont = ResetPopupFont,
+        .setAlphabetIndexerFont = SetAlphabetIndexerFont,
+        .resetAlphabetIndexerFont = ResetAlphabetIndexerFont,
+        .setPopupItemBackgroundColor = SetPopupItemBackgroundColor,
+        .resetPopupItemBackgroundColor = ResetPopupItemBackgroundColor,
+        .setAlphabetIndexerColor = SetAlphabetIndexerColor,
+        .resetAlphabetIndexerColor = ResetAlphabetIndexerColor,
+        .setPopupColor = SetPopupColor,
+        .resetPopupColor = ResetPopupColor,
+        .setAlphabetIndexerSelectedColor = SetAlphabetIndexerSelectedColor,
+        .resetAlphabetIndexerSelectedColor = ResetAlphabetIndexerSelectedColor,
+        .setPopupBackground = SetPopupBackground,
+        .resetPopupBackground = ResetPopupBackground,
+        .setSelectedBackgroundColor = SetSelectedBackgroundColor,
+        .resetSelectedBackgroundColor = ResetSelectedBackgroundColor,
+        .setPopupUnselectedColor = SetPopupUnselectedColor,
+        .resetPopupUnselectedColor = ResetPopupUnselectedColor,
+        .setAlignStyle = SetAlignStyle,
+        .resetAlignStyle = ResetAlignStyle,
+        .setUsingPopup = SetUsingPopup,
+        .resetUsingPopup = ResetUsingPopup,
+        .setAlphabetIndexerSelected = SetAlphabetIndexerSelected,
+        .resetAlphabetIndexerSelected = ResetAlphabetIndexerSelected,
+        .setPopupHorizontalSpace = SetPopupHorizontalSpace,
+        .resetPopupHorizontalSpace = ResetPopupHorizontalSpace,
+        .setPopupSelectedColor = SetPopupSelectedColor,
+        .resetPopupSelectedColor = ResetPopupSelectedColor,
+        .setItemSize = SetItemSize,
+        .resetItemSize = ResetItemSize,
+        .setPopupPosition = SetPopupPosition,
+        .resetPopupPosition = ResetPopupPosition,
+        .setPopupItemBorderRadius = SetPopupItemBorderRadius,
+        .resetPopupItemBorderRadius = ResetPopupItemBorderRadius,
+        .setItemBorderRadius = SetItemBorderRadius,
+        .resetItemBorderRadius = ResetItemBorderRadius,
+        .setPopupBackgroundBlurStyle = SetPopupBackgroundBlurStyle,
+        .resetPopupBackgroundBlurStyle = ResetPopupBackgroundBlurStyle,
+        .setPopupTitleBackground = SetPopupTitleBackground,
+        .resetPopupTitleBackground = ResetPopupTitleBackground,
+        .setAdaptiveWidth = SetAdaptiveWidth,
+        .resetAdaptiveWidth = ResetAdaptiveWidth,
+        .setAutoCollapse = SetAutoCollapse,
+        .resetAutoCollapse = ResetAutoCollapse,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+        .setArrayValue = SetArrayValue,
+        .resetArrayValue = ResetArrayValue,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
@@ -592,7 +694,7 @@ void SetOnIndexerSelected(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_SELECTED;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetOnSelected(frameNode, std::move(onEvent));
 }
@@ -607,7 +709,7 @@ void SetOnIndexerRequestPopupData(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_REQUEST_POPUP_DATA;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
         char** valueArray = reinterpret_cast<char**>(event.textArrayEvent.nativeStringArrayPtr);
         ArkUI_Int32 length = event.textArrayEvent.length;
         std::vector<std::string> valueVector;
@@ -633,7 +735,7 @@ void SetOnIndexerPopupSelected(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_POPUP_SELECTED;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
@@ -648,7 +750,7 @@ void SetIndexerChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CHANGE_EVENT;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }
@@ -663,7 +765,7 @@ void SetIndexerCreatChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_ALPHABET_INDEXER_CREAT_CHANGE_EVENT;
         event.componentAsyncEvent.data[0].i32 = selected;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     IndexerModelNG::SetCreatChangeEvent(frameNode, std::move(onEvent));
 }

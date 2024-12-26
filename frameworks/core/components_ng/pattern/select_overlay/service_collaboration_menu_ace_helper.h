@@ -41,7 +41,6 @@ public:
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
-    std::string GetIconPath(const std::string& abilityType);
     uint32_t GetSymbolId(const std::string& abilityType);
     RefPtr<FrameNode> CreateMainMenuItem(
         const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon);
@@ -87,6 +86,7 @@ private:
     static constexpr uint32_t INDEX_ONE = 1;
     static constexpr uint32_t INDEX_TWO = 2;
     static constexpr uint32_t INDEX_THREE = 3;
+    static constexpr uint32_t HEADER_TEXT_MAX_LINE = 2;
     static constexpr char SUN_MENU_TAG[33] = "SelectOverlayMenuByRightClickSub";
 };
 

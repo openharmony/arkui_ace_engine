@@ -148,11 +148,6 @@ public:
 protected:
     void OnModifyDone() override;
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
 private:
     void SetAccessibilityAction();
     void OnAttachToFrameNode() override;
@@ -164,6 +159,8 @@ private:
     void InitPressEvent();
     void HandlePressEvent(bool isPressed);
     void InitDisableStyle();
+    void InitOnFocusEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusEvent();
 
     RefPtr<ShallowBuilder> shallowBuilder_;
     bool forceRebuild_ = false;

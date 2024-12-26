@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextAreaModifier* GetTextAreaModifier();
     const CJUITextAreaModifier* GetCJUITextAreaModifier();
     void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam);
+    void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaSelectionChange(ArkUINodeHandle node, void* extraParam);
     void SetOnTextAreaEditChange(ArkUINodeHandle node, void* extraParam);
@@ -32,6 +33,7 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetTextAreaOnSubmit(ArkUINodeHandle node, void* extraParam);
 
     void ResetOnTextAreaChange(ArkUINodeHandle node);
+    void ResetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node);
     void ResetOnTextAreaPaste(ArkUINodeHandle node);
     void ResetOnTextAreaSelectionChange(ArkUINodeHandle node);
     void ResetOnTextAreaEditChange(ArkUINodeHandle node);

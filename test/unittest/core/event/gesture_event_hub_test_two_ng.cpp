@@ -101,9 +101,9 @@ HWTEST_F(GestureEventHubTestNg, DragForbidden001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->SetDragForbiddenForcely(true);
-    ASSERT_EQ(guestureEventHub->IsDragForbidden(), true);
+    EXPECT_EQ(guestureEventHub->IsDragForbidden(), true);
     guestureEventHub->SetDragForbiddenForcely(false);
-    ASSERT_EQ(guestureEventHub->IsDragForbidden(), false);
+    EXPECT_EQ(guestureEventHub->IsDragForbidden(), false);
 }
 
 /**
@@ -274,9 +274,9 @@ HWTEST_F(GestureEventHubTestNg, MonopolizeEvents001, TestSize.Level1)
     auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(guestureEventHub, nullptr);
     guestureEventHub->SetMonopolizeEvents(true);
-    ASSERT_EQ(guestureEventHub->GetMonopolizeEvents(), true);
+    EXPECT_EQ(guestureEventHub->GetMonopolizeEvents(), true);
     guestureEventHub->SetMonopolizeEvents(false);
-    ASSERT_EQ(guestureEventHub->GetMonopolizeEvents(), false);
+    EXPECT_EQ(guestureEventHub->GetMonopolizeEvents(), false);
 }
 
 /**
@@ -295,7 +295,7 @@ HWTEST_F(GestureEventHubTestNg, OnTouchInterceptFunc001, TestSize.Level1)
     ASSERT_NE(onGetTouchInterceptfunc, nullptr);
     OHOS::Ace::TouchEventInfo info("unknown");
     auto funcRet = onGetTouchInterceptfunc(info);
-    ASSERT_EQ(funcRet, NG::HitTestMode::HTMTRANSPARENT);
+    EXPECT_EQ(funcRet, NG::HitTestMode::HTMTRANSPARENT);
 }
 
 /**
@@ -312,7 +312,7 @@ HWTEST_F(GestureEventHubTestNg, GestureRecognizerJudgeFunc001, TestSize.Level1)
                     const std::list<RefPtr<NGGestureRecognizer>>& others) { return GestureJudgeResult(); };
 
     guestureEventHub->SetOnGestureRecognizerJudgeBegin(std::move(func));
-    ASSERT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
+    EXPECT_NE(guestureEventHub->GetOnGestureRecognizerJudgeBegin(), nullptr);
 }
 
 /**
@@ -360,7 +360,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragData001, TestSize.Level1)
     ASSERT_NE(newUnifiedData, nullptr);
     std::string udKey;
     auto ret = gestureEventHub->SetDragData(newUnifiedData, udKey);
-    ASSERT_NE(ret, -1);
+    EXPECT_NE(ret, -1);
 }
 /**
  * @tc.name: SetMouseDragMonitorState
@@ -482,9 +482,9 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart002, TestSize.Level1)
      * @tc.steps: step5. call OnDragStart
      */
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
-    ASSERT_NE(gestureHub->pixelMap_, nullptr);
-    ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->pixelMap_, nullptr);
+    EXPECT_NE(gestureHub->dragEventActuator_, nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
 }
@@ -556,7 +556,7 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart003, TestSize.Level1)
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
     ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     MockContainer::TearDown();
 }
@@ -590,8 +590,8 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart004, TestSize.Level1)
     event->SetResult(DragRet::DRAG_FAIL);
     auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
     gestureHub->OnDragStart(info, pipline, buttonFrameNode, dragDropInfo, event);
-    ASSERT_EQ(event->GetResult(), DragRet::DRAG_FAIL);
-    ASSERT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
+    EXPECT_EQ(event->GetResult(), DragRet::DRAG_FAIL);
+    EXPECT_EQ(info.GetInputEventType(), InputEventType::MOUSE_BUTTON);
 }
 
 RefPtr<FrameNode> CreateFrameNodeGroup(int32_t targetId, size_t childCount)
@@ -739,10 +739,91 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     gestureHub->OnDragStart(info, pipline, webFrameNode, dragDropInfo, event);
     ASSERT_NE(gestureHub->pixelMap_, nullptr);
     ASSERT_NE(gestureHub->dragEventActuator_, nullptr);
-    ASSERT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
+    EXPECT_NE(gestureHub->GetPreScaledPixelMapIfExist(1.0f, pixelMap), nullptr);
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     SubwindowManager::GetInstance()->SetCurrentSubwindow(nullptr);
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest001
+ * @tc.desc: Test GetGrayedState And SetGrayedState
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, false);
+
+    dragDropManager->SetGrayedState(true);
+    grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, true);
+
+    dragDropManager->SetGrayedState(false);
+    grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, false);
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest002
+ * @tc.desc: Test HandleDragThroughMouse And HandleDragEndAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest002, TestSize.Level1)
+{
+    auto pipline = PipelineContext::GetMainPipelineContext();
+    pipline->dragDropManager_->SetGrayedState(false);
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetRenderContext()->UpdateOpacity(1.0f);
+    auto grayedOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+
+    NG::DragPreviewOption dragPreviewOptions;
+    dragPreviewOptions.isDefaultDragItemGrayEffectEnabled = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->HandleDragThroughMouse(frameNode);
+    grayedOpacity = frameNode->GetPreGrayedOpacity();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+    auto renderOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(renderOpacity, 0.4f);
+
+    gestureEventHub->HandleDragEndAction(gestureEventHub->dragframeNodeInfo_);
+    auto opacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(opacity, 1.0f);
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest003
+ * @tc.desc: Test HandleDragThroughTouch And HandleDragEndAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetRenderContext()->UpdateOpacity(1.0f);
+    auto grayedOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+
+    NG::DragPreviewOption dragPreviewOptions;
+    dragPreviewOptions.isDefaultDragItemGrayEffectEnabled = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->HandleDragThroughTouch(frameNode);
+    grayedOpacity = frameNode->GetPreGrayedOpacity();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+    auto renderOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(renderOpacity, 0.4f);
+
+    gestureEventHub->HandleDragEndAction(gestureEventHub->dragframeNodeInfo_);
+    auto opacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(opacity, 1.0f);
 }
 
 /**

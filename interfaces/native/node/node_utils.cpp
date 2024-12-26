@@ -132,6 +132,54 @@ void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemColorModeChangeEvent(node->uiNodeHandle);
 }
 
+int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onDrawCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onLayoutCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
     ArkUI_NodeHandle node, void* userData, void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData))
 {
@@ -200,7 +248,7 @@ int32_t OH_ArkUI_NodeUtils_GetCustomProperty(ArkUI_NodeHandle node, const char* 
     impl->getNodeModifiers()->getFrameNodeModifier()->getCustomProperty(node->uiNodeHandle, name, &value);
     *handle  = new ArkUI_CustomProperty({ .value = value });
     
-    return 0;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node)
@@ -229,12 +277,12 @@ int32_t OH_ArkUI_NodeUtils_GetActiveChildrenInfo(ArkUI_NodeHandle head, ArkUI_Ac
     (*handle)->nodeCount = totalSize;
     if (totalSize > 0) {
         (*handle)->nodeList = new ArkUI_NodeHandle[totalSize] {};
-        for (uint32_t i = 0; i < totalSize; i++) {
+        for (int32_t i = 0; i < totalSize; i++) {
             ((*handle)->nodeList[i]) = GetArkUINode(innerNodes[i]);
         }
     }
     delete[] innerNodes;
-    return 0;
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_NodeHandle OH_ArkUI_NodeUtils_GetParentInPageTree(ArkUI_NodeHandle node)
@@ -332,7 +380,10 @@ void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
 
 const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle)
 {
-    CHECK_NULL_RETURN(handle, nullptr);
+    if (!handle) {
+        LOGF("CustomProperty is nullptr");
+        abort();
+    }
     return handle->value;
 }
 
@@ -346,7 +397,10 @@ void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle)
 
 ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildrenInfo* handle, int32_t index)
 {
-    CHECK_NULL_RETURN(handle, nullptr);
+    if (!handle) {
+        LOGF("ActiveChildrenInfo is nullptr");
+        abort();
+    }
     if (index < handle->nodeCount && index >= 0) {
         return handle->nodeList[index];
     }
@@ -355,7 +409,10 @@ ArkUI_NodeHandle OH_ArkUI_ActiveChildrenInfo_GetNodeByIndex(ArkUI_ActiveChildren
 
 int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
 {
-    CHECK_NULL_RETURN(handle, 0);
+    if (!handle) {
+        LOGF("ActiveChildrenInfo is nullptr");
+        abort();
+    }
     return handle->nodeCount;
 }
 

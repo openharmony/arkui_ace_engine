@@ -52,6 +52,7 @@ public:
     void SetIsIndicatorCustomSize(bool isCustomSize) override;
     void SetItemSpace(const Dimension& itemSpace) override;
     void SetCachedCount(int32_t cachedCount) override;
+    void SetCachedIsShown(bool isShown) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
@@ -76,6 +77,7 @@ public:
     void SetSwipeByGroup(bool swipeByGroup) override;
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
+    void SetPageFlipMode(int32_t pageFlipMode) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -85,6 +87,8 @@ public:
     static void SetDuration(FrameNode* frameNode, uint32_t duration);
     static void SetCachedCount(FrameNode* frameNode, int32_t cachedCount);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static void SetCachedIsShown(FrameNode* frameNode, bool isShown);
+    static bool GetCachedIsShown(FrameNode* frameNode);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
     static void SetLoop(FrameNode* frameNode, bool loop);
     static void SetDirection(FrameNode* frameNode, Axis axis);
@@ -138,6 +142,8 @@ public:
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);
+    static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
+    static int32_t GetPageFlipMode(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

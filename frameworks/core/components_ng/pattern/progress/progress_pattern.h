@@ -155,6 +155,8 @@ private:
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void ToJsonValueForRingStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void ToJsonValueForLinearStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToJsonValueForCapsuleStyleOptions(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    float GetBorderRadiusValues() const;
     static std::string ConvertProgressStatusToString(const ProgressStatus status);
     void OnSensitiveStyleChange(bool isSensitive) override;
     void ObscureText(bool isSensitive);

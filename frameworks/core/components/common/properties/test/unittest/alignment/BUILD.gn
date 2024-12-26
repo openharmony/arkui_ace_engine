@@ -23,7 +23,10 @@ if (is_ohos_standard_system) {
 ohos_unittest("AlignmentTest") {
   module_out_path = module_output_path
 
-  sources = [ "alignment_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "alignment_test.cpp",
+  ]
 
   configs = [
     ":alignment_test",

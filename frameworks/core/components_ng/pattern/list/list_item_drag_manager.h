@@ -49,6 +49,8 @@ public:
 
     void InitDragDropEvent();
     void DeInitDragDropEvent();
+    void SetDragState(ListItemDragState dragState);
+
 private:
     void HandleOnItemLongPress(const GestureEvent& info);
     void HandleOnItemDragStart(const GestureEvent& info);

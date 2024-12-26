@@ -310,6 +310,9 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     flingSpeedLimit(value: number): this;
     alignItems(value: GridItemAlignment): this;
+    onWillScroll(callback: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this;
+    onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -740,6 +743,8 @@ declare class ArkTextComponent extends ArkComponent implements TextAttribute {
     textSelectable(value: TextSelectableMode): TextAttribute;
     ellipsisMode(value: EllipsisMode): TextAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
+    marqueeOptions(value: MarqueeOptions): TextAttribute;
+    onMarqueeStateChange(callback: (value: MarqueeState) => void): TextAttribute;
 }
 declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -770,6 +775,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     selectionMenuHidden(value: boolean): TextAreaAttribute;
     maxLines(value: number): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
+    ellipsisMode(value: EllipsisMode): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -819,6 +825,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     barState(value: BarState): TextInputAttribute;
     maxLines(value: number): TextInputAttribute;
     customKeyboard(event: () => void): TextInputAttribute;
+    ellipsisMode(value: EllipsisMode): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1096,6 +1103,7 @@ declare class ArkNavigationComponent extends ArkComponent implements NavigationA
         options?: NavigationTitleOptions): NavigationAttribute;
     subTitle(value: string): NavigationAttribute;
     hideTitleBar(value: boolean): NavigationAttribute;
+    enableModeChangeAnimation(value: boolean): NavigationAttribute;
     hideBackButton(value: boolean): NavigationAttribute;
     titleMode(value: NavigationTitleMode): NavigationAttribute;
     menus(value: Array<NavigationMenuItem> | undefined): NavigationAttribute;
@@ -1832,7 +1840,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     vertical(value: boolean): this;
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
-    cachedCount(value: number): this;
+    cachedCount(value: number, isShown?: boolean): this;
     displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;
@@ -1846,6 +1854,10 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     onAnimationEnd(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     onGestureSwipe(event: (index: number, extraInfo: SwiperAnimationEvent) => void): this;
     nestedScroll(value: SwiperNestedScrollMode): this;
+    indicatorInteractive(value: boolean): this;
+    customContentTransition(transition: SwiperContentAnimatedTransition): this;
+    onContentDidScroll(handler: ContentDidScrollCallback): this;
+    pageFlipMode(value: PageFlipMode): this;
 }
 declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1872,6 +1884,7 @@ declare class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     barGridAlign(value: BarGridColumnOptions): TabsAttribute;
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     edgeEffect(value: EdgeEffect): TabsAttribute;
+    pageFlipMode(value: PageFlipMode): TabsAttribute;
 }
 declare class ArkTabContentComponent extends ArkComponent implements TabContentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);

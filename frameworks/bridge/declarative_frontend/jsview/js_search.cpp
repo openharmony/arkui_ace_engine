@@ -146,8 +146,11 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("decoration", &JSSearch::SetDecoration);
     JSClass<JSSearch>::StaticMethod("minFontSize", &JSSearch::SetMinFontSize);
     JSClass<JSSearch>::StaticMethod("maxFontSize", &JSSearch::SetMaxFontSize);
+    JSClass<JSSearch>::StaticMethod("minFontScale", &JSSearch::SetMinFontScale);
+    JSClass<JSSearch>::StaticMethod("maxFontScale", &JSSearch::SetMaxFontScale);
     JSClass<JSSearch>::StaticMethod("letterSpacing", &JSSearch::SetLetterSpacing);
     JSClass<JSSearch>::StaticMethod("lineHeight", &JSSearch::SetLineHeight);
+    JSClass<JSSearch>::StaticMethod("halfLeading", &JSSearch::SetHalfLeading);
     JSClass<JSSearch>::StaticMethod("fontFeature", &JSSearch::SetFontFeature);
     JSClass<JSSearch>::StaticMethod("id", &JSSearch::SetId);
     JSClass<JSSearch>::StaticMethod("key", &JSSearch::SetKey);
@@ -1300,6 +1303,36 @@ void JSSearch::SetMaxFontSize(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
 
+void JSSearch::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SearchModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SearchModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    SearchModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSSearch::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SearchModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    SearchModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+}
+
 void JSSearch::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -1323,6 +1356,16 @@ void JSSearch::SetLineHeight(const JSCallbackInfo& info)
         value.Reset();
     }
     SearchModel::GetInstance()->SetLineHeight(value);
+}
+
+void JSSearch::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    SearchModel::GetInstance()->SetHalfLeading(halfLeading);
 }
 
 void JSSearch::EditMenuOptions(const JSCallbackInfo& info)

@@ -93,6 +93,7 @@ public:
     void SetEraseLength(int32_t eraseLength);
     int32_t GetEraseLength() const;
     void SetValue(const std::string& value);
+    void SetValue(const std::u16string& value);
     const std::string& GetValue() const;
     void SetPreviewText(const std::string& previewText);
     const std::string& GetPreviewText() const;
@@ -279,10 +280,14 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
+    void SetPreviewText(const std::string& previewText);
+    const std::string& GetPreviewText() const;
+
 private:
     TextRange rangeBefore_;
     TextRange rangeAfter_;
     RefPtr<SpanStringBase> replacementString_;
+    std::string previewText_;
 };
 
 class RichEditorEventHub : public EventHub {

@@ -45,14 +45,38 @@ void ResetPolygonPoints(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPolygonModifier* GetPolygonModifier()
 {
-    static const ArkUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIPolygonModifier modifier = {
+        SetPolygonPoints,
+        ResetPolygonPoints,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIPolygonModifier* GetCJUIPolygonModifier()
 {
-    static const CJUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIPolygonModifier modifier = {
+        SetPolygonPoints,
+        ResetPolygonPoints,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

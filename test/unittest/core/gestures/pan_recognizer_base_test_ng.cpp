@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "test/unittest/core/gestures/gestures_common_test_ng.h"
 #include "test/unittest/core/gestures/pan_recognizer_test_utils.h"
+#include "test/unittest/core/gestures/recognizer_test_utils.h"
 
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/ace_events.h"
@@ -29,9 +30,8 @@ struct InputInfos {
     PointF startPoint;
     int32_t fingerId;
     PanQuadrantDirection direction;
-    PanDistanceComparationResult compare;
-    InputInfos(
-        PointF startPoint, int32_t fingerId, PanQuadrantDirection direction, PanDistanceComparationResult compare)
+    ComparationResult compare;
+    InputInfos(PointF startPoint, int32_t fingerId, PanQuadrantDirection direction, ComparationResult compare)
         : startPoint(startPoint), fingerId(fingerId), direction(direction), compare(compare)
     {}
 };
@@ -51,285 +51,200 @@ struct PanTestCase {
 
 const std::vector<PanTestCase> TEST_CASES = {
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::LESS),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO,
-                PanDistanceComparationResult::LESS) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::LESS),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::LESS) },
         RefereeState::DETECTING), // case 0
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 1
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 2
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ONE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ONE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 3
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::LESS) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::LESS) },
         RefereeState::DETECTING), // case 4
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 5
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 6
     PanTestCase(1, 10.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 7
     PanTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 8
     PanTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 9
     PanTestCase(1, 10.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SEVEN, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SEVEN, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 10
     PanTestCase(1, 15.0f, { PanDirection::ALL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 11
     PanTestCase(1, 15.0f, { PanDirection::ALL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FOUR, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FOUR, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 12
     PanTestCase(1, 15.0f, { PanDirection::LEFT },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 13
     PanTestCase(1, 15.0f, { PanDirection::LEFT },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 14
     PanTestCase(1, 15.0f, { PanDirection::RIGHT },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 15
     PanTestCase(1, 15.0f, { PanDirection::RIGHT },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 16
     PanTestCase(1, 15.0f, { PanDirection::UP },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 17
     PanTestCase(1, 15.0f, { PanDirection::UP },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SIX, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SIX, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 18
     PanTestCase(1, 15.0f, { PanDirection::UP },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_THREE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_THREE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 19
     PanTestCase(1, 15.0f, { PanDirection::DOWN },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 20
     PanTestCase(1, 15.0f, { PanDirection::DOWN },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 21
     PanTestCase(1, 15.0f, { PanDirection::DOWN },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FIVE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 22
     PanTestCase(1, 15.0f, { PanDirection::NONE },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 23
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-            PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT) },
         RefereeState::READY), // case 24
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SIX, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SIX, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_SIX, PanDistanceComparationResult::EQUAL) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SIX, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SIX, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_SIX, ComparationResult::EQUAL) },
         RefereeState::SUCCEED), // case 25
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::LESS),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO,
-                PanDistanceComparationResult::LESS) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::LESS),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::LESS) },
         RefereeState::DETECTING), // case 26
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, PanDistanceComparationResult::LESS),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE,
-                PanDistanceComparationResult::LESS) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::LESS),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::LESS) },
         RefereeState::DETECTING), // case 27
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, PanDistanceComparationResult::LESS),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ONE, PanDistanceComparationResult::LESS) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ONE, ComparationResult::LESS),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ONE, ComparationResult::LESS) },
         RefereeState::DETECTING), // case 28
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 29
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 30
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SEVEN, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SEVEN, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SEVEN, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SEVEN, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 31
     PanTestCase(2, 15.0f, { PanDirection::VERTICAL },
-        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SIX, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SIX, PanDistanceComparationResult::EQUAL) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_SIX, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_SIX, ComparationResult::EQUAL) },
         RefereeState::SUCCEED), // case 32
     PanTestCase(2, 15.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FOUR, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FOUR, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_FOUR, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FOUR, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FOUR, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_FOUR, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 33
     PanTestCase(2, 15.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ZERO, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ZERO, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_ZERO, PanDistanceComparationResult::EQUAL) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ZERO, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ZERO, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::LINE_ZERO, ComparationResult::EQUAL) },
         RefereeState::SUCCEED), // case 34
     PanTestCase(2, 15.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ZERO, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ZERO, PanDistanceComparationResult::EQUAL) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_ZERO, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_ZERO, ComparationResult::EQUAL) },
         RefereeState::SUCCEED), // case 35
     PanTestCase(2, 15.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_TWO, PanDistanceComparationResult::EQUAL),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_TWO, PanDistanceComparationResult::EQUAL) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_TWO, ComparationResult::EQUAL),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_TWO, ComparationResult::EQUAL) },
         RefereeState::DETECTING), // case 36
     PanTestCase(2, 15.0f, { PanDirection::HORIZONTAL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FOUR, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FOUR, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FOUR, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FOUR, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 37
     PanTestCase(2, 10.0f, { PanDirection::ALL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::QUADRANT_ONE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 38
     PanTestCase(2, 10.0f, { PanDirection::ALL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FOUR, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FOUR, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::QUADRANT_FOUR,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FOUR, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FOUR, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 2, PanQuadrantDirection::QUADRANT_FOUR, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 39
     PanTestCase(2, 10.0f, { PanDirection::ALL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 40
     PanTestCase(2, 10.0f, { PanDirection::ALL },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 41
     PanTestCase(2, 10.0f, { PanDirection::LEFT },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ZERO, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 42
     PanTestCase(2, 10.0f, { PanDirection::LEFT },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_THREE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_THREE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_THREE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 43
     PanTestCase(2, 10.0f, { PanDirection::RIGHT },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::DETECTING), // case 44
     PanTestCase(2, 10.0f, { PanDirection::RIGHT },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SEVEN, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 45
     PanTestCase(2, 10.0f, { PanDirection::UP },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 46
     PanTestCase(2, 10.0f, { PanDirection::UP },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SIX, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SIX,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_SIX, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_SIX, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 47
     PanTestCase(2, 10.0f, { PanDirection::UP },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_THREE, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_THREE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_THREE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_THREE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 48
     PanTestCase(2, 10.0f, { PanDirection::DOWN },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_TWO, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 49
     PanTestCase(2, 10.0f, { PanDirection::DOWN },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 50
     PanTestCase(2, 10.0f, { PanDirection::DOWN },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FIVE, PanDistanceComparationResult::GREAT),
-            InputInfos(
-                PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FIVE, PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::LINE_FIVE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::LINE_FIVE, ComparationResult::GREAT) },
         RefereeState::SUCCEED), // case 51
     PanTestCase(2, 10.0f, { PanDirection::NONE },
-        { InputInfos(
-              PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, PanDistanceComparationResult::GREAT),
-            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE,
-                PanDistanceComparationResult::GREAT) },
+        { InputInfos(PointF { 100.0f, 100.0f }, 0, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT),
+            InputInfos(PointF { 100.0f, 100.0f }, 1, PanQuadrantDirection::QUADRANT_ONE, ComparationResult::GREAT) },
         RefereeState::FAIL), // case 52
 };
 
@@ -378,12 +293,12 @@ void CreateTouchEvents(const std::vector<InputInfos>& infos, float distance, std
     for (const auto& info : infos) {
         PointF endPoint;
         switch (info.compare) {
-            case PanDistanceComparationResult::LESS:
+            case ComparationResult::LESS:
                 distance /= 2;
                 break;
-            case PanDistanceComparationResult::EQUAL:
+            case ComparationResult::EQUAL:
                 break;
-            case PanDistanceComparationResult::GREAT:
+            case ComparationResult::GREAT:
                 distance *= 2;
                 break;
             default:

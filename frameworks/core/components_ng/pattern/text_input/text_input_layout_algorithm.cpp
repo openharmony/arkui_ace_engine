@@ -64,7 +64,8 @@ std::optional<SizeF> TextInputLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.
     if (isInlineStyle) {
-        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(contentConstraintWithoutResponseArea, layoutWrapper);
@@ -278,7 +279,8 @@ bool TextInputLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, con
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isPasswordType = pattern->IsInPasswordMode();
     auto disableTextAlign = false;
-    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale());
     auto paragraphData = CreateParagraphData { disableTextAlign, fontSize };
 
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {

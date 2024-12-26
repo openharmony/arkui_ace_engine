@@ -43,16 +43,7 @@ public:
         return MakeRefPtr<TitleBarAccessibilityProperty>();
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
-        titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
-        titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
-        titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
-        titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
-        return titleBarLayoutAlgorithm;
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     bool IsAtomicNode() const override
     {
@@ -115,6 +106,15 @@ public:
     void MarkIsInitialSubtitle(bool isInitialSubtitle)
     {
         isInitialSubtitle_ = isInitialSubtitle;
+    }
+
+    void SetIsFirstTimeSetSystemTitle(bool isFirstTime)
+    {
+        isFirstTimeSetSystemTitle_ = isFirstTime;
+    }
+    bool IsFirstTimeSetSystemTitle() const
+    {
+        return isFirstTimeSetSystemTitle_;
     }
 
     void ProcessTitleDragUpdate(float offset);
@@ -397,6 +397,7 @@ private:
     double opacityRatio_ = 0.0f;
 
     float initialTitleOffsetY_ = 0.0f;
+    bool isFirstTimeSetSystemTitle_ = true;
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;

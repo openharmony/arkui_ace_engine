@@ -97,6 +97,7 @@ public:
 
     void InitializeParam();
     void PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& paintSize) const;
+    void DrawFocusBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
     void DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& contentSize, const OffsetF& offset) const;
 
     void DrawBorder(RSCanvas& canvas, const OffsetF& origin, RSPen& pen, const SizeF& paintSize) const;
@@ -129,6 +130,13 @@ public:
     {
         if (isSelect_) {
             isSelect_->Set(isSelect);
+        }
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
         }
     }
 
@@ -201,9 +209,17 @@ public:
         }
     }
 
+    void SetHasUnselectedColor(bool hasUnselectedColor)
+    {
+        hasUnselectedColor_ = hasUnselectedColor;
+    }
+
 private:
+    void DrawRectOrCircle(RSCanvas& canvas, const RSRoundRect& rrect) const;
+
     float borderWidth_ = 0.0f;
     float borderRadius_ = 0.0f;
+    float whiteBorderRadius_ = 0.0f;
     Color pointColor_;
     Color activeColor_;
     Color inactiveColor_;
@@ -212,15 +228,22 @@ private:
     Color hoverColor_;
     Color inactivePointColor_;
     Color userActiveColor_;
+    Color focusBoardColor_;
+    Color borderFocusedColor_;
+    Color focusedBGColorUnselected_;
     Dimension hoverRadius_;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
     Dimension defaultPaddingSize_;
+    Dimension defaultRoundPaddingSize_;
     Dimension shadowWidth_;
+    Dimension focusBoardSize_;
+    Dimension roundFocusBoardSize_;
     float hoverDuration_ = 0.0f;
     float hoverToTouchDuration_ = 0.0f;
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
+    bool hasUnselectedColor_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
@@ -231,6 +254,7 @@ private:
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyBool> useContentModifier_;
     RefPtr<PropertyBool> hasBuilder_;
+    RefPtr<PropertyBool> isFocused_;
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animatableCheckColor_;
     RefPtr<AnimatablePropertyColor> animatableBorderColor_;

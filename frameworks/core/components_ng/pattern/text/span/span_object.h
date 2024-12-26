@@ -221,11 +221,22 @@ public:
     std::string ToString() const override;
     void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
 
+    int32_t GetGestureSpanId()
+    {
+        return gestureSpanId_;
+    }
+
+    void SetGestureSpanId(int32_t gestureSpanId)
+    {
+        gestureSpanId_ = gestureSpanId;
+    }
+
 private:
     void AddSpanStyle(const RefPtr<NG::SpanItem>& spanItem) const;
     static void RemoveSpanStyle(const RefPtr<NG::SpanItem>& spanItem);
 
     GestureStyle gestureInfo_;
+    int32_t gestureSpanId_ = -1;
 };
 
 class TextShadowSpan : public SpanBase {

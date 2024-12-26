@@ -54,6 +54,7 @@ private:
     void UpdateObscuredRects();
     static std::vector<RectF> CalculateSelectedRect(
         const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth);
+    void DoStartTextRace();
 
     WeakPtr<Pattern> pattern_;
     float baselineOffset_;

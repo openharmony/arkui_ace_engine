@@ -33,6 +33,8 @@ public:
     static ArkUINativeModuleValue ResetRenderMode(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetSyncLoad(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetSyncLoad(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue ResetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetObjectFit(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetObjectFit(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue SetFitOriginalSize(ArkUIRuntimeCallInfo *runtimeCallInfo);

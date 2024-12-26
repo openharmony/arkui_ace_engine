@@ -149,6 +149,19 @@ void SetTabBarPosition(ArkUINodeHandle node, ArkUI_Int32 barVal)
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetTabBarPosition(frameNode, static_cast<BarPosition>(barVal));
 }
+void SetTabsOptionsIndex(ArkUINodeHandle node, ArkUI_Int32 indexVal)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarIndex(frameNode, indexVal);
+}
+void SetTabsOptionsController(ArkUINodeHandle node, ArkUINodeHandle tabsController)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabsController(frameNode,
+        AceType::Claim(reinterpret_cast<OHOS::Ace::SwiperController*>(tabsController)));
+}
 void SetScrollable(ArkUINodeHandle node, ArkUI_Bool scrollable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -264,6 +277,13 @@ void ResetTabBarPosition(ArkUINodeHandle node)
     TabsModelNG::SetTabBarPosition(frameNode, BarPosition::START);
 }
 
+void ResetTabsOptionsIndex(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetTabBarIndex(frameNode, 0);
+}
+
 void ResetScrollable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -325,6 +345,20 @@ void ResetTabEdgeEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TabsModelNG::SetEdgeEffect(frameNode, NUM_0);
+}
+
+void SetTabPageFlipMode(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetPageFlipMode(frameNode, pageFlipMode);
+}
+
+void ResetTabPageFlipMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetPageFlipMode(frameNode, NUM_0);
 }
 
 void SetTabWidthAuto(ArkUINodeHandle node)
@@ -419,100 +453,126 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUITabsModifier modifier = {
-        SetTabBarMode,
-        SetScrollableBarModeOptions,
-        SetBarGridAlign,
-        SetDivider,
-        SetFadingEdge,
-        SetBarBackgroundColor,
-        SetBarBackgroundBlurStyle,
-        SetBarOverlap,
-        SetIsVertical,
-        SetTabBarPosition,
-        SetScrollable,
-        SetTabBarWidth,
-        SetTabBarHeight,
-        SetBarAdaptiveHeight,
-        SetAnimationDuration,
-        ResetTabBarMode,
-        ResetScrollableBarModeOptions,
-        ResetBarGridAlign,
-        ResetDivider,
-        ResetFadingEdge,
-        ResetBarBackgroundColor,
-        ResetBarBackgroundBlurStyle,
-        ResetBarOverlap,
-        ResetIsVertical,
-        ResetTabBarPosition,
-        ResetScrollable,
-        ResetTabBarWidth,
-        ResetTabBarHeight,
-        ResetBarAdaptiveHeight,
-        ResetAnimationDuration,
-        SetTabClip,
-        ResetTabClip,
-        SetTabEdgeEffect,
-        ResetTabEdgeEffect,
-        SetTabWidthAuto,
-        ResetTabWidthAuto,
-        SetTabHeightAuto,
-        ResetTabHeightAuto,
-        SetAnimateMode,
-        ResetAnimateMode,
-        SetBarBackgroundEffect,
-        ResetBarBackgroundEffect,
+        .setTabBarMode = SetTabBarMode,
+        .setScrollableBarModeOptions = SetScrollableBarModeOptions,
+        .setBarGridAlign = SetBarGridAlign,
+        .setDivider = SetDivider,
+        .setFadingEdge = SetFadingEdge,
+        .setBarBackgroundColor = SetBarBackgroundColor,
+        .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
+        .setBarOverlap = SetBarOverlap,
+        .setIsVertical = SetIsVertical,
+        .setTabBarPosition = SetTabBarPosition,
+        .setTabsOptionsIndex = SetTabsOptionsIndex,
+        .setTabsOptionsController = SetTabsOptionsController,
+        .setScrollable = SetScrollable,
+        .setTabBarWidth = SetTabBarWidth,
+        .setTabBarHeight = SetTabBarHeight,
+        .setBarAdaptiveHeight = SetBarAdaptiveHeight,
+        .setAnimationDuration = SetAnimationDuration,
+        .resetTabBarMode = ResetTabBarMode,
+        .resetScrollableBarModeOptions = ResetScrollableBarModeOptions,
+        .resetBarGridAlign = ResetBarGridAlign,
+        .resetDivider = ResetDivider,
+        .resetFadingEdge = ResetFadingEdge,
+        .resetBarBackgroundColor = ResetBarBackgroundColor,
+        .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
+        .resetBarOverlap = ResetBarOverlap,
+        .resetIsVertical = ResetIsVertical,
+        .resetTabBarPosition = ResetTabBarPosition,
+        .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetScrollable = ResetScrollable,
+        .resetTabBarWidth = ResetTabBarWidth,
+        .resetTabBarHeight = ResetTabBarHeight,
+        .resetBarAdaptiveHeight = ResetBarAdaptiveHeight,
+        .resetAnimationDuration = ResetAnimationDuration,
+        .setTabClip = SetTabClip,
+        .resetTabClip = ResetTabClip,
+        .setTabEdgeEffect = SetTabEdgeEffect,
+        .resetTabEdgeEffect = ResetTabEdgeEffect,
+        .setTabPageFlipMode = SetTabPageFlipMode,
+        .resetTabPageFlipMode = ResetTabPageFlipMode,
+        .setTabWidthAuto = SetTabWidthAuto,
+        .resetTabWidthAuto = ResetTabWidthAuto,
+        .setTabHeightAuto = SetTabHeightAuto,
+        .resetTabHeightAuto = ResetTabHeightAuto,
+        .setAnimateMode = SetAnimateMode,
+        .resetAnimateMode = ResetAnimateMode,
+        .setBarBackgroundEffect = SetBarBackgroundEffect,
+        .resetBarBackgroundEffect = ResetBarBackgroundEffect,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUITabsModifier* GetCJUITabsModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUITabsModifier modifier = {
-        SetTabBarMode,
-        SetScrollableBarModeOptions,
-        SetBarGridAlign,
-        SetDivider,
-        SetFadingEdge,
-        SetBarBackgroundColor,
-        SetBarBackgroundBlurStyle,
-        SetBarOverlap,
-        SetIsVertical,
-        SetTabBarPosition,
-        SetScrollable,
-        SetTabBarWidth,
-        SetTabBarHeight,
-        SetBarAdaptiveHeight,
-        SetAnimationDuration,
-        ResetTabBarMode,
-        ResetScrollableBarModeOptions,
-        ResetBarGridAlign,
-        ResetDivider,
-        ResetFadingEdge,
-        ResetBarBackgroundColor,
-        ResetBarBackgroundBlurStyle,
-        ResetBarOverlap,
-        ResetIsVertical,
-        ResetTabBarPosition,
-        ResetScrollable,
-        ResetTabBarWidth,
-        ResetTabBarHeight,
-        ResetBarAdaptiveHeight,
-        ResetAnimationDuration,
-        SetTabClip,
-        ResetTabClip,
-        SetTabEdgeEffect,
-        ResetTabEdgeEffect,
-        SetTabWidthAuto,
-        ResetTabWidthAuto,
-        SetTabHeightAuto,
-        ResetTabHeightAuto,
-        SetAnimateMode,
-        ResetAnimateMode,
-        SetBarBackgroundEffect,
-        ResetBarBackgroundEffect,
+        .setTabBarMode = SetTabBarMode,
+        .setScrollableBarModeOptions = SetScrollableBarModeOptions,
+        .setBarGridAlign = SetBarGridAlign,
+        .setDivider = SetDivider,
+        .setFadingEdge = SetFadingEdge,
+        .setBarBackgroundColor = SetBarBackgroundColor,
+        .setBarBackgroundBlurStyle = SetBarBackgroundBlurStyle,
+        .setBarOverlap = SetBarOverlap,
+        .setIsVertical = SetIsVertical,
+        .setTabBarPosition = SetTabBarPosition,
+        .setTabsOptionsIndex = SetTabsOptionsIndex,
+        .setTabsOptionsController = SetTabsOptionsController,
+        .setScrollable = SetScrollable,
+        .setTabBarWidth = SetTabBarWidth,
+        .setTabBarHeight = SetTabBarHeight,
+        .setBarAdaptiveHeight = SetBarAdaptiveHeight,
+        .setAnimationDuration = SetAnimationDuration,
+        .resetTabBarMode = ResetTabBarMode,
+        .resetScrollableBarModeOptions = ResetScrollableBarModeOptions,
+        .resetBarGridAlign = ResetBarGridAlign,
+        .resetDivider = ResetDivider,
+        .resetFadingEdge = ResetFadingEdge,
+        .resetBarBackgroundColor = ResetBarBackgroundColor,
+        .resetBarBackgroundBlurStyle = ResetBarBackgroundBlurStyle,
+        .resetBarOverlap = ResetBarOverlap,
+        .resetIsVertical = ResetIsVertical,
+        .resetTabBarPosition = ResetTabBarPosition,
+        .resetTabsOptionsIndex = ResetTabsOptionsIndex,
+        .resetScrollable = ResetScrollable,
+        .resetTabBarWidth = ResetTabBarWidth,
+        .resetTabBarHeight = ResetTabBarHeight,
+        .resetBarAdaptiveHeight = ResetBarAdaptiveHeight,
+        .resetAnimationDuration = ResetAnimationDuration,
+        .setTabClip = SetTabClip,
+        .resetTabClip = ResetTabClip,
+        .setTabEdgeEffect = SetTabEdgeEffect,
+        .resetTabEdgeEffect = ResetTabEdgeEffect,
+        .setTabWidthAuto = SetTabWidthAuto,
+        .resetTabWidthAuto = ResetTabWidthAuto,
+        .setTabHeightAuto = SetTabHeightAuto,
+        .resetTabHeightAuto = ResetTabHeightAuto,
+        .setAnimateMode = SetAnimateMode,
+        .resetAnimateMode = ResetAnimateMode,
+        .setBarBackgroundEffect = SetBarBackgroundEffect,
+        .resetBarBackgroundEffect = ResetBarBackgroundEffect,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

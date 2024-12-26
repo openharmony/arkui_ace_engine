@@ -457,8 +457,13 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     CHECK_NULL_VOID(parentNode);
     auto dataPickerLayoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdatePadding(
-        PaddingProperty { CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX) });
+    dataPickerLayoutProperty->UpdatePadding(PaddingProperty {
+            .left = CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX),
+            .bottom = CalcLength(),
+            .top = CalcLength(),
+            .start = CalcLength(),
+            .end = CalcLength(),
+            .right = CalcLength()});
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
@@ -877,7 +882,6 @@ void TimePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
-        hapticController_->ClearVelocityInfo();
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());

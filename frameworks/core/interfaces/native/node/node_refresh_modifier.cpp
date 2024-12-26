@@ -120,17 +120,57 @@ namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
-        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setRefreshContent = SetRefreshContent,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIRefreshModifier* GetCJUIRefreshModifier()
 {
-    static const CJUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshContent, SetRefreshOffset,
-        ResetRefreshOffset, SetPullToRefresh, ResetPullToRefresh, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshContent = SetRefreshContent,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
@@ -144,7 +184,7 @@ void SetRefreshOnStateChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_STATE_CHANGE;
         event.componentAsyncEvent.data[0].i32 = value;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnStateChange(frameNode, std::move(onEvent));
 }
@@ -158,7 +198,7 @@ void SetOnRefreshing(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_REFRESHING;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));
 }
@@ -173,7 +213,7 @@ void SetRefreshOnOffsetChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_REFRESH_ON_OFFSET_CHANGE;
         event.componentAsyncEvent.data[0].f32 = value;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetOnOffsetChange(frameNode, std::move(onEvent));
 }
@@ -189,7 +229,7 @@ void SetRefreshChangeEvent(ArkUINodeHandle node, void* extraParam)
         event.componentAsyncEvent.subKind = ON_REFRESH_CHANGE_EVENT;
         bool newValue = value == "true";
         event.componentAsyncEvent.data[0].u32 = newValue;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RefreshModelNG::SetChangeEvent(frameNode, std::move(onEvent));
 }

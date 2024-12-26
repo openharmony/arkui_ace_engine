@@ -3328,4 +3328,3 @@ struct SearchBootcampPreviewer {
     })
   }
 }
-

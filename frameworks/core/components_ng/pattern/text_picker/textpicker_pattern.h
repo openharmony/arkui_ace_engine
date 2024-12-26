@@ -482,6 +482,13 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation);
+
+    bool GetDisableTextStyleAnimation() const
+    {
+        return isDisableTextStyleAnimation_;
+    }
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -574,6 +581,8 @@ private:
     float paintDividerSpacing_ = 1.0f;
     bool isNeedUpdateSelectedIndex_ = true;
     PickerTextProperties textProperties_;
+
+    bool isDisableTextStyleAnimation_ = false;
 };
 } // namespace OHOS::Ace::NG
 

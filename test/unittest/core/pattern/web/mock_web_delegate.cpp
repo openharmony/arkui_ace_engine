@@ -889,6 +889,10 @@ bool WebDelegate::WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::v
 {
     return false;
 }
+bool WebDelegate::SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent)
+{
+    return false;
+}
 void WebDelegate::OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count) {}
 void WebDelegate::WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent) {}
 void WebDelegate::OnFocus(const OHOS::NWeb::FocusReason& reason) {}
@@ -1059,6 +1063,13 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type) {}
 void WebDelegate::JavaScriptOnDocumentStart() {}
 void WebDelegate::JavaScriptOnDocumentEnd() {}
+
+void WebDelegate::SetJavaScriptItemsByOrder(
+    const ScriptItems& scriptItems,
+    const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder) {}
+void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
+void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
@@ -1179,4 +1190,12 @@ void SetComponentType(const std::string& type)
 }
 void WebDelegate::UpdateLayoutMode(OHOS::Ace::WebLayoutMode mode) {}
 void WebDelegate::SetTransformHint(uint32_t rotation) {}
+void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
+    const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
+{}
+void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+bool WebDelegate::IsActivePolicyDisable()
+{
+    return false;
+}
 } // namespace OHOS::Ace

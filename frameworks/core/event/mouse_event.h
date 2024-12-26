@@ -95,6 +95,7 @@ struct MouseEvent final : public PointerEvent {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
+    bool mockFlushEvent = false;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
@@ -170,6 +171,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
         mouseEvent.isInjected = isInjected;
         mouseEvent.isPrivacyMode = isPrivacyMode;
+        mouseEvent.mockFlushEvent = mockFlushEvent;
         return mouseEvent;
     }
 
@@ -491,6 +493,11 @@ public:
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
     bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool IsHoverTarget() const
+    {
+        return onHoverCallback_ != nullptr || onHoverEventCallback_ != nullptr;
+    }
 
     bool IsAccessibilityHoverTarget()
     {
