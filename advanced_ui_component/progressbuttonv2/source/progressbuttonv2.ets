@@ -175,7 +175,6 @@ export struct ProgressButtonV2 {
       return '';
     }
     const length: number = value.value;
-    let lengthString: string = '';
     switch (value.unit) {
       case LengthUnit.PX:
         return `${length}px`;
@@ -190,7 +189,6 @@ export struct ProgressButtonV2 {
       default:
         return `${length}vp`;
     }
-    return lengthString;
   }
 }
 
