@@ -344,7 +344,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetDirection(true);
     }
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();

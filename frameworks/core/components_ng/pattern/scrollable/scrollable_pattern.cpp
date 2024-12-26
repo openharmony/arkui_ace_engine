@@ -1093,6 +1093,7 @@ void ScrollablePattern::UpdateScrollBarRegion(float offset, float estimatedHeigh
         scrollBar_->SetIsOutOfBoundary(IsOutOfBoundary());
         scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, GetScrollSource());
         scrollBar_->MarkNeedRender();
+        CreateScrollBarOverlayModifier();
     }
 
     // outer scrollbar
@@ -1182,6 +1183,7 @@ void ScrollablePattern::CreateScrollBarOverlayModifier()
     scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
     scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
+    SetOnHiddenChangeForParent();
 }
 
 void ScrollablePattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)
@@ -3910,6 +3912,34 @@ void ScrollablePattern::StopScrollableAndAnimate()
     if (animator_ && !animator_->IsStopped()) {
         scrollAbort_ = true;
         animator_->Stop();
+    }
+}
+
+void ScrollablePattern::SetOnHiddenChangeForParent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parent = host->GetAncestorNodeOfFrame();
+    CHECK_NULL_VOID(parent);
+    while (parent) {
+        if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            break;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_VOID(navDestinationPattern);
+        auto navDestinationEventHub = navDestinationPattern->GetEventHub<NavDestinationEventHub>();
+        CHECK_NULL_VOID(navDestinationEventHub);
+        auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto scrollBarOverlayModifier = pattern->GetScrollBarOverlayModifier();
+            CHECK_NULL_VOID(scrollBarOverlayModifier);
+            scrollBarOverlayModifier->SetNavDestinationShow(isShow);
+        };
+        navDestinationEventHub->AddOnHiddenChange(host->GetId(), std::move(onHiddenChange));
     }
 }
 } // namespace OHOS::Ace::NG
