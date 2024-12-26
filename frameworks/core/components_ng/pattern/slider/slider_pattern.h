@@ -219,11 +219,112 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleCrownEvent(const CrownEvent& event);
-    double GetCrownRotatePx(const CrownEvent& event) const;
-    void HandleCrownAction(double mainDelta);
-    void StartVibrateFeedback();
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
+
+        auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->HandleCrownEvent(event);
+            return true;
+        };
+        focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+    }
+    void HandleCrownEvent(const CrownEvent& event)
+    {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider HandleCrownEvent event.action %{public}d event.degree %{public}f",
+            event.action, event.degree);
+        double mainDelta = GetCrownRotatePx(event);
+        switch (event.action) {
+            case CrownAction::BEGIN:
+                crownMovingLength_ = valueRatio_ * sliderLength_;
+                crownEventNum_ = 0;
+                reachBoundary_ = false;
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Begin);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::UPDATE:
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Moving);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::END:
+            default:
+                bubbleFlag_ = false;
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::End);
+                CloseTranslateAnimation();
+                break;
+        }
+    }
+    double GetCrownRotatePx(const CrownEvent& event) const
+    {
+        double px = event.degree * crownDisplayControlRatio_;
+        switch (crownSensitivity_) {
+            case CrownSensitivity::LOW:
+                px *= CROWN_SENSITIVITY_LOW;
+                break;
+            case CrownSensitivity::MEDIUM:
+                px *= CROWN_SENSITIVITY_MEDIUM;
+                break;
+            case CrownSensitivity::HIGH:
+                px *= CROWN_SENSITIVITY_HIGH;
+                break;
+            default:
+                break;
+        }
+        return px;
+    }
+    void HandleCrownAction(double mainDelta)
+    {
+        CHECK_NULL_VOID(sliderLength_ != 0);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+        CHECK_NULL_VOID(sliderLayoutProperty);
+        auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+        CHECK_NULL_VOID(sliderPaintProperty);
+        float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+        float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+        crownMovingLength_ += mainDelta;
+        crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
+        valueRatio_ = crownMovingLength_ / sliderLength_;
+        CHECK_NULL_VOID(stepRatio_ != 0);
+        valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+        float oldValue = value_;
+        value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
+        sliderPaintProperty->UpdateValue(value_);
+        valueChangeFlag_ = !NearEqual(oldValue, value_);
+        UpdateCircleCenterOffset();
+        reachBoundary_ = NearEqual(value_, min) || NearEqual(value_, max);
+        if (showTips_) {
+            bubbleFlag_ = true;
+            UpdateBubble();
+        }
+    }
+    void StartVibrateFeedback()
+    {
+        crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
+        if (valueChangeFlag_ && reachBoundary_) {
+            bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+                CROWN_VIBRATOR_STRONG, state);
+        } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+            bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+            TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+                CROWN_VIBRATOR_WEAK, state);
+        }
+    }
 #endif
     bool IsSliderVisible();
     void RegisterVisibleAreaChange();

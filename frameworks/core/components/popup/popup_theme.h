@@ -75,11 +75,7 @@ public:
             theme->maskColor_ = pattern->GetAttr<Color>("popup_mask_color", Color());
             theme->textStyle_.SetTextColor(pattern->GetAttr<Color>("popup_text_color", Color()));
             theme->textStyle_.SetFontSize(pattern->GetAttr<Dimension>("popup_text_font_size", 0.0_vp));
-            if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-                theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color_version_twelve", Color(0xffffffff));
-            } else {
-                theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
-            }
+            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
             theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
