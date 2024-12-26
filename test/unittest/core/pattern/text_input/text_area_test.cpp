@@ -1696,6 +1696,43 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaHalfLeading001
+ * @tc.desc: test TextArea halfLeading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaHalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(true);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text halfLeading
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), true);
+}
+
+/**
  * @tc.name: TextAreaLineSpacing001
  * @tc.desc: test TextArea lineSpacing.
  * @tc.type: FUNC
