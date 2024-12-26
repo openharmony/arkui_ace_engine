@@ -36,13 +36,13 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 @ComponentV2
 export struct ProgressButtonV2 {
   @Param @Require progress: number;
-  @Local textProgress: string = EMPTY_STRING;
   @Param content: ResourceStr = EMPTY_STRING;
-  @Local isLoading: boolean = false;
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
   @Param onClicked: ClickCallback = () => {};
   @Param enable: boolean = true;
   @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
+  @Local textProgress: string = EMPTY_STRING;
+  @Local isLoading: boolean = false;
 
   @Local progressColor: ResourceColor = '#330A59F7'
   @Local containerBorderColor: ResourceColor = '#330A59F7'
@@ -58,24 +58,24 @@ export struct ProgressButtonV2 {
 
   private getButtonProgress(): number {
     if (this.progress < 0) {
-      return 0
+      return 0;
     } else if (this.progress > MAX_PROGRESS) {
-      return MAX_PROGRESS
+      return MAX_PROGRESS;
     }
-    return this.progress
+    return this.progress;
   }
 
   @Monitor('progress')
   private getProgressContext() {
     if (this.progress < 0) {
-      this.isLoading = false
-      this.textProgress = MIN_PERCENTAGE
+      this.isLoading = false;
+      this.textProgress = MIN_PERCENTAGE;
     } else if (this.progress >= MAX_PROGRESS) {
-      this.isLoading = false
-      this.textProgress = MAX_PERCENTAGE
+      this.isLoading = false;
+      this.textProgress = MAX_PERCENTAGE;
     } else {
-      this.isLoading = true
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%'
+      this.isLoading = true;
+      this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
     }
   }
 
@@ -83,11 +83,11 @@ export struct ProgressButtonV2 {
   private getLoadingProgress() {
     if (this.isLoading) {
       if (this.progress < 0) {
-        this.textProgress = MIN_PERCENTAGE
+        this.textProgress = MIN_PERCENTAGE;
       } else if (this.progress >= MAX_PROGRESS) {
-        this.textProgress = MAX_PERCENTAGE
+        this.textProgress = MAX_PERCENTAGE;
       } else {
-        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%'
+        this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
       }
     }
   }
@@ -153,12 +153,12 @@ export struct ProgressButtonV2 {
     .stateEffect(this.enable)
     .onClick(() => {
       if (!this.enable) {
-        return
+        return;
       }
       if (this.progress < MAX_PROGRESS) {
-        this.isLoading = !this.isLoading
+        this.isLoading = !this.isLoading;
       }
-      this.onClicked && this.onClicked()
+      this.onClicked?.();
     })
   }
 
@@ -170,23 +170,17 @@ export struct ProgressButtonV2 {
     let lengthString: string = '';
     switch (value.unit) {
       case LengthUnit.PX:
-        lengthString = `${length}px`;
-        break;
+        return`${length}px`;
       case LengthUnit.FP:
-        lengthString = `${length}fp`;
-        break;
+        return`${length}fp`;
       case LengthUnit.LPX:
-        lengthString = `${length}lpx`;
-        break;
+        return `${length}lpx`;
       case LengthUnit.PERCENT:
-        lengthString = `${length * 100}%`;
-        break;
+        return`${length * 100}%`;
       case LengthUnit.VP:
-        lengthString = `${length}vp`;
-        break;
+        return `${length}vp`;
       default:
-        lengthString = `${length}vp`;
-        break;
+        return`${length}vp`;
     }
     return lengthString;
   }
