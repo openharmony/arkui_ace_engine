@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include <limits>
-#include "gtest/gtest.h"
 #include "text_base.h"
-#include "base/utils/string_utils.h"
+
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 

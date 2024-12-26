@@ -700,6 +700,34 @@ typedef enum {
     ARKUI_STICKY_STYLE_BOTH = 3,
 } ArkUI_StickyStyle;
 
+/**
+ * @brief Enumerates the content clipping modes of scrollable components.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Clip to the content area only. */
+    ARKUI_CONTENT_CLIP_MODE_CONTENT_ONLY = 0,
+    /** Clip to the component's boundary area. */
+    ARKUI_CONTENT_CLIP_MODE_BOUNDARY,
+    /** Clip to the safe area configured for the component. */
+    ARKUI_CONTENT_CLIP_MODE_SAFE_AREA,
+} ArkUI_ContentClipMode;
+
+/**
+ * @brief Enumerates the layout modes of the <b>WaterFlow</b> component.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Layout from top to bottom. In scenarios where column switching occurs, the layout starts from the first water
+     *  flow item to the currently displayed water flow item. */
+    ARKUI_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN = 0,
+    /** Sliding window layout. In scenarios where column switching occurs, only the range of water flow items currently
+     * on display is re-laid out. As the user scrolls down with their finger, water flow items that enter the display
+     * range from above are subsequently laid out. */
+    ARKUI_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW,
+} ArkUI_WaterFlowLayoutMode;
 
 /**
  * @brief Enumerates the border styles.

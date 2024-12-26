@@ -312,6 +312,8 @@ template("declarative_js_engine") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -512,6 +514,10 @@ template("declarative_js_engine") {
         "jsview/models/water_flow_item_model_impl.cpp",
         "jsview/models/water_flow_model_impl.cpp",
       ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
@@ -861,6 +867,8 @@ template("declarative_js_engine_ng") {
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -948,6 +956,10 @@ template("declarative_js_engine_ng") {
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
       ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
     sources += [

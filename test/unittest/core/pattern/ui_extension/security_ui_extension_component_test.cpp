@@ -920,4 +920,184 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionDpiTest, TestSiz
     EXPECT_TRUE(pattern->GetDensityDpi());
 #endif
 }
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern Initialize and CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, InitializeTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    NG::UIExtensionConfig config;
+
+    /**
+     * @tc.steps: step2. sessionWrapper_ is null ptr
+     */
+    pattern->sessionWrapper_ = nullptr;
+    pattern->Initialize(config);
+
+    /**
+     * @tc.steps: step3. sessionWrapper_ is not null ptr
+     */
+    pattern->sessionWrapper_ =
+        AceType::MakeRefPtr<SecuritySessionWrapperImpl>(pattern, pattern->instanceId_, false,
+        SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->Initialize(config);
+
+    /**
+     * @tc.steps: step3. test CreateLayoutAlgorithm
+     */
+    ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern OnExtensionDetachToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, OnExtensionDetachToDisplayTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. contentNode_  is null ptr
+     */
+    pattern->contentNode_  = nullptr;
+    pattern->OnExtensionDetachToDisplay();
+
+    /**
+     * @tc.steps: step3. contentNode_  is not null ptr
+     */
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode = FrameNode::GetOrCreateFrameNode(
+        "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    pattern->contentNode_  = placeholderNode;
+    ASSERT_NE(pattern->contentNode_, nullptr);
+    pattern->OnExtensionDetachToDisplay();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern DispatchFollowHostDensity and OnDpiConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, DispatchFollowHostDensityTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. test DispatchFollowHostDensity
+     */
+    bool densityDpi = true;
+    pattern->densityDpi_ = false;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_TRUE(pattern->densityDpi_);
+
+    densityDpi = false;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_FALSE(pattern->densityDpi_);
+
+    /**
+     * @tc.steps: step3. test OnDpiConfigurationUpdate
+     */
+    ASSERT_FALSE(pattern->GetDensityDpi());
+    pattern->OnDpiConfigurationUpdate();
+
+    densityDpi = true;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_TRUE(pattern->GetDensityDpi());
+    pattern->OnDpiConfigurationUpdate();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern OnLanguageConfigurationUpdate, OnColorConfigurationUpdate and GetSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, OnLanguageConfigurationUpdateTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    pattern->sessionWrapper_ = nullptr;
+    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. sessionWrapper_ is nullptr
+     */
+    pattern->OnLanguageConfigurationUpdate();
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(pattern->GetSessionId(), 0);
+
+    /**
+     * @tc.steps: step3. sessionWrapper_ is not nullptr
+     */
+    pattern->sessionWrapper_ =
+        AceType::MakeRefPtr<SecuritySessionWrapperImpl>(pattern, pattern->instanceId_, false,
+        SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(pattern->GetSessionId(), pattern->sessionWrapper_->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern DumpInfo and DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. test DumpInfo
+     */
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    /**
+     * @tc.steps: step3. test DumpInfo with one param
+     */
+    std::string testJson = "";
+    std::unique_ptr<JsonValue> testValue = JsonUtil::ParseJsonString(testJson);
+
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo(testValue);
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo(testValue);
+#endif
+}
 } //namespace OHOS::Ace::NG

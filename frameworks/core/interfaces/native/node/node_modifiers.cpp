@@ -35,6 +35,7 @@
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
+#include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -190,7 +191,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetTabsModifier,
     #else
-        .getTabsModifier = nullptr
+        .getTabsModifier = nullptr,
     #endif
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
@@ -201,7 +202,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
     #else
-        .getWaterFlowModifier = nullptr
+        .getWaterFlowModifier = nullptr,
     #endif
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
@@ -278,6 +279,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
         .getCustomNodeExtModifier = nullptr,
         .getThemeModifier = NodeModifier::GetThemeModifier,
+        .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -357,7 +359,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
     #else
-        .getTabsModifier = nullptr
+        .getTabsModifier = nullptr,
     #endif
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
@@ -368,7 +370,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetCJUIWaterFlowModifier,
     #else
-        .getWaterFlowModifier = nullptr
+        .getWaterFlowModifier = nullptr,
     #endif
         .getAlphabetIndexerModifier = NodeModifier::GetCJUIAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetCJUIDataPanelModifier,
@@ -415,7 +417,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetCJUITabContentModifier,
     #else
-        .getTabContentModifier = nullptr;
+        .getTabContentModifier = nullptr,
     #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,

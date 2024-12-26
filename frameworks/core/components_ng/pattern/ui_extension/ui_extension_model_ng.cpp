@@ -318,7 +318,7 @@ void UIExtensionModelNG::SetPlatformOnError(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    auto pattern = frameNode->GetPattern<PlatformPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }

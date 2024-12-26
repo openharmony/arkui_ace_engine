@@ -24,6 +24,7 @@ ace_unittest("text_test_ng") {
     "text_base.cpp",
     "text_test_ng.cpp",
     "text_testeight_ng.cpp",
+    "text_testeleven_ng.cpp",
     "text_testfive_ng.cpp",
     "text_testfour_ng.cpp",
     "text_testnine_ng.cpp",
@@ -34,6 +35,7 @@ ace_unittest("text_test_ng") {
     "text_testtwo_ng.cpp",
     "typed_text_test_ng.cpp",
   ]
+  cflags = [ "-fno-access-control" ]
 }
 
 ace_unittest("text_test_nullptr") {
@@ -43,6 +45,7 @@ ace_unittest("text_test_nullptr") {
     "text_nullptr_ng.cpp",
   ]
   defines = [ "NEED_PIPELINE_CONTEXT_BE_NULLPTR" ]
+  cflags = [ "-fno-access-control" ]
 }
 
 group("text_tests_ng") {

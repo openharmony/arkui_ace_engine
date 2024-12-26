@@ -734,7 +734,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     ASSERT_TRUE(pipeline->GetIsFocusActive());
     pattern->HandleFocusEvent();
     pattern->isKeyAsync_ = true;
-    event.code = KeyCode::KEY_TAB;
+    event.code = { KeyCode::KEY_TAB };
+    pattern->DispatchKeyEventSync(event);
+    event.code = { KeyCode::KEY_SPACE };
     pattern->DispatchKeyEventSync(event);
 #endif
 }
@@ -1211,6 +1213,12 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest005, TestSize.Level
     /**
      * @tc.steps: step2. Test DumpInfo
      */
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo();
 
     std::string testJson = "";

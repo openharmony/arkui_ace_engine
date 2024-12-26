@@ -964,6 +964,31 @@ void TabsModelNG::SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect)
     swiperPaintProperty->UpdateEdgeEffect(static_cast<EdgeEffect>(edgeEffect));
 }
 
+void TabsModelNG::SetTabBarIndex(FrameNode* frameNode, int32_t index)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(frameNode);
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    if (tabsLayoutProperty->GetIndex().has_value()) {
+        auto preIndex = tabsLayoutProperty->GetIndex().value();
+        if (preIndex == index || index < 0) {
+            return;
+        }
+    }
+    tabsLayoutProperty->UpdateIndexSetByUser(index);
+}
+
+void TabsModelNG::SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto nodeId = frameNode->GetId();
+    auto tabsNode = GetOrCreateTabsNode(V2::TABS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TabsPattern>(); });
+    CHECK_NULL_VOID(tabsNode);
+    InitTabsNode(tabsNode, tabsController);
+}
+
 void TabsModelNG::SetBarBackgroundEffect(const EffectOption& effectOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

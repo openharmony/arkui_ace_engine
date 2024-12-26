@@ -19,8 +19,8 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/i18n/localization.h"
-#include "base/utils/utils.h"
 #include "base/utils/utf_helper.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/components/theme/app_theme.h"
@@ -38,6 +38,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -50,6 +53,14 @@ constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
+constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
+constexpr float CROWN_SENSITIVITY_HIGH = 2.0f;
+constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.crown.strength2";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.crown.strength6";
+#endif
 
 bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
 {
@@ -98,6 +109,10 @@ void SliderPattern::OnModifyDone()
     InitializeBubble();
     HandleEnabled();
     SetAccessibilityAction();
+#ifdef SUPPORT_DIGITAL_CROWN
+    crownSensitivity_ = sliderPaintProperty->GetDigitalCrownSensitivity().value_or(CrownSensitivity::MEDIUM);
+    InitDigitalCrownEvent(focusHub);
+#endif
     InitAccessibilityHoverEvent();
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
@@ -1507,6 +1522,119 @@ Axis SliderPattern::GetDirection() const
     CHECK_NULL_RETURN(sliderLayoutProperty, Axis::HORIZONTAL);
     return sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void SliderPattern::InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+    CHECK_NULL_VOID(sliderTheme);
+    crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
+
+    auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        pattern->HandleCrownEvent(event);
+        return true;
+    };
+    focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+}
+
+void SliderPattern::HandleCrownEvent(const CrownEvent& event)
+{
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider HandleCrownEvent event.action %{public}d event.degree %{public}f",
+        event.action, event.degree);
+    double mainDelta = GetCrownRotatePx(event);
+    switch (event.action) {
+        case CrownAction::BEGIN:
+            crownMovingLength_ = valueRatio_ * sliderLength_;
+            crownEventNum_ = 0;
+            reachBoundary_ = false;
+            HandleCrownAction(mainDelta);
+            StartVibrateFeedback();
+            UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            FireChangeEvent(SliderChangeMode::Begin);
+            OpenTranslateAnimation(SliderStatus::MOVE);
+            break;
+        case CrownAction::UPDATE:
+            HandleCrownAction(mainDelta);
+            StartVibrateFeedback();
+            UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            FireChangeEvent(SliderChangeMode::Moving);
+            OpenTranslateAnimation(SliderStatus::MOVE);
+            break;
+        case CrownAction::END:
+        default:
+            bubbleFlag_ = false;
+            UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+            FireChangeEvent(SliderChangeMode::End);
+            CloseTranslateAnimation();
+            break;
+    }
+}
+
+double SliderPattern::GetCrownRotatePx(const CrownEvent& event) const
+{
+    double px = event.degree * crownDisplayControlRatio_;
+    switch (crownSensitivity_) {
+        case CrownSensitivity::LOW:
+            px *= CROWN_SENSITIVITY_LOW;
+            break;
+        case CrownSensitivity::MEDIUM:
+            px *= CROWN_SENSITIVITY_MEDIUM;
+            break;
+        case CrownSensitivity::HIGH:
+            px *= CROWN_SENSITIVITY_HIGH;
+            break;
+        default:
+            break;
+    }
+    return px;
+}
+
+void SliderPattern::HandleCrownAction(double mainDelta)
+{
+    CHECK_NULL_VOID(sliderLength_ != 0);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
+    CHECK_NULL_VOID(sliderLayoutProperty);
+    auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
+    CHECK_NULL_VOID(sliderPaintProperty);
+    float min = sliderPaintProperty->GetMin().value_or(SLIDER_MIN);
+    float max = sliderPaintProperty->GetMax().value_or(SLIDER_MAX);
+    crownMovingLength_ += mainDelta;
+    crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
+    valueRatio_ = crownMovingLength_ / sliderLength_;
+    CHECK_NULL_VOID(stepRatio_ != 0);
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    float oldValue = value_;
+    value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
+    sliderPaintProperty->UpdateValue(value_);
+    valueChangeFlag_ = !NearEqual(oldValue, value_);
+    UpdateCircleCenterOffset();
+    reachBoundary_ = NearEqual(value_, min) || NearEqual(value_, max);
+    if (showTips_) {
+        bubbleFlag_ = true;
+        UpdateBubble();
+    }
+}
+
+void SliderPattern::StartVibrateFeedback()
+{
+    crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
+    if (valueChangeFlag_ && reachBoundary_) {
+        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+            CROWN_VIBRATOR_STRONG, state);
+    } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
+            CROWN_VIBRATOR_WEAK, state);
+    }
+}
+#endif
 
 RefPtr<AccessibilityProperty> SliderPattern::CreateAccessibilityProperty()
 {
