@@ -500,6 +500,24 @@ void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
     gestureHub->AddClickEvent(clickEvent);
 }
 
+void TabBarPattern::AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem)
+{
+    CHECK_NULL_VOID(tabBarItem);
+    auto tabBarItemId = tabBarItem->GetId();
+    auto columnAccessibilityProperty = tabBarItem->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(columnAccessibilityProperty);
+    columnAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this), tabBarItemId](bool focus) {
+        if (focus) {
+            auto tabBar = weak.Upgrade();
+            CHECK_NULL_VOID(tabBar);
+            auto host = tabBar->GetHost();
+            CHECK_NULL_VOID(host);
+            auto index = host->GetChildFlatIndex(tabBarItemId).second;
+            tabBar->FocusCurrentOffset(index);
+        }
+    });
+}
+
 void TabBarPattern::AddMaskItemClickEvent()
 {
     auto host = GetHost();
@@ -946,7 +964,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ -= 1;
         PaintFocusState();
-        FocusCurrentOffset();
+        FocusCurrentOffset(focusIndicator_);
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -960,7 +978,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ += 1;
         PaintFocusState();
-        FocusCurrentOffset();
+        FocusCurrentOffset(focusIndicator_);
         return true;
     }
     return OnKeyEventWithoutClick(host, event);
@@ -1036,7 +1054,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
-void TabBarPattern::FocusCurrentOffset()
+void TabBarPattern::FocusCurrentOffset(int32_t index)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1054,15 +1072,15 @@ void TabBarPattern::FocusCurrentOffset()
         auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
         auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
         auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-        if (focusIndicator_ == visibleItemStartIndex) {
-            focusIndicator_ == 0 ? UpdateCurrentOffset(scrollMargin_ - visibleItemStartPos) :
+        if (index == visibleItemStartIndex) {
+            index == 0 ? UpdateCurrentOffset(scrollMargin_ - visibleItemStartPos) :
                 UpdateCurrentOffset(-visibleItemStartPos);
-        } else if (focusIndicator_ == visibleItemEndIndex) {
-            focusIndicator_ == childCount - 1 ? UpdateCurrentOffset(mainSize - scrollMargin_ - visibleItemEndPos) :
+        } else if (index == visibleItemEndIndex) {
+            index == childCount - 1 ? UpdateCurrentOffset(mainSize - scrollMargin_ - visibleItemEndPos) :
                 UpdateCurrentOffset(mainSize - visibleItemEndPos);
-        } else if ((focusIndicator_ >= 0  && focusIndicator_ < visibleItemStartIndex) ||
-            (focusIndicator_ <= childCount - 1 && focusIndicator_ > visibleItemEndIndex)) {
-            focusIndex_ = focusIndicator_;
+        } else if ((index >= 0  && index < visibleItemStartIndex) ||
+            (index <= childCount - 1 && index > visibleItemEndIndex)) {
+            focusIndex_ = index;
             tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
@@ -1350,6 +1368,10 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     isFirstLayout_ = false;
     if (focusIndex_) {
         focusIndex_.reset();
+        if (accessibilityScroll_) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            accessibilityScroll_ = false;
+        }
     }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 
@@ -1363,6 +1385,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             StopTranslateAnimation();
             jumpIndex_ = indicator_;
+            focusIndicator_ = indicator_;
             UpdateSubTabBoard(indicator_);
             UpdateIndicator(indicator_);
             windowSizeChangeReason_.reset();
@@ -2611,11 +2634,14 @@ void TabBarPattern::TriggerTranslateAnimation(int32_t currentIndex, int32_t targ
         layoutProperty->GetAxisValue(Axis::HORIZONTAL) != Axis::HORIZONTAL) {
         return;
     }
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
+    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIndicator(targetPaintRect);
     if (!changeByClick_) {
         return;
     }
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(currentIndex);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(targetIndex);
     PlayIndicatorTranslateAnimation(option, originalPaintRect, targetPaintRect, targetOffset);
 }
 
@@ -2956,8 +2982,10 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto index = pattern->GetIndicator() + 1;
-            pattern->FocusIndexChange(index);
+            auto visibleItemEndIndex = pattern->visibleItemPosition_.rbegin()->first;
+            visibleItemEndIndex == frameNode->TotalChildCount() - MASK_COUNT - 1 ?
+                pattern->FocusCurrentOffset(visibleItemEndIndex) : pattern->FocusCurrentOffset(visibleItemEndIndex + 1);
+            pattern->accessibilityScroll_ = true;
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -2971,8 +2999,10 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto index = pattern->GetIndicator() - 1;
-            pattern->FocusIndexChange(index);
+            auto visibleItemStartIndex = pattern->visibleItemPosition_.begin()->first;
+            visibleItemStartIndex == 0 ? pattern->FocusCurrentOffset(visibleItemStartIndex) :
+                pattern->FocusCurrentOffset(visibleItemStartIndex - 1);
+            pattern->accessibilityScroll_ = true;
             // AccessibilityEventType::SCROLL_END
         }
     });

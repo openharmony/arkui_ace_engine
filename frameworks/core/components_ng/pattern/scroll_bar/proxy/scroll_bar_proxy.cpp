@@ -143,7 +143,7 @@ void ScrollBarProxy::NotifyScrollStop() const
     }
 }
 
-void ScrollBarProxy::NotifyScrollBar() const
+void ScrollBarProxy::NotifyScrollBar(int32_t scrollSource) const
 {
     auto scrollable = scorllableNode_.scrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable)) {
@@ -177,7 +177,7 @@ void ScrollBarProxy::NotifyScrollBar() const
         }
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && !scrollBar->HasChild()) {
             scrollBar->SetScrollableNodeOffset(scrollableNodeOffset);
-            scrollBar->UpdateScrollBarOffset();
+            scrollBar->UpdateScrollBarOffset(scrollSource);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             scrollBar->SetScrollableNodeOffset(

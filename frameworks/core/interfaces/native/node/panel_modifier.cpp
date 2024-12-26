@@ -176,22 +176,76 @@ void ResetShow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPanelModifier* GetPanelModifier()
 {
-    static const ArkUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
-        ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
-        SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
-        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
-        ResetDragBar, SetShow, ResetShow };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIPanelModifier modifier = {
+        .setPanelMode = SetPanelMode,
+        .resetPanelMode = ResetPanelMode,
+        .setPanelFullHeight = SetPanelFullHeight,
+        .resetPanelFullHeight = ResetPanelFullHeight,
+        .setPanelHalfHeight = SetPanelHalfHeight,
+        .resetPanelHalfHeight = ResetPanelHalfHeight,
+        .setPanelMiniHeight = SetPanelMiniHeight,
+        .resetPanelMiniHeight = ResetPanelMiniHeight,
+        .setPanelBackgroundMask = SetPanelBackgroundMask,
+        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
+        .setPanelType = SetPanelType,
+        .resetPanelType = ResetPanelType,
+        .setPanelCustomHeight = SetPanelCustomHeight,
+        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
+        .resetPanelCustomHeight = ResetPanelCustomHeight,
+        .setShowCloseIcon = SetShowCloseIcon,
+        .resetShowCloseIcon = ResetShowCloseIcon,
+        .setDragBar = SetDragBar,
+        .resetDragBar = ResetDragBar,
+        .setShow = SetShow,
+        .resetShow = ResetShow,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIPanelModifier* GetCJUIPanelModifier()
 {
-    static const CJUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
-        ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
-        SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
-        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
-        ResetDragBar, SetShow, ResetShow };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIPanelModifier modifier = {
+        .setPanelMode = SetPanelMode,
+        .resetPanelMode = ResetPanelMode,
+        .setPanelFullHeight = SetPanelFullHeight,
+        .resetPanelFullHeight = ResetPanelFullHeight,
+        .setPanelHalfHeight = SetPanelHalfHeight,
+        .resetPanelHalfHeight = ResetPanelHalfHeight,
+        .setPanelMiniHeight = SetPanelMiniHeight,
+        .resetPanelMiniHeight = ResetPanelMiniHeight,
+        .setPanelBackgroundMask = SetPanelBackgroundMask,
+        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
+        .setPanelType = SetPanelType,
+        .resetPanelType = ResetPanelType,
+        .setPanelCustomHeight = SetPanelCustomHeight,
+        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
+        .resetPanelCustomHeight = ResetPanelCustomHeight,
+        .setShowCloseIcon = SetShowCloseIcon,
+        .resetShowCloseIcon = ResetShowCloseIcon,
+        .setDragBar = SetDragBar,
+        .resetDragBar = ResetDragBar,
+        .setShow = SetShow,
+        .resetShow = ResetShow,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

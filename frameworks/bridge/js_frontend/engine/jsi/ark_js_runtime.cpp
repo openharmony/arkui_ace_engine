@@ -158,8 +158,7 @@ bool ArkJSRuntime::StartDebugger()
     if (!libPath_.empty()) {
         bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-        auto callback = [instanceId = instanceId_,
-                            weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
+        auto callback = [weak = weak_from_this(), isDebugApp](int socketFd, std::string option) {
             LOGI("HdcRegister callback socket %{public}d, option %{public}s.", socketFd, option.c_str());
             if (option.find(DEBUGGER) == std::string::npos) {
                 if (isDebugApp) {

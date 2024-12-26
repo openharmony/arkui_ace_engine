@@ -53,7 +53,9 @@ public:
     static void SurfacePositionChanged(const RefPtr<AceViewOhos>& view, int32_t posX, int32_t posY);
     static void SetViewportMetrics(const RefPtr<AceViewOhos>& view, const ViewportConfig& config);
     static void TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t transform);
-
+    static void HandleMouseEvent(const RefPtr<AceViewOhos>& view,
+        const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+        int32_t pointerAction, bool isInjected, int32_t toolType);
     static void DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
         const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr,
         const std::function<void()>& callback = nullptr, bool isInjected = false);
@@ -74,7 +76,9 @@ public:
     void RegisterRotationEventCallback(RotationEventCallBack&& callback) override;
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override {}
     void RegisterCardViewAccessibilityParamsCallback(CardViewAccessibilityParamsCallback&& callback) override {}
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override;
+#endif
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
@@ -90,6 +94,11 @@ public:
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, bool isPreIme);
 
     bool ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        bool isInjected = false);
+#endif
 
     bool ProcessRotationEvent(float rotationValue);
 
@@ -245,6 +254,9 @@ private:
     RefPtr<PlatformResRegister> resRegister_;
     KeyEventCallback keyEventCallback_;
     NonPointerEventCallback nonPointerEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
     KeyEventRecognizer keyEventRecognizer_;
     // mark the touch event's state, HORIZONTAL_STATE: the event should send to platform, VERTICAL_STATE: should not
     enum class EventState { INITIAL_STATE, HORIZONTAL_STATE, VERTICAL_STATE };

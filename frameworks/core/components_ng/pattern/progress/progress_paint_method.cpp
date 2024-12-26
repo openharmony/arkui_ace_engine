@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -83,6 +83,22 @@ Gradient ProgressPaintMethod::GenerateRingProgressColor(PaintWrapper* paintWrapp
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
     return gradient;
+}
+
+void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)
+{
+    if (progressType_ != ProgressType::CAPSULE) {
+        return;
+    }
+    CHECK_NULL_VOID(progressModifier_);
+    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+    const SizeF& contentSize = paintWrapper->GetContentSize();
+    constexpr float HALF = 2.0f;
+    float contentMinHalf = std::min(contentSize.Height(), contentSize.Width()) / HALF;
+    auto borderRadius = static_cast<float>(
+        paintProperty->GetBorderRadiusValue(Dimension(contentMinHalf, DimensionUnit::PX)).ConvertToPx());
+    progressModifier_->SetCapsuleBorderRadius(std::min(contentMinHalf, borderRadius));
 }
 
 } // namespace OHOS::Ace::NG

@@ -26,7 +26,6 @@
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
-#include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,6 +34,8 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 #include "core/common/display_info.h"
@@ -70,6 +71,9 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
+#ifdef SUPPORT_DIGITAL_CROWN
+using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+#endif
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -498,9 +502,7 @@ public:
         return false;
     }
 
-    virtual bool GetCurPointerEventInfo(
-        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+    virtual bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -510,10 +512,12 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true)
+    virtual int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
     {
-        return false;
+        return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
     }
 
     virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -678,6 +682,9 @@ public:
     {
         return currentDisplayId_;
     }
+
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

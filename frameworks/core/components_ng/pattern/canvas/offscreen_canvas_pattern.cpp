@@ -390,6 +390,11 @@ void OffscreenCanvasPattern::SetFontSize(const Dimension& size)
     offscreenPaintMethod_->SetFontSize(size);
 }
 
+void OffscreenCanvasPattern::SetLetterSpacing(const Dimension& letterSpacing)
+{
+    offscreenPaintMethod_->SetLetterSpacing(letterSpacing);
+}
+
 std::string OffscreenCanvasPattern::ToDataURL(const std::string& type, const double quality)
 {
     return offscreenPaintMethod_->ToDataURL(type, quality);

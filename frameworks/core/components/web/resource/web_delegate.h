@@ -669,7 +669,7 @@ private:
 
 class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
 public:
-    NWebMouseEventImpl(int32_t x, int32_t y,
+    NWebMouseEventImpl(int32_t x, int32_t y, int32_t rawX, int32_t rawY,
         int32_t buttton, int32_t action,
         int32_t clickNum, std::vector<int32_t> pressedCodes)
         : x_(x), y_(y), buttton_(buttton), action_(action),
@@ -706,9 +706,21 @@ public:
         return pressedCodes_;
     }
 
+    int32_t GetRawX() override
+    {
+        return raw_x_;
+    }
+
+    int32_t GetRawY() override
+    {
+        return raw_y_;
+    }
+
 private:
     int32_t x_ = 0;
     int32_t y_ = 0;
+    int32_t raw_x_ = 0;
+    int32_t raw_y_ = 0;
     int32_t buttton_ = 0;
     int32_t action_ = 0;
     int32_t clickNum_ = 0;
@@ -1012,6 +1024,10 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
+    void JavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentEndByOrder();
+    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
@@ -1019,6 +1035,7 @@ public:
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1141,6 +1158,8 @@ public:
         const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
 
     void UnRegisterNativeArkJSFunction(const std::string& objName);
+
+    bool IsActivePolicyDisable();
 
 private:
     void InitWebEvent();
@@ -1329,6 +1348,8 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

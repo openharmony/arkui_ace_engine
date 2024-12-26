@@ -16,29 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H
 
-#define ACE_DISALLOW_COPY_AND_MOVE(className) \
-    ACE_DISALLOW_COPY(className);             \
-    ACE_DISALLOW_MOVE(className)
-
-#define ACE_DISALLOW_COPY(className)      \
-    className(const className&) = delete; \
-    className& operator=(const className&) = delete
-
-#define ACE_DISALLOW_MOVE(className) \
-    className(className&&) = delete; \
-    className& operator=(className&&) = delete
-
-namespace OHOS::Ace {
-
-class NonCopyable {
-protected:
-    NonCopyable() = default;
-    virtual ~NonCopyable() = default;
-
-private:
-    ACE_DISALLOW_COPY_AND_MOVE(NonCopyable);
-};
-
-} // namespace OHOS::Ace
+#include "ui/base/noncopyable.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_NONCOPYABLE_H

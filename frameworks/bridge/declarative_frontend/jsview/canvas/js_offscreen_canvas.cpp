@@ -316,10 +316,7 @@ napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
         return nullptr;
     }
     void* nativeObj = nullptr;
-    napi_status status = napi_unwrap(env, renderImage, &nativeObj);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_unwrap(env, renderImage, &nativeObj));
     auto jsImage = (JSRenderImage*)nativeObj;
     CHECK_NULL_RETURN(jsImage, nullptr);
 #ifndef PIXEL_MAP_SUPPORTED
@@ -393,22 +390,13 @@ void JSOffscreenCanvas::SetAntiAlias(napi_value argv)
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height, const EcmaVM* vm)
 {
     napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_global(env, &global));
     napi_value constructor = nullptr;
-    status = napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor));
 
     napi_value thisVal = nullptr;
     napi_create_object(env, &thisVal);
-    status = napi_new_instance(env, constructor, 0, nullptr, &thisVal);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_new_instance(env, constructor, 0, nullptr, &thisVal));
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
     }

@@ -47,6 +47,14 @@ protected:
      */
     static bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
 
+    /**
+     * @return true if the item is a cache item outside viewport.
+     */
+    inline bool IsCache(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t itemIdx) const
+    {
+        return !props_->GetShowCachedItemsValue(false) && (itemIdx < info->startIndex_ || itemIdx > info->endIndex_);
+    }
+
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;
     Axis axis_ = Axis::VERTICAL;

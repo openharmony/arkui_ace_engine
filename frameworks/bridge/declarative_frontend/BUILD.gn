@@ -31,8 +31,10 @@ template("declarative_frontend") {
     defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
-    include_dirs =
-        [ "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi" ]
+    include_dirs = [
+      "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi",
+      "$ace_root",
+    ]
     if (platform == "ohos_ng" || is_arkui_x) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
@@ -239,7 +241,6 @@ template("declarative_js_engine") {
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
-      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
@@ -276,12 +277,10 @@ template("declarative_js_engine") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
-      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
-      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -292,7 +291,6 @@ template("declarative_js_engine") {
       "jsview/js_environment.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -357,7 +355,6 @@ template("declarative_js_engine") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
-      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -381,10 +378,6 @@ template("declarative_js_engine") {
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
-      "jsview/js_tab_content.cpp",
-      "jsview/js_tabs.cpp",
-      "jsview/js_tabs_controller.cpp",
-      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -402,9 +395,6 @@ template("declarative_js_engine") {
       "jsview/js_view_functions.cpp",
       "jsview/js_view_measure_layout.cpp",
       "jsview/js_view_stack_processor.cpp",
-      "jsview/js_water_flow.cpp",
-      "jsview/js_water_flow_item.cpp",
-      "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "sharedata/js_share_data.cpp",
@@ -453,7 +443,6 @@ template("declarative_js_engine") {
       "jsview/models/indexer_model_impl.cpp",
       "jsview/models/lazy_for_each_model_impl.cpp",
       "jsview/models/line_model_impl.cpp",
-      "jsview/models/linear_split_model_impl.cpp",
       "jsview/models/list_item_group_model_impl.cpp",
       "jsview/models/list_item_model_impl.cpp",
       "jsview/models/list_model_impl.cpp",
@@ -490,8 +479,6 @@ template("declarative_js_engine") {
       "jsview/models/stepper_item_model_impl.cpp",
       "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
-      "jsview/models/tab_content_model_impl.cpp",
-      "jsview/models/tabs_model_impl.cpp",
       "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
@@ -503,9 +490,33 @@ template("declarative_js_engine") {
       "jsview/models/view_context_model_impl.cpp",
       "jsview/models/view_full_update_model_impl.cpp",
       "jsview/models/view_partial_update_model_impl.cpp",
-      "jsview/models/water_flow_item_model_impl.cpp",
-      "jsview/models/water_flow_model_impl.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "engine/functions/js_tabs_function.cpp",
+        "jsview/js_column_split.cpp",
+        "jsview/js_content_slot.cpp",
+        "jsview/js_folder_stack.cpp",
+        "jsview/js_row_split.cpp",
+        "jsview/js_tab_content.cpp",
+        "jsview/js_tabs.cpp",
+        "jsview/js_tabs_controller.cpp",
+        "jsview/js_tabs_feature.cpp",
+        "jsview/js_water_flow.cpp",
+        "jsview/js_water_flow_item.cpp",
+        "jsview/js_water_flow_sections.cpp",
+        "jsview/models/linear_split_model_impl.cpp",
+        "jsview/models/tab_content_model_impl.cpp",
+        "jsview/models/tabs_model_impl.cpp",
+        "jsview/models/water_flow_item_model_impl.cpp",
+        "jsview/models/water_flow_model_impl.cpp",
+      ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
@@ -774,7 +785,6 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
-      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
@@ -822,12 +832,10 @@ template("declarative_js_engine_ng") {
       "jsview/js_circle_shape.cpp",
       "jsview/js_clipboard.cpp",
       "jsview/js_column.cpp",
-      "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
       "jsview/js_container_modal_view.cpp",
       "jsview/js_container_span.cpp",
-      "jsview/js_content_slot.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -836,7 +844,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_ellipse_shape.cpp",
       "jsview/js_flex.cpp",
       "jsview/js_flex_impl.cpp",
-      "jsview/js_folder_stack.cpp",
       "jsview/js_foreach.cpp",
       "jsview/js_form_link.cpp",
       "jsview/js_gauge.cpp",
@@ -895,7 +902,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_repeat_virtual_scroll.cpp",
       "jsview/js_richeditor.cpp",
       "jsview/js_row.cpp",
-      "jsview/js_row_split.cpp",
       "jsview/js_save_button.cpp",
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
@@ -917,10 +923,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
-      "jsview/js_tab_content.cpp",
-      "jsview/js_tabs.cpp",
-      "jsview/js_tabs_controller.cpp",
-      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -934,9 +936,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_view.cpp",
       "jsview/js_view_abstract.cpp",
       "jsview/js_view_context.cpp",
-      "jsview/js_water_flow.cpp",
-      "jsview/js_water_flow_item.cpp",
-      "jsview/js_water_flow_sections.cpp",
       "jsview/menu/js_context_menu.cpp",
       "jsview/scroll_bar/js_scroll_bar.cpp",
       "style_string/js_span_object.cpp",
@@ -946,9 +945,35 @@ template("declarative_js_engine_ng") {
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
 
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "jsview/js_column_split.cpp",
+        "jsview/js_content_slot.cpp",
+        "jsview/js_folder_stack.cpp",
+        "jsview/js_row_split.cpp",
+      ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
     sources += [
       "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "engine/functions/js_tabs_function.cpp",
+        "jsview/js_tab_content.cpp",
+        "jsview/js_tabs.cpp",
+        "jsview/js_tabs_controller.cpp",
+        "jsview/js_tabs_feature.cpp",
+        "jsview/js_water_flow.cpp",
+        "jsview/js_water_flow_item.cpp",
+        "jsview/js_water_flow_sections.cpp",
+      ]
+    }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {

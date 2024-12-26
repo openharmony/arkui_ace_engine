@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/layout_param.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/common_decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
 #include "core/components/common/properties/text_style.h"
@@ -518,6 +519,11 @@ public:
         return dialogLandscapeHeightBoundary_;
     }
 
+    const int& GetDialogBackgroundBlurStyle() const
+    {
+        return dialogBackgroundBlurStyle_;
+    }
+
 protected:
     DialogTheme() = default;
 
@@ -613,6 +619,7 @@ private:
     Color dialogOuterBorderColor_;
     double dialogInnerBorderWidth_ = 0.0f;
     Color dialogInnerBorderColor_;
+    int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 
 } // namespace OHOS::Ace

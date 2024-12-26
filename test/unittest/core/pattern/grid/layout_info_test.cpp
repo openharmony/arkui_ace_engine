@@ -789,6 +789,6 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset001, TestSize.Level1)
 
     info.SkipStartIndexByOffset(option, 2.f);
 
-    EXPECT_EQ(info.startIndex_, 9674);
+    EXPECT_EQ(info.startIndex_, 9675);
 }
 } // namespace OHOS::Ace::NG

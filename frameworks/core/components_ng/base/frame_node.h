@@ -241,14 +241,7 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback(bool isApproximate = false)
-    {
-        if (isApproximate) {
-            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
-        } else {
-            eventHub_->CleanVisibleAreaCallback(true, false);
-        }
-    }
+    void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
         bool isCalculateInnerClip = false)
@@ -650,6 +643,16 @@ public:
     bool IsCustomerSet() const
     {
         return customerSet_;
+    }
+
+    float GetPreGrayedOpacity() const
+    {
+        return preOpacity_;
+    }
+
+    void SetPreGrayedOpacity(float preOpacity)
+    {
+        preOpacity_ = preOpacity;
     }
 
     void SetAllowDrop(const std::set<std::string>& allowDrop)
@@ -1162,6 +1165,8 @@ public:
         }
     }
 
+    void OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1407,7 +1412,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1432,6 +1437,7 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
+    float preOpacity_ = 1.0f;
 
     friend class RosenRenderContext;
     friend class RenderContext;

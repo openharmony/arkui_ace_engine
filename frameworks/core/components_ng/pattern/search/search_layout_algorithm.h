@@ -57,6 +57,10 @@ private:
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    float CalculateMaxFontScale(LayoutWrapper* layoutWrapper);
+    float CalculateMinFontScale(LayoutWrapper* layoutWrapper);
+    CalcSize searchButtonCalcSize(const RefPtr<SearchTheme>& searchTheme,
+    RefPtr<SearchLayoutProperty> layoutProperty, LayoutWrapper* layoutWrapper);
     void UpdateFontFeature(LayoutWrapper* layoutWrapper);
     void UpdateTextFieldSize(LayoutWrapper* layoutWrapper);
     void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,
@@ -77,6 +81,8 @@ private:
     void LayoutTextField(const LayoutSearchParams& params);
     void UpdateClipBounds(LayoutWrapper* layoutWrapper, float height);
     double CalcSymbolIconHeight(LayoutWrapper* layoutWrapper, int32_t index, double defaultImageHeight);
+    float CalculateTextFieldWidth(
+        LayoutWrapper* layoutWrapper, float searchWidthMax, const RefPtr<SearchTheme>& searchTheme);
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchLayoutAlgorithm);
 };

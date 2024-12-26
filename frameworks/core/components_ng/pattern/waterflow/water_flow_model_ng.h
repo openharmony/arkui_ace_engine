@@ -25,6 +25,7 @@ class ACE_EXPORT WaterFlowModelNG : public WaterFlowModel {
 public:
     void Create() override;
     void SetFooter(std::function<void()>&& footer) override;
+    void SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
@@ -113,10 +114,12 @@ public:
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static void SetWaterflowFooterWithFrameNode(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
     static bool hasFooter(FrameNode* frameNode);
     static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
+    static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

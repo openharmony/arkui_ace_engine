@@ -45,20 +45,20 @@ export interface PromptOptions {
 @Component
 export struct ExceptionPrompt {
   @Prop options: PromptOptions
-  @State fontSizeScale: number | undefined = undefined
+  @State fontSizeScale: number | undefined = undefined;
   touchBackgroundColor: Resource = $r('sys.color.ohos_id_color_sub_background_transparent')
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
   onTipClick?: () => void = undefined;
   onActionTextClick?: () => void = undefined;
-  private callbackId: number | undefined = undefined
+  private callbackId: number | undefined = undefined;
   private callbacks: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
       this.fontSizeScale = Math.min(this.updateFontScale(), MAX_SYMBOL_FONT_SCALE);
       this.fontSizeScale = Math.max(this.fontSizeScale, MIN_SYMBOL_FONT_SCALE);
     }, onMemoryLevel() {
     }
-  }
+  };
 
   @Builder
   TextBuilder() {
@@ -194,7 +194,7 @@ export struct ExceptionPrompt {
   aboutToDisappear(): void {
     if (this.callbackId) {
       this.getUIContext().getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
-      this.callbackId = void (0)
+      this.callbackId = void (0);
     }
   }
 

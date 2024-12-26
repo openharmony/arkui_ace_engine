@@ -1980,7 +1980,7 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->SetCaretPosition(5);
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 26);
 }
 
 /**

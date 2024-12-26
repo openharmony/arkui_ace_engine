@@ -894,6 +894,56 @@ HWTEST_F(ScrollEventTestNg, IntervalSnap003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalcPredictNextSnapOffset001
+ * @tc.desc: Test CalcPredictNextSnapOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, CalcPredictNextSnapOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set intervalSize to generate snapOffsets_.
+     */
+    const float intervalSize = 100.f; // check align start
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = { true, true };
+    ScrollModelNG model = CreateScroll();
+    model.SetScrollSnap(ScrollSnapAlign::START, Dimension(intervalSize), snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+
+    const float delta = -40.f;
+    auto predictSnapOffset = pattern_->CalcPredictSnapOffset(delta, 0.f, 0.f, SnapDirection::NONE);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), 0.f);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -intervalSize);
+
+    pattern_->currentOffset_ = -100.f;
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(-60.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(-100.f, 0.f, 0.f, SnapDirection::BACKWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), -2 * intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(0.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), intervalSize);
+
+    pattern_->currentOffset_ = -200.f;
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(60.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), intervalSize);
+
+    predictSnapOffset = pattern_->CalcPredictSnapOffset(100.f, 0.f, 0.f, SnapDirection::FORWARD);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_FLOAT_EQ(predictSnapOffset.value(), 2 * intervalSize);
+}
+
+/**
  * @tc.name: SnapPaginations001
  * @tc.desc: Test snap snapPaginations ScrollSnapAlign::START
  * @tc.type: FUNC

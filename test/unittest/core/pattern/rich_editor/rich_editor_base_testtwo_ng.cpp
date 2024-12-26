@@ -479,6 +479,31 @@ HWTEST_F(RichEditorBaseTestTwoNg, RichEditorController014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RichEditorController015
+ * @tc.desc: test get caret rect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestTwoNg, RichEditorController015, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    auto rect1 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect1.GetOffset().GetX(), -1);
+    EXPECT_EQ(rect1.GetOffset().GetY(), -1);
+    EXPECT_EQ(rect1.Width(), -1);
+    EXPECT_EQ(rect1.Height(), -1);
+    richEditorPattern->caretTwinkling_ = true;
+    auto rect2 = richEditorController->GetCaretRect();
+    EXPECT_EQ(rect2.GetOffset().GetX(), 0);
+    EXPECT_EQ(rect2.GetOffset().GetY(), 0);
+    EXPECT_EQ(rect2.Width(), 0);
+    EXPECT_EQ(rect2.Height(), 18.5);
+}
+
+/**
  * @tc.name: RichEditorController017
  * @tc.desc: test update span style
  * @tc.type: FUNC

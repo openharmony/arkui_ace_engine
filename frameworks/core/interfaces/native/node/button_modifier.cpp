@@ -642,29 +642,115 @@ void SetCreateWithLabel(ArkUINodeHandle node, bool createWithLabel)
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
-        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
-        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
-        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
-        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
-        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
-        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
-        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIButtonModifier modifier = {
+        .setButtonLabel = SetButtonLabel,
+        .resetButtonLabel = ResetButtonLabel,
+        .setButtonType = SetButtonType,
+        .resetButtonType = ResetButtonType,
+        .setButtonStateEffect = SetButtonStateEffect,
+        .resetButtonStateEffect = ResetButtonStateEffect,
+        .setButtonFontColor = SetButtonFontColor,
+        .resetButtonFontColor = ResetButtonFontColor,
+        .setButtonFontSize = SetButtonFontSize,
+        .resetButtonFontSize = ResetButtonFontSize,
+        .setButtonFontWeight = SetButtonFontWeight,
+        .resetButtonFontWeight = ResetButtonFontWeight,
+        .setButtonFontStyle = SetButtonFontStyle,
+        .resetButtonFontStyle = ResetButtonFontStyle,
+        .setButtonFontFamily = SetButtonFontFamily,
+        .resetButtonFontFamily = ResetButtonFontFamily,
+        .setButtonLabelStyle = SetButtonLabelStyle,
+        .resetButtonLabelStyle = ResetButtonLabelStyle,
+        .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .resetButtonBackgroundColor = ResetButtonBackgroundColor,
+        .setButtonBorderRadius = SetButtonBorderRadius,
+        .resetButtonBorderRadius = ResetButtonBorderRadius,
+        .setButtonFontWeightEnum = SetButtonFontWeightEnum,
+        .setButtonSize = SetButtonSize,
+        .resetButtonSize = ResetButtonSize,
+        .getButtonLabel = GetButtonLabel,
+        .getButtonFontSize = GetButtonFontSize,
+        .getButtonFontWeight = GetButtonFontWeight,
+        .getButtonFontColor = GetButtonFontColor,
+        .setButtonRole = SetButtonRole,
+        .resetButtonRole = ResetButtonRole,
+        .setButtonStyle = SetButtonStyle,
+        .resetButtonStyle = ResetButtonStyle,
+        .setButtonControlSize = SetButtonControlSize,
+        .resetButtonControlSize = ResetButtonControlSize,
+        .getButtonType = GetButtonType,
+        .setButtonLabelWithCheck = SetButtonLabelWithCheck,
+        .resetButtonLabelWithCheck = ResetButtonLabelWithCheck,
+        .setButtonOptions = SetButtonOptions,
+        .resetButtonOptions = ResetButtonOptions,
+        .setCreateWithLabel = SetCreateWithLabel,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIButtonModifier* GetCJUIButtonModifier()
 {
-    static const CJUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
-        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
-        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
-        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
-        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
-        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
-        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
-        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIButtonModifier modifier = {
+        .setButtonLabel = SetButtonLabel,
+        .resetButtonLabel = ResetButtonLabel,
+        .setButtonType = SetButtonType,
+        .resetButtonType = ResetButtonType,
+        .setButtonStateEffect = SetButtonStateEffect,
+        .resetButtonStateEffect = ResetButtonStateEffect,
+        .setButtonFontColor = SetButtonFontColor,
+        .resetButtonFontColor = ResetButtonFontColor,
+        .setButtonFontSize = SetButtonFontSize,
+        .resetButtonFontSize = ResetButtonFontSize,
+        .setButtonFontWeight = SetButtonFontWeight,
+        .resetButtonFontWeight = ResetButtonFontWeight,
+        .setButtonFontStyle = SetButtonFontStyle,
+        .resetButtonFontStyle = ResetButtonFontStyle,
+        .setButtonFontFamily = SetButtonFontFamily,
+        .resetButtonFontFamily = ResetButtonFontFamily,
+        .setButtonLabelStyle = SetButtonLabelStyle,
+        .resetButtonLabelStyle = ResetButtonLabelStyle,
+        .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .resetButtonBackgroundColor = ResetButtonBackgroundColor,
+        .setButtonBorderRadius = SetButtonBorderRadius,
+        .resetButtonBorderRadius = ResetButtonBorderRadius,
+        .setButtonFontWeightEnum = SetButtonFontWeightEnum,
+        .setButtonSize = SetButtonSize,
+        .resetButtonSize = ResetButtonSize,
+        .getButtonLabel = GetButtonLabel,
+        .getButtonFontSize = GetButtonFontSize,
+        .getButtonFontWeight = GetButtonFontWeight,
+        .getButtonFontColor = GetButtonFontColor,
+        .setButtonRole = SetButtonRole,
+        .resetButtonRole = ResetButtonRole,
+        .setButtonStyle = SetButtonStyle,
+        .resetButtonStyle = ResetButtonStyle,
+        .setButtonControlSize = SetButtonControlSize,
+        .resetButtonControlSize = ResetButtonControlSize,
+        .getButtonType = GetButtonType,
+        .setButtonLabelWithCheck = SetButtonLabelWithCheck,
+        .resetButtonLabelWithCheck = ResetButtonLabelWithCheck,
+        .setButtonOptions = SetButtonOptions,
+        .resetButtonOptions = ResetButtonOptions,
+        .setCreateWithLabel = SetCreateWithLabel,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 } // namespace NodeModifier

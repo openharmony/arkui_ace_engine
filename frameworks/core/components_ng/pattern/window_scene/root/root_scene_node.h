@@ -43,6 +43,11 @@ public:
         return false;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(RootSceneNode);
 };
 } // namespace OHOS::Ace::NG
