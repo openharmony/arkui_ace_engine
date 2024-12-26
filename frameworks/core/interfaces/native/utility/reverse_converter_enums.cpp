@@ -701,16 +701,4 @@ void AssignArkValue(Ark_MenuPolicy& dst, const MenuPolicy& src)
         default: dst = static_cast<Ark_MenuPolicy>(-1);
     }
 }
-
-void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src)
-{
-    switch (src) {
-        case ScrollSource::DRAG : dst = ARK_SCROLL_SOURCE_DRAG; break;
-        case ScrollSource::FLING : dst = ARK_SCROLL_SOURCE_FLING; break;
-        case ScrollSource::EDGE_EFFECT : dst = ARK_SCROLL_SOURCE_EDGE_EFFECT; break;
-        case ScrollSource::OTHER_USER_INPUT : dst = ARK_SCROLL_SOURCE_OTHER_USER_INPUT; break;
-        case ScrollSource::SCROLL_BAR: dst = ARK_SCROLL_SOURCE_SCROLL_BAR; break;
-        default: dst = static_cast<Ark_ScrollSource>(INT_MIN);
-    }
-}
 } // namespace OHOS::Ace::NG::Converter

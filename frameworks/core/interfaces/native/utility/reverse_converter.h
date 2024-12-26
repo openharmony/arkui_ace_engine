@@ -241,7 +241,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src);
     void AssignArkValue(Array_ImageAnalyzerType& dst, const std::vector<ImageAnalyzerType>& src);
     void AssignArkValue(Array_Number& dst, const std::vector<double>& src);
-    void AssignArkValue(Ark_ScrollSource& dst, const ScrollSource& src);
 
     // ATTENTION!!! Add AssignArkValue implementations above this line!
 

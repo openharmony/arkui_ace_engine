@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
+#include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/calc_length.h"
@@ -508,6 +509,7 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
+    template<> TwoDimensionScrollResult Convert(const Ark_OffsetResult& src);
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);

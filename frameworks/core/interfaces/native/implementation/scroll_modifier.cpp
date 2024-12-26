@@ -147,36 +147,25 @@ void OnWillScrollImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
-    auto call = [arkCallback = CallbackHelper(callValue.value())](
-        const Dimension& xOffset,
-        const Dimension& yOffset,
-        const ScrollState& scrollState,
-        const ScrollSource& scrollSource) {
-
-        auto retriever = [](const Ark_Int32 resourceId, Ark_OffsetResult value, uint8_t* data) {
-            memcpy(data, (uint8_t*)&value, sizeof(Ark_OffsetResult));
+    if (callValue.has_value()) {
+        auto call = [arkCallback = CallbackHelper(callValue.value(), frameNode)] (
+            const Dimension& xOffset,
+            const Dimension& yOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                TwoDimensionScrollResult,
+                Ark_OffsetResult,
+                Callback_OffsetResult_Void>(
+                Converter::ArkValue<Ark_Number>(xOffset),
+                Converter::ArkValue<Ark_Number>(yOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            return retVal.value_or(TwoDimensionScrollResult());
         };
-        Callback_OffsetResult_Void valueRetriever;
-        valueRetriever.call = retriever;
-        valueRetriever.data = new uint8_t[sizeof(Ark_OffsetResult)];
-
-        arkCallback.Invoke(
-            Converter::ArkValue<Ark_Number>(xOffset),
-            Converter::ArkValue<Ark_Number>(yOffset), 
-            Converter::ArkValue<Ark_ScrollState>(scrollState),
-            Converter::ArkValue<Ark_ScrollSource>(scrollSource),
-            valueRetriever);
-
-        Ark_OffsetResult ArkRes;
-        memcpy((uint8_t*)&ArkRes, valueRetriever.data, sizeof(Ark_OffsetResult));
-        TwoDimensionScrollResult retVal = {
-            Converter::Convert<Dimension>(ArkRes.xOffset),
-            Converter::Convert<Dimension>(ArkRes.yOffset)};
-        delete [] valueRetriever.data;
-
-        return retVal;
-    };
-    ScrollModelNG::SetOnWillScroll(frameNode, call);
+        ScrollModelNG::SetOnWillScroll(frameNode, call);
+    }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnWillScrollCallback* value)
