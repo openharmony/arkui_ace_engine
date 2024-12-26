@@ -571,7 +571,7 @@ void RichEditorModelNG::SetCustomKeyboard(FrameNode* frameNode, std::function<vo
     }
 }
 void RichEditorModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
-    std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();

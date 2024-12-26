@@ -552,13 +552,13 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
             }
         };
     }
-    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+    std::function<void()> builder = [callback = CallbackHelper(*content, frameNode), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
     auto span = aceSpanType.value_or(TextSpanType::NONE);
     auto response = aceResponseType.value_or(TextResponseType::NONE);
-    RichEditorModelNG::BindSelectionMenu(frameNode, span, response, std::move(builder), menuParam);
+    RichEditorModelNG::BindSelectionMenu(frameNode, span, response, builder, menuParam);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const CustomNodeBuilder* value,
