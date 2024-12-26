@@ -192,6 +192,7 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     static_cast<long long>(inputTime), static_cast<long long>(overTime));
             }
             firstInputTime_.reset();
+            ResetStateVoluntarily();
         }
     } else {
         extraInfo_ += "Reject: received up but not succeed.";

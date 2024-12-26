@@ -116,6 +116,7 @@ void PanRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
     // only report the pan gesture starting for touch event
     DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
@@ -294,6 +295,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingersId_.erase(event.id);
     }
     if (currentFingers_ < fingers_) {
+        if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+            ResetStateVoluntarily();
+            isNeedResetVoluntarily_ = false;
+        }
         return;
     }
 
@@ -327,6 +332,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             averageDistance_.Reset();
             AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
+            if (currentFingers_ > 1) {
+                isNeedResetVoluntarily_ = true;
+            } else {
+                ResetStateVoluntarily();
+            }
         }
     }
 
