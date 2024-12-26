@@ -256,8 +256,62 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
                                     const Opt_String* repetition)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::CreatePatternImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for CanvasPattern.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_RETURN(image, nullptr);
+    auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
+    CHECK_NULL_RETURN(bitmap, nullptr);
+    auto opt  = Converter::OptConvert<std::string>(*repetitin);
+    CHECK_NULL_RETURN(opt, nullptr);
+    std::string repeat = *opt;
+ 
+    auto pattern = std::make_shared<Pattern>();
+    pattern->SetImgSrc(jsImage->GetSrc());
+    pattern->SetImageWidth(jsImage->GetWidth());
+    pattern->SetImageHeight(jsImage->GetHeight());
+    pattern->SetRepetition(repeat);
+#if !defined(PREVIEW)
+        auto pixelMap = bitmap->GetPixelMap();
+        pattern->SetPixelMap(pixelMap);
+#endif
+    peerImpl->AddPattern(pattern);
+    
+
+    
+   
+    
+
+    auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
+    CHECK_NULL_VOID(jsImage);
+    std::string repeat;
+    info.GetStringArg(1, repeat);
+    auto pattern = std::make_shared<Pattern>();
+    pattern->SetImgSrc(jsImage->GetSrc());
+    pattern->SetImageWidth(jsImage->GetWidth());
+    pattern->SetImageHeight(jsImage->GetHeight());
+    pattern->SetRepetition(repeat);
+#if !defined(PREVIEW)
+        auto pixelMap = jsImage->GetPixelMap();
+        pattern->SetPixelMap(pixelMap);
+#endif
+        pattern_[patternCount_] = pattern;
+
+        auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
+
+
+        JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();
+        obj->SetProperty("__type", "pattern");
+        auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
+        canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
+        canvasPattern->SetId(patternCount_);
+        canvasPattern->SetUnit(GetUnit());
+        patternCount_++;
+        info.SetReturnValue(obj);
+
+
+
+    
     return 0;
 }
 Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,

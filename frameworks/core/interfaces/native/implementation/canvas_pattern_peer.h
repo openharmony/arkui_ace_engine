@@ -42,8 +42,33 @@ public:
         }
         pattern_->SetTransform(param);
     }
+    void SetId(int32_t id)
+    {
+        id_ = id;
+    }
+
+    int32_t GetId() const
+    {
+        return id_;
+    }
+
+    void SetUnit(CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+
+    CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
+public:
+    std::shared_ptr<OHOS::Ace::Pattern> pattern = nullptr;    
 private:
+    int32_t id_ = 0;
+    CanvasUnit unit_ = CanvasUnit::DEFAULT;   
     CanvasPatternPtr pattern_ = nullptr;
+    std::shared_ptr<OHOS::Ace::Pattern> pattern = nullptr; 
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H

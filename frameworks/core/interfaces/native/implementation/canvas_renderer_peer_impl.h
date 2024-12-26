@@ -151,6 +151,8 @@ public:
     Ace::ImageData imageData;
 
 protected:
+    std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> patterns_;
+    unsigned int patternCount_ = 0;
     RefPtr<CanvasPattern> pattern_;
 
 private:
