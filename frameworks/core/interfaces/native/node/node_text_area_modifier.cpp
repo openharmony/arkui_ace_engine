@@ -657,6 +657,21 @@ void ResetTextAreaLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextAreaHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHalfLeading(frameNode, static_cast<bool>(halfLeading));
+}
+
+void ResetTextAreaHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool value = false;
+    TextFieldModelNG::SetHalfLeading(frameNode, value);
+}
+
 void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1757,6 +1772,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaLetterSpacing = ResetTextAreaLetterSpacing,
         .setTextAreaLineHeight = SetTextAreaLineHeight,
         .resetTextAreaLineHeight = ResetTextAreaLineHeight,
+        .setTextAreaHalfLeading = SetTextAreaHalfLeading,
+        .resetTextAreaHalfLeading = ResetTextAreaHalfLeading,
         .setTextAreaFontFeature = SetTextAreaFontFeature,
         .resetTextAreaFontFeature = ResetTextAreaFontFeature,
         .setTextAreaWordBreak = SetTextAreaWordBreak,

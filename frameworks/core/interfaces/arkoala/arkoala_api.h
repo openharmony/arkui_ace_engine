@@ -3411,6 +3411,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaLetterSpacing)(ArkUINodeHandle node);
     void (*setTextAreaLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaLineHeight)(ArkUINodeHandle node);
+    void (*setTextAreaHalfLeading)(ArkUINodeHandle node, ArkUI_Uint32 halfLeading);
+    void (*resetTextAreaHalfLeading)(ArkUINodeHandle node);
     void (*setTextAreaFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextAreaFontFeature)(ArkUINodeHandle node);
     void (*setTextAreaWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
@@ -3607,6 +3609,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputLetterSpacing)(ArkUINodeHandle node);
     void (*setTextInputLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputLineHeight)(ArkUINodeHandle node);
+    void (*setTextInputHalfLeading)(ArkUINodeHandle node, ArkUI_Uint32 halfLeading);
+    void (*resetTextInputHalfLeading)(ArkUINodeHandle node);
     void (*setTextInputFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetTextInputFontFeature)(ArkUINodeHandle node);
     void (*setTextInputWordBreak)(ArkUINodeHandle node, ArkUI_Uint32 wordBreak);
@@ -4302,6 +4306,8 @@ struct ArkUISearchModifier {
     void (*resetSearchLetterSpacing)(ArkUINodeHandle node);
     void (*setSearchLineHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSearchLineHeight)(ArkUINodeHandle node);
+    void (*setSearchHalfLeading)(ArkUINodeHandle node, ArkUI_Uint32 halfLeading);
+    void (*resetSearchHalfLeading)(ArkUINodeHandle node);
     void (*setSearchFontFeature)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetSearchFontFeature)(ArkUINodeHandle node);
     void (*setSearchAdaptMinFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);

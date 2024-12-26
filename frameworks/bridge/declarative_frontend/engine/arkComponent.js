@@ -9600,6 +9600,23 @@ class SearchLineHeightModifier extends ModifierWithKey {
     }
 }
 SearchLineHeightModifier.identity = Symbol('searchLineHeight');
+class SearchHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().search.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().search.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchHalfLeadingModifier.identity = Symbol('searchHalfLeading');
 class SearchMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -10105,6 +10122,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   lineHeight(value) {
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
+    return this;
+  }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
     return this;
   }
   minFontSize(value) {
@@ -12702,6 +12723,23 @@ class TextAreaLineHeightModifier extends ModifierWithKey {
     }
 }
 TextAreaLineHeightModifier.identity = Symbol('textAreaLineHeight');
+class TextAreaHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().textArea.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaHalfLeadingModifier.identity = Symbol('textAreaHalfLeading');
 class TextAreaWordBreakModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -13896,6 +13934,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHalfLeadingModifier.identity, TextAreaHalfLeadingModifier, value);
+    return this;
+  }
   wordBreak(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
@@ -14203,6 +14245,23 @@ class TextInputLineHeightModifier extends ModifierWithKey {
     }
 }
 TextInputLineHeightModifier.identity = Symbol('textInputLineHeight');
+class TextInputHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().textInput.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputHalfLeadingModifier.identity = Symbol('textInputHalfLeading');
 class TextInputUnderlineColorModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -15677,6 +15736,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   lineHeight(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
+    return this;
+  }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
     return this;
   }
   underlineColor(value) {

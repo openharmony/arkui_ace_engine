@@ -1475,6 +1475,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetLineHeight));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetLineHeight));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetHalfLeading));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetHalfLeading));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetFontFeature));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
@@ -1981,6 +1985,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetLineHeight));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetLineHeight));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetHalfLeading));
+    textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::ResetHalfLeading));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontFeature"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextAreaBridge::SetFontFeature));
     textArea->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontFeature"),
@@ -2425,6 +2433,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetLineHeight));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLineHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetLineHeight));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetHalfLeading));
+    textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHalfLeading"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::ResetHalfLeading));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUnderlineColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TextInputBridge::SetUnderlineColor));
     textInput->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUnderlineColor"),

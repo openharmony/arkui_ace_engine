@@ -357,6 +357,21 @@ void ResetSearchLineHeight(ArkUINodeHandle node)
     SearchModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetSearchHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetHalfLeading(frameNode, static_cast<bool>(halfLeading));
+}
+
+void ResetSearchHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool value = false;
+    SearchModelNG::SetHalfLeading(frameNode, value);
+}
+
 void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -886,6 +901,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
         .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchHalfLeading = SetSearchHalfLeading,
+        .resetSearchHalfLeading = ResetSearchHalfLeading,
         .setSearchFontFeature = SetSearchFontFeature,
         .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
