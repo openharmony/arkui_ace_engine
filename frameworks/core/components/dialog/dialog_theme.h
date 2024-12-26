@@ -272,7 +272,7 @@ public:
         return buttonDefaultFontColor_;
     }
 
-    const int& GetDialogBackgroundBlurStyle() const
+    int GetDialogBackgroundBlurStyle() const
     {
         return dialogBackgroundBlurStyle_;
     }
