@@ -99,7 +99,6 @@ group("advanced_ui_component") {
       "swiperefresher/interfaces:swiperefresher",
       "tabtitlebar/interfaces:tabtitlebar",
       "toolbar/interfaces:toolbar",
-      "toolbarv2/interfaces:toolbarv2",
       "treeview/interfaces:treeview",
     ]
   }
