@@ -204,8 +204,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     bool hideNodesFinish = false;
     // record animating destination size
     int32_t animatingSize = 0;
-    int32_t remainNodeIndex = -1;
-    int32_t beforeLastStandardIndex = preLastStandardNode == nullptr ? -1 : preLastStandardNode->GetIndex();
+    int32_t remainNodeIndex = -1 ;
     while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
         int32_t candidateIndex = static_cast<int32_t>(navigationContentNode->GetChildren().size()) - 1 - animatingSize;
@@ -252,7 +251,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
-        if (navDestination->GetIndex() >= beforeLastStandardIndex && !hideNodesFinish) {
+        if (navDestination->GetIndex() >= preLastStandardIndex_ && !hideNodesFinish) {
             if (navDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD
                 && preLastStandardNode != navDestination) {
                 hideNodesFinish = true;
@@ -1499,7 +1498,6 @@ std::vector<WeakPtr<NavDestinationGroupNode>> NavigationGroupNode::FindNodesPope
     std::vector<WeakPtr<NavDestinationGroupNode>> preNavList;
     auto preNavdestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     CHECK_NULL_RETURN(preNavdestinationNode, preNavList);
-    auto end = preNavdestinationNode->GetIndex();
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_RETURN(navigationPattern, preNavList);
     const auto& navDestinationNodesPre = navigationPattern->GetAllNavDestinationNodesPrev();
@@ -1507,18 +1505,31 @@ std::vector<WeakPtr<NavDestinationGroupNode>> NavigationGroupNode::FindNodesPope
     if (curNode && curNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
         CHECK_NULL_RETURN(curNavdestination, preNavList);
-        start = curNavdestination->GetIndex() + 1;
+        start = preLastStandardIndex_ + 1;
     }
     // find the nodes need to do downward EXIT translation
-    for (int32_t index = start; index <= end; index++) {
+    auto stack = navigationPattern->GetNavigationStack();
+    int32_t size = static_cast<int32_t>(navDestinationNodesPre.size());
+    for (int32_t index = start; index < size; index++) {
         auto node = GetNavDestinationNode(navDestinationNodesPre[index].second.Upgrade());
-        if (node) {
-            auto preNode = AceType::DynamicCast<FrameNode>(node);
-            CHECK_NULL_RETURN(preNode, preNavList);
-            auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-            CHECK_NULL_RETURN(preNavDesNode, preNavList);
+        if (!node) {
+            continue;
+        }
+        auto preNode = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_RETURN(preNode, preNavList);
+        auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        CHECK_NULL_RETURN(preNavDesNode, preNavList);
+        bool isInCurStack = stack->FindIndex(navDestinationNodesPre[index].first,
+            navDestinationNodesPre[index].second.Upgrade(), true) != -1;
+        if (!isInCurStack) {
+            // this node not in current stack should do animation
             preNavDesNode->InitDialogTransition(true);
             preNavList.emplace_back(WeakPtr<NavDestinationGroupNode>(preNavDesNode));
+        } else {
+            // update visbility when this node is under the last standard page
+            if (preNavDesNode->GetIndex() < lastStandardIndex_) {
+                preNavDesNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            }
         }
     }
     return preNavList;
