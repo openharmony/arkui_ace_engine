@@ -452,6 +452,7 @@ public:
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
     RefPtr<FrameNode> GetShowedSubMenu();
     bool IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu) const;
+    bool IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const;
     bool HasEmbeddedSubMenu();
     void UpdateMenuAnimation(const RefPtr<FrameNode>& host);
     bool HasStackSubMenu();
