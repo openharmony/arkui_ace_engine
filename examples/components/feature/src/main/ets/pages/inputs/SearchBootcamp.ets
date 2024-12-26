@@ -20,8 +20,8 @@ import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 export struct SearchBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
-  @State changeValue: string = ''
-  @State submitValue: string = ''
+  @State changeValue: string = '';
+  @State submitValue: string = '';
   @State enableSearchButtonValue: boolean = false;
   @State searchButtonValue: string | undefined = undefined;
   @State enableSearchButtonOptionFontSize: boolean = false;
@@ -31,13 +31,13 @@ export struct SearchBootcamp {
   @State enablePlaceholderColor: boolean = false;
   @State placeholderColor: ResourceColor = '#99182431';
   @State enablePlaceholderFontSize: boolean = false;
-  @State placeholderFontSize: number = 16; ///length
+  @State placeholderFontSize: number = 16;
   @State enablePlaceholderFontWeight: boolean = false;
   @State placeholderFontWeight: FontWeight | number | string = 400|FontWeight.Normal;
   @State enablePlaceholderFontStyle: boolean = false;
   @State placeholderFontStyle: FontStyle = FontStyle.Normal;
   @State enableTextFontSize: boolean = false;
-  @State textFontSize: number = 16; //length
+  @State textFontSize: number = 16;
   @State enableTextFontWeight: boolean = false;
   @State textFontWeight: FontWeight | number | string = 400|FontWeight.Normal;
   @State enableTextFontStyle: boolean = false;
@@ -47,17 +47,17 @@ export struct SearchBootcamp {
   @State enableCopyOption: boolean =false;
   @State copyOption: CopyOptions = CopyOptions.LocalDevice;
   @State enableSearchIconSize: boolean = false;
-  @State searchIconSize: number = 16; //length
+  @State searchIconSize: number = 16;
   @State enableSearchIconColorLight: boolean = false;
   @State searchIconColorLight: ResourceColor = '#99182431';
   @State enableSearchIconColorDark: boolean = false;
-  @State searchIconColorDark: ResourceColor = '#99ffffff'; ////深色模式
+  @State searchIconColorDark: ResourceColor = '#99ffffff';
   @State enableSearchIconSrc: boolean = false;
   @State searchIconSrc: ResourceStr = '';
   @State enableCancelButtonStyle: boolean = false;
   @State cancelButtonStyle: CancelButtonStyle = CancelButtonStyle.INPUT;
   @State enableCancelButtonIconSize: boolean = false;
-  @State cancelButtonIconSize: number = 16; //length
+  @State cancelButtonIconSize: number = 16;
   @State enableCancelButtonIconColor: boolean = false;
   @State cancelButtonIconColor: ResourceColor = '#99ffffff';
   @State enableCancelButtonIconSrc: boolean = false;
@@ -65,7 +65,7 @@ export struct SearchBootcamp {
   @State enableFontColor: boolean = false;
   @State fontColor: ResourceColor = '#FF182431';
   @State enableCaretStyleWidth: boolean = false;
-  @State caretStyleWidth: number = 1.5; //length
+  @State caretStyleWidth: number = 1.5;
   @State enableCaretStyleColor: boolean = false;
   @State caretStyleColor: ResourceColor =  '#007DFF';
   @State enableEnableKeyboardOnFocus: boolean = false;
@@ -95,7 +95,7 @@ export struct SearchBootcamp {
   @State enableSelectedBackgroundColor: boolean = false;
   @State selectedBackgroundColor: ResourceColor | undefined = undefined;
   @State enableTextIndent: boolean = false;
-  @State textIndent: number = 0; //dimension
+  @State textIndent: number = 0;
   @State enableMinFontSize: boolean = false;
   @State minFontSize: number | undefined = undefined;
   @State enableMaxFontSize: boolean = false;
@@ -127,7 +127,7 @@ export struct SearchBootcamp {
     Row() {
       Search({ value: this.changeValue, placeholder: 'Type to search...' })
         .searchButton(useEnabled(this.enableSearchButtonValue, this.searchButtonValue), {
-          fontSize: useEnabled(this.enableSearchButtonOptionFontSize, this.searchButtonOptionFontSize),
+          fontSize: useEnabled(this.enableSearchButtonOptionFontSize, this.searchButtonOptionFontSize), 
           fontColor: useEnabled(this.enableSearchButtonOptionFontColor, this.searchButtonOptionFontColor)
         })
         .placeholderFont({
@@ -180,7 +180,6 @@ export struct SearchBootcamp {
         .minFontSize(useEnabled(this.enableMinFontSize,this.minFontSize))
         .maxFontSize(useEnabled(this.enableMaxFontSize,this.maxFontSize))
         .enablePreviewText(useEnabled(this.enableEnablePreviewText,this.enablePreviewText))
-        //.enableHapticFeedback
     }.justifyContent(FlexAlign.Start)
   }
 

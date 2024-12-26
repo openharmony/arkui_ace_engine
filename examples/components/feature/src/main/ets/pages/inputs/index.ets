@@ -18,7 +18,7 @@ import { TextInputBootcamp } from './TextInputBootcamp';
 import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { RichEditorSpanUrlBootcamp } from './RichEditorSpanUrlBootcamp';
-
+import { SearchBootcamp } from './SearchBootcamp';
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -28,6 +28,7 @@ export const inputsRoute: RouteGroup = {
     { name: 'textArea', label: '多行文本框/TextArea' },
     { name: 'richeditor', label: '富文本/RichEditor' },
     { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
+    { name: 'search', label: '搜索框/Search' },
   ]
 };
 
@@ -41,5 +42,7 @@ export function InputsDestination(name: string, route: Route) {
     RichEditorBootcamp({ title: route.label })
   } else if (name === 'inputs/richeditorSpanurl') {
     RichEditorSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'inputs/search') {
+    SearchBootcamp({ title: route.label })
   }
 }
