@@ -1696,6 +1696,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
     json->PutExtAttr("enablePreviewText", textFieldPattern->GetSupportPreviewText(), filter);
     textFieldPattern->ToJsonValueSelectOverlay(json, filter);
+    json->PutExtAttr("stopBackPress", textFieldLayoutProperty->GetStopBackPressValue(true), filter);
 }
 
 std::string SearchPattern::SearchTypeToString() const

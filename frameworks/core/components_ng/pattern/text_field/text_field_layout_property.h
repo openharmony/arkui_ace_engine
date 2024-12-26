@@ -133,6 +133,7 @@ public:
         json->PutExtAttr("textOverflow",
             V2::ConvertWrapTextOverflowToString(GetTextOverflow().value_or(TextOverflow::CLIP)).c_str(), filter);
         json->PutExtAttr("textIndent", GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
+        json->PutExtAttr("stopBackPress", GetStopBackPress().value_or(true), filter);
     }
 
     const std::function<void(WeakPtr<NG::FrameNode>)>& GetCancelIconSymbol() const
@@ -246,6 +247,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsShowCancelButton, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SetCounter, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowHighlightBorder, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StopBackPress, bool, PROPERTY_UPDATE_NORMAL);
 
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
@@ -288,6 +290,7 @@ protected:
         value->propShowHighlightBorder_ = CloneShowHighlightBorder();
         value->propBundleName_ = CloneBundleName();
         value->propModuleName_ = CloneModuleName();
+        value->propStopBackPress_ = CloneStopBackPress();
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldLayoutProperty);

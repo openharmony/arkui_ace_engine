@@ -681,4 +681,11 @@ bool TextFieldSelectOverlay::AllowSearch()
     CHECK_NULL_RETURN(pattern, false);
     return pattern->AllowCopy();
 }
+
+bool TextFieldSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
+}
 } // namespace OHOS::Ace::NG
