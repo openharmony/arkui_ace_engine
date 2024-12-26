@@ -14,6 +14,9 @@
  */
 
 /// <reference path='./import.ts' />
+
+import { ArkScrollable } from "./ArkScrollable";
+
 class ListEditModeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('editMode');
   applyPeer(node: KNode, reset: boolean): void {
@@ -424,7 +427,7 @@ interface ListParam {
   scroller?: Scroller;
 }
 
-class ArkListComponent extends ArkComponent implements ListAttribute {
+class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }

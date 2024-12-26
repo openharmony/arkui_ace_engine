@@ -5738,8 +5738,32 @@ if (globalThis.GridRow !== undefined) {
   };
 }
 
+class ClipContentModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().scrollable.resetContentClip(node);
+      } else {
+          getUINativeModule().scrollable.setContentClip(node, this.value);
+      }
+  }
+}
+ClipContentModifier.identity = Symbol('clipContent');
+
+class ArkScrollable extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+  clipContent(clip) {
+    modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
+    return this;
+  }
+}
+
 /// <reference path='./import.ts' />
-class ArkGridComponent extends ArkComponent {
+class ArkGridComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -17366,7 +17390,7 @@ class ScrollOnScrollFrameBeginModifier extends ModifierWithKey {
 }
 ScrollOnScrollFrameBeginModifier.identity = Symbol('scrollOnScrollFrameBegin');
 
-class ArkScrollComponent extends ArkComponent {
+class ArkScrollComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -26965,7 +26989,7 @@ class ListInitialScrollerModifier extends ModifierWithKey {
 }
 ListInitialScrollerModifier.identity = Symbol('listInitialScroller');
 
-class ArkListComponent extends ArkComponent {
+class ArkListComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }
@@ -29015,7 +29039,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey {
 }
 WaterFlowInitializeModifier.identity = Symbol('waterFlowInitialize');
 
-class ArkWaterFlowComponent extends ArkComponent {
+class ArkWaterFlowComponent extends ArkScrollable {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
   }

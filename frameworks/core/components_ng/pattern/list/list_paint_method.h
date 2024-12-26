@@ -19,7 +19,6 @@
 #include "core/components_ng/pattern/list/list_content_modifier.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 #include "core/components_v2/list/list_properties.h"
 
@@ -129,6 +128,11 @@ public:
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
 private:
+    ContentClipMode GetDefaultContentClip() const override
+    {
+        return ContentClipMode::CONTENT_ONLY;
+    }
+
     V2::ItemDivider divider_;
     int32_t lanes_ = 1;
     int32_t totalItemCount_ = 0;

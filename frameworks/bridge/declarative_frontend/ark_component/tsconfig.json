@@ -2,6 +2,7 @@
     "files": [
         "src/ArkLog.ts",
         "src/ArkComponent.ts",
+        "src/ArkScrollable.ts",
         "src/ArkBlank.ts",
         "src/ArkColumn.ts",
         "src/ArkColumnSplit.ts",
@@ -109,7 +110,7 @@
         "outFile": "../engine/arkComponent.js",
         "rootDir": "./src/",
         "declaration": false,
-        "noEmitOnError": true,
+        "noEmitOnError": false,
         "experimentalDecorators": true,
         "lib": [
             "ES2016"

@@ -144,7 +144,7 @@ void WaterFlowPattern::BeforeCreateLayoutWrapper()
     if (sections_ && layoutInfo_->segmentTails_.empty()) {
         layoutInfo_->InitSegments(sections_->GetSectionInfo(), 0);
     }
-    
+
     if (sections_ || SystemProperties::WaterFlowUseSegmentedLayout()) {
         return;
     }
@@ -638,7 +638,8 @@ bool WaterFlowPattern::NeedRender()
     needRender = property->GetPaddingProperty() != nullptr || needRender;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, needRender);
-    needRender = needRender || paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetFadingEdge().value_or(false);
+    needRender |= paintProperty->GetContentClip().has_value();
     return needRender;
 }
 

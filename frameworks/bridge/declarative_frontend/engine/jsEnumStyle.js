@@ -3376,6 +3376,13 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
 
+let ContentClipMode;
+(function (ContentClipMode) {
+  ContentClipMode[ContentClipMode['CONTENT_ONLY'] = 0] = 'CONTENT_ONLY';
+  ContentClipMode[ContentClipMode['BOUNDARY'] = 1] = 'BOUNDARY';
+  ContentClipMode[ContentClipMode['SAFE_AREA'] = 2] = 'SAFE_AREA';
+})(ContentClipMode || (ContentClipMode = {}));
+
 var AccessibilityHoverType;
 (function (AccessibilityHoverType) {
   AccessibilityHoverType[AccessibilityHoverType["HOVER_ENTER"] = 0] = "HOVER_ENTER";

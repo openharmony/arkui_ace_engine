@@ -961,12 +961,13 @@ private:
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);
     bool isVertical() const;
-    RefPtr<ClickRecognizer> clickRecognizer_;
     Offset locationInfo_;
     WeakPtr<NestableScrollContainer> scrollOriginChild_;
     float nestedScrollVelocity_ = 0.0f;
     uint64_t nestedScrollTimestamp_ = 0;
+    bool prevHasFadingEdge_ = false;
 
+    RefPtr<ClickRecognizer> clickRecognizer_;
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;

@@ -100,6 +100,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_marquee_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_shape_bridge.h"
@@ -2645,6 +2646,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterCheckboxAttributes(object, vm);
     RegisterDataPanelAttributes(object, vm);
     RegisterScrollAttributes(object, vm);
+    RegisterScrollableAttributes(object, vm);
     RegisterGridItemAttributes(object, vm);
     RegisterMarqueeAttributes(object, vm);
     RegisterProgressAttributes(object, vm);
@@ -4454,6 +4456,16 @@ void ArkUINativeModule::RegisterDataPanelAttributes(Local<panda::ObjectRef> obje
     dataPanel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DataPanelBridge::SetContentModifierBuilder));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "dataPanel"), dataPanel);
+}
+
+void ArkUINativeModule::RegisterScrollableAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto scrollable = panda::ObjectRef::New(vm);
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::SetContentClip));
+    scrollable->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentClip"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollableBridge::ResetContentClip));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "scrollable"), scrollable);
 }
 
 void ArkUINativeModule::RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)

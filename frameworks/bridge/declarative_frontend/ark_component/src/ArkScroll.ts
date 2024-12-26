@@ -15,6 +15,8 @@
 
 /// <reference path='./import.ts' />
 
+import { ArkScrollable } from "./ArkScrollable";
+
 class ScrollNestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions> {
   static identity: symbol = Symbol('nestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
@@ -275,6 +277,7 @@ class ScrollInitializeModifier extends ModifierWithKey<Scroller> {
     }
   }
 }
+
 class ScrollOnScrollStartModifier extends ModifierWithKey<() => void> {
   constructor(value: () => void) {
     super(value);
@@ -392,7 +395,7 @@ class ScrollOnScrollFrameBeginModifier extends ModifierWithKey<(offset: number, 
   }
 }
 
-class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
+class ArkScrollComponent extends ArkScrollable<ScrollAttribute> implements ScrollAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
