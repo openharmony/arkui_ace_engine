@@ -46,6 +46,7 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
+constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -126,7 +127,7 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     CHECK_NULL_VOID(paintProperty);
     if (!paintProperty->GetFadingEdge().value_or(false)) {
         paint->SetOverlayRenderContext(overlayRenderContext);
-        paint->SetFadingInfo(false, false);
+        paint->SetFadingInfo(false, false, prevHasFadingEdge_);
         return;
     }
     auto isFadingTop = !IsAtTop();
@@ -153,14 +154,14 @@ void ScrollablePattern::UpdateFadeInfo(
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value_or(LIST_FADINGEDGE);
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
         percentFading = fadingEdgeLength.ConvertToPx() / fadeFrameSize;
     }
-    paint->SetFadingInfo(isFadingTop, isFadingBottom, (percentFading > 0.5f ? 0.5f : percentFading), startPercent_,
-        endPercent_); // 0.5: Half
+    paint->SetFadingInfo(isFadingTop, isFadingBottom, true, (percentFading > 0.5f ? 0.5f : percentFading),
+        startPercent_, endPercent_); // 0.5: Half
 }
 
 void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
