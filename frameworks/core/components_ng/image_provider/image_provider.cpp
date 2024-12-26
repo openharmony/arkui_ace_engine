@@ -58,7 +58,7 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 
     auto&& dfxConfig = imageObj->GetImageDfxConfig();
 
-    auto container = Container::Current();
+    auto container = Container::CurrentSafelyWithCheck();
     if (container && container->IsSubContainer()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "%{private}s-%{public}s. subContainer's pipeline's dataProviderManager is null.",
             dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
