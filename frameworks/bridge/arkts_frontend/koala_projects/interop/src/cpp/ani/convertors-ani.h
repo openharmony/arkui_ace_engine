@@ -212,7 +212,6 @@ struct InteropTypeConverter<KInt*> {
     using InteropType = ani_array_int;
     static KInt* convertFrom(ani_env* env, InteropType value) {
       if (!value) return nullptr;
-      KInt* result = nullptr;
       //env->Array_Pin(value, (void**)&result);
       ani_size length = 0;
       env->Array_GetLength(value, &length);

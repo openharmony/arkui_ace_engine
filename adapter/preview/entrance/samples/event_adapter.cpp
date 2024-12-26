@@ -20,7 +20,13 @@
 #include <memory>
 
 #include "base/utils/utils.h"
-#include "frameworks/base/log/log.h"
+
+#ifdef __linux__
+#include <ctime>
+#endif
+#ifdef __APPLE__
+#include <mach/mach_time.h>
+#endif
 
 namespace OHOS::Ace::Sample {
 
@@ -81,8 +87,6 @@ void EventAdapter::Initialize(std::shared_ptr<GlfwRenderContext>& glfwRenderCont
         }
         if (keyEventCallback_ && RecognizeKeyEvent(key, action, mods)) {
             keyEventCallback_(keyEvent_);
-        } else {
-            LOGW("Unrecognized key type.");
         }
     };
     glfwRenderContext->OnKey(keyboardCbk);
@@ -175,6 +179,28 @@ bool EventAdapter::RecognizeKeyEvent(int key, int action, int mods)
     return true;
 }
 
+OHOS::MMI::TimeStamp GetExactTime()
+{
+#ifdef __linux__
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+
+    return std::chrono::system_clock::time_point(
+        std::chrono::system_clock::duration(std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec)));
+#elif defined(__APPLE__)
+    static mach_timebase_info_data_t info;
+    static std::once_flag flag;
+    std::call_once(flag, [] { mach_timebase_info(&info); });
+
+    auto nanos = (mach_absolute_time() * info.numer) / info.denom;
+
+    return std::chrono::steady_clock::time_point(
+        std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::nanoseconds(nanos)));
+#else
+    return std::chrono::high_resolution_clock::now();
+#endif
+}
+
 void EventAdapter::RecognizePointerEvent(const TouchType type)
 {
     std::lock_guard lock(mouseMutex_);
@@ -184,7 +210,7 @@ void EventAdapter::RecognizePointerEvent(const TouchType type)
     pointerEvent_->screenX = 0;
     pointerEvent_->screenY = 0;
     pointerEvent_->type = type;
-    pointerEvent_->time = std::chrono::high_resolution_clock::now();
+    pointerEvent_->time = GetExactTime();
     pointerEvent_->size = sizeof(PointerEvent);
     pointerEvent_->force = 0;
     pointerEvent_->deviceId = 0;

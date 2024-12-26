@@ -18,13 +18,6 @@
 
 namespace OHOS::Ace {
 namespace {
-// preview not support multi-instance, always using default instance id 0.
-#if defined(PREVIEW)
-constexpr int32_t DEFAULT_ID = 0;
-#else
-constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
-#endif
-
 std::shared_mutex mutex_;
 std::set<int32_t> containerSet_;
 thread_local int32_t currentLocalId_(DEFAULT_ID);
@@ -54,13 +47,13 @@ int32_t ContainerScope::DefaultId()
         std::shared_lock<std::shared_mutex> lock(mutex_);
         return *containerSet_.rbegin();
     }
-    return INSTANCE_ID_UNDEFINED;
+    return DEFAULT_ID;
 }
 
 int32_t ContainerScope::SingletonId()
 {
     if (ContainerCount() != 1) {
-        return INSTANCE_ID_UNDEFINED;
+        return DEFAULT_ID;
     }
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return *containerSet_.begin();
@@ -84,7 +77,7 @@ std::pair<int32_t, InstanceIdGenReason> ContainerScope::CurrentIdWithReason()
     }
     uint32_t containerCount = ContainerCount();
     if (containerCount == 0) {
-        return { INSTANCE_ID_UNDEFINED, InstanceIdGenReason::UNDEFINED };
+        return { DEFAULT_ID, InstanceIdGenReason::UNDEFINED };
     }
     if (containerCount == 1) {
         return { SingletonId(), InstanceIdGenReason::SINGLETON };
@@ -137,10 +130,10 @@ void ContainerScope::RemoveAndCheck(int32_t id)
 {
     Remove(id);
     if (RecentActiveId() == id) {
-        UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+        UpdateRecentActive(DEFAULT_ID);
     }
     if (RecentForegroundId() == id) {
-        UpdateRecentForeground(INSTANCE_ID_UNDEFINED);
+        UpdateRecentForeground(DEFAULT_ID);
     }
 }
 
