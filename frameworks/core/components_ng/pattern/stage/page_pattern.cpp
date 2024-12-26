@@ -938,14 +938,19 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        const float defaultAmplitudePx = 0.005f;
-        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+        CHECK_NULL_VOID(pipeline);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_VOID(appTheme);
+        float defaultAmplitudeRatio = appTheme->GetPageTransitionAmplitudeRatio();
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudeRatio);
     }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline) {
         const int32_t nanoToMilliSeconds = 1000000;
         const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;
