@@ -41,7 +41,21 @@ public:
     {
         return false;
     }
-    bool RemoveDownloadTask(const std::string& /* url */, int32_t /*nodeId*/) override
+    bool RemoveDownloadTask(const std::string& /* url */, int32_t /*nodeId*/, bool /*isCancel = true*/) override
+    {
+        return false;
+    }
+    bool RemoveDownloadTaskWithPreload(const std::string& url, int32_t nodeId, bool /*isCancel = true*/) override
+    {
+        return false;
+    }
+    bool DownloadAsyncWithPreload(DownloadCallback&& /* downloadCallback */, const std::string& /* url */,
+        int32_t /* instanceId */, int32_t /* nodeId */) override
+    {
+        return false;
+    }
+    bool DownloadSyncWithPreload(DownloadCallback&& /* downloadCallback */, const std::string& /* url */,
+        int32_t /* instanceId */, int32_t /* nodeId */) override
     {
         return false;
     }

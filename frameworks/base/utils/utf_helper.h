@@ -27,6 +27,7 @@ namespace OHOS::Ace::UtfUtils {
 ACE_EXPORT extern const std::string DEFAULT_STR;
 ACE_EXPORT extern const std::u16string DEFAULT_U16STR;
 ACE_EXPORT extern const std::u32string DEFAULT_U32STR;
+ACE_EXPORT extern const std::wstring DEFAULT_WSTR;
 
 uint32_t DecodeUTF16(uint16_t const *utf16, size_t len, size_t *index);
 

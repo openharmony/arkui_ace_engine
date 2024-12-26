@@ -24,7 +24,11 @@ build_component_ng("model_pattern_ng") {
   ]
 
   if (is_ohos_standard_system) {
-    external_deps = [ "graphic_3d:lib3dWidgetAdapter" ]
+    external_deps = [
+      "graphic_2d:EGL",
+      "graphic_2d:GLESv3",
+      "graphic_3d:lib3dWidgetAdapter",
+    ]
   }
 
   part_name = ace_engine_part

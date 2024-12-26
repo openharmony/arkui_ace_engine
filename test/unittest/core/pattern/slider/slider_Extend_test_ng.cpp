@@ -737,7 +737,8 @@ HWTEST_F(SliderExTestNg, SliderPaintMethodTest002, TestSize.Level1)
     /**
      * @tc.steps: step2. create paintWrapper.
      */
-    WeakPtr<RenderContext> renderContext;
+    RefPtr<RenderContext> renderContext = AceType::MakeRefPtr<RenderContext>();
+    renderContext->SetHostNode(frameNode);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();

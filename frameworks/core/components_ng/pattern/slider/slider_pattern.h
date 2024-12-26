@@ -153,6 +153,19 @@ public:
     }
 
     void SetSliderValue(double value, int32_t mode);
+    void InitAccessibilityVirtualNodeTask();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+#endif
 
 private:
     void OnAttachToFrameNode() override;
@@ -203,7 +216,13 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleCrownEvent(const CrownEvent& event);
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void HandleCrownAction(double mainDelta);
+    void StartVibrateFeedback();
+#endif
     bool IsSliderVisible();
     void RegisterVisibleAreaChange();
     void OnWindowHide() override;
@@ -233,8 +252,9 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
-    void InitAccessibilityVirtualNodeTask();
+    bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
@@ -254,6 +274,7 @@ private:
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
     void InitOrRefreshSlipFactor();
+    RefPtr<PanEvent> CreatePanEvent();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -305,6 +326,13 @@ private:
     float trackThickness_ = 0.0f;
     SizeF blockHotSize_;
     SizeF blockSize_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownDisplayControlRatio_ = 1.0;
+    double crownMovingLength_ = 0.0;
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+#endif
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -323,6 +351,7 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
 
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;

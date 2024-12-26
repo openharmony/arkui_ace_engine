@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_IMAGE_SOURCE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_IMAGE_SOURCE_H
 
+#include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 
@@ -36,10 +37,11 @@ public:
 
     virtual std::string GetProperty(const std::string& key) = 0;
 
-    virtual RefPtr<PixelMap> CreatePixelMap(
-        const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap(const Size& size, AIImageQuality imageQuality = AIImageQuality::NONE,
+        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size,
-        AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false) = 0;
+        AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false,
+        PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
     virtual uint32_t GetFrameCount() = 0;

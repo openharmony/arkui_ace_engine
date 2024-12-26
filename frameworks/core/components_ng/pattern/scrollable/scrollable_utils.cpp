@@ -17,9 +17,11 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 namespace OHOS::Ace::NG {
 namespace {
+Dimension FOCUS_SCROLL_MARGIN = 5.0_vp;
 std::vector<RefPtr<ForEachBaseNode>> GetForEachNodes(RefPtr<FrameNode>& host)
 {
     std::vector<RefPtr<ForEachBaseNode>> foreachNodes;
+    CHECK_NULL_RETURN(host, foreachNodes);
     for (const auto& child : host->GetChildren()) {
         if (!AceType::InstanceOf<ForEachBaseNode>(child)) {
             continue;
@@ -148,4 +150,45 @@ void ScrollableUtils::RecycleItemsOutOfBoundary(
     }
 }
 
+float ScrollableUtils::GetMoveOffset(
+    const RefPtr<FrameNode>& parentFrameNode,
+    const RefPtr<FrameNode>& curFrameNode,
+    bool isVertical,
+    float contentStartOffset,
+    float contentEndOffset)
+{
+    constexpr float notMove = 0.0f;
+    CHECK_NULL_RETURN(parentFrameNode, notMove);
+    CHECK_NULL_RETURN(curFrameNode, notMove);
+    auto parentGeometryNode = parentFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(parentGeometryNode, notMove);
+    auto parentFrameSize = parentGeometryNode->GetPaddingSize();
+    auto parentPaddingOffset = parentGeometryNode->GetPaddingOffset(true) - parentGeometryNode->GetFrameOffset();
+    auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset() + parentPaddingOffset;
+    auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
+    auto curGeometry = curFrameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(curGeometry, notMove);
+    auto curFrameSize = curGeometry->GetFrameSize();
+
+    float diffToTarFrame = isVertical ? offsetToTarFrame.GetY() : offsetToTarFrame.GetX();
+    if (NearZero(diffToTarFrame)) {
+        return notMove;
+    }
+    float curFrameLength = isVertical ? curFrameSize.Height() : curFrameSize.Width();
+    float parentFrameLength = isVertical ? parentFrameSize.Height() : parentFrameSize.Width();
+    float focusMarginStart = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentStartOffset);
+    float focusMarginEnd = std::max(static_cast<float>(FOCUS_SCROLL_MARGIN.ConvertToPx()), contentEndOffset);
+
+    bool totallyShow = LessOrEqual(curFrameLength + focusMarginStart + focusMarginEnd, (parentFrameLength));
+    float startAlignOffset = -diffToTarFrame + focusMarginStart;
+    float endAlignOffset = parentFrameLength - diffToTarFrame - curFrameLength - focusMarginEnd;
+    bool start2End = LessOrEqual(diffToTarFrame, focusMarginStart);
+    bool needScroll = !NearZero(startAlignOffset, 1.0f) && !NearZero(endAlignOffset, 1.0f) &&
+                      (std::signbit(startAlignOffset) == std::signbit(endAlignOffset));
+    if (needScroll) {
+        return (totallyShow ^ start2End) ? endAlignOffset : startAlignOffset;
+    }
+    return notMove;
+}
 } // namespace OHOS::Ace::NG

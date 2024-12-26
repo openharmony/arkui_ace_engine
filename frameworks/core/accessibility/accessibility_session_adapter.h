@@ -39,6 +39,8 @@ public:
 
     virtual bool IgnoreHostNode() const { return false; };
 
+    virtual bool IgnoreTransformMouseEvent() const { return false; };
+
     /*
     * Get session adapter of node if node type is in ${SESSION_ADAPTER_MAP}
     * {param} node: not-null

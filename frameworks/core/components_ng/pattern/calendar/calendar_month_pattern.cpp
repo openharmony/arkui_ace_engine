@@ -49,6 +49,7 @@ void CalendarMonthPattern::OnAttachToFrameNode()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitFoldState();
 }
 
 bool CalendarMonthPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -115,7 +116,11 @@ void CalendarMonthPattern::SetColRowSpace()
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    auto width = constraint.selfIdealSize.Width().value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
+    auto selfWidth = constraint.selfIdealSize.Width();
+    if (!selfWidth.has_value()) {
+        return;
+    }
+    auto width = selfWidth.value() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() * 2;
     auto paintProperty = GetPaintProperty<CalendarPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
@@ -124,7 +129,11 @@ void CalendarMonthPattern::SetColRowSpace()
     if (IsLargeSize(theme)) {
         gregorianDayHeight = GetDaySize(theme).ConvertToPx();
     }
-    auto height = constraint.selfIdealSize.Height().value()
+    auto selfHeight = constraint.selfIdealSize.Height();
+    if (!selfHeight.has_value()) {
+        return;
+    }
+    auto height = selfHeight.value()
         - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT.ConvertToPx() + gregorianDayHeight;
     auto calendarDaySize = GetDaySize(theme);
     auto space = (width - calendarDaySize.ConvertToPx() * CALENDAR_WEEK_DAYS) / (CALENDAR_WEEK_DAYS - 1);
@@ -316,9 +325,13 @@ void CalendarMonthPattern::OnLanguageConfigurationUpdate()
         std::string weekContent { weekNumbers[column % CALENDAR_WEEK_DAYS] };
         auto textFrameNode = AceType::DynamicCast<NG::FrameNode>(textNode);
         CHECK_NULL_VOID(textFrameNode);
+        auto calendarPaintProperty = host->GetPaintProperty<CalendarPaintProperty>();
+        CHECK_NULL_VOID(calendarPaintProperty);
+        auto fontSize = calendarPaintProperty->GetWeekFontSize().value_or(theme->GetCalendarTheme().weekFontSize);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         textLayoutProperty->UpdateContent(weekContent);
+        textLayoutProperty->UpdateFontSize(fontSize);
         ++column;
     }
 }
@@ -383,6 +396,9 @@ void CalendarMonthPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto calendarPattern = weak.Upgrade();
         CHECK_NULL_VOID(calendarPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             calendarPattern->OnTouchEvent(info.GetTouches().front().GetLocalLocation(), true);
         }
@@ -926,6 +942,7 @@ void CalendarMonthPattern::UpdateAccessibilityButtonNode(RefPtr<FrameNode> frame
     auto colSpace = paintProperty->GetColSpaceValue({}).ConvertToPx() <= 0
                     ? theme->GetCalendarTheme().colSpace.ConvertToPx()
                     : paintProperty->GetColSpaceValue({}).ConvertToPx();
+    colSpace_ = colSpace;
     Dimension buttonOffsetX = Dimension(margin_ / 2 + (colSpace + dayWidth) * pos.first);
     auto gregorianDayHeight = paintProperty->GetGregorianCalendarHeightValue({}).ConvertToPx() <= 0
                             ? theme->GetCalendarTheme().gregorianCalendarHeight.ConvertToPx()

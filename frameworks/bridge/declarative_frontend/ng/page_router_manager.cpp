@@ -77,9 +77,16 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url, params };
+    RouterPageInfo info;
+    info.url = url;
+    info.params = params;
 #if !defined(PREVIEW)
     if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
+        info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
+            TAG_LOGE(AceLogTag::ACE_ROUTER,
+                "Router load ohmUrl failed, probably caused by invalid ohmUrl. code:%{public}d, msg:%{public}s",
+                errorCode, errorMsg.c_str());
+        };
         auto loadTask = [weak = AceType::WeakClaim(this), info]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
@@ -154,7 +161,9 @@ void PageRouterManager::RunPageByNamedRouterInner(const std::string& name, const
         return;
     }
 
-    RouterPageInfo info { name, params };
+    RouterPageInfo info;
+    info.url = name;
+    info.params = params;
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
@@ -164,7 +173,8 @@ UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url };
+    RouterPageInfo info;
+    info.url = url;
 #ifndef PREVIEW
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
@@ -1164,12 +1174,12 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
         TAG_LOGE(AceLogTag::ACE_ROUTER, "push url is empty");
         return;
     }
-    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->UpdateSrcPage();
                 pageRouterManager->PushOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1200,6 +1210,7 @@ void PageRouterManager::StartPush(const RouterPageInfo& target)
     }
 
     CleanPageOverlay();
+    UpdateSrcPage();
 
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
@@ -1261,12 +1272,12 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
     if (target.url.empty()) {
         return;
     }
-    UpdateSrcPage();
 #if !defined(PREVIEW)
     if (target.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         auto loadTask = [weak = AceType::WeakClaim(this), target]() {
                 auto pageRouterManager = weak.Upgrade();
                 CHECK_NULL_VOID(pageRouterManager);
+                pageRouterManager->UpdateSrcPage();
                 pageRouterManager->ReplaceOhmUrl(target);
             };
         LoadOhmUrlPage(target.url, std::move(loadTask), target.errorCallback,
@@ -1286,7 +1297,7 @@ void PageRouterManager::StartReplace(const RouterPageInfo& target)
         }
         return;
     }
-
+    UpdateSrcPage();
     DealReplacePage(info);
 }
 
@@ -1524,7 +1535,11 @@ RefPtr<FrameNode> PageRouterManager::CreatePage(int32_t pageId, const RouterPage
     }
 
     if (target.isNamedRouterMode) {
-        manifestParser_->SetPagePath(target.url);
+        if (manifestParser_) {
+            manifestParser_->SetPagePath(target.url);
+        } else {
+            TAG_LOGE(AceLogTag::ACE_ROUTER, "set routeName in manifest failed, manifestParser is null!");
+        }
     }
 
     if (target.errorCallback != nullptr) {

@@ -166,21 +166,63 @@ void SetCheckboxGroupName(ArkUINodeHandle node, ArkUI_CharPtr group)
 namespace NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
 {
-    static const ArkUICheckboxGroupModifier modifier = { SetCheckboxGroupSelectedColor,
-        ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
-        SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
-        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUICheckboxGroupModifier modifier = {
+        .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
+        .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
+        .setCheckboxGroupUnSelectedColor = SetCheckboxGroupUnSelectedColor,
+        .resetCheckboxGroupUnSelectedColor = ResetCheckboxGroupUnSelectedColor,
+        .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAll,
+        .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAll,
+        .setCheckboxGroupWidth = SetCheckboxGroupWidth,
+        .resetCheckboxGroupWidth = ResetCheckboxGroupWidth,
+        .setCheckboxGroupHeight = SetCheckboxGroupHeight,
+        .resetCheckboxGroupHeight = ResetCheckboxGroupHeight,
+        .setCheckboxGroupMark = SetCheckboxGroupMark,
+        .resetCheckboxGroupMark = ResetCheckboxGroupMark,
+        .setCheckboxGroupStyle = SetCheckboxGroupStyle,
+        .resetCheckboxGroupStyle = ResetCheckboxGroupStyle,
+        .setCheckboxGroupName = SetCheckboxGroupName,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier()
 {
-    static const CJUICheckboxGroupModifier modifier = { SetCheckboxGroupSelectedColor,
-        ResetCheckboxGroupSelectedColor, SetCheckboxGroupUnSelectedColor, ResetCheckboxGroupUnSelectedColor,
-        SetCheckboxGroupSelectAll, ResetCheckboxGroupSelectAll, SetCheckboxGroupWidth, ResetCheckboxGroupWidth,
-        SetCheckboxGroupHeight, ResetCheckboxGroupHeight, SetCheckboxGroupMark, ResetCheckboxGroupMark,
-        SetCheckboxGroupStyle, ResetCheckboxGroupStyle, SetCheckboxGroupName };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUICheckboxGroupModifier modifier = {
+        .setCheckboxGroupSelectedColor = SetCheckboxGroupSelectedColor,
+        .resetCheckboxGroupSelectedColor = ResetCheckboxGroupSelectedColor,
+        .setCheckboxGroupUnSelectedColor = SetCheckboxGroupUnSelectedColor,
+        .resetCheckboxGroupUnSelectedColor = ResetCheckboxGroupUnSelectedColor,
+        .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAll,
+        .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAll,
+        .setCheckboxGroupWidth = SetCheckboxGroupWidth,
+        .resetCheckboxGroupWidth = ResetCheckboxGroupWidth,
+        .setCheckboxGroupHeight = SetCheckboxGroupHeight,
+        .resetCheckboxGroupHeight = ResetCheckboxGroupHeight,
+        .setCheckboxGroupMark = SetCheckboxGroupMark,
+        .resetCheckboxGroupMark = ResetCheckboxGroupMark,
+        .setCheckboxGroupStyle = SetCheckboxGroupStyle,
+        .resetCheckboxGroupStyle = ResetCheckboxGroupStyle,
+        .setCheckboxGroupName = SetCheckboxGroupName,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

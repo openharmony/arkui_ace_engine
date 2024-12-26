@@ -86,6 +86,8 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
     UpdateSafeArea();
+    isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
+    ResizeDialogSubwindow(expandDisplay_, isShowInSubWindow_, isShowInFloatingWindow_);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
     const auto& parentIdealSize = layoutConstraint->parentIdealSize;
     OptionalSizeF realSize;
@@ -123,6 +125,18 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             dialogMaxHeight_ = childLayoutConstraint.maxSize.Height();
         }
         AnalysisHeightOfChild(layoutWrapper);
+    }
+}
+
+void DialogLayoutAlgorithm::ResizeDialogSubwindow(
+    bool expandDisplay, bool isShowInSubWindow, bool isShowInFloatingWindow)
+{
+    if (expandDisplay && isShowInSubWindow && isShowInFloatingWindow) {
+        auto currentId = Container::CurrentId();
+        auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(currentId >= MIN_SUBCONTAINER_ID ?
+            SubwindowManager::GetInstance()->GetParentContainerId(currentId) : currentId);
+        CHECK_NULL_VOID(subWindow);
+        subWindow->ResizeDialogSubwindow();
     }
 }
 
@@ -900,11 +914,13 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
-    if (!foldCreaseRects.empty()) {
-        foldCreaseRect = foldCreaseRects.front();
+    if (isHoverMode_) {
+        auto displayInfo = container->GetDisplayInfo();
+        CHECK_NULL_VOID(displayInfo);
+        auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+        if (!foldCreaseRects.empty()) {
+            foldCreaseRect = foldCreaseRects.front();
+        }
     }
 }
 

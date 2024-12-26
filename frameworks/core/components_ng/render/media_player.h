@@ -104,6 +104,11 @@ public:
         return -1;
     }
 
+    virtual int32_t SetRenderFirstFrame(bool /*display*/)
+    {
+        return -1;
+    }
+
     virtual int32_t PrepareAsync()
     {
         return -1;
@@ -138,6 +143,10 @@ public:
         return -1;
     }
     virtual int32_t SetPlayRange(int64_t /*startTime*/, int64_t /*endTime*/)
+    {
+        return -1;
+    }
+    virtual int32_t SetParameter(const std::string& key, int64_t value)
     {
         return -1;
     }

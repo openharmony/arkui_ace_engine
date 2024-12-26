@@ -205,6 +205,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.isPrivacyMode = isPrivacyMode;
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
+    event.eventType = UIInputEventType::TOUCH;
     return event;
 }
 
@@ -462,7 +463,8 @@ void StateRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int
     if (!state.empty()) {
         oss << ", "
             << "state: " << state << ", "
-            << "disposal: " << disposal;
+            << "disposal: " << disposal << ", "
+            << "extraInfo: " << extraInfo;
     }
     oss << ", "
         << "timestamp: " << ConvertTimestampToStr(timestamp);
@@ -475,17 +477,18 @@ void StateRecord::Dump(std::unique_ptr<JsonValue>& json) const
     if (!state.empty()) {
         json->Put("state", state.c_str());
         json->Put("disposal", disposal.c_str());
+        json->Put("extraInfo", extraInfo.c_str());
     }
     json->Put("timestamp", ConvertTimestampToStr(timestamp).c_str());
 }
 
-void GestureSnapshot::AddProcedure(
-    const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp)
+void GestureSnapshot::AddProcedure(const std::string& procedure, const std::string& extraInfo,
+    const std::string& state, const std::string& disposal, int64_t timestamp)
 {
     if (timestamp == 0) {
         timestamp = GetCurrentTimestamp();
     }
-    stateHistory.emplace_back(StateRecord(procedure, state, disposal, timestamp));
+    stateHistory.emplace_back(StateRecord(procedure, extraInfo, state, disposal, timestamp));
 }
 
 bool GestureSnapshot::CheckNeedAddMove(const std::string& state, const std::string& disposal)

@@ -39,7 +39,9 @@ public:
     static void SetActiveCircleColor(const JSRef<JSVal>& info);
     static void SetActiveCircleRadius(const JSRef<JSVal>& info);
     static void SetEnableWaveEffect(const JSRef<JSVal>& info);
+    static void SetEnableForeground(const JSRef<JSVal>& info);
     static void SetActivateCircleStyle(const JSCallbackInfo& info);
+    static void SetSkipUnselectedPoint(const JSCallbackInfo& info);
 
 protected:
     static void SetPatternComplete(const JSCallbackInfo& info);

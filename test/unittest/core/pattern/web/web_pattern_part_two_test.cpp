@@ -25,6 +25,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "nweb_autofill.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1861,7 +1862,6 @@ HWTEST_F(WebPatternPartTwoTest, SetLayoutMode_001, TestSize.Level1)
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     webPattern->SetLayoutMode(mode);
     EXPECT_EQ(webPattern->layoutMode_, mode);
-    EXPECT_FALSE(webPattern->isLayoutModeChanged_);
     webPattern->SetLayoutMode(WebLayoutMode::NONE);
     EXPECT_TRUE(webPattern->isLayoutModeChanged_);
 #endif

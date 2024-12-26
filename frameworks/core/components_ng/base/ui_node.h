@@ -118,6 +118,11 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    virtual bool IsSyntaxNode() const
+    {
+        return false;
+    }
+
     void UpdateModalUiextensionCount(bool addNode)
     {
         if (addNode) {
@@ -142,7 +147,7 @@ public:
         return children_;
     }
 
-    RefPtr<UINode> GetLastChild()
+    RefPtr<UINode> GetLastChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -150,7 +155,7 @@ public:
         return children_.back();
     }
 
-    RefPtr<UINode> GetFirstChild()
+    RefPtr<UINode> GetFirstChild() const
     {
         if (children_.empty()) {
             return nullptr;
@@ -176,7 +181,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
+    void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -374,6 +379,8 @@ public:
     }
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const {}
+
+    virtual void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const {}
 
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
@@ -776,6 +783,15 @@ public:
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
+    int32_t GetThemeScopeId() const;
+    void SetThemeScopeId(int32_t themeScopeId);
+    virtual void UpdateThemeScopeId(int32_t themeScopeId);
+    virtual void UpdateThemeScopeUpdate(int32_t themeScopeId);
+    virtual void OnThemeScopeUpdate(int32_t themeScopeId) {}
+    void AllowUseParentTheme(bool isAllow);
+    bool IsAllowUseParentTheme() const;
+    ColorMode GetLocalColorMode() const;
+
     // Used to mark freeze and block dirty mark.
     virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
     bool IsFreeze() const
@@ -892,13 +908,14 @@ private:
     std::unique_ptr<PerformanceCheckNode> nodeInfo_;
     WeakPtr<UINode> parent_;
     std::string tag_ = "UINode";
-    int32_t depth_ = Infinity<int32_t>();
+    int32_t depth_ = 1;
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
+    int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -908,6 +925,7 @@ private:
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
     bool isTraversing_ = false;
+    bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;

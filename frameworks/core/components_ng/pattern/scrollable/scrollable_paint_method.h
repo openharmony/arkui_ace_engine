@@ -60,11 +60,6 @@ protected:
     bool isVerticalReverse_ = false;
 
 private:
-    /**
-     * @brief Return the default content clip mode.
-     */
-    virtual ContentClipMode GetDefaultContentClip() const = 0;
-
     RefPtr<RenderContext> overlayRenderContext_;
     bool isFadingTop_ = false;
     bool isFadingBottom_ = false;

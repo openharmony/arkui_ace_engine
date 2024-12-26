@@ -221,7 +221,7 @@ void RecognizerGroup::AddHittedRecognizerType(
                 continue;
             }
             hittedRecognizerInfo[AceType::TypeName(item)].emplace_back(NG::TouchTestResultInfo {
-                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue("") });
+                frameNode->GetId(), frameNode->GetTag(), frameNode->GetInspectorIdValue(""), "" });
         }
         auto group = AceType::DynamicCast<RecognizerGroup>(item);
         if (group) {

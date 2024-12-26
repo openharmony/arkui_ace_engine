@@ -174,192 +174,219 @@ ViewStackProcessor.StopGetAccessRecording();
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-const i = '28vp';
+const i = '20vp';
 const j = '28vp';
 const m = '12vp';
-const o = '-8vp';
+const o = '8vp';
 const t = '-8vp';
-const u = '40vp';
+const u = '-8vp';
 const a1 = '40vp';
-const b1 = '24vp';
-const c1 = '8vp';
-const d1 = '12vp';
-const e1 = '10vp';
-const f1 = '16fp';
-const g1 = 600;
-const f3 = 'arkui_custom_max_click';
-const r3 = 'arkui_custom_min_click';
-const s3 = 'arkui_custom_close_click';
-const u3 = 'arkui_custom_left_split_click';
-const v3 = 'arkui_custom_right_split_click';
-const e4 = 'arkui_custom_button_point_light_anim';
-const c5 = 'arkui_custom_button_rect_change';
-const x3 = 'arkui_color_configuration';
-const y3 = 'arkui_hide_split';
-const z3 = 'arkui_maximize_visibility';
-const a4 = 'arkui_minimize_visibility';
-const b4 = 'arkui_close_visibility';
-const c4 = 'arkui_close_status';
-const d4 = 'arkui_maximize_is_recover';
-const h1 = {
+const b1 = '40vp';
+const c1 = '24vp';
+const d1 = '8vp';
+const e1 = '12vp';
+const f1 = '10vp';
+const g1 = '16fp';
+const h1 = 1000;
+const i1 = 2000;
+const j1 = 1000;
+const l1 = 'arkui_custom_max_click';
+const m1 = 'arkui_custom_min_click';
+const n1 = 'arkui_custom_close_click';
+const o1 = 'arkui_custom_left_split_click';
+const q1 = 'arkui_custom_right_split_click';
+const s1 = 'arkui_custom_button_point_light_anim';
+const t1 = 'arkui_custom_button_rect_change';
+const u1 = 'arkui_custom_menu_width_change';
+const v1 = 'arkui_color_configuration';
+const w1 = 'arkui_hide_split';
+const z1 = 'arkui_maximize_visibility';
+const a2 = 'arkui_minimize_visibility';
+const b2 = 'arkui_close_visibility';
+const c2 = 'arkui_close_status';
+const d2 = 'arkui_maximize_is_recover';
+const e2 = 'arkui_menu_width_change';
+const f2 = 'arkui_button_size_change';
+const g2 = 'arkui_button_spacing_change';
+const h2 = 'arkui_color_mode_locked';
+const i2 = 'arkui_button_right_offset_change';
+const j2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125829923,
     type: 20000
 };
-const i1 = {
+const l2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125829925,
     type: 20000
 };
-const j1 = {
-    bundleName: '',
-    moduleName: '',
-    params: [],
-    id: 125834288,
-    type: 10001
-};
-const l1 = {
+const m2 = Color.Transparent;
+const n2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125830991,
     type: 10001
 };
-const m1 = {
+const o2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125834289,
     type: 10001
 };
-const n1 = {
+const q2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125830991,
     type: 10001
 };
-const o1 = {
-    bundleName: '',
-    moduleName: '',
-    id: 125834288,
-    type: 10001
-};
-const q1 = {
+const s2 = Color.Transparent;
+const t2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125830991,
     type: 10001
 };
-const s1 = {
+const u2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125830979,
     type: 10001
 };
-const t1 = {
+const v2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125831057,
     type: 10001
 };
-const u1 = {
+const w2 = {
     bundleName: '',
     moduleName: '',
     params: [],
     id: 125831024,
     type: 10001
 };
-class v1 extends ViewPU {
+const z2 = {
+    bundleName: '',
+    moduleName: '',
+    params: [],
+    id: 125830991,
+    type: 10001
+};
+class a3 {
+    constructor(l3, m3) {
+        this.d3 = '#000000';
+        this.e3 = '#FFFFFF';
+        this.e3 = m3;
+        this.d3 = l3;
+    }
+}
+const colorMap = new Map([
+    [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+    [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
+    [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+    [closeNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
+    [closeHoverBackgroundColor, new ColorGroup('#FA2A2D', '#E64548')],
+    [closeHoverIconFillColor, new ColorGroup('#ffffff', '#ffffff')],
+    [menuHoverColor, new ColorGroup('#19182431', '#19ffffff')],
+    [splitItemFillColor, new ColorGroup('#182431', '#e5ffffff')],
+]);
+class c3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.w1 = new ObservedPropertyObjectPU(h1, this, "maximizeResource");
-        this.z1 = new ObservedPropertyObjectPU({
+        this.f3 = new ObservedPropertySimplePU(0, this, "maxBtnTouchState");
+        this.g3 = new ObservedPropertyObjectPU(j2, this, "maximizeResource");
+        this.h3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125829924,
             type: 20000
         }, this, "minimizeResource");
-        this.a2 = new ObservedPropertyObjectPU({
+        this.i3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125829917,
             type: 20000
         }, this, "closeResource");
-        this.b2 = new ObservedPropertyObjectPU({
+        this.j3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125830147,
             type: 20000
         }, this, "menuLeftResource");
-        this.c2 = new ObservedPropertyObjectPU({
+        this.l3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125830148,
             type: 20000
         }, this, "menuRightResource");
-        this.d2 = new ObservedPropertyObjectPU(j1, this, "maximizeBackgroundColor");
-        this.e2 = new ObservedPropertyObjectPU(j1, this, "minimizeBackgroundColor");
-        this.f2 = new ObservedPropertyObjectPU(j1, this, "closeBackgroundColor");
-        this.g2 = new ObservedPropertyObjectPU(l1, this, "maximizeFillColor");
-        this.h2 = new ObservedPropertyObjectPU(l1, this, "minimizeFillColor");
-        this.i2 = new ObservedPropertyObjectPU(l1, this, "closeFillColor");
-        this.j2 = new ObservedPropertySimplePU(1.0, this, "maximizeScale");
-        this.l2 = new ObservedPropertySimplePU(1.0, this, "minimizeScale");
-        this.m2 = new ObservedPropertySimplePU(1.0, this, "closeScale");
-        this.n2 = new ObservedPropertySimplePU(Visibility.Visible, this, "rowVisibility");
-        this.o2 = new ObservedPropertySimplePU(Visibility.Visible, this, "maximizeVisibility");
-        this.q2 = new ObservedPropertySimplePU(Visibility.Visible, this, "minimizeVisibility");
-        this.s2 = new ObservedPropertySimplePU(Visibility.Visible, this, "closeVisibility");
-        this.t2 = new ObservedPropertySimplePU(true, this, "closeStatus");
-        this.u2 = new ObservedPropertySimplePU(false, this, "isShowMenu");
-        this.v2 = new ObservedPropertyObjectPU({
+        this.m3 = new ObservedPropertyObjectPU(m2, this, "maximizeBackgroundColor");
+        this.n3 = new ObservedPropertyObjectPU(m2, this, "minimizeBackgroundColor");
+        this.q3 = new ObservedPropertyObjectPU(m2, this, "closeBackgroundColor");
+        this.r3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "maximizeFillColor");
+        this.s3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "minimizeFillColor");
+        this.t3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "closeFillColor");
+        this.u3 = new ObservedPropertySimplePU(1.0, this, "maximizeScale");
+        this.v3 = new ObservedPropertySimplePU(1.0, this, "minimizeScale");
+        this.w3 = new ObservedPropertySimplePU(1.0, this, "closeScale");
+        this.x3 = new ObservedPropertySimplePU(Visibility.Visible, this, "rowVisibility");
+        this.y3 = new ObservedPropertySimplePU(Visibility.Visible, this, "maximizeVisibility");
+        this.z3 = new ObservedPropertySimplePU(Visibility.Visible, this, "minimizeVisibility");
+        this.a4 = new ObservedPropertySimplePU(Visibility.Visible, this, "closeVisibility");
+        this.b4 = new ObservedPropertySimplePU(true, this, "closeStatus");
+        this.c4 = new ObservedPropertySimplePU(false, this, "isShowMenu");
+        this.d4 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125833961,
             type: 10003
         }, this, "leftSplitTitle");
-        this.w2 = new ObservedPropertyObjectPU({
+        this.e4 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125833962,
             type: 10003
         }, this, "rightSplitTitle");
-        this.z2 = new ObservedPropertyObjectPU({
-            bundleName: '',
-            moduleName: '',
-            params: [],
-            id: 125830991,
-            type: 10001
-        }, this, "splitFillColor");
-        this.a3 = new ObservedPropertyObjectPU(Color.Transparent, this, "leftSplitBackgroundColor");
-        this.b3 = new ObservedPropertyObjectPU(Color.Transparent, this, "rightSplitBackgroundColor");
-        this.c3 = new ObservedPropertySimplePU(1.0, this, "rowOpacity");
+        this.f4 = new ObservedPropertyObjectPU(this.getResourceColor(z2), this, "splitFillColor");
+        this.g4 = new ObservedPropertyObjectPU(Color.Transparent, this, "leftSplitBackgroundColor");
+        this.h4 = new ObservedPropertyObjectPU(Color.Transparent, this, "rightSplitBackgroundColor");
+        this.i4 = new ObservedPropertySimplePU(1.0, this, "rowOpacity");
+        this.j4 = new ObservedPropertySimplePU('224vp', this, "menuWidth");
+        this.l4 = new ObservedPropertySimplePU(12, this, "buttonSpacing");
+        this.m4 = new ObservedPropertySimplePU(28, this, "buttonSize");
+        this.n4 = new ObservedPropertySimplePU(20, this, "buttonRightOffset");
+        this.colorConfigurationLocked = false;
         this.isFocused = true;
         this.isDark = false;
         this.isHoverShowMenu = false;
         this.showMenuTimeoutId = -1;
+        this.menuDisappearTimeoutId = -1;
         this.hideSplit = false;
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
+        if (params.maxBtnTouchState !== undefined) {
+            this.maxBtnTouchState = params.maxBtnTouchState;
+        }
         if (params.maximizeResource !== undefined) {
             this.maximizeResource = params.maximizeResource;
         }
@@ -438,6 +465,21 @@ class v1 extends ViewPU {
         if (params.rowOpacity !== undefined) {
             this.rowOpacity = params.rowOpacity;
         }
+        if (params.menuWidth !== undefined) {
+            this.menuWidth = params.menuWidth;
+        }
+        if (params.buttonSpacing !== undefined) {
+            this.buttonSpacing = params.buttonSpacing;
+        }
+        if (params.buttonSize !== undefined) {
+            this.buttonSize = params.buttonSize;
+        }
+        if (params.buttonRightOffset !== undefined) {
+            this.buttonRightOffset = params.buttonRightOffset;
+        }
+        if (params.colorConfigurationLocked !== undefined) {
+            this.colorConfigurationLocked = params.colorConfigurationLocked;
+        }
         if (params.isFocused !== undefined) {
             this.isFocused = params.isFocused;
         }
@@ -450,6 +492,9 @@ class v1 extends ViewPU {
         if (params.showMenuTimeoutId !== undefined) {
             this.showMenuTimeoutId = params.showMenuTimeoutId;
         }
+        if (params.menuDisappearTimeoutId !== undefined) {
+            this.menuDisappearTimeoutId = params.menuDisappearTimeoutId;
+        }
         if (params.hideSplit !== undefined) {
             this.hideSplit = params.hideSplit;
         }
@@ -457,218 +502,258 @@ class v1 extends ViewPU {
     updateStateVars(params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.w1.purgeDependencyOnElmtId(rmElmtId);
-        this.z1.purgeDependencyOnElmtId(rmElmtId);
-        this.a2.purgeDependencyOnElmtId(rmElmtId);
-        this.b2.purgeDependencyOnElmtId(rmElmtId);
-        this.c2.purgeDependencyOnElmtId(rmElmtId);
-        this.d2.purgeDependencyOnElmtId(rmElmtId);
-        this.e2.purgeDependencyOnElmtId(rmElmtId);
-        this.f2.purgeDependencyOnElmtId(rmElmtId);
-        this.g2.purgeDependencyOnElmtId(rmElmtId);
-        this.h2.purgeDependencyOnElmtId(rmElmtId);
-        this.i2.purgeDependencyOnElmtId(rmElmtId);
-        this.j2.purgeDependencyOnElmtId(rmElmtId);
-        this.l2.purgeDependencyOnElmtId(rmElmtId);
-        this.m2.purgeDependencyOnElmtId(rmElmtId);
-        this.n2.purgeDependencyOnElmtId(rmElmtId);
-        this.o2.purgeDependencyOnElmtId(rmElmtId);
-        this.q2.purgeDependencyOnElmtId(rmElmtId);
-        this.s2.purgeDependencyOnElmtId(rmElmtId);
-        this.t2.purgeDependencyOnElmtId(rmElmtId);
-        this.u2.purgeDependencyOnElmtId(rmElmtId);
-        this.v2.purgeDependencyOnElmtId(rmElmtId);
-        this.w2.purgeDependencyOnElmtId(rmElmtId);
-        this.z2.purgeDependencyOnElmtId(rmElmtId);
-        this.a3.purgeDependencyOnElmtId(rmElmtId);
-        this.b3.purgeDependencyOnElmtId(rmElmtId);
-        this.c3.purgeDependencyOnElmtId(rmElmtId);
+        this.f3.purgeDependencyOnElmtId(rmElmtId);
+        this.g3.purgeDependencyOnElmtId(rmElmtId);
+        this.h3.purgeDependencyOnElmtId(rmElmtId);
+        this.i3.purgeDependencyOnElmtId(rmElmtId);
+        this.j3.purgeDependencyOnElmtId(rmElmtId);
+        this.l3.purgeDependencyOnElmtId(rmElmtId);
+        this.m3.purgeDependencyOnElmtId(rmElmtId);
+        this.n3.purgeDependencyOnElmtId(rmElmtId);
+        this.q3.purgeDependencyOnElmtId(rmElmtId);
+        this.r3.purgeDependencyOnElmtId(rmElmtId);
+        this.s3.purgeDependencyOnElmtId(rmElmtId);
+        this.t3.purgeDependencyOnElmtId(rmElmtId);
+        this.u3.purgeDependencyOnElmtId(rmElmtId);
+        this.v3.purgeDependencyOnElmtId(rmElmtId);
+        this.w3.purgeDependencyOnElmtId(rmElmtId);
+        this.x3.purgeDependencyOnElmtId(rmElmtId);
+        this.y3.purgeDependencyOnElmtId(rmElmtId);
+        this.z3.purgeDependencyOnElmtId(rmElmtId);
+        this.a4.purgeDependencyOnElmtId(rmElmtId);
+        this.b4.purgeDependencyOnElmtId(rmElmtId);
+        this.c4.purgeDependencyOnElmtId(rmElmtId);
+        this.d4.purgeDependencyOnElmtId(rmElmtId);
+        this.e4.purgeDependencyOnElmtId(rmElmtId);
+        this.f4.purgeDependencyOnElmtId(rmElmtId);
+        this.g4.purgeDependencyOnElmtId(rmElmtId);
+        this.h4.purgeDependencyOnElmtId(rmElmtId);
+        this.i4.purgeDependencyOnElmtId(rmElmtId);
+        this.j4.purgeDependencyOnElmtId(rmElmtId);
+        this.l4.purgeDependencyOnElmtId(rmElmtId);
+        this.m4.purgeDependencyOnElmtId(rmElmtId);
+        this.n4.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.w1.aboutToBeDeleted();
-        this.z1.aboutToBeDeleted();
-        this.a2.aboutToBeDeleted();
-        this.b2.aboutToBeDeleted();
-        this.c2.aboutToBeDeleted();
-        this.d2.aboutToBeDeleted();
-        this.e2.aboutToBeDeleted();
-        this.f2.aboutToBeDeleted();
-        this.g2.aboutToBeDeleted();
-        this.h2.aboutToBeDeleted();
-        this.i2.aboutToBeDeleted();
-        this.j2.aboutToBeDeleted();
-        this.l2.aboutToBeDeleted();
-        this.m2.aboutToBeDeleted();
-        this.n2.aboutToBeDeleted();
-        this.o2.aboutToBeDeleted();
-        this.q2.aboutToBeDeleted();
-        this.s2.aboutToBeDeleted();
-        this.t2.aboutToBeDeleted();
-        this.u2.aboutToBeDeleted();
-        this.v2.aboutToBeDeleted();
-        this.w2.aboutToBeDeleted();
-        this.z2.aboutToBeDeleted();
-        this.a3.aboutToBeDeleted();
-        this.b3.aboutToBeDeleted();
-        this.c3.aboutToBeDeleted();
+        this.f3.aboutToBeDeleted();
+        this.g3.aboutToBeDeleted();
+        this.h3.aboutToBeDeleted();
+        this.i3.aboutToBeDeleted();
+        this.j3.aboutToBeDeleted();
+        this.l3.aboutToBeDeleted();
+        this.m3.aboutToBeDeleted();
+        this.n3.aboutToBeDeleted();
+        this.q3.aboutToBeDeleted();
+        this.r3.aboutToBeDeleted();
+        this.s3.aboutToBeDeleted();
+        this.t3.aboutToBeDeleted();
+        this.u3.aboutToBeDeleted();
+        this.v3.aboutToBeDeleted();
+        this.w3.aboutToBeDeleted();
+        this.x3.aboutToBeDeleted();
+        this.y3.aboutToBeDeleted();
+        this.z3.aboutToBeDeleted();
+        this.a4.aboutToBeDeleted();
+        this.b4.aboutToBeDeleted();
+        this.c4.aboutToBeDeleted();
+        this.d4.aboutToBeDeleted();
+        this.e4.aboutToBeDeleted();
+        this.f4.aboutToBeDeleted();
+        this.g4.aboutToBeDeleted();
+        this.h4.aboutToBeDeleted();
+        this.i4.aboutToBeDeleted();
+        this.j4.aboutToBeDeleted();
+        this.l4.aboutToBeDeleted();
+        this.m4.aboutToBeDeleted();
+        this.n4.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
+    get maxBtnTouchState() {
+        return this.f3.get();
+    }
+    set maxBtnTouchState(newValue) {
+        this.f3.set(newValue);
+    }
     get maximizeResource() {
-        return this.w1.get();
+        return this.g3.get();
     }
     set maximizeResource(newValue) {
-        this.w1.set(newValue);
+        this.g3.set(newValue);
     }
     get minimizeResource() {
-        return this.z1.get();
+        return this.h3.get();
     }
     set minimizeResource(newValue) {
-        this.z1.set(newValue);
+        this.h3.set(newValue);
     }
     get closeResource() {
-        return this.a2.get();
+        return this.i3.get();
     }
     set closeResource(newValue) {
-        this.a2.set(newValue);
+        this.i3.set(newValue);
     }
     get menuLeftResource() {
-        return this.b2.get();
+        return this.j3.get();
     }
     set menuLeftResource(newValue) {
-        this.b2.set(newValue);
+        this.j3.set(newValue);
     }
     get menuRightResource() {
-        return this.c2.get();
+        return this.l3.get();
     }
     set menuRightResource(newValue) {
-        this.c2.set(newValue);
+        this.l3.set(newValue);
     }
     get maximizeBackgroundColor() {
-        return this.d2.get();
+        return this.m3.get();
     }
     set maximizeBackgroundColor(newValue) {
-        this.d2.set(newValue);
+        this.m3.set(newValue);
     }
     get minimizeBackgroundColor() {
-        return this.e2.get();
+        return this.n3.get();
     }
     set minimizeBackgroundColor(newValue) {
-        this.e2.set(newValue);
+        this.n3.set(newValue);
     }
     get closeBackgroundColor() {
-        return this.f2.get();
+        return this.q3.get();
     }
     set closeBackgroundColor(newValue) {
-        this.f2.set(newValue);
+        this.q3.set(newValue);
     }
     get maximizeFillColor() {
-        return this.g2.get();
+        return this.r3.get();
     }
     set maximizeFillColor(newValue) {
-        this.g2.set(newValue);
+        this.r3.set(newValue);
     }
     get minimizeFillColor() {
-        return this.h2.get();
+        return this.s3.get();
     }
     set minimizeFillColor(newValue) {
-        this.h2.set(newValue);
+        this.s3.set(newValue);
     }
     get closeFillColor() {
-        return this.i2.get();
+        return this.t3.get();
     }
     set closeFillColor(newValue) {
-        this.i2.set(newValue);
+        this.t3.set(newValue);
     }
     get maximizeScale() {
-        return this.j2.get();
+        return this.u3.get();
     }
     set maximizeScale(newValue) {
-        this.j2.set(newValue);
+        this.u3.set(newValue);
     }
     get minimizeScale() {
-        return this.l2.get();
+        return this.v3.get();
     }
     set minimizeScale(newValue) {
-        this.l2.set(newValue);
+        this.v3.set(newValue);
     }
     get closeScale() {
-        return this.m2.get();
+        return this.w3.get();
     }
     set closeScale(newValue) {
-        this.m2.set(newValue);
+        this.w3.set(newValue);
     }
     get rowVisibility() {
-        return this.n2.get();
+        return this.x3.get();
     }
     set rowVisibility(newValue) {
-        this.n2.set(newValue);
+        this.x3.set(newValue);
     }
     get maximizeVisibility() {
-        return this.o2.get();
+        return this.y3.get();
     }
     set maximizeVisibility(newValue) {
-        this.o2.set(newValue);
+        this.y3.set(newValue);
     }
     get minimizeVisibility() {
-        return this.q2.get();
+        return this.z3.get();
     }
     set minimizeVisibility(newValue) {
-        this.q2.set(newValue);
+        this.z3.set(newValue);
     }
     get closeVisibility() {
-        return this.s2.get();
+        return this.a4.get();
     }
     set closeVisibility(newValue) {
-        this.s2.set(newValue);
+        this.a4.set(newValue);
     }
     get closeStatus() {
-        return this.t2.get();
+        return this.b4.get();
     }
     set closeStatus(newValue) {
-        this.t2.set(newValue);
+        this.b4.set(newValue);
     }
     get isShowMenu() {
-        return this.u2.get();
+        return this.c4.get();
     }
     set isShowMenu(newValue) {
-        this.u2.set(newValue);
+        this.c4.set(newValue);
     }
     get leftSplitTitle() {
-        return this.v2.get();
+        return this.d4.get();
     }
     set leftSplitTitle(newValue) {
-        this.v2.set(newValue);
+        this.d4.set(newValue);
     }
     get rightSplitTitle() {
-        return this.w2.get();
+        return this.e4.get();
     }
     set rightSplitTitle(newValue) {
-        this.w2.set(newValue);
+        this.e4.set(newValue);
     }
     get splitFillColor() {
-        return this.z2.get();
+        return this.f4.get();
     }
     set splitFillColor(newValue) {
-        this.z2.set(newValue);
+        this.f4.set(newValue);
     }
     get leftSplitBackgroundColor() {
-        return this.a3.get();
+        return this.g4.get();
     }
     set leftSplitBackgroundColor(newValue) {
-        this.a3.set(newValue);
+        this.g4.set(newValue);
     }
     get rightSplitBackgroundColor() {
-        return this.b3.get();
+        return this.h4.get();
     }
     set rightSplitBackgroundColor(newValue) {
-        this.b3.set(newValue);
+        this.h4.set(newValue);
     }
     get rowOpacity() {
-        return this.c3.get();
+        return this.i4.get();
     }
     set rowOpacity(newValue) {
-        this.c3.set(newValue);
+        this.i4.set(newValue);
+    }
+    get menuWidth() {
+        return this.j4.get();
+    }
+    set menuWidth(newValue) {
+        this.j4.set(newValue);
+    }
+    get buttonSpacing() {
+        return this.l4.get();
+    }
+    set buttonSpacing(newValue) {
+        this.l4.set(newValue);
+    }
+    get buttonSize() {
+        return this.m4.get();
+    }
+    set buttonSize(newValue) {
+        this.m4.set(newValue);
+    }
+    get buttonRightOffset() {
+        return this.n4.get();
+    }
+    set buttonRightOffset(newValue) {
+        this.n4.set(newValue);
     }
     onWindowFocused() {
         this.rowOpacity = 1.0;
@@ -679,91 +764,149 @@ class v1 extends ViewPU {
         this.isFocused = false;
     }
     parseBoolean(value) {
-        if (value == 'true') {
+        if (value === 'true') {
             return true;
         }
         return false;
     }
     setCustomCallback(eventName, param) {
-        if (eventName == x3) {
+        if (eventName === v1) {
             this.onColorConfigurationUpdate(this.parseBoolean(param));
         }
-        else if (eventName == y3) {
+        else if (eventName === w1) {
             this.setHideSplit(this.parseBoolean(param));
         }
-        else if (eventName == z3) {
+        else if (eventName === z1) {
             this.setMaximizeVisibility(this.parseBoolean(param));
         }
-        else if (eventName == a4) {
+        else if (eventName === a2) {
             this.setMinimizeVisibility(this.parseBoolean(param));
         }
-        else if (eventName == b4) {
+        else if (eventName === b2) {
             this.setCloseVisibility(this.parseBoolean(param));
         }
-        else if (eventName == c4) {
+        else if (eventName === c2) {
             this.setCloseStatus(this.parseBoolean(param));
         }
-        else if (eventName == d4) {
+        else if (eventName === d2) {
             this.setMaximizeIsRecover(this.parseBoolean(param));
         }
+        else if (eventName === e2) {
+            this.setMenuWidth(param);
+        }
+        else if (eventName === g2) {
+            this.setButtonSpacing(param);
+        }
+        else if (eventName === h2) {
+            this.setColorModeLocked(param);
+        }
+        else if (eventName === i2) {
+            this.setButtonRightOffset(param);
+        }
+        else if (eventName === f2) {
+            this.setButtonButtonSize(param);
+        }
+    }
+    setButtonSpacing(param) {
+        this.buttonSpacing = parseInt(param);
+    }
+    setButtonButtonSize(param) {
+        this.buttonSize = parseInt(param);
+    }
+    setButtonRightOffset(param) {
+        this.buttonRightOffset = parseInt(param);
+    }
+    setColorModeLocked(param) {
+        const colorMode = parseInt(param);
+        if (colorMode === -1) {
+            this.colorConfigurationLocked = false;
+            return;
+        }
+        this.isDark = (colorMode === 0);
+        this.colorConfigurationLocked = true;
+        this.maximizeFillColor = this.getResourceColor(n2);
+        this.minimizeFillColor = this.getResourceColor(n2);
+        this.closeFillColor = this.getResourceColor(n2);
+    }
+    getResourceColor(resource) {
+        if (this.colorConfigurationLocked && b3.has(resource)) {
+            const k3 = b3.get(resource);
+            if (k3) {
+                return this.isDark ? k3.e3 : k3.d3;
+            }
+        }
+        return resource;
     }
     onMaximizeButtonClick() {
         this.onCancelMenuTimer();
-        ContainerModal.callNative(f3);
+        this.onHoverMaximizeButton(false);
+        this.maximizeScale = 1.0;
+        ContainerModal.callNative(l1);
     }
     onMinimizeButtonClick() {
-        ContainerModal.callNative(r3);
+        this.onHoverMinimizeButton(false);
+        this.minimizeScale = 1.0;
+        ContainerModal.callNative(m1);
     }
     onCloseButtonClick() {
-        ContainerModal.callNative(s3);
+        ContainerModal.callNative(n1);
     }
     onMenuLeftSplitClick() {
-        ContainerModal.callNative(u3);
+        ContainerModal.callNative(o1);
     }
     onMenuRightSplitClick() {
-        ContainerModal.callNative(v3);
+        ContainerModal.callNative(q1);
     }
     addButtonPointLightAnim() {
-        ContainerModal.callNative(e4);
+        ContainerModal.callNative(s1);
     }
-    onAreaChangeEvent(oldValue, newValue) {
-        ContainerModal.callNative(c5);
+    onAreaChangeEvent(q3, r3) {
+        ContainerModal.callNative(t1);
     }
-    setHideSplit(n3) {
-        this.hideSplit = n3;
+    onMenuWidthChange() {
+        ContainerModal.callNative(u1,"125833961");
     }
-    onColorConfigurationUpdate(m3) {
-        this.isDark = m3;
-        this.maximizeBackgroundColor = j1;
-        this.maximizeFillColor = l1;
-        this.minimizeBackgroundColor = j1;
-        this.minimizeFillColor = l1;
-        this.closeBackgroundColor = j1;
-        this.closeFillColor = l1;
+    setHideSplit(j3) {
+        this.hideSplit = j3;
     }
-    setMaximizeVisibility(l3) {
-        this.maximizeVisibility = l3 ? Visibility.None : Visibility.Visible;
+    onColorConfigurationUpdate(i3) {
+        if (this.colorConfigurationLocked) {
+            return;
+        }
+        this.isDark = i3;
+        this.maximizeBackgroundColor = m2;
+        this.maximizeFillColor = n2;
+        this.minimizeBackgroundColor = m2;
+        this.minimizeFillColor = n2;
+        this.closeBackgroundColor = m2;
+        this.closeFillColor = n2;
     }
-    setMinimizeVisibility(k3) {
-        this.minimizeVisibility = k3 ? Visibility.None : Visibility.Visible;
+    setMaximizeVisibility(h3) {
+        this.maximizeVisibility = h3 ? Visibility.None : Visibility.Visible;
     }
-    setCloseVisibility(j3) {
-        this.closeVisibility = j3 ? Visibility.None : Visibility.Visible;
+    setMinimizeVisibility(g3) {
+        this.minimizeVisibility = g3 ? Visibility.None : Visibility.Visible;
+    }
+    setCloseVisibility(f3) {
+        this.closeVisibility = f3 ? Visibility.None : Visibility.Visible;
     }
     setCloseStatus(isEnabled) {
         this.closeStatus = isEnabled;
     }
-    setMaximizeIsRecover(i3) {
-        if (i3) {
-            this.maximizeResource = i1;
+    setMaximizeIsRecover(e3) {
+        if (e3) {
+            this.maximizeResource = l2;
         }
         else {
-            this.maximizeResource = h1;
+            this.maximizeResource = j2;
         }
     }
+    setMenuWidth(width) {
+        this.menuWidth = (80 + parseInt(width)) + 'vp';
+    }
     setRowVisibility() {
-        if (this.maximizeVisibility == Visibility.None && this.minimizeVisibility == Visibility.None &&
-            this.closeVisibility == Visibility.None) {
+        if (this.maximizeVisibility === Visibility.None && this.minimizeVisibility === Visibility.None &&
+            this.closeVisibility === Visibility.None) {
             this.rowVisibility = Visibility.None;
         }
         else {
@@ -772,43 +915,44 @@ class v1 extends ViewPU {
     }
     onHoverMaximizeButton(isHover) {
         if (isHover) {
-            this.maximizeBackgroundColor = m1;
-            this.maximizeFillColor = n1;
+            this.maximizeBackgroundColor = this.getResourceColor(o2);
+            this.maximizeFillColor = this.getResourceColor(q2);
         }
         else {
-            this.maximizeBackgroundColor = j1;
-            this.maximizeFillColor = l1;
+            this.maximizeBackgroundColor = m2;
+            this.maximizeFillColor = this.getResourceColor(n2);
         }
     }
     onHoverMinimizeButton(isHover) {
         if (isHover) {
-            this.minimizeBackgroundColor = m1;
-            this.minimizeFillColor = n1;
+            this.minimizeBackgroundColor = this.getResourceColor(o2);
+            this.minimizeFillColor = this.getResourceColor(q2);
         }
         else {
-            this.minimizeBackgroundColor = j1;
-            this.minimizeFillColor = l1;
+            this.minimizeBackgroundColor = m2;
+            this.minimizeFillColor = this.getResourceColor(q2);
         }
     }
     onHoverCloseButton(isHover) {
         if (isHover) {
-            this.closeBackgroundColor = s1;
-            this.closeFillColor = t1;
+            this.closeBackgroundColor = this.getResourceColor(u2);
+            this.closeFillColor = this.getResourceColor(v2);
         }
         else {
-            this.closeBackgroundColor = o1;
-            this.closeFillColor = q1;
+            this.closeBackgroundColor = s2;
+            this.closeFillColor = this.getResourceColor(t2);
         }
     }
     onShowMenuWithTimer() {
         if (!this.hideSplit && this.isFocused) {
             this.showMenuTimeoutId = setTimeout(() => {
                 this.isShowMenu = true;
-            }, g1);
+                this.menuDisappearTimer(i1);
+            }, h1);
         }
     }
     onCancelMenuTimer() {
-        if (this.showMenuTimeoutId != -1) {
+        if (this.showMenuTimeoutId !== -1) {
             clearTimeout(this.showMenuTimeoutId);
         }
     }
@@ -817,8 +961,15 @@ class v1 extends ViewPU {
     MenuBuilder(parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
-            Column.width('224vp');
-            Column.height('83vp');
+            Column.width(this.menuWidth);
+            Column.onHover((isHover, event) => {
+                if (isHover) {
+                    this.cancelMenuDisappearTimer();
+                }
+                else {
+                    this.menuDisappearTimer(j1);
+                }
+            });
         }, Column);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
@@ -837,7 +988,7 @@ class v1 extends ViewPU {
             });
             Row.onHover((isHover, event) => {
                 if (isHover) {
-                    this.leftSplitBackgroundColor = u1;
+                    this.leftSplitBackgroundColor = this.getResourceColor(w2);
                 }
                 else {
                     this.leftSplitBackgroundColor = Color.Transparent;
@@ -846,22 +997,22 @@ class v1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.menuLeftResource);
-            Image.width(b1);
-            Image.height(b1);
+            Image.width(c1);
+            Image.height(c1);
             Image.fillColor(ObservedObject.GetRawObject(this.splitFillColor));
             Image.margin({
-                top: c1,
-                bottom: c1,
-                left: d1,
-                right: d1
+                top: d1,
+                bottom: d1,
+                left: e1,
+                right: e1
             });
         }, Image);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.leftSplitTitle);
-            Text.fontSize(f1);
+            Text.fontSize(g1);
             Text.textAlign(TextAlign.Start);
             Text.maxLines(1);
-            Text.margin({ top: e1, bottom: e1, right: d1 });
+            Text.margin({ top: f1, bottom: f1, right: e1 });
         }, Text);
         Text.pop();
         Row.pop();
@@ -882,7 +1033,7 @@ class v1 extends ViewPU {
             });
             Row.onHover((isHover, event) => {
                 if (isHover) {
-                    this.rightSplitBackgroundColor = u1;
+                    this.rightSplitBackgroundColor = this.getResourceColor(w2);
                 }
                 else {
                     this.rightSplitBackgroundColor = Color.Transparent;
@@ -891,26 +1042,37 @@ class v1 extends ViewPU {
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Image.create(this.menuRightResource);
-            Image.width(b1);
-            Image.height(b1);
+            Image.width(c1);
+            Image.height(c1);
             Image.fillColor(ObservedObject.GetRawObject(this.splitFillColor));
             Image.margin({
-                top: c1,
-                bottom: c1,
-                left: d1,
-                right: d1
+                top: d1,
+                bottom: d1,
+                left: e1,
+                right: e1
             });
         }, Image);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.rightSplitTitle);
-            Text.fontSize(f1);
+            Text.fontSize(g1);
             Text.textAlign(TextAlign.Start);
             Text.maxLines(1);
-            Text.margin({ top: e1, bottom: e1, right: d1 });
+            Text.margin({ top: f1, bottom: f1, right: e1 });
         }, Text);
         Text.pop();
         Row.pop();
         Column.pop();
+    }
+    menuDisappearTimer(d3) {
+        this.cancelMenuDisappearTimer();
+        this.menuDisappearTimeoutId = setTimeout(() => {
+            this.isShowMenu = false;
+        }, d3);
+    }
+    cancelMenuDisappearTimer() {
+        if (this.menuDisappearTimeoutId !== -1) {
+            clearTimeout(this.menuDisappearTimeoutId);
+        }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -929,36 +1091,44 @@ class v1 extends ViewPU {
             Row.create();
             Row.id('containerModalButtonRowId');
             Row.height('100%');
-            Row.padding({ left: m, right: m });
+            Row.padding({ left: m, right: this.buttonRightOffset + 'vp' });
             Row.onAreaChange((oldValue, newValue) => {
                 this.onAreaChangeEvent(oldValue, newValue);
             });
+            Gesture.create(GesturePriority.Low);
+            PanGesture.create();
+            PanGesture.pop();
+            Gesture.pop();
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild();
             Button.id('EnhanceMaximizeBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.maximizeBackgroundColor));
-            Button.width(j);
-            Button.height(j);
-            Button.type(ButtonType.Circle);
-            Button.margin({ right: m });
+            Button.width(this.buttonSize + 'vp');
+            Button.height(this.buttonSize + 'vp');
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.hoverEffect(HoverEffect.None);
+            Button.margin({ right: this.buttonSpacing + 'vp' });
             Button.responseRegion({
-                x: o,
-                y: t,
-                width: u,
-                height: a1
+                x: t,
+                y: u,
+                width: a1,
+                height: b1
             });
             Button.visibility(this.maximizeVisibility);
             Button.bindMenu(this.isShowMenu, { builder: this.MenuBuilder.bind(this) }, {
                 placement: Placement.BottomRight, aboutToDisappear: () => {
                     this.isShowMenu = false;
+                    this.cancelMenuDisappearTimer();
                 }
             });
             Gesture.create(GesturePriority.Low);
             GestureGroup.create(GestureMode.Exclusive);
             LongPressGesture.create({ repeat: false });
             LongPressGesture.onAction(() => {
-                this.isShowMenu = true;
+                this.onMenuWidthChange();
+                this.isShowMenu = !this.hideSplit;
             });
             LongPressGesture.pop();
             TapGesture.create();
@@ -969,8 +1139,13 @@ class v1 extends ViewPU {
             GestureGroup.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
+                if (isHover && this.maxBtnTouchState == 2) {
+                    isHover = false;
+                    this.maxBtnTouchState = 0;
+                }
                 this.onHoverMaximizeButton(isHover);
                 if (isHover) {
+                    this.onMenuWidthChange();
                     this.onShowMenuWithTimer();
                 }
                 else {
@@ -984,6 +1159,26 @@ class v1 extends ViewPU {
                         this.maximizeScale = 1.0;
                     }
                 });
+            });
+            Button.onTouch((event) => {
+                if (event) {
+                    if (event.type === TouchType.Move) {
+                        this.maxBtnTouchState = 0;
+                    }
+                    if (event.type === TouchType.Down) {
+                        this.maxBtnTouchState = 1;
+                    }
+                    if (event.type === TouchType.Up) {
+                        this.maxBtnTouchState = 2;
+                    }
+                }
+            });
+            Button.onMouse((event) => {
+                if (event) {
+                    if (this.maxBtnTouchState == 0) {
+                        this.onHoverMaximizeButton(true);
+                    }
+                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1000,15 +1195,17 @@ class v1 extends ViewPU {
             Button.createWithChild();
             Button.id('EnhanceMinimizeBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.minimizeBackgroundColor));
-            Button.width(j);
-            Button.height(j);
-            Button.type(ButtonType.Circle);
-            Button.margin({ right: m });
+            Button.width(this.buttonSize + 'vp');
+            Button.height(this.buttonSize + 'vp');
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.margin({ right: this.buttonSpacing + 'vp' });
+            Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
-                x: o,
-                y: t,
-                width: u,
-                height: a1
+                x: t,
+                y: u,
+                width: a1,
+                height: b1
             });
             Button.visibility(this.minimizeVisibility);
             Gesture.create(GesturePriority.Low);
@@ -1019,6 +1216,10 @@ class v1 extends ViewPU {
             TapGesture.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
+                if (isHover && this.maxBtnTouchState == 2) {
+                    isHover = false;
+                    this.maxBtnTouchState = 0;
+                }
                 this.onHoverMinimizeButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1028,6 +1229,13 @@ class v1 extends ViewPU {
                         this.minimizeScale = 1.0;
                     }
                 });
+            });
+            Button.onMouse((event) => {
+                if (event) {
+                    if (this.maxBtnTouchState == 0) {
+                        this.onHoverMinimizeButton(true);
+                    }
+                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1044,15 +1252,16 @@ class v1 extends ViewPU {
             Button.createWithChild();
             Button.id('EnhanceCloseBtn');
             Button.backgroundColor(ObservedObject.GetRawObject(this.closeBackgroundColor));
-            Button.width(j);
-            Button.height(j);
-            Button.type(ButtonType.Circle);
-            Button.margin({ right: m });
+            Button.width(this.buttonSize + 'vp');
+            Button.height(this.buttonSize + 'vp');
+            Button.type(ButtonType.Normal);
+            Button.borderRadius('4vp');
+            Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
-                x: o,
-                y: t,
-                width: u,
-                height: a1
+                x: t,
+                y: u,
+                width: a1,
+                height: b1
             });
             Button.visibility(this.closeVisibility);
             Gesture.create(GesturePriority.Low);
@@ -1063,6 +1272,10 @@ class v1 extends ViewPU {
             TapGesture.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
+                if (isHover && this.maxBtnTouchState == 2) {
+                    isHover = false;
+                    this.maxBtnTouchState = 0;
+                }
                 this.onHoverCloseButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1072,6 +1285,13 @@ class v1 extends ViewPU {
                         this.closeScale = 1.0;
                     }
                 });
+            });
+            Button.onMouse((event) => {
+                if (event) {
+                    if (this.maxBtnTouchState == 0) {
+                        this.onHoverCloseButton(true);
+                    }
+                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1091,10 +1311,10 @@ class v1 extends ViewPU {
         this.updateDirtyElements();
     }
     static getEntryName() {
-        return "Index";
+        return "custombutton";
     }
 }
 
 ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
-loadCustomTitleButton(new v1(undefined, {}));
+loadCustomTitleButton(new c3(undefined, {}));
 ViewStackProcessor.StopGetAccessRecording();

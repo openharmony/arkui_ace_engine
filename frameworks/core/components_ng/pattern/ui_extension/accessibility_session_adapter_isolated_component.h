@@ -33,6 +33,13 @@ public:
     void TransferHoverEvent(const PointF& point, SourceType source,
         AccessibilityHoverEventType eventType, TimeStamp time) override;
     bool IgnoreHostNode() const override;
+
+    bool IgnoreTransformMouseEvent() const override
+    {
+        // already send mouse event by self, no need send in barrierfree hover
+        return true;
+    }
+
 private:
     WeakPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
 };

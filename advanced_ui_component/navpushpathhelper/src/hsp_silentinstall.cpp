@@ -101,6 +101,8 @@ bool HspSilentInstall::IsHspExist(const std::string &moduleName, const std::stri
         return module.moduleName == moduleName;
     });
     if (res) {
+        TAG_LOGI(OHOS::Ace::AceLogTag::ACE_DEFAULT_DOMAIN, "InitRouteMap when module exists");
+        InitRouteMap();
         return true;
     }
     return false;

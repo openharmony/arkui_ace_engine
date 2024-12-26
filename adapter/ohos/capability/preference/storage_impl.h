@@ -27,14 +27,7 @@ class StorageImpl : public Storage {
     DECLARE_ACE_TYPE(StorageImpl, Storage);
 
 public:
-    StorageImpl() : Storage()
-    {
-        auto fileName = AceApplicationInfo::GetInstance().GetDataFileDirPath();
-        if (fileName.empty()) {
-            LOGW("Cannot get storage date file path.");
-        }
-        fileName_ = fileName + "/persistent_storage";
-    };
+    explicit StorageImpl(int areaMode = -1);
     ~StorageImpl() override = default;
 
     void SetString(const std::string& key, const std::string& value) override;
@@ -62,7 +55,7 @@ private:
 };
 
 class StorageProxyImpl : public StorageInterface {
-    RefPtr<Storage> GetStorage() const override;
+    RefPtr<Storage> GetStorage(int areaMode = -1) const override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_ACE_ENGINE_ADAPTER_OHOS_CAPABILITY_PERFERENCE_STORAGE_IMPL_H

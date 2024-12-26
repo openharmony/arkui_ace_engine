@@ -112,7 +112,7 @@ public:
     // get element with nodeId from node map.
     static RefPtr<FrameNode> GetFrameNode(const std::string& tag, int32_t nodeId);
 
-    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node);
+    static void ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRemainActive = false);
     // avoid use creator function, use CreateFrameNode
 
     FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern,
@@ -241,14 +241,7 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback(bool isApproximate = false)
-    {
-        if (isApproximate) {
-            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
-        } else {
-            eventHub_->CleanVisibleAreaCallback(true, false);
-        }
-    }
+    void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
         bool isCalculateInnerClip = false)
@@ -258,6 +251,11 @@ public:
     }
 
     void SetIsCalculateInnerVisibleRectClip(bool isCalculateInnerClip = true)
+    {
+        isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+    }
+
+    void SetIsCalculateInnerClip(bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
     }
@@ -416,6 +414,8 @@ public:
     void ChangeSensitiveStyle(bool isSensitive);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
@@ -643,6 +643,16 @@ public:
     bool IsCustomerSet() const
     {
         return customerSet_;
+    }
+
+    float GetPreGrayedOpacity() const
+    {
+        return preOpacity_;
+    }
+
+    void SetPreGrayedOpacity(float preOpacity)
+    {
+        preOpacity_ = preOpacity;
     }
 
     void SetAllowDrop(const std::set<std::string>& allowDrop)
@@ -1113,14 +1123,16 @@ public:
         return childrenUpdatedFrom_;
     }
 
-    void OnForegroundColorUpdate(const Color& value);
-
     void SetJSCustomProperty(std::function<bool()> func, std::function<std::string(const std::string&)> getFunc);
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
     void AddCustomProperty(const std::string& key, const std::string& value) override;
     void RemoveCustomProperty(const std::string& key) override;
+
+    void AddExtraCustomProperty(const std::string& key, void* extraData);
+    void* GetExtraCustomProperty(const std::string& key) const;
+    void RemoveExtraCustomProperty(const std::string& key);
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1142,6 +1154,18 @@ public:
     RefPtr<UINode> GetCurrentPageRootNode() override;
 
     std::list<RefPtr<FrameNode>> GetActiveChildren();
+
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
+
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
+    }
+
+    void OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 protected:
     void DumpInfo() override;
@@ -1388,9 +1412,11 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
+
+    std::unordered_map<std::string, void*> extraCustomPropertyMap_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
@@ -1410,6 +1436,8 @@ private:
     std::optional<RectF> syncedFramePaintRect_;
 
     int32_t childrenUpdatedFrom_ = -1;
+    VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
+    float preOpacity_ = 1.0f;
 
     friend class RosenRenderContext;
     friend class RenderContext;

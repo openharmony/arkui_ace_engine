@@ -45,6 +45,7 @@ void JSCanvasGradient::JSBind(BindingTarget globalObj)
 
 void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
 {
+    CHECK_NULL_VOID(gradient_);
     if (!isColorStopValid_ && gradient_->GetColors().empty()) {
         isColorStopValid_ = true;
     }
@@ -77,9 +78,7 @@ void JSCanvasGradient::addColorStop(const JSCallbackInfo& info)
         }
         color.SetColor(colorFromString);
         color.SetDimension(offset);
-        if (gradient_) {
-            gradient_->AddColor(color);
-        }
+        gradient_->AddColor(color);
         auto colorSize = gradient_->GetColors().size();
         // prevent setting only one colorStop
         if (colorSize == 1) {

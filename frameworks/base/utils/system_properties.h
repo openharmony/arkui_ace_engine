@@ -606,9 +606,13 @@ public:
 
     static double GetSrollableFriction();
 
+    static double GetScrollableDistance();
+
     static bool IsNeedResampleTouchPoints();
 
     static bool IsNeedSymbol();
+    
+    static bool GetFocusCanBeActive();
 
 private:
     static bool opincEnabled_;
@@ -683,6 +687,8 @@ private:
     static float fontWeightScale_;
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
+    static double scrollableDistance_;
+    static bool focusCanBeActive_;
 };
 
 } // namespace OHOS::Ace

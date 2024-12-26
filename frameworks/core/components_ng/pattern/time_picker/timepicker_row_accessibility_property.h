@@ -33,6 +33,7 @@ public:
     void GetSecondText(std::string& result) const;
 
 private:
+    std::string GetShowDatePickerText() const;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerRowAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

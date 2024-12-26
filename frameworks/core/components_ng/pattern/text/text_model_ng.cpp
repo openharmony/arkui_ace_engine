@@ -35,6 +35,7 @@ constexpr float DEFAULT_OPACITY = 0.2;
 void TextModelNG::Create(const std::u16string& content)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_ETS_TAG, nodeId);
     auto frameNode =
@@ -54,6 +55,7 @@ void TextModelNG::Create(const std::u16string& content)
     }
 
     auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
     textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
     textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
     textPattern->ClearSelectionMenu();
@@ -76,6 +78,7 @@ void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
         auto spans = spanString->GetSpanItems();
         textPattern->SetSpanItemChildren(spans);
         textPattern->SetSpanStringMode(true);
+        textPattern->AllocStyledString();
     }
 }
 
@@ -155,6 +158,7 @@ void TextModelNG::SetTextColor(const Color& value)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
@@ -169,6 +173,7 @@ void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, frameNode);
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -410,7 +415,7 @@ void TextModelNG::SetCopyOption(CopyOptions copyOption)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOption);
 }
 
-void TextModelNG::SetOnCopy(std::function<void(const std::string&)>&& func)
+void TextModelNG::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -647,6 +652,107 @@ void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
+}
+
+void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMarqueeOptions(frameNode, options);
+}
+
+void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (options.HasTextMarqueeStart()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, frameNode);
+    }
+    if (options.HasTextMarqueeStep()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStep, options.GetTextMarqueeStepValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, frameNode);
+    }
+    if (options.HasTextMarqueeLoop()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeLoop, options.GetTextMarqueeLoopValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, frameNode);
+    }
+    if (options.HasTextMarqueeDirection()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDirection, options.GetTextMarqueeDirectionValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, frameNode);
+    }
+    if (options.HasTextMarqueeDelay()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
+    }
+    if (options.HasTextMarqueeFadeout()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeFadeout, options.GetTextMarqueeFadeoutValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeFadeout, frameNode);
+    }
+    if (options.HasTextMarqueeStartPolicy()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStartPolicy, options.GetTextMarqueeStartPolicyValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStartPolicy, frameNode);
+    }
+}
+
+void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
+{
+    TextMarqueeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, options);
+
+    if (layoutProperty->HasTextMarqueeStart()) {
+        options.UpdateTextMarqueeStart(layoutProperty->GetTextMarqueeStart().value());
+    }
+    if (layoutProperty->HasTextMarqueeStep()) {
+        options.UpdateTextMarqueeStep(layoutProperty->GetTextMarqueeStep().value());
+    }
+    if (layoutProperty->HasTextMarqueeLoop()) {
+        options.UpdateTextMarqueeLoop(layoutProperty->GetTextMarqueeLoop().value());
+    }
+    if (layoutProperty->HasTextMarqueeDirection()) {
+        options.UpdateTextMarqueeDirection(layoutProperty->GetTextMarqueeDirection().value());
+    }
+    if (layoutProperty->HasTextMarqueeDelay()) {
+        options.UpdateTextMarqueeDelay(layoutProperty->GetTextMarqueeDelay().value());
+    }
+    if (layoutProperty->HasTextMarqueeFadeout()) {
+        options.UpdateTextMarqueeFadeout(layoutProperty->GetTextMarqueeFadeout().value());
+    }
+    if (layoutProperty->HasTextMarqueeStartPolicy()) {
+        options.UpdateTextMarqueeStartPolicy(layoutProperty->GetTextMarqueeStartPolicy().value());
+    }
+
+    return options;
 }
 
 std::u16string TextModelNG::GetContent(FrameNode* frameNode)
@@ -1019,9 +1125,8 @@ void TextModelNG::SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_Sty
         for (const auto& item : value->items) {
             auto spanItem = SpanModelNG::CreateSpanItem(item);
             if (spanItem) {
-                auto wSpanContent = StringUtils::ToWstring(spanItem->content);
                 auto intervalStart = position;
-                position += static_cast<int32_t>(wSpanContent.length());
+                position += static_cast<int32_t>(spanItem->content.length());
                 auto intervalEnd = position;
                 spanItem->interval = { intervalStart, intervalEnd };
                 spanItem->position = position;
@@ -1051,7 +1156,7 @@ void TextModelNG::SetTextDetectConfig(FrameNode* frameNode, const TextDetectConf
     textPattern->SetTextDetectConfig(textDetectConfig);
 }
 
-void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+void TextModelNG::SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextEventHub>();
@@ -1150,6 +1255,14 @@ bool TextModelNG::GetHalfLeading(FrameNode* frameNode)
 void TextModelNG::SetEnableHapticFeedback(bool state)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetEnableHapticFeedback(state);
+}
+
+void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetEnableHapticFeedback(state);
 }

@@ -28,7 +28,11 @@ std::optional<SizeF> LoadingProgressLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<LoadingProgressPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        host->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            host->GetGeometryNode()->ResetContent();
+        } else {
+            host->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     float height_ = (contentConstraint.selfIdealSize.Height()) ? contentConstraint.selfIdealSize.Height().value()

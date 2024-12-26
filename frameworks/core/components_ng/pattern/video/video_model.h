@@ -20,6 +20,7 @@
 
 #include "base/image/pixel_map.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
 #include "core/components/video/video_controller_v2.h"
 
 namespace OHOS::Ace {
@@ -31,6 +32,7 @@ public:
 
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
     virtual void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetShowFirstFrame(bool showFirstFrame) {}
     virtual void SetProgressRate(double progressRate) = 0;
     virtual void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) = 0;
@@ -40,6 +42,8 @@ public:
     virtual void SetControls(bool controls) = 0;
     virtual void SetObjectFit(ImageFit objectFit) = 0;
     virtual void SetLoop(bool loop) = 0;
+    virtual void SetSurfaceBackgroundColor(Color color) {}
+    virtual void SetShortcutKeyEnabled(bool isEnableShortcutKey) {}
 
     virtual void SetOnStart(VideoEventFunc&& onStart) = 0;
     virtual void SetOnPause(VideoEventFunc&& onPause) = 0;

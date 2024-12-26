@@ -23,6 +23,29 @@ const ArkUIGridModifier* GetGridModifier();
 const CJUIGridModifier* GetCJUIGridModifier();
 void SetOnGridScrollIndex(ArkUINodeHandle node, void* extraParam);
 void ResetOnGridScrollIndex(ArkUINodeHandle node);
+void SetOnGridScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridScrollFrameBegin(ArkUINodeHandle node);
+void SetOnGridReachStartCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridReachStart(ArkUINodeHandle node);
+void SetOnGridReachEndCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridReachEnd(ArkUINodeHandle node);
+void SetOnGridScrollStartCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridScrollStart(ArkUINodeHandle node);
+void SetOnGridScrollStopCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridScrollStop(ArkUINodeHandle node);
+void SetOnGridScrollIndexCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnGridScrollBarUpdateCallBack(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridScrollBarUpdate(ArkUINodeHandle node);
+void SetOnGridItemDragStart(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemDragStart(ArkUINodeHandle node);
+void SetOnGridItemDragEnter(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemDragEnter(ArkUINodeHandle node);
+void SetOnGridItemDragMove(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemDragMove(ArkUINodeHandle node);
+void SetOnGridItemDragLeave(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemDragLeave(ArkUINodeHandle node);
+void SetOnGridItemDrop(ArkUINodeHandle node, void* extraParam);
+void ResetOnGridItemDrop(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_GRID_MODIFIER_H

@@ -194,7 +194,7 @@ public:
     uint32_t length = 0;
     std::string inspectId;
     std::string description;
-    std::string content;
+    std::u16string content;
     uint32_t unicode = 0;
     SpanItemType spanItemType = SpanItemType::NORMAL;
     std::pair<int32_t, int32_t> interval;
@@ -224,15 +224,16 @@ public:
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(), bool isMarquee = false);
     virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
-    virtual void UpdateTextStyleForAISpan(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyleForAISpan(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const TextStyle& aiSpanStyle);
-    virtual void UpdateTextStyle(const std::string& content, const RefPtr<Paragraph>& builder,
+    virtual void UpdateTextStyle(const std::u16string& content, const RefPtr<Paragraph>& builder,
         const TextStyle& textStyle, const int32_t selStart, const int32_t selEnd);
     virtual void UpdateContentTextStyle(
-        const std::string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
+        const std::u16string& content, const RefPtr<Paragraph>& builder, const TextStyle& textStyle);
     virtual void GetIndex(int32_t& start, int32_t& end) const;
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const;
     std::string GetFont() const;
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
@@ -296,8 +297,8 @@ public:
     {
         return isParentText;
     }
-    std::string GetSpanContent(const std::string& rawContent, bool isMarquee = false);
-    std::string GetSpanContent();
+    std::u16string GetSpanContent(const std::u16string& rawContent, bool isMarquee = false);
+    std::u16string GetSpanContent();
     uint32_t GetSymbolUnicode();
     std::string SymbolColorToString();
 
@@ -330,6 +331,9 @@ public:
     {
         return symbolId_;
     }
+    
+    virtual void SpanDumpInfo();
+    void SpanDumpInfoAdvance();
 
 private:
     void EncodeFontStyleTlv(std::vector<uint8_t>& buff) const;
@@ -395,6 +399,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
@@ -407,16 +416,16 @@ public:
             return;
         }
         spanItem_->unicode = unicode;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
-    void UpdateContent(const std::string& content)
+    void UpdateContent(const std::u16string& content)
     {
         if (spanItem_->content == content) {
             return;
         }
         spanItem_->content = content;
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void UpdateOnClickEvent(GestureEventFunc&& onClick)
@@ -437,6 +446,9 @@ public:
     void UpdateColorByResourceId()
     {
         spanItem_->fontStyle->UpdateColorByResourceId();
+        if (spanItem_->backgroundStyle) {
+            spanItem_->backgroundStyle->UpdateColorByResourceId();
+        }
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
@@ -486,12 +498,17 @@ public:
         spanItem_->ToJsonValue(json, filter);
     }
 
-    void RequestTextFlushDirty();
-    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        spanItem_->ToTreeJson(json, config);
+    }
+
+    void RequestTextFlushDirty(bool markModifyDone = false);
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node, bool markModifyDone = true);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
-        RequestTextFlushDirty();
+        RequestTextFlushDirty(true);
     }
 
     void SetPropertyInfoContainer();
@@ -546,23 +563,7 @@ public:
         const TextStyle& textStyle, PlaceholderStyle placeholderStyle = PlaceholderStyle(),
         bool isMarquee = false) override;
 
-    void DumpInfo() const
-    {
-        auto& dumpLog = DumpLog::GetInstance();
-        dumpLog.AddDesc("--------------- print run info ---------------");
-        dumpLog.AddDesc(std::string("Width: ").append(std::to_string(run_.width)));
-        dumpLog.AddDesc(std::string("Height: ").append(std::to_string(run_.height)));
-        dumpLog.AddDesc(std::string("Alignment: ").append(StringUtils::ToString(run_.alignment)));
-        dumpLog.AddDesc(std::string("Baseline: ").append(StringUtils::ToString(run_.baseline)));
-        dumpLog.AddDesc(std::string("BaselineOffset: ").append(std::to_string(run_.baseline_offset)));
-        dumpLog.AddDesc("--------------- print text style ---------------");
-        dumpLog.AddDesc(std::string("FontSize: ").append(textStyle.GetFontSize().ToString()));
-        dumpLog.AddDesc(std::string("LineHeight: ").append(textStyle.GetLineHeight().ToString()));
-        dumpLog.AddDesc(std::string("LineSpacing: ").append(textStyle.GetLineSpacing().ToString()));
-        dumpLog.AddDesc(std::string("VerticalAlign: ").append(StringUtils::ToString(textStyle.GetTextVerticalAlign())));
-        dumpLog.AddDesc(std::string("HalfLeading: ").append(std::to_string(textStyle.GetHalfLeading())));
-        dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
-    }
+    void DumpInfo() const;
     ACE_DISALLOW_COPY_AND_MOVE(PlaceholderSpanItem);
 
     void SetCustomNode(const RefPtr<UINode>& customNode)
@@ -590,48 +591,6 @@ public:
     {
         return false;
     }
-
-    void OnModifyDone() override
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-        CHECK_NULL_VOID(!IsInitHoverEvent_);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto inputHub = eventHub->GetOrCreateInputEventHub();
-        CHECK_NULL_VOID(inputHub);
-        auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "placeholder, on hover event isHover=%{public}d", isHover);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->OnHover(isHover);
-        };
-        auto hoverEvent = MakeRefPtr<InputEvent>(std::move(hoverTask));
-        inputHub->AddOnHoverEvent(hoverEvent);
-        IsInitHoverEvent_ = true;
-    }
-
-    void OnHover(bool isHover)
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG);
-        auto pipelineContext = parent->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto frameId = parent->GetId();
-        if (isHover) {
-            pipelineContext->FreeMouseStyleHoldNode(frameId);
-        } else {
-            pipelineContext->FreeMouseStyleHoldNode();
-            pipelineContext->SetMouseStyleHoldNode(frameId);
-            pipelineContext->ChangeMouseStyle(frameId, OHOS::Ace::MouseFormat::TEXT_CURSOR);
-        }
-    }
-
-    bool IsInitHoverEvent_ = false;
 };
 
 class ACE_EXPORT PlaceholderSpanNode : public FrameNode {
@@ -695,6 +654,10 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+    void SpanDumpInfo() override
+    {
+        PlaceholderSpanItem::DumpInfo();
+    }
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -769,6 +732,7 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+    OnHoverFunc onHover_;
 private:
     ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
     ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;

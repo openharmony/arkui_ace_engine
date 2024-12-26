@@ -42,6 +42,11 @@ constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
+constexpr float DEFAULT_GRAYED = 0.4f;
+const RefPtr<InterpolatingSpring> DRAG_START_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 380.0f, 34.0f);
+const RefPtr<InterpolatingSpring> DRAG_END_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 228.0f, 29.0f);
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
@@ -97,7 +102,7 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
     option.SetCurve(Curves::SHARP);
     auto frameNode = actuator->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
+    auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
     bool isGrid = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG;
@@ -108,14 +113,10 @@ void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEven
         [gatherNodeCenter, gatherNodeChildrenInfo, calcResult]() mutable {
             for (const auto& child : gatherNodeChildrenInfo) {
                 auto imageNode = child.imageNode.Upgrade();
-                CHECK_NULL_VOID(imageNode);
-                auto imageContext = imageNode->GetRenderContext();
-                CHECK_NULL_VOID(imageContext);
                 auto curPos = child.offset + OffsetF(child.halfWidth, child.halfHeight);
                 auto offset = CalcOffsetToTarget(curPos, gatherNodeCenter, calcResult);
-                imageContext->UpdatePosition(OffsetT<Dimension>(
-                    Dimension(child.offset.GetX() + offset.GetX()),
-                    Dimension(child.offset.GetY() + offset.GetY())));
+                offset += child.offset;
+                DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, offset);
             }
         });
 }
@@ -159,6 +160,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     auto gatherNodeChildrenInfo = actuator->GetGatherNodeChildrenInfo();
     DragEventActuator::MountGatherNode(manager, frameNode, gatherNode, gatherNodeChildrenInfo);
     actuator->ClearGatherNodeChildrenInfo();
+    actuator->InitGatherNodesPosition(gatherNodeChildrenInfo);
     pipeline->FlushSyncGeometryNodeTasks();
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
@@ -383,7 +385,6 @@ void DragAnimationHelper::UpdateGatherNodeToTop()
 
 void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode)
 {
-    TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather animation with menu");
     auto mainPipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(mainPipeline);
     auto manager = mainPipeline->GetOverlayManager();
@@ -406,5 +407,45 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
+}
+
+void DragAnimationHelper::SetPreOpacity(const RefPtr<FrameNode>& preNode)
+{
+    auto grayedOpacity = preNode->GetPreGrayedOpacity();
+    DoGrayedAnimation(preNode, grayedOpacity, DRAG_END_ANIMATION_CURVE);
+}
+
+void DragAnimationHelper::DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    float opacity = 1.0f;
+    if (renderContext->HasOpacity()) {
+        opacity = renderContext->GetOpacityValue();
+        frameNode->SetPreGrayedOpacity(opacity);
+    }
+    DoGrayedAnimation(frameNode, opacity * DEFAULT_GRAYED, DRAG_START_ANIMATION_CURVE);
+}
+
+void DragAnimationHelper::DoGrayedAnimation(
+    const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->IsTextCategoryComponent(frameTag)) {
+        return;
+    }
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (!dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        return;
+    }
+    AnimationOption option;
+    option.SetCurve(cure);
+    AnimationUtils::Animate(
+        option, [frameNode, opacity]() { ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode); },
+        option.GetOnFinishEvent());
 }
 }

@@ -59,6 +59,9 @@ XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
     if (nodePtr.IsEmpty() || nodePtr->IsNull() || nodePtr->IsUndefined()) {
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
     }
+    if (!nodePtr->IsNativePointer(vm)) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(nodePtr->ToNativePointer(vm)->Value());
     if (!frameNode) {
         return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;

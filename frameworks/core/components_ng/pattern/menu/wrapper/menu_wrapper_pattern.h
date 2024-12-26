@@ -222,6 +222,11 @@ public:
         isFirstShow_ = true;
     }
 
+    bool GetIsFirstShow() const
+    {
+        return isFirstShow_;
+    }
+
     void SetIsShowHoverImage(bool isShow)
     {
         isShowHoverImage_ = isShow;
@@ -250,6 +255,26 @@ public:
     bool GetIsShowHoverImagePreviewStartDrag() const
     {
         return isShowHoverImagePreviewStartDrag_;
+    }
+
+    void SetOnMenuDisappear(bool isDisappear)
+    {
+        onMenuDisappear_ = isDisappear;
+    }
+
+    bool GetOnMenuDisappear() const
+    {
+        return onMenuDisappear_;
+    }
+
+    void SetOnPreviewDisappear(bool isDisappear)
+    {
+        onPreviewDisappear_ = isDisappear;
+    }
+
+    bool GetOnPreviewDisappear() const
+    {
+        return onPreviewDisappear_;
     }
 
     void RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam);
@@ -386,28 +411,7 @@ public:
         return dumpInfo_;
     }
 
-    void SetDumpInfo(const MenuDumpInfo& dumpInfo)
-    {
-        dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
-        dumpInfo_.menuType = dumpInfo.menuType;
-        dumpInfo_.enableArrow = dumpInfo.enableArrow;
-        dumpInfo_.targetNode = dumpInfo.targetNode;
-        dumpInfo_.targetOffset = dumpInfo.targetOffset;
-        dumpInfo_.targetSize = dumpInfo.targetSize;
-        dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
-        dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
-        dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
-        dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
-        dumpInfo_.top = dumpInfo.top;
-        dumpInfo_.bottom = dumpInfo.bottom;
-        dumpInfo_.left = dumpInfo.left;
-        dumpInfo_.right = dumpInfo.right;
-        dumpInfo_.globalLocation = dumpInfo.globalLocation;
-        dumpInfo_.originPlacement = dumpInfo.originPlacement;
-        dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
-        dumpInfo_.finalPosition = dumpInfo.finalPosition;
-        dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
-    }
+    void SetDumpInfo(const MenuDumpInfo& dumpInfo);
 
     bool GetHasCustomRadius() const
     {
@@ -431,12 +435,18 @@ public:
 
     int IncreaseEmbeddedSubMenuCount()
     {
+        ++embeddedSubMenuExpandTotalCount_;
         return ++embeddedSubMenuCount_;
     }
 
     int DecreaseEmbeddedSubMenuCount()
     {
         return --embeddedSubMenuCount_;
+    }
+
+    int GetEmbeddedSubMenuExpandTotalCount() const
+    {
+        return embeddedSubMenuExpandTotalCount_;
     }
 
     RefPtr<FrameNode> GetMenuChild(const RefPtr<UINode>& node);
@@ -506,6 +516,21 @@ public:
 
     void RequestPathRender();
 
+    void SetChildLayoutConstraint(LayoutConstraintF constraint)
+    {
+        childLayoutConstraint_ = constraint;
+    }
+
+    LayoutConstraintF GetChildLayoutConstraint() const
+    {
+        return childLayoutConstraint_;
+    }
+
+    void SetPreviewDisappearStartOffset(OffsetF offset)
+    {
+        previewDisappearStartOffset_ = offset;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -550,6 +575,8 @@ private:
     RefPtr<FrameNode> currentTouchItem_ = nullptr;
     // menuId in OverlayManager's map
     int32_t targetId_ = -1;
+    int embeddedSubMenuExpandTotalCount_ = 0;
+    LayoutConstraintF childLayoutConstraint_;
 
     AnimationOption animationOption_;
     Placement menuPlacement_ = Placement::NONE;
@@ -558,10 +585,13 @@ private:
     bool isShowHoverImage_ = false;
     bool isStopHoverImageAnimation_ = false;
     bool isShowHoverImagePreviewStartDrag_ = false;
+    bool onMenuDisappear_ = false;
+    bool onPreviewDisappear_ = false;
     MenuStatus menuStatus_ = MenuStatus::INIT;
     bool hasTransitionEffect_ = false;
     bool hasPreviewTransitionEffect_ = false;
     bool hasFoldModeChangeTransition_ = false;
+    OffsetF previewDisappearStartOffset_;
     RefPtr<FrameNode> filterColumnNode_;
     MenuDumpInfo dumpInfo_;
     bool hasCustomRadius_ = false;

@@ -22,6 +22,7 @@
 #include "pointer_event.h"
 #include "transaction/rs_interfaces.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_adapter_impl_v2.h"
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
@@ -68,6 +69,7 @@ constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
+constexpr char NO_FORM_DUMP[] = "-noform";
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -138,6 +140,7 @@ void FormPattern::OnAttachToFrameNode()
         auto uiTaskExecutor =
             SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         auto id = subContainer->GetRunningCardId();
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnAttachToFrameNode, cardId: %{public}" PRId64, id);
         FormManager::GetInstance().AddSubContainer(id, subContainer);
         uiTaskExecutor.PostDelayedTask(
             [id, nodeId = subContainer->GetNodeId()] {
@@ -162,6 +165,7 @@ void FormPattern::InitClickEvent()
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     auto clickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto formPattern = weak.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FORM, "gestureEvent - clickCallback");
         CHECK_NULL_VOID(formPattern);
         formPattern->HandleStaticFormEvent(
             { static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()) });
@@ -291,6 +295,7 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
     if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
     for (const auto& info : formLinkInfos_) {
         auto linkInfo = JsonUtil::ParseJsonString(info);
         CHECK_NULL_VOID(linkInfo);
@@ -564,6 +569,11 @@ void FormPattern::OnRebuildFrame()
         return;
     }
 
+    if (isSkeletonAnimEnable_ && !isTransparencyEnable_ && !ShouldAddChildAtReuildFrame()) {
+        TAG_LOGW(AceLogTag::ACE_FORM, "should not add child");
+        return;
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
@@ -608,6 +618,7 @@ void FormPattern::OnModifyDone()
     }
     // Convert DimensionUnit to DimensionUnit::PX
     auto info = layoutProperty->GetRequestFormInfo().value_or(RequestFormInfo());
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnModifyDone, info.id: %{public}" PRId64, info.id);
     info.width = Dimension(width.ConvertToPx());
     info.height = Dimension(height.ConvertToPx());
     auto &&borderWidthProperty = layoutProperty->GetBorderWidthProperty();
@@ -1245,15 +1256,26 @@ void FormPattern::InitFormManagerDelegate()
     context->SetSizeChangeByRotateCallback(callback);
 }
 
-void FormPattern::GetRectRelativeToWindow(int32_t &top, int32_t &left)
+void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rect = host->GetTransformRectRelativeToWindow();
-    top = rect.Top();
-    left = rect.Left();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    parentRectInfo.top = static_cast<int32_t>(rect.Top());
+    parentRectInfo.left = static_cast<int32_t>(rect.Left());
+    parentRectInfo.scaleX = finalScale.x;
+    parentRectInfo.scaleY = finalScale.y;
+
+    auto pipeline = host->GetContext();
+    if (pipeline) {
+        auto windowRect = pipeline->GetDisplayWindowRectInfo();
+        parentRectInfo.top += static_cast<int32_t>(windowRect.Top());
+        parentRectInfo.left += static_cast<int32_t>(windowRect.Left());
+    }
+
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",
-        host->GetAccessibilityId(), top, left);
+        host->GetAccessibilityId(), parentRectInfo.top, parentRectInfo.left);
 }
 
 void FormPattern::ProcDeleteImageNode(const AAFwk::Want& want)
@@ -1571,7 +1593,11 @@ void FormPattern::OnLoadEvent()
 
 void FormPattern::OnActionEvent(const std::string& action)
 {
-    CHECK_NULL_VOID(formManagerBridge_);
+    TAG_LOGI(AceLogTag::ACE_FORM, "formPattern receive actionEvent");  
+    if (!formManagerBridge_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "OnActionEvent failed, form manager deleget is null!");
+        return;
+    }
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;
@@ -1599,8 +1625,8 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
+    isManuallyClick_ = false;
     if ("router" == type) {
-        isManuallyClick_ = false;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto context = host->GetContext();
@@ -1645,6 +1671,10 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
 
+    if (OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN == pointerEvent->GetPointerAction()) {
+        isManuallyClick_ = true;
+        DelayResetManuallyClickFlag();
+    }
     if (!isVisible_) {
         auto pointerAction = pointerEvent->GetPointerAction();
         if (pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_UP ||
@@ -1860,7 +1890,6 @@ bool FormPattern::CheckFormBundleForbidden(const std::string &bundleName)
 
 void FormPattern::DelayResetManuallyClickFlag()
 {
-    isManuallyClick_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -2121,7 +2150,6 @@ void FormPattern::InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceID)
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}zu", action.length());
         auto formPattern = weak.Upgrade();
         CHECK_NULL_VOID(formPattern);
-        formPattern->DelayResetManuallyClickFlag();
         formPattern->OnActionEvent(action);
     });
 }
@@ -2171,17 +2199,17 @@ void FormPattern::InitOtherCallback(int32_t instanceID)
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
     formManagerBridge_->AddGetRectRelativeToWindowCallback(
-        [weak = WeakClaim(this), instanceID](int32_t &top, int32_t &left) {
+        [weak = WeakClaim(this), instanceID](AccessibilityParentRectInfo& parentRectInfo) {
             ContainerScope scope(instanceID);
             auto context = PipelineContext::GetCurrentContextSafely();
             CHECK_NULL_VOID(context);
             auto uiTaskExecutor =
                 SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostSyncTask([weak, instanceID, &top, &left] {
+            uiTaskExecutor.PostSyncTask([weak, instanceID, &parentRectInfo] {
                 ContainerScope scope(instanceID);
                 auto form = weak.Upgrade();
                 CHECK_NULL_VOID(form);
-                form->GetRectRelativeToWindow(top, left);
+                form->GetRectRelativeToWindow(parentRectInfo);
                 }, "ArkUIFormGetRectRelativeToWindow");
         });
 
@@ -2243,6 +2271,76 @@ void FormPattern::enhancesSubContainer(bool hasContainer)
 
     if (hasContainer) {
         subContainer_->RunSameCard();
+    }
+}
+
+bool FormPattern::ShouldAddChildAtReuildFrame()
+{
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_RETURN(externalRenderContext, true);
+    auto externalRsNode = externalRenderContext->GetRSNode();
+    if (externalRsNode) {
+        auto externalParentRsNode = externalRsNode->GetParent();
+        if (externalParentRsNode) {
+            uint32_t externalParentRsNodeId = externalParentRsNode->GetId();
+            TAG_LOGW(AceLogTag::ACE_FORM, "external Parent RsNode Id:%{public}d", externalParentRsNodeId);
+            if (externalParentRsNodeId != 0) {
+                return false;
+            }
+        }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_FORM, "external RsNode is null");
+    }
+    return true;
+}
+
+void FormPattern::DumpInfo()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in string format");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -noform to choose not dump form info
+    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
+    } else {
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        formManagerBridge_->NotifyFormDump(params, dumpInfo);
+        for (std::string& info : dumpInfo) {
+            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
+            DumpLog::GetInstance().AddDesc(std::string("Form info: ").append(infoRes));
+        }
+    }
+}
+
+void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in json format");
+    if (formManagerBridge_ == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    // Use -noform to choose not dump form info
+    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
+    } else {
+        params.push_back(std::to_string(getpid()));
+        std::vector<std::string> dumpInfo;
+        formManagerBridge_->NotifyFormDump(params, dumpInfo);
+        for (std::string& info : dumpInfo) {
+            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
+            json->Put("Form info: ", infoRes.c_str());
+        }
     }
 }
 } // namespace OHOS::Ace::NG

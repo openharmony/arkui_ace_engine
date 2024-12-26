@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/components_ng/pattern/common_view/common_view_model_ng.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
+#include "core/components_ng/pattern/custom_node_ext/custom_node_ext_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
@@ -99,7 +100,7 @@ void* createSymbolNode(ArkUI_Int32 nodeId)
 
 void* createSpanNode(ArkUI_Int32 nodeId)
 {
-    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
@@ -149,7 +150,7 @@ void* createLoadingProgress(ArkUI_Int32 nodeId)
 
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", false);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", false);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -189,7 +190,7 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 
 void* createTextAreaNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", true);
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, u"", u"", true);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -570,6 +571,21 @@ void* createRatingNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* CreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNode(std::string(tag));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
+{
+    auto frameNode = CustomNodeExtModelNG::GetOrCreateFrameNode(std::string(tag));
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {
@@ -593,7 +609,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
+#ifndef ARKUI_WEARABLE
     createTabsNode,
+#else
+    nullptr, // createTabsNode
+#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -616,8 +636,13 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createCalendarPickerNode,
     createGridItemNode,
     createCustomNode,
+#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
+#else
+    nullptr, // createWaterFlowNode
+    nullptr, // createFlowItemNode
+#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,
@@ -628,7 +653,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSelectNode,
     createImageAnimatorNode,
     createCircleNode,
+#ifndef ARKUI_WEARABLE
     createTabContentNode,
+#else
+    nullptr, // createTabContentNode
+#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,

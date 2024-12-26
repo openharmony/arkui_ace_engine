@@ -4,11 +4,11 @@
         "src/utility/ArkResourcesHelper.ts",
         "src/utility/ArkThemeNativeHelper.ts",
 
-        // styles
-        "src/styles/lazyforeach/ArkLazyForEachBindings.ts",
-        "src/styles/listitem/ArkListItemBindings.ts",
-
         // theme management
+        "src/theme/lazy_for_each/ArkLazyForEachBindings.ts",
+        "src/theme/list_item/ArkListItemBindings.ts",
+        "src/theme/ArkThemeCache.ts",
+        "src/theme/ArkThemeBase.ts",
         "src/theme/system/ArkSystemColors.ts",
         "src/theme/system/ArkSystemShapes.ts",
         "src/theme/system/ArkSystemTypography.ts",

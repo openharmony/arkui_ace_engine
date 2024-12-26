@@ -93,9 +93,8 @@ Global::Resource::InputDevice ConvertInputDevice(bool deviceAccess)
 std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const ResourceConfiguration& config)
 {
     std::shared_ptr<Global::Resource::ResConfig> newResCfg(Global::Resource::CreateResConfig());
-    newResCfg->SetLocaleInfo(AceApplicationInfo::GetInstance().GetLanguage().c_str(),
-        AceApplicationInfo::GetInstance().GetScript().c_str(),
-        AceApplicationInfo::GetInstance().GetCountryOrRegion().c_str());
+    icu::Locale locale(config.GetLanguage().c_str());
+    newResCfg->SetLocaleInfo(locale);
     newResCfg->SetDeviceType(ConvertDeviceTypeToGlobal(config.GetDeviceType()));
     newResCfg->SetDirection(ConvertDirectionToGlobal(config.GetOrientation()));
     newResCfg->SetScreenDensity(config.GetDensity());
@@ -104,8 +103,8 @@ std::shared_ptr<Global::Resource::ResConfig> ConvertConfigToGlobal(const Resourc
     newResCfg->SetAppColorMode(config.GetColorModeIsSetByApp());
     newResCfg->SetMcc(config.GetMcc());
     newResCfg->SetMnc(config.GetMnc());
-    icu::Locale locale(config.GetPreferredLanguage().c_str());
-    newResCfg->SetPreferredLocaleInfo(locale);
+    icu::Locale preferredLocale(config.GetPreferredLanguage().c_str());
+    newResCfg->SetPreferredLocaleInfo(preferredLocale);
     return newResCfg;
 }
 

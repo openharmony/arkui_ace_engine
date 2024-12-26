@@ -34,6 +34,7 @@
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/animation/animation_pub.h"
 #include "core/common/ace_engine.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -132,6 +133,15 @@ bool CheckContainer(const RefPtr<Container>& container)
     }
     auto executor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(executor, false);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
+bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
     return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 
@@ -637,9 +647,31 @@ void JSViewContext::JSAnimateToImmediately(const JSCallbackInfo& info)
     AnimateToInner(info, true);
 }
 
+void RecordAnimationFinished(int32_t count)
+{
+    if (Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_ANIMATION)) {
+        Recorder::EventParamsBuilder builder;
+        builder.SetEventCategory(Recorder::EventCategory::CATEGORY_ANIMATION)
+            .SetEventType(Recorder::EventType::ANIMATION_FINISHED)
+            .SetExtra(Recorder::KEY_COUNT, std::to_string(count));
+        Recorder::EventRecorder::Get().OnEvent(std::move(builder));
+    }
+}
+
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
-    ContainerScope scope(Container::CurrentIdSafelyWithCheck());
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    if (!CheckRunOnThreadByThreadId(currentId, true)) {
+        // fix DynamicComponent get wrong container when calling the animateTo function.
+        auto localContainerId = ContainerScope::CurrentLocalId();
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "AnimateToInner not run on running thread, currentId: %{public}d, localId: %{public}d",
+            currentId, localContainerId);
+        if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
+            currentId = localContainerId;
+        }
+    }
+    ContainerScope scope(currentId);
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -682,6 +714,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
         onFinishEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                             id = Container::CurrentIdSafely(), traceStreamPtr, node = frameNode, count]() mutable {
+            RecordAnimationFinished(count.value_or(1));
             CHECK_NULL_VOID(func);
             ContainerScope scope(id);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -695,7 +728,8 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     } else {
-        onFinishEvent = [traceStreamPtr]() {
+        onFinishEvent = [traceStreamPtr, count]() {
+            RecordAnimationFinished(count.value_or(1));
             AceAsyncTraceEnd(0, traceStreamPtr->str().c_str(), true);
         };
     }
@@ -970,6 +1004,21 @@ void JSViewContext::GetMaxFontScale(const JSCallbackInfo& info)
     return;
 }
 
+void JSViewContext::SetEnableSwipeBack(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsBoolean()) {
+        return;
+    }
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->SetEnableSwipeBack(info[0]->ToBoolean());
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
@@ -983,11 +1032,14 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
+#ifndef ARKUI_WEARABLE
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
     JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
     JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
+#endif
+    JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

@@ -148,6 +148,8 @@ public:
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
+            theme->errorTextStyle_.SetTextAlign(
+                static_cast<TextAlign>(pattern->GetAttr<double>("textfield_error_text_align", 0.0)));
 
             theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
             theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
@@ -220,6 +222,8 @@ public:
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
+            auto supportSearch = pattern->GetAttr<std::string>("textfield_menu_search_is_support", "0");
+            theme->supportSearch_ = StringUtils::StringToInt(supportSearch);
         }
     };
 
@@ -670,10 +674,71 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetIsSupportSearch() const
+    {
+        return supportSearch_;
+    }
+
     const std::string& GetAIWriteIsSupport() const
     {
         return aiWriteIsSupport_;
     }
+
+    const Dimension& GetCounterTextTopMargin() const
+    {
+        return counterTextTopMargin_;
+    }
+
+    const Dimension& GetCounterTextBottomMargin() const
+    {
+        return counterTextBottomMargin_;
+    }
+
+    const Dimension& GetStandardCounterTextMargin() const
+    {
+        return standardCounterTextMargin_;
+    }
+
+    const Dimension& GetErrorTextTopMargin() const
+    {
+        return errorTextTopMargin_;
+    }
+
+    const Dimension& GetErrorTextBottomMargin() const
+    {
+        return errorTextBottomMargin_;
+    }
+
+    const Dimension& GetCounterTextMarginOffset() const
+    {
+        return counterTextMarginOffset_;
+    }
+
+    const Dimension& GetErrorTextUnderlineMargin() const
+    {
+        return errorTextUnderlineMargin_;
+    }
+
+    const Dimension& GetErrorTextCapsuleMargin() const
+    {
+        return errorTextCapsuleMargin_;
+    }
+
+    float GetErrorTextMaxFontScale() const
+    {
+        return errorTextMaxFontScale_;
+    }
+
+    uint32_t GetCounterTextMaxline() const
+    {
+        return counterTextMaxline_;
+    }
+
+    uint32_t GetErrorTextMaxLine() const
+    {
+        return errorTextMaxLine_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -766,6 +831,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool supportSearch_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 
     // cancelButton
@@ -779,6 +845,19 @@ private:
     Dimension inlinePaddingLeft_ = 0.0_vp;
     Dimension inlinePaddingRight_ = 0.0_vp;
     Dimension placeholderLineSpacing_ = 0.0_vp;
+
+    Dimension counterTextTopMargin_ = 8.0_vp;
+    Dimension counterTextBottomMargin_ = 8.0_vp;
+    Dimension standardCounterTextMargin_ = 22.0_vp;
+    Dimension errorTextTopMargin_ = 8.0_vp;
+    Dimension errorTextBottomMargin_ = 8.0_vp;
+    Dimension counterTextMarginOffset_ = 8._vp;
+    Dimension errorTextUnderlineMargin_ = 8.0_vp;
+    Dimension errorTextCapsuleMargin_ = 8.0_vp;
+    
+    float errorTextMaxFontScale_ = 2.0f;
+    uint32_t counterTextMaxline_ = 1;
+    uint32_t errorTextMaxLine_ = 1;
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;

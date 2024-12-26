@@ -45,7 +45,8 @@ enum class PlatformVersion {
     VERSION_THIRTEEN,
     VERSION_FOURTEEN,
     VERSION_FIFTEEN,
-    VERSION_SIXTEEN
+    VERSION_SIXTEEN,
+    VERSION_SEVENTEEN
 };
 struct AceBundleInfo {
     uint32_t versionCode = 0;
@@ -146,7 +147,7 @@ public:
         return script_;
     }
 
-    const std::string& GetLocaleTag() const
+    std::string GetLocaleTag()
     {
         std::shared_lock<std::shared_mutex> lock(localeTagMutex_);
         return localeTag_;

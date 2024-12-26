@@ -99,6 +99,8 @@ export struct GridBootcamp {
   scrollerForV: Scroller = new Scroller();
   scrollerForH: Scroller = new Scroller();
   @State currentIndex: number = 0
+  @State enableDragGray: boolean = false;
+  @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
   private controller: TabsController = new TabsController()
   private listScrollerForV: ListScroller = new ListScroller()
   private listScrollerForH: ListScroller = new ListScroller()
@@ -222,6 +224,8 @@ export struct GridBootcamp {
                   fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
                 })
               )
+              .onDragStart(() => {})
+              .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
               .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { //第一次拖拽此事件绑定的组件时，触发回调。
                 this.dragText = this.getElements()[itemIndex]
                 return this.pixelMapBuilder() //设置拖拽过程中显示的图片。
@@ -317,6 +321,8 @@ export struct GridBootcamp {
                   fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
                 })
               )
+              .onDragStart(() => {})
+              .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
               .onItemDragStart((event: ItemDragInfo, itemIndex: number) => { //第一次拖拽此事件绑定的组件时，触发回调。
                 this.dragText = this.getElements()[itemIndex]
                 return this.pixelMapBuilder() //设置拖拽过程中显示的图片。
@@ -610,6 +616,16 @@ export struct GridBootcamp {
           value: $frCount,
           min: 1,
           max: 6
+        })
+
+        RadioBlock({
+          title: '拖拽背板图样式',
+          isEnabled: $enableDragGray,
+          value: $dragGray,
+          dataSource: [
+            { label: '默认', value: DragPreviewMode.AUTO },
+            { label: '灰显', value: DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT }
+          ]
         })
 
         SliderBlock({

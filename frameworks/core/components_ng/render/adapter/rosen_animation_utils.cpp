@@ -17,6 +17,7 @@
 
 #include "core/animation/native_curve_helper.h"
 #include "core/common/container.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -87,6 +88,15 @@ private:
     friend AnimationUtils;
 };
 
+void AnimationUtils::SetNavGroupNodeTransAnimationCallback()
+{
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto navigationManger = pipelineContext->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManger);
+    navigationManger->SetNodeAddAnimation(true);
+}
+
 void AnimationUtils::OpenImplicitAnimation(
     const AnimationOption& option, const RefPtr<Curve>& curve, const std::function<void()>& finishCallback)
 {
@@ -99,6 +109,7 @@ bool AnimationUtils::CloseImplicitAnimation()
 {
     auto animations = Rosen::RSNode::CloseImplicitAnimation();
     auto pipeline = PipelineBase::GetCurrentContext();
+    SetNavGroupNodeTransAnimationCallback();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
     }
@@ -124,6 +135,7 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     Rosen::RSNode::Animate(timingProtocol, NativeCurveHelper::ToNativeCurve(option.GetCurve()), callback,
         wrappedOnFinish, wrappedOnRepeat);
     auto pipeline = PipelineBase::GetCurrentContext();
+    SetNavGroupNodeTransAnimationCallback();
     if (pipeline && !pipeline->GetOnShow()) {
         pipeline->FlushMessages();
     }

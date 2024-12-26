@@ -153,6 +153,9 @@ void CheckBoxGroupPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             checkboxPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }

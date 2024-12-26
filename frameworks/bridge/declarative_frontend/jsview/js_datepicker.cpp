@@ -865,7 +865,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
 
 JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
-    std::tm dateTime = { 0 };
+    std::tm dateTime {};
     auto year = selectedJson->GetValue("year");
     if (year && year->IsNumber()) {
         dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
@@ -1113,11 +1113,13 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject()) {
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+        && !info[0]->IsEmpty())) {
         return;
     }
 
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
     DatePickerType pickerType = DatePickerType::DATE;
     auto type = paramObject->GetProperty("type");
     if (type->IsNumber()) {
@@ -1668,10 +1670,12 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject()) {
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+        && !info[0]->IsEmpty())) {
         return;
     }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
+    auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;

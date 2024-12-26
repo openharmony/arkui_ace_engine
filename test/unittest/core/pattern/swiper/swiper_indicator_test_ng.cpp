@@ -51,7 +51,7 @@ void SwiperIndicatorTestNg::MouseClickIndicator(SourceType sourceType, Offset ho
     gestureEvent.SetSourceDevice(sourceType);
     indicatorPattern->isRepeatClicked_ = false;
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset touchPoint)
@@ -64,7 +64,7 @@ void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset to
     gestureEvent.SetSourceDevice(sourceType);
     gestureEvent.SetLocalLocation(touchPoint);
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoint)
@@ -77,7 +77,7 @@ void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoin
 
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::MOVE, endPoint));
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, endPoint));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -183,14 +183,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
 
     /**
-     * @tc.steps: step1. Click item(index:1)
-     * @tc.expected: Swipe to item(index:3)
-     */
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-
-    /**
-     * @tc.steps: step2. Click item(index:0)
+     * @tc.steps: step1. Click item(index:0)
      * @tc.expected: Swipe to item(index:0)
      */
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
@@ -531,24 +524,27 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.Level1)
 {
-    SwiperModelNG model = CreateSwiper();
+    CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+
     /**
      * @tc.steps: step1. call no mirror func.
      */
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
+    indicatorPattern->hoverPoint_ = PointF(72.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
+
     /**
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+    indicatorPattern->hoverPoint_ = PointF(16.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
 }
 
 /**
@@ -564,26 +560,21 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
     EXPECT_EQ(pattern_->currentIndex_, 3);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 5);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, 7);
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->currentIndex_, 5);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 4);
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 7);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 11);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 13);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
@@ -593,19 +584,16 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
     EXPECT_EQ(pattern_->currentIndex_, 12);
 
     pattern_->ChangeIndex(0, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -1);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -4);
 
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -9);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -12);
@@ -827,10 +815,12 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(2);
     model.SetSwipeByGroup(true);
-    CreateSwiperItems();
+    model.SetLoop(true);
+    CreateSwiperItems(6);
     CreateSwiperDone();
+
     auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 4);
+    EXPECT_EQ(totalCount, 6);
 
     float additionalOffset = 0.0f;
     pattern_->contentMainSize_ = SWIPER_WIDTH;

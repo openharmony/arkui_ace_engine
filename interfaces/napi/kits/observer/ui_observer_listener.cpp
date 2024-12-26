@@ -49,6 +49,11 @@ void UIObserverListener::OnScrollEventStateChange(
             "Handle scrollEvent state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
@@ -67,6 +72,7 @@ void UIObserverListener::OnScrollEventStateChange(
     napi_set_named_property(env_, objValue, "offset", scrollOffset);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnRouterPageStateChange(const NG::RouterPageInfoNG& pageInfo)
@@ -114,6 +120,11 @@ void UIObserverListener::OnDensityChange(double density)
             "Handle density change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
@@ -123,11 +134,18 @@ void UIObserverListener::OnDensityChange(double density)
     napi_set_named_property(env_, objValue, "density", napiDensity);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnDrawOrLayout()
 {
     if (!env_ || !callback_) {
+        TAG_LOGW(AceLogTag::ACE_OBSERVER, "Handle draw or layout failed, runtime or callback function invalid!");
+        return;
+    }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
         return;
     }
     napi_value callback = nullptr;
@@ -136,6 +154,7 @@ void UIObserverListener::OnDrawOrLayout()
     napi_create_object(env_, &objValue);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 void UIObserverListener::OnNavDestinationSwitch(const NG::NavDestinationSwitchInfo& switchInfo)
@@ -273,6 +292,11 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
             "Handle tabContent state change failed, runtime or callback function invalid!");
         return;
     }
+    napi_handle_scope scope = nullptr;
+    auto status = napi_open_handle_scope(env_, &scope);
+    if (status != napi_ok) {
+        return;
+    }
     napi_value callback = nullptr;
     napi_get_reference_value(env_, callback_, &callback);
     napi_value objValue = nullptr;
@@ -307,6 +331,7 @@ void UIObserverListener::OnTabContentStateChange(const NG::TabContentInfo& tabCo
     napi_create_object_with_named_properties(env_, &objValue, PARAM_SIZE_SIX, keys, values);
     napi_value argv[] = { objValue };
     napi_call_function(env_, nullptr, callback, 1, argv, nullptr);
+    napi_close_handle_scope(env_, scope);
 }
 
 napi_valuetype UIObserverListener::GetValueType(napi_env env, napi_value value)

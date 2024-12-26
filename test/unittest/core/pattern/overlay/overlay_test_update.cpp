@@ -427,7 +427,7 @@ HWTEST_F(OverlayTestUpdate, ToastTest004, TestSize.Level1)
     auto textval2 = textLayoutProperty->GetTextOverflow();
     auto textval3 = textLayoutProperty->GetEllipsisMode();
     auto textval4 = textLayoutProperty->GetTextColorValue(Color::BLACK);
-    EXPECT_EQ(textval1, TextDirection::RTL);
+    EXPECT_EQ(textval1, TextDirection::AUTO);
     EXPECT_EQ(textval2, TextOverflow::ELLIPSIS);
     EXPECT_EQ(textval3, EllipsisMode::TAIL);
     EXPECT_EQ(textval4, Color::RED);

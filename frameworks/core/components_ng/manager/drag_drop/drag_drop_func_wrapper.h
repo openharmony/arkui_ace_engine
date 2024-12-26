@@ -30,7 +30,7 @@ class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
-    static void DecideWhetherToStopDragging(const PointerEvent& pointerEvent,
+    static void DecideWhetherToStopDragging(const DragPointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
     static void UpdateDragPreviewOptionsFromModifier(
         std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& options);
@@ -50,6 +50,24 @@ public:
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
     static std::string GetAnonyString(const std::string &fullString);
     static OffsetF GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary = true);
+    static bool IsExpandDisplay(const RefPtr<PipelineBase>& context);
+    static OffsetF GetCurrentWindowOffset(const RefPtr<PipelineBase>& context);
+    static OffsetF GetPaintRectCenterToScreen(const RefPtr<FrameNode>& frameNode);
+    static OffsetF GetFrameNodeOffsetToScreen(const RefPtr<FrameNode>& frameNode);
+    static RectF GetPaintRectToScreen(const RefPtr<FrameNode>& frameNode);
+    static void UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset);
+    static void UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset);
+    static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
+        float width, float height);
+    static void ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event);
+    static RefPtr<FrameNode> GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key);
+    static OffsetF GetFrameNodeOffsetToWindow(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
+    static OffsetF GetPointRelativeToMainWindow(const Point& point);
+    static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+
+private:
+    static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);
 };
 } // namespace OHOS::Ace::NG
 

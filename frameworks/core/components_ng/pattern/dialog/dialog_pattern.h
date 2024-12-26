@@ -311,6 +311,7 @@ public:
     }
 
     bool IsShowInFreeMultiWindow();
+    bool IsShowInFloatingWindow();
 
 private:
     bool AvoidKeyboard() const override

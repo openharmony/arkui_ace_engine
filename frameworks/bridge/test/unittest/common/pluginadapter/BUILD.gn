@@ -26,10 +26,9 @@ ohos_unittest("PluginAdapterTest") {
     "$ace_root:ace_test_config",
   ]
 
-  deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
-    "//third_party/googletest:gmock_main",
-  ]
+  deps = [ "$ace_root/build:ace_ohos_unittest_base" ]
+
+  external_deps = [ "googletest:gmock_main" ]
 
   part_name = ace_engine_part
 }
