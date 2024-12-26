@@ -141,21 +141,21 @@ bool CheckTopEdgeOverlap(const RefPtr<NavBarLayoutProperty>& navBarLayoutPropert
     auto NavBarGeometryNode = hostNode->GetGeometryNode();
     CHECK_NULL_RETURN(NavBarGeometryNode, false);
     auto frame = NavBarGeometryNode->GetFrameRect() + parentGlobalOffset;
-
-    if ((opts.edges & SAFE_AREA_EDGE_TOP) && (opts.type & SAFE_AREA_TYPE_SYSTEM)) {
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
-        auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(opts);
-
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_RETURN(titleBarNode, false);
-        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-        CHECK_NULL_RETURN(titlePattern, false);
-        auto options = titlePattern->GetTitleBarOptions();
-        auto barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
-        if ((navBarLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK) &&
-            safeAreaPos.top_.IsOverlapped(frame.Top())) {
-            return true;
-        }
+    // only handle top-edge and system-type safeArea in current function
+    if (!(opts.edges & SAFE_AREA_EDGE_TOP) || !(opts.type & SAFE_AREA_TYPE_SYSTEM)) {
+        return false;
+    }
+    SafeAreaExpandOpts topSystemSafeAreaOpts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+    auto safeAreaPos = safeAreaManager->GetCombinedSafeArea(topSystemSafeAreaOpts);
+    auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_RETURN(navBarPattern, false);
+    auto barStyle = navBarPattern->GetTitleBarStyle().value_or(BarStyle::STANDARD);
+    if (!safeAreaPos.top_.IsOverlapped(frame.Top())) {
+        return false;
+    }
+    if (navBarLayoutProperty->GetHideTitleBar().value_or(false) || barStyle == BarStyle::STACK ||
+        (barStyle == BarStyle::SAFE_AREA_PADDING && !NearZero(navBarPattern->GetTitleBarOffsetY()))) {
+        return true;
     }
     return false;
 }
@@ -272,6 +272,9 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     float offsetY = 0.0f;
     offsetY = NavigationTitleUtil::CalculateTitlebarOffset(titleBarNode);
     auto titleBarOffset = OffsetF(0.0f, offsetY);
+    auto navBarPattern = hostNode->GetPattern<NavBarPattern>();
+    CHECK_NULL_RETURN(navBarPattern, 0.0f);
+    navBarPattern->SetTitleBarOffsetY(offsetY);
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -308,15 +311,7 @@ float TransferBarHeight(const RefPtr<NavBarNode>& hostNode, float originBarHeigh
     CHECK_NULL_RETURN(navBarPattern, originBarHeight);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_RETURN(navBarLayoutProperty, originBarHeight);
-    BarStyle barStyle = BarStyle::STANDARD;
-    if (isTitleBar) {
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_RETURN(titleBarNode, 0.0f);
-        auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
-        CHECK_NULL_RETURN(titlePattern, 0.0f);
-        auto options = titlePattern->GetTitleBarOptions();
-        barStyle = options.brOptions.barStyle.value_or(BarStyle::STANDARD);
-    }
+    auto barStyle = isTitleBar ? navBarPattern->GetTitleBarStyle() : navBarPattern->GetToolBarStyle();
     if (isTitleBar) {
         /**
          * In the follow scenarios, we need to convert titleBar's height to zero.
@@ -340,7 +335,7 @@ float TransferBarHeight(const RefPtr<NavBarNode>& hostNode, float originBarHeigh
             return 0.0f;
         }
     }
-    return barStyle == BarStyle::STANDARD ? originBarHeight : 0.0f;
+    return barStyle.value_or(BarStyle::STANDARD) == BarStyle::STANDARD ? originBarHeight : 0.0f;
 }
 } // namespace
 
@@ -360,10 +355,13 @@ void NavBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     NavigationLayoutUtil::UpdateTitleBarMenuNode(hostNode, size);
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
+    navBarPattern->MarkSafeAreaPaddingChangedWithCheckTitleBar(titleBarHeight);
     navBarPattern->SetTitleBarHeight(titleBarHeight);
     auto transferedTitleBarHeight = TransferBarHeight(hostNode, titleBarHeight, true);
     float toolBarHeight = NavigationLayoutUtil::MeasureToolBar(layoutWrapper, hostNode, navBarLayoutProperty, size);
     navBarPattern->SetToolBarHeight(toolBarHeight);
+    // after the visibility of title/tool bar determined, update safeAreaPadding of content node if needed.
+    NavigationLayoutUtil::UpdateContentSafeAreaPadding(hostNode, titleBarHeight);
     auto transferedToolBarHeight = TransferBarHeight(hostNode, toolBarHeight, false);
     float toolBarDividerHeight = NavigationLayoutUtil::MeasureToolBarDivider(
         layoutWrapper, hostNode, navBarLayoutProperty, size, transferedToolBarHeight);
