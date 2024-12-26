@@ -201,6 +201,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuTheme, nullptr);
     auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>());
+    
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
     menuItemPattern->onClickEventSet_ = true;
