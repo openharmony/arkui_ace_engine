@@ -3647,7 +3647,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll()
     }
     showSelect_ = true;
     if (!selectOverlay_->IsUsingMouse()) {
-        selectOverlay_->ProcessOverlay({.animation = true, .requestCode = REQUEST_RECREATE});
+        selectOverlay_->ProcessOverlay({ .animation = true });
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
