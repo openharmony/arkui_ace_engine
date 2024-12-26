@@ -20,7 +20,6 @@
 #include <memory>
 
 #include "base/utils/utils.h"
-#include "frameworks/base/log/log.h"
 
 namespace OHOS::Ace::Sample {
 
@@ -81,8 +80,6 @@ void EventAdapter::Initialize(std::shared_ptr<GlfwRenderContext>& glfwRenderCont
         }
         if (keyEventCallback_ && RecognizeKeyEvent(key, action, mods)) {
             keyEventCallback_(keyEvent_);
-        } else {
-            LOGW("Unrecognized key type.");
         }
     };
     glfwRenderContext->OnKey(keyboardCbk);

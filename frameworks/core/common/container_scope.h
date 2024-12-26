@@ -26,6 +26,7 @@
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
+#include "core/common/container_consts.h"
 
 namespace OHOS::Ace {
 
@@ -49,6 +50,13 @@ public:
     {
         UpdateCurrent(restoreId_);
     }
+
+    // preview not support multi-instance, always using default instance id 0.
+    #if defined(PREVIEW)
+    static const int32_t DEFAULT_ID = 0;
+    #else
+    static const int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
+    #endif
 
     static int32_t CurrentId();
     static int32_t DefaultId();

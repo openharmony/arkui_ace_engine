@@ -548,6 +548,51 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
   ]
 }
 
+if (use_mac || use_mingw_win || use_linux) {
+  common_bin += [
+    {
+      label = "//third_party/zlib:shared_libz"
+      subsystem_name = "thirdparty"
+      part_name = "zlib"
+      lib_names = [ "shared_libz" ]
+    },
+    {
+      label = "//third_party/ffmpeg:libohosffmpeg"
+      subsystem_name = "thirdparty"
+      part_name = "ffmpeg"
+      lib_names = [ "ohosffmpeg" ]
+    },
+    {
+      label = "//foundation/arkui/ace_engine/build:libevent_adapter"
+      subsystem_name = "arkui"
+      part_name = "ace_engine"
+    },
+  ]
+}
+
+if (use_linux) {
+  common_bin += [
+    {
+      label = "//base/hiviewdfx/hilog/interfaces/native/innerkits:libhilog"
+      subsystem_name = "hiviewdfx"
+      part_name = "hilog"
+      lib_names = [ "hilog" ]
+    },
+    {
+      label = "//third_party/cares:c_ares"
+      subsystem_name = "thirdparty"
+      part_name = "cares"
+      lib_names = [ "c_ares" ]
+    },
+    {
+      label = "//third_party/brotli:brotli_shared"
+      subsystem_name = "thirdparty"
+      part_name = "brotli"
+      lib_names = [ "brotli_shared" ]
+    },
+  ]
+}
+
 if (use_mac || use_mingw_win) {
   common_bin += [
     {
@@ -579,12 +624,6 @@ if (use_mac || use_mingw_win) {
       label = "//foundation/distributeddatamgr/kv_store/kvstoremock/distributeddb:distributeddb_mock"
       subsystem_name = "distributeddatamgr"
       part_name = "kv_store"
-    },
-    {
-      label = "//third_party/zlib:shared_libz"
-      subsystem_name = "thirdparty"
-      part_name = "zlib"
-      lib_names = [ "shared_libz" ]
     },
     {
       label = "//foundation/filemanagement/file_api/utils/filemgmt_libhilog:filemgmt_libhilog"
