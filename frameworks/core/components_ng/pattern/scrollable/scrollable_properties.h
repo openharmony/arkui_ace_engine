@@ -395,7 +395,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnDidScrollEvent = std::function<void(Dimension, ScrollState, bool, bool)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollState, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;

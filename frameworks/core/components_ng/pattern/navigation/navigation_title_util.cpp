@@ -953,4 +953,31 @@ bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBar
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
 }
+
+void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<NavDestinationNodeBase>& nodeBase,
+    const RefPtr<FrameNode>& barNode, float translate, bool isTitle)
+{
+    CHECK_NULL_VOID(nodeBase);
+    CHECK_NULL_VOID(barNode);
+    auto renderContext = barNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto option = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
+    option.y = CalcDimension(translate, DimensionUnit::PX);
+    renderContext->UpdateTransformTranslate(option);
+    auto barHeight = renderContext->GetPaintRectWithoutTransform().Height();
+    float opacity = 1.0f;
+    if (!NearZero(barHeight)) {
+        opacity = 1.0f - std::clamp(std::abs(translate) / barHeight, 0.0f, 1.0f);
+    }
+    renderContext->UpdateOpacity(opacity);
+    if (isTitle) {
+        return;
+    }
+    auto divider = AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarDividerNode());
+    CHECK_NULL_VOID(divider);
+    auto dividerRenderContext = divider->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    dividerRenderContext->UpdateTransformTranslate(option);
+    dividerRenderContext->UpdateOpacity(opacity);
+}
 } // namespace OHOS::Ace::NG
