@@ -1203,6 +1203,7 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 {
     CHECK_NULL_VOID(style.has_value());
     TextBackgroundStyle backgroundStyle = style.value();
+    backgroundStyle.needCompareGroupId = true;
     backgroundStyle.groupId = ElementRegister::GetInstance()->MakeUniqueId();
     spanNode->UpdateTextBackgroundFromParent(backgroundStyle);
 }
@@ -1879,6 +1880,15 @@ void RichEditorPattern::SetTypingStyle(std::optional<struct UpdateSpanStyle> typ
 {
     typingStyle_ = typingStyle;
     typingTextStyle_ = textStyle;
+    if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
+        IF_TRUE(typingStyle_->updateTextBackgroundStyle,
+            typingStyle_->updateTextBackgroundStyle->needCompareGroupId = false);
+        auto textBackgroundStyle = typingTextStyle_->GetTextBackgroundStyle();
+        if (textBackgroundStyle) {
+            textBackgroundStyle->needCompareGroupId = false;
+            typingTextStyle_->SetTextBackgroundStyle(textBackgroundStyle);
+        }
+    }
     presetParagraph_ = nullptr;
     if (spans_.empty() || !previewTextRecord_.previewContent.empty()) {
         auto host = GetHost();
@@ -4252,20 +4262,22 @@ TextSpanOptions RichEditorPattern::GetTextSpanOptions(const RefPtr<SpanItem>& sp
     CHECK_NULL_RETURN(spanItem, {});
     TextStyle textStyle = GetDefaultTextStyle();
     UseSelfStyle(spanItem->fontStyle, spanItem->textLineStyle, textStyle);
-    struct UpdateParagraphStyle paraStyle = {
-        .textAlign = spanItem->textLineStyle->GetTextAlign(),
-        .leadingMargin = spanItem->textLineStyle->GetLeadingMargin(),
-        .wordBreak = spanItem->textLineStyle->GetWordBreak(),
-        .lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy()
-    };
-    return {
-        .value = UtfUtils::Str16ToStr8(spanItem->content),
-        .offset = caretPosition_,
-        .userGestureOption.onClick = spanItem->onClick,
-        .userGestureOption.onLongPress = spanItem->onLongPress,
-        .style = textStyle,
-        .paraStyle = paraStyle
-    };
+    textStyle.SetTextBackgroundStyle(spanItem->backgroundStyle);
+    struct UpdateParagraphStyle paraStyle;
+    paraStyle.textAlign = spanItem->textLineStyle->GetTextAlign();
+    paraStyle.leadingMargin = spanItem->textLineStyle->GetLeadingMargin();
+    paraStyle.wordBreak = spanItem->textLineStyle->GetWordBreak();
+    paraStyle.lineBreakStrategy = spanItem->textLineStyle->GetLineBreakStrategy();
+    TextSpanOptions options;
+    options.value = UtfUtils::Str16ToStr8(spanItem->content);
+    options.offset = caretPosition_;
+    UserGestureOptions gestureOption;
+    gestureOption.onClick = spanItem->onClick;
+    gestureOption.onLongPress = spanItem->onLongPress;
+    options.userGestureOption = gestureOption;
+    options.style = textStyle;
+    options.paraStyle = paraStyle;
+    return options;
 }
 
 void RichEditorPattern::ResetDragSpanItems()
