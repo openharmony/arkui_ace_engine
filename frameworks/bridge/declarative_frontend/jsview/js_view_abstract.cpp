@@ -62,6 +62,9 @@
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 #include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "bridge/declarative_frontend/engine/functions/js_crown_function.h"
+#endif
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -297,18 +300,27 @@ bool ParseMotionPath(const JSRef<JSVal>& jsValue, MotionPathOption& option)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
-    }
     isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        default:
+            break;
+    }
 }
 
 void SetBgImgPosition(const DimensionUnit& typeX, const DimensionUnit& typeY, const double valueX, const double valueY,
@@ -837,6 +849,7 @@ ShadowStyle GetPopupDefaultShadowStyle()
 
 static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
 {
+    CHECK_NULL_VOID(popupParam);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<PopupTheme>();
@@ -7485,6 +7498,31 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (args.Length() <= 0) {
+        return;
+    }
+    JSRef<JSVal> arg = args[0];
+    if (args[0]->IsFunction()) {
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
+            GetMainFrameNode());
+        auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
+            node = frameNode](CrownEventInfo& info) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onCrown");
+                PipelineContext::SetCallBackNode(node);
+                func->Execute(info);
+            };
+        ViewAbstractModel::GetInstance()->SetOnCrownEvent(std::move(onCrownEvent));
+    } else {
+        ViewAbstractModel::GetInstance()->DisableOnCrownEvent();
+    }
+#endif
+}
+
 void JSViewAbstract::JsOnFocus(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -8245,6 +8283,9 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.width = width;
     }
 
+    auto radiusValue = paramObj->GetProperty("radius");
+    ParseBindSheetBorderRadius(radiusValue, sheetStyle);
+
     CalcDimension sheetHeight;
     if (height->IsString()) {
         std::string heightStr = height->ToString();
@@ -8288,6 +8329,64 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.height = sheetHeight;
         sheetStyle.sheetMode.reset();
     }
+}
+
+void JSViewAbstract::ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle)
+{
+    if (!args->IsObject() && !args->IsNumber() && !args->IsString()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "radius is not correct type");
+        return;
+    }
+    CalcDimension radius;
+    NG::BorderRadiusProperty borderRadius;
+    if (ParseJsLengthMetrics(args, radius)) {
+        borderRadius.SetRadius(radius);
+        sheetStyle.radius = borderRadius;
+    } else if (ParseBindSheetBorderRadiusProps(args, borderRadius)) {
+        sheetStyle.radius = borderRadius;
+    } else {
+        TAG_LOGW(AceLogTag::ACE_SHEET, "radius is not correct.");
+        return;
+    }
+}
+
+bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius)
+{
+    if (args->IsObject()) {
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
+        if (CheckLengthMetrics(object)) {
+            std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
+            std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
+            auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+            radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
+            radius.radiusTopRight = isRightToLeft ? radiusTopStart : radiusTopEnd;
+            radius.radiusBottomLeft = isRightToLeft ? radiusBottomEnd : radiusBottomStart;
+            radius.radiusBottomRight = isRightToLeft ? radiusBottomStart : radiusBottomEnd;
+            radius.multiValued = true;
+        } else {
+            ParseBorderRadiusProps(object, radius);
+        }
+        return true;
+    }
+    return false;
+}
+
+std::optional<CalcDimension> JSViewAbstract::ParseBindSheetBorderRadiusProp(
+    const JSRef<JSObject>& object, const char* prop)
+{
+    if (object->IsEmpty()) {
+        return std::nullopt;
+    }
+    if (object->HasProperty(prop) && object->GetProperty(prop)->IsObject()) {
+        JSRef<JSObject> propObj = JSRef<JSObject>::Cast(object->GetProperty(prop));
+        CalcDimension calcDimension;
+        if (ParseJsLengthMetrics(propObj, calcDimension)) {
+            return calcDimension;
+        }
+    }
+    return std::nullopt;
 }
 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
@@ -8919,6 +9018,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("onMouse", &JSViewAbstract::JsOnMouse);
     JSClass<JSViewAbstract>::StaticMethod("onHover", &JSViewAbstract::JsOnHover);
     JSClass<JSViewAbstract>::StaticMethod("onAccessibilityHover", &JSViewAbstract::JsOnAccessibilityHover);
+    JSClass<JSViewAbstract>::StaticMethod("onDigitalCrown", &JSViewAbstract::JsOnCrownEvent);
     JSClass<JSViewAbstract>::StaticMethod("onClick", &JSViewAbstract::JsOnClick);
     JSClass<JSViewAbstract>::StaticMethod("onGestureJudgeBegin", &JSViewAbstract::JsOnGestureJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchIntercept", &JSViewAbstract::JsOnTouchIntercept);

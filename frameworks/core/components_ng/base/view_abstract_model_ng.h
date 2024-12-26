@@ -951,6 +951,12 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override
+    {
+        ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    }
+#endif
     void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -1341,6 +1347,13 @@ public:
     {
         ViewAbstract::DisableOnKeyEvent();
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override
+    {
+        ViewAbstract::DisableOnCrownEvent();
+    }
+#endif
 
     void DisableOnKeyPreIme() override
     {

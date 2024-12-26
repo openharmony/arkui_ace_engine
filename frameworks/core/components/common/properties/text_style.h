@@ -231,14 +231,23 @@ struct TextBackgroundStyle {
     std::optional<Color> backgroundColor;
     std::optional<NG::BorderRadiusProperty> backgroundRadius;
     int32_t groupId = 0;
+    bool needCompareGroupId = true;
+
+    void UpdateColorByResourceId()
+    {
+        CHECK_NULL_VOID(backgroundColor);
+        backgroundColor->UpdateColorByResourceId();
+    }
 
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style,
         const NG::InspectorFilter& filter);
 
     bool operator==(const TextBackgroundStyle& value) const
     {
+        // Only compare groupId if both styles require it.
+        bool bothNeedCompareGroupId = needCompareGroupId && value.needCompareGroupId;
         return backgroundColor == value.backgroundColor && backgroundRadius == value.backgroundRadius &&
-               groupId == value.groupId;
+               (!bothNeedCompareGroupId || groupId == value.groupId);
     }
 };
 

@@ -121,6 +121,16 @@ public:
                 pattern->GetAttr<int>("menu_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->menuBackGroundBlurStyle_ =
                 pattern->GetAttr<int>("menu_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            ParseWideScreenAttrs(theme, pattern);
+        }
+
+        void ParseWideScreenAttrs(const RefPtr<MenuTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
+        {
+            theme->hasBackBlurColor_ = static_cast<bool>(pattern->GetAttr<double>("menu_back_blur_with_color", 0.0f));
+            theme->backBlurColor_ = pattern->GetAttr<Color>("menu_back_blur_color", Color::TRANSPARENT);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("menu_border_width", 0.0_vp);
+            theme->borderColor_ = pattern->GetAttr<Color>("menu_border_color", Color::BLACK);
+            theme->focusStyleType_ = pattern->GetAttr<double>("menu_focus_style_type", 0.0);
         }
     };
 
@@ -336,6 +346,31 @@ public:
         return enableDirectionalKeyFocus_;
     }
 
+    Color GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    bool HasBackBlurColor() const
+    {
+        return hasBackBlurColor_;
+    }
+
+    Color GetBackBlurColor() const
+    {
+        return backBlurColor_;
+    }
+
+    Dimension GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    double GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
     ShadowStyle GetMenuShadowStyle() const
     {
         return menuShadowStyle_;
@@ -392,6 +427,11 @@ private:
     bool normalPlacement_ = true;
     bool hasBackBlur_ = true;
     bool enableDirectionalKeyFocus_ = false;
+    bool hasBackBlurColor_ = false;
+    Dimension borderWidth_;
+    Color backBlurColor_ = Color::TRANSPARENT;
+    Color borderColor_ = Color::TRANSPARENT;
+    double focusStyleType_ = 0.0;
     ShadowStyle menuShadowStyle_ = ShadowStyle::OuterDefaultMD;
     int menuBackGroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };

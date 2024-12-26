@@ -596,16 +596,6 @@ private:
     bool eventResult_ = false;
 };
 
-class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END

@@ -34,6 +34,8 @@ export struct GridBootcamp {
   scrollerForV: Scroller = new Scroller();
   scrollerForH: Scroller = new Scroller();
   @State currentIndex: number = 0
+  @State enableDragGray: boolean = false;
+  @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
   private controller: TabsController = new TabsController()
 
   @Builder
@@ -91,6 +93,8 @@ export struct GridBootcamp {
               fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
             })
           )
+          .onDragStart(() => {})
+          .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
         }.tabBar(this.tabBuilder(0, '竖直布局'))
 
         TabContent() {
@@ -113,6 +117,8 @@ export struct GridBootcamp {
               fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
             })
           )
+          .onDragStart(() => {})
+          .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
         }.tabBar(this.tabBuilder(1, '水平布局'))
       }
       .onChange((index: number) => {
@@ -171,6 +177,15 @@ export struct GridBootcamp {
           value: this.columnCount,
           min: 1,
           max: 6
+        })
+        RadioBlock({
+          title: '拖拽背板图样式',
+          isEnabled: $enableDragGray,
+          value: $dragGray,
+          dataSource: [
+            { label: '默认', value: DragPreviewMode.AUTO },
+            { label: '灰显', value: DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT }
+          ]
         })
       }
       .width('100%')

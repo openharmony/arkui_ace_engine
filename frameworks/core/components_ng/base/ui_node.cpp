@@ -99,13 +99,6 @@ void UINode::AttachContext(PipelineContext* context, bool recursive)
 
 void UINode::DetachContext(bool recursive)
 {
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    auto container = Container::Current();
-    if (container && !container->IsFormRender() && PipelineContext::IsPipelineDestroyed(instanceId_)) {
-        LOGE("pipeline is destruct,not allow detach");
-        return;
-    }
-#endif
     CHECK_NULL_VOID(context_);
     context_->DetachNode(Claim(this));
     context_ = nullptr;

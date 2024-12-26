@@ -3491,6 +3491,7 @@ void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
     auto context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
+        context->FlushSyncGeometryNodeTasks();
     }
 }
 
@@ -5254,6 +5255,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         currentIndexOffset_ = 0.0f;
         if (pipeline->IsLayouting()) {
             pipeline->FlushUITaskWithSingleDirtyNode(host);
+            pipeline->FlushSyncGeometryNodeTasks();
         } else {
             pipeline->FlushUITasks();
             pipeline->FlushMessages();

@@ -77,7 +77,6 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -175,7 +174,9 @@ bool ScrollPattern::ScrollSnapTrigger()
     if (ScrollableIdle() && !AnimateRunning()) {
         SnapAnimationOptions snapAnimationOptions;
         if (StartSnapAnimation(snapAnimationOptions)) {
-            FireOnScrollStart();
+            if (!IsScrolling()) {
+                FireOnScrollStart();
+            }
             return true;
         }
     }
@@ -1341,7 +1342,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
     CHECK_NULL_VOID(scrollable);
     if (scrollable->IsSnapAnimationRunning()) {
         scrollable->UpdateScrollSnapEndWithOffset(
-            -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
         scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
         if (!IsScrolling()) {

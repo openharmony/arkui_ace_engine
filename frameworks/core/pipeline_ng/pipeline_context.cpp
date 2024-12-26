@@ -83,16 +83,11 @@ namespace {
 constexpr Dimension CARET_AVOID_OFFSET = 24.0_vp;
 } // namespace
 
-std::unordered_set<int32_t> PipelineContext::aliveInstanceSet_;
-
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
     RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
     const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId, platformResRegister)
 {
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    PipelineContext::aliveInstanceSet_.emplace(instanceId);
-#endif
     window_->OnHide();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
@@ -103,9 +98,6 @@ PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExec
     RefPtr<AssetManager> assetManager, const RefPtr<Frontend>& frontend, int32_t instanceId)
     : PipelineBase(window, std::move(taskExecutor), std::move(assetManager), frontend, instanceId)
 {
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    PipelineContext::aliveInstanceSet_.emplace(instanceId);
-#endif
     window_->OnHide();
     if (navigationMgr_) {
         navigationMgr_->SetPipelineContext(WeakClaim(this));
@@ -603,11 +595,12 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
 #endif
     if (!mouseEvents_.empty()) {
         FlushMouseEvent();
-        isNeedFlushMouseEvent_ = false;
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
         mouseEvents_.clear();
-    } else if (isNeedFlushMouseEvent_) {
+    } else if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT ||
+               isNeedFlushMouseEvent_ == MockFlushEventType::EXECUTE) {
         FlushMouseEventVoluntarily();
-        isNeedFlushMouseEvent_ = false;
+        isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
     }
     eventManager_->FlushCursorStyleRequests();
     if (isNeedFlushAnimationStartTime_) {
@@ -638,6 +631,9 @@ void PipelineContext::FlushMouseEventVoluntarily()
     CHECK_NULL_VOID(rootNode_);
 
     MouseEvent event;
+    if (isNeedFlushMouseEvent_ == MockFlushEventType::REJECT) {
+        event.mockFlushEvent = true;
+    }
     event.x = lastMouseEvent_->x;
     event.y = lastMouseEvent_->y;
     event.time = lastMouseEvent_->time;
@@ -3431,6 +3427,9 @@ void PipelineContext::OnFlushMouseEvent(
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
+            if (idIter.second.button == MouseButton::NONE_BUTTON) {
+                continue;
+            }
             MouseEvent newMouseEvent = eventManager_->GetResampleMouseEvent(
                 historyMousePointsById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newMouseEvent.x != 0 && newMouseEvent.y != 0) {
@@ -4007,9 +4006,6 @@ void PipelineContext::Destroy()
     uiExtensionManager_.Reset();
 #endif
     PipelineBase::Destroy();
-#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    PipelineContext::aliveInstanceSet_.erase(instanceId_);
-#endif
 }
 
 void PipelineContext::AddBuildFinishCallBack(std::function<void()>&& callback)

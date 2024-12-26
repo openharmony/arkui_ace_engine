@@ -56,7 +56,10 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     // so we need an u16string to get the correct index
     std::u16string remainString = u"";
     std::u32string u32ContentToDelete;
-    int32_t substrLength = u16.length() - startIndex;
+    if (startIndex < 0 || length < 0) {
+        return 0;
+    }
+    int32_t substrLength = u16.length() - unsigned(startIndex);
     if (substrLength < 0) {
         return 0;
     }

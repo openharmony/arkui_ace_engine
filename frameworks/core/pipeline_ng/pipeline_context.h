@@ -66,6 +66,11 @@ using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 
+enum class MockFlushEventType : int32_t {
+    REJECT = -1,
+    NONE = 0,
+    EXECUTE = 1,
+};
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -689,9 +694,9 @@ public:
         }
     }
 
-    void MarkNeedFlushMouseEvent()
+    void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
     {
-        isNeedFlushMouseEvent_ = true;
+        isNeedFlushMouseEvent_ = type;
     }
 
     void MarkNeedFlushAnimationStartTime()
@@ -1032,10 +1037,6 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
-    static bool IsPipelineDestroyed(int32_t instanceId)
-    {
-        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
-    }
 
     void AnimateOnSafeAreaUpdate();
     void RegisterAttachedNode(UINode* uiNode);
@@ -1250,7 +1251,7 @@ private:
     bool isFocusActive_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
-    bool isNeedFlushMouseEvent_ = false;
+    MockFlushEventType isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
     bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
@@ -1326,7 +1327,6 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
-    static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;

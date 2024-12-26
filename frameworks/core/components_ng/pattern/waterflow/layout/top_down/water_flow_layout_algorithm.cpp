@@ -322,7 +322,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
     if (layoutInfo_->currentOffset_ >= 0) {
-        if (!CanOverScroll()) {
+        if (!canOverScrollStart_) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = true;
@@ -407,7 +407,8 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     layoutInfo_->maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
-        if (!CanOverScroll()) {
+        if ((NonNegative(layoutInfo_->currentOffset_) && !canOverScrollStart_) ||
+            (NonPositive(layoutInfo_->currentOffset_) && !canOverScrollEnd_)) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, 0.0f);
@@ -417,7 +418,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
     if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
-        if (!CanOverScroll()) {
+        if (!canOverScrollEnd_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
         }
 

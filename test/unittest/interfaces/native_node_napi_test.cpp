@@ -17,6 +17,7 @@
 #include "native_interface.h"
 #include "native_node_napi.h"
 #include "native_type.h"
+#include "node_model.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,16 @@ public:
     static void SetUpTestCase() {};
     static void TearDownTestCase() {};
 };
+
+void CallBack(uint64_t nanoTimestamp, uint32_t frameCount, void* userData)
+{
+    printf("nanoTimestamp = %llu\n", nanoTimestamp);
+    printf("frameCount = %d\n", frameCount);
+    if (userData) {
+        int* myData = (int*)userData;
+        printf("User data = %d\n", *myData);
+    }
+}
 
 /**
  * @tc.name: NativeNodeNapiTest001
@@ -278,3 +289,42 @@ HWTEST_F(NativeNodeNapiTest, NavigationAPITest013, TestSize.Level1)
     auto ret = OH_ArkUI_GetRouterPageId(nullptr, nullptr, 0, nullptr);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: PostFrameCallbackAPITest001
+ * @tc.desc: Test OH_ArkUI_PostFrameCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, PostFrameCallbackAPITest001, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    int userdata = 5;
+    auto ret = OH_ArkUI_PostFrameCallback(uiContext, &userdata, CallBack);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+}
+
+/**
+ * @tc.name: PostFrameCallbackAPITest002
+ * @tc.desc: Test OH_ArkUI_PostFrameCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, PostFrameCallbackAPITest002, TestSize.Level1)
+{
+    ArkUI_ContextHandle uiContext = new ArkUI_Context({.id=10000});
+    int userdata = 6;
+    auto ret = OH_ArkUI_PostFrameCallback(uiContext, &userdata, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+}
+
+/**
+ * @tc.name: PostFrameCallbackAPITest003
+ * @tc.desc: Test OH_ArkUI_PostFrameCallback function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeNapiTest, PostFrameCallbackAPITest003, TestSize.Level1)
+{
+    int userdata = 7;
+    auto ret = OH_ArkUI_PostFrameCallback(nullptr, &userdata, CallBack);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+}
+

@@ -338,7 +338,7 @@ public:
         return popupShadowStyle_;
     }
 
-    const int& GetPopupBackgroundBlurStyle() const
+    int GetPopupBackgroundBlurStyle() const
     {
         return popupBackgroundBlurStyle_;
     }

@@ -234,6 +234,7 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     rect.SetHeight(nodeHeightI);
     return rect;
 }
+
 Gradient ConvertToGradient(Color color)
 {
     Gradient gradient;
@@ -248,14 +249,10 @@ Gradient ConvertToGradient(Color color)
 
     return gradient;
 }
+
 void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
-    int32_t instanceId)
+    int32_t instanceId, const SingleTaskExecutor& uiTaskExecutor)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-
     auto&& positionUpdatedEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([weak, currentPos, instanceId] {
             auto video = weak.Upgrade();
@@ -324,21 +321,17 @@ void VideoPattern::ResetMediaPlayerOnBg()
     CHECK_NULL_VOID(context);
     VideoSourceInfo videoSrc = {videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(), videoSrcInfo_.GetModuleName()};
 
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
-        renderSurfaceWeak = WeakClaim(AceType::RawPtr(renderSurface_)),
-        renderContextWeak = WeakClaim(AceType::RawPtr(renderContextForMediaPlayer_)),
-        context, videoSrc, id = instanceId_] {
+        videoSrc, id = instanceId_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
-        auto renderSurface = renderSurfaceWeak.Upgrade();
-        CHECK_NULL_VOID(renderSurface);
         mediaPlayer->ResetMediaPlayer();
 
         RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src, id);
 
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (!mediaPlayer->SetSource(videoSrc.src, videoSrc.bundleName, videoSrc.moduleName)) {
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
@@ -348,18 +341,12 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        if (!renderSurface->IsSurfaceValid()) {
-            auto renderContext = renderContextWeak.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            if (!SystemProperties::GetExtSurfaceEnabled()) {
-                renderSurface->SetRenderContext(renderContext);
-            }
-            renderSurface->InitSurface();
-            mediaPlayer->SetRenderSurface(renderSurface);
-            if (mediaPlayer->SetSurface() != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
-            }
-        }
+        uiTaskExecutor.PostSyncTask([weak, id] {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            videoPattern->PrepareSurface();
+            }, "ArkUIVideoPrepareSurface");
+
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
@@ -450,12 +437,11 @@ void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, c
         return;
     }
 
-    RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId);
-
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId, uiTaskExecutor);
+
     auto&& seekDoneEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask(
             [&weak, currentPos, instanceId] {

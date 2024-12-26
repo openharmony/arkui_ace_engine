@@ -385,6 +385,7 @@ enum class ImageFit {
     BOTTOM,
     BOTTOM_END,
     COVER_TOP_LEFT,
+    MATRIX,
 };
 
 namespace StringUtils {
@@ -440,6 +441,12 @@ enum class EdgeEffect {
     SPRING = 0,
     FADE,
     NONE,
+};
+
+enum class EffectEdge {
+    START = 1,
+    END = 2,
+    ALL = 3,
 };
 
 enum class BorderStyle {

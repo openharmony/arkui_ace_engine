@@ -1249,6 +1249,7 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     auto renderContext = columnNode->GetRenderContext();
     if (renderContext) {
         renderContext->MarkUiFirstNode(false);
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
     }
     MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
@@ -1797,6 +1798,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
     }
     modifier->StartFloatingAnimate();
+    pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
@@ -2129,9 +2131,9 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {
-        imageNode, offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()),
-        width, height, width / 2.0f, height / 2.0f };
+    gatherNodeChildInfo = { imageNode,
+        offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()), width, height,
+        width / 2.0f, height / 2.0f, WeakPtr<FrameNode>(frameNode) };
     return imageNode;
 }
 

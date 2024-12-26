@@ -309,7 +309,7 @@ template("ace_core_source_set") {
     }
 
     if (ohos_indep_compiler_enable) {
-      include_dirs = indep_compile_includes
+      include_dirs += indep_compile_includes
     }
 
     configs = [ "$ace_root:ace_config" ]
@@ -980,6 +980,7 @@ template("ace_core_ng_source_set") {
       if (!is_arkui_x) {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
         sources += [
+          "components/web/resource/web_area_changed.cpp",
           "components/web/resource/web_client_impl.cpp",
           "components/web/resource/web_configuration_observer.cpp",
           "components/web/resource/web_delegate.cpp",

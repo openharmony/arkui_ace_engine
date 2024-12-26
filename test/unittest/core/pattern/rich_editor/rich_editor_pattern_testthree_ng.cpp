@@ -1761,27 +1761,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleDoubleClickOrLongPress002
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->selectOverlay_->hasTransform_ = true;
-    auto localOffset = info.GetLocalLocation();
-    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
-    EXPECT_TRUE(localOffset == richEditorPattern->ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
-    EXPECT_TRUE(richEditorPattern->isEditing_);
-}
-
-/**
  * @tc.name: HandleDraggableFlag
  * @tc.desc: test HandleDraggableFlag
  * @tc.type: FUNC

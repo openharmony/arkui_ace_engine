@@ -68,6 +68,7 @@ struct GatherNodeChildInfo {
     float height = 0.0f;
     float halfWidth = 0.0f;
     float halfHeight = 0.0f;
+    WeakPtr<FrameNode> preImageNode;
 };
 
 struct DismissTarget {

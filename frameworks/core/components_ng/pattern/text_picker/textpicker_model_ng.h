@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 #include "core/components_ng/pattern/text_picker/textpicker_properties.h"
@@ -92,7 +93,7 @@ public:
     void HasUserDefinedOpacity() override;
 
     void SetDisableTextStyleAnimation(const bool value) override;
-    void SetDefaultTextStyle(const NG::PickerTextStyle& value) override;
+    void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
@@ -104,7 +105,8 @@ public:
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& pickerTheme, const NG::PickerTextStyle& value);
-    static void SetDefaultTextStyle(FrameNode* frameNode, const NG::PickerTextStyle& value);
+    static void SetDefaultTextStyle(
+        FrameNode* frameNode, const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value);
     static void SetDefaultPickerItemHeight(FrameNode* frameNode, const Dimension& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static bool IsSingle(FrameNode* frameNode);

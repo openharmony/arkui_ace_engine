@@ -92,6 +92,7 @@ group("advanced_ui_component") {
       "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
       "popup/interfaces:popup",
       "progressbutton/interfaces:progressbutton",
+      "progressbuttonv2/interfaces:progressbuttonv2",
       "segmentbutton/interfaces:segmentbutton",
       "selectionmenu/interfaces:selectionmenu",
       "selecttitlebar/interfaces:selecttitlebar",

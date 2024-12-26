@@ -91,6 +91,10 @@ typedef enum {
     ARKUI_NODE_RADIO = 18,
     /** Frame-by-frame animation component. */
     ARKUI_NODE_IMAGE_ANIMATOR = 19,
+    /** Check box group.
+     *  @since 16
+     */
+    ARKUI_NODE_CHECKBOX_GROUP = 20,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -3288,6 +3292,34 @@ typedef enum {
     NODE_CHECKBOX_SHAPE,
 
     /**
+     * @brief Defines the name of the checkbox.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     * 
+     *@since 16
+     */
+    NODE_CHECKBOX_NAME = 11005,
+
+    /**
+     * @brief Defines the name of the checkbox.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP = 11006,
+
+    /**
      * @brief Defines the ID of the <b><XComponent></b> component.
      * This attribute can be set and obtained as required through APIs.
      *
@@ -4057,6 +4089,96 @@ typedef enum {
     NODE_RADIO_GROUP,
 
     /**
+     * @brief Defines the name of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_NAME  = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
+
+    /**
+     * @brief Defines whether the checkboxgroup is selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the check box is selected.
+     * The value <b>1</b> means that the checkboxgroup is selected, and <b>0</b> means the opposite. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The value <b>1</b> means that the checkboxgroup is selected, and <b>0</b> means the opposite. \n
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SELECT_ALL = 20001,
+
+    /**
+     * @brief Defines the color of the checkboxgroup when it is selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: color of the checkboxgroup when it is selected, in 0xARGB format,
+     * for example, <b>0xFF1122FF</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: color of the checkboxgroup when it is selected, in 0xARGB format,
+     * for example, <b>0xFF1122FF</b>.
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 20002,
+    /**
+     * @brief Defines the border color of the checkboxgroup when it is not selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 20003,
+
+    /**
+     * @brief Defines the internal icon style of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
+     * .value[1]?.f32: size of the internal mark, in vp. Optional.\n
+     * .value[2]?.f32: stroke width of the internal mark, in vp. Optional. The default value is <b>2</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
+     * .value[1].f32: size of the internal mark, in vp. \n
+     * .value[2].f32: stroke width of the internal mark, in vp. The default value is <b>2</b>. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_MARK = 20004,
+
+    /**
+     * @brief Defines the shape of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: component shape. The parameter type is {@link ArkUI_CheckboxShape}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: component shape. The parameter type is {@link ArkUI_CheckboxShape}.
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SHAPE = 20005,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -4319,6 +4441,60 @@ typedef enum {
      * @since 14
      */
     NODE_SCROLL_SIZE,
+
+    /**
+     * @brief Sets the offset from the start of the content of this scrollable component.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: offset from the start of the content, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: offset from the start of the content, in vp. \n
+     *
+     * @since 16
+     */
+    NODE_SCROLL_CONTENT_START_OFFSET,
+
+    /**
+     * @brief Sets the offset from the end of the content of this scrollable component.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: offset from the end of the content, in vp. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: offset from the end of the content, in vp. \n
+     *
+     * @since 16
+     */
+    NODE_SCROLL_CONTENT_END_OFFSET,
+
+    /**
+     * @brief Sets the maximum initial velocity at the start of the fling animation that occurs after gesture-driven
+     * scrolling ends. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32: maximum initial velocity at the start of the fling animation, in vp/s. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32: maximum initial velocity at the start of the fling animation. \n
+     *
+     * @since 16
+     */
+    NODE_SCROLL_FLING_SPEED_LIMIT,
+
+    /**
+     * @brief Sets the content clipping area for this scrollable component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: content clipping mode. The parameter type is {@link ArkUI_ContentClipMode}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: content clipping mode. The parameter type is {@link ArkUI_ContentClipMode}. \n
+     *
+     * @since 16
+     */
+    NODE_SCROLL_CLIP_CONTENT,
 
     /**
      * @brief Defines the direction in which the list items are arranged. This attribute can be set, reset, and
@@ -5115,6 +5291,20 @@ typedef enum {
      *
      */
     NODE_WATER_FLOW_ITEM_CONSTRAINT_SIZE,
+
+    /**
+     * @brief Sets the layout mode for this <b>WaterFlow</b> component.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: layout mode. The parameter type is {@link ArkUI_WaterFlowLayoutMode}.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: layout mode. The parameter type is {@link ArkUI_WaterFlowLayoutMode}.
+     *
+     * @since 16
+     */
+    NODE_WATER_FLOW_LAYOUT_MODE,
 
     /**
      * @brief Sets the number of columns in the water flow layout. If this parameter is not set, one column is used by
@@ -6074,6 +6264,18 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: status of the radio button. \n
      */
     NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
+
+    /**
+     * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX_GROOUP</b>
+     * component changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b><b>1</b>: selected; <b>0</b>: not selected.\n
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this

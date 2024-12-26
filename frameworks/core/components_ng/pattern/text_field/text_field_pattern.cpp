@@ -1368,6 +1368,7 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
+    SetFloatingCursorVisible(false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -4613,6 +4614,10 @@ void TextFieldPattern::UpdateObscure(const std::u16string& insertValue, bool has
 void TextFieldPattern::InsertValue(const std::u16string& insertValue, bool isIME)
 {
     auto host = GetHost();
+    if (!host) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield can't get host, len:%{public}d, isIME:%{public}d",
+            static_cast<int32_t>(insertValue.length()), isIME);
+    }
     CHECK_NULL_VOID(host);
     if (!HasFocus()) {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't insert value", host->GetId());
@@ -4629,11 +4634,14 @@ void TextFieldPattern::InsertValue(const std::u16string& insertValue, bool isIME
         return;
     }
     if (focusIndex_ != FocuseIndex::TEXT && insertValue == u" ") {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "textfield HandleSpaceEvent");
         HandleSpaceEvent();
         return;
     }
     focusIndex_ = FocuseIndex::TEXT;
     if (FinishTextPreviewByPreview(insertValue)) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "FinishTextPreviewByPreview len:%{public}d",
+            static_cast<int32_t>(insertValue.length()));
         return;
     }
     inputOperations_.emplace(InputOperation::INSERT);
@@ -4763,6 +4771,7 @@ float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithm
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = FontSizeConvertToPx(textStyle.GetFontSize()) };
@@ -5712,7 +5721,7 @@ void TextFieldPattern::HandleOnPageDown()
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 {
     TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-        start, end - start, GetTextUtf16Value(), true, true);
+        start, end - start, GetTextUtf16Value(), false, true);
     start = range.startIndex;
     end = range.endIndex;
 }
@@ -9488,6 +9497,7 @@ void TextFieldPattern::DoTextSelectionTouchCancel()
     magnifierController_->RemoveMagnifierFrameNode();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     StopContentScroll();
+    StartTwinkling();
 }
 
 float TextFieldPattern::GetVerticalPaddingAndBorderSum() const

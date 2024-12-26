@@ -22,6 +22,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -143,7 +144,15 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto pipelineContext = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(selectTheme, focusPattern);
+        auto focusStyleType =
+            static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetSelectFocusStyleType_()));
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     // update selected option props
@@ -196,13 +205,21 @@ public:
     void SetDivider(const SelectDivider& divider);
     ControlSize GetControlSize();
     void SetLayoutDirection(TextDirection value);
+    Dimension GetSelectLeftRightMargin() const;
 
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
-
+    void HandleFocusStyleTask();
+    void HandleBlurStyleTask();
+    void SetFocusStyle();
+    void ClearFocusStyle();
+    void ModFocusIconStyle(RefPtr<SelectTheme> selectTheme, bool focusedFlag);
+    void InitFocusEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
     bool HasRowNode() const
     {
         return rowId_.has_value();
@@ -267,6 +284,7 @@ private:
     void ResetParams();
     void UpdateOptionsWidth(float selectWidth);
     void UpdateTargetSize();
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
 
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
@@ -310,6 +328,12 @@ private:
     std::string selectValue_;
     bool isFitTrigger_ = false;
     ControlSize controlSize_ = ControlSize::NORMAL;
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    bool focusEventInitialized_ = false;
+    bool focusTextColorModify_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(SelectPattern);
 };
 

@@ -1246,10 +1246,11 @@ bool TextPickerPattern::NeedAdaptForAging()
 
 void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation)
 {
+    isDisableTextStyleAnimation_ = isDisableTextStyleAnimation;
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto children = host->GetChildren();
-    isDisableTextStyleAnimation_ = isDisableTextStyleAnimation;
     for (const auto& child : children) {
         auto stackNode = DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(stackNode);

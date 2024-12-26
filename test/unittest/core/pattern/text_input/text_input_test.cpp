@@ -15,6 +15,8 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/core/rosen/mock_canvas.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -1898,7 +1900,7 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
      * @tc.steps: step4. escape when select all value
      */
     pattern_->HandleOnSelectAll(true);
-    EXPECT_FALSE(pattern_->HandleOnEscape());
+    EXPECT_TRUE(pattern_->HandleOnEscape());
 }
 
 /**

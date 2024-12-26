@@ -70,6 +70,7 @@
 #include "core/components_ng/pattern/side_bar/side_bar_theme.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
 #include "core/components_ng/pattern/grid/grid_item_theme.h"
+#include "core/components_ng/pattern/linear_indicator/linear_indicator_theme.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
@@ -149,6 +150,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { AgingAdapationDialogTheme::TypeId(), &ThemeBuildFunc<AgingAdapationDialogTheme::Builder> },
     { NG::ScrollableTheme::TypeId(), &ThemeBuildFunc<NG::ScrollableTheme::Builder> },
     { NG::SwiperTheme::TypeId(), &ThemeBuildFunc<NG::SwiperTheme::Builder> },
+    { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
 };
 
 template<class T>
