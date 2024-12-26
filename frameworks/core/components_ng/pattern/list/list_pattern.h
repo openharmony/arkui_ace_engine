@@ -134,7 +134,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     void OnTouchDown(const TouchEventInfo& info) override;
-    OverScrollOffset GetOutBoundaryOffset(bool useCurrentDelta) const;
+    OverScrollOffset GetOutBoundaryOffset(float delta, bool useChainDelta = true) const;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
     float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
@@ -276,10 +276,38 @@ public:
         predictSnapOffset_ = predictSnapOffset;
     }
 
-    bool StartSnapAnimation(
-        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
+
+    bool ScrollToSnapIndex(SnapDirection snapDirection, ScrollSnapAlign scrollSnapAlign);
+
+    int32_t GetEndIndexExcludeEndOffset();
+
+    int32_t GetStartIndexExcludeStartOffset();
 
     void StartListSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+
+    SnapType GetSnapType() override
+    {
+        auto snapAlign = GetScrollSnapAlign();
+        return snapAlign != ScrollSnapAlign::NONE ? SnapType::LIST_SNAP : SnapType::NONE_SNAP;
+    }
+
+    ScrollSnapAlign GetScrollSnapAlign() const;
+
+    void SetLastSnapTargetIndex(int32_t lastSnapTargetIndex) override
+    {
+        lastSnapTargetIndex_ = lastSnapTargetIndex;
+    }
+
+    std::optional<int32_t> GetLastSnapTargetIndex() override
+    {
+        return lastSnapTargetIndex_;
+    }
+
+    void ResetLastSnapTargetIndex() override
+    {
+        lastSnapTargetIndex_.reset();
+    }
 
     int32_t GetItemIndexByPosition(float xOffset, float yOffset);
 
@@ -338,27 +366,16 @@ public:
     {
         return static_cast<bool>(childrenSize_);
     }
-    bool CanOverScroll(int32_t source) override
-    {
-        auto canOverScroll = (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            IsScrollable() && (!ScrollableIdle() || animateOverScroll_ || animateCanOverScroll_) &&
-            (IsAtBottom() || IsAtTop()));
-        if (canOverScroll != lastCanOverScroll_) {
-            lastCanOverScroll_ = canOverScroll;
-            AddScrollableFrameInfo(source);
-        }
-        return canOverScroll;
-    }
     void UpdateChildPosInfo(int32_t index, float delta, float sizeChange);
 
     SizeF GetChildrenExpandedSize() override;
-private:
 
-    bool IsNeedInitClickEventRecorder() const override
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
     {
-        return true;
+        isNeedDividerAnimation_ = isNeedDividerAnimation;
     }
 
+private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
     void FireOnReachEnd(const OnReachEvent& onReachEnd) override;
@@ -366,6 +383,7 @@ private:
     void OnModifyDone() override;
     void ChangeAxis(RefPtr<UINode> node);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    bool HandleTargetIndex(bool isJump);
     float CalculateTargetPos(float startPos, float endPos);
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
@@ -375,9 +393,11 @@ private:
     WeakPtr<FocusHub> GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex);
     WeakPtr<FocusHub> ScrollAndFindFocusNode(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
         int32_t curIndexInGroup, int32_t moveStep, FocusStep step);
+    bool HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex);
     bool ScrollListForFocus(int32_t nextIndex, int32_t curIndex, int32_t nextIndexInGroup);
     bool ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
         int32_t moveStep, FocusStep step, bool isScrollIndex);
+    void VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param);
 
     void MarkDirtyNodeSelf();
     SizeF GetContentSize() const;
@@ -394,12 +414,13 @@ private:
     void SetChainAnimationLayoutAlgorithm(
         RefPtr<ListLayoutAlgorithm> listLayoutAlgorithm, RefPtr<ListLayoutProperty> listLayoutProperty);
     bool NeedScrollSnapAlignEffect() const;
-    ScrollAlign GetScrollAlignByScrollSnapAlign() const;
+    ScrollAlign GetInitialScrollAlign() const;
     bool GetListItemAnimatePos(float startPos, float endPos, ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, float startPos, float endPos,
         ScrollAlign align, float& targetPos);
     bool GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int32_t indexInGroup, float startPos,
         ScrollAlign align, float& targetPos);
+    bool GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty);
 
     // multiSelectable
     void ClearMultiSelect() override;
@@ -435,12 +456,14 @@ private:
     float contentStartOffset_ = 0.0f;
     float contentEndOffset_ = 0.0f;
     bool maintainVisibleContentPosition_ = false;
+    std::optional<int32_t> lastSnapTargetIndex_;
 
     float currentDelta_ = 0.0f;
     bool crossMatchChild_ = false;
     bool smooth_ = false;
     float scrollSnapVelocity_ = 0.0f;
     bool snapTrigOnScrollStart_ = false;
+    bool snapTrigByScrollBar_ = false;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> jumpIndexInGroup_;
@@ -492,6 +515,7 @@ private:
 
     ListItemIndex startInfo_ = {-1, -1, -1};
     ListItemIndex endInfo_ = {-1, -1, -1};
+    bool isNeedDividerAnimation_ = true;
 };
 } // namespace OHOS::Ace::NG
 

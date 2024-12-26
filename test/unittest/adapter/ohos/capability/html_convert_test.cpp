@@ -136,7 +136,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
 {
     auto imageOption = GetImageOption("src/icon-1.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    auto spanString3 = AceType::MakeRefPtr<SpanString>("012345678\n9");
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(u"012345678\n9");
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
@@ -166,7 +166,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
     spanString3->AddSpan(AceType::MakeRefPtr<TextShadowSpan>(textShadows, 3, 6));
     mutableStr->InsertSpanString(1, spanString3);
 
-    auto spanString2 = AceType::MakeRefPtr<SpanString>("测试一下中文，\n看看是什么情况");
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(u"测试一下中文，\n看看是什么情况");
     spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 5));
     spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 6, 10));
     spanString2->AddSpan(AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(10), 12, 14));
@@ -183,7 +183,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert000, TestSize.Level1)
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert001, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
@@ -211,7 +211,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert002, TestSize.Level1)
 {
     auto imageOption = GetImageOption("src/icon-1.png");
     auto imageSpan = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>("123456");
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>(u"123456");
     imageSpan->AppendSpanString(mutableStr2);
 
     std::vector<uint8_t> buffer;
@@ -266,7 +266,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert003, TestSize.Level1)
 
 HWTEST_F(HtmlConvertTestNg, SpanString004, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("01234中文56789");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"01234中文56789");
     std::vector<uint8_t> buff;
     spanString->EncodeTlv(buff);
     EXPECT_EQ(buff.size() > 0, true);
@@ -286,7 +286,7 @@ HWTEST_F(HtmlConvertTestNg, SpanString004, TestSize.Level1)
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert005, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
     spanString->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
@@ -332,7 +332,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert007, TestSize.Level1)
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("段落标题\n正文第一段开始");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"段落标题\n正文第一段开始");
     SpanParagraphStyle spanParagraphStyle;
     spanParagraphStyle.align = TextAlign::CENTER;
     // default max lines 4
@@ -359,7 +359,7 @@ HWTEST_F(HtmlConvertTestNg, HtmlConvert008, TestSize.Level1)
 
 HWTEST_F(HtmlConvertTestNg, HtmlConvert009, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("向上到顶适中向下到底");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"向上到顶适中向下到底");
     spanString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(20.0_vp), 0, 4));
     spanString->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(10.0_vp), 4, 6));
 

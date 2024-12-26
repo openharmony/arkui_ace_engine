@@ -521,7 +521,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
             textLayoutProperty->UpdateContent(optionValue.text_);
             textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
         }
-        UpdateTextAccessibilityProperty(textNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         textNode->GetRenderContext()->SetClipToFrame(true);
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -530,9 +530,11 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
     selectedIndex_ = currentIndex;
 }
 
-void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>& textNode, int32_t virtualIndex,
-    std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
+void TextPickerColumnPattern::UpdateTextAccessibilityProperty(
+    int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate)
 {
+    auto textNode = DynamicCast<FrameNode>(*(iter));
+    CHECK_NULL_VOID(textNode);
     auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     if (!NotLoopOptions() || virtualIndexValidate) {
@@ -543,13 +545,15 @@ void TextPickerColumnPattern::UpdateTextAccessibilityProperty(RefPtr<FrameNode>&
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
     if (virtualIndex == -1 && isFocus) {
         auto nextTextNode = DynamicCast<FrameNode>(*(++iter));
-        CHECK_NULL_VOID(nextTextNode);
-        nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        if (nextTextNode) {
+            nextTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        }
         --iter;
     } else if (virtualIndex == static_cast<int32_t>(GetOptionCount()) && isFocus) {
         auto preTextNode = DynamicCast<FrameNode>(*(--iter));
-        CHECK_NULL_VOID(preTextNode);
-        preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        if (preTextNode) {
+            preTextNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
+        }
         ++iter;
     }
 }
@@ -595,7 +599,7 @@ void TextPickerColumnPattern::FlushCurrentImageOptions()
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        UpdateTextAccessibilityProperty(rangeNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -672,7 +676,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
             iconLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
             iconLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(optionValue.icon_));
         }
-        UpdateTextAccessibilityProperty(linearLayoutNode, virtualIndex, iter, virtualIndexValidate);
+        UpdateTextAccessibilityProperty(virtualIndex, iter, virtualIndexValidate);
         iconNode->MarkModifyDone();
         iconNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         textNode->MarkModifyDone();
@@ -746,6 +750,8 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasDisappearFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDisappearFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
@@ -768,6 +774,8 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
         textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(
@@ -791,6 +799,8 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
         textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
@@ -802,6 +812,39 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+}
+
+void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(textPickerLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textStyle = theme->GetTextStyle();
+    textLayoutProperty->UpdateFontSize(
+        textPickerLayoutProperty->GetDefaultFontSize().value_or(textStyle.GetFontSize()));
+    textLayoutProperty->UpdateFontWeight(
+        textPickerLayoutProperty->GetDefaultWeight().value_or(textStyle.GetFontWeight()));
+    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDefaultColor().value_or(textStyle.GetTextColor()));
+    textLayoutProperty->UpdateFontFamily(
+        textPickerLayoutProperty->GetDefaultFontFamily().value_or(textStyle.GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        textPickerLayoutProperty->GetDefaultFontStyle().value_or(textStyle.GetFontStyle()));
+    textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+    if (textPickerLayoutProperty->GetDefaultTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetDefaultTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetDefaultTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(textStyle.GetTextOverflow());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    textLayoutProperty->UpdateMaxLines(1);
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(
@@ -855,6 +898,10 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex,
     uint32_t showCount)
 {
+    if (textPickerLayoutProperty && textPickerLayoutProperty->GetDisableTextStyleAnimation().value_or(false)) {
+        UpdateDefaultTextProperties(textLayoutProperty, textPickerLayoutProperty);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -875,6 +922,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 

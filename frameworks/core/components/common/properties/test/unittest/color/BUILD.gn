@@ -23,7 +23,10 @@ if (is_ohos_standard_system) {
 ohos_unittest("ColorPropertyTest") {
   module_out_path = module_output_path
 
-  sources = [ "color_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "color_test.cpp",
+  ]
 
   configs = [
     ":color_test",

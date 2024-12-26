@@ -117,6 +117,8 @@ public:
     }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage, uint32_t focusWindowId) {};
     virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
 
@@ -261,6 +263,9 @@ public:
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
 
+    virtual void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) {};
+
     /**
      * @description: Set parent ability token.
      * @param token ability token.
@@ -306,8 +311,6 @@ public:
     virtual void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) {}
 
     virtual void SetContainerModalTitleHeight(int height) {}
-
-    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
 
     virtual int32_t GetContainerModalTitleHeight()
     {
@@ -463,6 +466,15 @@ public:
 
     virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {}
     virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
+
+    virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
+
+    virtual int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback)
+    {
+        return 0;
+    }
+
+    virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
 };
 
 } // namespace OHOS::Ace

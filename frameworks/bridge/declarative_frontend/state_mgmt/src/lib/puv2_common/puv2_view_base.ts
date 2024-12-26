@@ -60,9 +60,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // when paused, getCurrentlyRenderedElmtId() will return UINodeRegisterProxy.notRecordingDependencies
   public static renderingPaused: boolean = false;
 
-  // flag if active of inActive
+  // greater than 0 means the node is active, otherwise node is inactive.
   // inActive means updates are delayed
-  protected isActive_: boolean = true;
+  protected activeCount_: number = 1;
 
   // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU/V2 has not been GC.
   protected isDeleting_: boolean = false;
@@ -219,6 +219,21 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     return this.isCompFreezeAllowed_;
   }
 
+  public setActiveCount(active: boolean): void {
+    // When the child node supports the Component freezing, the root node will definitely recurse to the child node. 
+    // From API16, to prevent child node mistakenly activated by the parent node, reference counting is used to control node status.
+    // active + 1 means count +1， inactive -1 means count -1, Expect no more than 1 
+    if (Utils.isApiVersionEQAbove(16)) {
+      this.activeCount_ += active ? 1 : -1;
+    }
+    else {
+      this.activeCount_ = active ? 1 : 0;
+    }
+    if (this.activeCount_ > 1) {
+      stateMgmtConsole.warn(`${this.debugInfo__()} activeCount_ error:${this.activeCount_}`);
+    }
+  }
+
   public getChildViewV2ForElmtId(elmtId: number): ViewV2 | undefined {
     const optComp = this.childrenWeakrefMap_.get(elmtId);
     return optComp?.deref() && (optComp.deref() instanceof ViewV2) ?
@@ -267,13 +282,14 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected abstract debugInfoStateVars(): string;
 
   public isViewActive(): boolean {
-    return this.isActive_;
+    return this.activeCount_ > 0;
   }
 
   // abstract functions to be implemented by application defined class / transpiled code
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected abstract get isViewV2(): boolean;
 
   public abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   public abstract updateStateVars(params: Object);
@@ -761,5 +777,22 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       }
     }
     return dfxCommands;
+  }
+
+  // dump state var for v1 and v2 and send the dump value to ide to show in inspector
+  public onDumpInspector(): string {
+    const dumpInfo: DumpInfo = new DumpInfo();
+    dumpInfo.viewInfo = {
+      componentName: this.constructor.name, id: this.id__(), isV2: this.isViewV2,
+      isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
+    };
+    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+    let resInfo: string = '';
+    try {
+      resInfo = JSON.stringify(dumpInfo);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+    }
+    return resInfo;
   }
 } // class PUV2ViewBase

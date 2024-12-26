@@ -39,7 +39,7 @@ class ArkTypographyImpl implements Typography {
     captionSmall: TypographyStyle;
 
     constructor(
-        typography: CustomTypography = {},
+        typography: CustomTypography,
         baselineTypography: Typography)
     {
         // Display

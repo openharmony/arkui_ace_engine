@@ -74,14 +74,12 @@ struct TextEditingValueNG {
     std::u16string GetValueBeforePosition(int32_t position) const
     {
         position = std::clamp(position, 0, static_cast<int32_t>(text.length()));
-        LOGI("GetValueBeforePosition %{public}d", position);
         return text.substr(0, position);
     }
 
     std::u16string GetValueAfterPosition(int32_t position) const
     {
         position = std::clamp(position, 0, static_cast<int32_t>(text.length()));
-        LOGI("GetValueAfterPosition %{public}d", position);
         return text.substr(position);
     }
 
@@ -122,6 +120,7 @@ struct TextEditingValueNG {
 
     std::u16string text;
     int32_t caretPosition = 0;
+    int32_t beforeCaretPosition = 0;
 };
 
 } // namespace OHOS::Ace::NG

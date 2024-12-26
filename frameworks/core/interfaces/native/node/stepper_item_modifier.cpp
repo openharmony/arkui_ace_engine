@@ -64,28 +64,46 @@ void ResetStatus(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIStepperItemModifier* GetCJUIStepperItemModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

@@ -83,11 +83,16 @@ struct BindMenuStatus {
 struct PreparedInfoForDrag {
     bool isMenuShow = false;
     int32_t badgeNumber = 0;
-    float defaultScale = 1.0f;
+    float previewScale = 1.0f;
     OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+};
+
+struct DragframeNodeInfo {
+    RefPtr<FrameNode> frameNode;
+    std::vector<RefPtr<FrameNode>> gatherFrameNode;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -259,6 +264,9 @@ public:
         const RefPtr<FrameNode>& frameNode);
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
+    void HandleDragThroughMouse(const RefPtr<FrameNode> frameNode);
+    void HandleDragThroughTouch(const RefPtr<FrameNode> frameNode);
+    void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
@@ -415,6 +423,7 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
+    DragframeNodeInfo dragframeNodeInfo_;
     // disable drag for the node itself and its all children
     bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;

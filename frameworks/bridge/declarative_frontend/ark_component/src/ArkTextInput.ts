@@ -1382,6 +1382,23 @@ class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
+  constructor(value: EllipsisMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEllipsisMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEllipsisMode(node);
+    } else {
+      getUINativeModule().textInput.setEllipsisMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1686,6 +1703,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
+    return this;
+  }
+  ellipsisMode(value: EllipsisMode): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
     return this;
   }
   padding(value: Padding | Length): this {

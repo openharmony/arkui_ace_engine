@@ -20,6 +20,7 @@ config("ace_napi_config") {
     "$ace_root",
     "$arkui_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$root_out_dir/arkui",
     "$root_out_dir/arkui/framework",
     "//third_party/zlib",

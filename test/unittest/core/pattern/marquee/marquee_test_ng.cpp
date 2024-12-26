@@ -1687,4 +1687,219 @@ HWTEST_F(MarqueeTestNg, MarqueeTest025, TestSize.Level1)
         EXPECT_TRUE(frameRateManager->isRateChanged_);
     }
 }
+
+/**
+ * @tc.name: OnWindowHide_001
+ * @tc.desc: Test marquee OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowHide_001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.src = std::make_optional(MARQUEE_SRC);
+    testProperty.playerStatus = std::make_optional(false);
+    auto frameNode = CreateMarqueeParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->animation_, nullptr);
+    pattern->playStatus_ = false;
+    pattern->OnWindowHide();
+    EXPECT_EQ(pattern->playStatus_, false);
+}
+
+/**
+ * @tc.name: OnWindowHide_002
+ * @tc.desc: Test marquee OnWindowHide
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowHide_002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.src = std::make_optional(MARQUEE_SRC);
+    testProperty.playerStatus = std::make_optional(false);
+    auto frameNode = CreateMarqueeParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->animation_, nullptr);
+    pattern->playStatus_ = true;
+    pattern->OnWindowHide();
+    EXPECT_EQ(pattern->playStatus_, false);
+}
+
+/**
+ * @tc.name: OnWindowShow_001
+ * @tc.desc: Test marquee OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowShow_001, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.src = std::make_optional(MARQUEE_SRC);
+    testProperty.playerStatus = std::make_optional(false);
+    auto frameNode = CreateMarqueeParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->animation_, nullptr);
+    pattern->playStatus_ = true;
+    pattern->OnWindowShow();
+    EXPECT_EQ(pattern->playStatus_, true);
+}
+
+/**
+ * @tc.name: OnWindowShow_002
+ * @tc.desc: Test marquee OnWindowShow
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowShow_002, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.src = std::make_optional(MARQUEE_SRC);
+    testProperty.playerStatus = std::make_optional(false);
+    auto frameNode = CreateMarqueeParagraph(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    ASSERT_NE(pattern, nullptr);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnModifyDone();
+    ASSERT_NE(pattern->animation_, nullptr);
+    pattern->playStatus_ = false;
+    pattern->OnWindowShow();
+    EXPECT_EQ(pattern->playStatus_, true);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged_001
+ * @tc.desc: Test marquee OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowSizeChanged_001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    int32_t width = 10;
+    int32_t height = 20;
+    marqueeModel.lastWindowWidth_ = width;
+    marqueeModel.lastWindowHeight_ = height;
+    marqueeModel.OnWindowSizeChanged(width, height, WindowSizeChangeReason::RESIZE);
+    EXPECT_EQ(marqueeModel.measureChanged_, false);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged_002
+ * @tc.desc: Test marquee OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowSizeChanged_002, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    int32_t width = 10;
+    int32_t height = 20;
+    marqueeModel.lastWindowWidth_ = 8;
+    marqueeModel.lastWindowHeight_ = height;
+    marqueeModel.OnWindowSizeChanged(width, height, WindowSizeChangeReason::RESIZE);
+    EXPECT_EQ(marqueeModel.measureChanged_, true);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged_003
+ * @tc.desc: Test marquee OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowSizeChanged_003, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    int32_t width = 10;
+    int32_t height = 20;
+    marqueeModel.lastWindowWidth_ = width;
+    marqueeModel.lastWindowHeight_ = 18;
+    marqueeModel.OnWindowSizeChanged(width, height, WindowSizeChangeReason::RESIZE);
+    EXPECT_EQ(marqueeModel.measureChanged_, true);
+}
+
+/**
+ * @tc.name: OnWindowSizeChanged_004
+ * @tc.desc: Test marquee OnWindowSizeChanged
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnWindowSizeChanged_004, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    int32_t width = 10;
+    int32_t height = 20;
+    marqueeModel.lastWindowWidth_ = 8;
+    marqueeModel.lastWindowHeight_ = 18;
+    marqueeModel.OnWindowSizeChanged(width, height, WindowSizeChangeReason::RESIZE);
+    EXPECT_EQ(marqueeModel.measureChanged_, true);
+}
+
+/**
+ * @tc.name: GetTextDirection_001
+ * @tc.desc: Test marquee GetTextDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, GetTextDirection_001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    std::string content = "HelloWorld";
+    auto res = marqueeModel.GetTextDirection(content, TextDirection::RTL);
+    EXPECT_EQ(res, TextDirection::RTL);
+}
+
+/**
+ * @tc.name: GetTextDirection_002
+ * @tc.desc: Test marquee GetTextDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, GetTextDirection_002, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    std::string content = "HelloWorld";
+    auto res = marqueeModel.GetTextDirection(content, TextDirection::AUTO);
+    EXPECT_EQ(res, TextDirection::LTR);
+}
+
+/**
+ * @tc.name: CheckTextDirectionChange_001
+ * @tc.desc: Test marquee CheckTextDirectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, CheckTextDirectionChange_001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.currentTextDirection_ = TextDirection::LTR;
+    marqueeModel.CheckTextDirectionChange(TextDirection::RTL);
+    EXPECT_EQ(marqueeModel.lastAnimationOffset_, std::nullopt);
+}
+
+/**
+ * @tc.name: OnFontScaleConfigurationUpdate_001
+ * @tc.desc: Test marquee OnFontScaleConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, OnFontScaleConfigurationUpdate_001, TestSize.Level1)
+{
+    MarqueePattern marqueeModel;
+    marqueeModel.OnFontScaleConfigurationUpdate();
+    EXPECT_FALSE(AnimationUtils::IsImplicitAnimationOpen());
+}
 } // namespace OHOS::Ace::NG

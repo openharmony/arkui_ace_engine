@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 config("container_scope_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "$ace_root/frameworks" ]
+  include_dirs = [
+    "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
+  ]
 }
 
 ohos_shared_library("ace_container_scope") {
@@ -56,7 +59,7 @@ template("ace_core_source_set") {
     part_name = ace_engine_part
     defines += invoker.defines
     platform = invoker.platform
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
 
     if (ace_engine_feature_enable_split_mode &&
         defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
@@ -234,6 +237,7 @@ template("ace_core_source_set") {
       "gestures/timeout_gesture.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
@@ -272,6 +276,7 @@ template("ace_core_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
@@ -301,6 +306,10 @@ template("ace_core_source_set") {
 
     if (defined(config.hdc_register_support) && config.hdc_register_support) {
       sources += [ "common/hdc_register.cpp" ]
+    }
+
+    if (ohos_indep_compiler_enable) {
+      include_dirs += indep_compile_includes
     }
 
     configs = [ "$ace_root:ace_config" ]
@@ -446,6 +455,7 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
 
     deps += [
@@ -734,6 +744,7 @@ template("ace_core_ng_source_set") {
       "common/window.cpp",
 
       # event
+      "event/axis_event.cpp",
       "event/back_end_event_manager.cpp",
       "event/key_event.cpp",
       "event/key_event_recognizer.cpp",
@@ -826,6 +837,7 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",
@@ -842,6 +854,7 @@ template("ace_core_ng_source_set") {
       "components/picker/picker_data.cpp",
       "components/picker/picker_theme.cpp",
       "components/scroll/scrollable.cpp",
+      "components/svg/svg_transform.cpp",
       "components/theme/app_theme.cpp",
       "components/theme/blur_style_theme.cpp",
       "components/theme/icon_theme.cpp",
@@ -866,12 +879,13 @@ template("ace_core_ng_source_set") {
       "common/recorder/event_controller.cpp",
       "common/recorder/event_recorder.cpp",
       "common/recorder/exposure_processor.cpp",
+      "common/recorder/inspector_tree_collector.cpp",
       "common/recorder/node_data_cache.cpp",
 
       # text
       "text/text_emoji_processor.cpp",
     ]
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
     if (is_arkui_x) {
       include_dirs += [
         "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler/include",
@@ -890,7 +904,6 @@ template("ace_core_ng_source_set") {
         "components/common/properties/scroll_bar.cpp",
         "components/custom_paint/rosen_render_offscreen_canvas.cpp",
         "components/declaration/common/event.cpp",
-        "components/svg/svg_transform.cpp",
         "components/video/resource/ext_surface.cpp",
         "components/video/resource/ext_texture.cpp",
         "components/video/resource/resource.cpp",
@@ -946,10 +959,8 @@ template("ace_core_ng_source_set") {
       "$ace_root/frameworks/core/components_ng/render:ace_core_components_render_ng_$platform",
       "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform",
       "$ace_root/frameworks/core/components_ng/syntax:ace_core_components_syntax_ng_$platform",
+      "$ace_root/frameworks/core/components_ng/token_theme:ace_core_components_token_theme_ng_$platform",
     ]
-    if (is_arkui_x) {
-      deps -= [ "$ace_root/frameworks/core/components_ng/svg:ace_core_components_svg_ng_$platform" ]
-    }
 
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]

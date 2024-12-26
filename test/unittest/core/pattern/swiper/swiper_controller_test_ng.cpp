@@ -659,7 +659,7 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
     EXPECT_TRUE(pattern_->isUserFinish_);
     EXPECT_FALSE(pattern_->isFinishAnimation_);
 
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     controller_->SetFinishCallback([]() {});
     controller_->FinishAnimation();
     EXPECT_EQ(controller_->GetFinishCallback(), nullptr);
@@ -739,6 +739,22 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
     CreateSwiperDone();
 
     VerifyChangeIndex(9, false, 9);
+}
+
+/**
+ * @tc.name: ChangeIndex003
+ * @tc.desc: Test ChangeIndex with animation and without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(8);
+    CreateSwiperDone();
+
+    VerifyChangeIndex(3, true, 3);
+    VerifyChangeIndex(1, false, 1);
 }
 
 /**

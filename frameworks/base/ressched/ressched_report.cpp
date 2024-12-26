@@ -26,6 +26,7 @@ constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
 constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
 constexpr uint32_t RES_TYPE_KEY_EVENT       = 122;
+constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -42,6 +43,9 @@ constexpr int32_t AUTO_PLAY_OFF_EVENT = 6;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
+constexpr int32_t AXIS_OFF_EVENT = 1;
+constexpr int32_t AXIS_IS_PAD = 0;
+constexpr int32_t AXIS_IS_MOUSE = 1;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -55,6 +59,7 @@ constexpr char CLICK[] = "click";
 constexpr char KEY_EVENT[] = "key_event";
 constexpr char PUSH_PAGE[] = "push_page";
 constexpr char POP_PAGE[] = "pop_page";
+constexpr char PAGE_END_FLUSH[] = "page_end_flush";
 constexpr char AUTO_PLAY_ON[] = "auto_play_on";
 constexpr char AUTO_PLAY_OFF[] = "auto_play_off";
 constexpr char SLIDE_OFF[] = "slide_off";
@@ -63,6 +68,9 @@ constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
 constexpr char UP_SPEED_KEY[] = "up_speed";
 constexpr char KEY_CODE[] = "key_code";
+constexpr char AXIS_OFF[] = "axis_off";
+constexpr char AXIS_NORMAL_UP_SPEED[] = "0.0";
+constexpr char AXIS_EVENT_TYPE[] = "axis_event_type";
 #ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
@@ -124,9 +132,19 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_POP_PAGE, POP_PAGE_EVENT, payload);
                 }
             },
+            { PAGE_END_FLUSH,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    ResSchedReport::GetInstance().LoadPageEvent(ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT);
+                }
+            },
             { WEB_GESTURE,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
+                }
+            },
+            { AXIS_OFF,
+                [this](std::unordered_map<std::string, std::string>& payload) {
+                    ResSchedReport::GetInstance().AxisEventReportEnd();
                 }
             },
 #ifdef FFRT_EXISTS
@@ -313,18 +331,94 @@ double ResSchedReport::GetUpVelocity(const TouchEvent& lastMoveInfo,
 
 void ResSchedReport::LoadPageEvent(int32_t value)
 {
-    if (LIKELY(value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)) {
+    if (LIKELY((value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == false)
+        || (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == false))) {
         return;
     } else if (value == ResDefine::LOAD_PAGE_COMPLETE_EVENT && loadPageOn_ == true) {
         loadPageOn_ = false;
+    } else if (value == ResDefine::LOAD_PAGE_NO_REQUEST_FRAME_EVENT && loadPageRequestFrameOn_ == true) {
+        loadPageRequestFrameOn_ = false;
     } else if (value == ResDefine::LOAD_PAGE_START_EVENT) {
         loadPageOn_ = true;
+        loadPageRequestFrameOn_ = true;
     }
 
     std::unordered_map<std::string, std::string> payload;
     payload[Ressched::NAME] = LOAD_PAGE;
     LoadAceApplicationContext(payload);
     ResSchedDataReport(RES_TYPE_LOAD_PAGE, value, payload);
+}
+
+void ResSchedReport::HandleAxisBegin(const AxisEvent& axisEvent)
+{
+    RecordAxisEvent(axisEvent, true);
+    std::unordered_map<std::string, std::string> payload;
+    LoadAceApplicationContext(payload);
+    ResSchedDataReport(RES_TYPE_SLIDE, SLIDE_DETECTING, payload);
+}
+
+void ResSchedReport::HandleAxisUpdate(const AxisEvent& axisEvent)
+{
+    RecordAxisEvent(axisEvent);
+}
+
+void ResSchedReport::HandleAxisEnd(const AxisEvent& axisEvent)
+{
+    RecordAxisEvent(axisEvent);
+}
+
+void ResSchedReport::RecordAxisEvent(const AxisEvent& axisEvent, bool enforce)
+{
+    if (enforce) {
+        lastAxisEvent_ = axisEvent;
+        curAxisEvent_ = axisEvent;
+    } else if (axisEvent.ConvertToOffset().GetX() != 0 || axisEvent.ConvertToOffset().GetY() != 0) {
+        lastAxisEvent_ = curAxisEvent_;
+        curAxisEvent_ = axisEvent;
+    }
+}
+
+double ResSchedReport::GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent)
+{
+    double distance = sqrt(pow(curAxisEvent.ConvertToOffset().GetX(), SQUARE) +
+        pow(curAxisEvent.ConvertToOffset().GetY(), SQUARE));
+    int64_t time = std::chrono::duration_cast<std::chrono::milliseconds>(curAxisEvent.time -
+        lastAxisEvent.time).count();
+    if (time <= 0) {
+        return 0.0;
+    }
+    return distance * dpi_ / static_cast<double>(time); //unit: pixel/ms
+}
+
+void ResSchedReport::AxisEventReportEnd()
+{
+    std::unordered_map<std::string, std::string> payload;
+    payload[Ressched::NAME] = TOUCH;
+    if (curAxisEvent_.sourceTool != SourceTool::TOUCHPAD) {
+        payload[UP_SPEED_KEY] = Ressched::AXIS_NORMAL_UP_SPEED;
+        payload[AXIS_EVENT_TYPE] = AXIS_IS_MOUSE;
+    } else {
+        payload[UP_SPEED_KEY] = std::to_string(GetAxisUpVelocity(lastAxisEvent_, curAxisEvent_));
+        payload[AXIS_EVENT_TYPE] = AXIS_IS_PAD;
+    }
+    ResSchedReport::GetInstance().ResSchedDataReport(Ressched::RES_TYPE_AXIS_EVENT, Ressched::AXIS_OFF_EVENT, payload);
+}
+
+void ResSchedReport::OnAxisEvent(const AxisEvent& axisEvent)
+{
+    switch (axisEvent.action) {
+        case AxisAction::BEGIN:
+            HandleAxisBegin(axisEvent);
+            break;
+        case AxisAction::UPDATE:
+            HandleAxisUpdate(axisEvent);
+            break;
+        case AxisAction::END:
+            HandleAxisEnd(axisEvent);
+            break;
+        default:
+            break;
+    }
 }
 
 ResSchedReportScope::ResSchedReportScope(const std::string& name,

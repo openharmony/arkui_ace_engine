@@ -47,9 +47,9 @@ WindowSceneLayoutManager* WindowSceneLayoutManager::GetInstance()
 void WindowSceneLayoutManager::Init()
 {
     Rosen::SceneSessionManager::GetInstance().SetDumpUITreeFunc(
-        [this](uint64_t screenId, std::string& info) {
+        [this](std::string& info) {
             isCoreDebugEnable_ = system::GetParameter("debug.window.coredebug.enabled", "0") == "1";
-            GetTotalUITreeInfo(screenId, info);
+            GetTotalUITreeInfo(info);
         }
     );
 }
@@ -166,6 +166,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s rsNode is null", GetWindowName(node).c_str());
         return;
     }
+    IsFrameNodeAbnormal(node);
     auto globalGeometry = isAncestorRecent ? std::make_shared<Rosen::RSObjAbsGeometry>()
                                            : rsNode->GetGlobalGeometry();
     auto localGeometry = rsNode->GetLocalGeometry();
@@ -277,6 +278,24 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
         return false;
     }
     return session->GetSystemTouchable();
+}
+
+void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    if (node->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        return;
+    }
+    auto windowScene = node->GetPattern<WindowScene>();
+    CHECK_NULL_VOID(windowScene);
+    auto session = windowScene->GetSession();
+    CHECK_NULL_VOID(session);
+    auto surfaceNode = session->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    if (!surfaceNode->GetParent()) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "node:%{public}d name:%{public}s is on ui tree but not rs tree,"
+            "screenId:%{public}" PRIu64, node->GetId(), GetWindowName(node).c_str(), GetScreenId(node));
+    }
 }
 
 void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
@@ -572,24 +591,22 @@ void WindowSceneLayoutManager::GetUINodeInfo(const RefPtr<FrameNode>& node,
     oss << " parentFrameNodeId: " << parentId << std::endl;
 }
 
-void WindowSceneLayoutManager::GetTotalUITreeInfo(uint64_t screenId, std::string& info)
+void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
 {
-    TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin:%{public}" PRIu64, screenId);
     if (!mainHandler_) {
         auto runner = AppExecFwk::EventRunner::GetMainEventRunner();
         mainHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     }
-    auto task = [this, screenId, &info] {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin task GetTotalUITreeInfo:%{public}" PRIu64, screenId);
-        if (screenNodeMap_.count(screenId) == 0) {
-            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "screenNode:%{public}" PRIu64 " not exists", screenId);
-            return;
+    auto task = [this, &info] {
+        for (auto it = screenNodeMap_.begin(); it != screenNodeMap_.end(); ++it) {
+            TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin task GetTotalUITreeInfo:%{public}" PRIu64, it->first);
+            std::ostringstream oss;
+            GetUITreeInfo(it->second, 0, 0, oss);
+            oss << "--------------------------------PatternTree" << " screenId: " <<
+                it->first << "-----------------------------------" << std::endl;
+            GetRSNodeTreeInfo(GetRSNode(it->second), 0, oss);
+            info.append(oss.str());
         }
-        std::ostringstream oss;
-        GetUITreeInfo(screenNodeMap_[screenId], 0, 0, oss);
-        oss << "-------------------------------------RSTree-----------------------------------" << std::endl;
-        GetRSNodeTreeInfo(GetRSNode(screenNodeMap_[screenId]), 0, oss);
-        info.append(oss.str());
     };
     mainHandler_->PostSyncTask(std::move(task), "GetTotalUITreeInfo", AppExecFwk::EventQueue::Priority::IMMEDIATE);
 }

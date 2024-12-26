@@ -26,55 +26,19 @@
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
-private:
-    /**
-     * Obtain the Id of WithTheme container which corresponds to current node.
-     * This invokes the globalThis.themeScopeMgr.getWithThemeIdForElmtId method on JS level.
-     */
-    static int32_t GetWithThemeId()
-    {
-        // use default theme if theme scope is desabled
-        int32_t ret = 0;
-        if (!JSThemeScope::jsThemeScopeEnabled) {
-            return ret;
-        }
-        // take theme scope id from js level method
-        auto elmId = NG::ViewStackProcessor::GetInstance()->GetNodeIdToAccountFor();
-        auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-        CHECK_NULL_RETURN(runtime, ret);
-        auto global = runtime->GetGlobal();
-        auto scopeMgr = global->GetProperty(runtime, "themeScopeMgr");
-        if (!scopeMgr->IsObject(runtime)) {
-            return ret;
-        }
-        auto func = scopeMgr->GetProperty(runtime, "getWithThemeIdForElmtId");
-        if (!func->IsFunction(runtime)) {
-            return ret;
-        }
-        std::vector<shared_ptr<JsValue>> argv;
-        argv.push_back(runtime->NewInt32(elmId));
-        auto retVal = func->Call(runtime, scopeMgr, argv, argv.size());
-        CHECK_NULL_RETURN(retVal, ret);
-        ret = retVal->ToInt32(runtime);
-        return ret;
-    }
-
 public:
     static constexpr int32_t DEFAULT_ALPHA = 255;
     static constexpr double DEFAULT_OPACITY = 0.2;
     
     static std::optional<JSTheme> GetTheme()
     {
-        auto themeId = GetWithThemeId();
-        auto it = JSThemeScope::jsThemes.find(themeId);
-        return (it != JSThemeScope::jsThemes.end()) ? std::make_optional(it->second) : std::nullopt;
+        return JSThemeScope::jsCurrentTheme;
     }
 
     static std::optional<JSThemeColors> GetThemeColors()
     {
-        auto themeId = GetWithThemeId();
-        auto it = JSThemeScope::jsThemes.find(themeId);
-        return (it != JSThemeScope::jsThemes.end()) ? std::make_optional(it->second.Colors()) : std::nullopt;
+        return (JSThemeScope::jsCurrentTheme) ?
+            std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
     }
 };
 }

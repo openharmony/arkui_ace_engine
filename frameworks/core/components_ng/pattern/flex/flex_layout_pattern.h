@@ -90,6 +90,14 @@ public:
                                            .append(std::to_string(layoutResult_.frontSpace).c_str())
                                            .append(std::string(" FlexBetweenSpace: "))
                                            .append(std::to_string(layoutResult_.betweenSpace).c_str()));
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<FlexLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        auto space = layoutProperty->GetSpace();
+        if (space.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
+        }
     }
 
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override
@@ -173,11 +181,6 @@ public:
         auto layoutProperty = host->GetLayoutProperty<FlexLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, Dimension().ToString());
         return layoutProperty->GetSpaceValue(Dimension()).ToString();
-    }
-
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
     }
 
     void SetFlexMeasureResult(FlexMeasureResult measureResult, uintptr_t addr)

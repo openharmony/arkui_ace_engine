@@ -181,6 +181,19 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     }
 }
 
+const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId, uint64_t displayId)
+{
+    SubwindowKey searchKey {.instanceId = instanceId, .displayId = displayId };
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
+    auto result = subwindowMap_.find(searchKey);
+    if (result != subwindowMap_.end()) {
+        return result->second;
+    }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
+    return nullptr;
+}
+
 const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
 {
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
@@ -1147,9 +1160,16 @@ void SubwindowManager::ClearToastInSystemSubwindow()
             containerId = container->GetInstanceId();
         }
     }
-    auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
+    RefPtr<Subwindow> subwindow;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
+            subwindow = GetSystemToastWindow(containerId);
+        }
+    } else {
+        auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
             GetParentContainerId(containerId) : containerId;
-    auto subwindow = GetSystemToastWindow(parentContainerId);
+        subwindow = GetSystemToastWindow(parentContainerId);
+    }
     if (subwindow) {
         subwindow->ClearToast();
     } else {

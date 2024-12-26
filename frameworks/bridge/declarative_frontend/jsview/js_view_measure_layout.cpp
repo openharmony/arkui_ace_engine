@@ -27,6 +27,9 @@ namespace OHOS::Ace::Framework {
 #ifdef USE_ARK_ENGINE
 
 namespace {
+using OHOS::Ace::NG::LayoutConstraintF;
+using OHOS::Ace::NG::LayoutProperty;
+using OHOS::Ace::NG::SizeF;
 JSRef<JSObject> GenConstraint(const std::optional<NG::LayoutConstraintF>& parentConstraint)
 {
     auto minSize = parentConstraint->minSize;
@@ -291,8 +294,12 @@ void JSMeasureLayoutParam::GenChildArray(int32_t start, int32_t end)
 JSRef<JSObject> JSMeasureLayoutParam::GetConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
-    return GenConstraint(parentConstraint);
+    if (layoutWrapper && layoutWrapper->GetGeometryNode() &&
+        layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint()) {
+        auto parentConstraint = layoutWrapper->GetGeometryNode()->GetParentLayoutConstraint();
+        return GenConstraint(parentConstraint);
+    }
+    return GenConstraint(LayoutConstraintF());
 }
 
 void JSMeasureLayoutParam::Update(NG::LayoutWrapper* layoutWrapper)
@@ -372,21 +379,29 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
 JSRef<JSObject> JSMeasureLayoutParamNG::GetConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
-    return GenConstraintNG(layoutConstraint);
+    if (layoutWrapper && layoutWrapper->GetLayoutProperty() &&
+        layoutWrapper->GetLayoutProperty()->GetLayoutConstraint()) {
+        auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint().value();
+        return GenConstraintNG(layoutConstraint);
+    }
+    return GenConstraintNG(LayoutConstraintF());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetPlaceChildrenConstraint()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
-    return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
+    if (layoutWrapper && layoutWrapper->GetLayoutProperty() && layoutWrapper->GetGeometryNode()) {
+        auto layoutFrameSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
+        return GenPlaceChildrenConstraintNG(layoutFrameSize, layoutWrapper->GetLayoutProperty());
+    }
+    return GenPlaceChildrenConstraintNG(SizeF(), MakeRefPtr<LayoutProperty>());
 }
 
 JSRef<JSObject> JSMeasureLayoutParamNG::GetSelfLayoutInfo()
 {
     auto layoutWrapper = GetLayoutWrapper();
-    return GenSelfLayoutInfo(layoutWrapper->GetLayoutProperty());
+    return GenSelfLayoutInfo(layoutWrapper && layoutWrapper->GetLayoutProperty() ? layoutWrapper->GetLayoutProperty()
+                                                                                 : MakeRefPtr<LayoutProperty>());
 }
 
 void JSMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)

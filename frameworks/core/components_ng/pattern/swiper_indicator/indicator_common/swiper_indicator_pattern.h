@@ -36,6 +36,8 @@ class SwiperIndicatorPattern : public Pattern {
 public:
     SwiperIndicatorPattern() = default;
     ~SwiperIndicatorPattern() override = default;
+    SwiperIndicatorPattern(SwiperIndicatorType indicatorType): swiperIndicatorType_(indicatorType)
+    {}
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -112,6 +114,8 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
+        paintMethod->SetTouchBottomPageRate(swiperPattern->CalcCurrentTurnPageRate());
+        paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
     }
 
@@ -144,6 +148,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -151,7 +156,13 @@ public:
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
+        focusPattern.SetFocusPaintParams(paintParam);
+        if (swiperIndicatorType_ != SwiperIndicatorType::DOT) {
+            return focusPattern;
+        }
+        auto focusStyleType = static_cast<FocusStyleType>(swiperTheme->GetFocusStyleType());
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     void SetChangeIndexWithAnimation(bool withAnimation)
@@ -205,6 +216,13 @@ private:
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
     int32_t GetCurrentIndex() const;
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethod(
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
@@ -217,6 +235,8 @@ private:
     void ResetDotModifier();
     void ResetOverlongModifier();
     void UpdateFocusable() const;
+    void CheckDragAndUpdate(
+        const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -230,6 +250,8 @@ private:
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isClicked_ = false;
     bool isRepeatClicked_ = false;
+    bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;

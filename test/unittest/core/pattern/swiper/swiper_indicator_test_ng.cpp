@@ -183,14 +183,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
 
     /**
-     * @tc.steps: step1. Click item(index:1)
-     * @tc.expected: Swipe to item(index:3)
-     */
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-
-    /**
-     * @tc.steps: step2. Click item(index:0)
+     * @tc.steps: step1. Click item(index:0)
      * @tc.expected: Swipe to item(index:0)
      */
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
@@ -822,16 +815,18 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(2);
     model.SetSwipeByGroup(true);
-    CreateSwiperItems();
+    model.SetLoop(true);
+    CreateSwiperItems(6);
     CreateSwiperDone();
+
     auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 4);
+    EXPECT_EQ(totalCount, 6);
 
     float additionalOffset = 0.0f;
     pattern_->contentMainSize_ = SWIPER_WIDTH;
 
     pattern_->UpdateCurrentOffset(-120.0f);
-    FlushUITasks();
+    FlushLayoutTask(frameNode_);
 
     auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
     EXPECT_EQ(groupTurnPageRate, -0.25f);

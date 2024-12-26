@@ -448,6 +448,25 @@ void FlexLayoutAlgorithm::FinalMeasureInWeightMode()
     }
 }
 
+void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
+    FlexItemProperties& flexItemProperties)
+{
+    if (childList.empty()) {
+        return;
+    }
+    for (auto& child : childList) {
+        allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
+        child.layoutWrapper->SetActive(false);
+        --validSizeCount_;
+        child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
+        const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
+        if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
+            flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
+        }
+        secondaryMeasureList_.pop_back();
+    }
+}
+
 void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProperties)
 {
     bool outOfDisplay = false;
@@ -468,6 +487,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
         float crossAxisSize = crossAxisSize_;
         for (auto& child : childList) {
             const auto& childLayoutWrapper = child.layoutWrapper;
+            childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
             UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
             childLayoutWrapper->Measure(child.layoutConstraint);
             UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
@@ -485,17 +505,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProp
             continue;
         }
         outOfDisplay = true;
-        for (auto& child : childList) {
-            allocatedSize_ -= GetChildMainAxisSize(child.layoutWrapper) + space_;
-            child.layoutWrapper->SetActive(false);
-            --validSizeCount_;
-            child.layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF());
-            const auto& flexItemProperty = child.layoutWrapper->GetLayoutProperty()->GetFlexItemProperty();
-            if (flexItemProperty && GreatNotEqual(flexItemProperty->GetFlexGrow().value_or(0.0f), 0.0f)) {
-                flexItemProperties.totalGrow -= flexItemProperty->GetFlexGrow().value_or(0.0f);
-            }
-            secondaryMeasureList_.pop_back();
-        }
+        PopOutOfDispayMagicNodesInPriorityMode(childList, flexItemProperties);
         ++iter;
     }
 }
@@ -1006,7 +1016,7 @@ void FlexLayoutAlgorithm::ApplyPatternOperation(
         CHECK_NULL_VOID(flexPattern);
         PatternOperator(flexPattern, operation, measureResult, layoutResult, addr);
     }
-    
+
     if (operation == FlexOperatorType::RESTORE_MEASURE_RESULT) {
         allocatedSize_ = measureResult.allocatedSize;
         validSizeCount_ = measureResult.validSizeCount;

@@ -23,6 +23,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/thread/cancelable_callback.h"
+#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -199,7 +200,9 @@ private:
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
     void CleanScrollingParentListener();
 
-    void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<FrameNode>& node);
+    void GetCustomNode(RefPtr<CustomNodeBase>& customNode, RefPtr<UINode> node);
+    bool GetCustomNodeFromSelf(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
+    bool GetCustomNodeFromNavgation(RefPtr<UINode>& node, RefPtr<CustomNodeBase>& customNode, int32_t nodeId);
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;

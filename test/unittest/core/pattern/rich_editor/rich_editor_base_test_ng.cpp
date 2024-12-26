@@ -12,7 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components/text_field/textfield_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +35,7 @@ int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
 const Dimension MAGNIFIERNODE_WIDTH = 127.0_vp;
 const Dimension MAGNIFIERNODE_HEIGHT = 95.0_vp;
+SelectionRangeInfo testSelectionRange(0, 0);
 } // namespace
 
 class RichEditorBaseTestNg : public RichEditorCommonTestNg {
@@ -36,6 +46,7 @@ public:
 private:
     void TestMagnifier(const RefPtr<RichEditorPattern>& richEditorPattern,
         const RefPtr<MagnifierController>& controller, const OffsetF& localOffset);
+    void InitMagnifierParams(const SizeF& frameSize);
 };
 
 void RichEditorBaseTestNg::SetUp()
@@ -70,6 +81,29 @@ void RichEditorBaseTestNg::TearDown()
 void RichEditorBaseTestNg::TearDownTestSuite()
 {
     TestNG::TearDownTestSuite();
+}
+
+void RichEditorBaseTestNg::InitMagnifierParams(const SizeF& frameSize)
+{
+    // set frameSize to RichEditor
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(frameSize);
+
+    // set frameSize to RootNode
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto rootUINode = pipeline->GetRootElement();
+    ASSERT_NE(rootUINode, nullptr);
+    auto rootGeometryNode = rootUINode->GetGeometryNode();
+    ASSERT_NE(rootGeometryNode, nullptr);
+    rootGeometryNode->SetFrameSize(frameSize);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textfieldTheme = AceType::MakeRefPtr<TextFieldTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textfieldTheme));
 }
 
 /**
@@ -386,7 +420,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     spanItemChildren = layoutAlgorithm->GetSpans();
     EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
+    EXPECT_EQ(StringUtils::Str16ToStr8(spanItemChildren.back()->GetSpanContent()), INIT_VALUE_2);
 
     // test when richEitor empty again,placeholder Appear again
     RangeOptions rangeoptions;
@@ -862,4 +896,26 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     EXPECT_FALSE(controller->GetShowMagnifier());
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
 }
+
+/**
+ * @tc.name: UpdateSpanStyle001
+ * @tc.desc: test UpdateSpanStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, UpdateSpanStyle001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    richEditorPattern->isSpanStringMode_ = true;
+    richEditorController->updateSpanStyle_.useThemeFontColor = false;
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"UpdateSpanStyle");
+    TextStyle textStyle;
+    ImageSpanAttribute imageStyle;
+    richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
+    EXPECT_FALSE(richEditorPattern->updateSpanStyle_.useThemeFontColor);
+}
+
 } // namespace OHOS::Ace::NG

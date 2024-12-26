@@ -1638,4 +1638,7 @@ void ViewAbstractModelImpl::SetAccessibilityChecked(bool checked, bool resetValu
 
 void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
 {}
+
+void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)
+{}
 } // namespace OHOS::Ace::Framework

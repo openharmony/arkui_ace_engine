@@ -16,7 +16,7 @@
 #include "adapter/ohos/osal/resource_theme_style.h"
 
 #include <regex>
-#include <set>
+#include <unordered_set>
 
 namespace OHOS::Ace {
 namespace {
@@ -37,9 +37,9 @@ constexpr char RES_PATH_TAG[] = "file:///";
 constexpr char RES_HAP_PATH[] = "/data/storage/el1/bundle/ohos.global.systemres/ohos.global.systemres/assets/";
 #endif
 
-const std::string DIMENSION_PATTERN = R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)";
+const std::regex DIMENSION_REGEX(R"(^([+-]?\d+(\.\d+)?)(px|fp|lpx|vp|%)?)");
 constexpr int32_t WAIT_FOR_TIME = 50;
-static const std::set<std::string> stringAttrs = {
+static const std::unordered_set<std::string> stringAttrs = {
     "attribute_text_font_family_regular",
     "attribute_text_font_family_medium",
     "description_current_location",
@@ -66,6 +66,7 @@ static const std::set<std::string> stringAttrs = {
     "description_export_to_gallery",
     "description_quick_save_to_gallery",
     "description_quick_resave_to_gallery",
+    "description_save_all",
     "draggable",
     "divider_shadow_enable",
     "camera_input",
@@ -114,8 +115,11 @@ static const std::set<std::string> stringAttrs = {
     "textfield_writting_is_support",
     "rich_editor_writting_is_support",
     "ai_write_menu_name",
+    "text_menu_search_is_support",
+    "textfield_menu_search_is_support",
     "textfield_accessibility_clear",
     "pass_point",
+    "side_length",
     "general_next_year",
     "general_next_month",
     "general_pre_year",
@@ -124,9 +128,8 @@ static const std::set<std::string> stringAttrs = {
 
 void ParseNumberUnit(const std::string& value, std::string& number, std::string& unit)
 {
-    std::regex regex(DIMENSION_PATTERN);
     std::smatch results;
-    if (std::regex_search(value, results, regex)) {
+    if (std::regex_search(value, results, DIMENSION_REGEX)) {
         number = results[1];
         // The unit is in the 3rd sub-match. If the value doesn't have unit,
         // the 3rd match result is empty.
@@ -152,7 +155,7 @@ DimensionUnit ParseDimensionUnit(const std::string& unit)
 
 void ResourceThemeStyle::ParseContent()
 {
-    for (auto& [attrName, attrValue] : rawAttrs_) {
+    for (const auto& [attrName, attrValue] : rawAttrs_) {
         if (attrName.empty() || attrValue.empty()) {
             continue;
         }
@@ -190,7 +193,7 @@ void ResourceThemeStyle::ParseContent()
 
 void ResourceThemeStyle::OnParseStyle()
 {
-    for (auto& [patternName, patternMap]: patternAttrs_) {
+    for (const auto& [patternName, patternMap]: patternAttrs_) {
         auto patternStyle = AceType::MakeRefPtr<ResourceThemeStyle>(resAdapter_);
         patternStyle->SetName(patternName);
         patternStyle->parentStyle_ = AceType::WeakClaim(this);

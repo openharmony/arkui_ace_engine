@@ -306,7 +306,7 @@ HWTEST_F(TextFieldUXTest, OnTextAreaScroll001, TestSize.Level1)
      * tc.expected: step2. Check if the currentOffset_ is right.
      */
     auto accessibilityProperty = frameNode_->GetAccessibilityProperty<AccessibilityProperty>();
-    EXPECT_TRUE(accessibilityProperty->ActActionScrollForward());
+    EXPECT_FALSE(accessibilityProperty->ActActionScrollForward());
 
     /**
      * @tc.steps: step3.set contentRect_.GetY() = 1

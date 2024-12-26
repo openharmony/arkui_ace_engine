@@ -67,6 +67,15 @@ declare_args() {
 
   # Enable wearable product support
   ace_engine_feature_wearable = false
+
+  # Enable form size change animation
+  ace_engine_feature_enable_form_size_change_animation = true
+
+  # Enalbe form menu default, wearable product is not supported
+  ace_engine_feature_form_menu_enable = true
+
+  # Enable ace_engine circular screen
+  ace_engine_feature_enable_digital_crown = false
 }
 
 enable_dump_drawcmd = false
@@ -99,7 +108,7 @@ ark_ets_path = "//arkcompiler/ets_runtime"
 crossplatform_plugin_root = "//plugins"
 crossplatform_multimedia_root = "//foundation/multimedia"
 skia_root_new = "//third_party/skia"
-c_utils_path = "//commonlibrary/c_utils/base/include"
+c_utils_header_path = "//commonlibrary/c_utils/base/include"
 
 # arkui-x
 flutter_root = "//third_party/flutter"
@@ -323,4 +332,13 @@ if (ace_engine_feature_enable_nav_split_mode) {
 
 if (ace_engine_feature_wearable) {
   ace_common_defines += [ "ARKUI_WEARABLE" ]
+}
+
+if (ohos_indep_compiler_enable) {
+  indep_compile_includes =
+      [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
+}
+
+if (ace_engine_feature_enable_form_size_change_animation) {
+  ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }

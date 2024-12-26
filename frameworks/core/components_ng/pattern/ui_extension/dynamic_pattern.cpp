@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
 
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/log/log_wrapper.h"
 #include "base/log/dump_log.h"
@@ -24,10 +25,16 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t WORKER_HAS_USED_ERROR = 10011;
+constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
+constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two workers are not allowed to run at the same time";
+}
+
 int32_t DynamicPattern::dynamicGenerator_ = 0;
 
 DynamicPattern::DynamicPattern()
-    : PlatformPattern(AceLogTag::ACE_ISOLATED_COMPONENT, ++dynamicGenerator_)
+    : PlatformPattern(AceLogTag::ACE_DYNAMIC_COMPONENT, ++dynamicGenerator_)
 {
     uiExtensionId_ = UIExtensionIdUtility::GetInstance().ApplyExtensionId();
     instanceId_ = -1;
@@ -38,11 +45,6 @@ DynamicPattern::~DynamicPattern()
 {
     UIExtensionIdUtility::GetInstance().RecycleExtensionId(uiExtensionId_);
     PLATFORM_LOGI("The DynamicPattern is destroyed.");
-}
-
-int32_t DynamicPattern::GetUiExtensionId()
-{
-    return uiExtensionId_;
 }
 
 int64_t DynamicPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
@@ -67,6 +69,11 @@ void DynamicPattern::InitializeDynamicComponent(
     InitializeRender(runtime);
 }
 
+void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
+}
+
 void DynamicPattern::InitializeRender(void* runtime)
 {
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
@@ -76,7 +83,14 @@ void DynamicPattern::InitializeRender(void* runtime)
         dynamicComponentRenderer_ =
             DynamicComponentRenderer::Create(GetHost(), runtime, curDynamicInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
+        if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
+            FireOnErrorCallbackOnUI(
+                WORKER_HAS_USED_ERROR, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+            return;
+        }
+        dynamicComponentRenderer_->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+        dynamicComponentRenderer_->SetBackgroundTransparent(backgroundTransparent_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
@@ -269,5 +283,93 @@ void DynamicPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("createUiContenTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
     json->Put("limitedWorkerInitTime", std::to_string(rendererDumpInfo.limitedWorkerInitTime).c_str());
     json->Put("loadAbcTime", std::to_string(rendererDumpInfo.createUiContenTime).c_str());
+}
+
+void DynamicPattern::InitializeAccessibility()
+{
+    if (accessibilityChildTreeCallback_ != nullptr) {
+        return;
+    }
+    ContainerScope scope(instanceId_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto ngPipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    int64_t accessibilityId = frameNode->GetAccessibilityId();
+    accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(
+        WeakClaim(this), accessibilityId);
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto realHostWindowId = ngPipeline->GetRealHostWindowId();
+    if (accessibilityManager->IsRegister()) {
+        accessibilityChildTreeCallback_->OnRegister(
+            realHostWindowId, accessibilityManager->GetTreeId());
+    }
+    PLATFORM_LOGI("SecurityUIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
+        accessibilityId, realHostWindowId);
+    accessibilityManager->RegisterAccessibilityChildTreeCallback(accessibilityId, accessibilityChildTreeCallback_);
+}
+
+void DynamicPattern::OnAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId) const
+{
+    PLATFORM_LOGI("treeId: %{public}d, id: %{public}" PRId64, treeId, accessibilityId);
+    if (dynamicComponentRenderer_ == nullptr) {
+        PLATFORM_LOGI("dynamicComponentRenderer_ is null");
+        return;
+    }
+    dynamicComponentRenderer_->TransferAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+}
+
+void DynamicPattern::OnAccessibilityChildTreeDeregister() const
+{
+    PLATFORM_LOGI("deregister accessibility child tree");
+    if (dynamicComponentRenderer_ == nullptr) {
+        PLATFORM_LOGI("dynamicComponentRenderer_ is null");
+        return;
+    }
+    dynamicComponentRenderer_->TransferAccessibilityChildTreeDeregister();
+}
+
+void DynamicPattern::OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetChildWindowId(childWindowId);
+    accessibilityProperty->SetChildTreeId(childTreeId);
+}
+
+void DynamicPattern::OnAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info) const
+{
+    PLATFORM_LOGI("dump accessibility child info");
+    if (dynamicComponentRenderer_ == nullptr) {
+        PLATFORM_LOGI("dynamicComponentRenderer_ is null");
+        return;
+    }
+    dynamicComponentRenderer_->TransferAccessibilityDumpChildInfo(params, info);
+}
+
+void DynamicPattern::ResetAccessibilityChildTreeCallback()
+{
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    ContainerScope scope(instanceId_);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_.reset();
+    accessibilityChildTreeCallback_ = nullptr;
 }
 } // namespace OHOS::Ace::NG

@@ -367,4 +367,25 @@ HWTEST_F(ClickEventTestNg, ClickEventActuatorTest006, TestSize.Level1)
     clickEventActuator.ClearClickAfterEvent();
     EXPECT_EQ(clickEventActuator.clickAfterEvents_, nullptr);
 }
+
+/**
+ * @tc.name: ClickEventRecordTest001
+ * @tc.desc: test RecordClickEventIfNeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickEventTestNg, ClickEventRecordTest001, TestSize.Level1)
+{
+    int32_t componentIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    int32_t rectIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_RECT);
+    Recorder::EventRecorder::Get().eventSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[rectIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[rectIndex] = true;
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    ClickEventActuator clickEventActuator = ClickEventActuator(AceType::WeakClaim(AceType::RawPtr(gestureEventHub)));
+    GestureEvent info = GestureEvent();
+    clickEventActuator.RecordClickEventIfNeed(info);
+    EXPECT_TRUE(gestureEventHub->GetFrameNode() == nullptr);
+}
 } // namespace OHOS::Ace::NG

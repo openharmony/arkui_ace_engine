@@ -15,7 +15,7 @@
 #include "form_renderer_dispatcher_proxy.h"
 
 #include "form_renderer_hilog.h"
-
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace Ace {
@@ -273,6 +273,33 @@ void FormRendererDispatcherProxy::OnAccessibilityTransferHoverEvent(float pointX
         data, reply, option);
     if (error != ERR_OK) {
         HILOG_ERROR("failed to SendRequest: %{public}d", error);
+    }
+}
+
+void FormRendererDispatcherProxy::OnNotifyDumpInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("failed to write interface token");
+        return;
+    }
+    if (!data.WriteStringVector(params)) {
+        HILOG_ERROR("failed to write params");
+        return;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int error = Remote()->SendRequest(
+        static_cast<uint32_t>(IFormRendererDispatcher::Message::NOTIFY_DUMP_INFO),
+        data, reply, option);
+    if (error != ERR_OK) {
+        HILOG_ERROR("failed to SendRequest: %{public}d", error);
+        return;
+    }
+    if (!reply.ReadStringVector(&info)) {
+        HILOG_ERROR("%{public}s, Read reply info failed.", __func__);
     }
 }
 } // namespace Ace

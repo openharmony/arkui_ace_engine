@@ -78,6 +78,12 @@ public:
         json->PutExtAttr("radioStyle", jsonValue->ToString().c_str(), filter);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        PaintProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CHECKED, GetRadioCheck().value_or(false) ? "true" : "false");
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheck, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioCheckedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RadioUncheckedBorderColor, Color, PROPERTY_UPDATE_RENDER);

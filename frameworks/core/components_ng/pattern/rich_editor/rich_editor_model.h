@@ -146,6 +146,9 @@ struct UpdateSpanStyle {
             auto& colors = updateSymbolColor.value();
             std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
         }
+        if (updateTextBackgroundStyle) {
+            updateTextBackgroundStyle->UpdateColorByResourceId();
+        }
     }
 
     std::string ToString() const
@@ -286,6 +289,7 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 
 public:
     virtual int32_t GetCaretOffset() = 0;
+    virtual NG::RectF GetCaretRect() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;

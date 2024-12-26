@@ -379,7 +379,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
 
 void JSSpan::Create(const JSCallbackInfo& info)
 {
-    std::string label;
+    std::u16string label;
     if (info.Length() > 0) {
         ParseJsString(info[0], label);
     }

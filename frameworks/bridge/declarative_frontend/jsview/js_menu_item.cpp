@@ -177,12 +177,22 @@ void JSMenuItem::IsSelected(const JSCallbackInfo& info)
     }
 
     bool isSelected = false;
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        isSelected = info[0]->ToBoolean();
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
     }
+    if (selectedVal->IsBoolean()) {
+        isSelected = selectedVal->ToBoolean();
+    }
+
     MenuItemModel::GetInstance()->SetSelected(isSelected);
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseIsSelectedObject(info, info[1]);
+    if (changeEventVal->IsFunction()) {
+        ParseIsSelectedObject(info, changeEventVal);
     }
 }
 
