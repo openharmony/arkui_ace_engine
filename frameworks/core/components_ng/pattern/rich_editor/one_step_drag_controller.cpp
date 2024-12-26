@@ -266,7 +266,7 @@ void OneStepDragController::SetEnableEventResponse(bool isEnable)
 }
 
 void OneStepDragController::SetEnableEventResponse(const TextSelector& selector,
-        std::list<WeakPtr<ImageSpanNode>>& imageNodes, std::list<WeakPtr<PlaceholderSpanNode>>& builderNodes)
+    std::list<WeakPtr<ImageSpanNode>>& imageNodes, std::list<WeakPtr<PlaceholderSpanNode>>& builderNodes)
 {
     auto start = selector.GetTextStart();
     auto end = selector.GetTextEnd();
