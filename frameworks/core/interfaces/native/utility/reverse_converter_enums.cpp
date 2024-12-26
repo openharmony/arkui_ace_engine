@@ -274,6 +274,36 @@ void AssignArkValue(Ark_LocationButtonOnClickResult& dst, const SecurityComponen
     }
 }
 
+void AssignArkValue(Ark_MouseAction& dst, const MouseAction& src)
+{
+    switch (src) {
+        case MouseAction::PRESS: dst = ARK_MOUSE_ACTION_PRESS; break;
+        case MouseAction::RELEASE: dst = ARK_MOUSE_ACTION_RELEASE; break;
+        case MouseAction::MOVE: dst = ARK_MOUSE_ACTION_MOVE; break;
+        case MouseAction::HOVER: dst = ARK_MOUSE_ACTION_HOVER; break;
+        default: {
+            dst = static_cast<Ark_MouseAction>(-1);
+            LOGE("Unexpected enum value in MouseAction: %{public}d", src);
+        }
+    }
+}
+
+void AssignArkValue(Ark_MouseButton& dst, const MouseButton& src)
+{
+    switch (src) {
+        case MouseButton::LEFT_BUTTON: dst = ARK_MOUSE_BUTTON_LEFT; break;
+        case MouseButton::RIGHT_BUTTON: dst = ARK_MOUSE_BUTTON_RIGHT; break;
+        case MouseButton::MIDDLE_BUTTON: dst = ARK_MOUSE_BUTTON_MIDDLE; break;
+        case MouseButton::BACK_BUTTON: dst = ARK_MOUSE_BUTTON_BACK; break;
+        case MouseButton::FORWARD_BUTTON: dst = ARK_MOUSE_BUTTON_FORWARD; break;
+        case MouseButton::NONE_BUTTON: dst = ARK_MOUSE_BUTTON_NONE; break;
+        default: {
+            dst = static_cast<Ark_MouseButton>(-1);
+            LOGE("Unexpected enum value in MouseButton: %{public}d", src);
+        }
+    }
+}
+
 void AssignArkValue(Ark_NavigationMode& dst, const NavigationMode& src)
 {
     switch (src) {

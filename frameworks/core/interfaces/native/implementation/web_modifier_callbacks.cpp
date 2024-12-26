@@ -705,13 +705,19 @@ bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     parameter.deviceId = Converter::ArkValue<Ark_Number>(keyEventInfo.GetDeviceId());
     parameter.metaKey = Converter::ArkValue<Ark_Number>(keyEventInfo.GetMetaKey());
     parameter.timestamp = Converter::ArkValue<Ark_Number>(
-        std::chrono::duration_cast<std::chrono::milliseconds>(
-            keyEventInfo.GetTimeStamp().time_since_epoch()).count());
+        static_cast<double>(keyEventInfo.GetTimeStamp().time_since_epoch().count()));
+    auto stopPropagationHandler = [&keyEventInfo]() {
+        keyEventInfo.SetStopPropagation(true);
+    };
+    auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
+        std::move(stopPropagationHandler));
+    parameter.stopPropagation = stopPropagation;
     LOGE("WebAttributeModifier::OnInterceptKeyEventImpl IntentionCode supporting is not implemented yet");
     parameter.unicode = Converter::ArkValue<Opt_Number>(keyEventInfo.GetUnicode());
     Callback_Boolean_Void continuation;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter, continuation);
+    stopPropagation.resource.release(stopPropagation.resource.resourceId);
     LOGE("WebAttributeModifier::OnInterceptKeyEventImpl return value can be incorrect");
     return false;
 }
