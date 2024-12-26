@@ -122,11 +122,13 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
-    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+    if (context) {
+        auto theme = context->GetTheme<RefreshTheme>();
+        if (theme) {
+            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+        }
+    }
     InitChildNode();
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
