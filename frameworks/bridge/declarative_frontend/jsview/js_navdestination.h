@@ -45,6 +45,7 @@ public:
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void SetSystemBarStyle(const JSCallbackInfo& info);
     static void SetSystemTransition(const JSCallbackInfo& info);
+    static void SetRecoverable(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

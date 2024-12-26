@@ -150,6 +150,10 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     }
     return this;
   }
+  recoverable(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationRecoverableModifier.identity, NavDestinationRecoverableModifier, value);
+    return this;
+  }
 }
 
 class NavDestinationTitleModifier extends ModifierWithKey<ArkNavigationTitle | undefined> {
@@ -292,6 +296,21 @@ class IgnoreLayoutSafeAreaModifier extends ModifierWithKey<ArkSafeAreaExpandOpts
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
       !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
+  }
+}
+
+class NavDestinationRecoverableModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('recoverable');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().navDestination.resetRecoverable(node);
+    } else {
+      getUINativeModule().navDestination.setRecoverable(node, this.value);
+    }
   }
 }
 

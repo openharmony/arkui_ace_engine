@@ -111,4 +111,77 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
     proxy->AddInteractiveAnimation(addCallback);
     return true;
 }
+
+bool NavigationManager::AddRecoverableNavigation(std::string id, RefPtr<AceType> navigationNode)
+{
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(navigationNode);
+    CHECK_NULL_RETURN(navigation, false);
+    if (!navigation->CanRecovery() || id != navigation->GetCurId()) {
+        return false;
+    }
+    recoverableNavigationMap_[id] = navigationNode;
+    return true;
+}
+
+std::unique_ptr<JsonValue> NavigationManager::GetNavigationJsonInfo()
+{
+    auto allNavigationInfo = JsonUtil::CreateArray(true);
+    for (auto iter : recoverableNavigationMap_) {
+        auto node = iter.second.Upgrade();
+        if (!node) {
+            continue;
+        }
+        auto navigation = AceType::DynamicCast<NavigationGroupNode>(node);
+        if (!navigation->CanRecovery()) {
+            continue;
+        }
+        auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+        if (!navigationPattern) {
+            continue;
+        }
+        auto navigationInfo = JsonUtil::Create(true);
+        navigationInfo->Put("id", iter.first.c_str());
+        navigationInfo->Put("stack", navigationPattern->GetNavdestinationJsonArray());
+        allNavigationInfo->Put(navigationInfo);
+    }
+    return allNavigationInfo;
+}
+
+void NavigationManager::StorageNavigationRecoveryInfo(std::unique_ptr<JsonValue> navigationRecoveryInfo)
+{
+    auto allNavigationInfo = std::move(navigationRecoveryInfo);
+    if (!allNavigationInfo || !allNavigationInfo->IsArray()) {
+        TAG_LOGW(AceLogTag::ACE_NAVIGATION, "Navigation recovery info invalid, can not restore!");
+        return;
+    }
+    auto arraySize = allNavigationInfo->GetArraySize();
+    for (int32_t i = 0; i < arraySize; ++ i) {
+        auto navigationInfo = allNavigationInfo->GetArrayItem(i);
+        auto navigationId = navigationInfo->GetString("id");
+        auto stackInfo = navigationInfo->GetValue("stack");
+        if (!stackInfo->IsArray()) {
+            continue;
+        }
+        std::vector<NavdestinationRecoveryInfo> navdestinationsInfo;
+        auto stackSize = stackInfo->GetArraySize();
+        for (int32_t j = 0; j < stackSize; ++ j) {
+            auto navdestinationInfo = stackInfo->GetArrayItem(j);
+            auto name = navdestinationInfo->GetString("name");
+            auto param = navdestinationInfo->GetString("param");
+            auto mode = navdestinationInfo->GetInt("mode");
+            navdestinationsInfo.emplace_back(NavdestinationRecoveryInfo(name, param, mode));
+        }
+        navigationRecoveryInfo_[navigationId] = navdestinationsInfo;
+    }
+}
+
+const std::vector<NavdestinationRecoveryInfo> NavigationManager::GetNavigationRecoveryInfo(std::string navigationId)
+{
+    if (navigationRecoveryInfo_.find(navigationId) == navigationRecoveryInfo_.end()) {
+        return {};
+    }
+    auto ret = navigationRecoveryInfo_[navigationId];
+    navigationRecoveryInfo_.erase(navigationId);
+    return ret;
+}
 } // namespace OHOS::Ace::NG

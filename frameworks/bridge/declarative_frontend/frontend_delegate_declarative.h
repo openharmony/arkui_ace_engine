@@ -443,6 +443,8 @@ private:
 
     DialogProperties ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr);
 
+    std::unique_ptr<JsonValue> GetNavigationJsonInfo();
+
     std::atomic<uint64_t> pageIdPool_ = 0;
     int32_t callbackCnt_ = 0;
     int32_t pageId_ = -1;

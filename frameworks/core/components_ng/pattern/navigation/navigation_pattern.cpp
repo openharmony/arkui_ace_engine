@@ -320,6 +320,10 @@ void NavigationPattern::OnModifyDone()
     if (GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
         DoNavbarHideAnimation(hostNode);
     }
+
+    // AddRecoverableNavigation function will check inside whether current navigation can be recovered
+    pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
+    RestoreJsStackIfNeeded();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -681,10 +685,24 @@ void NavigationPattern::UpdateNavPathList()
     NavPathList navPathList;
     int32_t pathListSize = static_cast<int32_t>(pathNames.size());
     isCurTopNewInstance_ = false;
+    // lastRecoveredStandardIndex will be only used in recovery case
+    int32_t lastRecoveredStandardIndex = 0;
     for (int32_t index = 0; index < pathListSize; ++index) {
         auto pathName = pathNames[index];
-        auto pathIndex = indexes[index];
         RefPtr<UINode> uiNode = nullptr;
+        if (navigationStack_->IsFromRecovery(index)) {
+            if (navigationStack_->GetRecoveredDestinationMode(index) ==
+                static_cast<int32_t>(NavDestinationMode::STANDARD)) {
+                lastRecoveredStandardIndex = index;
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            // only create recovery node when it is at top
+            if (index == pathListSize - 1) {
+                GenerateUINodeFromRecovery(lastRecoveredStandardIndex, navPathList);
+            }
+            continue;
+        }
+        auto pathIndex = indexes[index];
         if (navigationStack_->NeedBuildNewInstance(index)) {
             // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
             uiNode = GenerateUINodeByIndex(index);
@@ -1553,6 +1571,26 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
         }
     }
     return true;
+}
+
+void NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)
+{
+    /**
+     * In case several pages at the top of stack are dialog pages.
+     * We need to recovery node until a standard page created.
+     * And the creation process should be bottom-up to satisfy the order of life-cycle.
+     */
+    int32_t jsStackSize = static_cast<int32_t>(navPathList.size());
+    for (int32_t index = lastStandardIndex; index < jsStackSize; ++ index) {
+        if (navPathList[index].second || !navigationStack_->IsFromRecovery(index)) {
+            continue;
+        }
+        navPathList[index].second = GenerateUINodeByIndex(index);
+        navigationStack_->SetFromRecovery(index, false);
+        auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        navdestination->SetNeedAppearFromRecovery(true);
+    }
 }
 
 RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
@@ -2576,6 +2614,60 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     }
 }
 
+std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
+{
+    auto allNavdestinationInfo = JsonUtil::CreateArray(true);
+    const auto& navdestinationNodes = GetAllNavDestinationNodes();
+    for (auto iter : navdestinationNodes) {
+        auto navdestinationInfo = JsonUtil::Create(true);
+        auto navdestinationNode =
+            AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(iter.second));
+        if (!navdestinationNode) {
+            continue;
+        }
+        if (!navdestinationNode->CanRecovery()) {
+            continue;
+        }
+        auto navdestinationPattern = navdestinationNode->GetPattern<NavDestinationPattern>();
+        if (!navdestinationPattern) {
+            continue;
+        }
+        auto name = navdestinationPattern->GetName();
+        auto param = navigationStack_->GetStringifyParamByIndex(navdestinationNode->GetIndex());
+        auto mode = static_cast<int32_t>(navdestinationNode->GetNavDestinationMode());
+        navdestinationInfo->Put("name", name.c_str());
+        navdestinationInfo->Put("param", param.c_str());
+        navdestinationInfo->Put("mode", mode);
+        allNavdestinationInfo->Put(navdestinationInfo);
+    }
+    return allNavdestinationInfo;
+}
+
+void NavigationPattern::RestoreJsStackIfNeeded()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
+    if (navdestinationsInfo.empty()) {
+        return;
+    }
+    navigationStack_->SetPathArray(navdestinationsInfo);
+}
+
+void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
+{
+    if (nodeCount >= PAGE_NODES) {
+        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
+    }
+    if (depth >= PAGE_DEPTH) {
+        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
+    }
+}
+
 void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated)
 {
@@ -2616,16 +2708,6 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
-    }
-}
-
-void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
-{
-    if (nodeCount >= PAGE_NODES) {
-        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
-    }
-    if (depth >= PAGE_DEPTH) {
-        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
 }
 

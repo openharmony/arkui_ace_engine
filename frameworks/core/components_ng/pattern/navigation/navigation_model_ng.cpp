@@ -1400,6 +1400,21 @@ void NavigationModelNG::SetEnableDragBar(bool enableDragBar)
     pattern->SetEnableDragBar(enableDragBar);
 }
 
+void NavigationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
+{
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    navigationGroupNode->SetRecoverable(recoverable);
+}
+
+void NavigationModelNG::SetRecoverable(bool recoverable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    navigationGroupNode->SetRecoverable(recoverable);
+}
+
 void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
