@@ -61,6 +61,7 @@ public:
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
     static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetBuilder(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& buildFunc);
     static void SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallback&& jsMake);
     static void SetChangeValue(FrameNode* frameNode, bool value);
     static void SetCheckboxStyle(FrameNode* frameNode, const std::optional<CheckBoxStyle>& checkboxStyle);

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
@@ -60,6 +61,17 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
         auto group = Converter::OptConvert<Ark_CharPtr>(options->value.group);
         if (group) {
             eventHub->SetGroupName(group.value());
+        }
+
+        auto arkIndicatorBuilder = Converter::OptConvert<CustomNodeBuilder>(options->value.indicatorBuilder);
+        if (arkIndicatorBuilder) {
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value(), frameNode), node,
+                weakNode]() -> RefPtr<UINode> {
+                PipelineContext::SetCallBackNode(weakNode);
+                return callback.BuildSync(node);
+            };
+            CheckBoxModelNG::SetBuilder(frameNode, std::move(customBuilder));
         }
     }
 }
