@@ -1161,7 +1161,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         }
     }
     RefPtr<Subwindow> subwindow;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
             subwindow = GetSystemToastWindow(containerId);
         }

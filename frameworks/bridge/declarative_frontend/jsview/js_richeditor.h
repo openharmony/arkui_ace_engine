@@ -112,6 +112,7 @@ public:
 
     void SetCaretOffset(const JSCallbackInfo& args);
     void GetCaretOffset(const JSCallbackInfo& args);
+    void GetCaretRect(const JSCallbackInfo& args);
     void SetTypingStyle(const JSCallbackInfo& info);
     void ParseJsTextStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);

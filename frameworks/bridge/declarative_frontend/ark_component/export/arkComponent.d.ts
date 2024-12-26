@@ -310,6 +310,9 @@ declare class ArkGridComponent extends ArkComponent implements GridAttribute {
     clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this;
     flingSpeedLimit(value: number): this;
     alignItems(value: GridItemAlignment): this;
+    onWillScroll(callback: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this;
+    onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this;
 }
 declare class ArkGridColComponent extends ArkComponent implements GridColAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -772,6 +775,7 @@ declare class ArkTextAreaComponent extends ArkComponent implements CommonMethod<
     selectionMenuHidden(value: boolean): TextAreaAttribute;
     maxLines(value: number): TextAreaAttribute;
     customKeyboard(value: CustomBuilder): TextAreaAttribute;
+    ellipsisMode(value: EllipsisMode): TextAreaAttribute;
 }
 declare class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -821,6 +825,7 @@ declare class ArkTextInputComponent extends ArkComponent implements CommonMethod
     barState(value: BarState): TextInputAttribute;
     maxLines(value: number): TextInputAttribute;
     customKeyboard(event: () => void): TextInputAttribute;
+    ellipsisMode(value: EllipsisMode): TextInputAttribute;
 }
 declare class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1835,7 +1840,7 @@ declare class ArkSwiperComponent extends ArkComponent implements SwiperAttribute
     vertical(value: boolean): this;
     itemSpace(value: string | number): this;
     displayMode(value: SwiperDisplayMode): this;
-    cachedCount(value: number): this;
+    cachedCount(value: number, isShown?: boolean): this;
     displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this;
     effectMode(value: EdgeEffect): this;
     disableSwipe(value: boolean): this;

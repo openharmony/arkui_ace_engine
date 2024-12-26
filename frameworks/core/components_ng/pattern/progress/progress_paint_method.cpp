@@ -37,6 +37,13 @@ void ProgressPaintMethod::GetThemeData()
     capsuleBorderWidth_ = progressTheme->GetBorderWidth();
     ringProgressEndSideColor_ = progressTheme->GetRingProgressEndSideColor();
     ringProgressBeginSideColor_ = progressTheme->GetRingProgressBeginSideColor();
+    capsuleBgFocusedColor_ = progressTheme->GetCapsuleBgFocusedColor();
+    capsuleSelectFocusedColor_ = progressTheme->GetCapsuleSelectFocusedColor();
+    capsuleInprogressBorderColor_ = progressTheme->GetCapsuleInprogressBorderColor();
+    capsuleInprogressBorderWidth_ = progressTheme->GetCapsuleInprogressBorderWidth();
+    capsuleInprogressBgColor_ = progressTheme->GetCapsuleInprogressBgColor();
+    defaultBorderColor_ = progressTheme->GetBorderColor();
+    defaultBorderWidth_ = progressTheme->GetBorderWidth();
 }
 
 void ProgressPaintMethod::CalculateStrokeWidth(const SizeF& contentSize)
@@ -83,6 +90,42 @@ Gradient ProgressPaintMethod::GenerateRingProgressColor(PaintWrapper* paintWrapp
     gradientColorStart.SetDimension(Dimension(1.0));
     gradient.AddColor(gradientColorStart);
     return gradient;
+}
+
+void ProgressPaintMethod::UpdateCapsuleProgress(PaintWrapper* paintWrapper)
+{
+    if (progressType_ != ProgressType::CAPSULE) {
+        return;
+    }
+    CHECK_NULL_VOID(paintWrapper);
+    auto paintProperty = DynamicCast<ProgressPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
+
+    bool isFocused = progressModifier_->IsFocused();
+    bool isInprogress = LessNotEqual(0.0f, value_) && LessNotEqual(value_, maxValue_);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        bgColor_ = isInprogress ? capsuleInprogressBgColor_ : bgColor_;
+        bgColor_ = isFocused ? capsuleBgFocusedColor_ : bgColor_;
+    }
+    bgColor_ = progressModifier_->CalculateHoverPressColor(bgColor_);
+    progressModifier_->SetBackgroundColor(LinearColor(bgColor_));
+
+    if (!paintProperty->HasColor() && isFocused) {
+        color_ = capsuleSelectFocusedColor_;
+    }
+    color_ = progressModifier_->CalculateHoverPressColor(color_);
+    progressModifier_->SetColor(LinearColor(color_));
+
+    if (paintProperty->GetBorderColorValue(defaultBorderColor_) == defaultBorderColor_ && isInprogress) {
+        borderColor_ = capsuleInprogressBorderColor_;
+    }
+    borderColor_ = progressModifier_->CalculateHoverPressColor(borderColor_);
+    progressModifier_->SetBorderColor(LinearColor(borderColor_));
+
+    if (paintProperty->GetBorderWidthValue(defaultBorderWidth_) == defaultBorderWidth_ && isInprogress) {
+        progressModifier_->SetBorderWidth(capsuleInprogressBorderWidth_.ConvertToPx());
+    }
 }
 
 void ProgressPaintMethod::SetCapsuleBorderRadius(PaintWrapper* paintWrapper)

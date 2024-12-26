@@ -53,6 +53,8 @@ public:
         const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
 
     virtual void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) = 0;
+    virtual void SetBackgroundTransparent(bool backgroundTransparent) = 0;
+    virtual bool GetBackgroundTransparent() const = 0;
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 

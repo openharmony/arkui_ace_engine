@@ -327,9 +327,9 @@ int32_t WaterFlowModelNG::GetShowCached(FrameNode* frameNode)
     return show;
 }
 
-void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
@@ -559,9 +559,10 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
     return pattern->GetNestedScroll();
 }
 
-void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(
+    FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 float WaterFlowModelNG::GetFriction(FrameNode* frameNode)
 {
@@ -703,5 +704,13 @@ void WaterFlowModelNG::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode m
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutMode(mode);
+}
+
+WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, WaterFlowLayoutMode::TOP_DOWN);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
+    return pattern->GetLayoutMode();
 }
 } // namespace OHOS::Ace::NG

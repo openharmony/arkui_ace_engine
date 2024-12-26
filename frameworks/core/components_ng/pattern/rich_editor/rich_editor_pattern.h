@@ -619,6 +619,7 @@ public:
     }
 
     RectF GetCaretRect() const override;
+    void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -696,6 +697,7 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    RectF GetCaretRelativeRect();
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
@@ -766,6 +768,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
@@ -1386,6 +1389,7 @@ private:
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1459,7 +1463,8 @@ private:
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
-    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
 };
 } // namespace OHOS::Ace::NG
 

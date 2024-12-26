@@ -1064,7 +1064,7 @@ HWTEST_F(ScrollableCoverTestNg, UnRegister2DragDropManager001, TestSize.Level1)
     EXPECT_EQ(it->first, scroll_->GetId());
     EXPECT_EQ(it->second.Upgrade(), scroll_);
 
-    scrollPn->UnRegister2DragDropManager();
+    scrollPn->UnRegister2DragDropManager(&(*scroll_));
     /**
      * @tc.expected: step3. Verify that nodesForDragNotify_ dont contains the nodeId.
      */

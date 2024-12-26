@@ -71,6 +71,7 @@ void ProgressTestNg::SetUp()
 
 void ProgressTestNg::TearDown()
 {
+    MockContainer::TearDown();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;

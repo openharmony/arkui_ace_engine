@@ -245,6 +245,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_SLIDER), "Slider" },
     { static_cast<uint32_t>(ARKUI_NODE_RADIO), "Radio" },
     { static_cast<uint32_t>(ARKUI_NODE_STACK), "Stack" },
+    { static_cast<uint32_t>(ARKUI_NODE_CHECKBOX_GROUP), "CheckboxGroup" },
     { static_cast<uint32_t>(ARKUI_NODE_SWIPER), "Swiper" },
     { static_cast<uint32_t>(ARKUI_NODE_SCROLL), "Scroll" },
     { static_cast<uint32_t>(ARKUI_NODE_LIST), "List" },
@@ -283,6 +284,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "Slider", static_cast<uint32_t>(ARKUI_NODE_SLIDER) },
     { "Radio", static_cast<uint32_t>(ARKUI_NODE_RADIO) },
     { "Stack", static_cast<uint32_t>(ARKUI_NODE_STACK) },
+    { "CheckboxGroup", static_cast<uint32_t>(ARKUI_NODE_CHECKBOX_GROUP) },
     { "Swiper", static_cast<uint32_t>(ARKUI_NODE_SWIPER) },
     { "Scroll", static_cast<uint32_t>(ARKUI_NODE_SCROLL) },
     { "List", static_cast<uint32_t>(ARKUI_NODE_LIST) },
@@ -5387,25 +5389,34 @@ int32_t SetScrollEdgeEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* it
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0 || !InRegion(NUM_0, NUM_2, item->value[0].i32) ||
-        (item->size > NUM_1 && !InRegion(NUM_0, NUM_1, item->value[1].i32))) {
+        (item->size > NUM_1 && !InRegion(NUM_0, NUM_1, item->value[1].i32)) ||
+        (item->size > NUM_2 && !InRegion(NUM_1, NUM_3, item->value[2].i32))) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto fullImpl = GetFullImpl();
     auto attrVal = item->value[NUM_0].i32;
     bool alwaysEnabled = false;
+    auto effectEdge = NUM_0;
     if (item->size > NUM_1) {
         alwaysEnabled = item->value[NUM_1].i32;
     } else if (node->type == ARKUI_NODE_SCROLL) {
         alwaysEnabled = true;
     }
+    if (item->size > NUM_2) {
+        effectEdge = item->value[NUM_2].i32;
+    }
     if (node->type == ARKUI_NODE_LIST) {
-        fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+        fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->setEdgeEffect(
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(
-            node->uiNodeHandle, attrVal, alwaysEnabled);
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
         fullImpl->getNodeModifiers()->getWaterFlowModifier()->setEdgeEffect(
-            node->uiNodeHandle, attrVal, alwaysEnabled);
+            node->uiNodeHandle, attrVal, alwaysEnabled, effectEdge);
     }
     return ERROR_CODE_NO_ERROR;
 }
@@ -5417,6 +5428,8 @@ void ResetScrollEdgeEffect(ArkUI_NodeHandle node)
 
     if (node->type == ARKUI_NODE_LIST) {
         fullImpl->getNodeModifiers()->getListModifier()->resetListEdgeEffect(node->uiNodeHandle);
+    } else if (node->type == ARKUI_NODE_GRID) {
+        fullImpl->getNodeModifiers()->getGridModifier()->resetEdgeEffect(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_SCROLL) {
         fullImpl->getNodeModifiers()->getScrollModifier()->resetScrollEdgeEffect(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_WATER_FLOW) {
@@ -5733,6 +5746,31 @@ const ArkUI_AttributeItem* GetScrollContentSize(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getScrollModifier()->getScrollContentSize(node->uiNodeHandle, &values);
     g_numberValues[NUM_0].f32 = values[NUM_0];
     g_numberValues[NUM_1].f32 = values[NUM_1];
+    return &g_attributeItem;
+}
+
+void ResetScrollContentClip(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->resetContentClip(node->uiNodeHandle);
+}
+
+int32_t SetScrollContentClip(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setContentClip(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetScrollContentClip(ArkUI_NodeHandle node)
+{
+    auto value = GetFullImpl()->getNodeModifiers()->getScrollableModifier()->getContentClip(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
     return &g_attributeItem;
 }
 
@@ -7320,7 +7358,7 @@ const ArkUI_AttributeItem* GetSwiperNodeAdapter(ArkUI_NodeHandle node)
 int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
-    if (item->size != 1) {
+    if (item->size < 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
     if (LessNotEqual(item->value[0].i32, NUM_0)) {
@@ -7328,6 +7366,12 @@ int32_t SetSwiperCachedCount(ArkUI_NodeHandle node, const ArkUI_AttributeItem* i
     }
     GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperCachedCount(
         node->uiNodeHandle, item->value[0].i32);
+
+    ArkUI_Bool isShown = DEFAULT_FALSE;
+    if (item->size == 2 && InRegion(DEFAULT_FALSE, DEFAULT_TRUE, item->value[1].i32)) {
+        isShown = item->value[1].i32;
+    }
+    GetFullImpl()->getNodeModifiers()->getSwiperModifier()->setSwiperIsShown(node->uiNodeHandle, isShown);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7337,12 +7381,16 @@ void ResetSwiperCachedCount(ArkUI_NodeHandle node)
     auto* fullImpl = GetFullImpl();
 
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperCachedCount(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperIsShown(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperCachedCount(ArkUI_NodeHandle node)
 {
     ArkUI_Int32 value = GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getCachedCount(node->uiNodeHandle);
+    ArkUI_Int32 isShown =
+        GetFullImpl()->getNodeModifiers()->getSwiperModifier()->getSwiperCachedIsShown(node->uiNodeHandle);
     g_numberValues[0].i32 = value;
+    g_numberValues[1].i32 = isShown;
     return &g_attributeItem;
 }
 
@@ -11513,6 +11561,203 @@ void ResetCheckboxShape(ArkUI_NodeHandle node)
     GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->resetCheckboxShape(node->uiNodeHandle);
 }
 
+int32_t SetCheckboxName(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxName(
+        node->uiNodeHandle, item->string);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxName(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckboxName(
+        node->uiNodeHandle);
+    g_attributeItem.string = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxName(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxName(
+        node->uiNodeHandle, "");
+}
+
+int32_t SetCheckboxGroup(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxGroup(
+        node->uiNodeHandle, item->string);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroup(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->getCheckboxName(
+        node->uiNodeHandle);
+    g_attributeItem.string = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroup(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxModifier()->setCheckboxGroup(
+        node->uiNodeHandle, "");
+}
+
+int32_t SetCheckboxGroupName(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupName(
+        node->uiNodeHandle, item->string);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupName(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupName(
+        node->uiNodeHandle);
+    g_attributeItem.string = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupName(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupName(
+        node->uiNodeHandle, "");
+}
+
+int32_t SetCheckboxGroupSelectAll(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectAll(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupSelectAll(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupSelectAll(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupSelectAll(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupSelectAll(node->uiNodeHandle);
+}
+
+int32_t SetCheckboxGroupSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupSelectedColor(node->uiNodeHandle, item->value[0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupSelectedColor(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupSelectedColor(node->uiNodeHandle);
+    g_numberValues[0].u32 = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupSelectedColor(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupSelectedColor(node->uiNodeHandle);
+}
+
+int32_t SetCheckboxGroupUnSelectedColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupUnSelectedColor(
+        node->uiNodeHandle, item->value[0].u32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupUnSelectedColor(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupUnSelectedColor(node->uiNodeHandle);
+    g_numberValues[0].u32 = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupUnSelectedColor(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupUnSelectedColor(node->uiNodeHandle);
+}
+
+int32_t SetCheckboxGroupMark(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    int strokeColor = item->value[0].u32;
+    double size = -1;
+    if (item->size > 1) {
+        if (GreatOrEqual(item->value[1].f32, 0.0f)) {
+            size = item->value[1].f32;
+        }  
+    }
+    double strokeWidth = 2;
+    if (item->size > ALLOW_SIZE_2) {
+        if (GreatOrEqual(item->value[2].f32, 0.0f)) {
+            strokeWidth = item->value[2].f32;
+        }     
+    }
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupMark(
+        node->uiNodeHandle, strokeColor, size, strokeWidth);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupMark(ArkUI_NodeHandle node)
+{
+    auto strokeColor = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupMarkColor(node->uiNodeHandle);
+    auto size = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupMarkSize(node->uiNodeHandle);
+    auto strokeWidth = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupMarkWidth(node->uiNodeHandle);
+    int index = 0;
+    g_numberValues[index++].u32 = strokeColor;
+    g_numberValues[index++].f32 = size;
+    g_numberValues[index++].f32 = strokeWidth;
+    g_attributeItem.size = index;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupMark(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupMark(node->uiNodeHandle);
+}
+
+int32_t SetCheckboxGroupShape(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size == 0 || !CheckAttributeIsCheckboxShape(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupStyle(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupShape(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->getCheckboxGroupStyle(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    return &g_attributeItem;
+}
+
+void ResetCheckboxGroupShape(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getCheckboxGroupModifier()->resetCheckboxGroupStyle(node->uiNodeHandle);
+}
+
 int32_t SetSliderBlockColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0) {
@@ -12278,6 +12523,33 @@ void ResetItemConstraintSize(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxWidth(node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMinHeight(node->uiNodeHandle);
     fullImpl->getNodeModifiers()->getWaterFlowModifier()->resetItemMaxHeight(node->uiNodeHandle);
+}
+
+int32_t SetWaterFlowLayoutMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
+    if (item->size != 1) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (LessNotEqual(item->value[0].i32, NUM_0)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->setWaterFlowLayoutMode(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetWaterFlowLayoutMode(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetWaterFlowLayoutMode(ArkUI_NodeHandle node)
+{
+    ArkUI_Int32 value =
+        GetFullImpl()->getNodeModifiers()->getWaterFlowModifier()->getWaterFlowLayoutMode(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
 }
 
 const ArkUI_AttributeItem* GetItemConstraintSize(ArkUI_NodeHandle node)
@@ -13595,7 +13867,7 @@ void ResetProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetCheckboxSelect, SetCheckboxSelectedColor, SetCheckboxUnSelectedColor,
-        SetCheckboxMark, SetCheckboxShape };
+        SetCheckboxMark, SetCheckboxShape, SetCheckboxName, SetCheckboxGroup };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -13606,7 +13878,7 @@ int32_t SetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
 const ArkUI_AttributeItem* GetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetCheckboxSelect, GetCheckboxSelectedColor, GetCheckboxUnSelectedColor,
-        GetCheckboxMark, GetCheckboxShape };
+        GetCheckboxMark, GetCheckboxShape, GetCheckboxName, GetCheckboxGroup };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -13618,7 +13890,7 @@ const ArkUI_AttributeItem* GetCheckboxAttribute(ArkUI_NodeHandle node, int32_t s
 void ResetCheckboxAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetCheckboxSelect, ResetCheckboxSelectedColor, ResetCheckboxUnSelectedColor,
-        ResetCheckboxMark, ResetCheckboxShape };
+        ResetCheckboxMark, ResetCheckboxShape, ResetCheckboxName, ResetCheckboxGroup };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14017,7 +14289,8 @@ int32_t SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
         SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging,
-        SetScrollPage, SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr };
+        SetScrollPage, SetScrollBy, SetScrollFling, SetScrollFadingEdge, nullptr,
+        nullptr, nullptr, nullptr, SetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14030,7 +14303,8 @@ const ArkUI_AttributeItem* GetScrollAttribute(ArkUI_NodeHandle node, int32_t sub
     static Getter* getters[] = { GetScrollScrollBar, GetScrollScrollBarWidth, GetScrollScrollBarColor,
         GetScrollScrollable, GetScrollEdgeEffect, GetScrollEnableScrollInteraction, GetScrollFriction,
         GetScrollScrollSnap, GetScrollNestedScroll, GetScrollOffset, GetScrollEdge, GetScrollEnablePaging,
-        nullptr, nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize };
+        nullptr, nullptr, nullptr, GetScrollFadingEdge, GetScrollContentSize, nullptr,
+        nullptr, nullptr, GetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14044,7 +14318,7 @@ void ResetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
     static Resetter* resetters[] = { ResetScrollScrollBar, ResetScrollScrollBarWidth, ResetScrollScrollBarColor,
         ResetScrollScrollable, ResetScrollEdgeEffect, ResetScrollEnableScrollInteraction, ResetScrollFriction,
         ResetScrollScrollSnap, ResetScrollNestedScroll, ResetScrollTo, ResetScrollEdge, ResetScrollEnablePaging,
-        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr };
+        nullptr, nullptr, nullptr, ResetScrollFadingEdge, nullptr, nullptr, nullptr, nullptr, ResetScrollContentClip };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14278,7 +14552,7 @@ int32_t SetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
 {
     static Setter* setters[] = { SetLayoutDirection, SetColumnsTemplate, SetRowsTemplate, SetWaterFlowColumnsGap,
         SetWaterFlowRowsGap, SetWaterFlowSectionOption, SetWaterFlowNodeAdapter, SetWaterFlowCachedCount,
-        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize };
+        SetWaterFlowFooter, SetWaterFlowScrollToIndex, SetItemConstraintSize, SetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14290,7 +14564,7 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetLayoutDirection, ResetColumnsTemplate, ResetRowsTemplate,
         ResetWaterFlowColumnsGap, ResetWaterFlowRowsGap, ResetWaterFlowSectionOption, ResetWaterFlowNodeAdapter,
-        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize };
+        ResetWaterFlowCachedCount, ResetWaterFlowFooter, nullptr, ResetItemConstraintSize, ResetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14301,8 +14575,8 @@ void ResetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 const ArkUI_AttributeItem* GetWaterFlowAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetLayoutDirection, GetColumnsTemplate, GetRowsTemplate, GetWaterFlowColumnsGap,
-        GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount,
-        nullptr, nullptr, GetItemConstraintSize };
+        GetWaterFlowRowsGap, GetWaterFlowSectionOption, GetWaterFlowNodeAdapter, GetWaterFlowCachedCount, nullptr,
+        nullptr, GetItemConstraintSize, GetWaterFlowLayoutMode };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "waterFlow node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14377,6 +14651,40 @@ const ArkUI_AttributeItem* GetGridAttribute(ArkUI_NodeHandle node, int32_t subTy
 }
 } // namespace
 
+int32_t SetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
+{
+    static Setter* setters[] = { SetCheckboxGroupName, SetCheckboxGroupSelectAll, SetCheckboxGroupSelectedColor,
+        SetCheckboxGroupUnSelectedColor, SetCheckboxGroupMark, SetCheckboxGroupShape };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
+        return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
+    }
+    return setters[subTypeId](node, item);
+}
+
+const ArkUI_AttributeItem* GetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Getter* getters[] = { GetCheckboxGroupName, GetCheckboxGroupSelectAll, GetCheckboxGroupSelectedColor,
+        GetCheckboxGroupUnSelectedColor, GetCheckboxGroupMark, GetCheckboxGroupShape };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return nullptr;
+    }
+    g_attributeItem.size = RETURN_SIZE_ONE;
+    return getters[subTypeId](node);
+}
+
+void ResetCheckboxGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
+{
+    static Resetter* resetters[] = { ResetCheckboxGroupName, ResetCheckboxGroupSelectAll,
+        ResetCheckboxGroupSelectedColor, ResetCheckboxGroupUnSelectedColor, ResetCheckboxGroupMark,
+        ResetCheckboxGroupShape };
+    if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Checkbox node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    return resetters[subTypeId](node);
+}
+
 int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const ArkUI_AttributeItem* item)
 {
     using AttributeSetterClass = int32_t(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item);
@@ -14385,7 +14693,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetTextInputAttribute, SetTextAreaAttribute, SetButtonAttribute, SetProgressAttribute, SetCheckboxAttribute,
         SetXComponentAttribute, SetDatePickerAttribute, SetTimePickerAttribute, SetTextPickerAttribute,
         SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetImageAnimatorAttribute,
-        SetStackAttribute, SetSwiperAttribute,
+        SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute,
         SetScrollAttribute, SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute,
         SetRowAttribute, SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr,
         SetRelativeContainerAttribute, SetGridAttribute };
@@ -14415,7 +14723,8 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetImageSpanAttribute, GetImageAttribute, GetToggleAttribute, GetLoadingProgressAttribute,
         GetTextInputAttribute, GetTextAreaAttribute, GetButtonAttribute, GetProgressAttribute, GetCheckboxAttribute,
         GetXComponentAttribute, GetDatePickerAttribute, GetTimePickerAttribute, GetTextPickerAttribute,
-        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute, GetStackAttribute,
+        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
+        GetCheckboxGroupAttribute, GetStackAttribute,
         GetSwiperAttribute, GetScrollAttribute, GetListAttribute, nullptr, GetListItemGroupAttribute,
         GetColumnAttribute, GetRowAttribute, GetFlexAttribute, GetRefreshAttribute, GetWaterFlowAttribute, nullptr,
         GetRelativeContainerAttribute, GetGridAttribute };
@@ -14442,7 +14751,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
         ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
         ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetImageAnimatorAttribute,
+        ResetImageAnimatorAttribute, ResetCheckboxGroupAttribute,
         ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
         ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute };

@@ -36,6 +36,8 @@ inline constexpr float INDICATOR_WIDTH_RATIO = 0.135f;
 inline constexpr float INDICATOR_HEIGHT_RATIO = 0.087f;
 inline constexpr float INDICATOR_CORNER_RADIUS_RATIO = 0.01f;
 inline constexpr float INDICATOR_BORDER_WIDTH_RATIO_DOUBLE = 0.06f;
+inline constexpr float INTERVAL_RATIO = 0.08f;
+inline constexpr Dimension TRACK_THICKNESS = 4.0_vp;
 inline constexpr float INDICATOR_BORDER_WIDTH_RATIO = 0.03f;
 inline constexpr float DESCRIPTION_NODE_WIDTH_RATIO = 0.4444f;
 inline constexpr float DESCRIPTION_NODE_HEIGHT_RATIO = 0.254f;
@@ -82,7 +84,6 @@ public:
             if (!themeConstants) {
                 return theme;
             }
-            theme->trackThickness_ = themeConstants->GetDimension(THEME_PROGRERSS_THICKNESS);
             ParsePattern(themeConstants, theme);
             return theme;
         }
@@ -98,6 +99,15 @@ public:
             theme->indicatorColor_ = gaugePattern->GetAttr<Color>("indicator_color", Color::BLACK);
             theme->indicatorBorderColor_ = gaugePattern->GetAttr<Color>("indicator_border_color", Color::WHITE);
             theme->limitValueMinFontSize_ = gaugePattern->GetAttr<Dimension>("limit_value_min_font_size", 10.0_vp);
+            theme->indicatorWidthRatio_ = gaugePattern->GetAttr<double>("indicator_width_ratio", INDICATOR_WIDTH_RATIO);
+            theme->indicatorHeightRatio_ =
+                gaugePattern->GetAttr<double>("indicator_height_ratio", INDICATOR_HEIGHT_RATIO);
+            theme->indicatorRadiusRatio_ =
+                gaugePattern->GetAttr<double>("indicator_corner_radius_ratio", INDICATOR_CORNER_RADIUS_RATIO);
+            theme->indicatorBorderRatio_ =
+                gaugePattern->GetAttr<double>("indicator_border_ratio", INDICATOR_BORDER_WIDTH_RATIO_DOUBLE);
+            theme->intervalRatio_ = gaugePattern->GetAttr<double>("interval_ratio", INTERVAL_RATIO);
+            theme->trackThickness_ = gaugePattern->GetAttr<Dimension>("track_thickness", TRACK_THICKNESS);
         }
     };
 
@@ -123,6 +133,31 @@ public:
         return trackThickness_;
     }
 
+    const float& GetIndicatorRadiusRatio()
+    {
+        return indicatorRadiusRatio_;
+    }
+
+    const float& GetIndicatorBorderRatio() const
+    {
+        return indicatorBorderRatio_;
+    }
+
+    const float& GetIndicatorWidthRatio() const
+    {
+        return indicatorWidthRatio_;
+    }
+
+    const float& GetIndicatorHeightRatio() const
+    {
+        return indicatorHeightRatio_;
+    }
+
+    const float& GetIntervalRatio() const
+    {
+        return intervalRatio_;
+    }
+
 protected:
     GaugeTheme() = default;
 
@@ -131,6 +166,11 @@ private:
     Color indicatorBorderColor_;
     Dimension limitValueMinFontSize_;
     Dimension trackThickness_;
+    float intervalRatio_ = 0.0f;
+    float indicatorWidthRatio_ = 0.0f;
+    float indicatorHeightRatio_ = 0.0f;
+    float indicatorRadiusRatio_ = 0.0f;
+    float indicatorBorderRatio_ = 0.0f;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GAUGE_GAUGE_THEME_H

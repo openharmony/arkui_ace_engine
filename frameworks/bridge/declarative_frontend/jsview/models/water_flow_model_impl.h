@@ -53,7 +53,7 @@ public:
     void SetOnScrollIndex(std::function<void(int32_t, int32_t)>&& onScrollIndex) override {};
     void SetFriction(double friction) override {};
     void SetCachedCount(int32_t value, bool show) override {};
-    void SetEdgeEffect(EdgeEffect /* edgeEffect */, bool /* alwaysEnabled */) override {};
+    void SetEdgeEffect(EdgeEffect /* edgeEffect */, bool /* alwaysEnabled */, EffectEdge /* effectEdge */) override {};
 
     void SetScrollBarMode(DisplayMode /* value */) override {};
     void SetScrollBarColor(const std::string& /* value */) override {};

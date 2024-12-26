@@ -39,7 +39,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     endPos_ = EndPos();
 
     prevItemStart_ = itemStart_;
-    itemStart_ = startIndex_ == 0 && NonNegative(startPos_ - TopMargin());
+    itemStart_ = OverScrollTop();
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
         itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
@@ -52,12 +52,22 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     }
 
     const float contentEnd = endPos_ + footerHeight_ + BotMargin();
-    offsetEnd_ = itemEnd_ && LessOrEqualCustomPrecision(contentEnd, mainSize, 0.1f);
+    offsetEnd_ = OverScrollBottom();
     maxHeight_ = std::max(-totalOffset_ + contentEnd, maxHeight_);
 
     newStartIndex_ = EMPTY_NEW_START_INDEX;
 
     synced_ = true;
+}
+
+bool WaterFlowLayoutInfoSW::OverScrollTop()
+{
+    return startIndex_ == 0 && NonNegative(startPos_ + delta_ - TopMargin());
+}
+
+bool WaterFlowLayoutInfoSW::OverScrollBottom()
+{
+    return itemEnd_ && LessOrEqualCustomPrecision(endPos_ + delta_ + footerHeight_ + BotMargin(), lastMainSize_, 0.1f);
 }
 
 float WaterFlowLayoutInfoSW::CalibrateOffset()

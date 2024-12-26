@@ -91,6 +91,10 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "base/ressched/ressched_report.h"
+#endif
+
 namespace OHOS::Ace::Platform {
 namespace {
 constexpr uint32_t DIRECTION_KEY = 0b1000;
@@ -109,6 +113,9 @@ const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.s
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 std::mutex g_mutexFormRenderFontFamily;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
+#endif
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -972,6 +979,34 @@ void AceContainer::InitializeCallback()
         return result;
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess) {
+        if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_CROWN_ROTATION_STATUS,
+                static_cast<int32_t>(event.action), mapPayload);
+        }
+        ContainerScope scope(id);
+        bool result = false;
+        auto crownTask = [context, event, &result, markProcess, id]() {
+            ContainerScope scope(id);
+            result = context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            crownTask();
+            return result;
+        }
+        context->GetTaskExecutor()->PostTask(
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+        return result;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -3168,29 +3203,29 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
-bool AceContainer::GetCurPointerEventInfo(
-    int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
-    auto iter = currentEvents_.find(pointerId);
+    auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
-    pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) ||
+        !pointerItem.IsPressed()) {
         return false;
     }
-    sourceType = currentPointerEvent->GetSourceType();
-    globalX = pointerItem.GetDisplayX();
-    globalY = pointerItem.GetDisplayY();
-    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
-    displayId = currentPointerEvent->GetTargetDisplayId();
-    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
+    dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
 

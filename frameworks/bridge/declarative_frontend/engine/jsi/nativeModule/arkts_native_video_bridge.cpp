@@ -24,7 +24,7 @@ constexpr int32_t NUM_0 = 0;
 constexpr int32_t NUM_1 = 1;
 
 namespace {
-bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue, Color& result)
+bool ParseColorMetricsToColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result)
 {
     if (!jsValue->IsObject(vm)) {
         return false;
@@ -40,6 +40,7 @@ bool ParseColorMetricsToColor(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     return false;
 }
 } // namespace
+
 ArkUINativeModuleValue VideoBridge::SetAutoPlay(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

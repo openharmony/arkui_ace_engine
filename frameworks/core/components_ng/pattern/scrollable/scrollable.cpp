@@ -133,13 +133,18 @@ void Scrollable::InitAxisAnimator()
         CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollMotion(offset, SCROLL_FROM_AXIS);
     };
+    auto axisAnimationStartCallback = [weak = WeakClaim(this)](float position) {
+        auto scrollable = weak.Upgrade();
+        CHECK_NULL_VOID(scrollable && scrollable->onScrollStartRec_);
+        scrollable->onScrollStartRec_(position);
+    };
     auto axisAnimationFinishCallback = [weak = WeakClaim(this)]() {
         auto scrollable = weak.Upgrade();
         CHECK_NULL_VOID(scrollable);
         scrollable->ProcessScrollMotionStop();
     };
-    axisAnimator_ =
-        AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback), std::move(axisAnimationFinishCallback));
+    axisAnimator_ = AceType::MakeRefPtr<AxisAnimator>(std::move(axisAnimationCallback),
+        std::move(axisAnimationStartCallback), std::move(axisAnimationFinishCallback));
     axisAnimator_->Initialize(context_);
 }
 
@@ -166,7 +171,6 @@ void Scrollable::SetOnActionStart()
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         CHECK_NULL_VOID(scroll);
-        scroll->isDragging_ = true;
         scroll->HandleDragStart(info);
     };
     panRecognizerNG_->SetOnActionStart(actionStart);
@@ -383,14 +387,14 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
     if (IsMouseWheelScroll(info)) {
         InitAxisAnimator();
-        if (IsAxisAnimationRunning() || IsSnapAnimationRunning()) {
-            return;
-        } else {
+        if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
         }
+        return;
     } else if (IsAxisAnimationRunning()) {
         StopAxisAnimation();
     }
+    isDragging_ = true;
     if (onScrollStartRec_) {
         onScrollStartRec_(static_cast<float>(dragPositionInMainAxis));
     }
@@ -520,8 +524,8 @@ void Scrollable::LayoutDirectionEst(double gestureVelocity, double velocityScale
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
-    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s",
-        info.GetMainVelocity(), nodeId_, nodeTag_.c_str());
+    TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, velocity is %{public}f id:%{public}d, tag:%{public}s, "
+        "dragCnt:%{public}d", info.GetMainVelocity(), nodeId_, nodeTag_.c_str(), dragCount_);
     ReportToDragFRCScene(info.GetMainVelocity(), NG::SceneStatus::END);
     auto isAxisEvent = IsMouseWheelScroll(info);
     if (isAxisEvent) {
@@ -540,6 +544,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     double mainPosition = Round(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (!moved_ || isAxisEvent) {
         LayoutDirectionEst(lastGestureVelocity_, flingVelocityScale_, isScrollFromTouchPad);
+        ResetContinueDragCount();
         if (GetSnapType() == SnapType::SCROLL_SNAP) {
             currentPos_ = mainPosition;
             SnapAnimationOptions snapAnimationOptions = { .animationVelocity = currentVelocity_ };
@@ -1171,6 +1176,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
     source = snapAnimationFromScrollBar_ && state_ == AnimationState::SNAP ? SCROLL_FROM_BAR_FLING : source;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
     if (!moved_) {
+        ResetContinueDragCount();
         StopFrictionAnimation();
     }
     currentPos_ = position;
@@ -1185,6 +1191,7 @@ void Scrollable::ProcessScrollMotion(double position, int32_t source)
             skipRestartSpring_ = true;
             MarkNeedFlushAnimationStartTime();
         }
+        ResetContinueDragCount();
         StopFrictionAnimation();
         StopSnapAnimation();
     }

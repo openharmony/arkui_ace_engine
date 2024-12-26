@@ -14,14 +14,13 @@
  */
 
 #include "text_base.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "frameworks/base/memory/ace_type.h"
-#define private public
-#define protected public
+
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#undef protected
-#undef private
 
 namespace OHOS::Ace::NG {
 

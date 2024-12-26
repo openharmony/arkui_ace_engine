@@ -204,7 +204,7 @@ public:
         return toastShadowStyle_;
     }
     
-    const int& GetToastBackgroundBlurStyle() const
+    int GetToastBackgroundBlurStyle() const
     {
         return toastBackgroundBlurStyle_;
     }

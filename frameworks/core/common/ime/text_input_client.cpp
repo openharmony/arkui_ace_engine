@@ -66,6 +66,8 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_ENTER, KEY_CTRL), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_NUMPAD_ENTER, KEY_CTRL), &tic::HandleOnEnter },
     { KeyComb(KeyCode::KEY_DPAD_CENTER, KEY_CTRL), &tic::HandleOnEnter },
+    { KeyComb(KeyCode::KEY_PAGE_UP), &tic::HandleOnPageUp },
+    { KeyComb(KeyCode::KEY_PAGE_DOWN), &tic::HandleOnPageDown },
     // caret move keys
     { KeyComb(KeyCode::KEY_DPAD_LEFT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_DPAD_RIGHT), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Right); } },
@@ -117,6 +119,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_NUMPAD_2, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghEnd); } },
     // when numLock off, KEY_NUMPAD_3 perform as KEY_PAGE_DOWN
+    { KeyComb(KeyCode::KEY_NUMPAD_3), &tic::HandleOnPageDown },
     // when numLock off, KEY_NUMPAD_4 perform as KEY_DPAD_LEFT
     { KeyComb(KeyCode::KEY_NUMPAD_4), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::Left); } },
     { KeyComb(KeyCode::KEY_NUMPAD_4, KEY_CTRL), [](tic* c) -> void { c->CursorMove(CaretMoveIntent::LeftWord); } },
@@ -144,6 +147,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_NUMPAD_8, KEY_CTRL | KEY_SHIFT),
         [](tic* c) -> void { c->CursorMove(CaretMoveIntent::ParagraghBegin); } },
     // when numLock off, KEY_NUMPAD_9 perform as KEY_PAGE_UP
+    { KeyComb(KeyCode::KEY_NUMPAD_9), &tic::HandleOnPageUp },
     // when numLock off, KEY_NUMPAD_DOT perform as KEY_FORWARD_DEL
     { KeyComb(KeyCode::KEY_NUMPAD_DOT), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_NUMPAD_DOT, KEY_CTRL), [](tic* c) -> void { c->HandleOnDeleteComb(false); } },

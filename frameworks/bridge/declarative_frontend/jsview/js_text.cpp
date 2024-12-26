@@ -770,6 +770,7 @@ void JSText::Create(const JSCallbackInfo& info)
         }
     } else {
         ParseJsString(args, data);
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(data.data()), data.length(), 0);
         TextModel::GetInstance()->Create(data);
     }
 

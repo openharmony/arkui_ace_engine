@@ -755,7 +755,7 @@ void WebPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipeline);
     SetRotation(pipeline->GetTransformHint());
 
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
     if (!renderContextForSurface_) {
         renderContextForSurface_ = RenderContext::Create();
         static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE,
@@ -6723,8 +6723,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetTransitionalNodeById(in
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId));
+    auto accessNode = delegate_->GetAccessibilityNodeInfoById(accessibilityId);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetFocusedAccessibilityNode(
@@ -6734,8 +6735,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetFocusedAccessibilityNod
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus));
+    auto accessNode = delegate_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 
@@ -6746,8 +6748,9 @@ std::shared_ptr<NG::TransitionalNodeInfo> WebPattern::GetAccessibilityNodeByFocu
         return nullptr;
     }
     CHECK_NULL_RETURN(delegate_, nullptr);
-    return std::make_shared<NG::TransitionalNodeInfo>(
-        delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction));
+    auto accessNode = delegate_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction);
+    CHECK_NULL_RETURN(accessNode, nullptr);
+    return std::make_shared<NG::TransitionalNodeInfo>(accessNode);
 }
 
 bool WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action,

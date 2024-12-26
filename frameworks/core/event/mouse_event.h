@@ -95,6 +95,7 @@ struct MouseEvent final : public PointerEvent {
     float scrollX = 0.0f;
     float scrollY = 0.0f;
     float scrollZ = 0.0f;
+    bool mockFlushEvent = false;
     MouseAction action = MouseAction::NONE;
     MouseAction pullAction = MouseAction::NONE;
     MouseButton button = MouseButton::NONE_BUTTON;
@@ -103,7 +104,7 @@ struct MouseEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent;
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
@@ -170,6 +171,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.pressedKeyCodes_ = pressedKeyCodes_;
         mouseEvent.isInjected = isInjected;
         mouseEvent.isPrivacyMode = isPrivacyMode;
+        mouseEvent.mockFlushEvent = mockFlushEvent;
         return mouseEvent;
     }
 
@@ -262,6 +264,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.isPrivacyMode = isPrivacyMode;
         return mouseEvent;
     }
+    std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
 
 class MouseInfo : public BaseEventInfo {

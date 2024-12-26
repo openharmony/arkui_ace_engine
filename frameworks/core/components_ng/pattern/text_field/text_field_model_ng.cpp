@@ -447,6 +447,16 @@ void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
 }
 
+void TextFieldModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value);
+}
+
+void TextFieldModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
+}
+
 void TextFieldModelNG::SetInputFilter(const std::string& value,
     const std::function<void(const std::u16string&)>&& func)
 {
@@ -902,6 +912,11 @@ Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+}
+
+void TextFieldModelNG::SetHalfLeading(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
@@ -1692,6 +1707,11 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& valu
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
+}
+
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
@@ -1934,6 +1954,11 @@ void TextFieldModelNG::SetEnableHapticFeedback(bool state)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void TextFieldModelNG::SetEllipsisMode(EllipsisMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value);
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
@@ -2181,5 +2206,11 @@ void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

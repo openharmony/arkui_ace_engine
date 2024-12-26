@@ -137,6 +137,9 @@ public:
     virtual void Reset() = 0;
     virtual void ResetFooter() = 0;
 
+    virtual bool OverScrollTop() = 0;
+    virtual bool OverScrollBottom() = 0;
+
     // for compatibility
     virtual void UpdateStartIndex() {};
 

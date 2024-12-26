@@ -754,8 +754,11 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     SetIsWindowConsumed(false);
     if (isDragFwkShow_) {
         auto menuWrapper = GetMenuWrapperNodeFromDrag();
-        SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(OffsetF(static_cast<float>(point.GetX()),
-            static_cast<float>(point.GetY())), 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
+        if (menuWrapper) {
+            auto menuPosition = DragDropFuncWrapper::GetPointRelativeToMainWindow(point);
+            SubwindowManager::GetInstance()->UpdateHideMenuOffsetNG(
+                menuPosition, 1.0, false, menuWrapper ? menuWrapper->GetId() : -1);
+        }
     }
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(point);
@@ -912,6 +915,9 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
+    if (IsUIExtensionComponent(preTargetFrameNode_) && preTargetFrameNode_ != dragFrameNode) {
+        HandleUIExtensionDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE);
+    }
     if (!dragFrameNode) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);
         TAG_LOGI(AceLogTag::ACE_DRAG,
@@ -2205,6 +2211,7 @@ void DragDropManager::UpdateDragMovePosition(const NG::OffsetF& offset, bool isR
 
 bool DragDropManager::IsUIExtensionComponent(const RefPtr<NG::UINode>& node)
 {
+    CHECK_NULL_RETURN(node, false);
     return (V2::UI_EXTENSION_COMPONENT_ETS_TAG == node->GetTag() || V2::EMBEDDED_COMPONENT_ETS_TAG == node->GetTag()) &&
            (!IsUIExtensionShowPlaceholder(node));
 }

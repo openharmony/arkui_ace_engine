@@ -35,6 +35,7 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
+#include "core/components/web/resource/web_area_changed.h"
 #include "adapter/ohos/capability/html/span_to_html.h"
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
@@ -757,14 +758,6 @@ void WebDelegate::UnRegisterScreenLockFunction()
 {
     if (nweb_) {
         nweb_->UnRegisterScreenLockFunction(instanceId_);
-    }
-}
-
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
-{
-    if (auto delegate = webDelegate_.Upgrade()) {
-        delegate->OnAvoidAreaChanged(avoidArea, type);
     }
 }
 

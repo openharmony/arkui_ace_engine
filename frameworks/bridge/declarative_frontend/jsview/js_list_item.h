@@ -41,6 +41,9 @@ public:
     static void JsParseDeleteArea(const JsiExecutionContext& context, const JSRef<JSVal>& jsValue,
         bool isStartArea, NG::FrameNode* node);
     static void ParseBuilderComponentContent(const JSRef<JSVal>& contentParam, RefPtr<NG::FrameNode>& refPtrFrameNode);
+    static void ParseBuilder(const JSRef<JSObject>& obj, OnDeleteEvent&& onDelete,
+        OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+        OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea, NG::FrameNode* node);
 };
 
 } // namespace OHOS::Ace::Framework
