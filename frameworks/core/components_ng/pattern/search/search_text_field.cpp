@@ -44,7 +44,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(GetTextUtf16Value(), event);
     // If the developer wants to keep editing, editing will not stop
-    if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
+    if (event.IsKeepEditable()) {
         return;
     }
     CloseKeyboard(forceCloseKeyboard);

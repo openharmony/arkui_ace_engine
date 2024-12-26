@@ -212,7 +212,7 @@ advanced_ui_component/treeview/ @guozonghao11
 component_ext/arc_swiper/
 component_ext/BUILD.gn @arkui_architecture
 component_ext/ext_common/
-component_ext/movingphoto/ @hanyujia1
+component_ext/movingphoto/ @wangrunsen
 
 [Examples]
 examples/ @arkuipopupwindow
@@ -943,6 +943,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.cpp @arkui_image
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h @arkui_image
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.cpp @guozonghao11
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_theme_bridge.h @guozonghao11
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.cpp @arkuipopupwindow
@@ -973,7 +975,7 @@ frameworks/bridge/declarative_frontend/engine/js_types.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/js_types.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/engine/jsUIContext.js
 frameworks/bridge/declarative_frontend/engine/jsXNode.js
-frameworks/bridge/declarative_frontend/engine/stateMgmt.js @arkuistatemgmt
+frameworks/bridge/declarative_frontend/state_mgmt/src/lib @arkuistatemgmt
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.cpp @arkuiframework
 frameworks/bridge/declarative_frontend/frontend_delegate_declarative.h @arkuiframework
 frameworks/bridge/declarative_frontend/interfaces/profiler/js_profiler.cpp @arkuiframework
@@ -1724,6 +1726,8 @@ frameworks/core/accessibility/js_inspector/inspect_toolbar_item.h
 frameworks/core/accessibility/js_inspector/inspect_video.cpp @arkuilayout
 frameworks/core/accessibility/js_inspector/inspect_video.h @arkuilayout
 frameworks/core/animation/ @arkui_superman
+frameworks/core/animation/chain_animation.cpp @arkuiscroll
+frameworks/core/animation/chain_animation.h @arkuiscroll
 frameworks/core/animation/test/ @arkui_superman
 frameworks/core/BUILD.gn @arkui_architecture
 frameworks/core/common/ace_application_info.cpp @arkuiframework
@@ -2002,7 +2006,7 @@ frameworks/core/components/panel/ @arkui_superman
 frameworks/core/components_part_upd/foreach/ @arkuistatemgmt
 frameworks/core/components/picker/ @arkuipopupwindow
 frameworks/core/components/piece/ @arkui_image
-frameworks/core/components/plugin/ @arkuilayout
+frameworks/core/components/plugin/ @arkuiabilitygroup
 frameworks/core/components/popup/ @arkuipopupwindow
 frameworks/core/components/positioned/ @arkuilayout
 frameworks/core/components/progress/ @arkui_image
@@ -2341,6 +2345,7 @@ frameworks/core/components_ng/pattern/container_modal/ @arkuievent
 frameworks/core/components_ng/pattern/counter/ @arkui_image
 frameworks/core/components_ng/pattern/custom/ @arkuilayout
 frameworks/core/components_ng/pattern/custom_frame_node/ @arkuiframework
+frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @arkui_image
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/divider/ @arkuilayout
@@ -2405,6 +2410,8 @@ frameworks/core/components_ng/pattern/overlay/sheet_view.cpp @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_view.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.cpp @arkui_superman
+frameworks/core/components_ng/pattern/overlay/sheet_wrapper_paint_method.cpp @arkui_superman
+frameworks/core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h @arkui_superman
 frameworks/core/components_ng/pattern/overlay/sheet_wrapper_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/panel/ @arkui_superman
 frameworks/core/components_ng/pattern/particle/ @arkui_superman
@@ -2437,7 +2444,23 @@ frameworks/core/components_ng/pattern/shape/ @arkuilayout
 frameworks/core/components_ng/pattern/side_bar/ @arkui_superman
 frameworks/core/components_ng/pattern/slider/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/stack/ @arkuilayout
-frameworks/core/components_ng/pattern/stage/ @arkuievent
+frameworks/core/components_ng/pattern/stage/content_root_pattern.cpp @arkuievent
+frameworks/core/components_ng/pattern/stage/content_root_pattern.h @arkuievent
+frameworks/core/components_ng/pattern/stage/page_event_hub.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_event_hub.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_info.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_pattern.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_pattern.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_effect.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model_ng.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model_ng.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/page_transition_model.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_layout_algorithm.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_layout_algorithm.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_manager.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_manager.h @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_pattern.cpp @arkui_superman
+frameworks/core/components_ng/pattern/stage/stage_pattern.h @arkui_superman
 frameworks/core/components_ng/pattern/stepper/ @arkui_superman
 frameworks/core/components_ng/pattern/swiper/ @arkuiscroll
 frameworks/core/components_ng/pattern/swiper_indicator/ @arkuiscroll
@@ -2606,6 +2629,7 @@ frameworks/core/components_ng/render/media_player_creator.cpp @arkuilayout
 frameworks/core/components_ng/render/media_player.h @arkuilayout
 frameworks/core/components_ng/render/modifier_adapter.h @arkuiframework
 frameworks/core/components_ng/render/node_paint_method.h @arkuiframework
+frameworks/core/components_ng/render/paint_property.cpp @arkuiframework
 frameworks/core/components_ng/render/paint_property.h @arkuiframework
 frameworks/core/components_ng/render/paint_wrapper.cpp @arkuiframework
 frameworks/core/components_ng/render/paint_wrapper.h @arkuiframework
@@ -2625,6 +2649,7 @@ frameworks/core/components_ng/render/render_surface.h @arkuilayout
 frameworks/core/components_ng/render/shape_painter.cpp @arkuilayout
 frameworks/core/components_ng/render/shape_painter.h @arkuilayout
 frameworks/core/components_ng/render/snapshot_param.h @arkuievent
+frameworks/core/components_ng/token_theme/ @guozonghao11
 frameworks/core/pipeline_ng/ @arkui_architecture
 
 [Native Node Interfaces]
@@ -2718,6 +2743,8 @@ frameworks/core/interfaces/native/node/node_container_span_modifier.cpp @huawei_
 frameworks/core/interfaces/native/node/node_container_span_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/node_content_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/node_content_modifier.h @arkuiframework
+frameworks/core/interfaces/native/node/node_custom_node_ext_modifier.h
+frameworks/core/interfaces/native/node/node_custom_node_ext_modifier.cpp
 frameworks/core/interfaces/native/node/node_date_picker_modifier.cpp @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_date_picker_modifier.h @arkuipopupwindow
 frameworks/core/interfaces/native/node/node_drag_modifier.cpp @arkuievent
@@ -2826,6 +2853,8 @@ frameworks/core/interfaces/native/node/text_clock_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_clock_modifier.h @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.cpp @arkui_image
 frameworks/core/interfaces/native/node/text_timer_modifier.h @arkui_image
+frameworks/core/interfaces/native/node/theme_modifier.cpp @guozonghao11
+frameworks/core/interfaces/native/node/theme_modifier.h @guozonghao11
 frameworks/core/interfaces/native/node/touch_event_convertor.h @arkuievent
 frameworks/core/interfaces/native/node/util_modifier.cpp @arkuiframework
 frameworks/core/interfaces/native/node/util_modifier.h @arkuiframework
@@ -2885,6 +2914,8 @@ interfaces/native/node/node_transition.cpp @arkui_superman
 interfaces/native/node/node_transition.h @arkui_superman
 interfaces/native/node/node_transition_imp.cpp @arkui_superman
 interfaces/native/node/node_utils.cpp @arkuiframework
+interfaces/native/node/progress_option.cpp @arkui_image
+interfaces/native/node/progress_option.h @arkui_image
 interfaces/native/node/resource.h @arkuiframework
 interfaces/native/node/styled_string.h @huawei_g_five
 interfaces/native/node/style_modifier.cpp @arkuiframework
@@ -2933,6 +2964,8 @@ interfaces/inner_api/form_render/ @arondave
 interfaces/inner_api/ui_service_manager/ @arkuiframework
 interfaces/inner_api/ui_session/ @arkuiframework
 interfaces/inner_api/xcomponent_controller/ @arkuilayout
+interfaces/inner_api/ace_kit/include/ @arkui_architecture
+interfaces/inner_api/ace_kit/src/ @arkuiframework
 
 [NAPI Interfaces]
 interfaces/napi/kits/animator/ @arkui_superman
@@ -3075,7 +3108,7 @@ test/unittest/core/pattern/shape/ @arkuilayout
 test/unittest/core/pattern/side_bar/ @arkui_superman
 test/unittest/core/pattern/slider/ @arkuipopupwindow
 test/unittest/core/pattern/stack/ @arkuilayout
-test/unittest/core/pattern/stage/ @arkuievent
+test/unittest/core/pattern/stage/ @arkui_superman
 test/unittest/core/pattern/stepper/ @arkui_superman
 test/unittest/core/pattern/swiper/ @arkuiscroll
 test/unittest/core/pattern/symbol/ @huawei_g_five
@@ -3104,5 +3137,5 @@ test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework
 test/unittest/core/svg/ @arkui_image
 test/unittest/core/syntax/ @arkuistatemgmt
-test/unittest/interfaces/ @arkui_architecture
+test/unittest/interfaces/ @arkuiframework
 

@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TABS_TAB_CONTENT_TRANSITION_PROXY_H
 
 #include <functional>
+#include <memory>
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/memory/type_info_base.h"

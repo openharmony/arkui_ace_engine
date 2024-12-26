@@ -83,11 +83,16 @@ struct BindMenuStatus {
 struct PreparedInfoForDrag {
     bool isMenuShow = false;
     int32_t badgeNumber = 0;
-    float defaultScale = 1.0f;
+    float previewScale = 1.0f;
     OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
     OffsetF dragMovePosition = { 0.0f, 0.0f };
     RefPtr<PixelMap> pixelMap;
     RefPtr<FrameNode> imageNode;
+};
+
+struct DragframeNodeInfo {
+    RefPtr<FrameNode> frameNode;
+    std::vector<RefPtr<FrameNode>> gatherFrameNode;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -253,8 +258,15 @@ public:
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
+    bool CheckAllowDrag(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
+    RefPtr<OHOS::Ace::DragEvent> CreateDragEvent(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
+    void HandleDragThroughMouse(const RefPtr<FrameNode> frameNode);
+    void HandleDragThroughTouch(const RefPtr<FrameNode> frameNode);
+    void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
@@ -265,7 +277,7 @@ public:
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
-    void HandleNotallowDrag(const GestureEvent& info);
+    void HandleNotAllowDrag(const GestureEvent& info);
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool GetMonopolizeEvents() const;
     void SetMonopolizeEvents(bool monopolizeEvents);
@@ -411,6 +423,7 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
+    DragframeNodeInfo dragframeNodeInfo_;
     // disable drag for the node itself and its all children
     bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;

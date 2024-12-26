@@ -24,11 +24,13 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "base/geometry/offset.h"
+#include "core/event/axis_event.h"
 
 namespace OHOS::Ace {
 namespace ResDefine {
 constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
+constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
 }
 
@@ -46,6 +48,8 @@ public:
     void OnTouchEvent(const TouchEvent& touchEvent);
     void OnKeyEvent(const KeyEvent& event);
     void LoadPageEvent(int32_t value);
+    void OnAxisEvent(const AxisEvent& axisEvent);
+    void AxisEventReportEnd();
 
 private:
     ResSchedReport() {}
@@ -63,10 +67,20 @@ private:
         const TouchEvent& upEventInfo);
     void RecordTouchEvent(const TouchEvent& touchEvent, bool enforce = false);
 
+    void HandleAxisBegin(const AxisEvent& axisEvent);
+    void HandleAxisUpdate(const AxisEvent& axisEvent);
+    void HandleAxisEnd(const AxisEvent& axisEvent);
+
+    void RecordAxisEvent(const AxisEvent& axisEvent, bool enforce = false);
+    double GetAxisUpVelocity(const AxisEvent& lastAxisEvent, const AxisEvent& curAxisEvent);
+
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
+    bool loadPageRequestFrameOn_ = false;
     TouchEvent curTouchEvent_;
     TouchEvent lastTouchEvent_;
+    AxisEvent curAxisEvent_;
+    AxisEvent lastAxisEvent_;
     Offset averageDistance_;
     bool isInSlide_ = false;
     bool isInTouch_ = false;

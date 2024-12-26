@@ -244,7 +244,8 @@ void MenuItemPattern::RecordChangeEvent() const
         .SetType(host->GetTag())
         .SetChecked(isSelected_)
         .SetText(content)
-        .SetDescription(host->GetAutoEventParamValue(""));
+        .SetDescription(host->GetAutoEventParamValue(""))
+        .SetHost(host);
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(host, inspectorId, content, isSelected_);
 }
@@ -298,6 +299,8 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(host);
     auto menuNode = GetMenu(true);
     CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     auto customNode = BuildSubMenuCustomNode();
     CHECK_NULL_VOID(customNode);
     UpdateSubmenuExpandingMode(customNode);
@@ -308,8 +311,6 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
         return;
     }
 
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
     menuPattern->FocusViewHide();
     HideSubMenu();
     isSubMenuShowed_ = true;
@@ -322,6 +323,7 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     CHECK_NULL_VOID(focusMenuRenderContext);
     if (focusMenuRenderContext->GetBackBlurStyle().has_value()) {
         auto focusMenuBlurStyle = focusMenuRenderContext->GetBackBlurStyle();
+        CHECK_NULL_VOID(focusMenuBlurStyle);
         param.backgroundBlurStyle = static_cast<int>(focusMenuBlurStyle->blurStyle);
     }
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
@@ -391,6 +393,9 @@ RefPtr<FrameNode> MenuItemPattern::GetSubMenu(RefPtr<UINode>& customNode)
 void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 {
     auto frameNode = GetSubMenu(customNode);
+    if (!frameNode) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "subMenu has no Menu node");
+    }
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::MENU_ETS_TAG) {
         auto props = frameNode->GetLayoutProperty<MenuLayoutProperty>();
@@ -412,6 +417,7 @@ void MenuItemPattern::UpdateSubmenuExpandingMode(RefPtr<UINode>& customNode)
 
 void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
 {
+    CHECK_NULL_VOID(subMenu);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
@@ -471,14 +477,81 @@ void MenuItemPattern::HideSubMenu()
 void MenuItemPattern::OnExpandChanged(const RefPtr<FrameNode>& expandableNode)
 {
     CHECK_NULL_VOID(expandableNode);
+    auto menuNode = GetMenu(true);
+    CHECK_NULL_VOID(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
     isExpanded_ = !isExpanded_;
     if (isExpanded_) {
         embeddedMenu_ = expandableNode;
         ShowEmbeddedExpandMenu(embeddedMenu_);
+        menuPattern->SetShowedSubMenu(embeddedMenu_);
     } else {
         HideEmbeddedExpandMenu(embeddedMenu_);
         embeddedMenu_ = nullptr;
+        menuPattern->SetShowedSubMenu(nullptr);
     }
+}
+
+Offset GetTransformCenter(SizeF size, Placement placement)
+{
+    if (placement == Placement::TOP) {
+        return Offset(size.Width() / 2.0f, size.Height());
+    }
+    if (placement == Placement::TOP_LEFT) {
+        return Offset(0.0f, size.Height());
+    }
+    if (placement == Placement::TOP_RIGHT) {
+        return Offset(size.Width(), size.Height());
+    }
+    return Offset();
+}
+
+void MenuItemPattern::UpdatePreviewPosition(SizeF oldMenuSize, SizeF menuSize)
+{
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto topMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(topMenu);
+    auto menuPattern = topMenu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern && menuPattern->GetPreviewMode() != MenuPreviewMode::NONE);
+
+    auto placement = menuPattern->GetLastPlacement().value_or(Placement::NONE);
+    auto isTopMenuBottomPreview =
+        placement == Placement::TOP || placement == Placement::TOP_LEFT || placement == Placement::TOP_RIGHT;
+
+    auto offsetY = menuSize.Height() - oldMenuSize.Height();
+    CHECK_NULL_VOID(isTopMenuBottomPreview && !NearZero(offsetY));
+
+    auto preview = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(1));
+    CHECK_NULL_VOID(preview);
+    auto tag = preview->GetTag();
+    auto isPreview = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_VOID(isPreview);
+
+    auto renderContext = preview->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto previewGeometryNode = preview->GetGeometryNode();
+    CHECK_NULL_VOID(previewGeometryNode);
+
+    auto offset = previewGeometryNode->GetFrameOffset();
+    offset.AddY(offsetY);
+
+    previewGeometryNode->SetFrameOffset(offset);
+    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+    menuWrapperPattern->SetPreviewDisappearStartOffset(offset);
+
+    auto pipeline = topMenu->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto menuTheme = pipeline->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_VOID(menuTheme);
+    menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
+    auto menuRenderContext = topMenu->GetRenderContext();
+    CHECK_NULL_VOID(menuRenderContext);
+    menuRenderContext->UpdateTransformCenter(DimensionOffset(GetTransformCenter(menuSize, placement)));
 }
 
 void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
@@ -520,6 +593,7 @@ void MenuItemPattern::ShowEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
 
 void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expandableNode)
 {
+    CHECK_NULL_VOID(expandableNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto rightRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
@@ -533,6 +607,19 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     expandableNode->MarkModifyDone();
     expandableNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
+    auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+    CHECK_NULL_VOID(menuItemPattern);
+    auto menuWrapper = menuItemPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+
+    auto topMenu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(topMenu);
+    auto menuGeometryNode = topMenu->GetGeometryNode();
+    CHECK_NULL_VOID(menuGeometryNode);
+    auto oldMenuSize = menuGeometryNode->GetFrameSize();
+
     auto pipeline = host->GetContextWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->FlushUITasks();
@@ -542,6 +629,7 @@ void MenuItemPattern::SetShowEmbeddedMenuParams(const RefPtr<FrameNode>& expanda
     expandableAreaContext->ClipWithRRect(
         RectF(0.0f, 0.0f, expandableAreaFrameSize.Width(), expandableAreaFrameSize.Height()),
         RadiusF(EdgeF(0.0f, 0.0f)));
+    menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
 }
 
 void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandableNode)
@@ -563,7 +651,7 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
     RefPtr<ChainedTransitionEffect> opacity = AceType::MakeRefPtr<ChainedOpacityEffect>(OPACITY_EFFECT);
     expandableAreaContext->UpdateChainedTransition(opacity);
 
-    AnimationUtils::Animate(option, [this, host, expandableNode]() {
+    AnimationUtils::Animate(option, [host, expandableNode, menuWrapperPattern]() {
         host->RemoveChild(expandableNode, true);
         host->MarkModifyDone();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -574,9 +662,21 @@ void MenuItemPattern::HideEmbeddedExpandMenu(const RefPtr<FrameNode>& expandable
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
         imageContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f));
+
+        CHECK_NULL_VOID(menuWrapperPattern);
+        auto topMenu = menuWrapperPattern->GetMenu();
+        CHECK_NULL_VOID(topMenu);
+        auto menuGeometryNode = topMenu->GetGeometryNode();
+        CHECK_NULL_VOID(menuGeometryNode);
+        auto oldMenuSize = menuGeometryNode->GetFrameSize();
+
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->FlushUITasks();
+
+        auto menuItemPattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(menuItemPattern);
+        menuItemPattern->UpdatePreviewPosition(oldMenuSize, menuGeometryNode->GetFrameSize());
     });
 }
 
@@ -695,6 +795,7 @@ void MenuItemPattern::RegisterOnKeyEvent()
 
 bool MenuItemPattern::OnClick()
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive click event", index_);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     if (onClickAIMenuItem_) {
@@ -746,6 +847,7 @@ bool MenuItemPattern::OnClick()
 
 void MenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "MenuItem index:%{public}d receive touch event", index_);
     auto menuWrapper = GetMenuWrapper();
     // When menu wrapper exists, the pressed state is handed over to the menu wrapper
     if (menuWrapper && menuWrapper->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
@@ -804,6 +906,7 @@ void MenuItemPattern::NotifyPressStatus(bool isPress)
 
 void CustomMenuItemPattern::OnTouch(const TouchEventInfo& info)
 {
+    TAG_LOGD(AceLogTag::ACE_MENU, "Custom MenuItem receive touch event");
     const auto& touches = info.GetTouches();
     CHECK_EQUAL_VOID(touches.empty(), true);
     auto touchType = touches.front().GetTouchType();
@@ -1439,13 +1542,15 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
         node = FrameNode::CreateFrameNode(
             V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     }
-    auto textProperty = node ? node->GetLayoutProperty<TextLayoutProperty>() : nullptr;
+    CHECK_NULL_VOID(node);
+    auto textProperty = node->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(false);
     auto context = PipelineBase::GetCurrentContext();
-    auto theme = context ? context->GetTheme<SelectTheme>() : nullptr;
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto layoutDirection = itemProperty->GetNonAutoLayoutDirection();
     TextAlign textAlign = static_cast<TextAlign>(theme->GetMenuItemContentAlign());

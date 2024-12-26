@@ -133,6 +133,16 @@ void SwiperModelNG::SetCachedCount(int32_t cachedCount)
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedCount, cachedCount);
 }
 
+void SwiperModelNG::SetCachedIsShown(bool isShown)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown);
+}
+
+void SwiperModelNG::SetCachedIsShown(FrameNode* frameNode, bool isShown)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, CachedIsShown, isShown, frameNode);
+}
+
 void SwiperModelNG::SetIsIndicatorCustomSize(bool isCustomSize)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -438,6 +448,31 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetPageFlipMode(int32_t pageFlipMode)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPageFlipMode(pageFlipMode);
+}
+
+void SwiperModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetPageFlipMode(options);
+}
+
+int32_t SwiperModelNG::GetPageFlipMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, 0);
+    return pattern->GetPageFlipMode();
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlank)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
@@ -488,6 +523,13 @@ int32_t SwiperModelNG::GetCachedCount(FrameNode* frameNode)
     int32_t cachedCount = 1;
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedCount, cachedCount, frameNode, 1);
     return cachedCount;
+}
+
+bool SwiperModelNG::GetCachedIsShown(FrameNode* frameNode)
+{
+    bool isShown = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(SwiperLayoutProperty, CachedIsShown, isShown, frameNode, false);
+    return isShown;
 }
 
 void SwiperModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)

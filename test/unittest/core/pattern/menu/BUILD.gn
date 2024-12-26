@@ -16,22 +16,28 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("menu_test_ng") {
   type = "new"
   sources = [
+    "custommenuitem_pattern_test_ng.cpp",
+    "menu_accessibility_property_test_ng.cpp",
     "menu_expand_test_ng.cpp",
     "menu_layoutFst_test_ng.cpp",
     "menu_layoutScd_test_ng.cpp",
     "menu_layoutThi_test_ng.cpp",
+    "menu_layout_property_test_ng.cpp",
     "menu_origin_test_ng.cpp",
     "menu_paint_test_ng.cpp",
     "menu_patternEx_test_ng.cpp",
     "menu_patternMore_test_ng.cpp",
     "menu_pattern_test_ng.cpp",
     "menu_view_test_ng.cpp",
+    "menuitem_layout_property_test_ng.cpp",
+    "menuitem_pattern_basic_test_ng.cpp",
     "menuitem_pattern_option_test_ng.cpp",
-    "menuitem_pattern_test_ng.cpp",
     "menuitem_pattern_testone_ng.cpp",
     "menuitem_test_ng.cpp",
     "menuitem_testone_ng.cpp",
+    "menuitemgroup_accessibility_property_test_ng.cpp",
     "menuitemgroup_test_ng.cpp",
     "menuwrapper_test_ng.cpp",
+    "submenu_test_ng.cpp",
   ]
 }

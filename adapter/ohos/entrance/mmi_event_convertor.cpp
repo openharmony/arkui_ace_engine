@@ -150,6 +150,27 @@ void UpdateMouseEventForPen(const MMI::PointerEvent::PointerItem& pointerItem, M
     mouseEvent.originalId = mouseEvent.id;
 }
 
+TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
+{
+    TouchEvent event;
+    event.SetId(touchPoint.id)
+        .SetX(touchPoint.x)
+        .SetY(touchPoint.y)
+        .SetScreenX(touchPoint.screenX)
+        .SetScreenY(touchPoint.screenY)
+        .SetType(TouchType::UNKNOWN)
+        .SetPullType(TouchType::UNKNOWN)
+        .SetSize(touchPoint.size)
+        .SetForce(touchPoint.force)
+        .SetTiltX(touchPoint.tiltX)
+        .SetTiltY(touchPoint.tiltY)
+        .SetSourceType(SourceType::NONE)
+        .SetSourceTool(touchPoint.sourceTool)
+        .SetOriginalId(touchPoint.originalId)
+        .SetSourceType(SourceType::NONE);
+    return event;
+}
+
 TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     CHECK_NULL_RETURN(pointerEvent, TouchEvent());
@@ -161,27 +182,13 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
         return TouchEvent();
     }
     auto touchPoint = ConvertTouchPoint(item);
+    TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
-    TouchEvent event;
-    event.SetId(touchPoint.id)
-        .SetX(touchPoint.x)
-        .SetY(touchPoint.y)
-        .SetScreenX(touchPoint.screenX)
-        .SetScreenY(touchPoint.screenY)
-        .SetType(TouchType::UNKNOWN)
-        .SetPullType(TouchType::UNKNOWN)
-        .SetTime(time)
-        .SetSize(touchPoint.size)
-        .SetForce(touchPoint.force)
-        .SetTiltX(touchPoint.tiltX)
-        .SetTiltY(touchPoint.tiltY)
+    event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
         .SetTargetDisplayId(pointerEvent->GetTargetDisplayId())
-        .SetSourceType(SourceType::NONE)
-        .SetSourceTool(touchPoint.sourceTool)
-        .SetTouchEventId(pointerEvent->GetId())
-        .SetOriginalId(touchPoint.originalId);
+        .SetTouchEventId(pointerEvent->GetId());
     AceExtraInputData::ReadToTouchEvent(pointerEvent, event);
     event.pointerEvent = pointerEvent;
     int32_t orgDevice = pointerEvent->GetSourceType();
@@ -382,7 +389,7 @@ void GetAxisEventAction(int32_t action, AxisEvent& event)
     }
 }
 
-void GetNonPointerAxisEventAction(int32_t action, NG::NonPointerAxisEvent& event)
+void GetNonPointerAxisEventAction(int32_t action, NG::FocusAxisEvent& event)
 {
     switch (action) {
         case OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN:
@@ -402,6 +409,30 @@ void GetNonPointerAxisEventAction(int32_t action, NG::NonPointerAxisEvent& event
             break;
     }
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)
+{
+    event.touchEventId = pointerEvent->GetId();
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
+        event.action = Ace::CrownAction::BEGIN;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
+        event.action = Ace::CrownAction::UPDATE;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        event.action = Ace::CrownAction::END;
+    } else {
+        event.action = Ace::CrownAction::UNKNOWN;
+    }
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, event);
+    event.angularVelocity =  pointerEvent->GetVelocity();
+    event.degree =  pointerEvent->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    event.timeStamp = time;
+}
+#endif
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {
@@ -473,7 +504,9 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.timeStamp = time;
     event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
     event.deviceId = keyEvent->GetDeviceId();
-    event.sourceType = SourceType::KEYBOARD;
+    int32_t orgDevice = keyEvent->GetSourceType();
+    event.sourceType =
+        orgDevice == MMI::PointerEvent::SOURCE_TYPE_JOYSTICK ? SourceType::JOYSTICK : SourceType::KEYBOARD;
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = keyEvent->GetEnhanceData();
 #endif
@@ -485,7 +518,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     event.numLock = keyEvent->GetFunctionKey(MMI::KeyEvent::NUM_LOCK_FUNCTION_KEY);
 }
 
-void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::NonPointerAxisEvent& event)
+void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event)
 {
     int32_t pointerID = pointerEvent->GetPointerId();
     MMI::PointerEvent::PointerItem item;
@@ -508,7 +541,7 @@ void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointe
     GetNonPointerAxisEventAction(orgAction, event);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
-    event.sourceTool = GetSourceTool(item.GetToolType());
+    event.sourceTool = SourceTool::JOYSTICK;
     event.pointerEvent = pointerEvent;
     event.originalId = item.GetOriginPointerId();
     event.deviceId = pointerEvent->GetDeviceId();
@@ -557,6 +590,9 @@ void GetPointerEventAction(int32_t action, DragPointerEvent& event)
     }
 }
 
+/**
+ * Only for UIExtension to convert drag event type and dispatch.
+ */
 void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const PointerAction action)
 {
     if (action == PointerAction::PULL_IN_WINDOW) {
@@ -564,6 +600,9 @@ void UpdatePointerAction(std::shared_ptr<MMI::PointerEvent>& pointerEvent, const
     }
     if (action == PointerAction::PULL_OUT_WINDOW) {
         pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW);
+    }
+    if (action == PointerAction::UP) {
+        pointerEvent->SetPointerAction(OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP);
     }
 }
 

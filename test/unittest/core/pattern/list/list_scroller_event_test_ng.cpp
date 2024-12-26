@@ -142,11 +142,11 @@ HWTEST_F(ListScrollerEventTestNg, Event001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Event002
+ * @tc.name: OnScrollIndex001
  * @tc.desc: Test scroll callback
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex001, TestSize.Level1)
 {
     int32_t startIndex;
     int32_t endIndex;
@@ -169,6 +169,138 @@ HWTEST_F(ListScrollerEventTestNg, Event002, TestSize.Level1)
     ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
+    EXPECT_EQ(centerIndex, 3);
+}
+
+/**
+ * @tc.name: OnScrollIndex002
+ * @tc.desc: Test List center snap over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex002, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    model.SetOnScrollIndex(event);
+    CreateListItems(2);
+    CreateDone();
+
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 0);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 200, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), -300, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 1);
+
+    DragAction(frameNode_, Offset(), -200, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(centerIndex, 1);
+}
+
+/**
+ * @tc.name: OnScrollIndex003
+ * @tc.desc: Test List center snap over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex003, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
+    model.SetOnScrollIndex(event);
+    CreateListItems(4);
+    CreateDone();
+
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 10, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), 10, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+
+    DragAction(frameNode_, Offset(), 80, 0);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(centerIndex, 0);
+}
+
+/**
+ * @tc.name: OnScrollIndex004
+ * @tc.desc: Test List with content offset over scroll onScrollIndex event
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, OnScrollIndex004, TestSize.Level1)
+{
+    int32_t startIndex;
+    int32_t endIndex;
+    int32_t centerIndex;
+    auto event = [&startIndex, &endIndex, &centerIndex](int32_t start, int32_t end, int32_t center) {
+        startIndex = start;
+        endIndex = end;
+        centerIndex = center;
+    };
+    ListModelNG model = CreateList();
+    model.SetContentStartOffset(50);
+    model.SetContentEndOffset(50);
+    model.SetOnScrollIndex(event);
+    CreateListItems(5);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->currentOffset_, -50);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 3);
+    EXPECT_EQ(centerIndex, 1);
+
+    pattern_->ratio_ = 0;
+    DragAction(frameNode_, Offset(), 100, 0);
+    EXPECT_EQ(pattern_->currentOffset_, -150);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 3);
+    EXPECT_EQ(centerIndex, 1);
+
+    pattern_->ScrollToIndex(4, false, ScrollAlign::END);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 150);
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 4);
+    EXPECT_EQ(centerIndex, 3);
+
+    DragAction(frameNode_, Offset(), -100, 0);
+    EXPECT_EQ(pattern_->currentOffset_, 250);
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 4);
     EXPECT_EQ(centerIndex, 3);
 }
 
@@ -207,7 +339,7 @@ HWTEST_F(ListScrollerEventTestNg, Event003, TestSize.Level1)
      * @tc.steps: step4. Scroll up to start
      */
     isTrigger = false;
-    ScrollTo(0.f);
+    ScrollTo(0);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -228,7 +360,7 @@ HWTEST_F(ListScrollerEventTestNg, Event004, TestSize.Level1)
     /**
      * @tc.steps: step1. Scroll down to end
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(isTrigger);
 }
 
@@ -313,6 +445,28 @@ HWTEST_F(ListScrollerEventTestNg, Event007, TestSize.Level1)
     ScrollTo(ITEM_MAIN_SIZE * 2);
     EXPECT_EQ(startIndex, 2);
     EXPECT_EQ(endIndex, 5);
+}
+
+/**
+ * @tc.name: Event008
+ * @tc.desc: Test scroll callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerEventTestNg, Event008, TestSize.Level1)
+{
+    bool isTrigger = false;
+    auto event = [&isTrigger](Dimension offset, ScrollState state) { isTrigger = true; };
+    ListModelNG model = CreateList();
+    model.SetOnScroll(event);
+    CreateListItems(2);
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. When unScrollable, call ScrollToEdge
+     * @tc.expected: Would not trigger onScroll event
+     */
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_FALSE(isTrigger);
 }
 
 /**
@@ -620,7 +774,7 @@ HWTEST_F(ListScrollerEventTestNg, onWillScrollAndOnDidScroll003, TestSize.Level1
 HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
 {
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     model.SetChainAnimation(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
@@ -668,7 +822,7 @@ HWTEST_F(ListScrollerEventTestNg, Pattern005, TestSize.Level1)
     info.AddTouchLocationInfo(std::move(touch));
     pattern_->OnTouchDown(info);
     EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 4);
-    pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
+    pattern_->OnScrollCallback(0, SCROLL_FROM_UPDATE);
     FlushUITasks();
     pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
     FlushUITasks();
@@ -704,8 +858,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step2. scroll to the end
      * @tc.expected: Init callback OnScrollVisibleContentChange
      */
-    pattern_->ScrollTo(1200);
-    FlushUITasks();
+    ScrollTo(1200);
     EXPECT_TRUE(IsEqual(startInfo, { 12 }));
     EXPECT_TRUE(IsEqual(endInfo, { 15 }));
 
@@ -728,8 +881,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step4. scroll to the end
      * @tc.expected: startBottom.index = 13
      */
-    pattern_->ScrollTo(1500);
-    FlushUITasks();
+    ScrollTo(1500);
     EXPECT_TRUE(IsEqual(startInfo, { 13 }));
     EXPECT_TRUE(IsEqual(endInfo, { 17 }));
 
@@ -750,8 +902,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange001, TestSize.Leve
      * @tc.steps: step6. scroll to the end
      * @tc.expected: startBottom.index = 4
      */
-    pattern_->ScrollTo(200);
-    FlushUITasks();
+    ScrollTo(200);
     EXPECT_TRUE(IsEqual(startInfo, { 4 }));
     EXPECT_TRUE(IsEqual(endInfo, { 11 }));
 }
@@ -786,8 +937,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.cases: indexChanged == startChanged == endChanged == false
      * @tc.expected: startExpect.index = 0
      */
-    pattern_->ScrollTo(30);
-    FlushUITasks();
+    ScrollTo(30);
     EXPECT_EQ(pattern_->GetTotalOffset(), 30);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -798,8 +948,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.expected: startExpect.indexInGroup = 0
      */
     startExpect = { 0, 1, 0 };
-    pattern_->ScrollTo(60);
-    FlushUITasks();
+    ScrollTo(60);
     EXPECT_EQ(pattern_->GetTotalOffset(), 60);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -810,8 +959,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      * @tc.expected: endExpect.indexInGroup = 3
      */
     endExpect = { 1, 1, 1 };
-    pattern_->ScrollTo(120);
-    FlushUITasks();
+    ScrollTo(120);
     EXPECT_EQ(pattern_->GetTotalOffset(), 120);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));
@@ -822,8 +970,7 @@ HWTEST_F(ListScrollerEventTestNg, OnScrollVisibleContentChange002, TestSize.Leve
      */
     startExpect = { 0, 1, 1 };
     endExpect = { 2, 2, -1 };
-    pattern_->ScrollTo(240);
-    FlushUITasks();
+    ScrollTo(240);
     EXPECT_EQ(pattern_->GetTotalOffset(), 240);
     EXPECT_TRUE(IsEqual(startInfo, startExpect));
     EXPECT_TRUE(IsEqual(endInfo, endExpect));

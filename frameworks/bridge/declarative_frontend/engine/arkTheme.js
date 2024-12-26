@@ -34,7 +34,27 @@ ArkResourcesHelper.COLOR = 10001;
 ArkResourcesHelper.FLOAT = 10002;
 class ArkThemeNativeHelper {
     static sendThemeToNative(theme, elmtId) {
-        const colorsArray = [
+        WithTheme.sendThemeToNative(ArkThemeNativeHelper.convertThemeToColorArray(theme), elmtId);
+    }
+    static createInternal(themeScopeId, themeId, theme, colorMode, onThemeScopeDestroy) {
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
+        }
+        getUINativeModule().theme.createAndBindTheme(themeScopeId, themeId, ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors), colorMode, onThemeScopeDestroy);
+        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
+            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        }
+    }
+    static setDefaultTheme(theme) {
+        const colorArray = ArkThemeNativeHelper.convertColorsToArray(theme === null || theme === void 0 ? void 0 : theme.colors);
+        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.LIGHT);
+        getUINativeModule().theme.setDefaultTheme(colorArray, false);
+        ArkThemeScopeManager.getInstance().onEnterLocalColorMode(ThemeColorMode.DARK);
+        getUINativeModule().theme.setDefaultTheme(colorArray, true);
+        ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+    }
+    static convertThemeToColorArray(theme) {
+        return [
             theme.colors.brand,
             theme.colors.warning,
             theme.colors.alert,
@@ -87,49 +107,38 @@ class ArkThemeNativeHelper {
             theme.colors.interactiveSelect,
             theme.colors.interactiveClick,
         ];
-        WithTheme.sendThemeToNative(colorsArray, elmtId);
+    }
+    static convertColorsToArray(colors) {
+        const basisColors = ArkThemeScopeManager.getSystemColors();
+        if (!colors) {
+            return new Array(Object.keys(basisColors).length).fill(undefined);
+        }
+        const colorArray = [];
+        for (let attr in basisColors) {
+            colorArray.push(colors[attr]);
+        }
+        return colorArray;
     }
 }
-
-if (globalThis.LazyForEach !== undefined) {
-    globalThis.LazyForEach.create = function (paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode) {
-        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
-        if (themeScope === undefined) {
-            if (paramUpdateChangedNode) {
-                LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator, paramUpdateChangedNode);
-            }
-            else {
-                LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, paramItemGenerator, paramKeyGenerator);
-            }
-            return;
-        }
-        const itemGeneratorWrapper = (...params) => {
-            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
-            paramItemGenerator(...params);
-            if (result === true) {
-                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
-            }
-        };
-        if (paramUpdateChangedNode) {
-            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator, paramUpdateChangedNode);
-        }
-        else {
-            LazyForEach.createInternal(paramViewId, paramParentView, paramDataSource, itemGeneratorWrapper, paramKeyGenerator);
+globalThis.LazyForEach.getItemGeneratorForThemeSupport = function (paramItemGenerator) {
+    const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
+    if (themeScope === undefined) {
+        return paramItemGenerator;
+    }
+    const itemGeneratorWrapper = (...params) => {
+        const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+        paramItemGenerator(...params);
+        if (result === true) {
+            ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
         }
     };
-}
-
-if (globalThis.ListItem !== undefined) {
-    globalThis.ListItem.create = function (deepRenderFunction, isLazy, options) {
-        if (isLazy === false) {
-            ListItem.createInternal(deepRenderFunction, isLazy, options);
-            return;
-        }
-        const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-        const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId);
+    return itemGeneratorWrapper;
+};
+if (globalThis.WithTheme !== undefined) {
+    globalThis.ListItem.getDeepRenderFuncForThemeSupport = function (deepRenderFunction) {
+        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
         if (themeScope === undefined) {
-            ListItem.createInternal(deepRenderFunction, isLazy, options);
-            return;
+            return deepRenderFunction;
         }
         const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
             const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
@@ -138,10 +147,146 @@ if (globalThis.ListItem !== undefined) {
                 ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
         };
-        ListItem.createInternal(deepRenderFunctionWrapper, isLazy, options);
+        return deepRenderFunctionWrapper;
     };
 }
-
+class ArkThemeCache {
+    constructor() {
+        this.cache = [];
+    }
+    static getInstance() {
+        if (!ArkThemeCache.instance) {
+            ArkThemeCache.instance = new ArkThemeCache();
+        }
+        return ArkThemeCache.instance;
+    }
+    add(theme) {
+        if (this.contains(theme)) {
+            return;
+        }
+        this.cache.push(theme);
+    }
+    remove(theme) {
+        const index = this.cache.indexOf(theme);
+        if (index == -1) {
+            return;
+        }
+        this.cache.splice(index, 1);
+        getUINativeModule().theme.removeFromCache(theme.id);
+    }
+    get(baselineThemeId, customTheme, colorMode) {
+        return this.cache.find((item) => {
+            return item.getParentThemeId() === baselineThemeId &&
+                item.getColorMode() === colorMode &&
+                this.isEqualsCustomThemes(item.getCustomTheme(), customTheme);
+        });
+    }
+    contains(theme) {
+        return this.containsByAttributes(theme.getParentThemeId(), theme.getCustomTheme(), theme.getColorMode());
+    }
+    containsByAttributes(baselineThemeId, customTheme, colorMode) {
+        return this.get(baselineThemeId, customTheme, colorMode) !== undefined;
+    }
+    isEqualsCustomThemes(theme1, theme2) {
+        if (theme1 === theme2) {
+            return true;
+        }
+        if (!theme1 || !theme2) {
+            return false;
+        }
+        if (theme1.colors === theme2.colors) {
+            return true;
+        }
+        if (!theme1.colors || !theme2.colors) {
+            return false;
+        }
+        let keys1 = Object.keys(theme1.colors);
+        let keys2 = Object.keys(theme2.colors);
+        if (keys1.length !== keys2.length) {
+            return false;
+        }
+        for (let key of keys1) {
+            if (!keys2.includes(key)) {
+                return false;
+            }
+            let value1 = theme1.colors[key];
+            let value2 = theme2.colors[key];
+            if (value1 !== value2) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+let themeCounter = 0;
+class ArkThemeBase {
+    constructor(parentId, customTheme, colorMode, colors, shapes, typography) {
+        this.scopesCounter = 0;
+        this.bindedThemeScopesIds = [];
+        this.isJustCreated = true;
+        this.parentThemeId = -1;
+        this.id = themeCounter++;
+        this.parentThemeId = parentId;
+        this.customTheme = ArkThemeBase.copyCustomTheme(customTheme);
+        this.colorMode = colorMode;
+        this.colors = colors;
+        this.shapes = shapes;
+        this.typography = typography;
+    }
+    bindToScope(themeScopeId) {
+        if (this.bindedThemeScopesIds.includes(themeScopeId)) {
+            return;
+        }
+        this.scopesCounter++;
+        this.bindedThemeScopesIds.push(themeScopeId);
+        if (this.isJustCreated) {
+            ArkThemeCache.getInstance().add(this);
+            this.isJustCreated = false;
+        }
+    }
+    unbindFromScope(themeScopeId) {
+        const index = this.bindedThemeScopesIds.indexOf(themeScopeId);
+        if (index == -1) {
+            return;
+        }
+        this.scopesCounter--;
+        this.bindedThemeScopesIds.splice(index, 1);
+        if (this.canBeDestroyed()) {
+            ArkThemeCache.getInstance().remove(this);
+        }
+    }
+    canBeDestroyed() {
+        return !this.isJustCreated && this.scopesCounter === 0;
+    }
+    getParentThemeId() {
+        return this.parentThemeId;
+    }
+    getCustomTheme() {
+        return this.customTheme;
+    }
+    getColorMode() {
+        return this.colorMode;
+    }
+    static copyCustomTheme(customTheme) {
+        if (!customTheme) {
+            return undefined;
+        }
+        const copyTheme = {};
+        if (customTheme.colors) {
+            copyTheme.colors = {};
+            Object.assign(copyTheme.colors, customTheme.colors);
+        }
+        if (customTheme.shapes) {
+            copyTheme.shapes = {};
+            Object.assign(copyTheme.shapes, customTheme.shapes);
+        }
+        if (customTheme.typography) {
+            copyTheme.typography = {};
+            Object.assign(copyTheme.typography, customTheme.typography);
+        }
+        return copyTheme;
+    }
+}
 class ArkSystemColors {
     constructor() {
         this.brand = ArkResourcesHelper.$r('sys.color.brand', 125830976);
@@ -339,95 +484,49 @@ class ArkSystemTypography {
         };
     }
 }
-class ArkSystemTheme {
+class ArkSystemTheme extends ArkThemeBase {
     constructor() {
-        this.colors = new ArkSystemColors();
-        this.shapes = new ArkSystemShapes();
-        this.typography = new ArkSystemTypography();
+        super(-1, undefined, ThemeColorMode.SYSTEM, new ArkSystemColors(), new ArkSystemShapes(), new ArkSystemTypography());
     }
 }
 if (globalThis.WithTheme !== undefined) {
     globalThis.WithTheme.create = function (themeOptions) {
+        var _a;
         const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-        const theme = ArkThemeScopeManager.getInstance().makeTheme(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
-        const colorMode = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode;
-        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
-        }
+        const colorMode = (_a = themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.colorMode) !== null && _a !== void 0 ? _a : ThemeColorMode.SYSTEM;
+        const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(themeOptions === null || themeOptions === void 0 ? void 0 : themeOptions.theme);
+        const theme = ArkThemeScopeManager.getInstance().makeTheme(cloneTheme, colorMode);
+        theme.bindToScope(elmtId);
+        const onThemeScopeDestroy = () => {
+            ArkThemeScopeManager.getInstance().onScopeDestroy(elmtId);
+        };
         ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
-        }
-        if (themeOptions) {
-            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
-        } else {
-            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
-        }
+        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions !== null && themeOptions !== void 0 ? themeOptions : {}, theme);
     };
     globalThis.WithTheme.pop = function () {
         ArkThemeScopeManager.getInstance().onScopeExit();
+        getUINativeModule().theme.pop();
     };
 }
-
 class ArkColorsImpl {
-    constructor(colors = {}, baselineColors) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
-        const customAttribute = this;
-        for (let attribute in colors) {
-            customAttribute[attribute] = colors[attribute];
+    constructor(colors, baselineColors) {
+        Object.assign(this, baselineColors, colors);
+    }
+    static expandByBrandColor(colors) {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        if (colors.brand) {
+            const brandColors = ArkColorsImpl.makeBrandColors(colors.brand);
+            colors.fontEmphasize = (_a = colors.fontEmphasize) !== null && _a !== void 0 ? _a : brandColors.primary;
+            colors.iconEmphasize = (_b = colors.iconEmphasize) !== null && _b !== void 0 ? _b : brandColors.primary;
+            colors.iconSubEmphasize = (_c = colors.iconSubEmphasize) !== null && _c !== void 0 ? _c : brandColors.tertiary;
+            colors.backgroundEmphasize = (_d = colors.backgroundEmphasize) !== null && _d !== void 0 ? _d : brandColors.primary;
+            colors.compBackgroundEmphasize = (_e = colors.compBackgroundEmphasize) !== null && _e !== void 0 ? _e : brandColors.primary;
+            colors.compEmphasizeSecondary = (_f = colors.compEmphasizeSecondary) !== null && _f !== void 0 ? _f : brandColors.fourth;
+            colors.compEmphasizeTertiary = (_g = colors.compEmphasizeTertiary) !== null && _g !== void 0 ? _g : brandColors.fifth;
+            colors.interactiveFocus = (_h = colors.interactiveFocus) !== null && _h !== void 0 ? _h : brandColors.primary;
+            colors.interactiveActive = (_j = colors.interactiveActive) !== null && _j !== void 0 ? _j : brandColors.primary;
         }
-        this.brand = (_a = colors === null || colors === void 0 ? void 0 : colors.brand) !== null && _a !== void 0 ? _a : baselineColors.brand;
-        const brandColors = ArkColorsImpl.makeBrandColors(colors === null || colors === void 0 ? void 0 : colors.brand);
-        this.warning = (_b = colors === null || colors === void 0 ? void 0 : colors.warning) !== null && _b !== void 0 ? _b : baselineColors.warning;
-        this.alert = (_c = colors === null || colors === void 0 ? void 0 : colors.alert) !== null && _c !== void 0 ? _c : baselineColors.alert;
-        this.confirm = (_d = colors === null || colors === void 0 ? void 0 : colors.confirm) !== null && _d !== void 0 ? _d : baselineColors.confirm;
-        this.fontPrimary = (_e = colors === null || colors === void 0 ? void 0 : colors.fontPrimary) !== null && _e !== void 0 ? _e : baselineColors.fontPrimary;
-        this.fontSecondary = (_f = colors === null || colors === void 0 ? void 0 : colors.fontSecondary) !== null && _f !== void 0 ? _f : baselineColors.fontSecondary;
-        this.fontTertiary = (_g = colors === null || colors === void 0 ? void 0 : colors.fontTertiary) !== null && _g !== void 0 ? _g : baselineColors.fontTertiary;
-        this.fontFourth = (_h = colors === null || colors === void 0 ? void 0 : colors.fontFourth) !== null && _h !== void 0 ? _h : baselineColors.fontFourth;
-        this.fontEmphasize = (_k = (_j = colors === null || colors === void 0 ? void 0 : colors.fontEmphasize) !== null && _j !== void 0 ? _j : brandColors.primary) !== null && _k !== void 0 ? _k : baselineColors.fontEmphasize;
-        this.fontOnPrimary = (_l = colors === null || colors === void 0 ? void 0 : colors.fontOnPrimary) !== null && _l !== void 0 ? _l : baselineColors.fontOnPrimary;
-        this.fontOnSecondary = (_m = colors === null || colors === void 0 ? void 0 : colors.fontOnSecondary) !== null && _m !== void 0 ? _m : baselineColors.fontOnSecondary;
-        this.fontOnTertiary = (_o = colors === null || colors === void 0 ? void 0 : colors.fontOnTertiary) !== null && _o !== void 0 ? _o : baselineColors.fontOnTertiary;
-        this.fontOnFourth = (_p = colors === null || colors === void 0 ? void 0 : colors.fontOnFourth) !== null && _p !== void 0 ? _p : baselineColors.fontOnFourth;
-        this.iconPrimary = (_q = colors === null || colors === void 0 ? void 0 : colors.iconPrimary) !== null && _q !== void 0 ? _q : baselineColors.iconPrimary;
-        this.iconSecondary = (_r = colors === null || colors === void 0 ? void 0 : colors.iconSecondary) !== null && _r !== void 0 ? _r : baselineColors.iconSecondary;
-        this.iconTertiary = (_s = colors === null || colors === void 0 ? void 0 : colors.iconTertiary) !== null && _s !== void 0 ? _s : baselineColors.iconTertiary;
-        this.iconFourth = (_t = colors === null || colors === void 0 ? void 0 : colors.iconFourth) !== null && _t !== void 0 ? _t : baselineColors.iconFourth;
-        this.iconEmphasize = (_v = (_u = colors === null || colors === void 0 ? void 0 : colors.iconEmphasize) !== null && _u !== void 0 ? _u : brandColors.primary) !== null && _v !== void 0 ? _v : baselineColors.iconEmphasize;
-        this.iconSubEmphasize = (_x = (_w = colors === null || colors === void 0 ? void 0 : colors.iconSubEmphasize) !== null && _w !== void 0 ? _w : brandColors.tertiary) !== null && _x !== void 0 ? _x : baselineColors.iconSubEmphasize;
-        this.iconOnPrimary = (_y = colors === null || colors === void 0 ? void 0 : colors.iconOnPrimary) !== null && _y !== void 0 ? _y : baselineColors.iconOnPrimary;
-        this.iconOnSecondary = (_z = colors === null || colors === void 0 ? void 0 : colors.iconOnSecondary) !== null && _z !== void 0 ? _z : baselineColors.iconOnSecondary;
-        this.iconOnTertiary = (_0 = colors === null || colors === void 0 ? void 0 : colors.iconOnTertiary) !== null && _0 !== void 0 ? _0 : baselineColors.iconOnTertiary;
-        this.iconOnFourth = (_1 = colors === null || colors === void 0 ? void 0 : colors.iconOnFourth) !== null && _1 !== void 0 ? _1 : baselineColors.iconOnFourth;
-        this.backgroundPrimary = (_2 = colors === null || colors === void 0 ? void 0 : colors.backgroundPrimary) !== null && _2 !== void 0 ? _2 : baselineColors.backgroundPrimary;
-        this.backgroundSecondary = (_3 = colors === null || colors === void 0 ? void 0 : colors.backgroundSecondary) !== null && _3 !== void 0 ? _3 : baselineColors.backgroundSecondary;
-        this.backgroundTertiary = (_4 = colors === null || colors === void 0 ? void 0 : colors.backgroundTertiary) !== null && _4 !== void 0 ? _4 : baselineColors.backgroundTertiary;
-        this.backgroundFourth = (_5 = colors === null || colors === void 0 ? void 0 : colors.backgroundFourth) !== null && _5 !== void 0 ? _5 : baselineColors.backgroundFourth;
-        this.backgroundEmphasize = (_7 = (_6 = colors === null || colors === void 0 ? void 0 : colors.backgroundEmphasize) !== null && _6 !== void 0 ? _6 : brandColors.primary) !== null && _7 !== void 0 ? _7 : baselineColors.backgroundEmphasize;
-        this.compForegroundPrimary = (_8 = colors === null || colors === void 0 ? void 0 : colors.compForegroundPrimary) !== null && _8 !== void 0 ? _8 : baselineColors.compForegroundPrimary;
-        this.compBackgroundPrimary = (_9 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimary) !== null && _9 !== void 0 ? _9 : baselineColors.compBackgroundPrimary;
-        this.compBackgroundPrimaryTran = (_10 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryTran) !== null && _10 !== void 0 ? _10 : baselineColors.compBackgroundPrimaryTran;
-        this.compBackgroundPrimaryContrary = (_11 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundPrimaryContrary) !== null && _11 !== void 0 ? _11 : baselineColors.compBackgroundPrimaryContrary;
-        this.compBackgroundGray = (_12 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundGray) !== null && _12 !== void 0 ? _12 : baselineColors.compBackgroundGray;
-        this.compBackgroundSecondary = (_13 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundSecondary) !== null && _13 !== void 0 ? _13 : baselineColors.compBackgroundSecondary;
-        this.compBackgroundTertiary = (_14 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundTertiary) !== null && _14 !== void 0 ? _14 : baselineColors.compBackgroundTertiary;
-        this.compBackgroundEmphasize = (_16 = (_15 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundEmphasize) !== null && _15 !== void 0 ? _15 : brandColors.primary) !== null && _16 !== void 0 ? _16 : baselineColors.compBackgroundEmphasize;
-        this.compBackgroundNeutral = (_17 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundNeutral) !== null && _17 !== void 0 ? _17 : baselineColors.compBackgroundNeutral;
-        this.compEmphasizeSecondary = (_19 = (_18 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeSecondary) !== null && _18 !== void 0 ? _18 : brandColors.fourth) !== null && _19 !== void 0 ? _19 : baselineColors.compEmphasizeSecondary;
-        this.compEmphasizeTertiary = (_21 = (_20 = colors === null || colors === void 0 ? void 0 : colors.compEmphasizeTertiary) !== null && _20 !== void 0 ? _20 : brandColors.fifth) !== null && _21 !== void 0 ? _21 : baselineColors.compEmphasizeTertiary;
-        this.compDivider = (_22 = colors === null || colors === void 0 ? void 0 : colors.compDivider) !== null && _22 !== void 0 ? _22 : baselineColors.compDivider;
-        this.compCommonContrary = (_23 = colors === null || colors === void 0 ? void 0 : colors.compCommonContrary) !== null && _23 !== void 0 ? _23 : baselineColors.compCommonContrary;
-        this.compBackgroundFocus = (_24 = colors === null || colors === void 0 ? void 0 : colors.compBackgroundFocus) !== null && _24 !== void 0 ? _24 : baselineColors.compBackgroundFocus;
-        this.compFocusedPrimary = (_25 = colors === null || colors === void 0 ? void 0 : colors.compFocusedPrimary) !== null && _25 !== void 0 ? _25 : baselineColors.compFocusedPrimary;
-        this.compFocusedSecondary = (_26 = colors === null || colors === void 0 ? void 0 : colors.compFocusedSecondary) !== null && _26 !== void 0 ? _26 : baselineColors.compFocusedSecondary;
-        this.compFocusedTertiary = (_27 = colors === null || colors === void 0 ? void 0 : colors.compFocusedTertiary) !== null && _27 !== void 0 ? _27 : baselineColors.compFocusedTertiary;
-        this.interactiveHover = (_28 = colors === null || colors === void 0 ? void 0 : colors.interactiveHover) !== null && _28 !== void 0 ? _28 : baselineColors.interactiveHover;
-        this.interactivePressed = (_29 = colors === null || colors === void 0 ? void 0 : colors.interactivePressed) !== null && _29 !== void 0 ? _29 : baselineColors.interactivePressed;
-        this.interactiveFocus = (_31 = (_30 = colors === null || colors === void 0 ? void 0 : colors.interactiveFocus) !== null && _30 !== void 0 ? _30 : brandColors.primary) !== null && _31 !== void 0 ? _31 : baselineColors.interactiveFocus;
-        this.interactiveActive = (_33 = (_32 = colors === null || colors === void 0 ? void 0 : colors.interactiveActive) !== null && _32 !== void 0 ? _32 : brandColors.primary) !== null && _33 !== void 0 ? _33 : baselineColors.interactiveActive;
-        this.interactiveSelect = (_34 = colors === null || colors === void 0 ? void 0 : colors.interactiveSelect) !== null && _34 !== void 0 ? _34 : baselineColors.interactiveSelect;
-        this.interactiveClick = (_35 = colors === null || colors === void 0 ? void 0 : colors.interactiveClick) !== null && _35 !== void 0 ? _35 : baselineColors.interactiveClick;
     }
     static makeBrandColors(brandColor) {
         const result = {
@@ -461,12 +560,12 @@ class ArkColorsImpl {
     }
     static makeResourceWithOpacity(resourceColor, opacityRatio) {
         return {
-            "id": resourceColor.id,
-            "type": resourceColor.type,
-            "params": [...resourceColor.params],
-            "bundleName": resourceColor.bundleName,
-            "moduleName": resourceColor.moduleName,
-            "opacityRatio": opacityRatio
+            'id': resourceColor.id,
+            'type': resourceColor.type,
+            'params': [...resourceColor.params],
+            'bundleName': resourceColor.bundleName,
+            'moduleName': resourceColor.moduleName,
+            'opacityRatio': opacityRatio
         };
     }
     static blendOpacity(argbColor, opacityRatio) {
@@ -479,70 +578,27 @@ class ArkColorsImpl {
     }
 }
 class ArkCornerRadiusImpl {
-    constructor(corners = {}, baselineCorners) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-        this.none = (_a = corners === null || corners === void 0 ? void 0 : corners.none) !== null && _a !== void 0 ? _a : baselineCorners.none;
-        this.level1 = (_b = corners === null || corners === void 0 ? void 0 : corners.level1) !== null && _b !== void 0 ? _b : baselineCorners.level1;
-        this.level2 = (_c = corners === null || corners === void 0 ? void 0 : corners.level2) !== null && _c !== void 0 ? _c : baselineCorners.level2;
-        this.level3 = (_d = corners === null || corners === void 0 ? void 0 : corners.level3) !== null && _d !== void 0 ? _d : baselineCorners.level3;
-        this.level4 = (_e = corners === null || corners === void 0 ? void 0 : corners.level4) !== null && _e !== void 0 ? _e : baselineCorners.level4;
-        this.level5 = (_f = corners === null || corners === void 0 ? void 0 : corners.level5) !== null && _f !== void 0 ? _f : baselineCorners.level5;
-        this.level6 = (_g = corners === null || corners === void 0 ? void 0 : corners.level6) !== null && _g !== void 0 ? _g : baselineCorners.level6;
-        this.level7 = (_h = corners === null || corners === void 0 ? void 0 : corners.level7) !== null && _h !== void 0 ? _h : baselineCorners.level7;
-        this.level8 = (_j = corners === null || corners === void 0 ? void 0 : corners.level8) !== null && _j !== void 0 ? _j : baselineCorners.level8;
-        this.level9 = (_k = corners === null || corners === void 0 ? void 0 : corners.level9) !== null && _k !== void 0 ? _k : baselineCorners.level9;
-        this.level10 = (_l = corners === null || corners === void 0 ? void 0 : corners.level10) !== null && _l !== void 0 ? _l : baselineCorners.level10;
-        this.level11 = (_m = corners === null || corners === void 0 ? void 0 : corners.level11) !== null && _m !== void 0 ? _m : baselineCorners.level11;
-        this.level12 = (_o = corners === null || corners === void 0 ? void 0 : corners.level12) !== null && _o !== void 0 ? _o : baselineCorners.level12;
-        this.level16 = (_p = corners === null || corners === void 0 ? void 0 : corners.level16) !== null && _p !== void 0 ? _p : baselineCorners.level16;
+    constructor(corners, baselineCorners) {
+        Object.assign(this, baselineCorners, corners);
     }
 }
 class ArkPaddingsImpl {
-    constructor(paddings = {}, baselinePaddings) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
-        this.level0 = (_a = paddings === null || paddings === void 0 ? void 0 : paddings.level0) !== null && _a !== void 0 ? _a : baselinePaddings.level0;
-        this.level1 = (_b = paddings === null || paddings === void 0 ? void 0 : paddings.level1) !== null && _b !== void 0 ? _b : baselinePaddings.level1;
-        this.level2 = (_c = paddings === null || paddings === void 0 ? void 0 : paddings.level2) !== null && _c !== void 0 ? _c : baselinePaddings.level2;
-        this.level3 = (_d = paddings === null || paddings === void 0 ? void 0 : paddings.level3) !== null && _d !== void 0 ? _d : baselinePaddings.level3;
-        this.level4 = (_e = paddings === null || paddings === void 0 ? void 0 : paddings.level4) !== null && _e !== void 0 ? _e : baselinePaddings.level4;
-        this.level5 = (_f = paddings === null || paddings === void 0 ? void 0 : paddings.level5) !== null && _f !== void 0 ? _f : baselinePaddings.level5;
-        this.level6 = (_g = paddings === null || paddings === void 0 ? void 0 : paddings.level6) !== null && _g !== void 0 ? _g : baselinePaddings.level6;
-        this.level7 = (_h = paddings === null || paddings === void 0 ? void 0 : paddings.level7) !== null && _h !== void 0 ? _h : baselinePaddings.level7;
-        this.level8 = (_j = paddings === null || paddings === void 0 ? void 0 : paddings.level8) !== null && _j !== void 0 ? _j : baselinePaddings.level8;
-        this.level9 = (_k = paddings === null || paddings === void 0 ? void 0 : paddings.level9) !== null && _k !== void 0 ? _k : baselinePaddings.level9;
-        this.level10 = (_l = paddings === null || paddings === void 0 ? void 0 : paddings.level10) !== null && _l !== void 0 ? _l : baselinePaddings.level10;
-        this.level11 = (_m = paddings === null || paddings === void 0 ? void 0 : paddings.level11) !== null && _m !== void 0 ? _m : baselinePaddings.level11;
-        this.level12 = (_o = paddings === null || paddings === void 0 ? void 0 : paddings.level12) !== null && _o !== void 0 ? _o : baselinePaddings.level12;
-        this.level16 = (_p = paddings === null || paddings === void 0 ? void 0 : paddings.level16) !== null && _p !== void 0 ? _p : baselinePaddings.level16;
-        this.level24 = (_q = paddings === null || paddings === void 0 ? void 0 : paddings.level24) !== null && _q !== void 0 ? _q : baselinePaddings.level24;
-        this.level32 = (_r = paddings === null || paddings === void 0 ? void 0 : paddings.level32) !== null && _r !== void 0 ? _r : baselinePaddings.level32;
-        this.level36 = (_s = paddings === null || paddings === void 0 ? void 0 : paddings.level36) !== null && _s !== void 0 ? _s : baselinePaddings.level36;
+    constructor(paddings, baselinePaddings) {
+        Object.assign(this, baselinePaddings, paddings);
     }
 }
 class ArkOutlinesImpl {
     constructor(outlines = {}, baselineOutlines) {
-        var _a, _b, _c, _d, _e, _f;
-        this.none = (_a = outlines === null || outlines === void 0 ? void 0 : outlines.none) !== null && _a !== void 0 ? _a : baselineOutlines.none;
-        this.xs = (_b = outlines === null || outlines === void 0 ? void 0 : outlines.xs) !== null && _b !== void 0 ? _b : baselineOutlines.xs;
-        this.s = (_c = outlines === null || outlines === void 0 ? void 0 : outlines.s) !== null && _c !== void 0 ? _c : baselineOutlines.s;
-        this.m = (_d = outlines === null || outlines === void 0 ? void 0 : outlines.m) !== null && _d !== void 0 ? _d : baselineOutlines.m;
-        this.l = (_e = outlines === null || outlines === void 0 ? void 0 : outlines.l) !== null && _e !== void 0 ? _e : baselineOutlines.l;
-        this.xl = (_f = outlines === null || outlines === void 0 ? void 0 : outlines.xl) !== null && _f !== void 0 ? _f : baselineOutlines.xl;
+        Object.assign(this, baselineOutlines, outlines);
     }
 }
 class ArkBordersImpl {
     constructor(borders = {}, baselineBorders) {
-        var _a, _b, _c, _d, _e, _f;
-        this.none = (_a = borders === null || borders === void 0 ? void 0 : borders.none) !== null && _a !== void 0 ? _a : baselineBorders.none;
-        this.xs = (_b = borders === null || borders === void 0 ? void 0 : borders.xs) !== null && _b !== void 0 ? _b : baselineBorders.xs;
-        this.s = (_c = borders === null || borders === void 0 ? void 0 : borders.s) !== null && _c !== void 0 ? _c : baselineBorders.s;
-        this.m = (_d = borders === null || borders === void 0 ? void 0 : borders.m) !== null && _d !== void 0 ? _d : baselineBorders.m;
-        this.l = (_e = borders === null || borders === void 0 ? void 0 : borders.l) !== null && _e !== void 0 ? _e : baselineBorders.l;
-        this.xl = (_f = borders === null || borders === void 0 ? void 0 : borders.xl) !== null && _f !== void 0 ? _f : baselineBorders.xl;
+        Object.assign(this, baselineBorders, borders);
     }
 }
 class ArkShapesImpl {
-    constructor(shapes = {}, baselineShapes) {
+    constructor(shapes, baselineShapes) {
         this.cornerRadius = new ArkCornerRadiusImpl(shapes === null || shapes === void 0 ? void 0 : shapes.cornerRadius, baselineShapes.cornerRadius);
         this.paddings = new ArkPaddingsImpl(shapes === null || shapes === void 0 ? void 0 : shapes.paddings, baselineShapes.paddings);
         this.borders = new ArkBordersImpl(shapes === null || shapes === void 0 ? void 0 : shapes.borders, baselineShapes.borders);
@@ -550,7 +606,7 @@ class ArkShapesImpl {
     }
 }
 class ArkTypographyImpl {
-    constructor(typography = {}, baselineTypography) {
+    constructor(typography, baselineTypography) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21, _22, _23, _24, _25, _26, _27, _28, _29, _30, _31, _32, _33, _34, _35;
         this.displayLarge = {
             weight: (_b = (_a = typography === null || typography === void 0 ? void 0 : typography.displayLarge) === null || _a === void 0 ? void 0 : _a.weight) !== null && _b !== void 0 ? _b : ArkTypographyWeights.light,
@@ -614,16 +670,19 @@ class ArkTypographyImpl {
         };
     }
 }
-class ArkThemeImpl {
-    constructor(baselineTheme, colors, shapes, typography) {
-        this.colors = new ArkColorsImpl(colors, baselineTheme.colors);
-        this.shapes = new ArkShapesImpl(shapes, baselineTheme.shapes);
-        this.typography = new ArkTypographyImpl(typography, baselineTheme.typography);
+class ArkThemeImpl extends ArkThemeBase {
+    constructor(customTheme, colorMode, baselineTheme) {
+        if (!customTheme) {
+            super(baselineTheme.id, undefined, colorMode, new ArkColorsImpl(undefined, baselineTheme.colors), new ArkShapesImpl(undefined, baselineTheme.shapes), new ArkTypographyImpl(undefined, baselineTheme.typography));
+            return;
+        }
+        super(baselineTheme.id, customTheme, colorMode, new ArkColorsImpl(customTheme.colors, baselineTheme.colors), new ArkShapesImpl(customTheme.shapes, baselineTheme.shapes), new ArkTypographyImpl(customTheme.typography, baselineTheme.typography));
     }
 }
 class ArkThemeScopeItem {
     constructor() {
         this.isInWhiteList = undefined;
+        this.listener = undefined;
     }
 }
 class ArkThemeScopeArray extends Array {
@@ -666,7 +725,23 @@ class ArkThemeScope {
         if (!this.components) {
             this.components = new ArkThemeScopeArray();
         }
-        this.components.push({ elmtId: elmtId, owner: owner, name: componentName });
+        this.components.push({ elmtId: elmtId, ownerId: owner.id__(), owner: owner, name: componentName });
+    }
+    addCustomListenerInScope(listener) {
+        const len = this.components ? this.components.length : -1;
+        if (len <= 0) {
+            return;
+        }
+        const listenerId = listener.id__();
+        let themeScopeItem = this.components[len - 1];
+        if (themeScopeItem.elmtId === listenerId) {
+            themeScopeItem.listener = listener;
+            return;
+        }
+        themeScopeItem = this.components.find((item) => item.elmtId === listenerId);
+        if (themeScopeItem) {
+            themeScopeItem.listener = listener;
+        }
     }
     removeComponentFromScope(elmtId) {
         if (this.components) {
@@ -697,9 +772,13 @@ class ArkThemeScope {
         return this.withThemeOptions;
     }
     updateWithThemeOptions(options, theme) {
+        var _a;
         this.prevColorMode = this.colorMode();
         this.withThemeOptions = options;
-        this.theme = theme;
+        if (this.theme !== theme) {
+            (_a = this.theme) === null || _a === void 0 ? void 0 : _a.unbindFromScope(this.getWithThemeId());
+            this.theme = theme;
+        }
     }
     isColorModeChanged() {
         return this.prevColorMode !== this.colorMode();
@@ -708,34 +787,41 @@ class ArkThemeScope {
 class ArkThemeScopeManager {
     constructor() {
         this.localThemeScopes = [];
-        this.themeScopes = [];
+        this.themeScopes = undefined;
         this.ifElseLastScope = undefined;
         this.ifElseScopes = [];
+        this.lastThemeScopeId = 0;
         this.listeners = [];
         this.defaultTheme = undefined;
     }
     onComponentCreateEnter(componentName, elmtId, isFirstRender, ownerComponent) {
         this.handledIsFirstRender = isFirstRender;
         this.handledOwnerComponentId = ownerComponent.id__();
-        if (this.themeScopes.length === 0 || componentName === 'WithTheme') {
+        this.handledComponentElmtId = elmtId;
+        if (!this.themeScopes || componentName === 'WithTheme') {
             return;
         }
-        const scopesLength = this.localThemeScopes.length;
+        if (this.themeScopes.length === 0) {
+            this.handleThemeScopeChange(undefined);
+            return;
+        }
         let scope = undefined;
         if (isFirstRender) {
             const currentLocalScope = this.localThemeScopes[this.localThemeScopes.length - 1];
             const currentIfElseScope = this.ifElseScopes[this.ifElseScopes.length - 1];
             if (currentLocalScope) {
                 scope = currentLocalScope;
-                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
-            } else if (currentIfElseScope) {
+                scope.addComponentToScope(elmtId, ownerComponent, componentName);
+            }
+            else if (currentIfElseScope) {
                 scope = currentIfElseScope;
-                scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
-            } else {
+                scope.addComponentToScope(elmtId, ownerComponent, componentName);
+            }
+            else {
                 const parentScope = ownerComponent.themeScope_;
                 if (parentScope) {
                     scope = parentScope;
-                    scope.addComponentToScope(elmtId, ownerComponent.id__(), componentName);
+                    scope.addComponentToScope(elmtId, ownerComponent, componentName);
                 }
             }
         }
@@ -749,16 +835,24 @@ class ArkThemeScopeManager {
         if (componentName === 'If') {
             this.ifElseLastScope = scope;
         }
+        this.handledThemeScope = scope;
+        this.handleThemeScopeChange(this.handledThemeScope);
     }
     onComponentCreateExit(elmtId) {
         if (this.handledColorMode === ThemeColorMode.LIGHT || this.handledColorMode === ThemeColorMode.DARK) {
             this.onExitLocalColorMode();
         }
+        this.handledThemeScope = undefined;
+        this.handledComponentElmtId = undefined;
     }
     onScopeEnter(withThemeId, withThemeOptions, theme) {
+        this.lastThemeScopeId = withThemeId;
         if (this.handledIsFirstRender === true) {
             let themeScope = new ArkThemeScope(this.handledOwnerComponentId, withThemeId, withThemeOptions, theme);
             this.localThemeScopes.push(themeScope);
+            if (!this.themeScopes) {
+                this.themeScopes = new Array();
+            }
             this.themeScopes.push(themeScope);
         }
         else {
@@ -772,20 +866,42 @@ class ArkThemeScopeManager {
             this.localThemeScopes.pop();
         }
     }
+    onScopeDestroy(themeScopeId) {
+        var _a;
+        this.themeScopes = (_a = this.themeScopes) === null || _a === void 0 ? void 0 : _a.filter((scope) => {
+            if (scope.getWithThemeId() === themeScopeId) {
+                this.onScopeDestroyInternal(scope);
+                return false;
+            }
+            return true;
+        });
+    }
+    onScopeDestroyInternal(scope) {
+        const theme = scope.getTheme();
+        if (theme) {
+            theme.unbindFromScope(scope.getWithThemeId());
+        }
+        const index = this.localThemeScopes.indexOf(scope);
+        if (index !== -1) {
+            this.localThemeScopes.splice(index, 1);
+        }
+        WithTheme.removeThemeInNative(scope.getWithThemeId());
+    }
     onViewPUCreate(ownerComponent) {
-        this.subscribeListener(ownerComponent);
+        var _a;
+        if (ownerComponent.parent_ === undefined) {
+            this.subscribeListener(ownerComponent);
+        }
         ownerComponent.themeScope_ = this.scopeForElmtId(ownerComponent.id__());
+        (_a = ownerComponent.themeScope_) === null || _a === void 0 ? void 0 : _a.addCustomListenerInScope(ownerComponent);
     }
     onViewPUDelete(ownerComponent) {
+        var _a;
         this.unsubscribeListener(ownerComponent);
         const ownerComponentId = ownerComponent.id__();
-        this.themeScopes = this.themeScopes.filter((scope) => {
+        this.themeScopes = (_a = this.themeScopes) === null || _a === void 0 ? void 0 : _a.filter((scope) => {
             if (scope.getOwnerComponentId() === ownerComponentId) {
-                const index = this.localThemeScopes.indexOf(scope);
-                if (index !== -1) {
-                    this.localThemeScopes.splice(index, 1);
-                }
-                WithTheme.removeThemeInNative(scope.getWithThemeId());
+                this.onScopeDestroyInternal(scope);
                 return false;
             }
             return true;
@@ -821,23 +937,27 @@ class ArkThemeScopeManager {
         if (index > -1) {
             this.listeners.splice(index, 1);
         }
+        const scope = listener.themeScope_;
+        if (scope) {
+            scope.removeComponentFromScope(listener.id__());
+            listener.themeScope_ = undefined;
+        }
     }
-    themeForElmtId(elmtId) {
-        var _a;
-        const scope = this.scopeForElmtId(elmtId);
-        return (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme;
-    }
-    getFinalTheme(elmtId) {
-        var _a;
-        return (_a = this.themeForElmtId(elmtId)) !== null && _a !== void 0 ? _a : ArkThemeScopeManager.SystemTheme;
+    getFinalTheme(ownerComponent) {
+        var _a, _b, _c;
+        return (_c = (_b = (_a = ownerComponent.themeScope_) === null || _a === void 0 ? void 0 : _a.getTheme()) !== null && _b !== void 0 ? _b : this.defaultTheme) !== null && _c !== void 0 ? _c : ArkThemeScopeManager.SystemTheme;
     }
     scopeForElmtId(elmtId) {
+        var _a;
+        if (this.handledThemeScope && this.handledComponentElmtId === elmtId) {
+            return this.handledThemeScope;
+        }
         if (this.handledIsFirstRender) {
             if (this.localThemeScopes.length > 0) {
                 return this.localThemeScopes[this.localThemeScopes.length - 1];
             }
         }
-        return this.themeScopes.find(item => item.isComponentInScope(elmtId));
+        return (_a = this.themeScopes) === null || _a === void 0 ? void 0 : _a.find(item => item.isComponentInScope(elmtId));
     }
     lastLocalThemeScope() {
         if (this.localThemeScopes.length > 0) {
@@ -852,52 +972,61 @@ class ArkThemeScopeManager {
         getUINativeModule().resource.restore();
     }
     forceRerenderScope(scope) {
+        var _a, _b, _c;
         if (scope === undefined) {
             return;
         }
-        const components = scope.componentsInScope();
-        if (components) {
-            components.forEach((item) => {
-                this.notifyScopeThemeChanged(item, scope);
-            });
-        }
+        const theme = (_b = (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme;
+        (_c = scope.componentsInScope()) === null || _c === void 0 ? void 0 : _c.forEach((item) => this.notifyScopeThemeChanged(item, theme, scope.isColorModeChanged()));
     }
-    notifyScopeThemeChanged(item, scope) {
-        this.listeners.forEach((listener) => {
-            var _a, _b;
-            const listenerId = listener.id__();
-            if (listenerId === item.owner) {
-                if (scope.isColorModeChanged()) {
+    notifyScopeThemeChanged(item, themeWillApply, isColorModeChanged) {
+        if (item.owner) {
+            const listener = item.owner;
+            if (isColorModeChanged) {
+                listener.forceRerenderNode(item.elmtId);
+            }
+            else {
+                let isInWhiteList = item.isInWhiteList;
+                if (isInWhiteList === undefined) {
+                    isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name);
+                    item.isInWhiteList = isInWhiteList;
+                }
+                if (isInWhiteList === true) {
                     listener.forceRerenderNode(item.elmtId);
                 }
-                else {
-                    let isInWhiteList = item.isInWhiteList;
-                    if (isInWhiteList === undefined) {
-                        isInWhiteList = ArkThemeWhiteList.isInWhiteList(item.name);
-                        item.isInWhiteList = isInWhiteList;
-                    }
-                    if (isInWhiteList === true) {
-                        listener.forceRerenderNode(item.elmtId);
-                    }
-                }
             }
-            else if (listenerId === item.elmtId) {
-                listener.onWillApplyTheme((_b = (_a = scope === null || scope === void 0 ? void 0 : scope.getTheme()) !== null && _a !== void 0 ? _a : this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme);
-            }
-        });
-    }
-    makeTheme(customTheme) {
-        var _a, _b;
-        if (!customTheme) {
-            return (_a = this.defaultTheme) !== null && _a !== void 0 ? _a : ArkThemeScopeManager.SystemTheme;
         }
-        return new ArkThemeImpl((_b = this.defaultTheme) !== null && _b !== void 0 ? _b : ArkThemeScopeManager.SystemTheme, customTheme.colors, customTheme.shapes, customTheme.typography);
+        if (item.listener) {
+            const listener = item.listener;
+            listener.onWillApplyTheme(themeWillApply);
+        }
+    }
+    makeTheme(customTheme, colorMode) {
+        var _a;
+        const baselineTheme = (_a = this.defaultTheme) !== null && _a !== void 0 ? _a : ArkThemeScopeManager.SystemTheme;
+        const theme = ArkThemeCache.getInstance().get(baselineTheme.id, customTheme, colorMode);
+        return theme ? theme : new ArkThemeImpl(customTheme, colorMode, baselineTheme);
+    }
+    static cloneCustomThemeWithExpand(customTheme) {
+        const theme = ArkThemeBase.copyCustomTheme(customTheme);
+        if (theme === null || theme === void 0 ? void 0 : theme.colors) {
+            ArkColorsImpl.expandByBrandColor(theme.colors);
+        }
+        return theme;
     }
     setDefaultTheme(customTheme) {
+        var _a;
+        (_a = this.defaultTheme) === null || _a === void 0 ? void 0 : _a.unbindFromScope(0);
         this.defaultTheme = ArkThemeScopeManager.SystemTheme;
-        this.defaultTheme = this.makeTheme(customTheme);
+        const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(customTheme);
+        this.defaultTheme = this.makeTheme(customTheme, ThemeColorMode.SYSTEM);
+        this.defaultTheme.bindToScope(0);
         ArkThemeNativeHelper.sendThemeToNative(this.defaultTheme, 0);
+        ArkThemeNativeHelper.setDefaultTheme(cloneTheme);
         this.notifyGlobalThemeChanged();
+    }
+    static getSystemColors() {
+        return ArkThemeScopeManager.SystemTheme.colors;
     }
     notifyGlobalThemeChanged() {
         this.listeners.forEach(listener => {
@@ -906,9 +1035,13 @@ class ArkThemeScopeManager {
             }
         });
     }
-    getWithThemeIdForElmtId(elmtId) {
-        var _a, _b;
-        return (_b = (_a = this.scopeForElmtId(elmtId)) === null || _a === void 0 ? void 0 : _a.getWithThemeId()) !== null && _b !== void 0 ? _b : 0;
+    handleThemeScopeChange(scope) {
+        var _a;
+        const currentThemeScopeId = (_a = scope === null || scope === void 0 ? void 0 : scope.getWithThemeId()) !== null && _a !== void 0 ? _a : 0;
+        if (currentThemeScopeId !== this.lastThemeScopeId) {
+            this.lastThemeScopeId = currentThemeScopeId;
+            WithTheme.setThemeScopeId(currentThemeScopeId);
+        }
     }
     static getInstance() {
         if (!ArkThemeScopeManager.instance) {
@@ -957,7 +1090,7 @@ ArkThemeWhiteList.whiteList = [
     'Progress',
     'QRCode',
     'Radio',
-    "Scroll",
+    'Scroll',
     'Search',
     'Select',
     'Slider',

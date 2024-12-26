@@ -32,7 +32,7 @@ public:
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
@@ -50,7 +50,7 @@ public:
     void SetSticky(V2::StickyStyle stickyStyle) override;
     void SetContentStartOffset(float startOffset) override;
     void SetContentEndOffset(float endOffset) override;
-    void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) override;
+    void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -88,7 +88,7 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
     static void SetSticky(FrameNode* frameNode, int32_t stickyStyle);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static int32_t GetListDirection(FrameNode* frameNode);
     static void SetListDirection(FrameNode* frameNode, int32_t axis);
     static float GetListFriction(FrameNode* frameNode);
@@ -112,7 +112,7 @@ public:
     static float GetListSpace(FrameNode* frameNode);
     static void SetListSpace(FrameNode* frameNode, const Dimension& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
-    static void SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign);
+    static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);

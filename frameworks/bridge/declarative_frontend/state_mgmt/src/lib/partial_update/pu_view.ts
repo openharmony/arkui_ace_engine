@@ -126,7 +126,7 @@ abstract class ViewPU extends PUV2ViewBase
   // @Local, @Param, @Trace, etc V2 decorator functions modify isViewV2 to return true
   // (decorator can modify functions in prototype)
   // FIXME
-  private get isViewV2(): boolean {
+  protected get isViewV2(): boolean {
     return false;
   }
 
@@ -187,7 +187,7 @@ abstract class ViewPU extends PUV2ViewBase
   aboutToRecycle(): void { }
 
   private onWillApplyThemeInternally(): void {
-    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__())
+    const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this)
     if (theme) {
         this.onWillApplyTheme(theme)
     }
@@ -303,8 +303,8 @@ abstract class ViewPU extends PUV2ViewBase
   public setActiveInternal(active: boolean): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
-      this.isActive_ = active;
-      if (this.isActive_) {
+      this.setActiveCount(active);
+      if (this.isViewActive()) {
         this.onActiveInternal();
       } else {
         this.onInactiveInternal();
@@ -320,7 +320,7 @@ abstract class ViewPU extends PUV2ViewBase
   }
 
   private onActiveInternal(): void {
-    if (!this.isActive_) {
+    if (!this.isViewActive()) {
       return;
     }
 
@@ -332,7 +332,7 @@ abstract class ViewPU extends PUV2ViewBase
 
 
   private onInactiveInternal(): void {
-    if (this.isActive_) {
+    if (this.isViewActive()) {
       return;
     }
 
@@ -1014,33 +1014,6 @@ abstract class ViewPU extends PUV2ViewBase
     }
     return retVaL;
   }
-
-  /**
-    * onDumpInspector is invoked by native side to create Inspector tree including state variables
-    * @returns dump info
-    */
-  protected onDumpInspector(): string {
-    let res: DumpInfo = new DumpInfo();
-    res.viewInfo = { componentName: this.constructor.name, id: this.id__() };
-    Object.getOwnPropertyNames(this)
-      .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
-      .forEach((varName) => {
-        const prop: any = Reflect.get(this, varName);
-        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
-          const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
-          res.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
-        }
-      });
-    let resInfo: string = '';
-    try {
-      resInfo = JSON.stringify(res);
-    } catch (error) {
-      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
-    }
-    return resInfo;
-  }
-
-
 
   /**
    * on first render create a new Instance of Repeat

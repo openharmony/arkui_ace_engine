@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textfield_ffi.h"
 
 #include "cj_lambda.h"
+
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;
@@ -37,7 +39,10 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(const char* value))
 {
     const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
-        (const std::u16string& value) -> void { lambda(UtfUtils::Str16ToStr8(value).c_str()); };
+        (const std::u16string& value) -> void {
+        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        lambda(valueStr.c_str());
+    };
     return result;
 }
 

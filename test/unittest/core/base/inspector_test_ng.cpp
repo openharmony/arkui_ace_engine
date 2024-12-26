@@ -37,12 +37,21 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "base/json/json_util.h"
+#include "core/components_ng/pattern/custom/custom_node.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 std::string key = "key";
+const std::string TEXT_NODE_TYPE = "Text";
+const std::string TEST_TEXT = "SomeText";
+const char INSPECTOR_TYPE[] = "$type";
+const char INSPECTOR_ID[] = "$ID";
+const char INSPECTOR_DEBUGLINE[] = "$debugLine";
+const char INSPECTOR_ATTRS[] = "$attrs";
+const char INSPECTOR_CHILDREN[] = "$children";
 }; // namespace
 
 class InspectorTestNg : public testing::Test {
@@ -487,7 +496,7 @@ HWTEST_F(InspectorTestNg, InspectorTestNg012, TestSize.Level1)
     ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(ONE);
     int32_t containerId = 1;
-    std::string result = Inspector::GetSimplifiedInspector(containerId);
+    std::string result = Inspector::GetSimplifiedInspector(containerId, { false }, true);
     EXPECT_NE(result, "");
     context->stageManager_ = nullptr;
 }
@@ -577,6 +586,120 @@ HWTEST_F(InspectorTestNg, InspectorTestNg016, TestSize.Level1)
     Inspector::GetInspectorTree(treesInfos);
     EXPECT_TRUE(!treesInfos.empty());
     context1->stageManager_ = nullptr;
+}
+
+/**
+ * @tc.name: InspectorTestNg017
+ * @tc.desc: Test the operation of GetFrameNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg017, TestSize.Level1)
+{
+    // tc.steps: step1. add frameNode to arkui tree with inspector id text1
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    std::string inspectorId = "text1";
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    context->rootNode_ = rootNode;
+    rootNode->AddChild(frameNode);
+    auto searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
+    EXPECT_EQ(frameNode, searchedNode);
+    
+    // tc.steps:    add offScreencreenNode to off screencreen node with inspector id text1
+    // tc.expected: expect the function GetFrameNodeByKey get the offScreencreenNode
+    auto offScreencreenNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    offScreencreenNode->UpdateInspectorId(inspectorId);
+    Inspector::AddOffscreenNode(offScreencreenNode);
+    searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
+    EXPECT_EQ(offScreencreenNode, searchedNode);
+    
+    // tc.steps:    execute GetFrameNodeByKey when skipoffscreenNodes set true
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    searchedNode = Inspector::GetFrameNodeByKey(inspectorId, false, true);
+    EXPECT_EQ(frameNode, searchedNode);
+    
+    // tc.steps:    execute GetFrameNodeByKey when remove offScreencreenNode
+    // tc.expected: expect the function GetFrameNodeByKey get the frameNode
+    Inspector::RemoveOffscreenNode(offScreencreenNode);
+    searchedNode = Inspector::GetFrameNodeByKey(inspectorId);
+    EXPECT_EQ(frameNode, searchedNode);
+}
+
+/**
+ * @tc.name: InspectorTestNg018
+ * @tc.desc: Test the operation of GetInspectorNodeByKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg018, TestSize.Level1)
+{
+    // tc.steps: step1. add frameNode to arkui tree with inspector id text1
+    // tc.expected: expect the function GetInspectorNodeByKey get the frameNode
+    std::string inspectorId = "text1";
+    int32_t textNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
+        textNodeId, AceType::MakeRefPtr<Pattern>());
+    frameNode->UpdateInspectorId(inspectorId);
+    auto context = PipelineContext::GetCurrentContext();
+    context->rootNode_ = rootNode;
+    rootNode->AddChild(frameNode);
+    std::string searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
+    auto searchedNode = JsonUtil::ParseJsonString(searchedNodeStr);
+    EXPECT_TRUE(searchedNode->IsValid());
+    
+    std::string nodeType = searchedNode->GetString(INSPECTOR_TYPE);
+    EXPECT_EQ(nodeType, TEXT_NODE_TYPE);
+    
+    int32_t nodeId = searchedNode->GetInt(INSPECTOR_ID);
+    EXPECT_EQ(textNodeId, nodeId);
+    
+    std::string debugLine = searchedNode->GetString(INSPECTOR_DEBUGLINE);
+    EXPECT_EQ(debugLine, "");
+    
+    auto attrJson = searchedNode->GetObject(INSPECTOR_ATTRS);
+    std::string accessibilityTextAttr = attrJson->GetString("accessibilityText");
+    EXPECT_EQ(accessibilityTextAttr, "");
+    
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    accessibilityProperty->SetAccessibilityText(TEST_TEXT);
+    searchedNodeStr = Inspector::GetInspectorNodeByKey(inspectorId);
+    searchedNode = JsonUtil::ParseJsonString(searchedNodeStr);
+    EXPECT_TRUE(searchedNode->IsValid());
+    attrJson = searchedNode->GetObject(INSPECTOR_ATTRS);
+    accessibilityTextAttr = attrJson->GetString("accessibilityText");
+    EXPECT_EQ(accessibilityTextAttr, TEST_TEXT);
+}
+
+/**
+ * @tc.name: InspectorTestNg020
+ * @tc.desc: Test the operation of GetInspector
+ * @tc.type: FUNC
+ */
+HWTEST_F(InspectorTestNg, InspectorTestNg020, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    RefPtr<FrameNode> stageNode = FrameNode::CreateFrameNode(
+        "stage", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+    const RefPtr<FrameNode> PAGE = FrameNode::CreateFrameNode(
+        "page", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    auto customNode = CustomNode::CreateCustomNode(1, "custom");
+    stageNode->AddChild(PAGE);
+    PAGE->AddChild(customNode);
+
+    // tc.steps:    execute GetInspector when param isLayoutInspector is false
+    // tc.expected: expect the function GetInspector result without customNode
+    std::string searchedNodesStr = Inspector::GetInspector();
+    auto searchedNodes = JsonUtil::ParseJsonString(searchedNodesStr);
+    EXPECT_TRUE(searchedNodes->IsValid());
+    auto attrJson = searchedNodes->GetObject(INSPECTOR_CHILDREN);
+    EXPECT_TRUE(attrJson->IsNull());
 }
 
 /**

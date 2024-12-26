@@ -35,6 +35,22 @@ constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t MAX_RENDER_GROUP_TEXT_NODE_COUNT = 50;
 constexpr float MAX_RENDER_GROUP_TEXT_NODE_HEIGHT = 150.0f;
 
+namespace {
+const char* TransitionTypeToString(NavigationSystemTransitionType type)
+{
+    switch (type) {
+        case NavigationSystemTransitionType::NONE:
+            return "NavigationSystemTransitionType.NONE";
+        case NavigationSystemTransitionType::TITLE:
+            return "NavigationSystemTransitionType.TITLE";
+        case NavigationSystemTransitionType::CONTENT:
+            return "NavigationSystemTransitionType.CONTENT";
+        default:
+            return "NavigationSystemTransitionType.DEFAULT";
+    }
+}
+}
+
 NavDestinationGroupNode::~NavDestinationGroupNode()
 {
     if (contentNode_) {
@@ -50,6 +66,7 @@ RefPtr<NavDestinationGroupNode> NavDestinationGroupNode::GetOrCreateGroupNode(
     CHECK_NULL_RETURN(!frameNode, AceType::DynamicCast<NavDestinationGroupNode>(frameNode));
     auto pattern = patternCreator ? patternCreator() : MakeRefPtr<Pattern>();
     auto navDestinationNode = AceType::MakeRefPtr<NavDestinationGroupNode>(tag, nodeId, pattern);
+    CHECK_NULL_RETURN(navDestinationNode, nullptr);
     navDestinationNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(navDestinationNode);
     return navDestinationNode;
@@ -190,6 +207,7 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
     json->PutExtAttr("mode", mode_ == NavDestinationMode::DIALOG
         ? "NavDestinationMode::DIALOG"
         : "NavDestinationMode::STANDARD", filter);
+    json->PutExtAttr("systemTransition", TransitionTypeToString(systemTransitionType_), filter);
 }
 
 void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
@@ -232,7 +250,7 @@ void NavDestinationGroupNode::InitSystemTransitionPush(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
+void NavDestinationGroupNode::EndSystemTransitionPush(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     auto frameSize = GetGeometryNode()->GetFrameSize();
@@ -260,7 +278,7 @@ void NavDestinationGroupNode::StartSystemTransitionPush(bool transitionIn)
     }
 }
 
-void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, const int32_t animationId)
+void NavDestinationGroupNode::FinishSystemTransitionPush(bool transitionIn, const int32_t animationId)
 {
     if (animationId != animationId_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
@@ -281,6 +299,7 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, co
     }
     GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
     auto navDestinationPattern = GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
     auto navigation = AceType::DynamicCast<NavigationGroupNode>(navDestinationPattern->GetNavigationNode());
     CHECK_NULL_VOID(navigation);
     bool isInvisible = IsNodeInvisible(navigation);
@@ -294,14 +313,14 @@ void NavDestinationGroupNode::SystemTransitionPushCallback(bool transitionIn, co
     }
 }
 
-void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
+void NavDestinationGroupNode::InitSystemTransitionPop(bool transitionIn)
 {
     auto frameSize = GetGeometryNode()->GetFrameSize();
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
     bool needContentAnimation = IsNeedContentTransition();
     bool needTitleAnimation = IsNeedTitleTransition();
-    if (isTransitionIn) {
+    if (transitionIn) {
         SetTransitionType(PageTransitionType::ENTER_POP);
         GetRenderContext()->RemoveClipWithRRect();
         if (needContentAnimation) {
@@ -326,7 +345,7 @@ void NavDestinationGroupNode::InitSystemTransitionPop(bool isTransitionIn)
     }
 }
 
-void NavDestinationGroupNode::StartSystemTransitionPop(bool transitionIn)
+void NavDestinationGroupNode::EndSystemTransitionPop(bool transitionIn)
 {
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     bool needContentAnimation = IsNeedContentTransition();
@@ -581,6 +600,10 @@ void NavDestinationGroupNode::ReleaseTextNodeList()
 
 void NavDestinationGroupNode::CleanContent()
 {
+    // cacheNode is cached for pip info, and is no need to clean when clean content node
+    if (IsCacheNode()) {
+        return;
+    }
     auto pattern = GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     auto shallowBuilder = pattern->GetShallowBuilder();
@@ -618,5 +641,20 @@ std::string NavDestinationGroupNode::ToDumpString()
     dumpString.append(navDestinationPattern->GetIsOnShow() ? "TRUE" : "FALSE");
     dumpString.append("\" }");
     return dumpString;
+}
+
+void NavDestinationGroupNode::FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode,
+    RefPtr<FrameNode>& naviagtionNode, bool transitionIn, const int32_t animationId)
+{
+    auto navigaiton = DynamicCast<NavigationGroupNode>(naviagtionNode);
+    CHECK_NULL_VOID(navigaiton);
+    if (NeedRemoveInPush()) {
+        auto preDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        CHECK_NULL_VOID(preDestination);
+        navigaiton->GetHideNodes().emplace_back(std::make_pair(preDestination, true));
+        return;
+    }
+    FinishSystemTransitionPush(transitionIn, animationId);
+    GetRenderContext()->SetOpacity(1.0f);
 }
 } // namespace OHOS::Ace::NG

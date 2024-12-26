@@ -79,16 +79,50 @@ void ResetParams(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavigatorModifier* GetNavigatorModifier()
 {
-    static const ArkUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
-        ResetActive, SetParams, ResetParams };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUINavigatorModifier modifier = {
+        .setTarget = SetTarget,
+        .resetTarget = ResetTarget,
+        .setType = SetType,
+        .resetType = ResetType,
+        .setActive = SetActive,
+        .resetActive = ResetActive,
+        .setParams = SetParams,
+        .resetParams = ResetParams,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUINavigatorModifier* GetCJUINavigatorModifier()
 {
-    static const CJUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
-        ResetActive, SetParams, ResetParams };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUINavigatorModifier modifier = {
+        .setTarget = SetTarget,
+        .resetTarget = ResetTarget,
+        .setType = SetType,
+        .resetType = ResetType,
+        .setActive = SetActive,
+        .resetActive = ResetActive,
+        .setParams = SetParams,
+        .resetParams = ResetParams,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

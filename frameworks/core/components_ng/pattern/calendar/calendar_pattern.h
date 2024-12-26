@@ -177,6 +177,7 @@ private:
     RefPtr<CalendarControllerNg> calendarControllerNg_;
     CalendarDay calendarDay_;
     PickerDate selectedDay_;
+    uint8_t curMonthIndex_ = 1;
 
     // Used to mark the jump action destination.
     // eg. 2023-1-1

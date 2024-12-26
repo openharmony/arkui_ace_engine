@@ -302,7 +302,7 @@ void CounterDecorator::HandleNonTextArea()
     auto cleanNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
     auto updateCountXWithArea = [&countX, isRTL](const std::vector<RefPtr<TextInputResponseArea>>& areas) {
         for (auto area : areas) {
-            if (area) {
+            if (!area) {
                 continue;
             }
             if (isRTL) {
@@ -414,7 +414,7 @@ void ErrorDecorator::UpdateErrorStyle()
     textLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
     textLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
     textLayoutProperty->UpdateMaxFontScale(theme->GetErrorTextMaxFontScale());
-    textLayoutProperty->UpdateTextAlign(TextAlign::START);
+    textLayoutProperty->UpdateTextAlign(errorTextStyle.GetTextAlign());
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateIsAnimationNeeded(false);

@@ -333,6 +333,14 @@ void PipelineBase::HyperlinkStartAbility(const std::string& address) const
     }
 }
 
+void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const
+{
+    CHECK_RUN_ON(UI);
+    if (startAbilityOnQueryHandler_) {
+        startAbilityOnQueryHandler_(queryWord);
+    }
+}
+
 void PipelineBase::NotifyStatusBarBgColor(const Color& color) const
 {
     CHECK_RUN_ON(UI);
@@ -877,11 +885,17 @@ void PipelineBase::FireAllUIExtensionEvents()
     if (!FireUIExtensionEventValid() || uiExtensionEvents_.empty()) {
         return;
     }
+    std::vector<uint32_t> eventIds;
     for (auto it = uiExtensionEvents_.begin(); it != uiExtensionEvents_.end();) {
-        uiExtensionEventCallback_(static_cast<uint32_t>(it->eventId));
+        eventIds.push_back(static_cast<uint32_t>(it->eventId));
         if (!it->repeat) {
             it = uiExtensionEvents_.erase(it);
+        } else {
+            ++it;
         }
+    }
+    for (auto id : eventIds) {
+        FireUIExtensionEventInner(id);
     }
 }
 
@@ -890,7 +904,13 @@ void PipelineBase::FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId 
     if (!FireUIExtensionEventValid()) {
         return;
     }
-    uiExtensionEventCallback_(static_cast<uint32_t>(eventId));
+    FireUIExtensionEventInner(static_cast<uint32_t>(eventId));
+}
+
+void PipelineBase::FireUIExtensionEventInner(uint32_t eventId)
+{
+    auto callback = uiExtensionEventCallback_;
+    callback(eventId);
 }
 
 void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, int64_t)>&& callback)
@@ -910,10 +930,17 @@ void PipelineBase::FireAccessibilityEvents()
     if (!accessibilityCallback_ || accessibilityEvents_.empty()) {
         return;
     }
-    for (auto it = accessibilityEvents_.begin(); it != accessibilityEvents_.end();) {
-        accessibilityCallback_(static_cast<uint32_t>(it->eventId), it->parameter);
-        it = accessibilityEvents_.erase(it);
+    decltype(accessibilityEvents_) events;
+    std::swap(accessibilityEvents_, events);
+    for (auto &event : events) {
+        FireAccessibilityEventInner(static_cast<uint32_t>(event.eventId), event.parameter);
     }
+}
+
+void PipelineBase::FireAccessibilityEventInner(uint32_t event, int64_t parameter)
+{
+    auto callback = accessibilityCallback_;
+    callback(event, parameter);
 }
 
 void PipelineBase::SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId)
@@ -928,45 +955,6 @@ void PipelineBase::SetJsFormVsyncCallback(AceVsyncCallback&& callback, int32_t s
     if (callback) {
         jsFormVsyncCallbacks_.try_emplace(subWindowId, std::move(callback));
     }
-}
-
-void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEventCallback&& callback)
-{
-    if (!callback || pointId < 0) {
-        return;
-    }
-
-    etsCardTouchEventCallback_[pointId] = std::move(callback);
-}
-
-void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point,
-    SerializedGesture& serializedGesture)
-{
-    if (point.id < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(point.id);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-    if (iter->second) {
-        iter->second(point, serializedGesture);
-    }
-}
-
-void PipelineBase::RemoveEtsCardTouchEventCallback(int32_t pointId)
-{
-    if (pointId < 0) {
-        return;
-    }
-
-    auto iter = etsCardTouchEventCallback_.find(pointId);
-    if (iter == etsCardTouchEventCallback_.end()) {
-        return;
-    }
-
-    etsCardTouchEventCallback_.erase(iter);
 }
 
 void PipelineBase::RemoveSubWindowVsyncCallback(int32_t subWindowId)
@@ -1012,7 +1000,6 @@ void PipelineBase::Destroy()
     window_->Destroy();
     touchPluginPipelineContext_.clear();
     virtualKeyBoardCallback_.clear();
-    etsCardTouchEventCallback_.clear();
     formLinkInfoMap_.clear();
     TAG_LOGI(AceLogTag::ACE_ANIMATION,
         "pipeline destroyed, has %{public}zu finish callbacks not executed, finish count is %{public}s",

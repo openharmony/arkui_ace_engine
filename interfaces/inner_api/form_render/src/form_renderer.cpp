@@ -396,7 +396,18 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
         return;
     }
 
-    formRendererDelegate_ = renderRemoteObj;
+    if (!formRendererDelegate_) {
+        formRendererDelegate_ = renderRemoteObj;
+    } else {
+        auto formRendererDelegate = renderRemoteObj;
+        bool checkFlag = true;
+        formRendererDelegate->OnCheckManagerDelegate(checkFlag);
+        if (checkFlag) {
+            formRendererDelegate_ = renderRemoteObj;
+        } else {
+            HILOG_ERROR("EventHandle - SetRenderDelegate error  checkFlag is false");
+        }
+    }
 
     if (renderDelegateDeathRecipient_ == nullptr) {
         renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient(
@@ -499,13 +510,13 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     uiContent_->Foreground();
 }
 
-void FormRenderer::GetRectRelativeToWindow(int32_t &top, int32_t &left) const
+void FormRenderer::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
-    formRendererDelegate_->OnGetRectRelativeToWindow(top, left);
+    formRendererDelegate_->OnGetRectRelativeToWindow(parentRectInfo);
 }
 
 void FormRenderer::RecycleForm(std::string& statusData)
