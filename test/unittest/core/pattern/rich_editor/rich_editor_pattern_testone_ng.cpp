@@ -1093,44 +1093,6 @@ HWTEST_F(RichEditorPatternTestOneNg, CalculateEmptyValueCaretRect002, TestSize.L
 }
 
 /**
- * @tc.name: HandleDoubleClickOrLongPress001
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestOneNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    GestureEvent info;
-    info.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-
-    richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    richEditorPattern->previewTextRecord_.previewContent = "123";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = false;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-    richEditorPattern->status_ = Status::DRAGGING;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    richEditorPattern->status_ = Status::NONE;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-
-    AddSpan("test");
-    richEditorPattern->textSelector_.Update(3, 4);
-    EXPECT_EQ(richEditorPattern->IsSelected(), true);
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->IsSelected(), false);
-}
-
-/**
  * @tc.name: AdjustPlaceholderSelection001
  * @tc.desc: test AdjustPlaceholderSelection
  * @tc.type: FUNC

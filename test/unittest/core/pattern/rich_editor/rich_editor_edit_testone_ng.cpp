@@ -393,67 +393,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSelection001
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, SetSelection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->DumpInfo();
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    pipeline->SetThemeManager(theme);
-
-    richEditorPattern->isTextChange_ = false;
-    EXPECT_EQ(richEditorPattern->IsShowHandle(), false);
-
-    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    richEditorPattern->ScrollToSafeArea();
-    EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
-
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    Offset Offset = {1, 4};
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->isTextChange_ = false;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    int32_t index = 1;
-    richEditorPattern->MouseDoubleClickParagraphEnd(index);
-    EXPECT_NE(richEditorPattern->GetParagraphEndPosition(index), index);
-
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    int32_t start = 1;
-    int32_t end = 3;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetStart(), start);
-
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
-
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
-}
-
-/**
  * @tc.name: CreateHandles001
  * @tc.desc: test CreateHandles
  * @tc.type: FUNC

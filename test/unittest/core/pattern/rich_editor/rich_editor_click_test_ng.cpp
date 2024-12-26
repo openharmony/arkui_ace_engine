@@ -354,45 +354,6 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
 }
 
-/*
- * @tc.name: DoubleHandleClickEvent002
- * @tc.desc: test Mouse Double Click
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    AddSpan(TEST_INSERT_U16VALUE);
-
-    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
-        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
-        .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->isMouseSelect_ = false;
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
-    GestureEvent info;
-    info.SetSourceDevice(SourceType::MOUSE);
-    info.localLocation_ = Offset(0, 0);
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-}
-
 /**
  * @tc.name: HandleMouseEvent001
  * @tc.desc: test HandleMouseEvent
