@@ -178,8 +178,7 @@ void OnScrollBarUpdateImpl(Ark_NativePointer node,
         auto arkIndex = ArkValue<Ark_Number>(index);
         auto arkOffset = ArkValue<Ark_Number>(offset);
         auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
-            arkIndex, arkOffset
-        );
+            arkIndex, arkOffset);
         return ResType(Convert<float>(arkResult.totalOffset), Convert<float>(arkResult.totalLength));
     };
     GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
@@ -445,7 +444,9 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
         auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
             Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
-        return { .offset = Converter::Convert<Dimension>(arkResult.offsetRemain) };
+        return {
+            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
+        };
     };
     GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
@@ -501,5 +502,4 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
     };
     return &ArkUIGridModifierImpl;
 }
-
 }

@@ -1503,6 +1503,26 @@ void AssignCast(std::optional<GestureJudgeResult> &dst, const Ark_GestureJudgeRe
     }
 }
 
+void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
+{
+    dst.id = ArkValue<Ark_Number>(src.fingerId_);
+    dst.globalX = ArkValue<Ark_Number>(src.globalLocation_.GetX());
+    dst.globalY = ArkValue<Ark_Number>(src.globalLocation_.GetY());
+    dst.localX = ArkValue<Ark_Number>(src.localLocation_.GetX());
+    dst.localY = ArkValue<Ark_Number>(src.localLocation_.GetY());
+    dst.displayX = ArkValue<Ark_Number>(src.screenLocation_.GetX());
+    dst.displayY = ArkValue<Ark_Number>(src.screenLocation_.GetY());
+}
+
+template<>
+template<>
+ArkArrayHolder<Array_FingerInfo>::ArkArrayHolder(const std::list<FingerInfo>& data)
+{
+    std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const FingerInfo& src) {
+        return OHOS::Ace::NG::Converter::ArkValue<Ark_FingerInfo>(src);
+    });
+}
+
 void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
 {
     dst.tiltX = ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
@@ -1518,16 +1538,6 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     dst.pressure = ArkValue<Ark_Number>(src.GetForce());
     ArkArrayHolder<Array_FingerInfo> holder(src.GetFingerList());
     dst.fingerList = holder.ArkValue();
-}
-void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src)
-{
-   dst.id = ArkValue<Ark_Number>(src.fingerId_);
-   dst.globalX = ArkValue<Ark_Number>(src.globalLocation_.GetX());
-   dst.globalY = ArkValue<Ark_Number>(src.globalLocation_.GetY());
-   dst.localX = ArkValue<Ark_Number>(src.localLocation_.GetX());
-   dst.localY = ArkValue<Ark_Number>(src.localLocation_.GetY());
-   dst.displayX = ArkValue<Ark_Number>(src.screenLocation_.GetX());
-   dst.displayY = ArkValue<Ark_Number>(src.screenLocation_.GetY());
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -1736,7 +1746,7 @@ void OnChildTouchTestImpl(Ark_NativePointer node,
         const std::vector<NG::TouchTestInfo>& touchInfo
     ) -> NG::TouchResult {
         std::vector<NG::TouchTestInfo> touchInfoUpd = touchInfo;
-        for(auto &item: touchInfoUpd) {
+        for (auto &item: touchInfoUpd) {
             item.windowPoint.SetX(PipelineBase::Px2VpWithCurrentDensity(item.windowPoint.GetX()));
             item.windowPoint.SetY(PipelineBase::Px2VpWithCurrentDensity(item.windowPoint.GetY()));
             item.currentCmpPoint.SetX(PipelineBase::Px2VpWithCurrentDensity(item.currentCmpPoint.GetX()));
@@ -2534,7 +2544,8 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
         ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
     }
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value), node = weakNode](KeyEventInfo& info) -> bool {
+    auto onKeyPreImeEvent = [arkCallback = CallbackHelper(*value, frameNode), node = weakNode](KeyEventInfo& info)
+        -> bool {
         PipelineContext::SetCallBackNode(node);
         Ark_KeyEvent event;
         event.type = Converter::ArkValue<Ark_KeyType>(info.GetKeyType());
@@ -2545,7 +2556,7 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
         event.metaKey = Converter::ArkValue<Ark_Number>(info.GetMetaKey());
         event.unicode = Converter::ArkValue<Opt_Number>(info.GetUnicode());
         event.timestamp = Converter::ArkValue<Ark_Number>(
-        static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+            static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
         auto stopPropagationHandler = [&info]() {
             info.SetStopPropagation(true);
         };
@@ -2553,11 +2564,10 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
             std::move(stopPropagationHandler));
         event.stopPropagation = stopPropagation;
         LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
-        Callback_Boolean_Void continuation;
-        arkCallback.Invoke(event, continuation);
-        stopPropagation.resource.release(stopPropagation.resource.resourceId);
-        LOGE("CommonMethodModifier::OnKeyPreImeImpl return value can be incorrect");
-        return false;
+
+        auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
+        CallbackKeeper::Release(stopPropagation.resource.resourceId);
+        return Converter::Convert<bool>(arkResult);
     };
     ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
 }
@@ -2984,44 +2994,32 @@ void OnAreaChangeImpl(Ark_NativePointer node,
     auto onEvent = [frameNode, node = weakNode](
         const Rect& oldRect, const Offset& oldOrigin, const Rect& rect, const Offset& origin) {
         PipelineContext::SetCallBackNode(node);
+
         auto previousOffset = oldRect.GetOffset();
-
         Ark_Area previous;
-        previous.width.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.width.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()));
-        previous.height.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.height.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()));
-        previous.position.x.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.position.x.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            previousOffset.GetX()));
-        previous.position.y.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.position.y.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            previousOffset.GetY()));
-        previous.globalPosition.x.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.globalPosition.x.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            previousOffset.GetX() + oldOrigin.GetX()));
-        previous.globalPosition.y.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        previous.globalPosition.y.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            previousOffset.GetY() + oldOrigin.GetY()));
+        previous.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Width()));
+        previous.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(oldRect.Height()));
+        previous.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX()));
+        previous.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY()));
+        previous.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetX() + oldOrigin.GetX()));
+        previous.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(previousOffset.GetY() + oldOrigin.GetY()));
 
-        Ark_Area current;
         auto currentOffset = rect.GetOffset();
-        current.width.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.width.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
-        current.height.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.height.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
-        current.position.x.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.position.x.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            currentOffset.GetX()));
-        current.position.y.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.position.y.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            currentOffset.GetY()));
-        current.globalPosition.x.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.globalPosition.x.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            currentOffset.GetX() + origin.GetX()));
-        current.globalPosition.y.value.unit = static_cast<int32_t>(DimensionUnit::VP);
-        current.globalPosition.y.value.value = static_cast<float>(PipelineBase::Px2VpWithCurrentDensity(
-            currentOffset.GetY() + origin.GetY()));
+        Ark_Area current;
+        current.width = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Width()));
+        current.height = Converter::ArkValue<Ark_Length>(PipelineBase::Px2VpWithCurrentDensity(rect.Height()));
+        current.position.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX()));
+        current.position.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY()));
+        current.globalPosition.x = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetX() + origin.GetX()));
+        current.globalPosition.y = Converter::ArkValue<Opt_Length>(
+            PipelineBase::Px2VpWithCurrentDensity(currentOffset.GetY() + origin.GetY()));
 
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onAreaChange(
             frameNode->GetId(), previous, current);
@@ -3881,14 +3879,12 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkValCurrent = Converter::ArkValue<Ark_GestureRecognizer>(current);
         Converter::ArkArrayHolder<Array_GestureRecognizer> holderOthers(others);
         auto arkValOthers = holderOthers.ArkValue();
-        auto resultOpt = callback.InvokeWithOptConvertResult
-            <GestureJudgeResult, Ark_GestureJudgeResult, Callback_GestureJudgeResult_Void>(
-                arkGestEvent, arkValCurrent, arkValOthers
-            );
+        auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
+            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
         return resultOpt.value_or(defVal);
     };
     ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
-        std::move(onGestureRecognizerJudgefunc), Converter::Convert<bool>(exposeInnerGesture));    
+        std::move(onGestureRecognizerJudgefunc), Converter::Convert<bool>(exposeInnerGesture));
 }
 
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,

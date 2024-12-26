@@ -238,4 +238,20 @@ void AssignArkValue(Ark_DatePickerResult& dst, const std::string& src)
         .day = Converter::ArkValue<Opt_Number>(date.GetDay())
     };
 }
+
+void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
+{
+    Ark_Area area;
+    area.width = Converter::ArkValue<Ark_Length>(src.area.GetWidth());
+    area.height = Converter::ArkValue<Ark_Length>(src.area.GetHeight());
+    Ark_Position position;
+    position.x = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetX());
+    position.y = Converter::ArkValue<Opt_Length>(src.area.GetOffset().GetY());
+    area.position = Converter::ArkValue<Ark_Position>(position);
+    Ark_Position globPosition;
+    globPosition.x = Converter::ArkValue<Opt_Length>(src.origin.GetX());
+    globPosition.y = Converter::ArkValue<Opt_Length>(src.origin.GetY());
+    area.globalPosition = Converter::ArkValue<Ark_Position>(globPosition);
+    dst.area = area;
+}
 } // namespace OHOS::Ace::NG::Converter

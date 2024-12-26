@@ -523,7 +523,9 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
         auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
         auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
             Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
-        return { .offset = Converter::Convert<Dimension>(arkResult.offsetRemain) };
+        return {
+            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
+        };
     };
     ListModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
@@ -615,5 +617,4 @@ const GENERATED_ArkUIListModifier* GetListModifier()
     };
     return &ArkUIListModifierImpl;
 }
-
 }

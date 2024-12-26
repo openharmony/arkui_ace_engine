@@ -155,8 +155,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
             auto arkScrollSource = Converter::ArkValue<Ark_ScrollSource>(scrollSource);
             auto resultOpt =
                 callback.InvokeWithOptConvertResult<ScrollFrameResult, Ark_OffsetResult, Callback_OffsetResult_Void>(
-                    arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource
-                );
+                    arkScrollOffset, arkScrollOffset, arkScrollState, arkScrollSource);
             return resultOpt.value_or(ScrollFrameResult());
         };
         ScrollableModelNG::SetOnWillScroll(frameNode, std::move(modelCallback));

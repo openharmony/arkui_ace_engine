@@ -543,16 +543,7 @@ namespace OHOS::Ace::NG::Converter {
             });
         }
         template<typename P>
-        explicit ArkArrayHolder(const std::list<P>& data)
-        {
-            std::transform(data.begin(), data.end(), std::back_inserter(data_), [](const P& src) {
-                if constexpr (std::is_void_v<U>) {
-                    return OHOS::Ace::NG::Converter::ArkValue<Val>(src);
-                } else {
-                    return OHOS::Ace::NG::Converter::ArkUnion<Val, U>(src);
-                }
-            });
-        }
+        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {
