@@ -27,10 +27,6 @@ RefPtr<CustomNode> CustomNode::CreateCustomNode(int32_t nodeId, const std::strin
     return node;
 }
 
-CustomNode::CustomNode(int32_t nodeId, const std::string& viewKey)
-    : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey)
-{}
-
 void CustomNode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     Render();
@@ -245,7 +241,7 @@ void CustomNode::DumpInfo()
     TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI DumpInfo %{public}s", ret.c_str());
     if (ret != "") {
         auto json = JsonUtil::ParseJsonString(ret);
-        if (json != nullptr || !json->IsValid()) {
+        if (json == nullptr || !json->IsValid()) {
             TAG_LOGE(AceLogTag::ACE_STATE_MGMT, "ParseJsonString failed");
             return;
         }
@@ -255,7 +251,7 @@ void CustomNode::DumpInfo()
         }
         auto decoratorInfo = json->GetValue("observedPropertiesInfo");
         if (decoratorInfo != nullptr) {
-            DumpComponentInfo(decoratorInfo);
+            DumpDecoratorInfo(decoratorInfo);
         }
     }
 }

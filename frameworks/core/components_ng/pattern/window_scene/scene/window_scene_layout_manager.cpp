@@ -283,7 +283,7 @@ bool WindowSceneLayoutManager::IsRecentContainerState(const RefPtr<FrameNode>& n
 void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
-    if (node->GetTag() != "windowScene") {
+    if (node->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
         return;
     }
     auto windowScene = node->GetPattern<WindowScene>();

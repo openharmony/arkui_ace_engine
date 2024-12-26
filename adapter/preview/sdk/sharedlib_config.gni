@@ -350,7 +350,7 @@ napi_modules = [
     prefix = "arkui/advanced"
     shard_libs = [
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/chip/interfaces:chip"
+        label = "//foundation/arkui/ace_engine/advanced_ui_component:chip"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "chip" ]

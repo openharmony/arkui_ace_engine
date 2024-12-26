@@ -40,6 +40,11 @@ struct ModalUIExtensionConfig {
     bool prohibitedRemoveByNavigation = true;
 };
 
+struct ModalUIExtensionAllowedUpdateConfig {
+    bool prohibitedRemoveByRouter = false;
+    bool prohibitedRemoveByNavigation = true;
+};
+
 struct ModalUIExtensionCallbacks {
     std::function<void(int32_t)> onRelease;
     std::function<void(int32_t, const AAFwk::Want&)> onResult;

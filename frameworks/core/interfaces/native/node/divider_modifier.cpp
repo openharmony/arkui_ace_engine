@@ -93,15 +93,49 @@ void ResetDividerVertical(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDividerModifier* GetDividerModifier()
 {
-    static const ArkUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
-        ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIDividerModifier modifier = {
+        .setDividerStrokeWidth = SetDividerStrokeWidth,
+        .resetDividerStrokeWidth = ResetDividerStrokeWidth,
+        .setDividerLineCap = SetDividerLineCap,
+        .resetDividerLineCap = ResetDividerLineCap,
+        .setDividerColor = SetDividerColor,
+        .resetDividerColor = ResetDividerColor,
+        .setDividerVertical = SetDividerVertical,
+        .resetDividerVertical = ResetDividerVertical,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIDividerModifier* GetCJUIDividerModifier()
 {
-    static const CJUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
-        ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIDividerModifier modifier = {
+        .setDividerStrokeWidth = SetDividerStrokeWidth,
+        .resetDividerStrokeWidth = ResetDividerStrokeWidth,
+        .setDividerLineCap = SetDividerLineCap,
+        .resetDividerLineCap = ResetDividerLineCap,
+        .setDividerColor = SetDividerColor,
+        .resetDividerColor = ResetDividerColor,
+        .setDividerVertical = SetDividerVertical,
+        .resetDividerVertical = ResetDividerVertical,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

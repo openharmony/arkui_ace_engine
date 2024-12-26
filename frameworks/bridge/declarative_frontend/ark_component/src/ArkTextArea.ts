@@ -1175,6 +1175,23 @@ class TextAreaEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextAreaEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
+  constructor(value: EllipsisMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaEllipsisMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetEllipsisMode(node);
+    } else {
+      getUINativeModule().text.setEllipsisMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextAreaAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -1372,6 +1389,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   enterKeyType(value: EnterKeyType): TextAreaAttribute {
     modifierWithKey(this._modifiersWithKeys, TextAreaEnterKeyTypeModifier.identity,
       TextAreaEnterKeyTypeModifier, value);
+    return this;
+  }
+  ellipsisMode(value: EllipsisMode): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaEllipsisModeModifier.identity, TextAreaEllipsisModeModifier, value);
     return this;
   }
   padding(value: Padding | Length): this {

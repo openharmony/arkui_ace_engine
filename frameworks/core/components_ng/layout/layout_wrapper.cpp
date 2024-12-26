@@ -25,13 +25,6 @@ bool InRange(float number, float boundaryStart, float boundaryEnd)
     return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
 }
 
-bool IsSyntaxNode(const std::string& tag)
-{
-    return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
-           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG ||
-           tag == V2::JS_NODE_SLOT_ETS_TAG || tag == V2::JS_REPEAT_ETS_TAG || tag == V2::JS_VIEW_COMPONENT_TAG;
-}
-
 bool CheckPaddingBorderGap(ExpandEdges& incomingExpand, const PaddingPropertyF& innerSpace)
 {
     if (incomingExpand.left.has_value() && !NearZero(innerSpace.left.value_or(0.0f))) {
@@ -516,7 +509,7 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, b
 {
     auto child = DynamicCast<FrameNode>(childUI);
     if (!child) {
-        if (!IsSyntaxNode(childUI->GetTag())) {
+        if (!childUI->IsSyntaxNode()) {
             return;
         }
         for (const auto& syntaxChild : childUI->GetChildren()) {

@@ -14,8 +14,6 @@
 import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
-import("//foundation/arkui/ace_engine/adapter/ohos/build/config.gni")
-import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
 import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
 
 es2abc_gen_abc("gen_chip_abc") {
@@ -60,31 +58,65 @@ gen_obj("chip_v14_abc_preview") {
   snapshot_dep = [ ":gen_chip_v14_abc" ]
 }
 
-ohos_shared_library("chip") {
-  configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+template("chip_static") {
+  forward_variables_from(invoker, "*")
 
-  sources = [ "chip.cpp" ]
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
-  deps = [ libace_target ]
+    sources = [ "chip.cpp" ]
+    deps =
+        [ "$ace_root/interfaces/napi/kits/utils:napi_utils_static_${platform}" ]
+    external_deps = []
 
-  if (use_mingw_win || use_mac || use_linux) {
-    deps += [
-      ":gen_obj_src_chip_abc_preview",
-      ":gen_obj_src_chip_v14_abc_preview",
-    ]
-  } else {
-    deps += [
-      ":chip_abc",
-      ":chip_v14_abc",
-    ]
+    if (platform != "" && is_arkui_x) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    } else {
+      external_deps += [ "napi:ace_napi" ]
+    }
+
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    if (use_mingw_win || use_mac || use_linux) {
+      deps += [
+        ":gen_obj_src_chip_abc_preview",
+        ":gen_obj_src_chip_v14_abc_preview",
+      ]
+    } else {
+      deps += [
+        ":chip_abc",
+        ":chip_v14_abc",
+      ]
+    }
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
   }
+}
 
-  external_deps = [
-    "hilog:libhilog",
-    "napi:ace_napi",
-  ]
+foreach(item, ace_platforms) {
+  chip_static("chip_static_" + item.name) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    platform = item.name
 
-  relative_install_dir = "module/arkui/advanced"
-  subsystem_name = ace_engine_subsystem
-  part_name = ace_engine_part
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+  }
 }

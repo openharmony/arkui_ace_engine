@@ -230,7 +230,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_checkbox_bridge.cpp",
       "nativeModule/arkts_native_checkboxgroup_bridge.cpp",
       "nativeModule/arkts_native_column_bridge.cpp",
-      "nativeModule/arkts_native_column_split_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
       "nativeModule/arkts_native_common_shape_bridge.cpp",
       "nativeModule/arkts_native_container_span_bridge.cpp",
@@ -239,7 +238,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_date_picker_bridge.cpp",
       "nativeModule/arkts_native_divider_bridge.cpp",
       "nativeModule/arkts_native_flex_bridge.cpp",
-      "nativeModule/arkts_native_folder_stack_bridge.cpp",
       "nativeModule/arkts_native_frame_node_bridge.cpp",
       "nativeModule/arkts_native_gauge_bridge.cpp",
       "nativeModule/arkts_native_grid_bridge.cpp",
@@ -251,6 +249,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_image_bridge.cpp",
       "nativeModule/arkts_native_image_span_bridge.cpp",
       "nativeModule/arkts_native_line_bridge.cpp",
+      "nativeModule/arkts_native_linear_indicator.cpp",
       "nativeModule/arkts_native_list_bridge.cpp",
       "nativeModule/arkts_native_list_item_bridge.cpp",
       "nativeModule/arkts_native_list_item_group_bridge.cpp",
@@ -282,7 +281,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_resource_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
-      "nativeModule/arkts_native_row_split_bridge.cpp",
       "nativeModule/arkts_native_scroll_bridge.cpp",
       "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
@@ -305,6 +303,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_text_input_bridge.cpp",
       "nativeModule/arkts_native_text_timer_bridge.cpp",
       "nativeModule/arkts_native_textpicker_bridge.cpp",
+      "nativeModule/arkts_native_theme_bridge.cpp",
       "nativeModule/arkts_native_timepicker_bridge.cpp",
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_utils_bridge.cpp",
@@ -313,6 +312,14 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_utils.cpp",
       "nativeModule/ui_context_helper.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "nativeModule/arkts_native_column_split_bridge.cpp",
+        "nativeModule/arkts_native_folder_stack_bridge.cpp",
+        "nativeModule/arkts_native_row_split_bridge.cpp",
+      ]
+    }
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
