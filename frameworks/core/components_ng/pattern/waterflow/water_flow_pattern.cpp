@@ -189,7 +189,6 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     paint->SetContentModifier(contentModifier_);
 
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
 
     auto scrollEffect = GetScrollEdgeEffect();

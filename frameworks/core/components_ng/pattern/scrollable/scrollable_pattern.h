@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -995,6 +996,7 @@ private:
     void SetUiDvsyncSwitch(bool on);
     void SetNestedScrolling(bool nestedScrolling);
     void InitRatio();
+    void SetOnHiddenChangeForParent();
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;

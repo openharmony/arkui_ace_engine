@@ -77,7 +77,6 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
