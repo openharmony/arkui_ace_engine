@@ -15,52 +15,9 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
-
-namespace OHOS::Ace::NG {
-using MenuItemGroupType = std::variant<std::optional<std::string>, void*>;
-}
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-MenuItemGroupType Convert(const Ark_ResourceStr& src)
-{
-    return Converter::OptConvert<std::string>(src);
-}
-
-template<>
-MenuItemGroupType Convert(const Ark_Resource& src)
-{
-    return Converter::OptConvert<std::string>(src);
-}
-
-template<>
-MenuItemGroupType Convert(const Ark_String& src)
-{
-    return Converter::OptConvert<std::string>(src);
-}
-
-template<>
-MenuItemGroupType Convert(const CustomNodeBuilder& src)
-{
-    return nullptr;
-}
-
-struct MenuItemGroupOptions {
-    std::optional<MenuItemGroupType> header;
-    std::optional<MenuItemGroupType> footer;
-};
-
-template<>
-MenuItemGroupOptions Convert(const Ark_MenuItemGroupOptions& src)
-{
-    return {
-        .header = Converter::OptConvert<MenuItemGroupType>(src.header),
-        .footer = Converter::OptConvert<MenuItemGroupType>(src.footer)
-    };
-}
-}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MenuItemGroupModifier {
@@ -79,20 +36,34 @@ void SetMenuItemGroupOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-
-    auto options = value ? Converter::OptConvert<Converter::MenuItemGroupOptions>(*value) : std::nullopt;
-    if (options.has_value()) {
-        if (auto headerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().header))); headerPtr) {
-            MenuItemGroupView::SetHeader(frameNode, *headerPtr);
-        }
-        if (auto footerPtr = std::get_if<std::optional<std::string>>(&(*(options.value().footer))); footerPtr) {
-            MenuItemGroupView::SetFooter(frameNode, *footerPtr);
-        }
-    } else {
-        MenuItemGroupView::SetHeader(frameNode, std::nullopt);
-        MenuItemGroupView::SetHeader(frameNode, std::nullopt);
-    }
-    LOGE("MenuItemGroupModifier::SetMenuItemGroupOptionsImpl isn't implemented, Ark_CustomBuilder isn't supported");
+    auto arkOptions = Converter::OptConvert<Ark_MenuItemGroupOptions>(*value);
+    CHECK_NULL_VOID(arkOptions);
+    Converter::VisitUnion(arkOptions.value().header,
+        [frameNode, node](const Ark_ResourceStr& value) {
+            auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupView::SetHeader(frameNode, valueString);
+        },
+        [frameNode, node](const CustomNodeBuilder& value) {
+            auto builder = [callback = CallbackHelper(value, frameNode), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            MenuItemGroupView::SetHeader(frameNode, std::move(builder));
+        },
+        []() {}
+    );
+    Converter::VisitUnion(arkOptions.value().footer,
+        [frameNode, node](const Ark_ResourceStr& value) {
+            auto valueString = Converter::OptConvert<std::string>(value);
+            MenuItemGroupView::SetFooter(frameNode, valueString);
+        },
+        [frameNode, node](const CustomNodeBuilder& value) {
+            auto builder = [callback = CallbackHelper(value, frameNode), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            MenuItemGroupView::SetFooter(frameNode, std::move(builder));
+        },
+        []() {}
+    );
 }
 } // MenuItemGroupInterfaceModifier
 const GENERATED_ArkUIMenuItemGroupModifier* GetMenuItemGroupModifier()

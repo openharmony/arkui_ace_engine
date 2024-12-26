@@ -34,6 +34,9 @@ public:
     static void SetFooter(const std::string& footerStr);
     static void SetFooter(FrameNode* frameNode, const std::optional<std::string>& footerStr);
     static void SetHeader(FrameNode* frameNode, const std::optional<std::string>& headerStr);
+    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_GROUP_MENU_ITEM_GROUP_VIEW_H

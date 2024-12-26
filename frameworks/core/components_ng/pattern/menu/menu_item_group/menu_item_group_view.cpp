@@ -149,4 +149,31 @@ void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std:
     pattern->AddFooterContent(content);
     pattern->AddFooter(row);
 }
+
+void MenuItemGroupView::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    UpdateRowPadding(row);
+    RefPtr<UINode> unitNode = builder();
+    unitNode->MountToParent(row);
+    pattern->AddHeader(row);
+}
+
+void MenuItemGroupView::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    UpdateRowPadding(row);
+    RefPtr<UINode> unitNode = builder();
+    unitNode->MountToParent(row);
+    pattern->AddFooter(row);
+}
+
 } // namespace OHOS::Ace::NG

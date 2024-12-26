@@ -86,7 +86,7 @@ public:
     static void SetCustomKeyboard(FrameNode* frameNode, std::function<void()>&& func,
         const std::optional<bool>& supportAvoidance);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& editorType, TextResponseType& type,
-        std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+        std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
 
     static void SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick);

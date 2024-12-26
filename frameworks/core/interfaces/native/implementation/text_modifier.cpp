@@ -14,7 +14,9 @@
  */
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -64,6 +66,27 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
     }
 }
 
+template<>
+void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
+{
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+{
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
+    }
+}
 template<>
 TextOptions Convert(const Ark_TextOptions& src)
 {
@@ -559,9 +582,42 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(spanType);
-    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
-    //TextModelNG::SetBindSelectionMenu(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
+    auto aceResponseType = Converter::OptConvert<TextResponseType>(responseType);
+    auto arkMenuOptions = Converter::OptConvert<Ark_SelectionMenuOptions>(*options);
+    SelectMenuParam menuParam;
+    menuParam.onAppear = [](int32_t start, int32_t end) {};
+    menuParam.onDisappear = []() {};
+    if (arkMenuOptions) {
+        auto appearCb = Converter::OptConvert<MenuOnAppearCallback>(arkMenuOptions->onAppear);
+        auto disappearCb = Converter::OptConvert<Callback_Void>(arkMenuOptions->onDisappear);
+
+        CHECK_NULL_VOID(appearCb);
+        auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
+        menuParam.onAppear =
+            [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
+            if (appearCbPtr) {
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+            }
+        };
+
+        CHECK_NULL_VOID(disappearCb);
+        auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
+        menuParam.onDisappear =
+            [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
+            if (disappearCbPtr) {
+                arkCallback.Invoke();
+            }
+        };
+    }
+    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    auto span = aceSpanType.value_or(TextSpanType::NONE);
+    auto response = aceResponseType.value_or(TextResponseType::NONE);
+    TextModelNG::BindSelectionMenu(frameNode, span, response, std::move(builder), menuParam);
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()
