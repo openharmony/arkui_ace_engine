@@ -1516,6 +1516,8 @@ HWTEST_F(MenuTestNg, MenuViewTestNg003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+    RefPtr<SelectTheme> selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
 
     auto gestureHub = customNode->GetOrCreateGestureEventHub();
     menuTheme->doubleBorderEnable_ = 1;
