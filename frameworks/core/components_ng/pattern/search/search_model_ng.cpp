@@ -1519,6 +1519,18 @@ void SearchModelNG::SetLineHeight(const Dimension& value)
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void SearchModelNG::SetHalfLeading(bool value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateHalfLeading(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
 void SearchModelNG::SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1561,6 +1573,17 @@ void SearchModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdateLineHeight(value);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SearchModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    textFieldLayoutProperty->UpdateHalfLeading(value);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

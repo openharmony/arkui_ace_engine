@@ -129,6 +129,7 @@ public:
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetHalfLeading(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
