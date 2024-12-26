@@ -601,4 +601,124 @@ void GridModelNG::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& opti
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
 }
+
+void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+}
+
+void GridModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachStart(std::move(onReachStart));
+}
+
+void GridModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnReachEnd(std::move(onReachEnd));
+}
+
+void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(onScrollStart));
+}
+
+void GridModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
+{
+    CHECK_NULL_VOID(frameNode);
+    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(onScrollStop));
+}
+
+void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollBarUpdate(std::move(value));
+}
+
+void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onDragStart = [func = std::move(value)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<UINode> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        {
+            func(dragInfo, index);
+        }
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    eventHub->SetOnItemDragStart(std::move(onDragStart));
+
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    eventHub->InitItemDragEvent(gestureEventHub);
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragEnter(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragMove(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragLeave(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDrop(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
 } // namespace OHOS::Ace::NG

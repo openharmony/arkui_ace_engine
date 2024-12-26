@@ -2874,6 +2874,30 @@ struct ArkUIGridModifier {
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);
+    void (*setOnGridScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridScrollFrameBegin)(ArkUINodeHandle node);
+    void (*setOnGridReachStartCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridReachStart)(ArkUINodeHandle node);
+    void (*setOnGridReachEndCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridReachEnd)(ArkUINodeHandle node);
+    void (*setOnGridScrollStartCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridScrollStart)(ArkUINodeHandle node);
+    void (*setOnGridScrollStopCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridScrollStop)(ArkUINodeHandle node);
+    void (*setOnGridScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridScrollIndex)(ArkUINodeHandle node);
+    void (*setOnGridScrollBarUpdateCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridScrollBarUpdate)(ArkUINodeHandle node);
+    void (*setOnGridItemDragStart)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridItemDragStart)(ArkUINodeHandle node);
+    void (*setOnGridItemDragEnter)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridItemDragEnter)(ArkUINodeHandle node);
+    void (*setOnGridItemDragMove)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridItemDragMove)(ArkUINodeHandle node);
+    void (*setOnGridItemDragLeave)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridItemDragLeave)(ArkUINodeHandle node);
+    void (*setOnGridItemDrop)(ArkUINodeHandle node, void* callback);
+    void (*resetOnGridItemDrop)(ArkUINodeHandle node);
 };
 
 struct ArkUIGridItemModifier {
@@ -2908,6 +2932,10 @@ struct ArkUIScrollableModifier {
     void (*resetOnReachStartCallBack)(ArkUINodeHandle node);
     void (*setOnReachEndCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnReachEndCallBack)(ArkUINodeHandle node);
+    void (*setOnWillScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWillScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnDidScrollCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {

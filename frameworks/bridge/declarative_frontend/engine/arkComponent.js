@@ -6084,10 +6084,12 @@ class ArkGridComponent extends ArkScrollable {
     return this;
   }
   onScrollBarUpdate(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollBarUpdateModifier.identity, GridOnScrollBarUpdateModifier, event);
+    return this;
   }
   onScrollIndex(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollIndexModifier.identity, GridOnScrollIndexModifier, event);
+    return this;
   }
   cachedCount(count, show) {
     let opt = new ArkScrollableCacheOptions(count, show ? show : false);
@@ -6123,19 +6125,24 @@ class ArkGridComponent extends ArkScrollable {
     return this;
   }
   onItemDragStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragStartModifier.identity, GridOnItemDragStartModifier, event);
+    return this;
   }
   onItemDragEnter(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragEnterModifier.identity, GridOnItemDragEnterModifier, event);
+    return this;
   }
   onItemDragMove(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragMoveModifier.identity, GridOnItemDragMoveModifier, event);
+    return this;
   }
   onItemDragLeave(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDragLeaveModifier.identity, GridOnItemDragLeaveModifier, event);
+    return this;
   }
   onItemDrop(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnItemDropModifier.identity, GridOnItemDropModifier, event);
+    return this;
   }
   nestedScroll(value) {
     modifierWithKey(this._modifiersWithKeys, GridNestedScrollModifier.identity, GridNestedScrollModifier, value);
@@ -6153,19 +6160,24 @@ class ArkGridComponent extends ArkScrollable {
     throw new Error('Method not implemented.');
   }
   onReachStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
+    return this;
   }
   onReachEnd(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnReachEndModifier.identity, GridOnReachEndModifier, event);
+    return this;
   }
   onScrollStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollStartModifier.identity, GridOnScrollStartModifier, event);
+    return this;
   }
   onScrollStop(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollStopModifier.identity, GridOnScrollStopModifier, event);
+    return this;
   }
-  onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
+  onScrollFrameBegin(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnScrollFrameBeginModifier.identity, GridOnScrollFrameBeginModifier, callback);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
@@ -6179,7 +6191,14 @@ class ArkGridComponent extends ArkScrollable {
     modifierWithKey(this._modifiersWithKeys, GridAlignItemsModifier.identity, GridAlignItemsModifier, value);
     return this;
   }
-
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnWillScrollModifier.identity, GridOnWillScrollModifier, callback);
+    return this;
+  }
+  onDidScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, GridOnDidScrollModifier.identity, GridOnDidScrollModifier, callback);
+    return this;
+  }
 }
 class GridScrollerModifier extends ModifierWithKey {
   constructor(value) {
@@ -6426,6 +6445,188 @@ class GridFrictionModifier extends ModifierWithKey {
   }
 }
 GridFrictionModifier.identity = Symbol('gridFriction');
+class GridOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().grid.setOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+GridOnScrollFrameBeginModifier.identity = Symbol('gridOnScrollFrameBegin');
+class GridOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnWillScroll(node);
+    } else {
+      getUINativeModule().grid.setOnWillScroll(node, this.value);
+    }
+  }
+}
+GridOnWillScrollModifier.identity = Symbol('gridOnWillScroll');
+class GridOnDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnDidScroll(node);
+    } else {
+      getUINativeModule().grid.setOnDidScroll(node, this.value);
+    }
+  }
+}
+GridOnDidScrollModifier.identity = Symbol('gridOnDidScroll');
+class GridOnReachStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnReachStart(node);
+    } else {
+      getUINativeModule().grid.setOnReachStart(node, this.value);
+    }
+  }
+}
+GridOnReachStartModifier.identity = Symbol('gridOnReachStart');
+class GridOnReachEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnReachEnd(node);
+    } else {
+      getUINativeModule().grid.setOnReachEnd(node, this.value);
+    }
+  }
+}
+GridOnReachEndModifier.identity = Symbol('gridOnReachEnd');
+class GridOnScrollStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollStart(node);
+    } else {
+      getUINativeModule().grid.setOnScrollStart(node, this.value);
+    }
+  }
+}
+GridOnScrollStartModifier.identity = Symbol('gridOnScrollStart');
+class GridOnScrollStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().grid.setOnScrollStop(node, this.value);
+    }
+  }
+}
+GridOnScrollStopModifier.identity = Symbol('gridOnScrollStop');
+class GridOnScrollIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollIndex(node);
+    } else {
+      getUINativeModule().grid.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+GridOnScrollIndexModifier.identity = Symbol('gridOnScrollIndex');
+class GridOnScrollBarUpdateModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnScrollBarUpdate(node);
+    } else {
+      getUINativeModule().grid.setOnScrollBarUpdate(node, this.value);
+    }
+  }
+}
+GridOnScrollBarUpdateModifier.identity = Symbol('gridOnScrollBarUpdate');
+class GridOnItemDragStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragStart(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragStart(node, this.value);
+    }
+  }
+}
+GridOnItemDragStartModifier.identity = Symbol('gridOnItemDragStart');
+class GridOnItemDragEnterModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragEnter(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragEnter(node, this.value);
+    }
+  }
+}
+GridOnItemDragEnterModifier.identity = Symbol('gridOnItemDragEnter');
+class GridOnItemDragMoveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragMove(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragMove(node, this.value);
+    }
+  }
+}
+GridOnItemDragMoveModifier.identity = Symbol('gridOnItemDragMove');
+class GridOnItemDragLeaveModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDragLeave(node);
+    } else {
+      getUINativeModule().grid.setOnItemDragLeave(node, this.value);
+    }
+  }
+}
+GridOnItemDragLeaveModifier.identity = Symbol('gridOnItemDragLeave');
+class GridOnItemDropModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().grid.resetOnItemDrop(node);
+    } else {
+      getUINativeModule().grid.setOnItemDrop(node, this.value);
+    }
+  }
+}
+GridOnItemDropModifier.identity = Symbol('gridOnItemDrop');
 class GridMaxCountModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

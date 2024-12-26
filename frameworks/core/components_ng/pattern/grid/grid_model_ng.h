@@ -109,9 +109,21 @@ public:
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
+    static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
+    static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
+    static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
+    static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
+    static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
+    static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
+    static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
+    static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
 
 private:
     void AddDragFrameNodeToManager() const;
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG
