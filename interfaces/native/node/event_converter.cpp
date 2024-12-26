@@ -340,6 +340,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT:
             return ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
+        case NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE:
+            return ON_CHECKBOX_GROUP_CHANGE;
         default:
             return -1;
     }
@@ -556,6 +558,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT:
             return NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT;
+        case ON_CHECKBOX_GROUP_CHANGE:
+            return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
         default:
             return -1;
     }
