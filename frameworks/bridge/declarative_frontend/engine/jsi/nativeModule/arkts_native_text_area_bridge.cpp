@@ -35,6 +35,12 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_9 = 9;
 constexpr int NUM_13 = 13;
+constexpr int NUM_17 = 17;
+constexpr int NUM_21 = 21;
+constexpr int NUM_25 = 25;
+constexpr int NUM_26 = 26;
+constexpr int NUM_27 = 27;
+constexpr int NUM_28 = 28;
 constexpr int SIZE_OF_FOUR = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
@@ -123,6 +129,74 @@ bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value
         return true;
     }
     return false;
+}
+
+void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
+    }
+}
+
+void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values,
+    int32_t argsIndex)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, rightArgs, rightDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
+void SetBorderDash(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM *vm, ArkUINodeHandle nativeNode)
+{
+    std::vector<ArkUI_Float32> dashOptions;
+    // Border DashGap args start index from 17
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, NUM_17);
+    // Border DashGap args start index from 25
+    Local<JSValueRef> startDashGap = runtimeCallInfo->GetCallArgRef(NUM_25);
+    // Border DashGap args end index from 26
+    Local<JSValueRef> endDashGap = runtimeCallInfo->GetCallArgRef(NUM_26);
+    std::optional<CalcDimension> startDashGapDim;
+    std::optional<CalcDimension> endDashGapDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashGap, startDashGapDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashGap, endDashGapDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashGapDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashGapDim, dashOptions);
+
+    // Border DashWidth args start index from 21
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, NUM_21);
+    // Border DashWidth args start index from 27
+    Local<JSValueRef> startDashWidth = runtimeCallInfo->GetCallArgRef(NUM_27);
+    // Border DashWidth args end index from 28
+    Local<JSValueRef> endDashWidth = runtimeCallInfo->GetCallArgRef(NUM_28);
+    std::optional<CalcDimension> startDashWidthDim;
+    std::optional<CalcDimension> endDashWidthDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashWidth, startDashWidthDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashWidth, endDashWidthDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashWidthDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashWidthDim, dashOptions);
+
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderDash(nativeNode, dashOptions.data(),
+        dashOptions.size());
 }
 } // namespace
 
@@ -1649,6 +1723,10 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetBorderDash(runtimeCallInfo, vm, nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
