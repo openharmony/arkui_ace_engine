@@ -42,6 +42,8 @@ const std::string TEST_IMAGE_SOURCE = "src/image.png";
 int32_t callBack1 = 0;
 int32_t callBack2 = 0;
 int32_t callBack3 = 0;
+constexpr float DEFAULT_CONTENT_WIDTH = 800.0f;
+constexpr float DEFAULT_TEXT_HEIGHT = 50.0f;
 } // namespace
 
 class RichEditorOverlayTestNg : public RichEditorCommonTestNg {
@@ -237,7 +239,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->textForDisplay_ = u"test";
     richEditorPattern->InitSelection(Offset(0, 0));
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
@@ -253,7 +255,7 @@ HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = "test";
+    richEditorPattern->textForDisplay_ = u"test";
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.front()->position = 3;
     richEditorPattern->InitSelection(Offset(0, 0));
@@ -416,7 +418,7 @@ HWTEST_F(RichEditorOverlayTestNg, Selection002, TestSize.Level1)
     EXPECT_EQ(richEditorSelection2.selection[0], 15);
     EXPECT_EQ(richEditorSelection2.selection[1], 30);
     auto resultObject = richEditorSelection2.resultObjects.front();
-    EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
+    EXPECT_EQ(StringUtils::Str16ToStr8(resultObject.valueString), INIT_VALUE_3);
     EXPECT_EQ(resultObject.offsetInSpan[0], 15);
     EXPECT_EQ(resultObject.offsetInSpan[1], 30);
 }
@@ -1209,6 +1211,48 @@ HWTEST_F(RichEditorOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalculateSelectedRect001
+ * @tc.desc: test CalculateSelectedRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, CalculateSelectedRect001, TestSize.Level1)
+{
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    auto result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    std::vector<RectF> rects;
+    ParagraphStyle paragraphStyle;
+    std::pair<std::vector<RectF>, ParagraphStyle> paragraphRects;
+
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT + DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+}
+
+/**
  * @tc.name: OnMenuItemAction001
  * @tc.desc: test OnMenuItemAction
  * @tc.type: FUNC
@@ -1770,7 +1814,7 @@ HWTEST_F(RichEditorOverlayTestNg, RichEditorOverlayTestNg004, TestSize.Level1)
 
     auto geometryNode = richEditorNode_->GetGeometryNode();
     ASSERT_NE(geometryNode, nullptr);
-    geometryNode->SetContentSize(SizeF(BUILDER_WIDTH, BUILDER_HEIGHT));
+    geometryNode->SetFrameSize(SizeF(BUILDER_WIDTH, BUILDER_HEIGHT));
 
     richEditorPattern->selectOverlay_->enableHandleLevel_ = true;
     richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);

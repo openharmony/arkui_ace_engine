@@ -82,16 +82,47 @@ void SetQRValue(ArkUINodeHandle node, ArkUI_CharPtr value)
 namespace NodeModifier {
 const ArkUIQRCodeModifier* GetQRCodeModifier()
 {
-    static const ArkUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity, SetQRValue };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIQRCodeModifier modifier = {
+        .setQRColor = SetQRColor,
+        .resetQRColor = ResetQRColor,
+        .setQRBackgroundColor = SetQRBackgroundColor,
+        .resetQRBackgroundColor = ResetQRBackgroundColor,
+        .setContentOpacity = SetContentOpacity,
+        .resetContentOpacity = ResetContentOpacity,
+        .setQRValue = SetQRValue,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIQRCodeModifier* GetCJUIQRCodeModifier()
 {
-    static const CJUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIQRCodeModifier modifier = {
+        .setQRColor = SetQRColor,
+        .resetQRColor = ResetQRColor,
+        .setQRBackgroundColor = SetQRBackgroundColor,
+        .resetQRBackgroundColor = ResetQRBackgroundColor,
+        .setContentOpacity = SetContentOpacity,
+        .resetContentOpacity = ResetContentOpacity,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

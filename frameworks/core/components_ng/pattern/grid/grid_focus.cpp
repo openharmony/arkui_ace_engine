@@ -95,7 +95,6 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusSimplified(FocusStep step, const RefPtr
         CHECK_NULL_BREAK(next);
         auto nextFocus = next->GetHostNode()->GetFocusHub();
         if (nextFocus && nextFocus->IsFocusable()) {
-            focusIndex_ = idx;
             return nextFocus;
         }
         idx += diff;
@@ -160,15 +159,7 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(FocusStep step, const WeakPtr<Focu
         }
         auto secondStepRes = GetNextFocusNode(focusSteps.second, firstStepRes);
         if (!secondStepRes.Upgrade()) {
-            int32_t index = GetIndexByFocusHub(firstStepRes);
-            if (index > -1) {
-                focusIndex_ = index;
-            }
             return firstStepRes;
-        }
-        int32_t index = GetIndexByFocusHub(secondStepRes);
-        if (index > -1) {
-            focusIndex_ = index;
         }
         return secondStepRes;
     }
@@ -188,10 +179,6 @@ WeakPtr<FocusHub> GridFocus::GetNextFocusNode(FocusStep step, const WeakPtr<Focu
         auto child = weakChild.Upgrade();
         if (child && child->IsFocusable()) {
             ScrollToFocusNode(weakChild);
-            int32_t index = GetIndexByFocusHub(weakChild);
-            if (index > -1) {
-                focusIndex_ = index;
-            }
             return weakChild;
         }
         auto indexes = GetNextIndexByStep(nextMainIndex, nextCrossIndex, 1, 1, step);
@@ -748,11 +735,13 @@ void GridFocus::FireFocus()
     CHECK_NULL_VOID(focusHub);
     CHECK_NULL_VOID(focusHub->IsCurrentFocus());
     CHECK_NULL_VOID(focusIndex_.has_value());
-    if (IsInViewport(focusIndex_.value())) {
+    if (IsInViewport(focusIndex_.value(), true)) {
         auto child = host->GetChildByIndex(focusIndex_.value());
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
+        CHECK_NULL_VOID(childNode);
         auto childFocusHub = childNode->GetFocusHub();
+        CHECK_NULL_VOID(childFocusHub);
         if (!childFocusHub->IsCurrentFocus()) {
             focusHub->SetFocusDependence(FocusDependence::AUTO);
             childFocusHub->RequestFocusImmediately();
@@ -760,7 +749,11 @@ void GridFocus::FireFocus()
                 AceLogTag::ACE_GRID, "GridItem [%{public}d] scroll into viewport, Requests focus", focusIndex_.value());
         }
     } else {
-        focusHub->LostChildFocusToSelf();
+        auto childFocusHub = focusHub->GetLastWeakFocusNode().Upgrade();
+        CHECK_NULL_VOID(childFocusHub);
+        if (childFocusHub->IsCurrentFocus()) {
+            focusHub->LostChildFocusToSelf();
+        }
     }
 }
 
@@ -775,36 +768,27 @@ bool GridFocus::ScrollToLastFocusIndex(KeyCode keyCode)
     CHECK_NULL_RETURN(focusHub, false);
     CHECK_NULL_RETURN(focusHub->IsCurrentFocus(), false);
     CHECK_NULL_RETURN(focusIndex_.has_value(), false);
-
-    if (!IsInViewport(focusIndex_.value())) {
+    auto focusIndex = focusIndex_.value();
+    if (!IsInViewport(focusIndex, false)) {
         grid_.StopAnimate();
         needTriggerFocus_ = true;
+        
         // If focused item is above viewport and the current keyCode type is UP, scroll forward one more line
-        if (focusIndex_.value() < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP &&
-            focusIndex_.value() - info_.crossCount_ >= 0) {
-            grid_.UpdateStartIndex(focusIndex_.value() - info_.crossCount_);
+        if (focusIndex < info_.startIndex_ && keyCode == KeyCode::KEY_DPAD_UP &&
+            focusIndex - info_.crossCount_ >= 0) {
+            grid_.UpdateStartIndex(focusIndex - info_.crossCount_);
             // If focused item is below viewport and the current keyCode type is DOWN, scroll backward one more line
-        } else if (focusIndex_.value() > info_.endIndex_ && keyCode == KeyCode::KEY_DPAD_DOWN &&
-                   focusIndex_.value() + info_.crossCount_ < info_.childrenCount_) {
-            grid_.UpdateStartIndex(focusIndex_.value() + info_.crossCount_);
+        } else if (focusIndex > info_.endIndex_ && keyCode == KeyCode::KEY_DPAD_DOWN &&
+                   focusIndex + info_.crossCount_ < info_.childrenCount_) {
+            grid_.UpdateStartIndex(focusIndex + info_.crossCount_);
         } else {
-            grid_.UpdateStartIndex(focusIndex_.value());
+            grid_.UpdateStartIndex(focusIndex);
         }
         return true;
     }
     return false;
 }
 
-void GridFocus::HandleFocusEvent(const WeakPtr<FocusHub>& child)
-{
-    auto childFocusHub = child.Upgrade();
-    CHECK_NULL_VOID(childFocusHub);
-    int32_t index = GetIndexByFocusHub(childFocusHub);
-    if (index >= 0) {
-        focusIndex_ = index;
-        TAG_LOGI(AceLogTag::ACE_GRID, "Grid on focus with index: %{public}d", index);
-    }
-}
 void GridFocus::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
 {
     grid_.StopAnimate();
@@ -813,7 +797,7 @@ void GridFocus::ScrollToFocusNode(const WeakPtr<FocusHub>& focusNode)
     grid_.UpdateStartIndex(GetFocusNodeIndex(nextFocus));
 }
 
-bool GridFocus::IsInViewport(int32_t index) const
+bool GridFocus::IsInViewport(int32_t index, bool needCheckCache) const
 {
     auto host = grid_.GetHost();
     CHECK_NULL_RETURN(host, true);
@@ -821,9 +805,9 @@ bool GridFocus::IsInViewport(int32_t index) const
     CHECK_NULL_RETURN(gridLayoutProperty, true);
     int32_t cacheCount = gridLayoutProperty->GetCachedCountValue(info_.defCachedCount_) * info_.crossCount_;
     bool showCachedItems = gridLayoutProperty->GetShowCachedItemsValue(false);
-    if (!showCachedItems) {
-        return index >= info_.startIndex_ && index <= info_.endIndex_;
+    if (needCheckCache && showCachedItems) {
+        return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
     }
-    return index >= info_.startIndex_ - cacheCount && index <= info_.endIndex_ + cacheCount;
+    return index >= info_.startIndex_ && index <= info_.endIndex_;
 }
 } // namespace OHOS::Ace::NG

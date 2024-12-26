@@ -427,10 +427,6 @@ public:
     bool HasBackwardFocusMovementInChildren();
     bool HasForwardFocusMovementInChildren();
     void ClearFocusMovementFlagsInChildren();
-    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
-    {
-        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
-    }
 
     Dimension GetFocusPadding() const
     {
@@ -844,6 +840,10 @@ public:
         return enableDirectionalKeyFocus_;
     }
 
+    void SetIsNodeNeedKey(bool isNodeNeedKey)
+    {
+        isNodeNeedKey_ = isNodeNeedKey;
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -861,7 +861,7 @@ protected:
     bool RequestNextFocusByCustomAlgorithm(FocusStep moveStep, const RectF& rect);
 
     void OnFocus();
-    void OnFocusNode();
+    void OnFocusNode(bool currentHasFocused = false);
     void OnFocusScope(bool currentHasFocused = false);
     void OnBlur();
     void OnBlurNode();
@@ -924,6 +924,8 @@ private:
     bool SkipFocusMoveBeforeRemove();
 
     bool IsArrowKeyStepOut(FocusStep moveStep);
+
+    bool IsLastWeakNodeFocused() const;
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

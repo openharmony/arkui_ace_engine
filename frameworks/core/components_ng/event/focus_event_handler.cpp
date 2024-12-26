@@ -15,8 +15,11 @@
 #include "focus_event_handler.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/event/focus_axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 {
@@ -27,6 +30,19 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
     if (keyEvent.isPreIme || keyEvent.action != KeyAction::DOWN) {
         return FocusIntension::NONE;
     }
+    // Arrow key event is used to trasfer focus regardless of its pressed keys
+    switch (keyEvent.code) {
+        case KeyCode::KEY_DPAD_UP:
+            return FocusIntension::UP;
+        case KeyCode::KEY_DPAD_DOWN:
+            return FocusIntension::DOWN;
+        case KeyCode::KEY_DPAD_LEFT:
+            return FocusIntension::LEFT;
+        case KeyCode::KEY_DPAD_RIGHT:
+            return FocusIntension::RIGHT;
+        default:;
+    }
+
     if (keyEvent.pressedCodes.size() != 1) {
         return keyEvent.IsExactlyShiftWith(KeyCode::KEY_TAB) ? FocusIntension::SHIFT_TAB : FocusIntension::NONE;
     }
@@ -45,14 +61,6 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
         default:;
     }
     switch (keyEvent.keyIntention) {
-        case KeyIntention::INTENTION_UP:
-            return FocusIntension::UP;
-        case KeyIntention::INTENTION_DOWN:
-            return FocusIntension::DOWN;
-        case KeyIntention::INTENTION_LEFT:
-            return FocusIntension::LEFT;
-        case KeyIntention::INTENTION_RIGHT:
-            return FocusIntension::RIGHT;
         case KeyIntention::INTENTION_SELECT:
             return FocusIntension::SELECT;
         case KeyIntention::INTENTION_ESCAPE:
@@ -66,6 +74,12 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 
 bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
 {
+    if (!IsCurrentFocus()) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "node: %{public}s/%{public}d cannot handle key event because is not current focus",
+            GetFrameName().c_str(), GetFrameId());
+        return false;
+    }
     if (focusType_ == FocusType::SCOPE) {
         return OnFocusEventScope(event);
     }
@@ -99,10 +113,17 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
     if (focusEvent.event.eventType == UIInputEventType::KEY) {
         const KeyEvent& keyEvent = static_cast<const KeyEvent&>(focusEvent.event);
         ret = HandleKeyEvent(keyEvent, focusEvent.intension);
-    } else {
-        LOGI("Handle NonPointerAxisEvent");
-        return false;
     }
+    if (focusEvent.event.eventType == UIInputEventType::FOCUS_AXIS) {
+        const FocusAxisEvent& focusAxisEvent = static_cast<const FocusAxisEvent&>(focusEvent.event);
+        return HandleFocusAxisEvent(focusAxisEvent);
+    }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (focusEvent.event.eventType == UIInputEventType::CROWN) {
+        const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
+        return HandleCrownEvent(crownEvent);
+    }
+#endif
     return ret ? true : HandleFocusTravel(focusEvent);
 }
 
@@ -147,6 +168,56 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     }
     return ret;
 }
+
+bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
+{
+    auto node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto* pipeline = node->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto onFocusAxisCallback = GetOnFocusAxisCallback();
+    CHECK_NULL_RETURN(onFocusAxisCallback, false);
+    auto info = FocusAxisEventInfo(event);
+    auto eventHub = eventHub_.Upgrade();
+    if (eventHub) {
+        auto targetImpl = eventHub->CreateGetEventTargetImpl();
+        info.SetTarget(targetImpl().value_or(EventTarget()));
+    }
+    onFocusAxisCallback(info);
+    return info.IsStopPropagation();
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusEventHandler::HandleCrownEvent(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    bool retCallback = false;
+    auto onCrownEventCallback = GetOnCrownCallback();
+    if (onCrownEventCallback) {
+        CrownEventInfo crownInfo(CrownEvent);
+        onCrownEventCallback(crownInfo);
+        retCallback = crownInfo.IsStopPropagation();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnCrownEventUser: Node %{public}s/%{public}d handle CrownAction:%{public}d",
+            GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
+    } else {
+        retCallback = ProcessOnCrownEventInternal(CrownEvent);
+    }
+    return retCallback;
+}
+
+bool FocusEventHandler::ProcessOnCrownEventInternal(const CrownEvent& event)
+{
+    bool result = false;
+    auto onCrownEventCallbackInternal = GetOnCrownEventInternal();
+    if (onCrownEventCallbackInternal) {
+        onCrownEventCallbackInternal(event);
+        result = true;
+    }
+    return result;
+}
+
+#endif
 
 bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 {
@@ -217,11 +288,13 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     CHECK_NULL_RETURN(pipeline, false);
     bool isBypassInner = keyEvent.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
     auto retInternal = false;
-    if ((GetFrameName() == V2::UI_EXTENSION_COMPONENT_ETS_TAG || GetFrameName() == V2::EMBEDDED_COMPONENT_ETS_TAG ||
-        GetFrameName() == V2::ISOLATED_COMPONENT_ETS_TAG)
-        && (!IsCurrentFocus() || forceProcessOnKeyEventInternal_)) {
-        isBypassInner = false;
-        forceProcessOnKeyEventInternal_ = false;
+    if (isNodeNeedKey_) {
+        retInternal =  ProcessOnKeyEventInternal(keyEvent);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+        return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);

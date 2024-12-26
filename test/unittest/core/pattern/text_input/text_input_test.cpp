@@ -1898,7 +1898,7 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
      * @tc.steps: step4. escape when select all value
      */
     pattern_->HandleOnSelectAll(true);
-    EXPECT_FALSE(pattern_->HandleOnEscape());
+    EXPECT_TRUE(pattern_->HandleOnEscape());
 }
 
 /**
@@ -1980,7 +1980,7 @@ HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
     pattern_->SetCaretPosition(5);
     pattern_->UpdateEditingValueToRecord();
     pattern_->HandleOnUndoAction();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 26);
 }
 
 /**

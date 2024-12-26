@@ -117,15 +117,14 @@ bool ConfirmCurPointerEventInfo(
             PostStopDrag(dragAction, container);
         }
     };
-    int32_t sourceTool = -1;
-    bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->pointer, dragAction->x, dragAction->y,
-        dragAction->sourceType, sourceTool, dragAction->displayId, std::move(stopDragCallback));
-    if (dragAction->sourceType == SOURCE_TYPE_MOUSE) {
-        dragAction->pointer = MOUSE_POINTER_ID;
-    } else if (dragAction->sourceType == SOURCE_TYPE_TOUCH && sourceTool == SOURCE_TOOL_PEN) {
-        dragAction->pointer = PEN_POINTER_ID;
+    bool getPointSuccess = container->GetCurPointerEventInfo(dragAction->dragPointerEvent,
+        std::move(stopDragCallback));
+    if (dragAction->dragPointerEvent.sourceType == SOURCE_TYPE_MOUSE) {
+        dragAction->dragPointerEvent.pointerId = MOUSE_POINTER_ID;
+    } else if (dragAction->dragPointerEvent.sourceType == SOURCE_TYPE_TOUCH &&
+        static_cast<int32_t>(dragAction->dragPointerEvent.sourceTool) == SOURCE_TOOL_PEN) {
+        dragAction->dragPointerEvent.pointerId = PEN_POINTER_ID;
     }
-    dragAction->toolType = sourceTool;
     return getPointSuccess;
 }
 
@@ -141,7 +140,7 @@ void EnvelopedDragData(
         TAG_LOGE(AceLogTag::ACE_DRAG, "shadowInfo array is empty");
         return;
     }
-    auto pointerId = dragAction->pointer;
+    auto pointerId = dragAction->dragPointerEvent.pointerId;
     std::string udKey;
     std::map<std::string, int64_t> summary;
     int32_t dataSize = 1;
@@ -169,10 +168,13 @@ void EnvelopedDragData(
     CHECK_NULL_VOID(pipeline);
     dragAction->dipScale = pipeline->GetDipScale();
     arkExtraInfoJson->Put("dip_scale", dragAction->dipScale);
+    arkExtraInfoJson->Put("event_id", dragAction->dragPointerEvent.pointerEventId);
     NG::DragDropFuncWrapper::UpdateExtraInfo(arkExtraInfoJson, dragAction->previewOption);
-    dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(), dragAction->sourceType,
-        recordSize, pointerId, dragAction->toolType, dragAction->x, dragAction->y, dragAction->displayId, windowId,
-        true, false, summary };
+    dragData = { shadowInfos, {}, udKey, dragAction->extraParams, arkExtraInfoJson->ToString(),
+        dragAction->dragPointerEvent.sourceType, recordSize, pointerId,
+        static_cast<int32_t>(dragAction->dragPointerEvent.sourceTool), dragAction->dragPointerEvent.displayX,
+        dragAction->dragPointerEvent.displayY, dragAction->dragPointerEvent.displayId, windowId, true, false,
+        summary };
 }
 
 void HandleCallback(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction,
@@ -255,7 +257,8 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
         }
         HandleCallback(dragAction, dragNotifyMsg, DragAdapterStatus::ENDED);
     };
-    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(dragAction->pointer, dragAction->instanceId);
+    NG::DragDropFuncWrapper::SetDraggingPointerAndPressedState(
+        dragAction->dragPointerEvent.pointerId, dragAction->instanceId);
     int32_t ret = InteractionInterface::GetInstance()->StartDrag(dragData.value(), callback);
     if (ret != 0) {
         manager->GetDragAction()->dragState = DragAdapterState::INIT;
@@ -263,16 +266,26 @@ int32_t DragDropFuncWrapper::StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkU
     }
     HandleCallback(dragAction, DragNotifyMsg {}, DragAdapterStatus::STARTED);
     pipelineContext->SetIsDragging(true);
+    NG::DragDropFuncWrapper::HandleOnDragEvent(dragAction);
+    return 0;
+}
+
+void DragDropFuncWrapper::HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction)
+{
+    CHECK_NULL_VOID(dragAction);
+    auto pipelineContext = PipelineContext::GetContextByContainerId(dragAction->instanceId);
+    CHECK_NULL_VOID(pipelineContext);
     std::lock_guard<std::mutex> lock(dragAction->dragStateMutex);
     if (dragAction->dragState == DragAdapterState::SENDING) {
         dragAction->dragState = DragAdapterState::SUCCESS;
         InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         pipelineContext->OnDragEvent(
-            { dragAction->x, dragAction->y }, DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
+            { dragAction->dragPointerEvent.displayX, dragAction->dragPointerEvent.displayY },
+            DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER);
         NG::DragDropFuncWrapper::DecideWhetherToStopDragging(
-            { dragAction->x, dragAction->y }, dragAction->extraParams, dragAction->pointer, dragAction->instanceId);
+            { dragAction->dragPointerEvent.displayX, dragAction->dragPointerEvent.displayY }, dragAction->extraParams,
+            dragAction->dragPointerEvent.pointerId, dragAction->instanceId);
     }
-    return 0;
 }
 
 void DragDropFuncWrapper::SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId)
@@ -635,6 +648,23 @@ void DragDropFuncWrapper::UpdatePositionFromFrameNode(const RefPtr<FrameNode>& t
     UpdateNodePositionToScreen(targetNode, offset);
 }
 
+OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToWindow(const RefPtr<FrameNode>& targetNode,
+    const RefPtr<FrameNode>& frameNode, float width, float height)
+{
+    CHECK_NULL_RETURN(targetNode, OffsetF());
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto paintRectCenter = GetPaintRectCenterToScreen(frameNode);
+    auto offset = paintRectCenter - OffsetF(width / 2.0f, height / 2.0f);
+    offset -= GetCurrentWindowOffset(targetNode->GetContextRefPtr());
+    auto renderContext = targetNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, OffsetF());
+    RefPtr<FrameNode> parentNode = targetNode->GetAncestorNodeOfFrame(true);
+    if (parentNode) {
+        offset -= parentNode->GetPositionToWindowWithTransform();
+    }
+    return offset;
+}
+
 void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
 {
     event.rawPointerEvent = touchPoint.pointerEvent;
@@ -686,5 +716,39 @@ void DragDropFuncWrapper::GetPointerEventAction(const TouchEvent& touchPoint, Dr
             event.action = PointerAction::UNKNOWN;
             break;
     }
+}
+
+RefPtr<FrameNode> DragDropFuncWrapper::GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key)
+{
+    std::queue<RefPtr<UINode>> elements;
+    elements.push(root);
+    RefPtr<UINode> inspectorElement;
+    while (!elements.empty()) {
+        auto current = elements.front();
+        elements.pop();
+        if (key == current->GetInspectorId().value_or("")) {
+            return AceType::DynamicCast<FrameNode>(current);
+        }
+
+        const auto& children = current->GetChildren();
+        for (const auto& child : children) {
+            elements.push(child);
+        }
+    }
+    return nullptr;
+}
+
+OffsetF DragDropFuncWrapper::GetPointRelativeToMainWindow(const Point& point)
+{
+    OffsetF position (static_cast<float>(point.GetX()), static_cast<float>(point.GetY()));
+    auto currentPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(currentPipeline, position);
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(mainPipeline, position);
+    if (mainPipeline != currentPipeline) {
+        position -= (GetCurrentWindowOffset(mainPipeline) -
+                     GetCurrentWindowOffset(currentPipeline));
+    }
+    return position;
 }
 } // namespace OHOS::Ace

@@ -20,6 +20,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -116,7 +117,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -141,6 +142,9 @@ public:
     void GetTimeLimitResource(std::string &content);
 
     void UnregisterAccessibility();
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -253,6 +257,7 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
+    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
@@ -261,6 +266,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace

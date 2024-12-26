@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -181,6 +182,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -439,6 +447,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -567,7 +577,10 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty)
+{
+    dirtyPropertyNodes_.emplace(dirty);
+}
 
 void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
@@ -653,7 +666,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }
@@ -878,6 +892,15 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1029,6 +1052,8 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
+void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
@@ -1124,6 +1149,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
+
+void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

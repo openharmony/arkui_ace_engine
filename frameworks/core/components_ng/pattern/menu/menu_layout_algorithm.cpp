@@ -329,7 +329,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
         InitializePadding(layoutWrapper);
     }
     InitializeParam(menuPattern);
-    if (canExpandCurrentWindow_ && isExpandDisplay_) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());
@@ -660,8 +660,13 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
     if (isContainerModal) {
         wrapperOffset = OffsetF(0.0f, static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()));
         if (windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
-            wrapperOffset += OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+            if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                wrapperOffset += OffsetF(static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()),
                 static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+            } else {
+                wrapperOffset += OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()));
+            }
         }
         position -= wrapperOffset;
     }
@@ -698,11 +703,12 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuPattern);
     auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(menuLayoutProperty);
-    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+    auto isContextMenu = menuPattern->IsContextMenu();
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true) || isContextMenu;
     InitCanExpandCurrentWindow(isShowInSubWindow);
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
-        InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
+        InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
     }
 
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
@@ -978,7 +984,6 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
     CHECK_NULL_RETURN(frameNode, size);
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, size);
-    bool isShowHoverImage = false;
     for (auto& child : frameNode->GetAllChildrenWithBuild()) {
         auto hostNode = child->GetHostNode();
         auto geometryNode = child->GetGeometryNode();
@@ -990,7 +995,6 @@ SizeF MenuLayoutAlgorithm::GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<Frame
         if (hostNode->GetTag() == V2::MENU_ETS_TAG && menuPattern && !menuPattern->IsSubMenu()) {
             menuLayoutWrapper = child;
             size += geometryNode->GetMarginFrameSize();
-            isShowHoverImage = menuPattern->GetIsShowHoverImage();
         }
     }
     return size;
@@ -1265,6 +1269,24 @@ float MenuLayoutAlgorithm::GetMenuItemTotalHeight(const RefPtr<LayoutWrapper>& m
     return height;
 }
 
+float MenuLayoutAlgorithm::CheckHorizontalLayoutPreviewOffsetX(
+    const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, float offsetX)
+{
+    if (SystemProperties::GetDeviceOrientation() != DeviceOrientation::LANDSCAPE) {
+        return offsetX;
+    }
+    CHECK_NULL_RETURN(previewGeometryNode, offsetX);
+    auto previewSize = previewGeometryNode->GetMarginFrameSize() * previewScale_;
+    CHECK_NULL_RETURN(menuGeometryNode, offsetX);
+    auto menuSize = menuGeometryNode->GetMarginFrameSize();
+    // left menu right preview
+    auto x_min = wrapperRect_.Left() + paddingStart_ + menuSize.Width() + targetSecurity_;
+    // left preview right menu
+    auto x_max = wrapperRect_.Right() - paddingEnd_ - menuSize.Width() - previewSize.Width() - targetSecurity_;
+    auto needAvoid = GreatNotEqual(offsetX, x_max) && LessNotEqual(offsetX, x_min);
+    return needAvoid ? x_max : offsetX;
+}
+
 void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize)
 {
@@ -1292,6 +1314,7 @@ void MenuLayoutAlgorithm::LayoutOtherDeviceLeftPreviewRightMenuLessThan(
     auto offsetX = targetCenterOffset.GetX() - previewSize.Width() / 2;
     auto offsetY = std::min<float>(targetCenterOffset.GetY() - previewSize.Height() / 2,
         param_.windowGlobalSizeF.Height() - param_.bottomSecurity - param_.bottom - menuSize.Height());
+    offsetX = CheckHorizontalLayoutPreviewOffsetX(previewGeometryNode, menuGeometryNode, offsetX);
     auto x = std::clamp(offsetX, static_cast<float>(wrapperRect_.Left()) + paddingStart_,
         static_cast<float>(wrapperRect_.Right()) - previewSize.Width() - paddingEnd_);
     auto y = std::clamp(offsetY, static_cast<float>(wrapperRect_.Top()) + param_.topSecurity,
@@ -1425,14 +1448,19 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     CHECK_NULL_VOID(previewHostNode);
     auto renderContext = previewHostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
 
     auto menuHostNode = menuLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuHostNode);
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
-    previewSize_ = previewSize;
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+
+    // only update when current position is not equal to last position, otherwise animation will be interrupted
+    if (previewOffset_ != menuPattern->GetPreviewRect().GetOffset()) {
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
+    }
+
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
+    previewSize_ = previewSize;
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
     menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 }
@@ -2014,8 +2042,10 @@ void MenuLayoutAlgorithm::PlacementRTL(LayoutWrapper* layoutWrapper, Placement& 
 void MenuLayoutAlgorithm::LimitContainerModalMenuRect(double& rectWidth, double& rectHeight)
 {
     auto containerOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                            static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                            static_cast<float>(CONTENT_PADDING.ConvertToPx());
+                            static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        containerOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
+    }
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto containerOffsetY = static_cast<float>(pipeline->GetCustomTitleHeight().ConvertToPx()) +
@@ -2313,10 +2343,6 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
         targetTag_.c_str(), targetSize_.ToString().c_str(), targetOffset_.ToString().c_str());
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    bool expandDisplay = menuPattern->GetMenuExpandDisplay();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        expandDisplay = true;
-    }
     if (canExpandCurrentWindow_ && targetTag_ != V2::SELECT_ETS_TAG) {
         ModifyTargetOffset();
         OffsetF offset = GetMenuWrapperOffset(layoutWrapper);
@@ -2328,8 +2354,10 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     if (isContainerModal) {
-        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                          static_cast<float>(CONTENT_PADDING.ConvertToPx());
+        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
+        }
         auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
                           static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
         targetOffset_ -= OffsetF(newOffsetX, newOffsetY);

@@ -195,8 +195,7 @@ uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
 {
     return 0;
 }
-bool AceContainer::GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
 {
     return true;
 }
@@ -206,11 +205,13 @@ bool AceContainer::GetCurPointerEventSourceType(int32_t& sourceType)
     return true;
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
-    return true;
+    return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
 }
+
 bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
 {
     return true;

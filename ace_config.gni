@@ -68,8 +68,14 @@ declare_args() {
   # Enable wearable product support
   ace_engine_feature_wearable = false
 
-  # Enable mouse axis support
-  ace_engine_feature_enable_form_mouse_axis_support = false
+  # Enable form size change animation
+  ace_engine_feature_enable_form_size_change_animation = true
+
+  # Enalbe form menu default, wearable product is not supported
+  ace_engine_feature_form_menu_enable = true
+
+  # Enable ace_engine circular screen
+  ace_engine_feature_enable_digital_crown = false
 }
 
 enable_dump_drawcmd = false
@@ -328,6 +334,11 @@ if (ace_engine_feature_wearable) {
   ace_common_defines += [ "ARKUI_WEARABLE" ]
 }
 
-if (ace_engine_feature_enable_form_mouse_axis_support) {
-  ace_common_defines += [ "FORM_MOUSE_AXIS_SUPPORT" ]
+if (ohos_indep_compiler_enable) {
+  indep_compile_includes =
+      [ "//binarys/third_party/icu/innerapis/shared_icuuc/includes" ]
+}
+
+if (ace_engine_feature_enable_form_size_change_animation) {
+  ace_common_defines += [ "FORM_SIZE_CHANGE_ANIMATION" ]
 }

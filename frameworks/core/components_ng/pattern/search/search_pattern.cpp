@@ -50,8 +50,6 @@ constexpr int32_t BUTTON_INDEX = 4;
 constexpr int32_t DIVIDER_INDEX = 5;
 constexpr int32_t DOUBLE = 2;
 constexpr int32_t ERROR = -1;
-constexpr double OPACITY_DISABLED = 0.4;
-constexpr double OPACITY_ENABLED = 1.0;
 
 // The focus state requires an 2vp inner stroke, which should be indented by 1vp when drawn.
 constexpr Dimension FOCUS_OFFSET = 1.0_vp;
@@ -144,22 +142,34 @@ void SearchPattern::UpdateDisable(const std::u16string& textValue)
     CHECK_NULL_VOID(frameNode);
     auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
     CHECK_NULL_VOID(searchButtonFrameNode);
-    auto searchButtonContext = searchButtonFrameNode->GetRenderContext();
-    CHECK_NULL_VOID(searchButtonContext);
-    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
-    CHECK_NULL_VOID(buttonEventHub);
     auto searchButtonLayoutProperty = searchButtonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(searchButtonLayoutProperty);
     auto needToDisable = searchButtonLayoutProperty->GetAutoDisable().value_or(false);
-    if (needToDisable) {
-        if (textValue.empty()) {
-            searchButtonContext->UpdateOpacity(OPACITY_DISABLED);
-            buttonEventHub->SetEnabled(false);
-        } else {
-            searchButtonContext->UpdateOpacity(OPACITY_ENABLED);
-            buttonEventHub->SetEnabled(true);
-        }
+    if (!needToDisable) {
+        return;
     }
+    bool isEmptyText = textValue.empty();
+    if (isSearchButtonEnabled_ && isEmptyText) {
+        UpdateEnable(false);
+    } else if (!isSearchButtonEnabled_ && !isEmptyText) {
+        UpdateEnable(true);
+    }
+}
+
+void SearchPattern::UpdateEnable(bool needToenable)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
+    auto buttonEventHub = searchButtonFrameNode->GetEventHub<ButtonEventHub>();
+    CHECK_NULL_VOID(buttonEventHub);
+    if (needToenable) {
+        buttonEventHub->SetEnabled(true);
+    } else {
+        buttonEventHub->SetEnabled(false);
+    }
+    isSearchButtonEnabled_ = buttonEventHub->IsEnabled();
     searchButtonFrameNode->MarkModifyDone();
     searchButtonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -243,7 +253,7 @@ void SearchPattern::SetAccessibilityClearAction()
     CHECK_NULL_VOID(layoutProperty);
     auto cleanNodeStyle = layoutProperty->GetCleanNodeStyleValue(CleanNodeStyle::INPUT);
     auto hasContent = cleanNodeStyle == CleanNodeStyle::CONSTANT ||
-                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->IsOperation());
+                        (cleanNodeStyle == CleanNodeStyle::INPUT && textFieldPattern->HasText());
     textAccessibilityProperty->SetAccessibilityText(hasContent ? textFieldPattern->GetCancelButton() : "");
 }
 
@@ -741,7 +751,7 @@ int32_t SearchPattern::HandleTextContentLines()
     CHECK_NULL_RETURN(textFieldFrameNode, lines);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, lines);
-    if (!textFieldPattern->IsOperation()) {
+    if (!textFieldPattern->HasText()) {
         return lines;
     }
     RectF textRect = textFieldPattern->GetTextRect();
@@ -930,7 +940,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::SEARCH && event.IsShiftWith(KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH && !isAllTextSelected && !isTextEmpty) {
@@ -947,7 +956,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
                 event.code == KeyCode::KEY_DPAD_RIGHT) {
                 return true;
             } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                textFieldPattern->CloseKeyboard(true);
                 return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
@@ -985,7 +993,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON &&
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
-            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&
@@ -1433,6 +1440,11 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
         "minFontSize", textFieldLayoutProperty->GetAdaptMinFontSize().value_or(Dimension()).ToString().c_str(), filter);
     json->PutExtAttr(
         "maxFontSize", textFieldLayoutProperty->GetAdaptMaxFontSize().value_or(Dimension()).ToString().c_str(), filter);
+    json->PutExtAttr(
+        "minFontScale", std::to_string(textFieldLayoutProperty->GetMinFontScale().value_or(0.0f)).c_str(), filter);
+    json->PutExtAttr(
+        "maxFontScale", std::to_string(textFieldLayoutProperty->GetMaxFontScale().value_or(
+		          static_cast<float>(INT32_MAX))).c_str(), filter);
     json->PutExtAttr("inputFilter", textFieldLayoutProperty->GetInputFilterValue("").c_str(), filter);
     json->PutExtAttr(
         "textIndent", textFieldLayoutProperty->GetTextIndent().value_or(0.0_vp).ToString().c_str(), filter);
@@ -2220,11 +2232,31 @@ void SearchPattern::UpdateIconChangeEvent()
 
 const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSizeValue)
 {
-    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, iconSizeValue);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, iconSizeValue);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, iconSizeValue);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, iconSizeValue);
+    auto maxFontScale = MAX_FONT_SCALE;
+    auto minFontScale = 0.0f;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+    }
+    if (pipeline->GetMaxAppFontScale()) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+    }
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+    }
+    if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
+        ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
     }
     if (iconSizeValue.Unit() != DimensionUnit::VP) {
-        return Dimension(iconSizeValue.ConvertToPxDistribute(0.0f, MAX_FONT_SCALE));
+        return Dimension(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale));
     } else {
         return iconSizeValue;
     }

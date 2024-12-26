@@ -254,7 +254,8 @@ protected:
     void InitContainerColor();
 
     virtual void InitButtonsLayoutProperty();
-    
+    virtual void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) {}
+
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
 

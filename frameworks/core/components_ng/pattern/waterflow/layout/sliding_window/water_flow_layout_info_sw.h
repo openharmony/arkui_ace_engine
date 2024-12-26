@@ -67,7 +67,10 @@ public:
 
     bool OutOfBounds() const override;
 
-    float GetContentHeight() const override;
+    float GetContentHeight() const override
+    {
+        return maxHeight_;
+    }
 
     float CalcTargetPosition(int32_t idx, int32_t crossIdx) const override;
 
@@ -209,12 +212,24 @@ public:
     float EstimateTotalHeight() const override;
 
     /**
+     * @brief If delta is large enough, convert it to a jump to improve layout performance.
+     *
+     * @param viewport main-axis length of the viewport
+     * @param itemCnt total FlowItem count
+     * @return true if delta is converted to jump
+     */
+    bool TryConvertLargeDeltaToJump(float viewport, int32_t itemCnt);
+
+    /**
      * @brief prepare lanes in the current section.
      *
      * @param idx current item index
      * @param fillBack true if preparing in the forward direction (prevIdx < curIdx).
      */
     void PrepareSectionPos(int32_t idx, bool fillBack);
+
+    bool OverScrollTop() override;
+    bool OverScrollBottom() override;
 
     void NotifyDataChange(int32_t index, int32_t count) override;
     void UpdateLanesIndex(int32_t updateIdx);
@@ -228,7 +243,7 @@ public:
     const Lane* GetLane(int32_t itemIdx) const;
     Lane* GetMutableLane(int32_t itemIdx);
 
-    bool LaneOutOfBounds(size_t laneIdx, int32_t section) const;
+    bool LaneOutOfRange(size_t laneIdx, int32_t section) const;
 
     /**
      * @brief lanes in multiple sections.
@@ -247,7 +262,7 @@ public:
 
     std::vector<float> mainGap_; // update this at the end of a layout
 
-    // maximum content height encountered so far, mainly for comparing content and viewport height
+    // maximum content height encountered so far
     float maxHeight_ = 0.0f;
     float footerHeight_ = 0.0f;
 
@@ -278,7 +293,7 @@ private:
      */
     bool AdjustLanes(const std::vector<WaterFlowSections::Section>& sections,
         const WaterFlowSections::Section& prevSection, int32_t start, int32_t prevSegIdx);
-    
+
     /**
      * @param section index of section to estimate
      * @param average item height
@@ -308,6 +323,7 @@ private:
 
     bool synced_ = false;
     bool prevItemStart_ = false;
+    bool knowTotalHeight_ = false; // set to true when content end is reached. no longer need to estimate totalHeight
 
     struct ItemInfo;
 };

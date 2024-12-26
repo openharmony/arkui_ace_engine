@@ -35,7 +35,7 @@ public:
     static void JSCloseBindSheet(const JSCallbackInfo& info);
     static void IsFollowingSystemFontScale(const JSCallbackInfo& info);
     static void GetMaxFontScale(const JSCallbackInfo& info);
-
+    static void SetEnableSwipeBack(const JSCallbackInfo& info);
 private:
     static void AnimateToInner(const JSCallbackInfo& info, bool immediately);
 };

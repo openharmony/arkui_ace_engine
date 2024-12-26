@@ -29,9 +29,14 @@ public:
     virtual void RecycleItems(int32_t from, int32_t to) {}
     virtual void FireOnMove(int32_t from, int32_t to)
     {
-        if (onMoveEvent_) {
+        if (from != to && onMoveEvent_) {
             onMoveEvent_(from, to);
         }
+    }
+
+    bool IsSyntaxNode() const override
+    {
+        return true;
     }
 
 protected:

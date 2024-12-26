@@ -298,6 +298,9 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
     CHECK_NULL_VOID(task);
     ContainerScope scope(patternInstanceId_);
     auto context = PipelineBase::GetCurrentContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "When name:%{public}s PostTaskToUI, context is null", name.c_str());
+    }
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

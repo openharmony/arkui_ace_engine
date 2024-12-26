@@ -852,7 +852,8 @@ void IndexerPattern::UpdateFocusAndSelectedStyle(RefPtr<IndexerPaintProperty>& p
     CHECK_NULL_VOID(indexerTheme);
     if (index == childFocusIndex_) {
         auto borderColor = indexerTheme->GetFocusBgOutlineColor();
-        textRenderContext->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+        textRenderContext->UpdateBorderColor(
+            { borderColor, borderColor, borderColor, borderColor, std::nullopt, std::nullopt });
         textRenderContext->UpdateBackgroundColor(
             paintProperty->GetSelectedBackgroundColor().value_or(indexerTheme->GetSelectedBackgroundColor()));
     } else if (!fromTouchUp || animateSelected_ == lastSelected_) {
@@ -901,7 +902,8 @@ void IndexerPattern::UpdateTextLayoutProperty(
     textLayoutProperty->UpdateMinFontScale(1.0f);
     textLayoutProperty->UpdateMaxFontScale(1.0f);
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateBorderWidth({borderWidth, borderWidth, borderWidth, borderWidth});
+    textLayoutProperty->UpdateBorderWidth(
+        { borderWidth, borderWidth, borderWidth, borderWidth, std::nullopt, std::nullopt });
     textLayoutProperty->UpdateFontSize(fontStyle.GetFontSize());
     textLayoutProperty->UpdateFontFamily(fontStyle.GetFontFamilies());
     textLayoutProperty->UpdateFontWeight(fontStyle.GetFontWeight());
@@ -1001,7 +1003,8 @@ void IndexerPattern::UpdateBubbleView(std::vector<std::string>& currentListData)
     CHECK_NULL_VOID(columnRenderContext);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto columnPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
-        columnLayoutProperty->UpdatePadding({ CalcLength(0), CalcLength(0), CalcLength(columnPadding), CalcLength(0) });
+        columnLayoutProperty->UpdatePadding(
+            { CalcLength(0), CalcLength(0), CalcLength(columnPadding), CalcLength(0), std::nullopt, std::nullopt });
         auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
         if (paintProperty->GetPopupBorderRadius().has_value()) {
@@ -1136,12 +1139,13 @@ void IndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std::s
         auto zeroWidth = Dimension();
         if (showDivider) {
             letterLayoutProperty->UpdateBorderWidth(
-                { zeroWidth, zeroWidth, zeroWidth, Dimension(INDEXER_LIST_DIVIDER) });
-            auto boderColor = BorderColorProperty();
-            boderColor.bottomColor = indexerTheme->GetPopupSeparateColor();
-            letterNodeRenderContext->UpdateBorderColor(boderColor);
+                { zeroWidth, zeroWidth, zeroWidth, Dimension(INDEXER_LIST_DIVIDER), std::nullopt, std::nullopt });
+            auto borderColor = BorderColorProperty();
+            borderColor.bottomColor = indexerTheme->GetPopupSeparateColor();
+            letterNodeRenderContext->UpdateBorderColor(borderColor);
         } else {
-            letterLayoutProperty->UpdateBorderWidth({ zeroWidth, zeroWidth, zeroWidth, zeroWidth });
+            letterLayoutProperty->UpdateBorderWidth(
+                { zeroWidth, zeroWidth, zeroWidth, zeroWidth, std::nullopt, std::nullopt });
         }
     }
     letterNodeRenderContext->SetClipToBounds(true);
@@ -1185,7 +1189,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
     letterLayoutProperty->UpdateMaxFontScale(1.0f);
     auto textPadding = Dimension(IndexerTheme::TEXT_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     letterLayoutProperty->UpdatePadding(
-        { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0) });
+        { CalcLength(textPadding), CalcLength(textPadding), CalcLength(0), CalcLength(0), std::nullopt, std::nullopt });
 
     if (!autoCollapse_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto letterStackNode = DynamicCast<FrameNode>(popupNode_->GetFirstChild());
@@ -1198,7 +1202,7 @@ void IndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
             CalcSize(CalcLength(letterStackWidth), CalcLength(letterStackHeight)));
         auto letterStackPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
         letterStackLayoutProperty->UpdatePadding({ CalcLength(letterStackPadding), CalcLength(letterStackPadding),
-            CalcLength(0), CalcLength(letterStackPadding) });
+            CalcLength(0), CalcLength(letterStackPadding), std::nullopt, std::nullopt });
     }
 }
 
@@ -1236,8 +1240,8 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         auto maxItemsSize = autoCollapse_ ? INDEXER_BUBBLE_MAXSIZE_COLLAPSED_API_TWELVE : INDEXER_BUBBLE_MAXSIZE;
         auto listPadding = Dimension(BUBBLE_DIVIDER_SIZE, DimensionUnit::VP).ConvertToPx();
-        listLayoutProperty->UpdatePadding(
-            { CalcLength(listPadding), CalcLength(listPadding), CalcLength(0), CalcLength(0) });
+        listLayoutProperty->UpdatePadding({ CalcLength(listPadding), CalcLength(listPadding), CalcLength(0),
+            CalcLength(0), std::nullopt, std::nullopt });
         UpdatePopupListGradientView(popupSize, maxItemsSize);
     }
     if (!currentListData.empty() || autoCollapse_) {

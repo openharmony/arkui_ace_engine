@@ -743,7 +743,7 @@ HWTEST_F(RichEditorPatternTestNg, AdjustPlaceholderSelection001, TestSize.Level1
     richEditorPattern->CreateNodePaintMethod();
     EXPECT_NE(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
@@ -851,7 +851,7 @@ HWTEST_F(RichEditorPatternTestNg, UpdateChildrenOffset001, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem1);
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem2 = AceType::MakeRefPtr<PlaceholderSpanItem>();
@@ -898,7 +898,7 @@ HWTEST_F(RichEditorPatternTestNg, NeedAiAnalysis001, TestSize.Level1)
      */
     std::string content = "";
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
     CaretUpdateType targeType1 = CaretUpdateType::PRESSED;
     int32_t pos = 0;
     int32_t spanStart = 10;
@@ -931,7 +931,7 @@ HWTEST_F(RichEditorPatternTestNg, AdjustCursorPosition001, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    std::string content = "TEST123";
+    std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
     int32_t pos = 0;
@@ -1133,7 +1133,7 @@ HWTEST_F(RichEditorPatternTestNg, GetReplacedSpanFission001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorChangeValue changeValue;
     int32_t innerPosition = 0;
-    std::string content = "test123\n";
+    std::u16string content = u"test123\n";
     int32_t startSpanIndex = 0;
     int32_t offsetInSpan = 0;
     std::optional<TextStyle> textStyle = std::optional<TextStyle>(TextStyle());
@@ -1184,11 +1184,11 @@ HWTEST_F(RichEditorPatternTestNg, CalcInsertValueObj003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
 
     richEditorPattern->spans_.clear();
-    AddSpan("");
+    AddSpan(u"");
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
     TextInsertValueInfo info;
-    it->content = "";
+    it->content = u"";
     it->position = 0;
     int textIndex = 1;
     richEditorPattern->CalcInsertValueObj(info, textIndex, false);
@@ -1197,7 +1197,7 @@ HWTEST_F(RichEditorPatternTestNg, CalcInsertValueObj003, TestSize.Level1)
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    it->content = "test123\n";
+    it->content = u"test123\n";
     it->position = 18;
     textIndex = 18;
     richEditorPattern->CalcInsertValueObj(info, textIndex, false);
@@ -1235,7 +1235,7 @@ HWTEST_F(RichEditorPatternTestNg, GetDelPartiallySpanItem001, TestSize.Level1)
     lastInfo.SetValue("test123\n");
     int32_t lastLength = static_cast<int32_t>(StringUtils::ToWstring(lastInfo.GetValue()).length());
     lastInfo.SetEraseLength(lastLength - 1);
-    std::string originalStr;
+    std::u16string originalStr;
     int32_t originalPos = 0;
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
     auto it = richEditorPattern->spans_.front();
@@ -1557,11 +1557,11 @@ HWTEST_F(RichEditorPatternTestNg, FromStyledString001, TestSize.Level1)
     EXPECT_EQ(selection.selection[0], 0);
     EXPECT_EQ(selection.selection[1], 0);
 
-    spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     ASSERT_NE(spanString, nullptr);
     selection = richEditorPattern->FromStyledString(spanString).GetSelection();
     EXPECT_EQ(selection.selection[0], 0);
-    EXPECT_EQ(selection.selection[1], INIT_VALUE_1.size());
+    EXPECT_EQ(selection.selection[1], INIT_U16VALUE_1.size());
 
     auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
     spanString->AppendSpanItem(imageSpanItem);
@@ -1586,9 +1586,9 @@ HWTEST_F(RichEditorPatternTestNg, ToGestureSpan001, TestSize.Level1)
     spanItem->onClick = [](GestureEvent& info) {};
     spanItem->onLongPress = [](GestureEvent& info) {};
 
-    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     ASSERT_NE(spanString, nullptr);
-    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto start = spanItem->position - spanItem->content.length();
     auto end = spanItem->position;
     EXPECT_NE(spanString->ToGestureSpan(spanItem, start, end), nullptr);
 }
@@ -1604,7 +1604,7 @@ HWTEST_F(RichEditorPatternTestNg, AddSpanByPasteData001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     ASSERT_NE(spanString, nullptr);
 
     richEditorPattern->SetSpanStringMode(true);
@@ -1709,7 +1709,7 @@ HWTEST_F(RichEditorPatternTestNg, AddUdmfData001, TestSize.Level1)
     richEditorPattern->dragResultObjects_.emplace_back(resultObject);
 
     resultObject.type = SelectSpanType::TYPEIMAGE;
-    resultObject.valueString = INIT_VALUE_1;
+    resultObject.valueString = INIT_U16VALUE_1;
     richEditorPattern->dragResultObjects_.emplace_back(resultObject);
 
     resultObject.type = SelectSpanType::TYPEIMAGE;
@@ -1746,9 +1746,9 @@ HWTEST_F(RichEditorPatternTestNg, ToBaselineOffsetSpan001, TestSize.Level1)
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
     ASSERT_NE(spanItem, nullptr);
     spanItem->textLineStyle->UpdateBaselineOffset(Dimension(testNumber5, DimensionUnit::PX));
-    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     ASSERT_NE(spanString, nullptr);
-    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto start = spanItem->position - spanItem->content.length();
     auto end = spanItem->position;
     EXPECT_NE(spanString->ToBaselineOffsetSpan(spanItem, start, end), nullptr);
 }
@@ -1773,9 +1773,9 @@ HWTEST_F(RichEditorPatternTestNg, ToTextShadowSpan001, TestSize.Level1)
     textShadow2.SetColor(Color::WHITE);
     std::vector<Shadow> shadows { textShadow1, textShadow2 };
     spanItem->fontStyle->UpdateTextShadow(shadows);
-    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
+    auto spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
     ASSERT_NE(spanString, nullptr);
-    auto start = spanItem->position - StringUtils::ToWstring(spanItem->content).length();
+    auto start = spanItem->position - spanItem->content.length();
     auto end = spanItem->position;
     EXPECT_NE(spanString->ToTextShadowSpan(spanItem, start, end), nullptr);
 }
@@ -1847,10 +1847,10 @@ HWTEST_F(RichEditorPatternTestNg, IsLineSeparatorInLast001, TestSize.Level1)
     auto spanItem = spanNode->GetSpanItem();
     ASSERT_NE(spanNode, nullptr);
 
-    spanItem->content = "ni\nhao";
+    spanItem->content = u"ni\nhao";
     EXPECT_FALSE(richEditorPattern->IsLineSeparatorInLast(spanNode));
 
-    spanItem->content = "nihao\n";
+    spanItem->content = u"nihao\n";
     EXPECT_TRUE(richEditorPattern->IsLineSeparatorInLast(spanNode));
 }
 

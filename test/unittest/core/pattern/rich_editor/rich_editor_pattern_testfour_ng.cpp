@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 #include "test/mock/core/render/mock_paragraph.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -28,6 +29,7 @@ class RichEditorPatternTestFourNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
+    static int32_t GetEmojiStringLength(std::string emojiString);
     static void TearDownTestSuite();
 };
 
@@ -61,6 +63,15 @@ void RichEditorPatternTestFourNg::TearDownTestSuite()
 }
 
 /**
+ * get emoji string length in UTF-16 format
+ */
+int32_t RichEditorPatternTestFourNg::GetEmojiStringLength(std::string emojiString)
+{
+    std::u16string u16EmojiString = StringUtils::Str8ToStr16(emojiString);
+    return static_cast<int32_t>(u16EmojiString.length());
+}
+
+/**
  * @tc.name: HandleDoubleClickOrLongPress001
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
@@ -80,6 +91,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress001, TestSize.
     richEditorPattern->isEditing_ = true;
     richEditorPattern->selectOverlay_->hasTransform_ = true;
 
+    richEditorPattern->isLongPress_ = true;
     richEditorPattern->HandleDoubleClickOrLongPress(info, imageNode);
     /**
      * @tc.steps: step2. add span and select text
@@ -95,7 +107,7 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress001, TestSize.
 }
 
 /**
- * @tc.name: HandleDoubleClickOrLongPress001
+ * @tc.name: HandleDoubleClickOrLongPress002
  * @tc.desc: test HandleDoubleClickOrLongPress
  * @tc.type: FUNC
  */
@@ -126,6 +138,42 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress002, TestSize.
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
     richEditorPattern->HandleDoubleClickOrLongPress(info);
     EXPECT_FALSE(richEditorPattern->isMousePressed_);
+}
+
+/**
+ * @tc.name: HandleDoubleClickOrLongPress003
+ * @tc.desc: test HandleDoubleClickOrLongPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    richEditorNode_->eventHub_->GetOrCreateFocusHub();
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    GestureEvent info;
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->textSelector_.baseOffset = 0;
+    richEditorPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(0, 0, 100, 20));
+        }));
+    PositionWithAffinity defaultPositionWithAffinity(2, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    richEditorPattern->isMousePressed_ = true;
+    richEditorPattern->HandleDoubleClickOrLongPress(info);
+    EXPECT_FALSE(richEditorPattern->isLongPress_);
 }
 
 /**
@@ -453,8 +501,7 @@ HWTEST_F(RichEditorPatternTestFourNg, InsertValueToSpanNode001, TestSize.Level1)
 
     auto spanItem = spanNode->GetSpanItem();
     auto text = spanItem->content;
-    std::wstring textTemp = StringUtils::ToWstring(text);
-    auto textTempSize = static_cast<int32_t>(textTemp.size());
+    auto textTempSize = static_cast<int32_t>(text.size());
 
     ASSERT_EQ(textTempSize, 0);
 }
@@ -496,11 +543,6 @@ HWTEST_F(RichEditorPatternTestFourNg, ResetFirstNodeStyle001, TestSize.Level1)
     auto index4 = richEditorController->AddSymbolSpan(options);
     EXPECT_EQ(index4, 3);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 4);
-
-    richEditorPattern->ResetFirstNodeStyle();
-
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
 }
 
 /**
@@ -521,6 +563,83 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward001, TestSize.Level1)
     richEditorPattern->DeleteBackward(0);
 
     ASSERT_EQ(richEditorPattern->IsPreviewTextInputting(), true);
+}
+
+/**
+ * @tc.name: DeleteBackward002
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. delete image&text
+     */
+    AddImageSpan();
+    std::string emoji = "👨‍👩‍👧‍👦";
+    AddSpan(emoji);
+    auto contentLength = richEditorPattern->GetTextContentLength();
+    richEditorPattern->caretPosition_ = contentLength;
+    richEditorPattern->DeleteBackward(contentLength);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+
+    /**
+     * @tc.steps: step2. delete length is greater than content length
+     */
+    AddSpan(INIT_VALUE_1);
+    AddSpan(emoji);
+    contentLength = richEditorPattern->GetTextContentLength();
+    richEditorPattern->caretPosition_ = contentLength;
+    richEditorPattern->DeleteBackward(contentLength + 1);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+
+    /**
+     * @tc.steps: step3. delete emojis
+     */
+    std::string emojis = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️";
+    AddSpan(emojis);
+    contentLength = richEditorPattern->GetTextContentLength();
+    richEditorPattern->caretPosition_ = contentLength;
+    richEditorPattern->DeleteBackward(contentLength);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+}
+
+/**
+ * @tc.name: DeleteBackward003
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. create and add emoji
+     */
+    std::string caseEmoji = "3️⃣";
+    int32_t bytesOfOneEmoji = GetEmojiStringLength(caseEmoji);
+    AddSpan(caseEmoji);
+
+    /**
+     * @tc.step: step2. DeleteBackward in end of emoji
+     */
+    richEditorPattern->caretPosition_ = bytesOfOneEmoji;
+    richEditorPattern->DeleteBackward(bytesOfOneEmoji);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
+
+    /**
+     * @tc.step: step3. DeleteForward in start of emoji
+     */
+    AddSpan(caseEmoji);
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->DeleteForward(bytesOfOneEmoji);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
 /**
@@ -619,7 +738,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString002, TestSize.Level1)
     ret = richEditorPattern->CanStartAITask();
     EXPECT_TRUE(ret);
 
-    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
+    richEditorPattern->textForDisplay_ = INIT_U16VALUE_1;
     richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
     richEditorPattern->ProcessStyledString();
 
@@ -697,7 +816,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetSelection008, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    std::string content = "TEST123";
+    std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
     richEditorPattern->previewTextRecord_.previewContent = "test";
@@ -727,7 +846,7 @@ HWTEST_F(RichEditorPatternTestFourNg, GetTextBoxes002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "testShowHandles";
+    richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 1;
@@ -941,15 +1060,15 @@ HWTEST_F(RichEditorPatternTestFourNg, GetAdjustedSelectionInfo001, TestSize.Leve
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::vector<std::tuple<SelectSpanType, std::string, RefPtr<PixelMap>>> testTuples;
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, " ", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, "", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, " ", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, "", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, " ", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, "", PixelMap::CreatePixelMap(nullptr));
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, " ", nullptr);
-    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, "", nullptr);
+    std::vector<std::tuple<SelectSpanType, std::u16string, RefPtr<PixelMap>>> testTuples;
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u" ", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u"", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u" ", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPEIMAGE, u"", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u" ", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u"", PixelMap::CreatePixelMap(nullptr));
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u" ", nullptr);
+    testTuples.emplace_back(SelectSpanType::TYPESYMBOLSPAN, u"", nullptr);
     std::list<ResultObject> resultObjectList;
     ResultObject obj;
     for (const auto& testcase : testTuples) {
@@ -1061,10 +1180,10 @@ HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
     richEditorPattern->HandleFocusEvent();
 
-    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
     richEditorPattern->previewTextRecord_.previewContent = "abc";
-    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD, true);
+    richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
     EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
 }
@@ -1130,47 +1249,6 @@ HWTEST_F(RichEditorPatternTestFourNg, CheckEditorTypeChange001, TestSize.Level1)
     richEditorPattern->CheckEditorTypeChange();
 
     EXPECT_TRUE(richEditorPattern->selectOverlayProxy_);
-}
-
-/**
- * @tc.name: HandleOnlyImageSelected001
- * @tc.desc: test HandleOnlyImageSelected
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleOnlyImageSelected001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddImageSpan();
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    Offset globalOffset;
-    richEditorPattern->isSpanStringMode_ = false;
-    richEditorPattern->isOnlyImageDrag_ = true;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    auto selectOverlayInfo = richEditorPattern->selectOverlay_->GetSelectOverlayInfo();
-    selectOverlayInfo->firstHandle.isShow = true;
-    selectOverlayInfo->secondHandle.isShow = true;
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::FINGER);
-    richEditorPattern->textSelector_.baseOffset = 1;
-    richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->isOnlyImageDrag_ = false;
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-    auto textPattern = AceType::DynamicCast<TextPattern>(richEditorPattern);
-    auto children = textPattern->GetAllChildren();
-    for (const auto& uinode : children) {
-        auto imageNode = AceType::DynamicCast<FrameNode>(uinode);
-        auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageNode->GetLayoutProperty());
-        ImageSourceInfo value(" ");
-        imageLayoutProperty->UpdateImageSourceInfo(value);
-    }
-    richEditorPattern->HandleOnlyImageSelected(globalOffset, SourceTool::MOUSE);
-    EXPECT_TRUE(richEditorPattern->isOnlyImageDrag_);
 }
 
 /**
@@ -1301,11 +1379,11 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteValueInStyledString002, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>("abc");
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     richEditorPattern->caretVisible_ = false;
     richEditorPattern->previewLongPress_ = true;
 
-    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, ""), false);
+    ASSERT_EQ(!richEditorPattern->BeforeStyledStringChange(0, 10, u""), false);
 
     richEditorPattern->DeleteValueInStyledString(0, 0, true, false);
 

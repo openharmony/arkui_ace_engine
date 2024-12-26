@@ -1069,7 +1069,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateDisplayIndex001, TestSize.Level1)
      */
     EXPECT_FALSE(layoutProperty->flexItemProperty_);
     layoutProperty->UpdateDisplayIndex(0);
-    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE);
+    EXPECT_EQ(layoutProperty->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     /**
      * @tc.steps3 Call UpdateFlexBasis with flexItemProperty_ again.

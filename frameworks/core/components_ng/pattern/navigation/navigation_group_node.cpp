@@ -66,7 +66,7 @@ NavigationGroupNode::~NavigationGroupNode()
             navDestinationNode->GetPattern<NavDestinationPattern>()->SetCustomNode(nullptr);
         }
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -204,7 +204,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     bool hideNodesFinish = false;
     // record animating destination size
     int32_t animatingSize = 0;
-    int32_t remainNodeIndex = -1;
+    int32_t remainNodeIndex = pattern->IsCurTopNewInstance() ? slot - 1 : slot;
     int32_t beforeLastStandardIndex = preLastStandardNode == nullptr ? -1 : preLastStandardNode->GetIndex();
     while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
@@ -263,9 +263,8 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
-            auto index = slot + removeSize - 1;
             // move current destination position to navigation stack size + remove navDestination nodes
-            if (index > 0) {
+            if (remainNodeIndex >= 0) {
                 navDestination->MovePosition(remainNodeIndex);
             }
             continue;
@@ -515,7 +514,8 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
         navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
-        navigationManager->SetPreNodeHasAnimation(false);
+        navigationManager->SetPreNodeAnimationCached(false);
+        navigationManager->SetPreNodeNeverSet(true);
     }
     navigationManager->SetNavNodeInTransition(nullptr, nullptr);
     navigationManager->SetIsNavigationOnAnimation(false);
@@ -602,9 +602,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            if (curNavDesNode) {
-                navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
-            }
+            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -612,7 +610,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 parent->RemoveChild(preNavDesNode);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
         };
@@ -647,7 +645,7 @@ void NavigationGroupNode::CreateAnimationWithPush(const RefPtr<FrameNode>& preNo
     AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         finishCallback);
     auto newPushAnimation = AnimationUtils::StartAnimation(option, [
-        this, preNode, curNode]() {
+        preNode, curNode]() {
             ACE_SCOPED_TRACE_COMMERCIAL("Navigation page push transition start");
             PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
             TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
@@ -760,7 +758,8 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     CHECK_NULL_VOID(curNavDestination);
     if (AceChecker::IsPerformanceCheckEnabled()) {
         int64_t startTime = GetSysTimestamp();
-        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(PipelineContext::GetCurrentContext());
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(GetContextWithCheck());
+        CHECK_NULL_VOID(pipeline);
         // After completing layout tasks at all nodes on the page, perform performance testing and management
         pipeline->AddAfterLayoutTask([weakNav = WeakClaim(this), weakNode = WeakPtr<FrameNode>(curNode), startTime,
                                          path = curNavDestination->GetNavDestinationPathInfo()]() {
@@ -846,10 +845,8 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        if (curNode) {
-            navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
-        }
-        auto context = PipelineContext::GetCurrentContext();
+        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
     });
@@ -882,7 +879,7 @@ void NavigationGroupNode::TransitionWithReplace(
 
 void NavigationGroupNode::OnInspectorIdUpdate(const std::string& id)
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     context->AddOrReplaceNavigationNode(id, WeakClaim(this));
     curId_ = id;
@@ -932,7 +929,7 @@ void NavigationGroupNode::DealNavigationExit(const RefPtr<FrameNode>& preNode, b
 
 void NavigationGroupNode::NotifyPageHide()
 {
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto stageManager = context->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -1103,7 +1100,7 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
     }
     bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
@@ -1289,7 +1286,7 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
             navigation->RemoveDialogDestination();
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
         };
@@ -1550,7 +1547,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 parent->RemoveChild(preNode);
                 parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             }
-            auto context = PipelineContext::GetCurrentContext();
+            auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
             navigation->CleanPopAnimations();

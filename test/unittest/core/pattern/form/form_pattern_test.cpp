@@ -1443,15 +1443,18 @@ HWTEST_F(FormPatternTest, FormPatternTest_036, TestSize.Level1)
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
 
-    int32_t top = 0;
-    int32_t lef = 0;
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 0;
+    parentRectInfo.left = 0;
+    int32_t& top = parentRectInfo.top;
+    int32_t& lef = parentRectInfo.left;
     pattern->frameNode_ = nullptr;
-    pattern->GetRectRelativeToWindow(top, lef);
+    pattern->GetRectRelativeToWindow(parentRectInfo);
     EXPECT_EQ(top, 0);
     EXPECT_EQ(lef, 0);
 
     pattern->frameNode_ = formNode;
-    pattern->GetRectRelativeToWindow(top, lef);
+    pattern->GetRectRelativeToWindow(parentRectInfo);
     EXPECT_EQ(top, 0);
     EXPECT_EQ(lef, 0);
 }

@@ -375,12 +375,12 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
 void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const ResultObject& resultObject)
 {
     if (resultObject.type == SelectSpanType::TYPESPAN) {
-        resultObj->SetProperty<std::string>("value", resultObject.valueString);
+        resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
         resultObj->SetProperty<std::string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
         resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
-        resultObj->SetProperty<std::string>("value", resultObject.valueString);
+        resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(resultObject.symbolSpanStyle));
         resultObj->SetPropertyObject("valueResource", CreateJSValueResource(resultObject.valueResource));
     } else if (resultObject.type == SelectSpanType::TYPEIMAGE) {
@@ -392,7 +392,7 @@ void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const Resul
             }
 #endif
         } else {
-            resultObj->SetProperty<std::string>("valueResourceStr", resultObject.valueString);
+            resultObj->SetProperty<std::u16string>("valueResourceStr", resultObject.valueString);
         }
         resultObj->SetPropertyObject("imageStyle", CreateJSImageStyleResult(resultObject.imageStyle));
     }
@@ -1976,6 +1976,7 @@ void JSRichEditorController::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditorController>::CustomMethod("addBuilderSpan", &JSRichEditorController::AddPlaceholderSpan);
     JSClass<JSRichEditorController>::CustomMethod("setCaretOffset", &JSRichEditorController::SetCaretOffset);
     JSClass<JSRichEditorController>::CustomMethod("getCaretOffset", &JSRichEditorController::GetCaretOffset);
+    JSClass<JSRichEditorController>::CustomMethod("getCaretRect", &JSRichEditorController::GetCaretRect);
     JSClass<JSRichEditorController>::CustomMethod("updateSpanStyle", &JSRichEditorController::UpdateSpanStyle);
     JSClass<JSRichEditorController>::CustomMethod(
         "updateParagraphStyle", &JSRichEditorController::UpdateParagraphStyle);
@@ -2232,6 +2233,21 @@ void JSRichEditorBaseController::GetCaretOffset(const JSCallbackInfo& args)
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(caretOffset)));
     }
+}
+
+void JSRichEditorBaseController::GetCaretRect(const JSCallbackInfo& args)
+{
+    ContainerScope scope(instanceId_ < 0 ? Container::CurrentId() : instanceId_);
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    auto caretRect = controller->GetCaretRect();
+    CHECK_EQUAL_VOID(caretRect.IsValid(), false);
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty<float>("x", caretRect.GetOffset().GetX());
+    obj->SetProperty<float>("y", caretRect.GetOffset().GetY());
+    obj->SetProperty<float>("width", caretRect.Width());
+    obj->SetProperty<float>("height", caretRect.Height());
+    args.SetReturnValue(obj);
 }
 
 void JSRichEditorBaseController::SetCaretOffset(const JSCallbackInfo& args)
@@ -2644,7 +2660,6 @@ void JSRichEditorBaseController::GetLayoutManager(const JSCallbackInfo& args)
     JSRef<JSObject> obj = JSClass<JSLayoutManager>::NewInstance();
     auto jsLayoutManager = Referenced::Claim(obj->Unwrap<JSLayoutManager>());
     CHECK_NULL_VOID(jsLayoutManager);
-    jsLayoutManager->IncRefCount();
     auto controller = controllerWeak_.Upgrade();
     CHECK_NULL_VOID(controller);
     auto layoutInfoInterface = controller->GetLayoutInfoInterface();
@@ -2799,6 +2814,7 @@ JSRef<JSVal> JSRichEditorStyledStringController::CreateJsOnWillChange(const NG::
     jsSpanString->SetController(spanString);
     onWillChangeObj->SetPropertyObject("range", rangeObj);
     onWillChangeObj->SetPropertyObject("replacementString", replacementStringObj);
+    onWillChangeObj->SetPropertyObject("previewText", JSRef<JSVal>::Make(ToJSValue(changeValue.GetPreviewText())));
     return JSRef<JSVal>::Cast(onWillChangeObj);
 }
 
@@ -2809,6 +2825,8 @@ void JSRichEditorStyledStringController::JSBind(BindingTarget globalObj)
         "setCaretOffset", &JSRichEditorStyledStringController::SetCaretOffset);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getCaretOffset", &JSRichEditorStyledStringController::GetCaretOffset);
+    JSClass<JSRichEditorStyledStringController>::CustomMethod(
+        "getCaretRect", &JSRichEditorStyledStringController::GetCaretRect);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(
         "getTypingStyle", &JSRichEditorStyledStringController::GetTypingStyle);
     JSClass<JSRichEditorStyledStringController>::CustomMethod(

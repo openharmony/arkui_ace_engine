@@ -27,9 +27,12 @@
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
-#include "core/event/non_pointer_axis_event.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -63,7 +66,11 @@ void GetEventDevice(int32_t sourceType, E& event)
             event.sourceType = SourceType::TOUCH_PAD;
             break;
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_MOUSE:
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_JOYSTICK:
             event.sourceType = SourceType::MOUSE;
+            break;
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_CROWN:
+            event.sourceType = SourceType::CROWN;
             break;
         default:
             event.sourceType = SourceType::NONE;
@@ -79,6 +86,10 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
     bool useRealtimeMatrix = false);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event);
+#endif
+
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);
 
@@ -92,7 +103,7 @@ void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ax
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event);
 
-void ConvertNonPointerAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::NonPointerAxisEvent& event);
+void ConvertFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, NG::FocusAxisEvent& event);
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, DragPointerEvent& event);
 

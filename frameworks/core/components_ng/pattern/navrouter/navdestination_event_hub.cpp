@@ -81,8 +81,9 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
         auto id = host->GetInspectorIdValue("");
         Recorder::EventParamsBuilder builder;
         builder.SetId(id)
-            .SetText(name)
+            .SetNavDst(name)
             .SetExtra(Recorder::KEY_PAGE_PARAM, param)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
     }
@@ -109,7 +110,7 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
         CHECK_NULL_VOID(host);
         auto id = host->GetInspectorIdValue("");
         Recorder::EventParamsBuilder builder;
-        builder.SetId(id).SetText(name).SetDescription(host->GetAutoEventParamValue(""));
+        builder.SetId(id).SetNavDst(name).SetHost(host).SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
     }
 }

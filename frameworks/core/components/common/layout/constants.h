@@ -17,6 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H
 
 #include <cstdint>
+#include <string>
+
 #include "base/utils/linear_map.h"
 #include "base/utils/utils.h"
 
@@ -233,6 +235,17 @@ inline std::string ToString(const TextAlign& textAlign)
 }
 } // namespace StringUtils
 
+enum class TextMarqueeState {
+    START = 0,
+    BOUNCE,
+    FINISH,
+};
+
+enum class MarqueeStartPolicy {
+    DEFAULT = 0,
+    ON_FOCUS,
+};
+
 enum class TextDataDetectType {
     PHONE_NUMBER = 0,
     URL,
@@ -343,6 +356,8 @@ enum class TextHeightAdaptivePolicy {
 enum class MarqueeDirection {
     LEFT,
     RIGHT,
+    DEFAULT,
+    DEFAULT_REVERSE,
 };
 
 enum class ImageRepeat {
@@ -370,6 +385,7 @@ enum class ImageFit {
     BOTTOM,
     BOTTOM_END,
     COVER_TOP_LEFT,
+    MATRIX,
 };
 
 namespace StringUtils {
@@ -425,6 +441,12 @@ enum class EdgeEffect {
     SPRING = 0,
     FADE,
     NONE,
+};
+
+enum class EffectEdge {
+    START = 1,
+    END = 2,
+    ALL = 3,
 };
 
 enum class BorderStyle {

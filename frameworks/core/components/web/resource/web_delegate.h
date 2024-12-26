@@ -63,6 +63,8 @@ typedef struct WindowsSurfaceInfoTag {
     EGLSurface surface;
 } WindowsSurfaceInfo;
 
+typedef NWeb::NativeArkWebOnJavaScriptProxyCallback NativeMethodCallback;
+
 class WebMessagePortOhos : public WebMessagePort {
     DECLARE_ACE_TYPE(WebMessagePortOhos, WebMessagePort)
 
@@ -623,9 +625,51 @@ private:
     uint8_t theme_flags_ = static_cast<uint8_t>(NWeb::SystemThemeFlags::NONE);
 };
 
+class NWebKeyboardEventImpl : public OHOS::NWeb::NWebKeyboardEvent {
+public:
+    NWebKeyboardEventImpl(
+        int32_t keyCode, int32_t action, int32_t unicode, bool enableCapsLock,
+        std::vector<int32_t> pressedCodes)
+        : keyCode_(keyCode), action_(action), unicode_(unicode), enableCapsLock_(enableCapsLock),
+        pressedCodes_(pressedCodes) {}
+    ~NWebKeyboardEventImpl() = default;
+
+    int32_t GetKeyCode() override
+    {
+        return keyCode_;
+    }
+
+    int32_t GetAction() override
+    {
+        return action_;
+    }
+
+    int32_t GetUnicode() override
+    {
+        return unicode_;
+    }
+
+    bool IsEnableCapsLock() override
+    {
+        return enableCapsLock_;
+    }
+
+    std::vector<int32_t> GetPressKeyCodes() override
+    {
+        return pressedCodes_;
+    }
+
+private:
+    int32_t keyCode_ = 0;
+    int32_t action_ = 0;
+    uint32_t unicode_ = 0;
+    bool enableCapsLock_ = false;
+    std::vector<int32_t> pressedCodes_ {};
+};
+
 class NWebMouseEventImpl : public OHOS::NWeb::NWebMouseEvent {
 public:
-    NWebMouseEventImpl(int32_t x, int32_t y,
+    NWebMouseEventImpl(int32_t x, int32_t y, int32_t rawX, int32_t rawY,
         int32_t buttton, int32_t action,
         int32_t clickNum, std::vector<int32_t> pressedCodes)
         : x_(x), y_(y), buttton_(buttton), action_(action),
@@ -662,9 +706,21 @@ public:
         return pressedCodes_;
     }
 
+    int32_t GetRawX() override
+    {
+        return raw_x_;
+    }
+
+    int32_t GetRawY() override
+    {
+        return raw_y_;
+    }
+
 private:
     int32_t x_ = 0;
     int32_t y_ = 0;
+    int32_t raw_x_ = 0;
+    int32_t raw_y_ = 0;
     int32_t buttton_ = 0;
     int32_t action_ = 0;
     int32_t clickNum_ = 0;
@@ -806,6 +862,7 @@ public:
         const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
     bool WebOnKeyEvent(int32_t keyCode, int32_t keyAction, const std::vector<int32_t>& pressedCodes);
+    bool SendKeyboardEvent(const std::shared_ptr<OHOS::NWeb::NWebKeyboardEvent>& keyboardEvent);
     void OnMouseEvent(int32_t x, int32_t y, const MouseButton button, const MouseAction action, int count);
     void WebOnMouseEvent(const std::shared_ptr<OHOS::NWeb::NWebMouseEvent>& mouseEvent);
     void OnFocus(const OHOS::NWeb::FocusReason& reason = OHOS::NWeb::FocusReason::EVENT_REQUEST);
@@ -967,6 +1024,10 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
+    void JavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentEndByOrder();
+    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
@@ -974,6 +1035,7 @@ public:
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1090,6 +1152,15 @@ public:
 
     void SetTransformHint(uint32_t rotation);
 
+    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
+
+    void RegisterNativeArkJSFunction(const std::string& objName,
+        const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
+
+    void UnRegisterNativeArkJSFunction(const std::string& objName);
+
+    bool IsActivePolicyDisable();
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1111,7 +1182,6 @@ private:
 #ifdef OHOS_STANDARD_SYSTEM
     sptr<OHOS::Rosen::Window> CreateWindow();
     void LoadUrl(const std::string& url, const std::map<std::string, std::string>& httpHeaders);
-    void ExecuteTypeScript(const std::string& jscode, const std::function<void(std::string)>&& callback);
     void LoadDataWithBaseUrl(const std::string& baseUrl, const std::string& data, const std::string& mimeType,
         const std::string& encoding, const std::string& historyUrl);
     void Refresh();
@@ -1278,6 +1348,8 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

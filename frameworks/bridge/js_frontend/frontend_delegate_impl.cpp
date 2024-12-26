@@ -1321,7 +1321,7 @@ void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
@@ -1431,7 +1431,10 @@ void FrontendDelegateImpl::OnPushPageSuccess(const RefPtr<JsAcePage>& page, cons
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = url;
+    pageRouteStack_.emplace_back(pageInfo);
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1649,7 +1652,10 @@ void FrontendDelegateImpl::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, c
         ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = url;
+    pageRouteStack_.emplace_back(pageInfo);
     auto pipelineContext = pipelineContextHolder_.Get();
     if (pipelineContext) {
         pipelineContext->onRouterChange(url);

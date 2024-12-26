@@ -14,6 +14,9 @@
  */
 
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+
+#include <atomic>
+
 #include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
@@ -53,6 +56,8 @@ const Dimension MENU_SAFETY_Y = 96.0_vp;
 const Dimension MENU_ITEM_TEXT_PADDING = 8.0_vp;
 const Color MENU_ITEM_COLOR = Color(0xffffff);
 
+std::atomic<int32_t> g_nextListenerId = 1;
+
 RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
 {
     auto node = weak.Upgrade();
@@ -62,7 +67,7 @@ RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
     const auto& windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
 
-    bool isMoving = windowManager->GetWindowStartMoveFlag();
+    bool isMoving = windowManager->WindowIsStartMoving();
     if (isMoving) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "window is moving, button click event is not supported");
         return nullptr;
@@ -191,7 +196,6 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     bool isFloatingWindow = windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth((isFloatingWindow && isShow) ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -810,9 +814,13 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     CHECK_NULL_VOID(customNode);
 
     auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_VOID(windowManager);
+    auto windowMode = windowManager->GetWindowMode();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
-    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode_ == WindowMode::WINDOW_MODE_FULLSCREEN) {
+    if (mode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+        windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY || windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, true);
     } else {
         customNode->FireCustomCallback(EVENT_NAME_MAXIMIZE_IS_RECOVER, false);
@@ -924,4 +932,27 @@ void ContainerModalPatternEnhance::CallMenuWidthChange(int32_t resId)
     controlButtonsNode->FireCustomCallback(EVENT_NAME_MENU_WIDTH_CHANGE, std::to_string(width));
 }
 
+int32_t ContainerModalPatternEnhance::AddButtonsRectChangeListener(ButtonsRectChangeListener&& listener)
+{
+    auto id = g_nextListenerId.fetch_add(1);
+    rectChangeListeners_.emplace(id, listener);
+    return id;
+}
+
+void ContainerModalPatternEnhance::RemoveButtonsRectChangeListener(int32_t id)
+{
+    auto it = rectChangeListeners_.find(id);
+    if (it != rectChangeListeners_.end()) {
+        rectChangeListeners_.erase(it);
+    }
+}
+
+void ContainerModalPatternEnhance::NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect)
+{
+    for (auto& pair : rectChangeListeners_) {
+        if (pair.second) {
+            pair.second(containerModal, buttonsRect);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
