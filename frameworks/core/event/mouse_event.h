@@ -104,7 +104,7 @@ struct MouseEvent final : public PointerEvent {
     int32_t targetDisplayId = 0;
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent;
     int32_t touchEventId = 0;
     int32_t originalId = 0;
     std::vector<KeyCode> pressedKeyCodes_;
@@ -264,6 +264,7 @@ struct MouseEvent final : public PointerEvent {
         mouseEvent.isPrivacyMode = isPrivacyMode;
         return mouseEvent;
     }
+    std::shared_ptr<MMI::PointerEvent> GetMouseEventPointerEvent() const;
 };
 
 class MouseInfo : public BaseEventInfo {
