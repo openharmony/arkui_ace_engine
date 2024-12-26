@@ -44,6 +44,9 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
@@ -776,6 +779,13 @@ public:
 
     void StopScrollableAndAnimate();
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
+    CrownSensitivity GetDigitalCrownSensitivity() const
+    {
+        return crownSensitivity_;
+    }
+#endif
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -878,6 +888,10 @@ protected:
 
     void RecordScrollEvent(Recorder::EventType eventType);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownEvent();
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+#endif
 private:
     virtual void OnScrollEndCallback() {};
 
