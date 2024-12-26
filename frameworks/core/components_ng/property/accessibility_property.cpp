@@ -80,11 +80,19 @@ std::string AccessibilityProperty::GetText() const
 std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
 {
     std::string text;
-    GetGroupTextRecursive(forceGetChildren, text);
+    GetGroupTextRecursive(forceGetChildren, text, false);
     return text;
 }
 
-void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+std::string AccessibilityProperty::GetGroupPreferAccessibilityText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text, true);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text,
+                                                  bool preferAccessibilityText) const
 {
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -93,7 +101,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES_STR) {
-        auto nodeText = GetText();
+        std::string accessibilityText = GetAccessibilityText();
+        auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
@@ -112,7 +121,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         if (child == nullptr) {
             continue;
         }
-        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text,
+                                                                                        preferAccessibilityText);
     }
 }
 
@@ -733,6 +743,11 @@ void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
+void AccessibilityProperty::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{
+    accessibilityTextPreferred_ = accessibilityTextPreferred;
+}
+
 void AccessibilityProperty::SetAccessibilityText(const std::string& text)
 {
     if (text == accessibilityText_.value_or("")) {
@@ -767,6 +782,11 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
     }
     accessibilityDescription_ = accessibilityDescription;
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+bool AccessibilityProperty::IsAccessibilityTextPreferred() const
+{
+    return accessibilityTextPreferred_;
 }
 
 void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)

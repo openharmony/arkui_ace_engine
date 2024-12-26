@@ -295,6 +295,7 @@ public:
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

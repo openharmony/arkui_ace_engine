@@ -1230,6 +1230,23 @@ bool IsUserCheckedOrSelected(const RefPtr<NG::FrameNode> frameNode)
     return false;
 }
 
+void UpdateAccessibilityTextValueInfo(
+    RefPtr<NG::AccessibilityProperty>& accessibilityProperty, AccessibilityElementInfo& nodeInfo)
+{
+    if (accessibilityProperty->HasUserTextValue()) {
+        nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
+    } else {
+        nodeInfo.SetContent(accessibilityProperty->GetGroupText());
+    }
+
+    if (!accessibilityProperty->HasUserTextValue() && accessibilityProperty->GetAccessibilityText().empty() &&
+        accessibilityProperty->IsAccessibilityGroup() && accessibilityProperty->IsAccessibilityTextPreferred()) {
+        nodeInfo.SetAccessibilityText(accessibilityProperty->GetGroupPreferAccessibilityText());
+    } else {
+        nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
+    }
+}
+
 void UpdateElementInfoPageIdWithTreeId(Accessibility::AccessibilityElementInfo& info, int32_t treeId)
 {
     int32_t pageId = info.GetPageId();
@@ -1312,12 +1329,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
         nodeInfo.SetComponentType(accessibilityProperty->GetAccessibilityRole());
     }
 
-    if (accessibilityProperty->HasUserTextValue()) {
-        nodeInfo.SetContent(accessibilityProperty->GetUserTextValue());
-    } else {
-        nodeInfo.SetContent(accessibilityProperty->GetGroupText());
-    }
-    nodeInfo.SetAccessibilityText(accessibilityProperty->GetAccessibilityText());
+    UpdateAccessibilityTextValueInfo(accessibilityProperty, nodeInfo);
     if (accessibilityProperty->HasRange()) {
         RangeInfo rangeInfo = ConvertAccessibilityValue(accessibilityProperty->GetAccessibilityValue());
         nodeInfo.SetRange(rangeInfo);
