@@ -2139,7 +2139,6 @@ class NavPathInfo {
     this.needUpdate = false;
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
-    this.promise = undefined;
     this.isEntry = isEntry;
   }
 }
@@ -2222,6 +2221,7 @@ class NavPathStack {
       info = new NavPathInfo(name, param, onPop);
     }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     if (typeof onPop === 'boolean') {
@@ -2248,18 +2248,18 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+
+    let promise = this.nativeStack?.onPushDestination(info);
+    if (!promise) {
+      return new Promise((resolve, reject) => {
+        reject({ message: 'Internal error.', code: 100001 });
+      })
+    }
     [info.index, info.navDestinationId] = this.findInPopArray(name);
+    info.pushDestination = true;
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return new Promise((resolve, reject) => {
-      info.promise = (errorCode, errorMessage) => {
-        if (errorCode == 0) {
-          resolve(0);
-          return;
-        }
-        reject({code: errorCode, message: errorMessage});
-      }
-    });
+    return promise;
   }
   parseNavigationOptions(param) {
     let launchMode = LaunchMode.STANDARD;
@@ -2310,6 +2310,7 @@ class NavPathStack {
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
+    info.pushDestination = false;
     this.pathArray.push(info);
     this.isReplace = 0;
     this.animated = animated;
@@ -2323,21 +2324,20 @@ class NavPathStack {
     }
     this.isReplace = 0;
     this.animated = animated;
+    let promise = this.nativeStack?.onPushDestination(info);
+    if (!promise) {
+      return new Promise((resolve, reject) => {
+        reject({ message: 'Internal error.', code: 100001 });
+      })
+    }
     [info.index, info.navDestinationId] = this.findInPopArray(info.name);
+    info.pushDestination = true;
     if (launchMode === LaunchMode.NEW_INSTANCE) {
       info.needBuildNewInstance = true;
     }
     this.pathArray.push(info);
     this.nativeStack?.onStateChanged();
-    return new Promise((resolve, reject) => {
-      info.promise = (errorCode, errorMessage) => {
-        if (errorCode == 0) {
-          resolve(0);
-          return;
-        }
-        reject({code: errorCode, message: errorMessage});
-      }
-    });
+    return promise;
   }
   replacePath(info, optionParam) {
     let [launchMode, animated] = this.parseNavigationOptions(optionParam);
@@ -2552,8 +2552,14 @@ class NavPathStack {
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
   }
-  removeInvalidPage(index) {
-    this.pathArray.splice(index, 1);
+  removeInvalidPage(name, param) {
+    for (let i = 0; i < this.pathArray.length; i++) {
+      if (this.pathArray[i].name === name &&
+        this.pathArray[i].param === param) {
+        this.pathArray.splice(i, 1);
+        return;
+      }
+    }
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
