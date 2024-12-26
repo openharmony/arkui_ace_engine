@@ -38,10 +38,7 @@ export struct SymbolGlyphBootcamp {
   @State symbolEffectIsActive: boolean = false;
   @State enableSymbolEffectTriggerValue: boolean = false;
   @State symbolEffectTriggerValue: number = -1;
-  @State replace: boolean = true
-
-
-
+  @State replace: boolean = true;
 
   build() {
     NavDestination() {
@@ -76,7 +73,6 @@ export struct SymbolGlyphBootcamp {
           .effectStrategy(useEnabled(this.enableEffectStrategy, this.effectStrategy))
 
       }
-
       if (this.enableSymbolEffectIsActive) {
         Column() {
           SymbolGlyph($r('sys.symbol.ohos_wifi'))
@@ -197,7 +193,6 @@ export struct SymbolGlyphBootcamp {
           min: -1,
           max: 10
         })
-
       }
     }
   }
