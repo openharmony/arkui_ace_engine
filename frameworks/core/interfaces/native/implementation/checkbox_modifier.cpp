@@ -67,9 +67,10 @@ void SetCheckboxOptionsImpl(Ark_NativePointer node,
         if (arkIndicatorBuilder) {
             WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
             auto customBuilder = [callback = CallbackHelper(arkIndicatorBuilder.value(), frameNode), node,
-                weakNode]() -> RefPtr<UINode> {
+                weakNode]() {
                 PipelineContext::SetCallBackNode(weakNode);
-                return callback.BuildSync(node);
+                auto uiNode = callback.BuildSync(node);
+                ViewStackProcessor::GetInstance()->Push(uiNode);
             };
             CheckBoxModelNG::SetBuilder(frameNode, std::move(customBuilder));
         }

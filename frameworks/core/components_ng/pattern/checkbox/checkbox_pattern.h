@@ -188,11 +188,6 @@ public:
         builder_ = buildFunc;
     }
 
-    void SetIndicatorBuilder(std::function<RefPtr<UINode>()>&& buildFunc)
-    {
-        builder2_ = buildFunc;
-    }
-
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         Pattern::ToJsonValue(json, filter);
@@ -307,7 +302,6 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
-    std::optional<std::function<RefPtr<UINode>()>> builder2_;
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;

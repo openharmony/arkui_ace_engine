@@ -43,7 +43,7 @@ void CheckBoxPattern::UpdateIndicator()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if ((builder_.has_value() || builder2_.has_value()) && !UseContentModifier()) {
+    if (builder_.has_value() && !UseContentModifier()) {
         LoadBuilder();
         auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
         CHECK_NULL_VOID(paintProperty);
@@ -492,19 +492,15 @@ void CheckBoxPattern::StartExitAnimation()
 void CheckBoxPattern::LoadBuilder()
 {
     RefPtr<UINode> customNode;
-    if (builder_.has_value() || builder2_.has_value()) {
+    if (builder_.has_value()) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         if (builderNode_) {
             host->RemoveChildAndReturnIndex(builderNode_);
         }
-        if (builder_.has_value()) {
-            NG::ScopedViewStackProcessor builderViewStackProcessor;
-            builder_.value()();
-            customNode = NG::ViewStackProcessor::GetInstance()->Finish();
-        } else {
-            customNode = builder2_.value()();
-        }
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        builder_.value()();
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         CHECK_NULL_VOID(customNode);
         builderNode_ = AceType::DynamicCast<FrameNode>(customNode);
         CHECK_NULL_VOID(builderNode_);

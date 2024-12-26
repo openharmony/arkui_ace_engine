@@ -306,7 +306,7 @@ CheckBoxStyle CheckBoxModelNG::GetCheckboxStyle(FrameNode* frameNode)
     return value;
 }
 
-void CheckBoxModelNG::SetBuilder(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& buildFunc)
+void CheckBoxModelNG::SetBuilder(FrameNode* frameNode, std::function<void(void)>&& buildFunc)
 {
     CHECK_NULL_VOID(frameNode);
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
