@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-var __decorate = (this && this.__decorate) || function (g1, h1, i1, j1) {
-  var k1 = arguments.length, l1 = k1 < 3 ? h1 : j1 === null ? j1 = Object.getOwnPropertyDescriptor(h1, i1) : j1, m1;
+var __decorate = (this && this.__decorate) || function (k1, l1, m1, n1) {
+  var o1 = arguments.length, p1 = o1 < 3 ? l1 : n1 === null ? n1 = Object.getOwnPropertyDescriptor(l1, m1) : n1, q1;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
-    l1 = Reflect.decorate(g1, h1, i1, j1);
+    p1 = Reflect.decorate(k1, l1, m1, n1);
   else
-    for (var n1 = g1.length - 1; n1 >= 0; n1--)
-      if (m1 = g1[n1])
-        l1 = (k1 < 3 ? m1(l1) : k1 > 3 ? m1(h1, i1, l1) : m1(h1, i1)) || l1;
-  return k1 > 3 && l1 && Object.defineProperty(h1, i1, l1), l1;
+    for (var r1 = k1.length - 1; r1 >= 0; r1--)
+      if (q1 = k1[r1])
+        p1 = (o1 < 3 ? q1(p1) : o1 > 3 ? q1(l1, m1, p1) : q1(l1, m1)) || p1;
+  return o1 > 3 && p1 && Object.defineProperty(l1, m1, p1), p1;
 };
 if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
@@ -41,16 +41,17 @@ const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
 const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_container_background_color_key';
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
 export class ProgressButtonV2 extends ViewV2 {
-  constructor(y, z, a1, b1 = -1, c1, d1) {
-    super(y, b1, d1);
-    this.initParam("progress", (z && "progress" in z) ? z.progress : undefined);
+  constructor(c1, d1, e1, f1 = -1, g1, h1) {
+    super(c1, f1, h1);
+    this.initParam("progress", (d1 && "progress" in d1) ? d1.progress : undefined);
+    this.initParam("content", (d1 && "content" in d1) ? d1.content : EMPTY_STRING);
+    this.initParam("progressButtonWidth", (d1 && "progressButtonWidth" in d1) ? d1.progressButtonWidth : LengthMetrics.vp(BUTTON_NORMARL_WIDTH));
+    this.initParam("onClicked", (d1 && "onClicked" in d1) ? d1.onClicked : () => {
+    });
+    this.initParam("enable", (d1 && "enable" in d1) ? d1.enable : true);
+    this.initParam("colorOptions", (d1 && "colorOptions" in d1) ? d1.colorOptions : undefined);
     this.textProgress = EMPTY_STRING;
-    this.initParam("content", (z && "content" in z) ? z.content : EMPTY_STRING);
     this.isLoading = false;
-    this.initParam("progressButtonWidth", (z && "progressButtonWidth" in z) ? z.progressButtonWidth : LengthMetrics.vp(BUTTON_NORMARL_WIDTH));
-    this.initParam("onClicked", (z && "onClicked" in z) ? z.onClicked : () => { });
-    this.initParam("enable", (z && "enable" in z) ? z.enable : true);
-    this.initParam("colorOptions", (z && "colorOptions" in z) ? z.colorOptions : undefined);
     this.progressColor = '#330A59F7';
     this.containerBorderColor = '#330A59F7';
     this.containerBackgroundColor = { "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
@@ -58,10 +59,10 @@ export class ProgressButtonV2 extends ViewV2 {
     this.buttonBorderRadius = BUTTON_BORDER_RADIUS;
     this.finalizeConstruction();
   }
-  onWillApplyTheme(x) {
-    this.progressColor = x.colors.compEmphasizeSecondary;
-    this.containerBorderColor = x.colors.compEmphasizeSecondary;
-    this.containerBackgroundColor = x.colors.iconOnFourth;
+  onWillApplyTheme(b1) {
+    this.progressColor = b1.colors.compEmphasizeSecondary;
+    this.containerBorderColor = b1.colors.compEmphasizeSecondary;
+    this.containerBackgroundColor = b1.colors.iconOnFourth;
   }
   getButtonProgress() {
     if (this.progress < 0) {
@@ -83,7 +84,7 @@ export class ProgressButtonV2 extends ViewV2 {
     }
     else {
       this.isLoading = true;
-      this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
+      this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
     }
   }
   getLoadingProgress() {
@@ -95,12 +96,12 @@ export class ProgressButtonV2 extends ViewV2 {
         this.textProgress = MAX_PERCENTAGE;
       }
       else {
-        this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
+        this.textProgress = `${Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS)}%`;
       }
     }
   }
   initialRender() {
-    this.observeComponentCreation2((u, v) => {
+    this.observeComponentCreation2((y, z) => {
       Button.createWithChild();
       Button.borderRadius(this.buttonBorderRadius);
       Button.clip(false);
@@ -120,15 +121,17 @@ export class ProgressButtonV2 extends ViewV2 {
         if (this.progress < MAX_PROGRESS) {
           this.isLoading = !this.isLoading;
         }
-        this.onClicked && this.onClicked();
+        this.onClicked?.();
       });
     }, Button);
-    this.observeComponentCreation2((s, t) => {
+    this.observeComponentCreation2((w, x) => {
       Stack.create();
     }, Stack);
-    this.observeComponentCreation2((q, r) => {
-      Progress.create({ value: this.getButtonProgress(), total: MAX_PROGRESS,
-        style: ProgressStyle.Capsule });
+    this.observeComponentCreation2((u, v) => {
+      Progress.create({
+        value: this.getButtonProgress(), total: MAX_PROGRESS,
+        style: ProgressStyle.Capsule
+      });
       Progress.height(this.textHeight);
       Progress.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
       Progress.borderRadius(this.buttonBorderRadius);
@@ -139,11 +142,11 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
       Progress.color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor);
     }, Progress);
-    this.observeComponentCreation2((o, p) => {
+    this.observeComponentCreation2((s, t) => {
       Row.create();
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
     }, Row);
-    this.observeComponentCreation2((j, k) => {
+    this.observeComponentCreation2((n, o) => {
       Text.create(this.isLoading ? this.textProgress : this.content);
       Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
@@ -151,25 +154,31 @@ export class ProgressButtonV2 extends ViewV2 {
       Text.fontColor(this.colorOptions?.textColor?.color);
       Text.maxLines(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-      Text.padding({ top: 4, left: 8, right: 8, bottom: 4 });
+      Text.padding({
+        top: 4,
+        left: 8,
+        right: 8,
+        bottom: 4
+      });
       Text.opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY);
-      Text.onAreaChange((m, n) => {
-        if (!n.height || n.height === this.textHeight) {
+      Text.onSizeChange((q, r) => {
+        if (!r.height || r.height === this.textHeight) {
           return;
         }
-        this.textHeight = n.height > BUTTON_NORMARL_HEIGHT ? n.height : BUTTON_NORMARL_HEIGHT;
+        this.textHeight = r.height > BUTTON_NORMARL_HEIGHT ? r.height : BUTTON_NORMARL_HEIGHT;
         this.buttonBorderRadius = Number(this.textHeight) / 2;
       });
     }, Text);
     Text.pop();
     Row.pop();
-    this.observeComponentCreation2((h, i) => {
+    this.observeComponentCreation2((l, m) => {
       Row.create();
       Row.key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY);
       Row.backgroundColor(Color.Transparent);
       Row.border({
         width: 1,
-        color: this.colorOptions?.borderColor?.color ? this.colorOptions?.borderColor?.color : this.containerBorderColor
+        color: this.colorOptions?.borderColor?.color ?
+          this.colorOptions?.borderColor?.color : this.containerBorderColor
       });
       Row.height(this.textHeight);
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
@@ -180,55 +189,47 @@ export class ProgressButtonV2 extends ViewV2 {
     Stack.pop();
     Button.pop();
   }
-  toLengthString(b) {
-    if (b === void (0)) {
+  toLengthString(c) {
+    if (c === void (0)) {
       return '';
     }
-    const c = b.value;
-    let d = '';
-    switch (b.unit) {
+    const d = c.value;
+    switch (c.unit) {
       case LengthUnit.PX:
-        d = `${c}px`;
-        break;
+        return `${d}px`;
       case LengthUnit.FP:
-        d = `${c}fp`;
-        break;
+        return `${d}fp`;
       case LengthUnit.LPX:
-        d = `${c}lpx`;
-        break;
+        return `${d}lpx`;
       case LengthUnit.PERCENT:
-        d = `${c * 100}%`;
-        break;
+        return `${d * 100}%`;
       case LengthUnit.VP:
-        d = `${c}vp`;
-        break;
+        return `${d}vp`;
       default:
-        d = `${c}vp`;
-        break;
+        return `${d}vp`;
     }
-    return d;
   }
-  updateStateVars(a) {
-    if (a === undefined) {
+  updateStateVars(b) {
+    if (b === undefined) {
       return;
     }
-    if ("progress" in a) {
-      this.updateParam("progress", a.progress);
+    if ("progress" in b) {
+      this.updateParam("progress", b.progress);
     }
-    if ("content" in a) {
-      this.updateParam("content", a.content);
+    if ("content" in b) {
+      this.updateParam("content", b.content);
     }
-    if ("progressButtonWidth" in a) {
-      this.updateParam("progressButtonWidth", a.progressButtonWidth);
+    if ("progressButtonWidth" in b) {
+      this.updateParam("progressButtonWidth", b.progressButtonWidth);
     }
-    if ("onClicked" in a) {
-      this.updateParam("onClicked", a.onClicked);
+    if ("onClicked" in b) {
+      this.updateParam("onClicked", b.onClicked);
     }
-    if ("enable" in a) {
-      this.updateParam("enable", a.enable);
+    if ("enable" in b) {
+      this.updateParam("enable", b.enable);
     }
-    if ("colorOptions" in a) {
-      this.updateParam("colorOptions", a.colorOptions);
+    if ("colorOptions" in b) {
+      this.updateParam("colorOptions", b.colorOptions);
     }
   }
   rerender() {
@@ -239,14 +240,8 @@ __decorate([
   Param
 ], ProgressButtonV2.prototype, "progress", void 0);
 __decorate([
-  Local
-], ProgressButtonV2.prototype, "textProgress", void 0);
-__decorate([
   Param
 ], ProgressButtonV2.prototype, "content", void 0);
-__decorate([
-  Local
-], ProgressButtonV2.prototype, "isLoading", void 0);
 __decorate([
   Param,
   Once
@@ -258,8 +253,14 @@ __decorate([
   Param
 ], ProgressButtonV2.prototype, "enable", void 0);
 __decorate([
-    Param
+  Param
 ], ProgressButtonV2.prototype, "colorOptions", void 0);
+__decorate([
+  Local
+], ProgressButtonV2.prototype, "textProgress", void 0);
+__decorate([
+  Local
+], ProgressButtonV2.prototype, "isLoading", void 0);
 __decorate([
   Local
 ], ProgressButtonV2.prototype, "progressColor", void 0);
@@ -282,27 +283,27 @@ __decorate([
   Monitor('isLoading')
 ], ProgressButtonV2.prototype, "getLoadingProgress", null);
 let ProgressButtonV2Color = class ProgressButtonV2Color {
-    constructor(e) {
-        this.progressColor = e.progressColor;
-        this.borderColor = e.borderColor;
-        this.textColor = e.textColor;
-        this.backgroundColor = e.backgroundColor;
-    }
+  constructor(a) {
+    this.progressColor = a.progressColor;
+    this.borderColor = a.borderColor;
+    this.textColor = a.textColor;
+    this.backgroundColor = a.backgroundColor;
+  }
 };
 __decorate([
-    Trace
+  Trace
 ], ProgressButtonV2Color.prototype, "progressColor", void 0);
 __decorate([
-    Trace
+  Trace
 ], ProgressButtonV2Color.prototype, "borderColor", void 0);
 __decorate([
-    Trace
+  Trace
 ], ProgressButtonV2Color.prototype, "textColor", void 0);
 __decorate([
-    Trace
+  Trace
 ], ProgressButtonV2Color.prototype, "backgroundColor", void 0);
 ProgressButtonV2Color = __decorate([
-    ObservedV2
+  ObservedV2
 ], ProgressButtonV2Color);
 
 export default { ProgressButtonV2,ProgressButtonV2Color };
