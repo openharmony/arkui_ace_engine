@@ -431,7 +431,7 @@ public:
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
 
-    static void JsAccessibilityGroup(bool accessible);
+    static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
