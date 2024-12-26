@@ -61,9 +61,7 @@ public:
 
     void Update(WeakPtr<FrameNode> hostNode, RefPtr<GeometryNode> geometryNode, RefPtr<LayoutProperty> layoutProperty);
 
-
     void AppendChild(const RefPtr<LayoutWrapperNode>& child, bool isOverlayNode = false);
-
 
     void SetLayoutWrapperBuilder(const RefPtr<LayoutWrapperBuilder>& builder)
     {

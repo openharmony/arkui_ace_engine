@@ -68,8 +68,9 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   onScrollIndex(event: (first: number, last: number) => void): this {
     throw new Error('Method not implemented.');
   }
-  cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, value);
+  cachedCount(count: number, show?: boolean): GridAttribute {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, GridCachedCountModifier.identity, GridCachedCountModifier, opt);
     return this;
   }
   editMode(value: boolean): this {
@@ -309,13 +310,16 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
   }
 }
 
-class GridCachedCountModifier extends ModifierWithKey<number> {
+class GridCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+  constructor(value: ArkScrollableCacheOptions) {
+    super(value);
+  }
   static identity: Symbol = Symbol('gridCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().grid.resetCachedCount(node);
     } else {
-      getUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }

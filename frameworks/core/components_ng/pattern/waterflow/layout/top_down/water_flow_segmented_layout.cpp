@@ -25,9 +25,6 @@
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
-#include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
@@ -78,7 +75,13 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     }
     info_->lastMainSize_ = mainSize_;
 
-    wrapper_->SetCacheCount(props->GetCachedCountValue(info_->defCachedCount_));
+    const int32_t cacheCnt = props->GetCachedCountValue(info_->defCachedCount_);
+    wrapper_->SetCacheCount(cacheCnt);
+    if (props->GetShowCachedItemsValue(false)) {
+        SyncPreloadItems(wrapper_, info_, cacheCnt);
+    } else {
+        PreloadItems(wrapper_, info_, cacheCnt);
+    }
 }
 
 void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
@@ -116,13 +119,11 @@ void WaterFlowSegmentedLayout::Layout(LayoutWrapper* wrapper)
     for (int32_t i = std::max(0, info_->startIndex_ - cacheCount); i <= maxIdx; ++i) {
         LayoutItem(i, crossPos[info_->GetSegment(i)][info_->itemInfos_[i].crossIdx], initialOffset, isReverse);
     }
-    wrapper_->SetActiveChildRange(
-        info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount, cacheCount);
+    wrapper_->SetActiveChildRange(info_->NodeIdx(info_->startIndex_), info_->NodeIdx(info_->endIndex_), cacheCount,
+        cacheCount, props->GetShowCachedItemsValue(false));
 
     // for compatibility
     info_->firstIndex_ = info_->startIndex_;
-
-    PreloadItems(wrapper_, info_, cacheCount);
 }
 
 namespace {
@@ -431,7 +432,7 @@ float WaterFlowSegmentedLayout::SolveJumpOffset(const WaterFlowLayoutInfo::ItemI
     return offset;
 }
 
-void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline)
+void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<int64_t> cacheDeadline, bool force)
 {
     auto props = DynamicCast<WaterFlowLayoutProperty>(wrapper_->GetLayoutProperty());
     targetIdx = std::min(targetIdx, info_->childrenCount_ - 1);
@@ -439,7 +440,7 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
         int32_t seg = info_->GetSegment(i);
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[seg]);
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, i);
-        if (cacheDeadline || Negative(itemHeight)) {
+        if (force || Negative(itemHeight)) {
             auto item = MeasureItem(props, i, position.crossIndex, itemHeight, cacheDeadline.has_value());
             if (item) {
                 itemHeight = GetMeasuredHeight(item, axis_);
@@ -523,13 +524,25 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     }
 }
 
-bool WaterFlowSegmentedLayout::AppendCacheItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
+bool WaterFlowSegmentedLayout::PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline)
 {
     wrapper_ = host;
     if (itemIdx < static_cast<int32_t>(info_->itemInfos_.size())) {
         return host->GetOrCreateChildByIndex(itemIdx, false, true);
     }
-    MeasureToTarget(itemIdx, deadline);
+    MeasureToTarget(itemIdx, deadline, true);
     return true;
+}
+
+void WaterFlowSegmentedLayout::SyncPreloadItem(LayoutWrapper* host, int32_t itemIdx)
+{
+    if (itemIdx >= static_cast<int32_t>(info_->itemInfos_.size())) {
+        MeasureToTarget(itemIdx, std::nullopt, true);
+    } else {
+        int32_t seg = info_->GetSegment(itemIdx);
+        MeasureItem(DynamicCast<WaterFlowLayoutProperty>(host->GetLayoutProperty()),
+            itemIdx, info_->itemInfos_[itemIdx].crossIdx,
+            WaterFlowLayoutUtils::GetUserDefHeight(sections_, seg, itemIdx), false);
+    }
 }
 } // namespace OHOS::Ace::NG

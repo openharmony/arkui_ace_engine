@@ -145,7 +145,14 @@ private:
 
     bool IsIrregularLine(int32_t lineIndex) const override;
 
+    /**
+     * @brief post delayed task to preload GridItems in cache range.
+     */
     void PreloadItems(int32_t cacheCnt);
+    /**
+     * @brief immediately create & measure GridItems in cache range.
+     */
+    void SyncPreloadItems(int32_t cacheCnt);
 
     GridLayoutInfo& info_;
     LayoutWrapper* wrapper_ = nullptr;

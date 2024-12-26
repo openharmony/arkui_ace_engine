@@ -243,8 +243,8 @@ class WaterFlowScrollBarColorModifier extends ModifierWithKey<string | number | 
   }
 }
 
-class WaterFlowCachedCountModifier extends ModifierWithKey<number> {
-  constructor(value: number) {
+class WaterFlowCachedCountModifier extends ModifierWithKey<ArkScrollableCacheOptions> {
+  constructor(value: ArkScrollableCacheOptions) {
     super(value);
   }
   static identity: Symbol = Symbol('waterFlowCachedCount');
@@ -252,7 +252,7 @@ class WaterFlowCachedCountModifier extends ModifierWithKey<number> {
     if (reset) {
       getUINativeModule().waterFlow.resetCachedCount(node);
     } else {
-      getUINativeModule().waterFlow.setCachedCount(node, this.value);
+      getUINativeModule().waterFlow.setCachedCount(node, this.value.count, this.value.show);
     }
   }
 }
@@ -352,8 +352,9 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
     modifierWithKey(this._modifiersWithKeys, FrictionModifier.identity, FrictionModifier, value);
     return this;
   }
-  cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, value);
+  cachedCount(count: number, show?: boolean): WaterFlowAttribute {
+    let opt = new ArkScrollableCacheOptions(count, show ? show : false);
+    modifierWithKey(this._modifiersWithKeys, WaterFlowCachedCountModifier.identity, WaterFlowCachedCountModifier, opt);
     return this;
   }
   onReachStart(event: () => void): this {

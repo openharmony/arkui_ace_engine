@@ -1303,10 +1303,10 @@ class ArkScrollSnapOptions {
 class ArkGeometryTransition {
   id: string | undefined;
   options: GeometryTransitionOptions | undefined;
-  
+
   constructor() {
     this.id = undefined;
-    this.options = undefined;   
+    this.options = undefined;
   }
 
   isEqual(another: ArkGeometryTransition): boolean {
@@ -1457,12 +1457,12 @@ class ArkDragPreviewOptions {
 }
 
 class ArkDragPreview {
-  inspetorId : string;
+  inspetorId: string;
   constructor() {
     this.inspetorId = undefined;
   }
 
-  isEqual(another: ArkDragPreview) : boolean {
+  isEqual(another: ArkDragPreview): boolean {
     return this.inspetorId === another.inspetorId;
   }
 }
