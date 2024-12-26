@@ -821,6 +821,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
