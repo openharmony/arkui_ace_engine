@@ -34,7 +34,6 @@ template("ace_core_interfaces_native_node") {
       "node/badge_modifier.cpp",
       "node/blank_modifier.cpp",
       "node/button_modifier.cpp",
-      "node/calendar_picker_modifier.cpp",
       "node/canvas_rendering_context_2d_modifier.cpp",
       "node/checkboxgroup_modifier.cpp",
       "node/column_modifier.cpp",
@@ -167,6 +166,11 @@ template("ace_core_interfaces_native_node") {
         config.plugin_components_support) {
       sources += [ "node/plugin_modifier.cpp" ]
     }
+
+    if (!ace_engine_feature_wearable) {
+      sources += [ "node/calendar_picker_modifier.cpp" ]
+    }
+
     external_deps = [
       "graphic_2d:drawing_napi_impl",
       "graphic_2d:librender_service_client",

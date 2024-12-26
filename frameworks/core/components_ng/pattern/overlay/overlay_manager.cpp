@@ -2763,11 +2763,13 @@ void OverlayManager::ShowDateDialog(const DialogProperties& dialogProps, const D
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show date dialog enter");
+#ifndef ARKUI_WEARABLE
     auto dialogNode = DatePickerDialogView::Show(
         dialogProps, std::move(settingData), buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
+#endif
 }
 
 void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const TimePickerSettingData& settingData,
@@ -7042,7 +7044,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
     }
     node->MountToParent(rootNode);
 }
- 
+
 void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(rootNode);
@@ -7051,7 +7053,7 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
 }
- 
+
 bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(rootNode, false);
