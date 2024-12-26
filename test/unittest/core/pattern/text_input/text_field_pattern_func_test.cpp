@@ -15,13 +15,6 @@
 
 #include "text_input_base.h"
 
-#include "adapter/preview/entrance/editing/text_input_connection_impl.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
-
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
