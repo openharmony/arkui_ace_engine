@@ -1097,7 +1097,11 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
         DragEventActuator::GetFrameNodePreviewPixelMap(itemFrameNode);
         auto gestureHub = itemFrameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        dragDropManager->PushGatherPixelMap(gestureHub->GetDragPreviewPixelMap());
+        auto itemPreviewPixelMap = gestureHub->GetDragPreviewPixelMap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;
@@ -1124,7 +1128,11 @@ void GestureEventHub::SetNotMouseDragGatherPixelMaps()
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-        dragDropManager->PushGatherPixelMap(imageSourceInfo.GetPixmap());
+        auto itemPreviewPixelMap = imageSourceInfo.GetPixmap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;
