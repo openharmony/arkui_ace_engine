@@ -204,7 +204,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     bool hideNodesFinish = false;
     // record animating destination size
     int32_t animatingSize = 0;
-    int32_t remainNodeIndex = -1;
+    int32_t remainNodeIndex = pattern->IsCurTopNewInstance() ? slot - 1 : slot;
     int32_t beforeLastStandardIndex = preLastStandardNode == nullptr ? -1 : preLastStandardNode->GetIndex();
     while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
@@ -263,9 +263,8 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
-            auto index = slot + removeSize - 1;
             // move current destination position to navigation stack size + remove navDestination nodes
-            if (index > 0) {
+            if (remainNodeIndex >= 0) {
                 navDestination->MovePosition(remainNodeIndex);
             }
             continue;
