@@ -317,6 +317,34 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
     return OHOS::Ace::NodeModel::GetNodeTypeByTag(node);
 }
 
+int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    char* name = nullptr;
+    int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(node->uiNodeHandle, &name);
+    *info = new ArkUI_HostWindowInfo({ .name = name });
+    return error;
+}
+
+const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info)
+{
+    if (!info) {
+        LOGF("HostWindowInfo is nullptr");
+        abort();
+    }
+    return info->name;
+}
+
+void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info)
+{
+    delete[] info->name;
+    info->name = nullptr;
+    delete info;
+    info = nullptr;
+}
+
 void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
 {
     delete[] handle->value;
@@ -361,6 +389,17 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
         abort();
     }
     return handle->nodeCount;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node)
+{
+    CHECK_NULL_RETURN(id, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_PARAM_INVALID);
+    auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getAttachedFrameNodeById(id);
+    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *node = OHOS::Ace::NodeModel::GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option)

@@ -1489,6 +1489,14 @@
     },
     {
         "first_introduced": "15",
+        "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
+    },
+    {
+        "first_introduced": "15",
         "name": "OH_ArkUI_NodeUtils_SetCrossLanguageOption"
     },
     {
@@ -2546,6 +2554,14 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_HostWindowInfo_GetName"
+    },
+    {
+        "first_introduced": "15",
+        "name": "OH_ArkUI_HostWindowInfo_Destroy"
     },
     {
         "first_introduced": "15",
