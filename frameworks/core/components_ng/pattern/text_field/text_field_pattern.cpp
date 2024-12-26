@@ -5784,7 +5784,7 @@ bool TextFieldPattern::OnBackPressed()
         CloseSelectOverlay();
         StartTwinkling();
         if (!closeKeyboard) {
-            return true;
+            return IsStopBackPress();
         }
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -5800,8 +5800,15 @@ bool TextFieldPattern::OnBackPressed()
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
-    return true;
+    return IsStopBackPress();
 #endif
+}
+
+bool TextFieldPattern::IsStopBackPress() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, true);
+    return layoutProperty->GetStopBackPressValue(true);
 }
 
 int32_t TextFieldPattern::GetNakedCharPosition() const

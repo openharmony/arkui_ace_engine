@@ -1033,4 +1033,10 @@ void SelectContentOverlayManager::MarkHandleDirtyNode(PropertyChangeFlag flag)
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(flag);
 }
+
+bool SelectContentOverlayManager::IsStopBackPress() const
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, true);
+    return selectOverlayHolder_->IsStopBackPress();
+}
 } // namespace OHOS::Ace::NG

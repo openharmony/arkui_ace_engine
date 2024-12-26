@@ -121,6 +121,7 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetStopBackPress(bool isStopBackPress) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -279,6 +280,7 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void SetJSTextEditableController(FrameNode* frameNode, const RefPtr<Referenced>& controller);
     static RefPtr<Referenced> GetJSTextEditableController(FrameNode* frameNode);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
 
 private:
     void AddDragFrameNodeToManager() const;
