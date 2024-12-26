@@ -211,7 +211,8 @@ ScrollerObserver CreateObserver(WeakPtr<JSScroller> jsScrollerWeak)
     };
     observer.onScrollStopEvent = std::move(scrollStopEvent);
 
-    auto didScrollEvent = [jsScrollerWeak](Dimension dimension, ScrollState state, bool isAtTop, bool isAtBottom) {
+    auto didScrollEvent = [jsScrollerWeak](Dimension dimension, ScrollState state,
+        ScrollSource source, bool isAtTop, bool isAtBottom) {
         HandleOnDidScrollEvent(jsScrollerWeak, dimension, state, isAtTop, isAtBottom);
     };
     observer.onDidScrollEvent = std::move(didScrollEvent);
