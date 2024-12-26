@@ -108,6 +108,28 @@ void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
 void NavDestinationEventHub::FireOnAppear()
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "%{public}s lifecycle change to onAppear state.", name_.c_str());
+    auto onAppearAction = [weakEventHub = WeakClaim(this)]() {
+        auto eventHub = weakEventHub.Upgrade();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->state_ = NavDestinationState::ON_APPEAR;
+        UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
+            NavDestinationState::ON_APPEAR);
+        if (eventHub->onAppear_) {
+            auto onAppear = eventHub->onAppear_;
+            onAppear();
+        }
+        if (eventHub->onJSFrameNodeAppear_) {
+            auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
+            onJSFrameNodeAppear();
+        }
+    };
+    auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    // if navdestination is created from recovery, it need trigger onAppear immediately
+    if (navdestination && navdestination->NeedAppearFromRecovery()) {
+        navdestination->SetNeedAppearFromRecovery(false);
+        onAppearAction();
+        return;
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
@@ -116,21 +138,7 @@ void NavDestinationEventHub::FireOnAppear()
     auto pattern = navDestination->GetPattern<NavDestinationPattern>();
     CHECK_NULL_VOID(pattern);
     if (pattern->GetNavigationNode()) {
-        navigationManager->AddNavigationUpdateCallback([weakEventHub = WeakClaim(this)]() {
-            auto eventHub = weakEventHub.Upgrade();
-            CHECK_NULL_VOID(eventHub);
-            eventHub->state_ = NavDestinationState::ON_APPEAR;
-            UIObserverHandler::GetInstance().NotifyNavigationStateChange(eventHub->GetNavDestinationPattern(),
-                NavDestinationState::ON_APPEAR);
-            if (eventHub->onAppear_) {
-                auto onAppear = eventHub->onAppear_;
-                onAppear();
-            }
-            if (eventHub->onJSFrameNodeAppear_) {
-                auto onJSFrameNodeAppear = eventHub->onJSFrameNodeAppear_;
-                onJSFrameNodeAppear();
-            }
-        });
+        navigationManager->AddNavigationUpdateCallback(std::move(onAppearAction));
     } else {
         EventHub::FireOnAppear();
     }

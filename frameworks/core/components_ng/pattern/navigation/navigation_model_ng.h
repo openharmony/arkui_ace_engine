@@ -70,6 +70,8 @@ public:
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetEnableDragBar(bool enableDragBar) override;
+    void SetRecoverable(bool recoverable) override;
+
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
@@ -87,6 +89,7 @@ public:
     static void SetHideBackButton(FrameNode* frameNode, bool hideBackButton);
     static void SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMode mode);
     static void SetEnableDragBar(FrameNode* frameNode, bool enableDragBar);
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
 
     void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) override;
     static void SetIgnoreLayoutSafeArea(FrameNode* frameNode, const NG::SafeAreaExpandOpts& opts);

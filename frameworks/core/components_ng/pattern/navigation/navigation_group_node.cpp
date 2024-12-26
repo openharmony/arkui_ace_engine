@@ -182,7 +182,10 @@ bool NavigationGroupNode::ReorderNavDestination(
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
         if (navDestination == nullptr) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get destination node failed");
+            if (pattern->GetNavigationStack()->IsFromRecovery(i)) {
+                continue;
+            }
+            TAG_LOGW(AceLogTag::ACE_NAVIGATION, "get destination node failed");
             return false;
         }
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
@@ -964,6 +967,7 @@ void NavigationGroupNode::UpdateLastStandardIndex()
 bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
     const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize, const RefPtr<UINode>& preLastStandardNode)
 {
+    CHECK_NULL_RETURN(navDestination, false);
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
     if (index == static_cast<int32_t>(destinationSize) - 1) {

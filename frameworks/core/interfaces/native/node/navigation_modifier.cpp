@@ -378,6 +378,22 @@ void SetNavMenuItemSymbol(ArkUINodeHandle node, void* symbol, ArkUI_Uint32 index
     NavigationModelNG::SetMenuItemSymbol(frameNode, std::move(*iconFunc), index);
 }
 
+void SetNavigationRecoverable(ArkUINodeHandle node, ArkUI_Bool recoverable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NavigationModelNG::SetRecoverable(frameNode, recoverable);
+}
+
+void ResetNavigationRecoverable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    // default value of navigation's recoverable is false
+    NavigationModelNG::SetRecoverable(frameNode, false);
+}
+
+
 namespace NodeModifier {
 const ArkUINavigationModifier* GetNavigationModifier()
 {
@@ -415,7 +431,9 @@ const ArkUINavigationModifier* GetNavigationModifier()
         SetNavMenus,
         ResetNavMenus,
         SetNavMenuItemAction,
-        SetNavMenuItemSymbol
+        SetNavMenuItemSymbol,
+        SetNavigationRecoverable,
+        ResetNavigationRecoverable,
     };
 
     return &modifier;

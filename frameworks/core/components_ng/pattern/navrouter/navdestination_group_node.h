@@ -180,6 +180,30 @@ public:
     bool TransitionContentInValid();
     bool IsNeedTitleTransition();
 
+    void SetRecoverable(bool recoverable)
+    {
+        recoverable_ = recoverable;
+    }
+
+    void SetFromNavrouterAndNoRouteInfo(bool fromNavrouterAndNoRouteInfo)
+    {
+        fromNavrouterAndNoRouteInfo_ = fromNavrouterAndNoRouteInfo;
+    }
+
+    bool CanRecovery() const
+    {
+        return recoverable_ && !fromNavrouterAndNoRouteInfo_;
+    }
+
+    void SetNeedAppearFromRecovery(bool needAppear)
+    {
+        needAppearFromRecovery_ = needAppear;
+    }
+
+    bool NeedAppearFromRecovery() const
+    {
+        return needAppearFromRecovery_;
+    }
 private:
     WeakPtr<CustomNodeBase> customNode_; // nearest parent customNode
     NavDestinationBackButtonEvent backButtonEvent_;
@@ -189,6 +213,9 @@ private:
     bool isCacheNode_ = false;
     bool isAnimated_ = true;
     bool canReused_ = true;
+    bool recoverable_ = true;
+    bool fromNavrouterAndNoRouteInfo_ = false;
+    bool needAppearFromRecovery_ = false;
     std::string navDestinationPathInfo_;
     std::string navDestinationModuleName_;
     bool needRemoveInPush_ = false;

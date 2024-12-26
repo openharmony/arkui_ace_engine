@@ -274,10 +274,19 @@ public:
         return hideNodes_;
     }
 
+    void SetRecoverable(bool recoverable)
+    {
+        recoverable_ = recoverable;
+    }
+
+    bool CanRecovery() const
+    {
+        return recoverable_ && !curId_.empty();
+    }
+
 protected:
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
     std::list<std::shared_ptr<AnimationUtils::Animation>> popAnimations_;
-
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize,
@@ -308,6 +317,7 @@ private:
     bool isModeChange_ { false };
     bool needSetInvisible_ { false };
     bool isOnModeSwitchAnimation_ { false };
+    bool recoverable_ { false };
     std::string curId_;
     std::string navigationPathInfo_;
     std::string navigationModuleName_;

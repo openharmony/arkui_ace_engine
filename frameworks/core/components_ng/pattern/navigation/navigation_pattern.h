@@ -453,6 +453,9 @@ public:
         return enableDragBar_;
     }
     
+    std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
+    void RestoreJsStackIfNeeded();
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -486,6 +489,7 @@ private:
     void RecoveryToLastStack(const RefPtr<NavDestinationGroupNode>& preTopDestination,
         const RefPtr<NavDestinationGroupNode>& newTopDestination);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
+    void GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList);
     void DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>& hostNode);
     RefPtr<FrameNode> GetDividerNode() const;
     void FireInterceptionEvent(bool isBefore,
@@ -537,6 +541,7 @@ private:
         bool isPopPage, const RefPtr<NavigationTransitionProxy>& proxy,
         NavigationTransition navigationTransition);
     bool GetIsFocusable(const RefPtr<FrameNode>& frameNode);
+    void GetOrCreateNavDestinationUINode();
 
     void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     RefPtr<FrameNode> CreateDragBarItemNode();

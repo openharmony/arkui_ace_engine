@@ -563,6 +563,21 @@ void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
     navDestination->SetNavDestinationMode(mode);
 }
 
+void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
+}
+
+void NavDestinationModelNG::SetRecoverable(bool recoverable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
+}
+
 void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

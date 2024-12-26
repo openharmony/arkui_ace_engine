@@ -161,6 +161,7 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
     } else if (navDestination) {
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         CHECK_NULL_VOID(navDestinationPattern);
+        navDestination->SetFromNavrouterAndNoRouteInfo(true);
         auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
         if (shallowBuilder && navRouteMode != NavRouteMode::PUSH) {
             shallowBuilder->MarkIsExecuteDeepRenderDone(false);

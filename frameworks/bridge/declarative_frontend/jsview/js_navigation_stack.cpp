@@ -16,6 +16,7 @@
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
@@ -33,8 +34,19 @@ constexpr int32_t ARGC_COUNT_TWO = 2;
 constexpr int32_t MAX_PARSE_DEPTH = 3;
 constexpr uint32_t MAX_PARSE_LENGTH = 1024;
 constexpr uint32_t MAX_PARSE_PROPERTY_SIZE = 15;
+constexpr int32_t INVALID_DESTINATION_MODE = -1;
+constexpr char JS_STRINGIFIED_UNDEFINED[] = "undefined";
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
 constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
+
+napi_env GetNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
+}
 }
 
 std::string JSRouteInfo::GetName()
@@ -1167,4 +1179,107 @@ JSRef<JSObject> JSNavigationStack::CreatePathInfoWithNecessaryProperty(
     return pathInfo;
 }
 
+std::string JSNavigationStack::GetStringifyParamByIndex(int32_t index) const
+{
+    auto env = GetNapiEnv();
+    if (!env) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    if (dataSourceObj_->IsEmpty()) {
+        napi_close_handle_scope(env, scope);
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    napi_value navPathStack = JsConverter::ConvertJsValToNapiValue(dataSourceObj_);
+    napi_value getParamByIndex;
+    napi_get_named_property(env, navPathStack, "getParamByIndex", &getParamByIndex);
+    napi_value napiIndex;
+    napi_create_int32(env, index, &napiIndex);
+    napi_value param;
+    napi_call_function(env, navPathStack, getParamByIndex, 1, &napiIndex, &param);
+
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonClass;
+    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
+    napi_value stringifyFunc;
+    napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
+    napi_value stringifyParam;
+    if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
+        napi_get_and_clear_last_exception(env, &stringifyParam);
+        napi_close_handle_scope(env, scope);
+        return JS_STRINGIFIED_UNDEFINED;
+    }
+    size_t len = 0;
+    napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
+    std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
+    napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
+    napi_close_handle_scope(env, scope);
+    return paramChar.get();
+}
+
+void JSNavigationStack::SetPathArray(const std::vector<NG::NavdestinationRecoveryInfo>& navdestinationsInfo)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    JSRef<JSArray> newPathArray = JSRef<JSArray>::New();
+    for (int32_t index = 0; index < static_cast<int32_t>(navdestinationsInfo.size()); ++index) {
+        auto infoName = navdestinationsInfo[index].name;
+        auto infoParam = navdestinationsInfo[index].param;
+        auto infoMode = navdestinationsInfo[index].mode;
+
+        JSRef<JSObject> navPathInfo = JSRef<JSObject>::New();
+        navPathInfo->SetProperty<std::string>("name", infoName);
+        if (!infoParam.empty() && infoParam != JS_STRINGIFIED_UNDEFINED) {
+            navPathInfo->SetPropertyObject("param", JSRef<JSObject>::New()->ToJsonObject(infoParam.c_str()));
+        }
+        navPathInfo->SetProperty<bool>("fromRecovery", true);
+        navPathInfo->SetProperty<int32_t>("mode", infoMode);
+        newPathArray->SetValueAt(index, navPathInfo);
+    }
+    dataSourceObj_->SetPropertyObject("pathArray", newPathArray);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set navPathArray by recovery info success");
+}
+
+bool JSNavigationStack::IsFromRecovery(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return false;
+    }
+    auto fromRecovery = pathInfo->GetProperty("fromRecovery");
+    if (!fromRecovery->IsBoolean()) {
+        return false;
+    }
+    return fromRecovery->ToBoolean();
+}
+
+void JSNavigationStack::SetFromRecovery(int32_t index, bool fromRecovery)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return;
+    }
+    pathInfo->SetProperty<bool>("fromRecovery", fromRecovery);
+}
+
+int32_t JSNavigationStack::GetRecoveredDestinationMode(int32_t index)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, 0);
+    auto pathInfo = GetJsPathInfo(index);
+    if (pathInfo->IsEmpty()) {
+        return INVALID_DESTINATION_MODE;
+    }
+    auto mode = pathInfo->GetProperty("mode");
+    if (!mode->IsNumber()) {
+        return INVALID_DESTINATION_MODE;
+    }
+    return mode->ToNumber<int32_t>();
+}
 } // namespace OHOS::Ace::Framework

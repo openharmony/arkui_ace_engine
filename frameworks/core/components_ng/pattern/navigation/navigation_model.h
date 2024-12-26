@@ -90,6 +90,7 @@ public:
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
     virtual void SetEnableDragBar(bool recoverable) {}
+    virtual void SetRecoverable(bool recoverable) {}
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

@@ -275,6 +275,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("ignoreLayoutSafeArea", &JSNavigation::SetIgnoreLayoutSafeArea);
     JSClass<JSNavigation>::StaticMethod("systemBarStyle", &JSNavigation::SetSystemBarStyle);
     JSClass<JSNavigation>::StaticMethod("enableDragBar", &JSNavigation::SetEnableDragBar);
+    JSClass<JSNavigation>::StaticMethod("recoverable", &JSNavigation::SetRecoverable);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -854,5 +855,16 @@ void JSNavigation::SetEnableDragBar(const JSCallbackInfo& info)
     }
     auto enableDragBar = info[0]->ToBoolean();
     NavigationModel::GetInstance()->SetEnableDragBar(enableDragBar);
+}
+
+void JSNavigation::SetRecoverable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navigation's recoverable is false
+        NavigationModel::GetInstance()->SetRecoverable(false);
+        return;
+    }
+    auto recoverable = info[0]->ToBoolean();
+    NavigationModel::GetInstance()->SetRecoverable(recoverable);
 }
 } // namespace OHOS::Ace::Framework

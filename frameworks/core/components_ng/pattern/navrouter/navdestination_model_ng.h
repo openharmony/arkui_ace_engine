@@ -51,7 +51,10 @@ public:
     static void SetBackButtonIcon(FrameNode* frameNode, const std::string& src,
         bool noPixMap, RefPtr<PixelMap>& pixMap);
     static void SetNavDestinationMode(FrameNode* frameNode, NavDestinationMode mode);
+    static void SetRecoverable(FrameNode* frameNode, bool recoverable);
+
     void SetNavDestinationMode(NavDestinationMode mode) override;
+    void SetRecoverable(bool recoverable) override;
     bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) override;
     void SetMenuItems(std::vector<NG::BarItem>&& menuItems) override;

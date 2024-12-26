@@ -3315,6 +3315,12 @@ std::pair<RouterRecoverRecord, UIContentErrorCode> FrontendDelegateDeclarative::
             pageRouterManager_->RestoreFullPathInfo(std::move(fullPathInfo));
         }
     }
+    // restore navigation info
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    if (pipelineContextNG && pipelineContextNG->GetNavigationManager()) {
+        auto navigationRecoveryInfo = jsonContentInfo->GetValue("navigationInfo");
+        pipelineContextNG->GetNavigationManager()->StorageNavigationRecoveryInfo(std::move(navigationRecoveryInfo));
+    }
     return pageRouterManager_->RestoreRouterStack(std::move(routerStack), type);
 }
 
@@ -3340,6 +3346,11 @@ std::string FrontendDelegateDeclarative::GetContentInfo(ContentInfoType type)
             auto fullPathInfo = pageRouterManager_->GetFullPathInfo();
             if (fullPathInfo) {
                 jsonContentInfo->Put("fullPathInfo", std::move(fullPathInfo));
+            }
+            // add navigation stack info
+            auto navigationRecoveryInfo = GetNavigationJsonInfo();
+            if (navigationRecoveryInfo) {
+                jsonContentInfo->Put("navigationInfo", navigationRecoveryInfo);
             }
         }
     }
@@ -3382,28 +3393,6 @@ void FrontendDelegateDeclarative::CreateSnapshot(
 
     NG::ComponentSnapshot::Create(customNode, std::move(callback), enableInspector, param);
 #endif
-}
-
-RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
-{
-    napi_value napiVal = reinterpret_cast<napi_value>(value);
-    JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
-    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
-        LOGE("Convert TransitionEffect from napi value to JSVal failed.");
-        return nullptr;
-    }
-    JSRef<JSObject> transitionObj = JSRef<JSObject>::Cast(transitionVal);
-
-    auto engine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_RETURN(engine, nullptr);
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
-    CHECK_NULL_RETURN(arkNativeEngine, nullptr);
-    auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
-    CHECK_NULL_RETURN(vm, nullptr);
-    JsiExecutionContext context = { vm };
-
-    return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
 }
 
 void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index)
@@ -3465,4 +3454,36 @@ void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
 }
+
+RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
+{
+    napi_value napiVal = reinterpret_cast<napi_value>(value);
+    JSRef<JSVal> transitionVal = JsConverter::ConvertNapiValueToJsVal(napiVal);
+    if (transitionVal.IsEmpty() || !transitionVal->IsObject()) {
+        LOGE("Convert TransitionEffect from napi value to JSVal failed.");
+        return nullptr;
+    }
+    JSRef<JSObject> transitionObj = JSRef<JSObject>::Cast(transitionVal);
+
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    auto arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine);
+    CHECK_NULL_RETURN(arkNativeEngine, nullptr);
+    auto vm = const_cast<EcmaVM*>(arkNativeEngine->GetEcmaVm());
+    CHECK_NULL_RETURN(vm, nullptr);
+    JsiExecutionContext context = { vm };
+
+    return JSViewAbstract::ParseNapiChainedTransition(transitionObj, context);
+}
+
+std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
+{
+    auto pipelineContextNG = AceType::DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_RETURN(pipelineContextNG, nullptr);
+    auto navigationManager = pipelineContextNG->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, nullptr);
+    return navigationManager->GetNavigationJsonInfo();
+}
+
 } // namespace OHOS::Ace::Framework
