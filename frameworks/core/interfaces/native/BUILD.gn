@@ -86,6 +86,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_modifiers.cpp",
       "node/node_refresh_modifier.cpp",
       "node/node_relative_container_modifier.cpp",
+      "node/node_scroll_bar_modifier.cpp",
       "node/node_scroll_modifier.cpp",
       "node/node_slider_modifier.cpp",
       "node/node_span_modifier.cpp",

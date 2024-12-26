@@ -24159,10 +24159,26 @@ if (globalThis.RichText !== undefined) {
   };
 }
 
+class ScrollBarEnableNestedScrollModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().ScrollBar.resetScrollBarEnableNestedScroll(node);
+    } else {
+      getUINativeModule().ScrollBar.setScrollBarEnableNestedScroll(node, this.value);
+    }
+  }
+}
+ScrollBarEnableNestedScrollModifier.identity = Symbol('enableNestedScroll');
+
 /// <reference path='./import.ts' />
 class ArkScrollBarComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
+  }
+  enableNestedScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollBarEnableNestedScrollModifier.identity,
+      ScrollBarEnableNestedScrollModifier, value);
+    return this;
   }
 }
 // @ts-ignore

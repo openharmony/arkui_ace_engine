@@ -59,6 +59,7 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -219,7 +220,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
 #endif
     NodeModifier::GetFlexModifier, // FlexModifier
-    nullptr, // ScrollBarModifier
+    NodeModifier::GetScrollBarModifier, // ScrollBarModifier
     NodeModifier::GetScrollerModifier,
     NodeModifier::GetTabContentModifier,
     nullptr, // TabsControllerModifier
@@ -360,7 +361,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     nullptr,
 #endif
     OHOS::Ace::NG::NodeModifier::GetCJUIFlexModifier, // FlexModifier
-    nullptr, // ScrollBarModifier
+    OHOS::Ace::NG::NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
     OHOS::Ace::NG::NodeModifier::GetCJUIScrollerModifier,
     OHOS::Ace::NG::NodeModifier::GetCJUITabContentModifier,
     nullptr, // TabsControllerModifier

@@ -27,9 +27,9 @@ namespace OHOS::Ace::NG {
 class ScrollablePattern;
 struct ScrollableNodeInfo {
     WeakPtr<ScrollablePattern> scrollableNode;
-    std::function<bool(double, int32_t source)> onPositionChanged;
-    std::function<bool(double, int32_t source)> scrollStartCallback;
-    std::function<void()> scrollEndCallback;
+    std::function<bool(double, int32_t source, bool)> onPositionChanged;
+    std::function<bool(double, int32_t source, bool)> scrollStartCallback;
+    std::function<void(bool)> scrollEndCallback;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback;
     ScrollBarFRCallback scrollbarFRcallback;
@@ -54,7 +54,6 @@ public:
     void RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     // UnRegister scrollable node and scroll bar.
-    void UnRegisterScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode);
     void UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     /*
@@ -76,7 +75,7 @@ public:
      * Notify scroll bar to update state, called by scrollable node.
      * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
+    void NotifyScrollBar() const;
 
     /*
      * Start animation of ScrollBar.
@@ -109,13 +108,24 @@ public:
     void SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
     void ScrollPage(bool reverse, bool smooth);
 
+    void RegisterNestScrollableNode(const ScrollableNodeInfo& scrollableNode);
+
+    void UnRegisterNestScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode);
+
+    ScrollableNodeInfo& GetScrollableNodeInfo()
+    {
+        return scorllableNode_;
+    }
+
+    bool IsNestScroller() const;
 private:
     /*
      * Drag the built-in or external scroll bar to slide the Scroll.
      * When the sliding stops and the fingers are not raised, prevent scrolling to the limit point
      */
     bool scrollSnapTrigger_ = false;
-    std::list<ScrollableNodeInfo> scrollableNodes_;  // Scrollable nodes, like list, grid, scroll, etc.
+    ScrollableNodeInfo scorllableNode_; // Scrollable node, like list, grid, scroll, etc.
+    std::list<ScrollableNodeInfo> nestScrollableNodes_; // Scrollable nodes, like scroll.
     std::list<WeakPtr<ScrollBarPattern>> scrollBars_; // ScrollBar should effect with scrollable node.
 };
 

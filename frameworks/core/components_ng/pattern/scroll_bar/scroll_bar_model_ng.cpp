@@ -71,4 +71,65 @@ void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, b
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollBarLayoutProperty, Visibility, visible);
     }
 }
+
+void ScrollBarModelNG::SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsOnMainTree()) {
+        pattern->SearchAndSetParentNestedScroll(frameNode);
+    }
+}
+
+void ScrollBarModelNG::UnSetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->IsOnMainTree()) {
+        pattern->SearchAndUnsetParentNestedScroll(frameNode);
+    }
+}
+
+void ScrollBarModelNG::SetEnableNestedScroll(bool enableNestedSroll)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(scrollBarPattern);
+    auto enableNested = scrollBarPattern->GetEnableNestedSorll();
+    auto scrollBarProxy = scrollBarPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+    scrollBarPattern->SetEnableNestedSorll(enableNestedSroll);
+    auto info = scrollBarProxy->GetScrollableNodeInfo();
+    auto pattern = info.scrollableNode.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto node = pattern->GetHost();
+    CHECK_NULL_VOID(node);
+    if (enableNestedSroll == true && enableNestedSroll != enableNested) {
+        SetNestedScroll(node, pattern);
+    }
+    if (enableNestedSroll == false && enableNestedSroll != enableNested) {
+        UnSetNestedScroll(node, pattern);
+    }
+}
+
+void ScrollBarModelNG::SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
+    CHECK_NULL_VOID(scrollBarPattern);
+    auto enableNested = scrollBarPattern->GetEnableNestedSorll();
+    auto scrollBarProxy = scrollBarPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+    scrollBarPattern->SetEnableNestedSorll(enableNestedSroll);
+    auto info = scrollBarProxy->GetScrollableNodeInfo();
+    auto pattern = info.scrollableNode.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto node = pattern->GetHost();
+    CHECK_NULL_VOID(node);
+    if (enableNestedSroll == true && enableNestedSroll != enableNested) {
+        SetNestedScroll(node, pattern);
+    }
+    if (enableNestedSroll == false && enableNestedSroll != enableNested) {
+        UnSetNestedScroll(node, pattern);
+    }
+}
 } // namespace OHOS::Ace::NG

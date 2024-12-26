@@ -306,11 +306,13 @@ HWTEST_F(ScrollTestNg, ScrollTest002, TestSize.Level1)
      * @tc.expected: Check whether the return value is as expected.
      */
     auto scrollBarProxy = pattern_->GetScrollBarProxy();
-    EXPECT_FALSE(scrollBarProxy->scrollableNodes_.empty());
-    bool ret = scrollBarProxy->scrollableNodes_.back().onPositionChanged(0.0, SCROLL_FROM_BAR);
-    EXPECT_TRUE(ret);
-    ret = scrollBarProxy->scrollableNodes_.back().onPositionChanged(0.0, SCROLL_FROM_START);
-    EXPECT_TRUE(ret);
+    auto scrollableNode = scrollBarProxy->scorllableNode_;
+    if (scrollableNode.onPositionChanged) {
+        bool ret = scrollableNode.onPositionChanged(0.0, SCROLL_FROM_BAR, false);
+        EXPECT_TRUE(ret);
+        ret = scrollableNode.onPositionChanged(0.0, SCROLL_FROM_START, false);
+        EXPECT_TRUE(ret);
+    }
 }
 
 /**

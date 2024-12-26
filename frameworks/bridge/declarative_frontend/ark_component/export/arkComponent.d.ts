@@ -1270,6 +1270,7 @@ declare class ArkRichTextComponent extends ArkComponent implements CommonMethod<
 }
 declare class ArkScrollBarComponent extends ArkComponent implements ScrollBarAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
+    enableNestedScroll(value: boolean): this;
 }
 declare class ArkStepperComponent extends ArkComponent implements StepperAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
