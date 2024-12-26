@@ -345,9 +345,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
         CHECK_NULL_RETURN(focusMenu, nullptr);
     }
     // SelectOverlay's custom menu does not need to be focused.
-    auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
-    
-    if (!isCustomMenu) {
+    auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
+    if (!isCustomMenu && !isRightClickMenu) {
         auto menuPattern = focusMenu->GetPattern<MenuPattern>();
         CHECK_NULL_RETURN(menuPattern, nullptr);
         menuPattern->FocusViewShow();
@@ -735,6 +734,13 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, false);
     return menuPattern->IsSelectOverlayCustomMenu();
+}
+
+bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayRightClickMenu();
 }
 
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
