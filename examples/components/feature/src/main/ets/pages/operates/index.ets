@@ -39,6 +39,7 @@ export const operatesRoute: RouteGroup = {
     { name: 'menu', label: '菜单/menu' },
     { name: 'bindsheet', label: '半模态/BindSheet' },
     { name: 'MenuItemGroup', label: '菜单分组/MenuItemGroup' },
+    { name: 'AlertDialog', label: '警告弹窗/AlertDialog' },
     { name: 'promptActionCustomDialog', label: '打开自定义弹窗/promptActionCustomDialog' },
     { name: 'ActionMenu', label: '菜单弹窗/ActionMenu' },
     { name: 'Dialog', label: '对话框/Dialog' },
@@ -64,6 +65,8 @@ export function OperatesDestination(name: string, route: Route) {
     BindSheetBootcamp({ title: route.label })
   } else if (name === 'operates/MenuItemGroup') {
     MenuItemGroupBootcamp({ title: route.label })
+  } else if (name === 'operates/AlertDialog') {
+    AlertDialogBootcamp({ title: route.label })
   } else if (name === 'operates/promptActionCustomDialog') {
     promptActionCustomDialogBootcamp({ title: route.label })
   } else if (name === 'operates/ActionMenu') {
