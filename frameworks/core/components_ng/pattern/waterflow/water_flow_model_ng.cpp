@@ -56,6 +56,19 @@ RefPtr<ScrollControllerBase> WaterFlowModelNG::GetOrCreateController(FrameNode* 
     return pattern->GetPositionController();
 }
 
+RefPtr<ScrollProxy> WaterFlowModelNG::GetOrCreateScrollBarProxy(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetScrollBarProxy()) {
+        auto proxy = AceType::MakeRefPtr<NG::ScrollBarProxy>();
+        pattern->SetScrollBarProxy(proxy);
+        pattern->TriggerModifyDone();
+    }
+    return pattern->GetScrollBarProxy();
+}
+
 void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
 {
     RefPtr<NG::UINode> footerNode;
@@ -66,6 +79,16 @@ void WaterFlowModelNG::SetFooter(std::function<void()>&& footer)
     }
     CHECK_NULL_VOID(footerNode);
     auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footerNode);
+}
+
+void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<RefPtr<NG::UINode>()>&& footer)
+{
+    RefPtr<NG::UINode> footerNode = footer();
+    CHECK_NULL_VOID(footerNode);
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
