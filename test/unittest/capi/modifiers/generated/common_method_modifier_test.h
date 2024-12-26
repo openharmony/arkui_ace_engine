@@ -30,6 +30,7 @@ using namespace testing::ext;
 using namespace Converter;
 using namespace TypeHelper;
 namespace TestConst::CommonMethod {
+const auto ATTRIBUTE_CHAIN_WEIGHT_NAME = "chainWeight";
 const auto ATTRIBUTE_MOTION_BLUR_NAME = "motionBlur";
 const auto ATTRIBUTE_MOTION_BLUR_I_ANCHOR_NAME = "anchor";
 const auto ATTRIBUTE_ROTATE_NAME = "rotate";
@@ -50,6 +51,10 @@ const auto ATTRIBUTE_ALIGN_RULES_I_BIAS_NAME = "bias";
 const auto ATTRIBUTE_ALIGN_RULES_I_START_NAME = "start";
 const auto ATTRIBUTE_ALIGN_RULES_I_END_NAME = "end";
 const auto ATTRIBUTE_DRAG_PREVIEW_NAME = "dragPreview";
+const auto ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_NAME = "horizontal";
+const auto ATTRIBUTE_CHAIN_WEIGHT_I_HORIZONTAL_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_NAME = "vertical";
+const auto ATTRIBUTE_CHAIN_WEIGHT_I_VERTICAL_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_TAB_INDEX_NAME = "tabIndex";
 const auto ATTRIBUTE_TAB_INDEX_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_DEFAULT_FOCUS_NAME = "defaultFocus";

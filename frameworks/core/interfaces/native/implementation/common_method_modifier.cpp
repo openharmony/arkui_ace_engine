@@ -1648,8 +1648,9 @@ void ChainWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetChainWeight(frameNode, convValue);
+    LayoutWeightPair layoutWeightPair(Converter::OptConvert<float>(value->horizontal),
+                                      Converter::OptConvert<float>(value->vertical));
+    ViewAbstractModelNG::SetLayoutWeight(frameNode, layoutWeightPair);
 }
 void PaddingImpl(Ark_NativePointer node,
                  const Ark_Union_Padding_Length_LocalizedPadding* value)

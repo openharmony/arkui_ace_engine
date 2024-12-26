@@ -1544,6 +1544,10 @@ public:
     {
         ViewAbstract::SetChainStyle(frameNode, chainInfo);
     }
+    static void SetLayoutWeight(FrameNode* frameNode, const LayoutWeightPair& value)
+    {
+        ViewAbstract::SetLayoutWeight(frameNode, value);
+    }
 
     static void BindPopup(FrameNode* targetNode, const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode)
     {
