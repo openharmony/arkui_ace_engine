@@ -38,12 +38,12 @@ export struct ProgressButtonV2 {
   @Param @Require progress: number;
   @Param content: ResourceStr = EMPTY_STRING;
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
-  @Param onClicked: ClickCallback = () => {};
+  @Param onClicked: ClickCallback = () => {
+  };
   @Param enable: boolean = true;
   @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
   @Local textProgress: string = EMPTY_STRING;
   @Local isLoading: boolean = false;
-
   @Local progressColor: ResourceColor = '#330A59F7'
   @Local containerBorderColor: ResourceColor = '#330A59F7'
   @Local containerBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_foreground_contrary')
@@ -94,9 +94,11 @@ export struct ProgressButtonV2 {
 
   build() {
     Button() {
-      Stack(){
-        Progress({ value: this.getButtonProgress(), total: MAX_PROGRESS,
-          style: ProgressStyle.Capsule })
+      Stack() {
+        Progress({
+          value: this.getButtonProgress(), total: MAX_PROGRESS,
+          style: ProgressStyle.Capsule
+        })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.buttonBorderRadius)
@@ -107,16 +109,21 @@ export struct ProgressButtonV2 {
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor)
         Row() {
-          Text(this.isLoading ? this.textProgress: this.content)
+          Text(this.isLoading ? this.textProgress : this.content)
             .fontSize($r('sys.float.ohos_id_text_size_button3'))
             .fontWeight(FontWeight.Medium)
             .key(PROGRESS_BUTTON_PRIMARY_FONT_KEY)
             .fontColor(this.colorOptions?.textColor?.color)
             .maxLines(1)
             .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .padding({ top: 4, left: 8, right: 8, bottom: 4})
+            .padding({
+              top: 4,
+              left: 8,
+              right: 8,
+              bottom: 4
+            })
             .opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY)
-            .onAreaChange((_, newValue)=>{
+            .onSizeChange((_, newValue) => {
               if (!newValue.height || newValue.height === this.textHeight) {
                 return;
               }
@@ -125,6 +132,7 @@ export struct ProgressButtonV2 {
             })
         }
         .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
+
         Row()
           .key(PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY)
           .backgroundColor(Color.Transparent)
@@ -147,9 +155,9 @@ export struct ProgressButtonV2 {
       this.colorOptions?.backgroundColor?.color
         ? this.colorOptions?.backgroundColor?.color
         : this.containerBackgroundColor)
-    .padding({ top: 0, bottom: 0})
+    .padding({ top: 0, bottom: 0 })
     .width(this.toLengthString(this.progressButtonWidth))
-    .constraintSize({minWidth: BUTTON_NORMARL_WIDTH})
+    .constraintSize({ minWidth: BUTTON_NORMARL_WIDTH })
     .stateEffect(this.enable)
     .onClick(() => {
       if (!this.enable) {
@@ -170,17 +178,17 @@ export struct ProgressButtonV2 {
     let lengthString: string = '';
     switch (value.unit) {
       case LengthUnit.PX:
-        return`${length}px`;
+        return `${length}px`;
       case LengthUnit.FP:
-        return`${length}fp`;
+        return `${length}fp`;
       case LengthUnit.LPX:
         return `${length}lpx`;
       case LengthUnit.PERCENT:
-        return`${length * 100}%`;
+        return `${length * 100}%`;
       case LengthUnit.VP:
         return `${length}vp`;
       default:
-        return`${length}vp`;
+        return `${length}vp`;
     }
     return lengthString;
   }
@@ -193,7 +201,7 @@ export class ProgressButtonV2Color {
   @Trace public textColor?: ColorMetrics;
   @Trace public backgroundColor?: ColorMetrics;
 
-  constructor (options: ProgressButtonV2ColorOptions) {
+  constructor(options: ProgressButtonV2ColorOptions) {
     this.progressColor = options.progressColor;
     this.borderColor = options.borderColor;
     this.textColor = options.textColor;
