@@ -385,4 +385,64 @@ HWTEST_F(MenuPattern2TestNg, InitPreviewMenuAnimationInfo, TestSize.Level1)
     menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
     EXPECT_TRUE(menuPattern->disappearOffset_.NonNegative());
 }
+
+HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    CHECK_NULL_VOID(outerMenuNode);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(jsViewNode);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(jsViewNode1);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    auto foundInnerMenu = menuPattern->GetFirstInnerMenu();
+    ASSERT_NE(foundInnerMenu, nullptr);
+}
+
+HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
+{
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    CHECK_NULL_VOID(outerMenuNode);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(jsViewNode);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_VOID(jsViewNode1);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    auto innerMenuCount = menuPattern->GetInnerMenuCount();
+    ASSERT_EQ(innerMenuCount, 1);
+}
 } // namespace OHOS::Ace::NG

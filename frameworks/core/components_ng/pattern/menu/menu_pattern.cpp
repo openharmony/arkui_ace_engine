@@ -775,60 +775,80 @@ RefPtr<FrameNode> MenuPattern::GetMenuWrapper() const
 uint32_t MenuPattern::GetInnerMenuCount() const
 {
     if (type_ == MenuType::MULTI_MENU || type_ == MenuType::DESKTOP_MENU || IsSelectOverlayCustomMenu()) {
+        std::cout << "MenuPattern::GetInnerMenuCount() return 00" << std::endl;
         return 0;
     }
 
     auto host = GetHost();
+    std::cout << "MenuPattern::GetInnerMenuCount() 00" << std::endl;
     CHECK_NULL_RETURN(host, 0);
     auto child = host->GetChildAtIndex(0);
     uint32_t depth = 0;
+    std::cout << "MenuPattern::GetInnerMenuCount() 11" << std::endl;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        std::cout << "MenuPattern::GetInnerMenuCount() while 22" << std::endl;
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+            std::cout << "MenuPattern::GetInnerMenuCount() while 22.1" << std::endl;
             child = child->GetFrameChildByIndex(0, false);
             if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                std::cout << "MenuPattern::GetInnerMenuCount() while 22.2" << std::endl;
                 child = child->GetChildAtIndex(0);
                 ++depth;
             }
             continue;
         }
+        std::cout << "MenuPattern::GetInnerMenuCount() while 33" << std::endl;
         if (child->GetTag() == V2::MENU_ETS_TAG) {
+            std::cout << "MenuPattern::GetInnerMenuCount() while 33.1" << std::endl;
             auto parent = child->GetParent();
             CHECK_NULL_RETURN(parent, 0);
+            std::cout << "MenuPattern::GetInnerMenuCount() while 33.2 return" << std::endl;
             return parent->GetChildren().size();
         }
+        std::cout << "MenuPattern::GetInnerMenuCount() while 44" << std::endl;
         child = child->GetChildAtIndex(0);
         ++depth;
     }
+    std::cout << "MenuPattern::GetInnerMenuCount() exit while return 0" << std::endl;
     return 0;
 }
 
 RefPtr<FrameNode> MenuPattern::GetFirstInnerMenu() const
 {
     if (type_ == MenuType::MULTI_MENU || type_ == MenuType::DESKTOP_MENU) {
+        std::cout << "MenuPattern::GetFirstInnerMenu() return 00" << std::endl;
         return nullptr;
     }
 
     auto host = GetHost();
+    std::cout << "MenuPattern::GetFirstInnerMenu() 00" << std::endl;
     CHECK_NULL_RETURN(host, nullptr);
     uint32_t depth = 0;
     auto child = host->GetChildAtIndex(0);
+    std::cout << "MenuPattern::GetFirstInnerMenu() 11" << std::endl;
     while (child && depth < MAX_SEARCH_DEPTH) {
         // found component <Menu>
+        std::cout << "MenuPattern::GetFirstInnerMenu() while 22" << std::endl;
         if (child->GetTag() == V2::JS_VIEW_ETS_TAG) {
             child = child->GetFrameChildByIndex(0, false);
+            std::cout << "MenuPattern::GetFirstInnerMenu() while 22.1" << std::endl;
             if (child && child->GetTag() == V2::JS_VIEW_ETS_TAG) {
+                std::cout << "MenuPattern::GetFirstInnerMenu() while 22.2" << std::endl;
                 child = child->GetChildAtIndex(0);
                 ++depth;
             }
             continue;
         }
+        std::cout << "MenuPattern::GetFirstInnerMenu() while 33" << std::endl;
         if (child->GetTag() == V2::MENU_ETS_TAG) {
+            std::cout << "MenuPattern::GetFirstInnerMenu() while 33.1 return child" << std::endl;
             return AceType::DynamicCast<FrameNode>(child);
         }
         child = child->GetChildAtIndex(0);
         ++depth;
     }
+    std::cout << "MenuPattern::GetFirstInnerMenu() exit while return nullptr" << std::endl;
     return nullptr;
 }
 
