@@ -224,6 +224,7 @@ void RichEditorPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     CHECK_NULL_VOID(pattern);
     pattern->SetSyncLoad(true);
     auto index = host->GetChildren().size();
+    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
     imageNode->MountToParent(host, index);
     CHECK_NULL_VOID(imageItem);
     auto options = imageItem->options;
@@ -843,6 +844,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     int32_t spanIndex = TextSpanSplit(insertIndex);
     IF_TRUE(spanIndex == -1, spanIndex = static_cast<int32_t>(host->GetChildren().size()));
 
+    imageNodes.push_back(WeakClaim(imageNode.GetRawPtr()));
     imageNode->MountToParent(host, spanIndex);
     auto renderContext = imageNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
@@ -1018,6 +1020,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (spanIndex == -1) {
         spanIndex = static_cast<int32_t>(host->GetChildren().size());
     }
+    builderNodes.push_back(WeakClaim(placeholderSpanNode.GetRawPtr()));
     placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
     if (renderContext) {
@@ -3538,7 +3541,8 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
         if (!selector.SelectNothing()) {
             pattern->StopTwinkling();
         }
-        IF_PRESENT(pattern->oneStepDragController_, SetEnableEventResponse(selector.SelectNothing()));
+        IF_PRESENT(pattern->oneStepDragController_,
+            SetEnableEventResponse(selector, pattern->imageNodes, pattern->builderNodes));
         pattern->FireOnSelectionChange(selector);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);

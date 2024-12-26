@@ -265,6 +265,7 @@ void OneStepDragController::SetEnableEventResponse(bool isEnable)
     isEnableEventResponse_ = isEnable;
 }
 
+
 void OneStepDragController::FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue)
 {
     IF_PRESENT(imageDragParam_, FillJsonValue(jsonValue));

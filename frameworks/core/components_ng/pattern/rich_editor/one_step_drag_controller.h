@@ -79,6 +79,7 @@ public:
     void EnableOneStepDrag(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
     void CopyDragCallback(TextSpanType spanType, const RefPtr<FrameNode>& frameNode);
     void SetEnableEventResponse(bool isEnable);
+    
     void FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue);
     void MarkDirtyNode(const WeakPtr<ImageSpanNode>& dirtyFrameNode);
     void HandleDirtyNodes();
