@@ -90,7 +90,8 @@ public:
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetShowCached(FrameNode* frameNode);
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled,
+        EffectEdge edge = EffectEdge::ALL);
     static float GetFriction(FrameNode* frameNode);
     static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);
     static int32_t GetScrollBarMode(FrameNode* frameNode);
