@@ -2477,12 +2477,15 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2505,12 +2508,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2529,12 +2535,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
