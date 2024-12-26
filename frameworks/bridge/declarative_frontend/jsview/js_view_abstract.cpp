@@ -51,6 +51,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_on_size_change_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_should_built_in_recognizer_parallel_with_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_touch_intercept_function.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
@@ -79,6 +81,8 @@
 #include "core/common/resource/resource_configuration.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -3701,6 +3705,64 @@ uint32_t ParseBindContextMenuShow(const JSCallbackInfo& info, NG::MenuParam& men
         }
     }
     return builderIndex;
+}
+
+void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    if (jsObj->HasProperty("type")) {
+        int32_t defaultValue = 0;
+        keyEvent.action =
+            static_cast<KeyAction>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), defaultValue));
+    }
+    if (jsObj->HasProperty("keyCode")) {
+        int32_t defaultValue = 0;
+        keyEvent.code = static_cast<KeyCode>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("keyCode"), defaultValue));
+    }
+    if (jsObj->HasProperty("keyText")) {
+        auto jsValue = jsObj->GetProperty("keyText");
+        if (jsValue->IsString()) {
+            keyEvent.key = jsValue->ToString().c_str();
+        }
+    }
+
+    if (jsObj->HasProperty("sourceType")) {
+        int32_t defaultValue = 0;
+        keyEvent.sourceType =
+            static_cast<SourceType>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("sourceType"), defaultValue));
+    }
+
+    if (jsObj->HasProperty("deviceId")) {
+        auto jsValue = jsObj->GetProperty("deviceId");
+        if (jsValue->IsNumber()) {
+            keyEvent.deviceId = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("metaKey")) {
+        int32_t defaultValue = 0;
+        keyEvent.metaKey = JSViewAbstract::ParseJsInt32(jsObj->GetProperty("metaKey"), defaultValue);
+    }
+
+    if (jsObj->HasProperty("unicode")) {
+        int32_t defaultValue = 0;
+        keyEvent.unicode = JSViewAbstract::ParseJsInt32(jsObj->GetProperty("unicode"), defaultValue);
+    }
+
+    if (jsObj->HasProperty("timeStamp")) {
+        auto jsValue = jsObj->GetProperty("timeStamp");
+        if (jsValue->IsNumber()) {
+            auto timeStamp = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
+            std::chrono::milliseconds milliseconds(timeStamp);
+            TimeStamp time(milliseconds);
+            keyEvent.timeStamp = time;
+        }
+    }
+
+    if (jsObj->HasProperty("intentionCode")) {
+        int32_t defaultValue = 0;
+        keyEvent.keyIntention =
+            static_cast<KeyIntention>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("intentionCode"), defaultValue));
+    }
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
@@ -7497,6 +7559,34 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
+{
+    JSRef<JSVal> arg = args[0];
+    if (!(arg->IsNumber() || arg->IsString())) {
+        return;
+    }
+    RefPtr<NG::FrameNode> frameNode = nullptr;
+    if (arg->IsString()) {
+        std::string id = arg->ToString();
+        frameNode = NG::Inspector::GetFrameNodeByKey(id);
+    }
+
+    if (arg->IsNumber()) {
+        auto id = arg->ToNumber<int32_t>();
+        auto node = ElementRegister::GetInstance()->GetNodeById(id);
+        frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    JSRef<JSObject> jsObject = args[1];
+    KeyEvent keyEvent;
+    ParseJsKeyEvent(jsObject, keyEvent);
+    auto result = focusHub->HandleEvent(keyEvent);
+    args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
+}
+
 void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -8926,6 +9016,8 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
+    JSClass<JSViewAbstract>::StaticMethod("onKeyEventDispatch", &JSInteractableView::JsOnKeyEventDispatch);
+    JSClass<JSViewAbstract>::StaticMethod("dispatchKeyEvent", &JSViewAbstract::JsDispatchKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onFocusMove", &JSViewAbstract::JsOnFocusMove);
     JSClass<JSViewAbstract>::StaticMethod("onFocus", &JSViewAbstract::JsOnFocus);
     JSClass<JSViewAbstract>::StaticMethod("onBlur", &JSViewAbstract::JsOnBlur);

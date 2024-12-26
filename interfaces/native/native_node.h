@@ -5674,6 +5674,7 @@ typedef enum {
      * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
+
     /**
      * @brief Defines the event triggered when the bound component receives a focus axis event after gaining focus.
      *
@@ -5684,6 +5685,19 @@ typedef enum {
      * @since 15
      */
     NODE_ON_FOCUS_AXIS = 23,
+
+     /**
+     * @brief Dispatch key event on the component node.
+     *
+     * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
+     * children. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 16
+     */
+    NODE_DISPATCH_KEY_EVENT = 24,
+
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *

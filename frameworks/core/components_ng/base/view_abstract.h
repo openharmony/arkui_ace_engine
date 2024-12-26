@@ -405,6 +405,7 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+    static void DisableOnKeyEventDispatch();
 #ifdef SUPPORT_DIGITAL_CROWN
     static void DisableOnCrownEvent();
 #endif
@@ -429,6 +430,7 @@ public:
     static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnKeyEventDispatch(FrameNode* frameNode);
 #ifdef SUPPORT_DIGITAL_CROWN
     static void DisableOnCrownEvent(FrameNode* frameNode);
 #endif
@@ -667,6 +669,9 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
+    static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void DispatchKeyEvent(FrameNode* frameNode, KeyEvent& keyEvent);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);

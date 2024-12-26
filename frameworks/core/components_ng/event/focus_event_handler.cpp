@@ -15,7 +15,9 @@
 #include "focus_event_handler.h"
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/event/event_constants.h"
 #include "core/event/focus_axis_event.h"
+#include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
@@ -72,6 +74,29 @@ FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
     }
 }
 
+bool FocusEventHandler::HasCustomKeyEventDispatch(const FocusEvent& event)
+{
+    if (event.event.eventType != UIInputEventType::KEY) {
+        return false;
+    }
+    const KeyEvent& keyEvent = static_cast<const KeyEvent&>(event.event);
+    if (keyEvent.isPreIme) {
+        return false;
+    }
+    return GetOnKeyEventDispatchCallback() != nullptr;
+}
+
+bool FocusEventHandler::HandleCustomEventDispatch(const FocusEvent& event)
+{
+    auto onKeyEventDispatchCallback = GetOnKeyEventDispatchCallback();
+    if (onKeyEventDispatchCallback) {
+        const KeyEvent& keyEvent = static_cast<const KeyEvent&>(event.event);
+        auto info = KeyEventInfo(keyEvent);
+        return onKeyEventDispatchCallback(info);
+    }
+    return false;
+}
+
 bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
 {
     if (!IsCurrentFocus()) {
@@ -80,6 +105,11 @@ bool FocusEventHandler::OnFocusEvent(const FocusEvent& event)
             GetFrameName().c_str(), GetFrameId());
         return false;
     }
+
+    if (HasCustomKeyEventDispatch(event)) {
+        return HandleCustomEventDispatch(event);
+    }
+
     if (focusType_ == FocusType::SCOPE) {
         return OnFocusEventScope(event);
     }
@@ -315,8 +345,8 @@ bool FocusEventHandler::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& k
     auto retCallback = false;
     auto onKeyEventCallback = GetOnKeyCallback();
     if (onKeyEventCallback) {
-        onKeyEventCallback(info);
-        retCallback = info.IsStopPropagation();
+        auto result = onKeyEventCallback(info);
+        retCallback = info.IsStopPropagation() || result;
         auto eventManager = pipeline->GetEventManager();
         PrintOnKeyEventUserInfo(keyEvent, retCallback);
     }

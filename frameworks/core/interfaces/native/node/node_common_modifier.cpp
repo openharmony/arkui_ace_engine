@@ -6333,6 +6333,28 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
 
+void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkUIkeyEvent);
+    KeyEvent keyEvent;
+    keyEvent.action = static_cast<KeyAction>(arkUIkeyEvent->type);
+    keyEvent.code = static_cast<KeyCode>(arkUIkeyEvent->keyCode);
+    keyEvent.key = arkUIkeyEvent->keyText;
+    keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
+    keyEvent.deviceId = arkUIkeyEvent->deviceId;
+    keyEvent.unicode = arkUIkeyEvent->unicode;
+    std::chrono::milliseconds milliseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
+    TimeStamp timeStamp(milliseconds);
+    keyEvent.timeStamp = timeStamp;
+    for (int32_t i = 0; i < arkUIkeyEvent->keyCodesLength; i ++) {
+        keyEvent.pressedCodes.push_back(static_cast<KeyCode>(arkUIkeyEvent->pressedKeyCodes[i]));
+    }
+    keyEvent.keyIntention = static_cast<KeyIntention>(arkUIkeyEvent->intentionCode);
+    ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
+}
+
 void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -6788,6 +6810,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .getTabStop = GetTabStop,
         .setOnClick = SetOnClickExt,
         .setOnAppear = SetOnAppearExt,
+        .dispatchKeyEvent = DispatchKeyEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
     };
@@ -7466,6 +7489,41 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
 
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, onKeyEvent);
+}
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
