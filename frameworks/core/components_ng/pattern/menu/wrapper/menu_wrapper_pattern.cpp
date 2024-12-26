@@ -345,6 +345,7 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
         CHECK_NULL_RETURN(focusMenu, nullptr);
     }
     // SelectOverlay's custom menu does not need to be focused.
+    auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
     auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
     if (!isCustomMenu && !isRightClickMenu) {
         auto menuPattern = focusMenu->GetPattern<MenuPattern>();
