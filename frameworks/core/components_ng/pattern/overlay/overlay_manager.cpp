@@ -6282,8 +6282,13 @@ void OverlayManager::CreateOverlayNode()
     CHECK_NULL_VOID(stageManager);
     auto stageNode = stageManager->GetStageNode();
     CHECK_NULL_VOID(stageNode);
-    overlayNode_ = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<OverlayContainerPattern>());
+    if (overlayInfo_.has_value() && !overlayInfo_.value().renderRootOverlay) {
+        overlayNode_ = FrameNode::CreateCommonNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            true, AceType::MakeRefPtr<OverlayContainerPattern>());
+    } else {
+        overlayNode_ = FrameNode::CreateFrameNode(V2::OVERLAY_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<OverlayContainerPattern>());
+    }
     CHECK_NULL_VOID(overlayNode_);
     overlayNode_->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
     auto layoutProperty = overlayNode_->GetLayoutProperty();

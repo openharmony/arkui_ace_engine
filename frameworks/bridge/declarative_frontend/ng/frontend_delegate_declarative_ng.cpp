@@ -1326,4 +1326,25 @@ void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
 }
+
+bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->SetOverlayManagerOptions(overlayInfo);
+};
+std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    return overlayManager->GetOverlayManagerOptions();
+};
 } // namespace OHOS::Ace::Framework
