@@ -10985,7 +10985,7 @@ bool RichEditorPattern::InsertOrDeleteSpace(int32_t index)
     return true;
 }
 
-void RichEditorPattern::DeleteRange(int32_t start, int32_t end)
+void RichEditorPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 {
     if (start > end) {
         std::swap(start, end);

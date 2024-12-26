@@ -237,7 +237,7 @@ public:
     {
         return false;
     }
-    virtual void DeleteRange(int32_t start, int32_t end) {}
+    virtual void DeleteRange(int32_t start, int32_t end, bool isIME = true) {}
     virtual void HandleOnPageUp() {};
     virtual void HandleOnPageDown() {};
 protected:
