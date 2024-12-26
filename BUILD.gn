@@ -82,6 +82,10 @@ config("ace_config") {
     defines += [ "_USE_MATH_DEFINES" ]
   }
 
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
+
   ldflags = []
   if (ace_engine_feature_enable_coverage) {
     cflags += [ "--coverage" ]

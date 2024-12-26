@@ -1435,6 +1435,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
+    json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
 }
 
 void ImagePattern::DumpLayoutInfo()

@@ -74,6 +74,8 @@ const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 const char JS_REPEAT_ETS_TAG[] = "Repeat";
 // js if else node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js with theme node
+const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -590,6 +592,10 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 const char ISOLATED_COMPONENT_TAG[] = "IsolatedComponent";
 const char ISOLATED_COMPONENT_ETS_TAG[] = "IsolatedComponent";
 
+// DynamicComponent
+const char DYNAMIC_COMPONENT_TAG[] = "DynamicComponent";
+const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
+
 // ContainerSpan
 const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
 const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
@@ -609,4 +615,8 @@ const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 
 // CustomSpanNode
 const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
+
+// LinearIndicator
+const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
+const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
 } // namespace OHOS::Ace::V2

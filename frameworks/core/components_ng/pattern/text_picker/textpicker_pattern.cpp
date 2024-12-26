@@ -626,6 +626,10 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
         } else {
             centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
         }
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+            centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
+        }
         AdjustFocusBoxOffset(centerX, centerY);
     } else {
         paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
@@ -1238,5 +1242,25 @@ bool TextPickerPattern::NeedAdaptForAging()
         return true;
     }
     return false;
+}
+
+void TextPickerPattern::SetDisableTextStyleAnimation(bool isDisableTextStyleAnimation)
+{
+    isDisableTextStyleAnimation_ = isDisableTextStyleAnimation;
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetDisableTextStyleAnimation(isDisableTextStyleAnimation);
+    }
 }
 } // namespace OHOS::Ace::NG

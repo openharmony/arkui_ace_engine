@@ -60,14 +60,7 @@ protected:
     }
 
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
-    {
-        auto node = AceType::MakeRefPtr<WaterFlowItemNode>(
-            V2::FLOW_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<WaterFlowItemPattern>());
-        node->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(FILL_LENGTH), CalcLength(getHeight_(index))));
-        return { std::to_string(index), node };
-    }
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override;
 
 private:
     int32_t itemCnt_ = 0;

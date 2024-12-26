@@ -853,6 +853,36 @@ void ViewAbstract::DisableOnKeyEvent()
     focusHub->ClearOnKeyCallback();
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ViewAbstract::DisableOnCrownEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnCrownCallback();
+}
+
+void ViewAbstract::DisableOnCrownEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnCrownCallback();
+}
+
+void ViewAbstract::SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnCrownCallback(std::move(onCrownCallback));
+}
+
+void ViewAbstract::SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnCrownCallback(std::move(onCrownCallback));
+}
+#endif
+
 void ViewAbstract::DisableOnHover()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -5180,6 +5210,24 @@ void ViewAbstract::SetSystemFontChangeEvent(FrameNode* frameNode, std::function<
 {
     CHECK_NULL_VOID(frameNode);
     frameNode->SetNDKFontUpdateCallback(std::move(onFontChange));
+}
+
+void ViewAbstract::SetDrawCompleteEvent(
+    FrameNode* frameNode, std::function<void()>&& onDraw)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKDrawCompletedCallback(std::move(onDraw));
+}
+
+void ViewAbstract::SetLayoutEvent(
+    FrameNode* frameNode, std::function<void()>&& onLayout)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NG::EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetNDKLayoutCallback(std::move(onLayout));
 }
 
 void ViewAbstract::AddCustomProperty(UINode* frameNode, const std::string& key, const std::string& value)

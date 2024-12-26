@@ -112,11 +112,27 @@ public:
         node_ = node;
     }
 
+    bool HasContent() const
+    {
+        return !content_.Invalid();
+    }
+
+    void SetContent(const WeakPtr<NG::UINode>& content)
+    {
+        content_ = content;
+    }
+
+    const WeakPtr<NG::UINode>& GetContent() const
+    {
+        return content_;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
+    WeakPtr<NG::UINode> content_ = nullptr;
     TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };

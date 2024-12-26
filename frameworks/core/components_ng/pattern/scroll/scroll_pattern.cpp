@@ -175,7 +175,9 @@ bool ScrollPattern::ScrollSnapTrigger()
     if (ScrollableIdle() && !AnimateRunning()) {
         SnapAnimationOptions snapAnimationOptions;
         if (StartSnapAnimation(snapAnimationOptions)) {
-            FireOnScrollStart();
+            if (!IsScrolling()) {
+                FireOnScrollStart();
+            }
             return true;
         }
     }
@@ -875,10 +877,10 @@ std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapD
     int32_t end = static_cast<int32_t>(snapOffsets_.size()) - 1;
     int32_t mid = 0;
     auto targetOffset = currentOffset_ + delta;
-    if (LessOrEqual(targetOffset, -scrollableDistance_) && snapDirection == SnapDirection::BACKWARD) {
+    if (LessOrEqual(targetOffset, snapOffsets_[end]) && snapDirection == SnapDirection::BACKWARD) {
         predictSnapOffset = -scrollableDistance_ - currentOffset_;
         return predictSnapOffset;
-    } else if (GreatOrEqual(targetOffset, 0.f) && snapDirection == SnapDirection::FORWARD) {
+    } else if (GreatOrEqual(targetOffset, snapOffsets_[start]) && snapDirection == SnapDirection::FORWARD) {
         predictSnapOffset = -currentOffset_;
         return predictSnapOffset;
     }
@@ -1341,9 +1343,12 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
     CHECK_NULL_VOID(scrollable);
     if (scrollable->IsSnapAnimationRunning()) {
         scrollable->UpdateScrollSnapEndWithOffset(
-            -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
         scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
+        if (!IsScrolling()) {
+            FireOnScrollStart();
+        }
     }
 }
 

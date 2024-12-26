@@ -1127,22 +1127,139 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint001, TestSize.Level1
 {
     SheetPresentationTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 301, AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.isTitleBuilder = true;
     EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_CENTER);
     EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_POPUP);
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
 
     algorithm->sheetType_ = SheetType::SHEET_CENTER;
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
     algorithm->sheetType_ = SheetType::SHEET_POPUP;
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateSheetChildConstraint002
+ * @tc.desc: Branch: if ((sheetStyle_.isTitleBuilder.has_value()) && ((sheetType_ == SheetType::SHEET_CENTER) ||
+ *                      (sheetType_ == SheetType::SHEET_POPUP)))
+ *           Condition: sheetStyle_.isTitleBuilder.has_value() = true && sheetType_ == SheetType::SHEET_CENTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_CENTER;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheet algorithm.
+     * @tc.expected: sheet title has value.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+
+    /**
+     * @tc.steps: step3. set sheetType is SHEET_CENTER and sheetStyle_.isTitleBuilder is true and sheetHeight_ is 1000.
+     */
+    algorithm->sheetStyle_.isTitleBuilder = true;
+    algorithm->sheetType_ = SheetType::SHEET_CENTER;
+    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetHeight_ = 1000.0f;
+
+    /**
+     * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
+     * @tc.expected: childConstraint.maxSize.Height() is 900.
+     */
+    auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
+    ASSERT_NE(operationNode, nullptr);
+    auto titleGeometryNode = operationNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto childConstraint = algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    EXPECT_EQ(childConstraint.maxSize.Height(), 900);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateSheetChildConstraint003
+ * @tc.desc: Branch: if (sheetType_ == SheetType::SHEET_POPUP)
+ *           Condition: sheetStyle_.isTitleBuilder.has_value() = true && sheetType_ == SheetType::SHEET_POPUP
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_POPUP;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheet algorithm.
+     * @tc.expected: sheet title has value.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+
+    /**
+     * @tc.steps: step3. set sheetType is SHEET_CENTER and sheetStyle_.isTitleBuilder is true and sheetHeight_ is 1000.
+     */
+    algorithm->sheetStyle_.isTitleBuilder = true;
+    algorithm->sheetType_ = SheetType::SHEET_POPUP;
+    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetHeight_ = 1000.0f;
+
+    /**
+     * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
+     * @tc.expected: childConstraint.maxSize.Height() is (900 - SHEET_ARROW_HEIGHT.ConvertToPx()).
+     */
+    auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
+    ASSERT_NE(operationNode, nullptr);
+    auto titleGeometryNode = operationNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto childConstraint = algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    EXPECT_EQ(childConstraint.maxSize.Height(), 900 - SHEET_ARROW_HEIGHT.ConvertToPx());
     SheetPresentationTestNg::TearDownTestCase();
 }
 

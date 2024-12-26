@@ -141,6 +141,7 @@ void ConvertPlaceholderRun(const PlaceholderRun& span, OHOS::Rosen::PlaceholderS
 
 SkColor ConvertSkColor(Color color);
 
+float GetVariableFontWeight(FontWeight fontWeight);
 } // namespace Constants
 
 } // namespace OHOS::Ace

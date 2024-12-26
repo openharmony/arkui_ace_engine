@@ -28,6 +28,7 @@ public:
     MockThemeManager() = default;
     ~MockThemeManager() override = default;
     MOCK_METHOD(RefPtr<Theme>, GetTheme, (ThemeType type));
+    MOCK_METHOD(RefPtr<Theme>, GetTheme, (ThemeType type, int32_t themeScopeId));
     MOCK_METHOD(Color, GetBackgroundColor, (), (const));
     MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants, (), (const));
     MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants,

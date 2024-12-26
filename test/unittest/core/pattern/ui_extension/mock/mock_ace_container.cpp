@@ -195,8 +195,7 @@ uint32_t AceContainer::GetParentMainWindowId(uint32_t currentWindowId) const
 {
     return 0;
 }
-bool AceContainer::GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
 {
     return true;
 }

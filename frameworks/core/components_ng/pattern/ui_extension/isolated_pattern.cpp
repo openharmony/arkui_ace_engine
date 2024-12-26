@@ -112,6 +112,7 @@ void IsolatedPattern::InitializeRender(void* runtime)
 
         dynamicComponentRenderer_->SetUIContentType(UIContentType::ISOLATED_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+        dynamicComponentRenderer_->SetBackgroundTransparent(true);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);

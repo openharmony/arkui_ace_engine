@@ -36,6 +36,7 @@ public:
     void SetBackBorder() override;
     void SetBlur(double blur) override;
     void SetImageFit(ImageFit value) override;
+    void SetImageMatrix(const Matrix4 &value) override {};
     void SetMatchTextDirection(bool value) override;
     void SetFitOriginSize(bool value) override;
     void SetOnComplete(std::function<void(const LoadImageSuccessEvent& info)>&& callback) override;

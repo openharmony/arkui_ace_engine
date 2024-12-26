@@ -256,4 +256,329 @@ HWTEST_F(OverlayManagerMenuTestNg, MenuTest002, TestSize.Level1)
     overlayManager->SendToAccessibility(menuWrapperNode, false);
     ASSERT_NE(menuWrapperNode, nullptr);
 }
+
+/**
+ * @tc.name: MenuTest003
+ * @tc.desc: Test OverlayManager::ShowMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node and root node.
+     */
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenuFirst = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto subMenuSecond = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    mainMenu->MountToParent(menuNode);
+    subMenuFirst->MountToParent(menuNode);
+    subMenuSecond->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    menuNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. call showMenu when menuNode already appended.
+     * @tc.expected: function exits rightly
+     */
+    auto targetId = rootNode->GetId();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    overlayManager->HideMenu(menuNode, targetId);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    overlayManager->ShowMenuInSubWindow(rootNode->GetId(), MENU_OFFSET, menuNode);
+    overlayManager->HideMenuInSubWindow(menuNode, rootNode->GetId());
+    overlayManager->HideMenuInSubWindow();
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    overlayManager->ShowMenuAnimation(menuNode);
+    EXPECT_FALSE(menuPattern == nullptr);
+    EXPECT_FALSE(menuPattern->animationOption_.GetOnFinishEvent() == nullptr);
+    menuPattern->StartShowAnimation();
+    auto menuHelper = overlayManager->ShowMenuHelper(menuNode, rootNode->GetId(), MENU_OFFSET);
+    EXPECT_TRUE(menuHelper);
+
+    /**
+     * @tc.steps: step3. call HideMenu related functions after menuNode already erased.
+     * @tc.expected: return normally
+     */
+    overlayManager->HideAllMenus();
+    overlayManager->DeleteMenu(targetId);
+    overlayManager->HideMenu(menuNode, targetId);
+    overlayManager->HideMenuInSubWindow(menuNode, targetId);
+    overlayManager->HideMenuInSubWindow();
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+
+    /**
+     * @tc.steps: step4. call DeleteMenu again after menuNode already erased.
+     * @tc.expected: return normally
+     */
+    overlayManager->RemoveMenu(menuNode);
+    overlayManager->RemoveOverlayInSubwindow();
+    overlayManager->DeleteMenu(targetId);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+}
+
+/**
+ * @tc.name: MenuTest004
+ * @tc.desc: Test OverlayManager::ShowMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto targetId = rootNode->GetId();
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId));
+    auto subMenuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto subMenuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, subMenuId, AceType::MakeRefPtr<MenuPattern>(1, "Test", MenuType::MENU));
+    subMenuNode->MountToParent(menuNode);
+    /**
+     * @tc.steps: step2. call showMenu when menuNode is nullptr and menuMap is empty.
+     * @tc.expected: function exits normally
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    overlayManager->ShowMenuInSubWindow(targetId, MENU_OFFSET, nullptr);
+    EXPECT_TRUE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step3. call showMenu when menuNode is not appended.
+     * @tc.expected: menuNode mounted successfully
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step4. call showMenu when menuNode is nullptr and menuMap is not empty.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->ShowMenu(targetId, MENU_OFFSET, nullptr);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    /**
+     * @tc.steps: step5. call HideAllMenus.
+     * @tc.expected: function exits normally
+     */
+    overlayManager->CleanMenuInSubWindow(targetId);
+    overlayManager->FocusOverlayNode(menuNode, false);
+    EXPECT_FALSE(overlayManager->menuMap_.empty());
+    EXPECT_FALSE(overlayManager->RemoveOverlayInSubwindow());
+    EXPECT_TRUE(overlayManager->RemoveAllModalInOverlay());
+    EXPECT_FALSE(overlayManager->RemoveOverlay(false));
+    overlayManager->RemoveMenu(rootNode);
+}
+
+/**
+ * @tc.name: MenuTest005
+ * @tc.desc: Test OverlayManager::PopMenuAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node , preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto previewContext = previewNode->GetRenderContext();
+    ASSERT_NE(previewContext, nullptr);
+    auto menuContext = previewNode->GetRenderContext();
+    ASSERT_NE(menuContext, nullptr);
+    previewContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    menuContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is true
+     * @tc.expected: the render context of menu and preview will update, and menu wrapper node will remove
+     */
+    EXPECT_EQ(rootNode->GetChildren().size(), 1);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    overlayManager->PopMenuAnimation(menuWrapperNode, true);
+    pipeline->taskExecutor_ = nullptr;
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(rootNode->GetChildren().size(), 0);
+
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
+     * @tc.expected: the none of node will remove.
+     */
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+    overlayManager->PopMenuAnimation(menuWrapperNode, false);
+    EXPECT_EQ(menuWrapperNode->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: MenuTest006
+ * @tc.desc: Test OverlayManager::CleanMenuInSubWindowWithAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node, preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto menuWrapperContext = menuWrapperNode->GetRenderContext();
+    ASSERT_NE(menuWrapperContext, nullptr);
+    menuWrapperContext->UpdateOpacity(1.0);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto previewContext = previewNode->GetRenderContext();
+    ASSERT_NE(previewContext, nullptr);
+    auto menuContext = previewNode->GetRenderContext();
+    ASSERT_NE(menuContext, nullptr);
+    previewContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    menuContext->UpdateTransformScale(VectorF(0.0f, 0.0f));
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    /**
+     * @tc.steps: step2. call PopMenuAnimation when showPreviewAnimation is false
+     * @tc.expected: the render context of menu and preview will update
+     */
+    overlayManager->CleanMenuInSubWindowWithAnimation();
+    pipeline->taskExecutor_ = nullptr;
+    EXPECT_EQ(menuContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+    EXPECT_EQ(previewContext->GetTransformScale(), VectorF(1.0f, 1.0f));
+}
+
+/**
+ * @tc.name: MenuTest007
+ * @tc.desc: Test OverlayManager::ShowMenuAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create menu node , preview node and root node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    auto focusHub = menuWrapperNode->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    menuPattern->SetPreviewMode(MenuPreviewMode::CUSTOM);
+    /**
+     * @tc.steps: step2. call ShowMenuAnimation and call StartShowAnimation of menu pattern
+     * @tc.expected: the isFirstShow_ of preview pattern true and parentFocusable_ of menuWrapper's focus hub is true
+     */
+    overlayManager->ShowMenuAnimation(menuWrapperNode);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    menuWrapperPattern->StartShowAnimation();
+    pipeline->taskExecutor_ = nullptr;
+
+    auto previewPattern = previewNode->GetPattern<MenuPreviewPattern>();
+    ASSERT_NE(previewPattern, nullptr);
+    EXPECT_TRUE(previewPattern->isFirstShow_);
+}
+
+/**
+ * @tc.name: MenuTest008
+ * @tc.desc: Test OverlayManager::UpdateContextMenuDisappearPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerMenuTestNg, MenuTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get overlay manager instance , set two different menu_offset.
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlay = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlay, nullptr);
+    overlay->ResetContextMenuDragHideFinished();
+    const OffsetF menu_zero_offset(0.0, 0.0);
+    const OffsetF menu_five_offset(5.0, 0.0);
+    overlay->UpdateContextMenuDisappearPosition(menu_zero_offset);
+    overlay->UpdateDragMoveVector(menu_five_offset);
+    overlay->UpdateContextMenuDisappearPosition(MENU_OFFSET);
+    /**
+     * @tc.steps: step2. create menu and call UpdateContextMenuDisappearPosition.
+     * @tc.expected: submenu is called
+     */
+    auto menuId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto menuNode =
+        FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, menuId, AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto mainMenu =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
+    auto subMenuFirst = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    auto subMenuSecond = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, 4, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
+    mainMenu->MountToParent(menuNode);
+    subMenuFirst->MountToParent(menuNode);
+    subMenuSecond->MountToParent(menuNode);
+    auto menuPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    auto rootNode = overlay->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    menuNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode();
+    auto targetId = rootNode->GetId();
+    overlay->ShowMenu(targetId, MENU_OFFSET, menuNode);
+    overlay->UpdateContextMenuDisappearPosition(menu_five_offset);
+    EXPECT_EQ(rootNode->GetChildren().size(), 2);
+    auto node = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().back());
+    EXPECT_EQ(node->GetTag(), V2::MENU_WRAPPER_ETS_TAG);
+    overlay->HideMenu(menuNode, targetId);
+}
 } // namespace OHOS::Ace::NG

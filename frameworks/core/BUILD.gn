@@ -17,7 +17,10 @@ import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 
 config("container_scope_config") {
   visibility = [ ":*" ]
-  include_dirs = [ "$ace_root/frameworks" ]
+  include_dirs = [
+    "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
+  ]
 }
 
 ohos_shared_library("ace_container_scope") {
@@ -306,7 +309,7 @@ template("ace_core_source_set") {
     }
 
     if (ohos_indep_compiler_enable) {
-      include_dirs = indep_compile_includes
+      include_dirs += indep_compile_includes
     }
 
     configs = [ "$ace_root:ace_config" ]
@@ -834,6 +837,7 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
       "components/custom_paint/render_offscreen_canvas_creator.cpp",

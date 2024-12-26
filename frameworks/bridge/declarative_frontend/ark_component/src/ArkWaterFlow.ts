@@ -257,7 +257,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey<WaterFlowParam> {
       getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
     } else {
       getUINativeModule().waterFlow.setWaterFlowInitialize(node,
-        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode, this.value?.footerContent);
     }
   }
 }
@@ -266,6 +266,7 @@ interface WaterFlowParam {
   scroller?: Scroller;
   sections?: WaterFlowSections;
   layoutMode?: WaterFlowLayoutMode;
+  footerContent?: ComponentContent;
 }
 
 class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements WaterFlowAttribute {

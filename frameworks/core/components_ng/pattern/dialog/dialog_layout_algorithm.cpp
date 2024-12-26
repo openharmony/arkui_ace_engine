@@ -914,11 +914,13 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
-    auto displayInfo = container->GetDisplayInfo();
-    CHECK_NULL_VOID(displayInfo);
-    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
-    if (!foldCreaseRects.empty()) {
-        foldCreaseRect = foldCreaseRects.front();
+    if (isHoverMode_) {
+        auto displayInfo = container->GetDisplayInfo();
+        CHECK_NULL_VOID(displayInfo);
+        auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+        if (!foldCreaseRects.empty()) {
+            foldCreaseRect = foldCreaseRects.front();
+        }
     }
 }
 

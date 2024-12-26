@@ -116,19 +116,58 @@ void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
 namespace NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
-    static const ArkUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
-        SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
-        SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
-        SetGridItemColumnEnd, ResetGridItemColumnEnd, SetGridItemOptions };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIGridItemModifier modifier = {
+        .setGridItemSelectable = SetGridItemSelectable,
+        .resetGridItemSelectable = ResetGridItemSelectable,
+        .setGridItemSelected = SetGridItemSelected,
+        .resetGridItemSelected = ResetGridItemSelected,
+        .setGridItemRowStart = SetGridItemRowStart,
+        .resetGridItemRowStart = ResetGridItemRowStart,
+        .setGridItemRowEnd = SetGridItemRowEnd,
+        .resetGridItemRowEnd = ResetGridItemRowEnd,
+        .setGridItemColumnStart = SetGridItemColumnStart,
+        .resetGridItemColumnStart = ResetGridItemColumnStart,
+        .setGridItemColumnEnd = SetGridItemColumnEnd,
+        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
+        .setGridItemOptions = SetGridItemOptions,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIGridItemModifier* GetCJUIGridItemModifier()
 {
-    static const CJUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
-        SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
-        SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
-        SetGridItemColumnEnd, ResetGridItemColumnEnd };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIGridItemModifier modifier = {
+        .setGridItemSelectable = SetGridItemSelectable,
+        .resetGridItemSelectable = ResetGridItemSelectable,
+        .setGridItemSelected = SetGridItemSelected,
+        .resetGridItemSelected = ResetGridItemSelected,
+        .setGridItemRowStart = SetGridItemRowStart,
+        .resetGridItemRowStart = ResetGridItemRowStart,
+        .setGridItemRowEnd = SetGridItemRowEnd,
+        .resetGridItemRowEnd = ResetGridItemRowEnd,
+        .setGridItemColumnStart = SetGridItemColumnStart,
+        .resetGridItemColumnStart = ResetGridItemColumnStart,
+        .setGridItemColumnEnd = SetGridItemColumnEnd,
+        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

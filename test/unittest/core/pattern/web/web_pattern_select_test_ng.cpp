@@ -372,11 +372,11 @@ void WebPatternSelectTestNg::TearDown() {}
 std::vector<MenuOptionsParam> CreateMenuOptions(const std::vector<NG::MenuItemParam>&)
 {
     std::vector<MenuOptionsParam> options {
-        { std::nullopt, std::nullopt, "option1",
+        { std::nullopt, std::nullopt, std::nullopt, "option1",
             [](const std::string& id) { std::cout << "Option 1 clicked with ID: " << id << std::endl; }, true },
-        { std::nullopt, std::nullopt, "option2",
+        { std::nullopt, std::nullopt, std::nullopt, "option2",
             [](const std::string& id) { std::cout << "Option 2 clicked with ID: " << id << std::endl; }, false },
-        { std::nullopt, std::nullopt, "option3",
+        { std::nullopt, std::nullopt, std::nullopt, "option3",
             [](const std::string& id) { std::cout << "Option 3 clicked with ID: " << id << std::endl; }, false }
     };
     return options;

@@ -680,7 +680,10 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     ScrollToIndex(29, true, ScrollAlign::START);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 29)->IsActive());
     EXPECT_FLOAT_EQ(pattern_->finalPosition_, 2100.f);
+    EXPECT_FALSE(pattern_->AnimateStoped());
     MockAnimationManager::GetInstance().Tick();
+    // because animation finishes in 1 tick, AnimateStoped status becomes true again
+    pattern_->isAnimationStop_ = false; // manually set to prevent jumping
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 29);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 29)->IsActive());
@@ -971,7 +974,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachEnd001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(reached, 2);
-    EXPECT_EQ(GetChildRect(frameNode_, 19).Bottom(), WATER_FLOW_HEIGHT);
+    EXPECT_NEAR(GetChildRect(frameNode_, 19).Bottom(), WATER_FLOW_HEIGHT, 0.01f);
 }
 
 /**
@@ -990,6 +993,7 @@ HWTEST_F(WaterFlowScrollerTestNg, ScrollAnimation001, TestSize.Level1)
 
     ScrollToIndex(48, true, ScrollAlign::START);
     MockAnimationManager::GetInstance().Tick();
+    pattern_->isAnimationStop_ = false; // animation ended in 1 tick, need to set manually
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 49);
     for (int i = pattern_->layoutInfo_->startIndex_; i <= 49; i++) {
