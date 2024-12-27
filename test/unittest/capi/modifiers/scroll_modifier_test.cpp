@@ -1338,7 +1338,9 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
         Ark_OffsetResult retVal;
         retVal.xOffset = xOffset;
         retVal.yOffset = yOffset;
-        continuation.call(continuation.resource.resourceId, retVal);
+        if (continuation.call != nullptr) {
+            continuation.call(continuation.resource.resourceId, retVal);
+        }
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
