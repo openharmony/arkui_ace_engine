@@ -294,23 +294,6 @@ void SubwindowManager::ShowMenuNG(std::function<void()>&& buildFunc, std::functi
     subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
 }
 
-void SubwindowManager::ShowMenuNG(std::function<RefPtr<NG::UINode>()>&& buildFunc,
-    std::function<RefPtr<NG::UINode>()>&& previewBuildFunc, const NG::MenuParam& menuParam,
-    const RefPtr<NG::FrameNode>& targetNode, const NG::OffsetF& offset)
-{
-    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "show menu ng enter");
-    CHECK_NULL_VOID(targetNode);
-    auto pipelineContext = targetNode->GetContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto containerId = pipelineContext->GetInstanceId();
-    auto subwindow = GetOrCreateSubwindow(containerId);
-    if (!subwindow) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "get or create subwindow failed");
-        return;
-    }
-    subwindow->ShowMenuNG(std::move(buildFunc), std::move(previewBuildFunc), menuParam, targetNode, offset);
-}
-
 void SubwindowManager::HidePreviewNG()
 {
     auto subwindow = GetCurrentWindow();
