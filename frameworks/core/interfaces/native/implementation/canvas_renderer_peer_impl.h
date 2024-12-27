@@ -111,6 +111,7 @@ public:
     void GetPixelMap(const ImageSize& imageSize);
     double GetDimension(const Dimension& value, const bool force = false);
     void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
+    std::optional<OHOS::Ace::TextMetrics> GetTextMetrics(const std::string& text);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -157,15 +158,17 @@ public:
     uint32_t patternCount = 0;
 
 protected:
-    RefPtr<CanvasPattern> pattern_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> pattern_;
 
 private:
     void ParseImageData(const ImageSizeExt& ext);
     Dimension GetDimensionValue(const std::string& str);
 
-    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    OHOS::Ace::CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;
+    std::vector<OHOS::Ace::PaintState> savePaintState_;
+    OHOS::Ace::PaintState paintState_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

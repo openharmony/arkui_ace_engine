@@ -361,6 +361,8 @@ Ark_NativePointer CreateImageData0Impl(CanvasRendererPeer* peer,
             peerImpl->imageData.data.push_back(COLOR_WHITE);
         }
     }
+    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
+        "should be replaced with a valid accessor for ImageData.");
     return reinterpret_cast<Ark_NativePointer>(peerImpl);
 }
 Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
@@ -371,6 +373,8 @@ Ark_NativePointer CreateImageData1Impl(CanvasRendererPeer* peer,
     CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(imagedata, nullptr);
     peerImpl->imageData = Converter::Convert<Ace::ImageData>(*imagedata);
+    LOGE("ARKOALA CanvasRendererAccessor::CreateImageData0Impl return type Ark_NativePointer "
+        "should be replaced with a valid accessor for ImageData.");
     return reinterpret_cast<Ark_NativePointer>(peerImpl);
 }
 Ark_NativePointer GetImageDataImpl(CanvasRendererPeer* peer,
@@ -628,8 +632,15 @@ void FillTextImpl(CanvasRendererPeer* peer,
 Ark_NativePointer MeasureTextImpl(CanvasRendererPeer* peer,
                                   const Ark_String* text)
 {
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    CHECK_NULL_RETURN(text, nullptr);
+    auto content = Converter::Convert<std::string>(*text);
+    auto opt = peerImpl->GetTextMetrics(content);
+    CHECK_NULL_RETURN(opt, nullptr);
     LOGE("ARKOALA CanvasRendererAccessor::MeasureTextImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for TextMetrics.");
+         "should be replaced with an accessor type for TextMetrics.");
     return nullptr;
 }
 void StrokeTextImpl(CanvasRendererPeer* peer,

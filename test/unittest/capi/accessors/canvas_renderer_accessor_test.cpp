@@ -1920,10 +1920,4 @@ HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
     }
     holder->TearDown();
 }
-/**
- * @tc.name: createPatternTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, DISABLED_createPatternTest, TestSize.Level1) {}
 } // namespace OHOS::Ace::NG

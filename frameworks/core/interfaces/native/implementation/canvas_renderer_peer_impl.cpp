@@ -15,7 +15,7 @@
 
 #include "canvas_renderer_peer_impl.h"
 
-namespace {
+namespace OHOS::Ace::NG {
 const std::set<std::string> FONT_WEIGHTS = {
     "100", "200", "300", "400", "500", "600", "700", "800", "900",
     "bold", "bolder", "lighter", "medium", "normal", "regular",
@@ -24,12 +24,15 @@ const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
 const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
 constexpr double MATH_2_PI = 2 * M_PI;
 constexpr double DIFF = 1e-10;
-}
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-
 CanvasRendererPeerImpl::CanvasRendererPeerImpl()
 {
     density_ = PipelineBase::GetCurrentDensity();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
     if (pipeline) {
         densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
@@ -65,6 +68,10 @@ void CanvasRendererPeerImpl::TriggerRestoreImpl()
              "not bound to component.");
         return;
     }
+    if (!savePaintState_.empty()) {
+        paintState_ = savePaintState_.back();
+        savePaintState_.pop_back();
+    }
     pattern_->Restore();
 }
 void CanvasRendererPeerImpl::TriggerSaveImpl()
@@ -74,6 +81,7 @@ void CanvasRendererPeerImpl::TriggerSaveImpl()
              "not bound to component.");
         return;
     }
+    savePaintState_.push_back(paintState_);
     pattern_->Save();
 }
 void CanvasRendererPeerImpl::TriggerResetTransformImpl()
@@ -607,5 +615,31 @@ void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const Image
         }
     }
     pattern_->PutImageData(imageData);
+}
+std::optional<OHOS::Ace::TextMetrics> CanvasRendererPeerImpl::GetTextMetrics(const std::string& text)
+{
+    std::optional<OHOS::Ace::TextMetrics> textMetrics = std::nullopt;
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetTextMetrics pattern not bound to component.");
+        return textMetrics;
+    }
+    auto density = GetDensity();
+    if (NonPositive(density)) {
+        return textMetrics;
+    }
+    textMetrics = pattern_->MeasureTextMetrics(text, paintState_);
+    textMetrics->height /= density;
+    textMetrics->actualBoundingBoxLeft /= density;
+    textMetrics->actualBoundingBoxRight /= density;
+    textMetrics->actualBoundingBoxAscent /= density;
+    textMetrics->actualBoundingBoxDescent /= density;
+    textMetrics->hangingBaseline /= density;
+    textMetrics->alphabeticBaseline /= density;
+    textMetrics->ideographicBaseline /= density;
+    textMetrics->emHeightAscent /= density;
+    textMetrics->emHeightDescent /= density;
+    textMetrics->fontBoundingBoxAscent /= density;
+    textMetrics->fontBoundingBoxDescent /= density;
+    return textMetrics;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
