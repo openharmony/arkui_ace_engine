@@ -1873,19 +1873,4 @@ TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
     dst.children = optionsOpt.value_or(empty);
     return dst;
 }
-
-template<>
-TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
-{
-    auto xOffset = OptConvert<Dimension>(src.xOffset);
-    auto yOffset = OptConvert<Dimension>(src.yOffset);
-    TwoDimensionScrollResult result;
-    if (xOffset.has_value()) {
-        result.xOffset = xOffset.value();
-    }
-    if (yOffset.has_value()) {
-        result.yOffset = yOffset.value();
-    }
-    return result;
-}
 } // namespace OHOS::Ace::NG::Converter

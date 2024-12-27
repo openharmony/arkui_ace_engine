@@ -66,6 +66,20 @@ void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBegi
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     dst = ret;
 }
+
+template<>
+TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
+{
+    auto xOffset = OptConvert<Dimension>(src.xOffset);
+    auto yOffset = OptConvert<Dimension>(src.yOffset);
+    TwoDimensionScrollResult result;
+    if (xOffset.has_value()) {
+        result.xOffset = xOffset.value();
+    }
+    if (yOffset.has_value()) {
+        result.yOffset = yOffset.value();
+    }
+    return result;
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
