@@ -30,6 +30,7 @@ enum class PlaceholderType : int32_t {
 enum class UIExtCallbackEventId : uint32_t {
     ON_AREA_CHANGED = 0,
     ON_UEA_ACCESSIBILITY_READY = 6,
+    ON_DRAW_FIRST = 7,
 };
 
 struct UIExtCallbackEvent {
