@@ -657,7 +657,7 @@ HWTEST_F(TabsModifierTest, setOnAnimationStartTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setOnAnimationEnd
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
+HWTEST_F(TabsModifierTest, setOnAnimationEndTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     OnTabsAnimationEndCallback func{};
@@ -677,6 +677,8 @@ HWTEST_F(TabsModifierTest, DISABLED_setOnAnimationEndTest, TestSize.Level1)
     info.currentOffset = CURRENT_OFFSET;
     info.targetOffset = TARGET_OFFSET;
     info.velocity = VELOCITY;
+    // the start animation before is required for the end of animation testing
+    eventHub->FireAnimationStartEvent(0, 0, {});
     eventHub->FireAnimationEndEvent(INDEX, info);
     EXPECT_EQ(g_indexValue, INDEX);
     EXPECT_EQ(g_currentOffsetValue, CURRENT_OFFSET);
