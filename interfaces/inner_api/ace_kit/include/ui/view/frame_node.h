@@ -56,7 +56,11 @@ public:
     virtual NodeHandle GetHandle() = 0;
 
     virtual void AddChild(const RefPtr<FrameNode>& child) = 0;
+    virtual std::list<RefPtr<FrameNode>> GetChildren() = 0;
     virtual void MarkDirtyNode(NG::PropertyChangeFlag flag = NG::PROPERTY_UPDATE_NORMAL) = 0;
+
+    virtual std::string GetTag() const = 0;
+    virtual int32_t GetId() const = 0;
 
     virtual void MeasureChildren() = 0;
     virtual void LayoutChildren() = 0;

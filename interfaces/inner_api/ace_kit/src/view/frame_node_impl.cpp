@@ -15,11 +15,12 @@
 
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/ace_type.h"
-#include "interfaces/inner_api/ace_kit/include/ui/base/referenced.h"
-#include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/pattern.h"
-#include "interfaces/inner_api/ace_kit/include/ui/view/ui_context.h"
+#include "ui/base/ace_type.h"
+#include "ui/base/referenced.h"
+#include "ui/base/utils/utils.h"
+#include "ui/view/frame_node.h"
+#include "ui/view/pattern.h"
+#include "ui/view/ui_context.h"
 
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/property.h"
@@ -156,10 +157,39 @@ void FrameNodeImpl::AddChild(const RefPtr<FrameNode>& child)
     frameNode_->AddChild(AceType::Claim(childNodePtr));
 }
 
+std::list<RefPtr<FrameNode>> FrameNodeImpl::GetChildren()
+{
+    std::list<RefPtr<FrameNode>> children;
+    CHECK_NULL_RETURN(frameNode_, children);
+    for (auto& child : frameNode_->GetAllChildrenWithBuild(false)) {
+        auto node = child->GetHostNode();
+        if (!node) {
+            continue;
+        }
+        auto kitNode = node->GetKitNode();
+        if (!kitNode) {
+            kitNode = MakeRefPtr<FrameNodeImpl>(node);
+        }
+        children.emplace_back(kitNode);
+    }
+    return children;
+}
+
 void FrameNodeImpl::MarkDirtyNode(NG::PropertyChangeFlag flag)
 {
     CHECK_NULL_VOID(frameNode_);
     frameNode_->MarkDirtyNode(flag);
 }
 
+std::string FrameNodeImpl::GetTag() const
+{
+    CHECK_NULL_RETURN(frameNode_, "");
+    return frameNode_->GetTag();
+}
+
+int32_t FrameNodeImpl::GetId() const
+{
+    CHECK_NULL_RETURN(frameNode_, -1);
+    return frameNode_->GetId();
+}
 } // namespace OHOS::Ace::Kit
