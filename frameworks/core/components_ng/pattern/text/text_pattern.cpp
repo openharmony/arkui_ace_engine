@@ -4322,6 +4322,9 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
     gesture->SetHitTestMode(HitTestMode::HTMNONE);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetSyncLoad(imgAttr.syncLoad);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -4368,14 +4371,18 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
+    ImageSourceInfo info;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!options.imagePixelMap.has_value()) {
-        return { src, bundleName, moduleName };
+        info = ImageSourceInfo{ src, bundleName, moduleName };
+    } else {
+        info = ImageSourceInfo(pixMap);
     }
-    return ImageSourceInfo(pixMap);
 #else
-    return { src, bundleName, moduleName };
+    info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
+    info.SetIsUriPureNumber(options.isUriPureNumber);
+    return info;
 }
 
 void TextPattern::ProcessSpanString()
