@@ -41,6 +41,8 @@ constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
 constexpr bool DEFAULT_KEY_BOARD_VALUE = true;
 constexpr bool DEFAULT_ENABLE_AUTO_FILL = true;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr char DEFAULT_FONT_FAMILY[] = "HarmonyOS Sans";
 const double DEFAULT_DASH_DIMENSION = -1;
 const uint32_t ERROR_UINT_CODE = -1;
@@ -91,6 +93,34 @@ void SetTextAreaMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetMaxViewLines(frameNode, maxLine);
     TextFieldModelNG::SetNormalMaxViewLines(frameNode, maxLine);
+}
+
+void SetTextAreaMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinFontScale(frameNode, number);
+}
+
+void ResetTextAreaMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetTextAreaMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMaxFontScale(frameNode, number);
+}
+
+void ResetTextAreaMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
 }
 
 void ResetTextAreaMaxLines(ArkUINodeHandle node)
@@ -1899,6 +1929,10 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setEllipsisMode = SetEllipsisMode,
         .resetEllipsisMode = ResetEllipsisMode,
         .setTextAreaBorderDash = SetTextAreaBorderDash,
+        .setTextAreaMinFontScale = SetTextAreaMinFontScale,
+        .resetTextAreaMinFontScale = ResetTextAreaMinFontScale,
+        .setTextAreaMaxFontScale = SetTextAreaMaxFontScale,
+        .resetTextAreaMaxFontScale = ResetTextAreaMaxFontScale,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
