@@ -601,6 +601,11 @@ void ViewAbstractModelNG::DismissSheet()
 
 void ViewAbstractModelNG::DismissContentCover()
 {
+    ViewAbstractModelNG::DismissContentCoverStatic();
+}
+
+void ViewAbstractModelNG::DismissContentCoverStatic()
+{
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();

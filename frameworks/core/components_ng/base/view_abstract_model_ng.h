@@ -1330,6 +1330,7 @@ public:
     RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;
+    static void DismissContentCoverStatic();
     void SheetSpringBack() override;
 
     void SetAccessibilityGroup(bool accessible) override;

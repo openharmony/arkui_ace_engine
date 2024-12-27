@@ -144,7 +144,7 @@ auto g_onWillDismissPopup = [](
                 };
                 parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
                 arkCallback.Invoke(parameter);
-                parameter.dismiss.resource.release(parameter.dismiss.resource.resourceId); // release reverse callback
+                CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -246,11 +246,11 @@ auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_Content
             parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                 .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
             auto dismiss = []() {
-                ViewAbstract::DismissPopup();
+                ViewAbstractModelNG::DismissContentCoverStatic();
             };
             parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
             arkCallback.Invoke(parameter);
-            parameter.dismiss.resource.release(parameter.dismiss.resource.resourceId); // release reverse callback
+            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
 };
@@ -4144,7 +4144,7 @@ void BindContentCover0Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    bool isShowValue = (isShow ? Converter::OptConvert<bool>(*isShow) : std::nullopt).value_or(false);
+    bool isShowValue = isShow && Converter::OptConvert<bool>(*isShow).value_or(false);
     auto weakNode = AceType::WeakClaim(frameNode);
     auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
         PipelineContext::SetCallBackNode(weakNode);
@@ -4164,7 +4164,7 @@ void BindContentCover1Impl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    bool isShowValue = (isShow ? Converter::OptConvert<bool>(*isShow) : std::nullopt).value_or(false);
+    bool isShowValue = isShow && Converter::OptConvert<bool>(*isShow).value_or(false);
     auto weakNode = AceType::WeakClaim(frameNode);
     auto buildFunc = [arkCallback = CallbackHelper(*builder, frameNode), weakNode, node]() -> RefPtr<UINode> {
         PipelineContext::SetCallBackNode(weakNode);
