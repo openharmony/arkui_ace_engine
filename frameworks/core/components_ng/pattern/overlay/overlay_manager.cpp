@@ -4497,6 +4497,7 @@ void OverlayManager::PlaySheetTransition(
             });
         ACE_SCOPED_TRACE("Sheet start admission");
         sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
+        sheetPattern->UpdateAccessibilityDetents(sheetHeight_);
         AnimationUtils::Animate(
             option,
             [context, offset]() {

@@ -684,6 +684,7 @@ public:
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
     void RecoverHalfFoldOrAvoidStatus();
+    bool UpdateAccessibilityDetents(float height);
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -746,6 +747,16 @@ private:
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
+
+    // broadcast
+    void SendTextUpdateEvent();
+    void SendSelectedEvent();
+    void HandleFollowAccessibilityEvent(float currHeight);
+    void HandleDragEndAccessibilityEvent();
+    void RegisterElementInfoCallBack();
+    uint32_t GetCurrentBroadcastDetentsIndex();
+    uint32_t broadcastPreDetentsIndex_ = 0;
+    SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
