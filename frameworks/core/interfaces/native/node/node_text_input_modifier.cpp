@@ -1130,6 +1130,21 @@ void ResetTextInputLineHeight(ArkUINodeHandle node)
     TextFieldModelNG::SetLineHeight(frameNode, value);
 }
 
+void SetTextInputHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHalfLeading(frameNode, static_cast<bool>(halfLeading));
+}
+
+void ResetTextInputHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool value = false;
+    TextFieldModelNG::SetHalfLeading(frameNode, value);
+}
+
 void SetTextInputFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1985,6 +2000,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputLetterSpacing = ResetTextInputLetterSpacing,
         .setTextInputLineHeight = SetTextInputLineHeight,
         .resetTextInputLineHeight = ResetTextInputLineHeight,
+        .setTextInputHalfLeading = SetTextInputHalfLeading,
+        .resetTextInputHalfLeading = ResetTextInputHalfLeading,
         .setTextInputFontFeature = SetTextInputFontFeature,
         .resetTextInputFontFeature = ResetTextInputFontFeature,
         .setTextInputWordBreak = SetTextInputWordBreak,

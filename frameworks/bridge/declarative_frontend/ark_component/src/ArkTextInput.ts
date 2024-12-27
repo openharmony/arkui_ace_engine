@@ -126,6 +126,24 @@ class TextInputLineHeightModifier extends ModifierWithKey<number | string | Reso
   }
 }
 
+class TextInputHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetHalfLeading(node);
+    } else {
+      getUINativeModule().textInput.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | UnderlineColor | undefined> {
   constructor(value: ResourceColor | UnderlineColor | undefined) {
     super(value);
@@ -1709,6 +1727,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
+    return this;
+  }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
     return this;
   }
   underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {

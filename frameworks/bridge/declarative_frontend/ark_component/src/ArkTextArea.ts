@@ -114,6 +114,24 @@ class TextAreaLineHeightModifier extends ModifierWithKey<number | string | Resou
   }
 }
 
+class TextAreaHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textAreaHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetHalfLeading(node);
+    } else {
+      getUINativeModule().textArea.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextAreaWordBreakModifier extends ModifierWithKey<WordBreak> {
   constructor(value: WordBreak) {
     super(value);
@@ -1382,6 +1400,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
+    return this;
+  }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHalfLeadingModifier.identity, TextAreaHalfLeadingModifier, value);
     return this;
   }
   lineSpacing(value: LengthMetrics): this {

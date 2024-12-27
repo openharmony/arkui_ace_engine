@@ -372,6 +372,25 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class SearchHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetHalfLeading(node);
+    } else {
+      getUINativeModule().search.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -950,6 +969,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   lineHeight(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
+    return this;
+  }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
     return this;
   }
   minFontSize(value: number | string | Resource): this {

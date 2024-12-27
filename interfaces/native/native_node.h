@@ -2817,6 +2817,19 @@ typedef enum {
     NODE_TEXT_INPUT_ENABLE_PREVIEW_TEXT = 7033,
 
     /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_HALF_LEADING = 7034,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3130,6 +3143,19 @@ typedef enum {
      * @since 16
      */
     NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT = 8024,
+
+    /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_HALF_LEADING = 8025,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
