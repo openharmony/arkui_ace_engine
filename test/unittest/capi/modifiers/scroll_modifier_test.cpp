@@ -1384,10 +1384,10 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::Test
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
 
-    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
     ASSERT_NE(modifier_->setOnWillScroll, nullptr);
     modifier_->setOnWillScroll(node_, nullptr);
-    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
 }
 
 } // namespace OHOS::Ace::NG
