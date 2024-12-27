@@ -1181,6 +1181,11 @@ export struct SideBarContainerBootcamp {
     .onClick((event) => {
       this.eventTriggeredLog('点击事件触发')
     })
+
+    .width(useEnabled(this.enableCompWidth, this.compWidth))
+    .height(useEnabled(this.enableCompHeight, this.compHeight))
+    .padding(useEnabled(this.enableCompPadding, this.compPadding))
+    .margin(useEnabled(this.enableCompMargin, this.compMargin))
     .constraintSize({
       maxWidth: useEnabled(this.enableCompConstraintSizeMaxWidth, this.compConstraintSizeMaxWidth),
       maxHeight: useEnabled(this.enableCompConstraintSizeMaxHeight, this.compConstraintSizeMaxHeight),
@@ -1313,6 +1318,7 @@ export struct SideBarContainerBootcamp {
         )
       ] : [0, 0]
     })
+
     .backgroundEffect({
       radius: useEnabled(
         this.enableCompBackgroundEffectRadius,
@@ -3180,7 +3186,7 @@ export struct SideBarContainerBootcamp {
             { label: 'false', value: false },
           ]
         })
-        }
+      }
       .width('100%')
     }
     .align(Alignment.Top)
