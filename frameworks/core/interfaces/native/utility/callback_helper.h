@@ -96,9 +96,7 @@ public:
     {
         std::optional<ResultType> retValueOpt = std::nullopt;
         auto handler = [&retValueOpt](const void *valuePtr) {
-            ArkResultType retValue {};
-            memcpy((void*)&retValue, valuePtr, sizeof(ArkResultType));
-            retValueOpt = Converter::OptConvert<ResultType>(retValue);
+            retValueOpt = Converter::OptConvert<ResultType>(*(reinterpret_cast<const ArkResultType *>(valuePtr)));
         };
         CallbackKeeper::InvokeWithResultHandler<ArkResultType, ContinuationType>(
             handler, *this, std::forward<Params>(args)...
