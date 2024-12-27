@@ -510,6 +510,22 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
+void* createMarqueeNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextClockNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
@@ -526,25 +542,9 @@ void* createBadgeNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
-void* createTextClockNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = TextClockModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
 void* createTextTimerNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextTimerModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-
-void* createMarqueeNode(ArkUI_Int32 nodeId)
-{
-    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -612,11 +612,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
+    createMarqueeNode,
     createQRcodeNode,
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,
-    createMarqueeNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
