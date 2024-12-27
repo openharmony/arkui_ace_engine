@@ -30,6 +30,7 @@ export const navigatesRoute: RouteGroup = {
   ]
 };
 
+
 @Builder
 export function NavigatesDestination(name: string, route: Route) {
   if (name === 'navigates/swiper') {

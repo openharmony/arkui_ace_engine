@@ -59,7 +59,6 @@ import { CompMotionBlurBlocks } from '../../components/CompMotionBlurBlocks';
 import { CompClickEffectBlocks } from '../../components/CompClickEffectBlocks';
 import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlocks';
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
-import { CompUniversalTextAttributesBlocks } from '../../components/CompUniversalTextAttributesBlocks';
 
 class DerivedNavPathStack extends NavPathStack {
   // usr defined property 'id'
