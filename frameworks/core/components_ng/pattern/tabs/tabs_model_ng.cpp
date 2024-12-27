@@ -252,6 +252,16 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
 }
 
+void TabsModelNG::SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+{
+    CHECK_NULL_VOID(onApply);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    onApply(tabBarNode);
+}
+
 void TabsModelNG::SetWidthAuto(bool isAuto)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
