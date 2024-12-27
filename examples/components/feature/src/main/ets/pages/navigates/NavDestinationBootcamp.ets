@@ -71,7 +71,7 @@ class DerivedNavPathStack extends NavPathStack {
 
   // new function in derived class
   getInfo(): string {
-    return "this page used Derived NavPathStack, id: " + this.id
+    return 'this page used Derived NavPathStack, id: ' + this.id
   }
 
   // overwrite function of NavPathStack
@@ -97,8 +97,8 @@ class DerivedNavPathStack extends NavPathStack {
   // other function of base class...
 }
 
-class param {
-  info: string = "__default_param__";
+class Param {
+  info: string = '__default_param__';
 
   constructor(info: string) {
     this.info = info
@@ -175,7 +175,7 @@ struct PageOne {
   }
 
   private stack: NavPathStack | null = null;
-  @State eventStr: string = "";
+  @State eventStr: string = '';
 
   build() {
     NavDestination() {
@@ -249,7 +249,7 @@ struct PageOne {
     })
     .onDisAppear(() => {
       this.eventTriggeredLog('卸载事件触发')
-      this.eventStr += "<onDisAppear>";
+      this.eventStr += '<onDisAppear>';
     })
   }
 }
@@ -2200,7 +2200,7 @@ export struct NavDestinationBootcamp {
       Button('to Page One').margin(20).onClick(() => {
         this.derivedStack.pushPath({
           name: 'pageOne',
-          param: new param('push pageOne in homePage when stack size: ' + this.derivedStack.size())
+          param: new Param('push pageOne in homePage when stack size: ' + this.derivedStack.size())
         });
       })
     }
