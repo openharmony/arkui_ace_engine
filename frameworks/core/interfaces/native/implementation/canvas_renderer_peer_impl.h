@@ -138,7 +138,7 @@ public:
     }
     RefPtr<CanvasPattern> GetCanvasPattern()
     {
-          return pattern_;  
+        return pattern_;
     }
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {

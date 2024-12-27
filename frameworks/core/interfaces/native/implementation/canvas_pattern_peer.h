@@ -15,7 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 
-#include"canvas_renderer_peer_impl.h"
+#include "canvas_renderer_peer_impl.h"
 #include "core/components/common/properties/decoration.h"
 
 struct CanvasPatternPeer {
@@ -69,13 +69,13 @@ public:
     }
 
 public:
-    std::shared_ptr<OHOS::Ace::Pattern> pattern = nullptr;    
+    std::shared_ptr<OHOS::Ace::Pattern> pattern = nullptr;
 
 private:
     int32_t id_ = 0;
-    OHOS::Ace::CanvasUnit unit_ = OHOS::Ace::CanvasUnit::DEFAULT;   
-    CanvasPatternPtr pattern_ = nullptr;
+    OHOS::Ace::CanvasUnit unit_ = OHOS::Ace::CanvasUnit::DEFAULT;
     OHOS::Ace::WeakPtr<CanvasRendererCls> canvasRenderer_ = nullptr;
+    CanvasPatternPtr pattern_ = nullptr;
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
