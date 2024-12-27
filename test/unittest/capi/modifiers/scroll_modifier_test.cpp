@@ -26,6 +26,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
+#include "core/interfaces/native/utility/callback_helper.h"
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -1346,9 +1348,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
         Ark_OffsetResult retVal;
         retVal.xOffset = xOffset;
         retVal.yOffset = yOffset;
-        if (continuation.call != nullptr) {
-            continuation.call(continuation.resource.resourceId, retVal);
-        }
+        CallbackHelper(continuation).Invoke(retVal);
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
