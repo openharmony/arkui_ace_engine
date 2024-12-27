@@ -62,7 +62,27 @@ void SetRefreshOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    LOGE("ARKOALA RefreshInterfaceModifier::SetRefreshOptionsImpl is not implemented yet");
+    LOGE("ARKOALA RefreshInterfaceModifier::SetRefreshOptionsImpl - refreshingContent is not supported yet");
+
+    bool refreshing = Converter::Convert<bool>(value->refreshing);
+    RefreshModelNG::SetRefreshing(frameNode, refreshing);
+
+    auto promptText = Converter::OptConvert<std::string>(value->promptText);
+    if (promptText) {
+        RefreshModelNG::SetLoadingText(frameNode, promptText.value());
+    }
+
+    RefPtr<UINode> customNode;
+    auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(value->builder);
+    if (arkBuilder) {
+        customNode = CallbackHelper(arkBuilder.value(), frameNode).BuildSync(node);
+    }
+    if (customNode) {
+        RefreshModelNG::SetCustomBuilder(frameNode, customNode);
+        RefreshModelNG::SetIsCustomBuilderExist(frameNode, true);
+    } else {
+        RefreshModelNG::SetIsCustomBuilderExist(frameNode, false);
+    }
 }
 } // RefreshInterfaceModifier
 namespace RefreshAttributeModifier {

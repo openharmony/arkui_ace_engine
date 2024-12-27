@@ -63,16 +63,19 @@ public:
     static void SetRefreshing(FrameNode* frameNode, bool isRefreshing);
     static bool GetRefreshing(FrameNode* frameNode);
     static void SetCustomBuilder(FrameNode* frameNode, FrameNode* customBuilder);
+    static void SetCustomBuilder(FrameNode* frameNode, const RefPtr<NG::UINode>& customBuilder);
     static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
     static void SetOnOffsetChange(FrameNode* frameNode, OffsetChangeEvent&& dragOffset);
     static void ResetOnOffsetChange(FrameNode* frameNode);
     static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
+    static void SetLoadingText(FrameNode* frameNode, const std::string& loadingText);
     static void SetRefreshOffset(FrameNode* frameNode, const std::optional<Dimension>& offset);
     static void SetPullToRefresh(FrameNode* frameNode, bool isPullToRefresh);
     static void SetPullDownRatio(FrameNode* frameNode, const std::optional<float>& pullDownRatio);
     static float GetPullDownRatio(FrameNode* frameNode);
     static Dimension GetRefreshOffset(FrameNode* frameNode);
     static bool GetPullToRefresh(FrameNode* frameNode);
+    static void SetIsCustomBuilderExist(FrameNode* frameNode, bool isCustomBuilderExist);
     static void SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent&& changeEvent);
 };
 } // namespace OHOS::Ace::NG
