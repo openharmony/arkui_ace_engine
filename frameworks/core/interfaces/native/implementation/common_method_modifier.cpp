@@ -1735,7 +1735,6 @@ void HitTestBehaviorImpl(Ark_NativePointer node,
     NG::HitTestMode hitTestModeNG = static_cast<NG::HitTestMode>(value);
     ViewAbstract::SetHitTestMode(frameNode, hitTestModeNG);
 }
-
 void OnChildTouchTestImpl(Ark_NativePointer node,
                           const Callback_Array_TouchTestInfo_TouchResult* value)
 {
@@ -3886,7 +3885,6 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
     ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
         std::move(onGestureRecognizerJudgefunc), Converter::Convert<bool>(exposeInnerGesture));
 }
-
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
                                              const ShouldBuiltInRecognizerParallelWithCallback* value)
 {
