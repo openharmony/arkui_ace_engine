@@ -809,6 +809,7 @@ enum ArkUINodeType {
     ARKUI_MARQUEE,
     ARKUI_CHECK_BOX_GROUP,
     ARKUI_RATING,
+    ARKUI_XCOMPONENT_TEXTURE,
 };
 
 enum ArkUIEventCategory {
