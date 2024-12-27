@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "children_main_size_peer.h"
@@ -22,15 +23,6 @@
 namespace OHOS::Ace::NG::Converter {
 template<>
 V2::ItemDivider Convert(const Ark_ListDividerOptions& src);
-
-template<>
-Converter::ListItemGroupOptions Convert(const Ark_ListItemGroupOptions& src)
-{
-    return {
-        .space = OptConvert<Dimension>(src.space),
-        .style = OptConvert<V2::ListItemGroupStyle>(src.style)
-    };
-}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -51,12 +43,25 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto optionsOpt = Converter::OptConvert<Converter::ListItemGroupOptions>(*options);
-    if (optionsOpt.has_value()) {
-        ListItemGroupModelNG::SetSpace(frameNode, optionsOpt.value().space);
-        ListItemGroupModelNG::SetStyle(frameNode, optionsOpt.value().style);
-        // process CustomBuilder parameters
-        LOGE("ListItemGroupModifier::SetListItemGroupOptionsImpl support CustomObjects not implemented");
+    auto arkOptions = Converter::OptConvert<Ark_ListItemGroupOptions>(*options);
+    CHECK_NULL_VOID(arkOptions);
+    auto space = Converter::OptConvert<Dimension>(arkOptions.value().space);
+    ListItemGroupModelNG::SetSpace(frameNode, space);
+    auto style = Converter::OptConvert<V2::ListItemGroupStyle>(arkOptions.value().style);
+    ListItemGroupModelNG::SetStyle(frameNode, style);
+    auto header = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().header);
+    if (header.has_value()) {
+        auto builder = [callback = CallbackHelper(header.value(), frameNode), node]() -> RefPtr<UINode> {
+            return callback.BuildSync(node);
+        };
+        ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
+    }
+    auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
+    if (footer.has_value()) {
+        auto builder = [callback = CallbackHelper(footer.value(), frameNode), node]() -> RefPtr<UINode> {
+            return callback.BuildSync(node);
+        };
+        ListItemGroupModelNG::SetFooter(frameNode, std::move(builder));
     }
 }
 } // ListItemGroupInterfaceModifier

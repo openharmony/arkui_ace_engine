@@ -110,6 +110,24 @@ void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
 }
 
+void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<UINode> unitNode = builder();
+    pattern->AddHeader(unitNode);
+}
+
+void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<UINode> unitNode = builder();
+    pattern->AddFooter(unitNode);
+}
+
 RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

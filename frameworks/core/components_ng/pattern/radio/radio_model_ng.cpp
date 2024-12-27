@@ -58,6 +58,14 @@ void RadioModelNG::SetBuilder(std::function<void()>&& buildFunc)
     radioPattern->SetBuilder(std::move(buildFunc));
 }
 
+void RadioModelNG::SetBuilder(FrameNode* frameNode, std::function<void()>&& builder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto radioPattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(radioPattern);
+    radioPattern->SetBuilder(std::move(builder));
+}
+
 void RadioModelNG::SetRadioIndicator(int32_t indicator)
 {
     ACE_UPDATE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicator, indicator);

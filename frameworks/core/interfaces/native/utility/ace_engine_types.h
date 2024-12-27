@@ -70,11 +70,6 @@ struct ListItemOptions {
     std::optional<V2::ListItemStyle> style;
 };
 
-struct ListItemGroupOptions {
-    std::optional<Dimension> space;
-    std::optional<V2::ListItemGroupStyle> style;
-};
-
 struct AnimateParam {
     std::optional<int32_t> duration;
     std::optional<int32_t> delay;

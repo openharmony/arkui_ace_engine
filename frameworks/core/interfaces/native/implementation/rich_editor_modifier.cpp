@@ -17,10 +17,10 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_styled_string_controller.h"
 #include "core/components_ng/base/frame_node.h"
 #include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "rich_editor_controller_peer_impl.h"
 #include "rich_editor_styled_string_controller_peer_impl.h"
@@ -552,14 +552,13 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
             }
         };
     }
-
-    std::function<void()> buildFunc = [arkCallback = CallbackHelper(*content), parentNode = frameNode]() {
-        Callback_Pointer_Void continuation;
-        arkCallback.Invoke(parentNode, continuation);
+    std::function<void()> builder = [callback = CallbackHelper(*content, frameNode), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
-
-    RichEditorModelNG::BindSelectionMenu(
-        frameNode, aceSpanType.value(), aceResponseType.value(), buildFunc, menuParam);
+    auto span = aceSpanType.value_or(TextSpanType::NONE);
+    auto response = aceResponseType.value_or(TextResponseType::NONE);
+    RichEditorModelNG::BindSelectionMenu(frameNode, span, response, builder, menuParam);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const CustomNodeBuilder* value,
@@ -573,14 +572,11 @@ void CustomKeyboardImpl(Ark_NativePointer node,
     if (convValue) {
         supportAvoidance = Converter::OptConvert<bool>(convValue->supportAvoidance);
     }
-    std::function<void()> callback = []() {};
-    if (value) {
-        callback = [arkCallback = CallbackHelper(*value), parentNode = frameNode]() -> void {
-            Callback_Pointer_Void continuation;
-            arkCallback.Invoke(parentNode, continuation);
-        };
-    }
-    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(callback), supportAvoidance);
+    auto builder = [callback = CallbackHelper(*value, frameNode), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    RichEditorModelNG::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
 }
 void PlaceholderImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,

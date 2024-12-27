@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
@@ -88,9 +89,37 @@ static const std::vector<ColorTestStep> COLOR_TEST_PLAN = {
 
 using namespace testing;
 using namespace testing::ext;
-
+struct CheckEvent {
+    int32_t resourceId;
+    Ark_NativePointer parentNode;
+};
+static std::optional<CheckEvent> checkEvent = std::nullopt;
 class RichEditorModifierTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
     &GENERATED_ArkUINodeModifiers::getRichEditorModifier, GENERATED_ARKUI_RICH_EDITOR> {
+public:
+    CustomNodeBuilder getBuilderCb()
+    {
+        int32_t nodeId = 555;
+        auto node = BlankModelNG::CreateFrameNode(nodeId);
+        EXPECT_NE(node, nullptr);
+        static std::optional<RefPtr<UINode>> uiNode = node;
+        auto checkCallback = [](
+            Ark_VMContext context,
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
+        CustomNodeBuilder customBuilder =
+            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+        return customBuilder;
+    }
 };
 
 /**
@@ -460,7 +489,6 @@ HWTEST_F(RichEditorModifierTest, setBarStateTest, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_BAR_STATE_VALUE);
 }
 
-static bool g_onBuilt = false;
 static bool g_onAppear = false;
 static bool g_onDisappear = false;
 
@@ -474,10 +502,6 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     // Prepare callbacks
-    auto onBuiltCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
-        g_onBuilt = true;
-    };
     auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
         g_onAppear = true;
     };
@@ -487,20 +511,18 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     // Prepare options
     auto responseType = Converter::ArkUnion<Ark_Union_ResponseType_RichEditorResponseType, Ark_ResponseType>(
         Ark_ResponseType::ARK_RESPONSE_TYPE_LONG_PRESS);
-    auto buildFunc = Converter::ArkValue<CustomNodeBuilder>(onBuiltCallback, TEST_RESOURCE_ID);
     Ark_SelectionMenuOptions value;
     value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
     auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
     value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
     auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
     value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
-
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    auto buildFunc = getBuilderCb();
     modifier_->setBindSelectionMenu(node_,
         Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT, &buildFunc, &responseType, &options);
 
     // The testing part begins here:
-    EXPECT_FALSE(g_onBuilt);
     EXPECT_FALSE(g_onAppear);
     EXPECT_FALSE(g_onDisappear);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
@@ -508,15 +530,15 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     pattern->SetSelectedType(TextSpanType::TEXT); // Needed for logic of CopySelectionMenuParams()
     SelectOverlayInfo selectInfo;
     pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    checkEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
-    EXPECT_TRUE(g_onBuilt);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
     selectInfo.menuCallback.onAppear();
     EXPECT_TRUE(g_onAppear);
     selectInfo.menuCallback.onDisappear();
     EXPECT_TRUE(g_onDisappear);
 }
-
-static bool g_keyboardCallbackCalled = false;
 
 /**
  * @tc.name: setCustomKeyboardTest
@@ -532,25 +554,20 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     std::string resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_DEFAULT_VALUE);
 
-    auto onCallback = [](const Ark_Int32 resourceId,
-        const Ark_NativePointer parentNode, const Callback_Pointer_Void continuation) {
-        g_keyboardCallbackCalled = true;
-    };
-    auto keyboardBuilderCallback = Converter::ArkValue<CustomNodeBuilder>(onCallback, TEST_RESOURCE_ID);
-
     Ark_KeyboardOptions keyboardOptions;
     keyboardOptions.supportAvoidance = Converter::ArkValue<Opt_Boolean>(true);
     auto options = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
-
-    modifier_->setCustomKeyboard(node_, &keyboardBuilderCallback, &options);
+    auto buildFunc = getBuilderCb();
+    modifier_->setCustomKeyboard(node_, &buildFunc, &options);
 
     // Testing callback
-    EXPECT_FALSE(g_keyboardCallbackCalled);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
+    checkEvent = std::nullopt;
     bool built = pattern->RequestCustomKeyboard();
     EXPECT_TRUE(built);
-    EXPECT_TRUE(g_keyboardCallbackCalled);
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
 
     // Testing value
     jsonValue = GetJsonValue(node_);
