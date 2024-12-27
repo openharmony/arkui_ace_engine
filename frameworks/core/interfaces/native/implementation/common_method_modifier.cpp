@@ -1564,6 +1564,13 @@ void AssignArkValue(Ark_BaseGestureEvent& dst, const BaseGestureEvent& src)
     ArkArrayHolder<Array_FingerInfo> holder(src.GetFingerList());
     dst.fingerList = holder.ArkValue();
 }
+
+template<>
+RefPtr<PixelMap> Convert(const Ark_PixelMap& src)
+{
+    LOGE("ARKOALA: Convert to [RefPtr<PixelMap>] from [Ark_PixelMap] is not supported\n");
+    return nullptr;
+}
 } // namespace Converter
 } // namespace OHOS::Ace::NG
 
@@ -1605,7 +1612,7 @@ void AssignArkValue(Ark_DragEvent& dst, const DragEvent& src)
     dst.useCustomDropAnimation = NG::Converter::ArkValue<Ark_Boolean>(isUseCustomAnimation2);
     dst.dragBehavior = NG::Converter::ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
 }
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 constexpr int32_t CASE_0 = 0;
@@ -3310,11 +3317,36 @@ void OnDragStartImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnDragStart(frameNode, convValue);
-    LOGE("DragDropInfo contains pixelMap which is not supported by C-API. "
-        "The OnDragStartFunc callback returns a value of type DragDropInfo."
-        " Callbacks with return values are not supported.");
+    LOGE("DragDropInfo contains pixelMap which is not supported by C-API. ");
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto onDragStart = [callback = CallbackHelper(*value, frameNode), weakNode]
+        (const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams) -> DragDropInfo {
+        DragDropInfo result;
+        CHECK_NULL_RETURN(info, result);
+        auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(*info);
+        auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
+        auto handler = [&result, weakNode](const void *rawResultPtr) {
+            auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
+            CHECK_NULL_VOID(arkResultPtr);
+            auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
+                if (auto fnode = weakNode.Upgrade(); fnode) {
+                    result.customNode = CallbackHelper(val, fnode.GetRawPtr()).BuildSync(fnode.GetRawPtr());
+                }
+            };
+            auto parseDinfo = [&result](const Ark_DragItemInfo& value) {
+                result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+                result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+            };
+            Converter::VisitUnion(*arkResultPtr, parseCustBuilder, parseDinfo, [](){});
+        };
+
+        PipelineContext::SetCallBackNode(weakNode);
+
+        CallbackKeeper::InvokeWithResultHandler<Ark_Union_CustomBuilder_DragItemInfo,
+            Callback_Union_CustomBuilder_DragItemInfo_Void>(handler, callback, arkDragInfo, arkExtraParam);
+        return result;
+    };
+    ViewAbstract::SetOnDragStart(frameNode, std::move(onDragStart));
 }
 void OnDragEnterImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Void* value)

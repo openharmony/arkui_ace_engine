@@ -19,6 +19,8 @@
 #include "modifiers_test_utils.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "generated/type_helpers.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -448,5 +450,75 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragEndTest, TestSize.Level1)
     test(DragBehavior::MOVE, true);
     test(DragBehavior::COPY, false);
     test(DragBehavior::MOVE, false);
+}
+
+/*
+ * @tc.name: SetOnDragStart
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnDragStart, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    static const int32_t expectedResourceId = 123;
+    static auto expectedCustomNode = CreateNode();
+    static const FrameNode *expectedParentNode = frameNode;
+    constexpr DragBehavior buildBehavior = DragBehavior::MOVE;
+    constexpr DragBehavior infoBehavior = DragBehavior::COPY;
+    static const std::string expectedInfo("key:value");
+
+    static const CustomNodeBuilder builder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
+        const Opt_String extraParams, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+    {
+        using namespace TypeHelper;
+        using namespace Converter;
+        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
+        Ark_Union_CustomBuilder_DragItemInfo arkResult;
+        auto dragBehavior = Convert<DragBehavior>(event.dragBehavior);
+        if (dragBehavior == buildBehavior) {
+            WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
+        } else if (dragBehavior == infoBehavior) {
+            WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = ArkValue<Opt_String>(extraParams);
+        } else {
+            WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = ArkValue<Opt_String>(std::nullopt);
+        }
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+
+    auto arkCallback = Converter::ArkValue<Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo>(nullptr,
+        callSyncFunc, expectedResourceId);
+    modifier_->setOnDragStart(node_, &arkCallback);
+
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto fireOnDragStart = eventHub->GetOnDragStart();
+    ASSERT_NE(fireOnDragStart, nullptr);
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    {
+        dragEvent->SetDragBehavior(buildBehavior);
+        DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+        EXPECT_EQ(reinterpret_cast<Ark_NativePointer>(ddInfo.customNode.GetRawPtr()),
+            reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        EXPECT_EQ(ddInfo.extraInfo, std::string());
+    }
+    {
+        dragEvent->SetDragBehavior(infoBehavior);
+        DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+        EXPECT_EQ(ddInfo.customNode, nullptr);
+        EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
+    }
+    DisposeNode(expectedCustomNode);
 }
 }
