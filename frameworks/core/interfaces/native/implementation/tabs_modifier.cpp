@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/tab_content_transition_proxy_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
@@ -104,6 +105,14 @@ TabsOptions Convert(const Ark_TabsOptions& src)
         .indexOpt = OptConvert<int32_t>(src.index),
         .controllerOpt = OptConvert<GeneratedModifier::TabsControllerPeerImpl *>(src.controller),
     };
+}
+
+template<>
+void AssignTo(std::optional<TabContentAnimatedTransition>& dst, const Opt_TabContentAnimatedTransition& from)
+{
+    TabContentAnimatedTransition ret;
+    ret.timeout = Converter::OptConvert<int32_t>(from.value.timeout).value_or(0);
+    dst = ret;
 }
 }
 
@@ -393,15 +402,18 @@ void CustomContentTransitionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(internalController);
     peerImplPtr->AddTargetController(internalController);
 
-    auto onCustomAnimation = [frameNode, peerImplPtr](int32_t from, int32_t to) {
+    auto onCustomAnimation = [callback = CallbackHelper(*value, frameNode), peerImplPtr](
+        int32_t from, int32_t to) -> TabContentAnimatedTransition {
         peerImplPtr->SetFrom(from);
         peerImplPtr->SetTo(to);
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->customContentTransition(frameNode->GetId(),
-            Converter::ArkValue<Ark_Number>(from), Converter::ArkValue<Ark_Number>(to));
         TabContentAnimatedTransition result;
-        LOGE("ARKOALA TabsAttributeModifier.customContentTransition -> Method work incorrect.");
-        return result;  // wrong result!!!
-    };
+        Ark_Number arkFrom = Converter::ArkValue<Ark_Number>(from);
+        Ark_Number arkTo = Converter::ArkValue<Ark_Number>(to);
+        return callback.InvokeWithOptConvertResult<
+            TabContentAnimatedTransition, Opt_TabContentAnimatedTransition,
+            Callback_Opt_TabContentAnimatedTransition_Void>(arkFrom, arkTo)
+            .value_or(result);
+        };
     TabsModelNG::SetIsCustomAnimation(frameNode, true); //Set 'true' to any cases. It is wrong behavior.
     TabsModelNG::SetOnCustomAnimation(frameNode, std::move(onCustomAnimation));
 }
@@ -442,11 +454,13 @@ void OnContentWillChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto callback = [frameNode](int32_t currentIndex, int32_t comingIndex) {
-        GetFullAPI()->getEventsAPI()->getTabsEventsReceiver()->onContentWillChange(frameNode->GetId(),
-            Converter::ArkValue<Ark_Number>(currentIndex), Converter::ArkValue<Ark_Number>(comingIndex));
-        LOGE("ARKOALA TabsAttributeModifier.onContentWillChange -> Method work incorrect.");
-        return true; // wrong result!!!
+    auto callback = [callback = CallbackHelper(*value, frameNode)](
+        int32_t currentIndex, int32_t comingIndex) -> bool {
+        Ark_Number arkCurrentIndex = Converter::ArkValue<Ark_Number>(currentIndex);
+        Ark_Number arkComingIndex = Converter::ArkValue<Ark_Number>(comingIndex);
+        return callback.InvokeWithOptConvertResult<
+            bool, Ark_Boolean, Callback_Boolean_Void>(arkCurrentIndex, arkComingIndex)
+            .value_or(false);
     };
     TabsModelNG::SetOnContentWillChange(frameNode, std::move(callback));
 }

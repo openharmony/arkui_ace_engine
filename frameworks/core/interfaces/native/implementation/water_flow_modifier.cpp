@@ -34,6 +34,17 @@ void AssignCast(std::optional<WaterFlowLayoutMode>& dst, const Ark_WaterFlowLayo
         default: LOGE("Unexpected enum value in Ark_WaterFlowLayoutMode: %{public}d", src);
     }
 }
+
+template<>
+void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_Literal_Number_offsetRemain& from)
+{
+    auto offset = Converter::OptConvert<Dimension>(from.offsetRemain);
+    if (offset) {
+        ScrollFrameResult ret;
+        ret.offset = offset.value();
+        dst = ret;
+    }
+}
 } // Converter
 } // OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -243,9 +254,18 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnScrollFrameBeginImpl -> Method is not implemented. Event with return value!");
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+        Dimension offset, ScrollState state) -> ScrollFrameResult {
+        ScrollFrameResult result;
+        Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_Literal_Number_offsetRemain,
+            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState)
+            .value_or(result);
+    };
+
+    WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        const Callback_Number_Number_Void* value)
