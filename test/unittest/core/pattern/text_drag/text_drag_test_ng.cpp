@@ -59,6 +59,7 @@ const RectF DEFAULT_TEXT_CONTENT_RECTF(80.f, 80.f, 100.f, 200.f);
 class MockCanvas : public RSCanvas {
 public:
     MOCK_METHOD0(Restore, void());
+    MOCK_METHOD0(Save, void());
 };
 
 void TextDragTestNg::SetUpTestSuite()
@@ -387,5 +388,57 @@ HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintShadow002, TestSize.Level1)
     modifier.type_ = DragAnimType::FLOATING;
     EXPECT_CALL(mockCanvas, Restore()).Times(1);
     modifier.PaintShadow(path, shadow, mockCanvas);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground001
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground001, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    EXPECT_CALL(mockCanvas, Save()).Times(0);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground002
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground002, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    modifier.type_ = DragAnimType::FLOATING_CANCEL;
+    EXPECT_CALL(mockCanvas, Restore()).Times(2);
+    EXPECT_CALL(mockCanvas, Save()).Times(1);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
+}
+
+/**
+ * @tc.name: TextDragOverlayModifierPaintBackground003
+ * @tc.desc: test PaintBackground
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground003, TestSize.Level1)
+{
+    auto textDragPattern = AceType::MakeRefPtr<TextDragPattern>();
+    WeakPtr<OHOS::Ace::NG::Pattern> pattern(textDragPattern);
+    TextDragOverlayModifier modifier(pattern);
+    RSPath path;
+    MockCanvas mockCanvas;
+    modifier.type_ = DragAnimType::FLOATING;
+    EXPECT_CALL(mockCanvas, Restore()).Times(2);
+    EXPECT_CALL(mockCanvas, Save()).Times(1);
+    modifier.PaintBackground(path, mockCanvas, textDragPattern);
 }
 } // namespace OHOS::Ace::NG
