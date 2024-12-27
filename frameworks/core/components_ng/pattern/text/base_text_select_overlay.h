@@ -254,6 +254,7 @@ public:
         selectInfo.onCreateCallback.textRangeCallback = textRange;
     }
     bool GetClipHandleViewPort(RectF& rect);
+    bool CalculateClippedRect(RectF& rect);
     void MarkOverlayDirty();
     void OnHandleMarkInfoChange(const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag) override;
     void UpdateHandleColor();
@@ -267,6 +268,13 @@ public:
     bool IsEnableContainerModal() override
     {
         return enableContainerModal_;
+    }
+    bool IsHiddenHandle();
+
+    bool IsHandleVisible(bool isFirst);
+    void SetIsSupportMenuSearch(bool isSupportMenuSearch)
+    {
+        isSupportMenuSearch_ = isSupportMenuSearch;
     }
 
 protected:
@@ -285,8 +293,7 @@ protected:
     RectF ConvertPaintInfoToRect(const SelectHandlePaintInfo& paintInfo);
     void SetTransformPaintInfo(SelectHandleInfo& handleInfo, const RectF& localHandleRect);
     bool CheckHandleCanPaintInHost(const RectF& firstRect, const RectF& secondRect);
-    virtual RectF GetFirstHandleLocalPaintRect();
-    virtual RectF GetSecondHandleLocalPaintRect();
+    virtual RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex);
     virtual void CalcHandleLevelMode(const RectF& firstLocalPaintRect, const RectF& secondLocalPaintRect);
     bool IsAncestorNodeStartAnimation(FrameNodeChangeInfoFlag flag);
     bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
@@ -324,6 +331,8 @@ protected:
     {
         enableContainerModal_ = true;
     }
+    bool IsNeedMenuSearch();
+    void HandleOnSearch();
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -355,6 +364,7 @@ private:
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
     bool enableContainerModal_ = false;
+    bool isSupportMenuSearch_ = false;
 };
 
 } // namespace OHOS::Ace::NG

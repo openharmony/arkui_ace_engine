@@ -57,6 +57,8 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);
     JSClass<JSTextArea>::StaticMethod("fontStyle", &JSTextField::SetFontStyle);
     JSClass<JSTextArea>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
+    JSClass<JSTextArea>::StaticMethod("minFontScale", &JSTextField::SetMinFontScale);
+    JSClass<JSTextArea>::StaticMethod("maxFontScale", &JSTextField::SetMaxFontScale);
     JSClass<JSTextArea>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextArea>::StaticMethod("hoverEffect", &JSTextField::JsHoverEffect);
     JSClass<JSTextArea>::StaticMethod("maxLength", &JSTextField::SetMaxLength);
@@ -96,6 +98,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextArea>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextArea>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
+    JSClass<JSTextArea>::StaticMethod("halfLeading", &JSTextField::SetHalfLeading);
     JSClass<JSTextArea>::StaticMethod("lineSpacing", &JSTextField::SetLineSpacing);
     JSClass<JSTextArea>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
     JSClass<JSTextArea>::StaticMethod("contentType", &JSTextField::SetContentType);
@@ -111,6 +114,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("editMenuOptions", &JSTextField::EditMenuOptions);
     JSClass<JSTextArea>::StaticMethod("enablePreviewText", &JSTextField::SetEnablePreviewText);
     JSClass<JSTextArea>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
+    JSClass<JSTextArea>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

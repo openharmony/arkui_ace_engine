@@ -38,10 +38,9 @@
 #include "core/components_ng/pattern/flex/flex_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -578,7 +577,7 @@ HWTEST_F(SelectPatternTestControlSizeNg, SelectPatternExTest003, TestSize.Level1
      * @tc.steps: step1+. Create vector options_[0] props HasDivider.
      * @tc.expected: Objects are created successfully.
      */
-    auto props = selectPattern->options_[0]->GetPaintProperty<OptionPaintProperty>();
+    auto props = selectPattern->options_[0]->GetPaintProperty<MenuItemPaintProperty>();
     NG::SelectDivider divider;
     divider.color = Color(1);
     props->UpdateDivider(divider);

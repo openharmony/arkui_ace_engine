@@ -25,8 +25,8 @@ namespace OHOS::Ace::NG {
 
 class ACE_EXPORT SearchModelNG : public OHOS::Ace::SearchModel {
 public:
-    RefPtr<TextFieldControllerBase> Create(const std::optional<std::string>& value,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon) override;
+    RefPtr<TextFieldControllerBase> Create(const std::optional<std::u16string>& value,
+        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon) override;
     void RequestKeyboardOnFocus(bool needToRequest) override;
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override;
@@ -51,28 +51,30 @@ public:
     void SetPlaceholderColor(const Color& color) override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
-    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
+    void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
-    void SetOnCut(std::function<void(const std::string&)>&& func) override;
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnCut(std::function<void(const std::u16string&)>&& func) override;
     void SetOnWillInsertValueEvent(std::function<bool(const InsertValueInfo&)>&& func) override;
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override;
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override;
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
-    void SetOnPaste(std::function<void(const std::string&)>&& func) override;
-    void SetOnPasteWithEvent(std::function<void(const std::string&, NG::TextCommonEvent&)>&& func) override;
-    void SetOnChangeEvent(std::function<void(const std::string&)>&& onChangeEvent) override;
+    void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
+    void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
+    void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
     void SetSearchEnterKeyType(TextInputAction value) override;
-    void SetInputFilter(const std::string& value, const std::function<void(const std::string&)>& onError) override;
+    void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) override;
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetTextIndent(const Dimension& value) override;
     void SetMaxLength(uint32_t value) override;
@@ -80,6 +82,7 @@ public:
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetHalfLeading(bool value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
@@ -101,7 +104,7 @@ public:
     static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetInputFilter(
-        FrameNode* frameNode, const std::string& value, const std::function<void(const std::string&)>& onError);
+        FrameNode* frameNode, const std::string& value, const std::function<void(const std::u16string&)>& onError);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
@@ -135,15 +138,16 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode,
-        std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
-    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
-    static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+        std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&, PreviewText&)>&& onChange);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
+    static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,
-                                    std::function<void(const std::string&, NG::TextCommonEvent&)>&& func);
+                                    std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetType(FrameNode* frameNode, TextInputType value);
@@ -165,10 +169,10 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
-    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& icon);
-    static void CreateTextField(const RefPtr<SearchNode>& parentNode,
-        const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
+    static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::u16string>& value,
+        const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon);
+    static void CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::u16string>& placeholder,
+        const std::optional<std::u16string>& value, bool hasTextFieldNode);
     static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
     static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
     static RefPtr<SearchNode> GetOrCreateSearchNode(

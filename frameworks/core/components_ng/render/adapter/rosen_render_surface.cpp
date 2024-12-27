@@ -328,8 +328,14 @@ void RosenRenderSurface::DrawBuffer(int32_t width, int32_t height)
     if (!surfaceNode) {
         return;
     }
-    CompareBufferSize(width, height, surfaceNode);
+    bool res = CompareBufferSize(width, height, surfaceNode);
     ACE_SCOPED_TRACE("Web DrawBuffer");
+    if (res && isNeedSyncGeometryProperties_) {
+        RectF keyBoardAvoidRect = RectF(keyBoardAvoidRect_.GetX(), keyBoardAvoidRect_.GetY(), width, height);
+        ACE_SCOPED_TRACE("Web DrawBuffer, SyncGeometryProperties: %s", keyBoardAvoidRect.ToString().c_str());
+        rosenRenderContext->SyncGeometryProperties(keyBoardAvoidRect);
+        isNeedSyncGeometryProperties_ = false;
+    }
     rosenRenderContext->StartRecording();
     auto rsNode = rosenRenderContext->GetRSNode();
     CHECK_NULL_VOID(rsNode);
@@ -459,7 +465,7 @@ void RosenRenderSurface::PostRenderOnlyTaskToUI()
     if (uiTaskExecutor.IsRunOnCurrentThread()) {
         task();
     } else {
-        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly");
+        uiTaskExecutor.PostTask(task, "ArkUIMarkNeedRenderOnly", PriorityType::VIP);
     }
 }
 
@@ -569,10 +575,19 @@ void RosenRenderSurface::DrawBufferForXComponent(
     if (!isUniRender_.load()) {
         sendCount_.fetch_add(1);
     }
-    ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d]", surfaceNode->bufferId_, surfaceNode->sendTimes_);
+    auto uid = GetUniqueIdNum();
+    if (uid == 0) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "DrawSurfaceBuffer uid is invalid");
+    }
+    ACE_SCOPED_TRACE("DrawXComponentBuffer[id:%u][sendTimes:%d][uid:%" PRIu64 "]", surfaceNode->bufferId_,
+        surfaceNode->sendTimes_, uid);
     auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
+    auto transform = (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FIFTEEN) ||
+        surfaceNode->buffer_ == nullptr)
+        ? GraphicTransformType::GRAPHIC_ROTATE_NONE
+        : surfaceNode->buffer_->GetSurfaceBufferTransform();
     Rosen::DrawingSurfaceBufferInfo info { surfaceNode->buffer_, offsetX, offsetY, static_cast<int32_t>(width),
-        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_ };
+        static_cast<int32_t>(height), getpid(), GetUniqueIdNum(), surfaceNode->acquireFence_, transform };
     recordingCanvas.DrawSurfaceBuffer(info);
 #endif
 }
@@ -581,12 +596,14 @@ void RosenRenderSurface::RegisterBufferCallback()
 {
 #ifdef OHOS_PLATFORM
     CHECK_EQUAL_VOID(isTexture_, false);
-    auto pid = getpid();
     auto uid = GetUniqueIdNum();
     if (!bufferCallback_) {
         bufferCallback_ = std::make_shared<XComponentSurfaceBufferCallback>(WeakClaim(this));
     }
-    Rosen::RSInterfaces::GetInstance().RegisterSurfaceBufferCallback(pid, uid, bufferCallback_);
+    if (uid == 0) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "RegisterBufferCallback uid is invalid");
+    }
+    Rosen::RSInterfaces::GetInstance().RegisterSurfaceBufferCallback(getpid(), uid, bufferCallback_);
     auto rosenRenderContext = DynamicCast<RosenRenderContext>(renderContext_.Upgrade());
     CHECK_NULL_VOID(rosenRenderContext);
     auto rsNode = rosenRenderContext->GetRSNode();
@@ -629,9 +646,23 @@ void RosenRenderSurface::SetIsUniRender(bool isUniRender)
         return;
     }
     std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
+    if (buffersToDraw_.empty()) {
+        auto lastSurfaceNode = buffersToRelease_.empty() ? nullptr : buffersToRelease_.back();
+        if (lastSurfaceNode) {
+            buffersToRelease_.pop_back();
+            buffersToDraw_.emplace_back(lastSurfaceNode);
+        }
+    }
     ReleaseAllBuffers(buffersToRelease_, consumerSurface_);
     ReleaseAllButLastBuffer(buffersToDraw_, consumerSurface_);
+    // buffersToDraw_ has 1 buffer at most, so .back() equals .front()
+    auto lastSurfaceNode = buffersToDraw_.empty() ? nullptr : buffersToDraw_.back();
+    if (lastSurfaceNode) {
+        lastSurfaceNode->sendTimes_ = 0;
+    }
+    sendCount_.store(-1);
     isUniRender_.store(isUniRender);
+    PostRenderOnlyTaskToUI();
 }
 
 #ifdef OHOS_PLATFORM
@@ -691,7 +722,8 @@ void RosenRenderSurface::OnWindowStateChange(bool isShow)
         std::lock_guard<std::mutex> lock(surfaceNodeMutex_);
         if (buffersToDraw_.empty()) {
             ReleaseAllButLastBuffer(buffersToRelease_, consumerSurface_);
-            sendCount_.store(buffersToRelease_.empty() ? -1 : buffersToRelease_.front()->sendTimes_ - 1);
+            sendCount_.store(
+                buffersToRelease_.empty() ? -1 : static_cast<int32_t>(buffersToRelease_.front()->sendTimes_ - 1));
         } else {
             ReleaseAllBuffers(buffersToRelease_, consumerSurface_);
             ReleaseAllButLastBuffer(buffersToDraw_, consumerSurface_);
@@ -714,6 +746,8 @@ void DrawBufferListener::OnBufferAvailable()
 #ifdef OHOS_PLATFORM
 void XComponentSurfaceBufferCallback::OnFinish(const Rosen::FinishCallbackRet& ret)
 {
+    ACE_SCOPED_TRACE(
+        "SurfaceBufferCallback::OnFinish[uid:%" PRIu64 "][size:%zu]", ret.uid, ret.surfaceBufferIds.size());
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_VOID(renderSurface);
     if (ret.uid != renderSurface->GetUniqueIdNum()) {

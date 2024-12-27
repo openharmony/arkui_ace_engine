@@ -27,9 +27,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
-#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#else
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "base/web/webview/ohos_interface/include/ohos_nweb/nweb.h"
 #endif
 #include "bridge/common/utils/engine_helper.h"
@@ -2199,7 +2197,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
     jsWebSslError->SetResult(eventInfo.GetResult());
     obj->SetPropertyObject("handler", resultObj);
     obj->SetProperty("error", eventInfo.GetError());
-    
+
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
         return JSRef<JSVal>::Cast(obj);
@@ -2213,7 +2211,7 @@ JSRef<JSVal> WebSslErrorEventToJSValue(const WebSslErrorEvent& eventInfo)
             TAG_LOGE(AceLogTag::ACE_WEB, "Cert chain data array reach max.");
             break;
         }
-        
+
         void *data = nullptr;
         napi_value buffer = nullptr;
         napi_value item = nullptr;
@@ -4347,17 +4345,17 @@ void JSWeb::OnDataResubmitted(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetOnDataResubmitted(uiCallback);
 }
 
-Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
+Media::PixelFormat GetPixelFormat(NG::TransImageColorType colorType)
 {
     Media::PixelFormat pixelFormat;
     switch (colorType) {
-        case NWeb::ImageColorType::COLOR_TYPE_UNKNOWN:
+        case NG::TransImageColorType::COLOR_TYPE_UNKNOWN:
             pixelFormat = Media::PixelFormat::UNKNOWN;
             break;
-        case NWeb::ImageColorType::COLOR_TYPE_RGBA_8888:
+        case NG::TransImageColorType::COLOR_TYPE_RGBA_8888:
             pixelFormat = Media::PixelFormat::RGBA_8888;
             break;
-        case NWeb::ImageColorType::COLOR_TYPE_BGRA_8888:
+        case NG::TransImageColorType::COLOR_TYPE_BGRA_8888:
             pixelFormat = Media::PixelFormat::BGRA_8888;
             break;
         default:
@@ -4367,20 +4365,20 @@ Media::PixelFormat GetPixelFormat(NWeb::ImageColorType colorType)
     return pixelFormat;
 }
 
-Media::AlphaType GetAlphaType(NWeb::ImageAlphaType alphaType)
+Media::AlphaType GetAlphaType(NG::TransImageAlphaType alphaType)
 {
     Media::AlphaType imageAlphaType;
     switch (alphaType) {
-        case NWeb::ImageAlphaType::ALPHA_TYPE_UNKNOWN:
+        case NG::TransImageAlphaType::ALPHA_TYPE_UNKNOWN:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_OPAQUE:
+        case NG::TransImageAlphaType::ALPHA_TYPE_OPAQUE:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
+        case NG::TransImageAlphaType::ALPHA_TYPE_PREMULTIPLIED:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
             break;
-        case NWeb::ImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
+        case NG::TransImageAlphaType::ALPHA_TYPE_POSTMULTIPLIED:
             imageAlphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
             break;
         default:
@@ -4402,8 +4400,8 @@ JSRef<JSObject> FaviconReceivedEventToJSValue(const FaviconReceivedEvent& eventI
     Media::InitializationOptions opt;
     opt.size.width = static_cast<int32_t>(width);
     opt.size.height = static_cast<int32_t>(height);
-    opt.pixelFormat = GetPixelFormat(NWeb::ImageColorType(colorType));
-    opt.alphaType = GetAlphaType(NWeb::ImageAlphaType(alphaType));
+    opt.pixelFormat = GetPixelFormat(NG::TransImageColorType(colorType));
+    opt.alphaType = GetAlphaType(NG::TransImageAlphaType(alphaType));
     opt.editable = true;
     auto pixelMap = Media::PixelMap::Create(opt);
     if (pixelMap == nullptr) {
@@ -5121,7 +5119,8 @@ void JSWeb::SetMetaViewport(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetMetaViewport(enabled);
 }
 
-void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems)
+void JSWeb::ParseScriptItems(
+    const JSCallbackInfo& args, ScriptItems& scriptItems, ScriptItemsByOrder& scriptItemsByOrder)
 {
     if (args.Length() != 1 || args[0]->IsUndefined() || args[0]->IsNull() || !args[0]->IsArray()) {
         return;
@@ -5153,6 +5152,7 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
         }
         if (scriptItems.find(script) == scriptItems.end()) {
             scriptItems.insert(std::make_pair(script, scriptRules));
+            scriptItemsByOrder.emplace_back(script);
         }
     }
 }
@@ -5160,15 +5160,26 @@ void JSWeb::ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItem
 void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
-    ParseScriptItems(args, scriptItems);
-    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+    } else {
+        WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
+    }
 }
 
 void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
 {
     ScriptItems scriptItems;
-    ParseScriptItems(args, scriptItems);
-    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+    } else {
+        WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+    }
 }
 
 void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)

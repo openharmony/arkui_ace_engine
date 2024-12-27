@@ -13,31 +13,10 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <memory>
-#include <optional>
-#include <vector>
-
-#include "gtest/gtest.h"
-#define private public
-#define protected public
-
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_paragraph.h"
 
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/text/text_theme.h"
-#include "core/components_ng/pattern/text/span/mutable_span_string.h"
-#include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/text_styles.h"
-#include "core/components_ng/property/measure_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -128,19 +107,19 @@ Font testEmptyFont {};
  */
 HWTEST_F(SpanStringTestNg, SpanString001, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<SpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"0123456789");
     EXPECT_EQ(spanString->GetString(), "0123456789");
     EXPECT_EQ(spanString->GetLength(), 10);
 
-    auto spanString1 = AceType::MakeRefPtr<SpanString>("中0123456789");
+    auto spanString1 = AceType::MakeRefPtr<SpanString>(u"中0123456789");
     EXPECT_EQ(spanString1->GetString(), "中0123456789");
     EXPECT_EQ(spanString1->GetLength(), 11);
 
-    auto spanString2 = AceType::MakeRefPtr<SpanString>("0123456");
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(u"0123456");
     EXPECT_EQ(spanString2->GetString(), "0123456");
     EXPECT_EQ(spanString2->GetLength(), 7);
 
-    auto spanString3 = AceType::MakeRefPtr<SpanString>("你好");
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(u"你好");
     EXPECT_EQ(spanString3->GetString(), "你好");
     EXPECT_EQ(spanString3->GetLength(), 2);
 }
@@ -151,23 +130,23 @@ HWTEST_F(SpanStringTestNg, SpanString001, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString002, TestSize.Level1)
 {
-    auto spanString1 = AceType::MakeRefPtr<SpanString>("01234中56789");
-    auto spanString2 = AceType::MakeRefPtr<SpanString>("01234中56789");
-    auto spanString3 = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanString1 = AceType::MakeRefPtr<SpanString>(u"01234中56789");
+    auto spanString2 = AceType::MakeRefPtr<SpanString>(u"01234中56789");
+    auto spanString3 = AceType::MakeRefPtr<SpanString>(u"01234567891");
     EXPECT_TRUE(spanString1->IsEqualToSpanString(spanString2));
     EXPECT_FALSE(spanString1->IsEqualToSpanString(spanString3));
     std::vector<RefPtr<SpanBase>> spans;
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
-    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans1 = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans1->BindWithSpans(spans);
-    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans2 = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans2->BindWithSpans(spans);
     EXPECT_TRUE(spanStringWithSpans1->IsEqualToSpanString(spanStringWithSpans2));
     std::vector<RefPtr<SpanBase>> spans1;
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testFont2, 0, 3));
     spans1.push_back(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 7));
-    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans3 = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans3->BindWithSpans(spans1);
     EXPECT_FALSE(spanStringWithSpans3->IsEqualToSpanString(spanStringWithSpans2));
     auto subSpanStringWithSpans2 = spanStringWithSpans2->GetSubSpanString(0, 7);
@@ -175,7 +154,7 @@ HWTEST_F(SpanStringTestNg, SpanString002, TestSize.Level1)
     auto map2 = subSpanStringWithSpans2->GetSpansMap();
     EXPECT_TRUE(subSpanStringWithSpans2->IsEqualToSpanString(subSpanStringWithSpans3));
     auto emptySpanString = spanStringWithSpans2->GetSubSpanString(1, 0);
-    EXPECT_TRUE(emptySpanString->IsEqualToSpanString(AceType::MakeRefPtr<SpanString>("")));
+    EXPECT_TRUE(emptySpanString->IsEqualToSpanString(AceType::MakeRefPtr<SpanString>(u"")));
 }
 
 /**
@@ -185,7 +164,7 @@ HWTEST_F(SpanStringTestNg, SpanString002, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString003, TestSize.Level1)
 {
-    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 3, 5));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 5, 8));
@@ -220,7 +199,7 @@ HWTEST_F(SpanStringTestNg, SpanString003, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
 {
-    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testEmptyFont, 0, 3));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 3, 5));
     spanString3->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont2, 5, 8));
@@ -252,7 +231,7 @@ HWTEST_F(SpanStringTestNg, SpanString004, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
 {
-    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     spanString3->AddSpan(
         AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
@@ -293,7 +272,7 @@ HWTEST_F(SpanStringTestNg, SpanString005, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString006, TestSize.Level1)
 {
-    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString3 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     spanString3->AddSpan(
         AceType::MakeRefPtr<DecorationSpan>(TextDecoration::OVERLINE, Color::RED, TextDecorationStyle::WAVY, 0, 1));
     spanString3->AddSpan(AceType::MakeRefPtr<BaselineOffsetSpan>(Dimension(4), 0, 2));
@@ -375,8 +354,8 @@ HWTEST_F(SpanStringTestNg, SpanString008, TestSize.Level1)
 {
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    mutableStr->InsertString(0, "123");
-    mutableStr->InsertString(4, "456");
+    mutableStr->InsertString(0, u"123");
+    mutableStr->InsertString(4, u"456");
     auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
     auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
     mutableStr->AppendSpanString(imageSpan1);
@@ -397,19 +376,19 @@ HWTEST_F(SpanStringTestNg, SpanString008, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString001, TestSize.Level1)
 {
-    auto a = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto a = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     EXPECT_EQ(a->GetString(), "0123456789");
-    a->ReplaceString(0, 1, "abcd");
+    a->ReplaceString(0, 1, u"abcd");
     EXPECT_EQ(a->GetString(), "abcd123456789");
-    a->InsertString(0, "abcd");
+    a->InsertString(0, u"abcd");
     EXPECT_EQ(a->GetString(), "abcdabcd123456789");
     a->RemoveString(3, 3);
     EXPECT_EQ(a->GetString(), "abccd123456789");
-    a->InsertString(4, "中文插入测试");
+    a->InsertString(4, u"中文插入测试");
     EXPECT_EQ(a->GetString(), "abcc中文插入测试d123456789");
     a->RemoveString(4, 6);
     EXPECT_EQ(a->GetString(), "abccd123456789");
-    a->ReplaceString(5, 9, "中文替换测试");
+    a->ReplaceString(5, 9, u"中文替换测试");
     EXPECT_EQ(a->GetString(), "abccd中文替换测试");
 }
 
@@ -439,7 +418,7 @@ bool CompareSpanList(const std::list<RefPtr<SpanBase>>& a, const std::list<RefPt
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString002, TestSize.Level1)
 {
-    auto a = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto a = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     std::string test_str[] = { "hello", "world", "this", "find", "gank", "pink", "that", "when", "how", "cpp" };
     a->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10));
@@ -460,7 +439,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString002, TestSize.Level1)
     EXPECT_TRUE(CompareSpanList(aSpansMap[SpanType::Font], resultList3));
 
     // 用中文再测一次
-    auto b = MutableSpanString("零一二三四五六七八九");
+    auto b = MutableSpanString(u"零一二三四五六七八九");
     b.AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10));
     EXPECT_EQ(b.GetString(), "零一二三四五六七八九");
     std::list<RefPtr<SpanBase>> resultList4 = { AceType::MakeRefPtr<FontSpan>(testFont1, 0, 10) };
@@ -486,7 +465,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString002, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString003, TestSize.Level1)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     Font fontOne { .fontColor = OHOS::Ace::Color::RED };
     Font fontTwo { .fontColor = OHOS::Ace::Color::WHITE };
@@ -526,7 +505,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString003, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString004, TestSize.Level1)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     Font fontOne { .fontColor = OHOS::Ace::Color::RED };
     Font fontTwo { .fontColor = OHOS::Ace::Color::WHITE };
@@ -564,7 +543,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString004, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString005, TestSize.Level1)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     Font fontOne { .fontColor = OHOS::Ace::Color::RED };
     Font fontTwo { .fontColor = OHOS::Ace::Color::WHITE };
@@ -600,14 +579,14 @@ HWTEST_F(SpanStringTestNg, MutableSpanString006, TestSize.Level1)
 {
     Font fontOne { .fontColor = OHOS::Ace::Color::RED };
     Font fontTwo { .fontColor = OHOS::Ace::Color::WHITE };
-    auto spanString1 = AceType::MakeRefPtr<SpanString>("0123456789");
+    auto spanString1 = AceType::MakeRefPtr<SpanString>(u"0123456789");
     spanString1->AddSpan(AceType::MakeRefPtr<FontSpan>(fontOne, 0, 3));
-    auto mutableSpanString1 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto mutableSpanString1 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     EXPECT_FALSE(spanString1->IsEqualToSpanString(mutableSpanString1));
     mutableSpanString1->AddSpan(AceType::MakeRefPtr<FontSpan>(fontOne, 0, 3));
     EXPECT_TRUE(spanString1->IsEqualToSpanString(mutableSpanString1));
     mutableSpanString1->AddSpan(AceType::MakeRefPtr<FontSpan>(fontOne, 3, 7));
-    auto mutableSpanString2 = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto mutableSpanString2 = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     mutableSpanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(fontOne, 0, 7));
     EXPECT_TRUE(mutableSpanString2->IsEqualToSpanString(mutableSpanString1));
     EXPECT_TRUE(spanString1->GetSubSpanString(0, 3)->IsEqualToSpanString(mutableSpanString2->GetSubSpanString(0, 3)));
@@ -619,14 +598,14 @@ HWTEST_F(SpanStringTestNg, MutableSpanString006, TestSize.Level1)
 
 /**
  * @tc.name: MutableSpanString007
- * @tc.desc: Test some edge case of InsertString/ReplaceString/RemoveString 
+ * @tc.desc: Test some edge case of InsertString/ReplaceString/RemoveString
  * @tc.type: FUNC
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString007, TestSize.Level1)
 {
     vector<OHOS::Ace::Color> colors = { Color::RED, Color::BLACK, Color::GREEN, Color::GRAY, Color::BLUE };
     vector<Font> fonts;
-    auto spanString1 = AceType::MakeRefPtr<MutableSpanString>("01234");
+    auto spanString1 = AceType::MakeRefPtr<MutableSpanString>(u"01234");
     for (int i = 0; i < colors.size(); i++) {
         Font f;
         f.fontColor = colors[i];
@@ -641,17 +620,17 @@ HWTEST_F(SpanStringTestNg, MutableSpanString007, TestSize.Level1)
     std::list<RefPtr<SpanBase>> resultList1 = { AceType::MakeRefPtr<FontSpan>(fonts[0], 0, 6),
         AceType::MakeRefPtr<FontSpan>(fonts[1], 6, 7), AceType::MakeRefPtr<FontSpan>(fonts[2], 7, 8),
         AceType::MakeRefPtr<FontSpan>(fonts[3], 8, 9), AceType::MakeRefPtr<FontSpan>(fonts[4], 9, 10) };
-    spanString1->InsertString(0, "一二三四五");
+    spanString1->InsertString(0, u"一二三四五");
     auto spanMap = spanString1->GetSpansMap();
     EXPECT_TRUE(CompareSpanList(spanMap[SpanType::Font], resultList1));
-    spanString1->InsertString(6, "红红火火");
+    spanString1->InsertString(6, u"红红火火");
     std::list<RefPtr<SpanBase>> resultList2 = { AceType::MakeRefPtr<FontSpan>(fonts[0], 0, 10),
         AceType::MakeRefPtr<FontSpan>(fonts[1], 10, 11), AceType::MakeRefPtr<FontSpan>(fonts[2], 11, 12),
         AceType::MakeRefPtr<FontSpan>(fonts[3], 12, 13), AceType::MakeRefPtr<FontSpan>(fonts[4], 13, 14) };
     spanMap = spanString1->GetSpansMap();
     EXPECT_TRUE(CompareSpanList(spanMap[SpanType::Font], resultList2));
-    spanString1->InsertString(11, "abcdefg");
-    spanString1->ReplaceString(8, 8, "A");
+    spanString1->InsertString(11, u"abcdefg");
+    spanString1->ReplaceString(8, 8, u"A");
     std::list<RefPtr<SpanBase>> resultList3 = { AceType::MakeRefPtr<FontSpan>(fonts[0], 0, 9),
         AceType::MakeRefPtr<FontSpan>(fonts[1], 9, 11), AceType::MakeRefPtr<FontSpan>(fonts[2], 11, 12),
         AceType::MakeRefPtr<FontSpan>(fonts[3], 12, 13), AceType::MakeRefPtr<FontSpan>(fonts[4], 13, 14) };
@@ -675,7 +654,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString008, TestSize.Level1)
 {
     vector<OHOS::Ace::Color> colors = { Color::RED, Color::BLACK, Color::GREEN, Color::GRAY, Color::BLUE };
     vector<Font> fonts;
-    auto spanString1 = AceType::MakeRefPtr<MutableSpanString>("0123");
+    auto spanString1 = AceType::MakeRefPtr<MutableSpanString>(u"0123");
     for (int i = 0; i < 5; i++) {
         Font f;
         f.fontColor = colors[i];
@@ -685,7 +664,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString008, TestSize.Level1)
         }
     }
     auto spanArr = spanString1->GetSpans(0, spanString1->GetLength());
-    auto spanString2 = AceType::MakeRefPtr<MutableSpanString>("abc");
+    auto spanString2 = AceType::MakeRefPtr<MutableSpanString>(u"abc");
     Font f;
     f.fontColor = colors[4];
     spanString2->AddSpan(AceType::MakeRefPtr<FontSpan>(f, 0, 3));
@@ -733,7 +712,7 @@ HWTEST_F(SpanStringTestNg, GestureSpanString001, TestSize.Level1)
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans->BindWithSpans(spanBases);
 
     /**
@@ -761,7 +740,7 @@ HWTEST_F(SpanStringTestNg, GestureSpanString002, TestSize.Level1)
     ConstructGestureStyle(gestureInfo);
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567891");
     spanStringWithSpans->BindWithSpans(spanBases);
 
     std::list<RefPtr<SpanBase>> resultList = { AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3),
@@ -805,7 +784,7 @@ HWTEST_F(SpanStringTestNg, GestureSpanString03, TestSize.Level1)
     /**
      * @tc.steps: step1. Create spanString and textPattern
      */
-    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>("01234567891");
+    auto spanStringWithSpans = AceType::MakeRefPtr<SpanString>(u"01234567891");
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
 
@@ -856,7 +835,7 @@ HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
     std::vector<RefPtr<SpanBase>> spanBases;
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 0, 3));
     spanBases.emplace_back(AceType::MakeRefPtr<GestureSpan>(gestureInfo, 8, 11));
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("01234567891");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"01234567891");
     spanString->BindWithSpans(spanBases);
     auto textPattern = AceType::MakeRefPtr<TextPattern>();
     auto frameNode = FrameNode::CreateFrameNode("Test", 1, textPattern);
@@ -877,7 +856,7 @@ HWTEST_F(SpanStringTestNg, GestureSpanString004, TestSize.Level1)
      * @tc.steps: step2. Call the ReplaceString function
      * @tc.expect: The number of spanItems for textPattern is 4 and the events for each span were as expected
      */
-    spanString->ReplaceString(0, 2, "a");
+    spanString->ReplaceString(0, 2, u"a");
     spanItems = textPattern->GetSpanItemChildren();
     EXPECT_EQ(spanItems.size(), 3);
 
@@ -939,13 +918,13 @@ HWTEST_F(SpanStringTestNg, MutableSpanString010, TestSize.Level1)
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
 
-    mutableStr->InsertString(0, "123");
+    mutableStr->InsertString(0, u"123");
     auto text = mutableStr->GetString();
     EXPECT_TRUE(text == "123 ");
     auto length = mutableStr->GetLength();
     EXPECT_TRUE(length == 4);
 
-    mutableStr->InsertString(4, "456");
+    mutableStr->InsertString(4, u"456");
     text = mutableStr->GetString();
     EXPECT_TRUE(text == "123 456");
     length = mutableStr->GetLength();
@@ -968,7 +947,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString011, TestSize.Level1)
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
 
-    auto spanStr = AceType::MakeRefPtr<SpanString>("123");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"123");
     spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     mutableStr->InsertSpanString(0, spanStr);
     auto text = mutableStr->GetString();
@@ -976,7 +955,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString011, TestSize.Level1)
     auto length = mutableStr->GetLength();
     EXPECT_EQ(length, 4);
 
-    spanStr = AceType::MakeRefPtr<SpanString>("456");
+    spanStr = AceType::MakeRefPtr<SpanString>(u"456");
     spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont1, 0, 3));
     mutableStr->InsertSpanString(4, spanStr);
     text = mutableStr->GetString();
@@ -996,8 +975,8 @@ HWTEST_F(SpanStringTestNg, MutableSpanString012, TestSize.Level1)
 {
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    mutableStr->InsertString(0, "123");
-    mutableStr->InsertString(4, "456");
+    mutableStr->InsertString(0, u"123");
+    mutableStr->InsertString(4, u"456");
 
     auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
     auto imageSpan1 = AceType::MakeRefPtr<ImageSpan>(imageOption1);
@@ -1025,8 +1004,8 @@ HWTEST_F(SpanStringTestNg, MutableSpanString013, TestSize.Level1)
 {
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    mutableStr->InsertString(0, "123");
-    mutableStr->InsertString(4, "456");
+    mutableStr->InsertString(0, u"123");
+    mutableStr->InsertString(4, u"456");
     auto imageOption1 = SpanStringTestNg::GetImageOption("src/icon-2.png");
     auto imageSpan1 = AceType::MakeRefPtr<SpanString>(imageOption1);
     mutableStr->AppendSpanString(imageSpan1);
@@ -1049,7 +1028,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString013, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, MutableSpanString014, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
     SpanParagraphStyle spanParagraphStyle;
     spanParagraphStyle.align = TextAlign::END;
     spanParagraphStyle.maxLines = 4;
@@ -1139,7 +1118,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString016, TestSize.Level1)
 
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon-1.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>("123456");
+    auto mutableStr2 = AceType::MakeRefPtr<MutableSpanString>(u"123456");
     mutableStr->AddSpan(paraSpan);
     mutableStr2->AddSpan(lineHeightSpan);
     mutableStr->AppendSpanString(mutableStr2);
@@ -1170,7 +1149,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString017, TestSize.Level1)
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
 
-    auto spanStr = AceType::MakeRefPtr<SpanString>("123");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"123");
     spanStr->AddSpan(paraSpan);
     mutableStr->InsertSpanString(0, spanStr);
     auto text = mutableStr->GetString();
@@ -1178,7 +1157,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString017, TestSize.Level1)
     auto length = mutableStr->GetLength();
     EXPECT_EQ(length, 4);
 
-    spanStr = AceType::MakeRefPtr<SpanString>("456");
+    spanStr = AceType::MakeRefPtr<SpanString>(u"456");
     spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
     mutableStr->InsertSpanString(4, spanStr);
     text = mutableStr->GetString();
@@ -1201,7 +1180,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     std::vector<std::string>(test_str, test_str + 10), OHOS::Ace::Color::RED };
     Font testFont2 { OHOS::Ace::FontWeight::W300, Dimension(49.0, DimensionUnit::VP), OHOS::Ace::FontStyle::ITALIC,
     std::vector<std::string>(test_str, test_str + 5), OHOS::Ace::Color::BLUE };
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd当地经的123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd当地经的123456");
     spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(30), 0, 3));
     spanStr->AddSpan(AceType::MakeRefPtr<LineHeightSpan>(Dimension(10), 0, 2));
     spanStr->AddSpan(AceType::MakeRefPtr<FontSpan>(testFont, 1, 2));
@@ -1220,16 +1199,16 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     spanStr->EncodeTlv(buff);
     auto spanString2 = SpanString::DecodeTlv(buff);
     std::list<RefPtr<NG::SpanItem>> spans = spanString2->GetSpanItems();
-    
+
     EXPECT_EQ(spans.size(), 10);
     EXPECT_EQ(spanStr->GetString(), "dddd当地经的123456");
     auto it = spans.begin();
-    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "d");
     EXPECT_EQ((*it)->interval.first, 0);
     EXPECT_EQ((*it)->interval.second, 1);
     EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
     ++it;
-    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "d");
     EXPECT_EQ((*it)->interval.first, 1);
     EXPECT_EQ((*it)->interval.second, 2);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(29));
@@ -1238,16 +1217,16 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::BOLD);
     EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(10));
     ++it;
-    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "d");
     EXPECT_EQ((*it)->interval.first, 2);
     EXPECT_EQ((*it)->interval.second, 3);
     EXPECT_EQ((*it)->textLineStyle->GetLineHeight().value(), Dimension(30));
     ++it;
-    EXPECT_EQ((*it)->content, "d");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "d");
     EXPECT_EQ((*it)->interval.first, 3);
     EXPECT_EQ((*it)->interval.second, 4);
     ++it;
-    EXPECT_EQ((*it)->content, "当");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "当");
     EXPECT_EQ((*it)->interval.first, 4);
     EXPECT_EQ((*it)->interval.second, 5);
     EXPECT_EQ((*it)->fontStyle->GetFontSize().value(), Dimension(49, OHOS::Ace::DimensionUnit::VP));
@@ -1255,21 +1234,21 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), OHOS::Ace::FontStyle::ITALIC);
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), OHOS::Ace::FontWeight::W300);
     ++it;
-    EXPECT_EQ((*it)->content, "地经的");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "地经的");
     EXPECT_EQ((*it)->interval.first, 5);
     EXPECT_EQ((*it)->interval.second, 8);
     ++it;
-    EXPECT_EQ((*it)->content, "1");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "1");
     EXPECT_EQ((*it)->interval.first, 8);
     EXPECT_EQ((*it)->interval.second, 9);
     EXPECT_EQ((*it)->fontStyle->GetLetterSpacing().value(), Dimension(15));
     ++it;
-    EXPECT_EQ((*it)->content, "2");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "2");
     EXPECT_EQ((*it)->interval.first, 9);
     EXPECT_EQ((*it)->interval.second, 10);
     EXPECT_EQ((*it)->textLineStyle->GetBaselineOffset().value(), Dimension(16));
     ++it;
-    EXPECT_EQ((*it)->content, "3");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "3");
     EXPECT_EQ((*it)->interval.first, 10);
     EXPECT_EQ((*it)->interval.second, 11);
     EXPECT_EQ((*it)->textLineStyle->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
@@ -1278,7 +1257,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString018, TestSize.Level1)
     EXPECT_EQ((*it)->textLineStyle->GetTextIndent().value(), Dimension(23));
     EXPECT_EQ((*it)->textLineStyle->GetWordBreak().value(), WordBreak::BREAK_ALL);
     ++it;
-    EXPECT_EQ((*it)->content, "456");
+    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), "456");
     EXPECT_EQ((*it)->interval.first, 11);
     EXPECT_EQ((*it)->interval.second, 14);
 }
@@ -1293,7 +1272,7 @@ HWTEST_F(SpanStringTestNg, MutableSpanString019, TestSize.Level1)
     auto extSpan = AceType::MakeRefPtr<ExtSpan>(1, 2);
     auto imageOption = SpanStringTestNg::GetImageOption("src/icon.png");
     auto mutableStr = AceType::MakeRefPtr<MutableSpanString>(imageOption);
-    auto spanStr = AceType::MakeRefPtr<SpanString>("12345");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"12345");
     spanStr->AddSpan(extSpan);
     mutableStr->InsertSpanString(0, spanStr);
     auto text = mutableStr->GetString();
@@ -1349,7 +1328,7 @@ HWTEST_F(SpanStringTestNg, SpanString009, TestSize.Level1)
     buffer = letterSpacingSpan->ToString();
     EXPECT_FALSE(buffer.empty());
     EXPECT_EQ(buffer.find("LetterSpacingSpan"), 0);
-   
+
     Shadow textShadow;
     textShadow.SetBlurRadius(1.0);
     textShadow.SetColor(Color::BLACK);
@@ -1388,7 +1367,8 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
     imageSpan->ApplyToSpanItem(imageSpanItem, SpanOperation::REMOVE);
     imageSpan->GetSubSpan(0, 3);
     buffer = imageSpan->ToString();
-    EXPECT_TRUE(buffer.empty());
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("ImageSpan"), 0);
 
     auto customSpan = AceType::MakeRefPtr<CustomSpan>();
     auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
@@ -1404,7 +1384,8 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
     paragraphStyleSpan->ApplyToSpanItem(spanItem, SpanOperation::REMOVE);
     EXPECT_FALSE(paragraphStyleSpan->IsAttributesEqual(fontSpan));
     buffer = paragraphStyleSpan->ToString();
-    EXPECT_TRUE(buffer.empty());
+    EXPECT_FALSE(buffer.empty());
+    EXPECT_EQ(buffer.find("ParagraphStyleSpan"), 0);
 
     auto lineHeightSpan = AceType::MakeRefPtr<LineHeightSpan>();
     EXPECT_FALSE(lineHeightSpan->IsAttributesEqual(fontSpan));
@@ -1429,7 +1410,7 @@ HWTEST_F(SpanStringTestNg, SpanString010, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString011, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     TextBackgroundStyle textBackgroundStyle;
     NG::BorderRadiusProperty borderRadius;
@@ -1468,7 +1449,7 @@ HWTEST_F(SpanStringTestNg, SpanString011, TestSize.Level1)
  */
 HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
 {
-    auto spanString = AceType::MakeRefPtr<MutableSpanString>("0123456789");
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"0123456789");
 
     TextBackgroundStyle textBackgroundStyle;
     NG::BorderRadiusProperty borderRadius;
@@ -1491,6 +1472,247 @@ HWTEST_F(SpanStringTestNg, SpanString012, TestSize.Level1)
     EXPECT_EQ(backgroundColorSpan->GetStartIndex(), 8);
     EXPECT_EQ(backgroundColorSpan->GetEndIndex(), 9);
     EXPECT_TRUE(backgroundColorSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString013
+ * @tc.desc: Test insert spanstring between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString013, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+    auto insertString = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 8));
+    // insert span string
+    spanString->InsertSpanString(2, insertString);
+
+    // check range start->end [0, 13]
+    auto backgroundSpans = spanString->GetSpans(0, 13);
+    EXPECT_EQ(backgroundSpans.size(), 2);
+    auto firstBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(firstBackgroundSpan, nullptr);
+    EXPECT_EQ(firstBackgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(firstBackgroundSpan->GetEndIndex(), 2);
+    EXPECT_TRUE(firstBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    auto secondBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[1]);
+    EXPECT_NE(secondBackgroundSpan, nullptr);
+    EXPECT_EQ(secondBackgroundSpan->GetStartIndex(), 5);
+    EXPECT_EQ(secondBackgroundSpan->GetEndIndex(), 11);
+    EXPECT_TRUE(secondBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    // check range [0, 10]
+    backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 2);
+
+    auto secondBackgroundSpan2 = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[1]);
+    EXPECT_NE(secondBackgroundSpan2, nullptr);
+    EXPECT_EQ(secondBackgroundSpan2->GetStartIndex(), 5);
+    EXPECT_EQ(secondBackgroundSpan2->GetEndIndex(), 10);
+    EXPECT_TRUE(secondBackgroundSpan2->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString014
+ * @tc.desc: Test append spanstring after BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString014, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+    auto appendString = AceType::MakeRefPtr<MutableSpanString>(u"abc");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::RED;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 10));
+    // append span string
+    spanString->AppendSpanString(appendString);
+
+    // check range
+    auto backgroundSpans = spanString->GetSpans(0, 13);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto firstBackgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(firstBackgroundSpan, nullptr);
+    EXPECT_EQ(firstBackgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(firstBackgroundSpan->GetEndIndex(), 10);
+    EXPECT_TRUE(firstBackgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString015
+ * @tc.desc: Test insert string between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString015, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+
+    // insert value
+    spanString->InsertString(2, u"abc");
+
+    // check range of span
+    auto backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 8);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString016
+ * @tc.desc: Test remove string between BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString016, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveString(2, 1);
+
+    // check range of span
+    auto backgroundSpans = spanString->GetSpans(0, 7);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 4);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+
+    // remove multi times
+    spanString->RemoveString(2, 2);
+    backgroundSpans = spanString->GetSpans(0, 7);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+    backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 2);
+    EXPECT_TRUE(backgroundSpan->GetBackgroundColor() == textBackgroundStyle);
+}
+
+/**
+ * @tc.name: SpanString017
+ * @tc.desc: Test remove span of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString017, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveSpan(0, 5, SpanType::BackgroundColor);
+
+    // check span count
+    auto backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 0);
+
+    // add again
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    backgroundSpans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(backgroundSpans.size(), 1);
+
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(backgroundSpans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 5);
+}
+
+/**
+ * @tc.name: SpanString018
+ * @tc.desc: Test remove span of BackgroundColorSpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, SpanString018, TestSize.Level1)
+{
+    auto spanString = AceType::MakeRefPtr<MutableSpanString>(u"1234567890");
+
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, OHOS::Ace::DimensionUnit::VP);
+
+    textBackgroundStyle.backgroundColor = Color::BLUE;;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    // remove string
+    spanString->RemoveSpan(0, 5, SpanType::BackgroundColor);
+
+    // check span count
+    auto spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 0);
+
+    // add again
+    spanString->AddSpan(AceType::MakeRefPtr<BackgroundColorSpan>(textBackgroundStyle, 0, 5));
+    spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 1);
+
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(spans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetStartIndex(), 0);
+    EXPECT_EQ(backgroundSpan->GetEndIndex(), 5);
+
+    // remove all spans
+    spanString->ClearAllSpans();
+    spans = spanString->GetSpans(0, 10);
+    EXPECT_EQ(spans.size(), 0);
 }
 
 /**
@@ -1787,5 +2009,50 @@ HWTEST_F(SpanStringTestNg, Tlv011, TestSize.Level1)
     cursor = 0;
     readLeadingMargin = TLVUtil::ReadLeadingMargin(buffer, cursor);
     EXPECT_FALSE(writeLeadingMargin == readLeadingMargin);
+}
+
+/**
+ * @tc.name: GetSpanResultObject001
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject001, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 2;
+    auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
+    EXPECT_TRUE(resultObject.isInit);
+}
+
+/**
+ * @tc.name: GetSpanResultObject002
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject002, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 2;
+    auto resultObject = customSpanItem->GetSpanResultObject(2, 3);
+    EXPECT_FALSE(resultObject.isInit);
+}
+
+/**
+ * @tc.name: GetSpanResultObject003
+ * @tc.desc: Test GetSpanResultObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanStringTestNg, GetSpanResultObject003, TestSize.Level1)
+{
+    auto customSpanItem = AceType::MakeRefPtr<NG::CustomSpanItem>();
+    ASSERT_NE(customSpanItem, nullptr);
+    customSpanItem->interval.first = 1;
+    customSpanItem->interval.second = 4;
+    auto resultObject = customSpanItem->GetSpanResultObject(0, 3);
+    EXPECT_FALSE(resultObject.isInit);
 }
 } // namespace OHOS::Ace::NG

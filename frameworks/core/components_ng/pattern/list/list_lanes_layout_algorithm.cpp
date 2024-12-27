@@ -334,13 +334,16 @@ void ListLanesLayoutAlgorithm::ModifyLaneLength(
     }
 }
 
-float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize)
+float ListLanesLayoutAlgorithm::CalculateLaneCrossOffset(float crossSize, float childCrossSize, bool isGroup)
 {
     if (lanes_ <= 0) {
         return 0.0f;
     }
+    if (isGroup) {
+        return ListLayoutAlgorithm::CalculateLaneCrossOffset(crossSize, childCrossSize, isGroup);
+    }
     return ListLayoutAlgorithm::CalculateLaneCrossOffset((crossSize + GetLaneGutter()) / lanes_,
-        childCrossSize / lanes_);
+        childCrossSize / lanes_, isGroup);
 }
 
 int32_t ListLanesLayoutAlgorithm::GetLazyForEachIndex(const RefPtr<FrameNode>& host)

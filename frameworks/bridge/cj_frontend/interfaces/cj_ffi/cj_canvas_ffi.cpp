@@ -171,6 +171,53 @@ void FfiOHOSAceFrameworkRenderingContextSetFillStyle(int64_t contextId, uint32_t
     }
 }
 
+double FfiOHOSAceFrameworkRenderingContextGetHight(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return -1;
+    }
+    return context->GetHeight();
+}
+
+double FfiOHOSAceFrameworkRenderingContextGetWidth(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return -1;
+    }
+    return context->GetWidth();
+}
+
+void FfiOHOSAceFrameworkRenderingContextRestoreLayer(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return;
+    }
+    context->RestoreLayer();
+}
+
+
+void FfiOHOSAceFrameworkRenderingContextSaveLayer(int64_t contextId)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return;
+    }
+    context->SaveLayer();
+}
+
+void FfiOHOSAceFrameworkRenderingContextSetFilter(int64_t contextId, const char* value)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        return;
+    }
+    std::string filter = value;
+    context->SetFilter(filter);
+}
+
 void FfiOHOSAceFrameworkRenderingContextSetFillStyleByGradient(int64_t contextId, int64_t gradientId)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);

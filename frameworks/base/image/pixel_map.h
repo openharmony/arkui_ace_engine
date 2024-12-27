@@ -47,6 +47,8 @@ enum class PixelFormat : int32_t {
     NV21 = 8, // Each pixel is stored on 3/2 bytes.
     NV12 = 9,
     CMYK = 10,
+    YCBCR_P010 = 11,
+    YCRCB_P010 = 12,
     RGBA_1010102 = 14,
 };
 

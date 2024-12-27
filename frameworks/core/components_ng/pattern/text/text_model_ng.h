@@ -70,7 +70,7 @@ public:
     void ClearOnClick() override;
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
-    void SetOnCopy(std::function<void(const std::string&)>&& func) override;
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
     void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
     void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
@@ -82,6 +82,8 @@ public:
     RefPtr<TextControllerBase> GetTextController() override;
     void SetClipEdge(bool clip) override;
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
+    void SetMarqueeOptions(const TextMarqueeOptions& options) override;
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
@@ -124,6 +126,8 @@ public:
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode value);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
+    static void SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options);
+    static void SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func);
     static void SetTextDetectConfig(FrameNode* frameNode, const std::string& value);
     static void SetOnClick(FrameNode* frameNode, GestureEventFunc&& click);
     static void ClearOnClick(FrameNode* frameNode);
@@ -135,6 +139,7 @@ public:
     static void SetTextContentWithStyledString(FrameNode* frameNode, ArkUI_StyledString* value);
     static std::vector<std::string> GetFontFamily(FrameNode* frameNode);
     static CopyOptions GetCopyOption(FrameNode* frameNode);
+    static TextMarqueeOptions GetMarqueeOptions(FrameNode* frameNode);
     static TextHeightAdaptivePolicy GetHeightAdaptivePolicy(FrameNode* frameNode);
     static Dimension GetAdaptMinFontSize(FrameNode* frameNode);
     static Dimension GetAdaptMaxFontSize(FrameNode* frameNode);
@@ -173,13 +178,14 @@ public:
     static void SetTextSelection(FrameNode* frameNode, int32_t startIndex, int32_t endIndex);
     static void SetTextSelectableMode(FrameNode* frameNode, TextSelectableMode value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
-    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void OnCreateMenuCallbackUpdate(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback);
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetHalfLeading(FrameNode* frameNode, bool halfLeading);
     static bool GetHalfLeading(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 };
 } // namespace OHOS::Ace::NG
 

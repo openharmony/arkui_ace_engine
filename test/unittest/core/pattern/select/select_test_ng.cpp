@@ -39,8 +39,6 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/select/select_model_ng.h"
 #include "core/components_ng/pattern/select/select_pattern.h"
@@ -1154,7 +1152,7 @@ HWTEST_F(SelectTestNg, SelectOption001, TestSize.Level1)
      */
     auto options = selectPattern->GetOptions();
     if (options.size() > 0) {
-        auto optionPaintProperty = options[0]->GetPaintProperty<OptionPaintProperty>();
+        auto optionPaintProperty = options[0]->GetPaintProperty<MenuItemPaintProperty>();
         EXPECT_EQ(optionPaintProperty->GetSelectModifiedWidth().value(), OPTION_WIDTH.ConvertToPx());
     }
 }

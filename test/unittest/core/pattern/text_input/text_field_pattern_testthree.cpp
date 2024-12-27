@@ -15,12 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -178,7 +173,7 @@ HWTEST_F(TextFieldPatternTestThree, SetPreviewTextOperation001, TestSize.Level0)
     EXPECT_TRUE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 
-    pattern_->InitEditingValueText("");
+    pattern_->InitEditingValueText(u"");
     EXPECT_FALSE(pattern_->GetIsPreviewText());
     FlushLayoutTask(frameNode_);
 }
@@ -548,11 +543,11 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
     pattern_->HandleOnAIWrite();
 
     std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>("dddd结果回填123456");
+    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
     spanStr->EncodeTlv(buff);
     pattern_->HandleAIWriteResult(0, 5, buff);
     auto contentController = pattern_->GetTextContentController();
-    auto sentenceContent = contentController->GetSelectedValue(0, spanStr->GetLength());
+    auto sentenceContent = StringUtils::Str16ToStr8(contentController->GetSelectedValue(0, spanStr->GetLength()));
     ASSERT_EQ(sentenceContent, spanStr->GetString());
 }
 

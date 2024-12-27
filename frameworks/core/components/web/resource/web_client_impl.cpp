@@ -127,14 +127,6 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
-}
-
 void FindListenerImpl::OnFindResultReceived(
     const int activeMatchOrdinal, const int numberOfMatches, const bool isDoneCounting)
 {
@@ -1080,6 +1072,14 @@ void WebClientImpl::OnPopupSize(int x, int y, int width, int height)
     delegate->OnPopupSize(x, y, width, height);
 }
 
+void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 void WebClientImpl::OnPopupShow(bool show)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1301,5 +1301,23 @@ bool WebClientImpl::OnSslErrorRequestByJSV2(std::shared_ptr<NWeb::NWebJSSslError
             }
         }, OHOS::Ace::TaskExecutor::TaskType::JS, "ArkUIWebClientSslErrorRequest");
     return jsResult;
+}
+
+void WebClientImpl::OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "OnAccessibilityEvent accessibilityId: %{public}" PRId64 ", eventType: %{public}d",
+        accessibilityId, eventType);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
+}
+
+bool WebClientImpl::IsCurrentFocus()
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_RETURN(delegate, false);
+    ContainerScope scope(delegate->GetInstanceId());
+    return delegate->IsCurrentFocus();
 }
 } // namespace OHOS::Ace

@@ -112,11 +112,27 @@ public:
         node_ = node;
     }
 
+    bool HasContent() const
+    {
+        return !content_.Invalid();
+    }
+
+    void SetContent(const WeakPtr<NG::UINode>& content)
+    {
+        content_ = content;
+    }
+
+    const WeakPtr<NG::UINode>& GetContent() const
+    {
+        return content_;
+    }
+
 private:
     std::string text_;
     std::string icon_;
     std::optional<TabBarSymbol> symbol_;
     TabBarBuilderFunc builder_;
+    WeakPtr<NG::UINode> content_ = nullptr;
     TabBarStyle tabBarStyle_ = TabBarStyle::NOSTYLE;
     FrameNode* node_ = nullptr;
 };
@@ -130,6 +146,12 @@ enum class AnimationType {
 enum class TabBarState {
     SHOW = 0,
     HIDE
+};
+
+enum class TabBarParamType {
+    NORMAL = 0,
+    CUSTOM_BUILDER,
+    COMPONENT_CONTENT
 };
 
 class TabBarPattern : public Pattern {
@@ -158,6 +180,8 @@ public:
             layoutAlgorithm->SetTargetIndex(targetIndex_);
         } else if (jumpIndex_) {
             layoutAlgorithm->SetJumpIndex(jumpIndex_);
+        } else if (focusIndex_) {
+            layoutAlgorithm->SetFocusIndex(focusIndex_);
         }
         layoutAlgorithm->SetVisibleItemPosition(visibleItemPosition_);
         layoutAlgorithm->SetCanOverScroll(canOverScroll_);
@@ -216,9 +240,9 @@ public:
 
     SelectedMode GetSelectedMode() const;
 
-    void AddTabBarItemType(int32_t tabBarItemId, bool isBuilder)
+    void AddTabBarItemType(int32_t tabBarItemId, TabBarParamType type)
     {
-        tabBarType_.emplace(std::make_pair(tabBarItemId, isBuilder));
+        tabBarType_.emplace(std::make_pair(tabBarItemId, type));
     }
 
     bool IsContainsBuilder();
@@ -499,6 +523,7 @@ public:
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
 
     void AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem);
+    void AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem);
 
     void RemoveTabBarItemInfo(int32_t tabBarItemId)
     {
@@ -551,6 +576,7 @@ private:
         const RefPtr<TabBarLayoutProperty>& layoutProperty, const RefPtr<GestureEventHub>& gestureHub);
     void InitScrollable(const RefPtr<GestureEventHub>& gestureHub);
     void InitTouch(const RefPtr<GestureEventHub>& gestureHub);
+    bool InsideTabBarRegion(const TouchLocationInfo& locationInfo);
     void InitHoverEvent();
     void InitMouseEvent();
     void SetSurfaceChangeCallback();
@@ -594,13 +620,14 @@ private:
     void PlayIndicatorTranslateAnimation(AnimationOption option, RectF originalPaintRect, RectF targetPaintRect,
         float targetOffset);
     void CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& host, const std::string& propertyName);
-    void StopTranslateAnimation();
+    void StopTranslateAnimation(bool isImmediately = false);
     float CalculateTargetOffset(int32_t targetIndex);
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
+    void FocusCurrentOffset(int32_t index);
     void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
@@ -670,7 +697,7 @@ private:
     int32_t indicator_ = 0;
     int32_t focusIndicator_ = 0;
     Axis axis_ = Axis::HORIZONTAL;
-    std::unordered_map<int32_t, bool> tabBarType_;
+    std::unordered_map<int32_t, TabBarParamType> tabBarType_;
     std::optional<int32_t> animationDuration_;
 
     std::shared_ptr<AnimationUtils::Animation> tabbarIndicatorAnimation_;
@@ -724,10 +751,12 @@ private:
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
+    std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
+    bool accessibilityScroll_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

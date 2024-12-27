@@ -189,7 +189,7 @@ bool SecurityComponentHandler::CheckDiagonalLinearGradientBlur(const RectF& pare
     switch (direction) {
         case GradientDirection::LEFT_TOP:
             dest.SetX(rect.GetX() + radius);
-            dest.SetY(rect.GetY()+ radius);
+            dest.SetY(rect.GetY() + radius);
             src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
             src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
             gradient = (0 - parentRect.Width()) / parentRect.Height();
@@ -240,9 +240,9 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
     }
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
-    CHECK_NULL_RETURN(buttonNode, false);
+    CHECK_NULL_RETURN(buttonNode, 0.0);
     auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(bgProp, false);
+    CHECK_NULL_RETURN(bgProp, 0.0);
     auto borderRadius = bgProp->GetBorderRadius();
     float radius = 0.0;
 
@@ -617,6 +617,12 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         GetWindowSceneWindowId(node, windId);
     }
     buttonInfo.windowId_ = static_cast<int32_t>(windId);
+    uint64_t displayId = container->GetDisplayId();
+    if (displayId == Rosen::DISPLAY_ID_INVALID) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get displayId failed, using default displayId");
+        displayId = 0;
+    }
+    buttonInfo.displayId_ = displayId;
     return true;
 }
 
@@ -853,7 +859,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     auto& children = root->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
         auto node = AceType::DynamicCast<NG::FrameNode>(*child);
-        if (node && IsContextTransparent(node)) {
+        if (node && (IsContextTransparent(node) || !node->IsActive())) {
             continue;
         }
         res |= CheckSecurityComponentStatus(*child, nodeId2Rect, secNodeId, nodeId2Zindex);

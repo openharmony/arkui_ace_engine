@@ -70,6 +70,10 @@ ohos_shared_library("ace_form_render") {
     "window_manager:libwm",
   ]
 
+  if (ohos_indep_compiler_enable) {
+    external_deps += [ "graphic_2d:librender_service_base" ]
+  }
+
   subsystem_name = ace_engine_subsystem
   innerapi_tags = [ "platformsdk_indirect" ]
   part_name = ace_engine_part

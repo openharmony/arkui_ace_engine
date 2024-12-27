@@ -22,17 +22,18 @@ ohos_unittest("plugin_manager_test") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/plugin_manager.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/unittest/core/pattern/plugin/mock/mock_plugin_sub_container.cpp",
     "plugin_manager_test.cpp",
   ]
   deps = [
     "$ace_root/frameworks/base:ace_memory_monitor_ohos",
     "$ace_root/test/unittest:ace_unittest_log",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "cJSON:cjson",
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
   configs = [ "$ace_root/test/unittest:ace_unittest_config" ]

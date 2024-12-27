@@ -452,7 +452,16 @@ public:
     {
         return enableDragBar_;
     }
-    
+
+    void SetNavigationSize(const SizeF& size)
+    {
+        navigationSize_ = size;
+    }
+    const SizeF& GetNavigationSize() const
+    {
+        return navigationSize_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -544,6 +553,11 @@ private:
 
     void CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     RefPtr<FrameNode> CreateDragBarItemNode();
+    void SetMouseStyle(MouseFormat format);
+
+    void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
+    void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
+    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -598,6 +612,8 @@ private:
     bool isCurTopNewInstance_ = false;
     RefPtr<TouchEventImpl> touchEvent_;
     bool enableDragBar_ = false;
+    SizeF navigationSize_;
+    std::optional<NavBarPosition> preNavBarPosition_;
 };
 
 } // namespace OHOS::Ace::NG

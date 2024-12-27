@@ -64,6 +64,13 @@ void MockCustomDialogController::JSBind(BindingTarget globalObj)
     JSClass<JSMockBaseNode>::Bind(globalObj);
 }
 
+void JSMockNativeCustomSpan::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSMockNativeCustomSpan>::Declare("NativeCustomSpan");
+    JSClass<JSMockNativeCustomSpan>::CustomMethod("invalidate", &JSMockNativeCustomSpan::Invalidate);
+    JSClass<JSMockNativeCustomSpan>::Bind(globalObj);
+}
+
 void JSMock::JSBind(BindingTarget globalObj)
 {
     JSMockBaseNode::JSBind(globalObj);
@@ -71,6 +78,7 @@ void JSMock::JSBind(BindingTarget globalObj)
     JSMockViewPU::JSBind(globalObj, "PUV2ViewBase");
     JSMockScopeUtil::JSBind(globalObj);
     MockCustomDialogController::JSBind(globalObj);
+    JSMockNativeCustomSpan::JSBind(globalObj);
 }
 
 bool JSMock::InitModule(

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cstdint>
+#include "base/utils/utils.h"
 #ifndef PREVIEW
 
 #include "core/components_ng/pattern/select_overlay/service_collaboration_menu_ace_helper.h"
@@ -47,8 +49,6 @@
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/sub_menu_layout_algorithm.h"
-#include "core/components_ng/pattern/option/option_paint_property.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -59,6 +59,11 @@
 #include "image_source.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr int32_t TOAST_DURATION = 2000;
+const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
+} // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
     const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIncon)
@@ -109,6 +114,10 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     textProperty->UpdateFontSize(textTheme->GetMenuFontSize());
     textProperty->UpdateFontWeight(FontWeight::REGULAR);
     textProperty->UpdateTextColor(richTheme->GetMenuTitleColor());
+    textProperty->UpdateMaxLines(HEADER_TEXT_MAX_LINE);
+    textProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
+    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    textProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
     textProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(HEADER_MIN_WIDTH)), CalcLength(static_cast<float>(HEADER_MIN_HEIGHT))));
     auto textRenderContext = textNode->GetRenderContext();
@@ -141,10 +150,7 @@ void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const Ref
     iconProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(iconId));
     iconProperty->UpdateSymbolColorList({ richTheme->GetMenuIconColor() });
     iconProperty->UpdateFontSize(iconTheme->GetIconSideLength());
-    iconProperty->UpdateAlignment(Alignment::CENTER_LEFT);
-    MarginProperty margin;
-    margin.right = CalcLength(static_cast<float>(ENDICON_MARGIN_RIGHT));
-    iconProperty->UpdateMargin(margin);
+    iconProperty->UpdateAlignment(Alignment::CENTER);
     iconNode->MountToParent(parent);
     iconNode->MarkModifyDone();
 }
@@ -200,7 +206,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_RETURN(menuItemProperty, nullptr);
-    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f), .top = CalcLength(0.0f) });
+    menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f) });
     auto renderContext = menuItemNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBorderRadius(BorderRadiusProperty(menuTheme->GetMenuDefaultInnerRadius()));
@@ -209,34 +215,31 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(row, nullptr);
     auto rowProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
-    BorderWidthProperty borderWidth;
-    borderWidth.topDimen = Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX);
-    BorderWidthProperty width;
-    width.UpdateWithCheck(borderWidth);
-    rowProperty->UpdateBorderWidth(width);
-    auto rowContext = row->GetRenderContext();
-    CHECK_NULL_RETURN(rowContext, nullptr);
-    rowContext->UpdateBorderWidth(width);
-    BorderColorProperty borderColorProperty;
-    borderColorProperty.SetColor(Color::GRAY);
-    rowContext->UpdateBorderColor(borderColorProperty);
+    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    CHECK_NULL_RETURN(rightRow, nullptr);
+    auto rightRowProperty = rightRow->GetLayoutProperty<LinearLayoutProperty>();
+    CHECK_NULL_RETURN(rightRowProperty, nullptr);
+    rightRowProperty->UpdatePadding({ .right = CalcLength(22.0f) });
+    auto paintProperty = menuItemNode->GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateStrokeWidth(Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX));
+    paintProperty->UpdateStartMargin(Dimension(12.0f, DimensionUnit::VP));
+    paintProperty->UpdateEndMargin(Dimension(12.0f, DimensionUnit::VP));
+    paintProperty->UpdateDividerColor(Color::GRAY);
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH), DimensionUnit::VP),
         CalcLength(static_cast<float>(MENUITEM_HEIGHT), DimensionUnit::VP)));
-    PaddingProperty rowpadding { .right = CalcLength(static_cast<float>(PANDDING_ZERO)) };
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        rowpadding.top = CalcLength(menuTheme->GetMenuItemVerticalPadding().ConvertToPx());
-    }
-    rowProperty->UpdatePadding(rowpadding);
-    MarginProperty margin;
-    margin.bottom = CalcLength(static_cast<float>(ROW_PADDING));
-    rowProperty->UpdateMargin(margin);
     CreateText(value, row, color, true, needEndIcon);
-    if (needEndIcon) {
-        CreateEndIcon(iconId, row);
-    }
     row->MountToParent(menuItemNode);
     row->MarkModifyDone();
+    if (needEndIcon) {
+        CreateEndIcon(iconId, rightRow);
+        rightRow->MountToParent(menuItemNode);
+        rightRow->MarkModifyDone();
+    }
+    menuItemNode->MarkModifyDone();
+    menuItemNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return menuItemNode;
 }
 uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abilityType)
@@ -258,25 +261,6 @@ uint32_t ServiceCollaborationMenuAceHelper::GetSymbolId(const std::string& abili
         return richTheme->GetChevronRightSymbolId();
     }
     return 0;
-}
-std::string ServiceCollaborationMenuAceHelper::GetIconPath(const std::string& abilityType)
-{
-    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(iconPipeline, "");
-    auto iconTheme = iconPipeline->GetTheme<IconTheme>();
-    CHECK_NULL_RETURN(iconTheme, "");
-    auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG) : "";
-    TAG_LOGI(AceLogTag::ACE_MENU, "iconPath is %{public}s", iconPath.c_str());
-    if (abilityType == "CAMERA") {
-        return "resource:///ohos_ic_public_camera.svg";
-    }
-    if (abilityType == "SCAN") {
-        return "resource:///ohos_ic_public_scan.svg";
-    }
-    if (abilityType == "IMAGE_PICKER") {
-        return "resource:///ohos_ic_public_albums.svg";
-    }
-    return "";
 }
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateDeviceMenuItem(
     const std::string& value, uint32_t iconId)
@@ -432,12 +416,20 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceMenuOnCol(
         taskExecutor->PostDelayedTask(
             cancelableCallback, TaskExecutor::TaskType::UI, 100, "ArkUIRichEditorRemoveMenuNode");
     };
-    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent);
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
     return subMenu;
 }
 
 void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+    std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
+{
+    AddHoverEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
+    AddClickEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
+}
+
+void ServiceCollaborationMenuAceHelper::AddHoverEventToMainMenu(
     const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
     std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
 {
@@ -488,8 +480,44 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
         taskExecutor->PostDelayedTask(
             cancelableCallback, TaskExecutor::TaskType::UI, 100, "ArkUIRichEditorRemoveMenuNode");
     };
-    auto mouseEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-    inputHub->AddOnHoverEvent(mouseEvent);
+    auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+    std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
+{
+    TAG_LOGI(AceLogTag::ACE_MENU, "Service Collaborationfwk mainMenu clickTask enter");
+    auto gestureHub = menuNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto clickTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper)),
+                      weakMenuNode = WeakClaim(RawPtr(menuNode)), subDeviceMenuCreator](GestureEvent& event) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "menuitem clickTask enter");
+        auto menuItemNode = weakMenuNode.Upgrade();
+        auto menuWrapper = weakMenuWrapper.Upgrade();
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(menuItemNode && menuWrapper && helper);
+        helper->subMenuIsShow_ = false;
+        if (!helper->subMenuIsShow_) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "clickTask create SubMenu enter.1");
+            auto subMenu = subDeviceMenuCreator();
+            CHECK_NULL_VOID(subMenu);
+            TAG_LOGI(AceLogTag::ACE_MENU, "clickTask create SubMenu enter.2");
+            auto submenuPattern = subMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(submenuPattern);
+            submenuPattern->SetParentMenuItem(menuItemNode);
+            subMenu->MountToParent(menuWrapper);
+            auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+            auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
+            OffsetF position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+            menuProps->UpdateMenuOffset(position);
+            subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            helper->subMenuIsShow_ = true;
+        }
+    };
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickTask));
+    gestureHub->AddClickEvent(clickEvent);
 }
 
 // Callback
@@ -568,9 +596,9 @@ void ServiceCollaborationAceCallback::AddMouseEventToEndIcon(const RefPtr<FrameN
             iconContext->UpdateBackgroundColor(helper->endIconIsHover_ ? theme->GetHoverColor() : Color::TRANSPARENT);
         }
     };
-    auto mouseEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    auto hoverEvent = MakeRefPtr<InputEvent>(std::move(mouseTask));
     auto touchEvent = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    inputHub->AddOnHoverEvent(mouseEvent);
+    inputHub->AddOnHoverEvent(hoverEvent);
     gestureHub->AddTouchEvent(touchEvent);
 }
 
@@ -678,7 +706,7 @@ RefPtr<FrameNode> ServiceCollaborationAceCallback::CreateCustomPopUpNode(
         CHECK_NULL_RETURN(rowProperty, nullptr);
         CreateStartIcon(GetSymbolId(ability_), row);
         CreateText(value, row);
-        CreateEndIcon("resource:///ohos_ic_public_cancel.svg", row);
+        CreateEndIcon(END_ICON_PATH, row);
         row_ = row;
         row_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         return row_;
@@ -727,12 +755,23 @@ RefPtr<PopupParam> ServiceCollaborationAceCallback::GetPopupParam(bool isShow, S
     popupParam->SetUseCustomComponent(true);
     popupParam->SetBackgroundColor(Color::WHITE);
     popupParam->SetTargetSpace(Dimension(static_cast<float>(TARGET_SPACE), DimensionUnit::VP));
-    popupParam->SetOnStateChange(std::move(onStateChange));
+    popupParam->SetOnStateChange(
+        [weakHelper = WeakClaim(this), onStateChange](const std::string& isShow) {
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(helper);
+        bool show = JsonUtil::ParseJsonString(isShow)->GetBool("isVisible");
+        if (!show && !helper->isMultiImage_) {
+            onStateChange(isShow);
+        }
+    });
     Shadow shadow;
     auto colorMode = SystemProperties::GetColorMode();
     auto container = Container::Current();
+    CHECK_NULL_RETURN(container, popupParam);
     auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, popupParam);
     auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, popupParam);
     shadow =  shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode);
     popupParam->SetShadow(shadow);
     return popupParam;
@@ -769,9 +808,10 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         return 0;
     }
     if (code == MULTI_PHOTO_SENDING_BACK) {
-        auto popupParam = GetPopupParam(true, onStateChange_);
-        auto row = CreateCustomPopUpNode(category, "");
-        ViewAbstract::BindPopup(popupParam, info_->pattern.Upgrade()->GetHost(), row);
+        if (!isMultiImage_) {
+            isMultiImage_ = true;
+            RemovePopupNode();
+        }
         return 0;
     }
     if (code == REMOTE_CANCEL) {
@@ -779,12 +819,13 @@ int32_t ServiceCollaborationAceCallback::OnEvent(uint32_t code, uint32_t eventId
         info_ = nullptr;
         return 0;
     }
+    isMultiImage_ = false;
     RemovePopupNode();
     auto toastPipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(toastPipeline, -1);
     auto overlay = toastPipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlay, -1);
-    overlay->ShowToast({ .message = category, .duration = 2000, .alignment = -1 }, nullptr);
+    overlay->ShowToast({ .message = category, .duration = TOAST_DURATION, .alignment = -1 }, nullptr);
     info_ = nullptr;
     return 0;
 }
@@ -853,6 +894,7 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
             callback->RemovePopupNode();
             callback->isTransmit_ = false;
             callback->info_ = nullptr;
+            callback->isMultiImage_ = false;
         }
     });
     auto taskExecutor = context->GetTaskExecutor();

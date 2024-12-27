@@ -25,6 +25,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -34,6 +35,12 @@ constexpr int NUM_5 = 5;
 constexpr int NUM_6 = 6;
 constexpr int NUM_9 = 9;
 constexpr int NUM_13 = 13;
+constexpr int NUM_17 = 17;
+constexpr int NUM_21 = 21;
+constexpr int NUM_25 = 25;
+constexpr int NUM_26 = 26;
+constexpr int NUM_27 = 27;
+constexpr int NUM_28 = 28;
 constexpr int SIZE_OF_FOUR = 4;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
@@ -55,6 +62,143 @@ const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NO
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+
+bool ParseLocalizedPadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        return true;
+    }
+    return false;
+}
+
+bool ParseLocalizedMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        return true;
+    }
+    return false;
+}
+
+void SetBorderWidthArrayByDimen(CalcDimension& borderDimension, ArkUI_Float32 values[], int units[], int index)
+{
+    values[index] = borderDimension.Value();
+    units[index] = static_cast<int>(borderDimension.Unit());
+}
+
+void ParseMirrorDimen(ArkUI_Float32 values[], int units[], int idx, CalcDimension& calcDimen)
+{
+    values[idx] = calcDimen.Value();
+    units[idx] = static_cast<int>(calcDimen.Unit());
+}
+
+bool ParseLocalizedBorderWidth(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        return true;
+    }
+    return false;
+}
+
+bool ParseLocalizedBorderRadius(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, result)) {
+        if (result.IsNegative()) {
+            result.Reset();
+        }
+        return true;
+    }
+    return false;
+}
+
+void PushOuterBorderDimensionVector(const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options)
+{
+    options.push_back(static_cast<ArkUI_Float32>(valueDim.has_value()));
+    if (valueDim.has_value()) {
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Value()));
+        options.push_back(static_cast<ArkUI_Float32>(valueDim.value().Unit()));
+    } else {
+        options.push_back(0);
+        options.push_back(0);
+    }
+}
+
+void ParseOuterBorderDashParam(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<ArkUI_Float32> &values,
+    int32_t argsIndex)
+{
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
+    std::optional<CalcDimension> leftDim;
+    std::optional<CalcDimension> rightDim;
+    std::optional<CalcDimension> topDim;
+    std::optional<CalcDimension> bottomDim;
+
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, leftArgs, leftDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, rightArgs, rightDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, topArgs, topDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, bottomArgs, bottomDim);
+
+    PushOuterBorderDimensionVector(leftDim, values);
+    PushOuterBorderDimensionVector(rightDim, values);
+    PushOuterBorderDimensionVector(topDim, values);
+    PushOuterBorderDimensionVector(bottomDim, values);
+}
+
+void SetBorderDash(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM *vm, ArkUINodeHandle nativeNode)
+{
+    std::vector<ArkUI_Float32> dashOptions;
+    // Border DashGap args start index from 17
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, NUM_17);
+    // Border DashGap args start index from 25
+    Local<JSValueRef> startDashGap = runtimeCallInfo->GetCallArgRef(NUM_25);
+    // Border DashGap args end index from 26
+    Local<JSValueRef> endDashGap = runtimeCallInfo->GetCallArgRef(NUM_26);
+    std::optional<CalcDimension> startDashGapDim;
+    std::optional<CalcDimension> endDashGapDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashGap, startDashGapDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashGap, endDashGapDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashGapDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashGapDim, dashOptions);
+
+    // Border DashWidth args start index from 21
+    ParseOuterBorderDashParam(runtimeCallInfo, vm, dashOptions, NUM_21);
+    // Border DashWidth args start index from 27
+    Local<JSValueRef> startDashWidth = runtimeCallInfo->GetCallArgRef(NUM_27);
+    // Border DashWidth args end index from 28
+    Local<JSValueRef> endDashWidth = runtimeCallInfo->GetCallArgRef(NUM_28);
+    std::optional<CalcDimension> startDashWidthDim;
+    std::optional<CalcDimension> endDashWidthDim;
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, startDashWidth, startDashWidthDim);
+    ArkTSUtils::ParseOuterBorderForDashParams(vm, endDashWidth, endDashWidthDim);
+    ArkTSUtils::PushOuterBorderDimensionVector(startDashWidthDim, dashOptions);
+    ArkTSUtils::PushOuterBorderDimensionVector(endDashWidthDim, dashOptions);
+
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderDash(nativeNode, dashOptions.data(),
+        dashOptions.size());
+}
+} // namespace
 
 ArkUINativeModuleValue TextAreaBridge::SetStyle(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
@@ -1038,17 +1182,17 @@ ArkUINativeModuleValue TextAreaBridge::SetOnChange(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, PreviewText&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, PreviewText& previewText) {
+    std::function<void(const std::u16string&, PreviewText&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& changeValue, PreviewText& previewText) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "offset", "value" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
-            panda::StringRef::NewFromUtf8(vm, previewText.value.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, previewText.value.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf8(vm, changeValue.c_str()), eventObject };
+            panda::StringRef::NewFromUtf16(vm, changeValue.c_str()), eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnChange(
@@ -1114,13 +1258,13 @@ ArkUINativeModuleValue TextAreaBridge::SetInputFilter(ArkUIRuntimeCallInfo* runt
             nativeNode, inputFilter.c_str(), nullptr);
     } else {
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
-        std::function<void(const std::string&)> callback = [vm, frameNode,
-            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        std::function<void(const std::u16string&)> callback = [vm, frameNode,
+            func = panda::CopyableGlobal(vm, func)](const std::u16string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-                panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+                panda::StringRef::NewFromUtf16(vm, info.c_str()) };
             func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         };
         GetArkUINodeModifiers()->getTextAreaModifier()->
@@ -1268,13 +1412,13 @@ ArkUINativeModuleValue TextAreaBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& copyStr) {
+    std::function<void(const std::u16string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& copyStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-            panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, copyStr.c_str()) };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnCopy(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1305,13 +1449,13 @@ ArkUINativeModuleValue TextAreaBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& cutStr) {
+    std::function<void(const std::u16string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& cutStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-            panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, cutStr.c_str()) };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnCut(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1342,8 +1486,8 @@ ArkUINativeModuleValue TextAreaBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& val, NG::TextCommonEvent& info) {
+    std::function<void(const std::u16string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& val, NG::TextCommonEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -1353,7 +1497,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtimeC
             panda::FunctionRef::New(vm, Framework::JsPreventDefault));
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf8(vm, val.c_str()), eventObject };
+            panda::StringRef::NewFromUtf16(vm, val.c_str()), eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaOnPaste(
@@ -1417,7 +1561,31 @@ ArkUINativeModuleValue TextAreaBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeC
     CalcDimension rightDimen(0, DimensionUnit::VP);
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension leftDimen(0, DimensionUnit::VP);
-    
+
+    bool isLengthMetrics = false;
+    if (secondArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, secondArg, topDimen, top);
+    }
+    if (thirdArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, thirdArg, rightDimen, right);
+    }
+    if (forthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, forthArg, bottomDimen, bottom);
+    }
+    if (fifthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedPadding(vm, fifthArg, leftDimen, left);
+    }
+
+    if (isLengthMetrics) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPadding(nativeNode,
+            &top,
+            isRightToLeft ? &left : &right,
+            &bottom,
+            isRightToLeft ? &right : &left);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     ArkTSUtils::ParsePadding(vm, secondArg, topDimen, top);
     ArkTSUtils::ParsePadding(vm, thirdArg, rightDimen, right);
     ArkTSUtils::ParsePadding(vm, forthArg, bottomDimen, bottom);
@@ -1456,7 +1624,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtime
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "text", "keepEditableState" };
-        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()),
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf16(vm, event.GetText().c_str()),
             panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
@@ -1555,6 +1723,10 @@ ArkUINativeModuleValue TextAreaBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCa
     
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetBorderDash(runtimeCallInfo, vm, nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1574,23 +1746,50 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderWidth(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> bottomArgs = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> leftArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     if (leftArgs->IsUndefined() && rightArgs->IsUndefined() && topArgs->IsUndefined() && bottomArgs->IsUndefined()) {
         GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaBorderWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
+    }
+
+    CalcDimension top;
+    CalcDimension right;
+    CalcDimension bottom;
+    CalcDimension left;
+    bool isLengthMetrics = false;
+
+    if (topArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, topArgs, top);
+    }
+    if (rightArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, rightArgs, right);
+    }
+    if (bottomArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, bottomArgs, bottom);
+    }
+    if (leftArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderWidth(vm, leftArgs, left);
     }
 
     uint32_t size = NUM_4;
     ArkUI_Float32 values[size];
     int units[size];
 
-    ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_0);
-    ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
-    ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_2);
-    ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_3);
+    if (isLengthMetrics) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        SetBorderWidthArrayByDimen(top, values, units, NUM_0);
+        SetBorderWidthArrayByDimen(isRightToLeft ? left : right, values, units, NUM_1);
+        SetBorderWidthArrayByDimen(bottom, values, units, NUM_2);
+        SetBorderWidthArrayByDimen(isRightToLeft ? right : left, values, units, NUM_3);
+    } else {
+        ArkTSUtils::SetBorderWidthArray(vm, topArgs, values, units, NUM_0);
+        ArkTSUtils::SetBorderWidthArray(vm, rightArgs, values, units, NUM_1);
+        ArkTSUtils::SetBorderWidthArray(vm, bottomArgs, values, units, NUM_2);
+        ArkTSUtils::SetBorderWidthArray(vm, leftArgs, values, units, NUM_3);
+    }
 
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderWidth(nativeNode, values, units, size);
     return panda::JSValueRef::Undefined(vm);
@@ -1611,31 +1810,37 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderColor(ArkUIRuntimeCallInfo *runt
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> isLocalizedArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto isLocalized = (isLocalizedArg->IsBoolean()) ? isLocalizedArg->ToBoolean(vm)->Value() : false;
 
     Color leftColor;
     Color rightColor;
     Color topColor;
     Color bottomColor;
 
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
-        leftColor.SetValue(COLOR_ALPHA_VALUE);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
+        topColor.SetValue(COLOR_ALPHA_VALUE);
     }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, rightArg, rightColor)) {
         rightColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, topArg, topColor)) {
-        topColor.SetValue(COLOR_ALPHA_VALUE);
-    }
     if (!ArkTSUtils::ParseJsColorAlpha(vm, bottomArg, bottomColor)) {
         bottomColor.SetValue(COLOR_ALPHA_VALUE);
     }
-    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(nativeNode, leftColor.GetValue(),
-        rightColor.GetValue(), topColor.GetValue(), bottomColor.GetValue());
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, leftArg, leftColor)) {
+        leftColor.SetValue(COLOR_ALPHA_VALUE);
+    }
+    auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderColor(nativeNode,
+        topColor.GetValue(),
+        (isRightToLeft && isLocalized) ? leftColor.GetValue() : rightColor.GetValue(),
+        bottomColor.GetValue(),
+        (isRightToLeft && isLocalized) ? rightColor.GetValue() : leftColor.GetValue());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1722,24 +1927,35 @@ ArkUINativeModuleValue TextAreaBridge::SetBorderRadius(ArkUIRuntimeCallInfo *run
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
 
-    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    bool isLengthMetrics = false;
+    if (topLeftArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topLeftArgs, topLeft);
+    }
+    if (topRightArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, topRightArgs, topRight);
+    }
+    if (bottomLeftArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomLeftArgs, bottomLeft);
+    }
+    if (bottomRightArgs->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedBorderRadius(vm, bottomRightArgs, bottomRight);
+    }
+    if (!isLengthMetrics) {
+        ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
+        ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
+        ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+        ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    }
 
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
 
-    values[NUM_0] = topLeft.Value();
-    units[NUM_0] = static_cast<int>(topLeft.Unit());
-    values[NUM_1] = topRight.Value();
-    units[NUM_1] = static_cast<int>(topRight.Unit());
-    values[NUM_2] = bottomLeft.Value();
-    units[NUM_2] = static_cast<int>(bottomLeft.Unit());
-    values[NUM_3] = bottomRight.Value();
-    units[NUM_3] = static_cast<int>(bottomRight.Unit());
-
+    bool isMirror = isLengthMetrics && AceApplicationInfo::GetInstance().IsRightToLeft();
+    ParseMirrorDimen(values, units, NUM_0, isMirror ? topRight : topLeft);
+    ParseMirrorDimen(values, units, NUM_1, isMirror ? topLeft : topRight);
+    ParseMirrorDimen(values, units, NUM_2, isMirror ? bottomRight : bottomLeft);
+    ParseMirrorDimen(values, units, NUM_3, isMirror ? bottomLeft : bottomRight);
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
 
     return panda::JSValueRef::Undefined(vm);
@@ -1791,10 +2007,40 @@ ArkUINativeModuleValue TextAreaBridge::SetMargin(ArkUIRuntimeCallInfo *runtimeCa
     Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+
     ArkUISizeType top = ArkTSUtils::ParseJsToArkUISize(vm, secondArg);
     ArkUISizeType right = ArkTSUtils::ParseJsToArkUISize(vm, thirdArg);
     ArkUISizeType bottom = ArkTSUtils::ParseJsToArkUISize(vm, forthArg);
     ArkUISizeType left = ArkTSUtils::ParseJsToArkUISize(vm, fifthArg);
+
+    CalcDimension topDimen(0, DimensionUnit::VP);
+    CalcDimension rightDimen(0, DimensionUnit::VP);
+    CalcDimension bottomDimen(0, DimensionUnit::VP);
+    CalcDimension leftDimen(0, DimensionUnit::VP);
+
+    bool isLengthMetrics = false;
+    if (secondArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedMargin(vm, secondArg, topDimen, top);
+    }
+    if (thirdArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedMargin(vm, thirdArg, rightDimen, right);
+    }
+    if (forthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedMargin(vm, forthArg, bottomDimen, bottom);
+    }
+    if (fifthArg->IsObject(vm)) {
+        isLengthMetrics |= ParseLocalizedMargin(vm, fifthArg, leftDimen, left);
+    }
+    if (isLengthMetrics) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMargin(nativeNode,
+            &top,
+            isRightToLeft ? &left : &right,
+            &bottom,
+            isRightToLeft ? &right : &left);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
     GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaMargin(nativeNode, &top, &right, &bottom, &left);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -1830,7 +2076,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnWillInsert(ArkUIRuntimeCallInfo* run
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "insertOffset", "insertValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.insertOffset),
-            panda::StringRef::NewFromUtf8(vm, insertValue.insertValue.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, insertValue.insertValue.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1875,7 +2121,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnDidInsert(ArkUIRuntimeCallInfo* runt
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "insertOffset", "insertValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.insertOffset),
-            panda::StringRef::NewFromUtf8(vm, insertValue.insertValue.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, insertValue.insertValue.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1917,7 +2163,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnWillDelete(ArkUIRuntimeCallInfo* run
         const char* keys[] = { "deleteOffset", "direction", "deleteValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.deleteOffset),
             panda::NumberRef::New(vm, static_cast<int32_t>(deleteValue.direction)),
-            panda::StringRef::NewFromUtf8(vm, deleteValue.deleteValue.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, deleteValue.deleteValue.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
         auto ret = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -1963,7 +2209,7 @@ ArkUINativeModuleValue TextAreaBridge::SetOnDidDelete(ArkUIRuntimeCallInfo* runt
         const char* keys[] = { "deleteOffset", "direction", "deleteValue" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, deleteValue.deleteOffset),
             panda::NumberRef::New(vm, static_cast<int32_t>(deleteValue.direction)),
-            panda::StringRef::NewFromUtf8(vm, deleteValue.deleteValue.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, deleteValue.deleteValue.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = { eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
@@ -2136,6 +2382,32 @@ ArkUINativeModuleValue TextAreaBridge::ResetEnableHapticFeedback(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> ellipsisModeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (ellipsisModeArg->IsNull() || ellipsisModeArg->IsUndefined() || !ellipsisModeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->resetEllipsisMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t ellipsisMode = ellipsisModeArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextAreaModifier()->setEllipsisMode(nativeNode, ellipsisMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::ResetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextAreaModifier()->resetEllipsisMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

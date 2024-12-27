@@ -340,8 +340,23 @@ class UIContext {
     }
 
     getOverlayManager() {
-        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        this.overlayManager_.setOverlayManagerOptions();
         return this.overlayManager_;
+    }
+    setOverlayManagerOptions(options) {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.setOverlayManagerOptions(options);
+    }
+    getOverlayManagerOptions() {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.getOverlayManagerOptions();
     }
 
     animateTo(value, event) {
@@ -718,6 +733,12 @@ class UIContext {
         Context.unbindTabsFromNestedScrollable(tabsController, parentScroller, childScroller);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    enableSwipeBack(enabled) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.enableSwipeBack(enabled);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {
@@ -851,6 +872,9 @@ class FocusController {
     }
 
     setAutoFocusTransfer(value) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_focusController.setAutoFocusTransfer(value);
         __JSScopeUtil__.restoreInstanceId();
@@ -1229,6 +1253,20 @@ class OverlayManager {
     constructor(instanceId) {
         this.instanceId_ = instanceId;
         this.ohos_overlayManager = globalThis.requireNapi('overlay');
+    }
+
+    setOverlayManagerOptions(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.setOverlayManagerOptions(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
+    }
+
+    getOverlayManagerOptions() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.getOverlayManagerOptions();
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
     }
 
     addComponentContent(content, index) {

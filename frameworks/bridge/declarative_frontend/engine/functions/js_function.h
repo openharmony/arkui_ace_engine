@@ -159,6 +159,17 @@ public:
         JsFunction::ExecuteJS(ARGC, params);
     }
 
+    void Execute(const std::u16string& val, T& eventInfo)
+    {
+        JSRef<JSVal> jsVal = JSRef<JSVal>::Make(ToJSValue(val));
+        JSRef<JSVal> itemInfo;
+        if (parser_) {
+            itemInfo = parser_(eventInfo);
+        }
+        JSRef<JSVal> params[] = { jsVal, itemInfo };
+        JsFunction::ExecuteJS(ARGC, params);
+    }
+
 private:
     ParseFunc parser_;
 };

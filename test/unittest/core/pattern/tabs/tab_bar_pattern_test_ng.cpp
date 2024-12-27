@@ -14,10 +14,11 @@
  */
 
 #include "tabs_test_ng.h"
-
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
+#include "test/mock/core/render/mock_render_context.h"
+
+#include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 
@@ -373,7 +374,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight003, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -446,7 +447,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight005, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -517,7 +518,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight007, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -588,7 +589,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight009, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -657,7 +658,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight011, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -693,7 +694,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight012, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -728,7 +729,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight013, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -763,7 +764,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight014, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -921,7 +922,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight015, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -957,7 +958,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight016, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -992,7 +993,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight017, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1027,7 +1028,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight018, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1061,7 +1062,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight019, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1096,7 +1097,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight020, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1130,7 +1131,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight021, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1164,7 +1165,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTextColorAndFontWeight022, Test
     CreateTabContents(1);
     CreateTabsDone(model);
     tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, true));
+    auto pr = tabBarPattern_->tabBarType_.emplace(std::make_pair(1, TabBarParamType::CUSTOM_BUILDER));
     ASSERT_TRUE(pr.second);
     /**
      * @tc.steps: step2. Test function UpdateTextColorAndFontWeight and UpdateImageColor.
@@ -1361,6 +1362,8 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest001, TestSize.Leve
      * @tc.expected: Related function runs ok.
      */
     auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     renderContext->UpdateTransformTranslate(TranslateOptions(0.0f, 10.0f, 0.0f));
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartShowTabBar();
@@ -1392,12 +1395,14 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartShowTabBarTest002, TestSize.Leve
      * @tc.steps: step2. start hide tab bar, test function StartShowTabBar.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_GT(options.y.ConvertToPx(), 0.0f);
     tabBarPattern_->StartShowTabBar();
@@ -1429,12 +1434,14 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest001, TestSize.Leve
      * @tc.steps: step2. default translate is 0, test function StartHideTabBar.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_LT(options.y.ConvertToPx(), 0.0f);
     tabBarPattern_->StartHideTabBar();
@@ -1470,12 +1477,14 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStartHideTabBarTest002, TestSize.Leve
      * @tc.steps: step2. default translate is 0, test function StartHideTabBar.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_GT(options.y.ConvertToPx(), 0.0f);
     tabBarPattern_->StartHideTabBar();
@@ -1508,12 +1517,14 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternStopHideTabBarTest001, TestSize.Level
      * @tc.steps: step3. Start hide tab bar, test function StopHideTabBar.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     MockAnimationManager::Enable(true);
     MockAnimationManager::GetInstance().SetTicks(2);
     tabBarPattern_->StartHideTabBar();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     EXPECT_GT(options.y.ConvertToPx(), 0.0f);
     tabBarPattern_->StopHideTabBar();
@@ -1539,13 +1550,15 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest001, TestSize.L
      * @tc.steps: step2.Set offset to 10.0f, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     auto offset1 = 10.0f;
     tabBarPattern_->UpdateTabBarHiddenOffset(offset1);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto opacity = renderContext->GetOpacityValue(1.0f);
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
-    EXPECT_EQ(options.y.ConvertToPx(), - offset1);
+    EXPECT_EQ(options.y.ConvertToPx(), -offset1);
     EXPECT_EQ(opacity, 1.0f - offset1 / size);
 
     /**
@@ -1559,13 +1572,13 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest001, TestSize.L
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_LT(options.y.ConvertToPx(), - (offset1 + offset2));
+    EXPECT_LT(options.y.ConvertToPx(), -(offset1 + offset2));
     tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->isTabBarHiding_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     opacity = renderContext->GetOpacityValue(1.0f);
-    EXPECT_EQ(options.y.ConvertToPx(), - size);
+    EXPECT_EQ(options.y.ConvertToPx(), -size);
     EXPECT_EQ(opacity, 0.0f);
 
     /**
@@ -1575,7 +1588,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest001, TestSize.L
     tabBarPattern_->UpdateTabBarHiddenOffset(-offset1);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     opacity = renderContext->GetOpacityValue(1.0f);
-    EXPECT_EQ(options.y.ConvertToPx(), - size + offset1);
+    EXPECT_EQ(options.y.ConvertToPx(), -size + offset1);
     EXPECT_EQ(opacity, offset1 / size);
 
     /**
@@ -1589,7 +1602,7 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest001, TestSize.L
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(tabBarPattern_->isTabBarShowing_);
     options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
-    EXPECT_GT(options.y.ConvertToPx(), - size + (offset1 + offset2));
+    EXPECT_GT(options.y.ConvertToPx(), -size + (offset1 + offset2));
     tabBarPattern_->UpdateTabBarHiddenOffset(offset2);
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(tabBarPattern_->isTabBarShowing_);
@@ -1614,9 +1627,11 @@ HWTEST_F(TabBarPatternTestNg, TabBarPatternUpdateTabBarOffsetTest002, TestSize.L
      * @tc.steps: step2.Set offset to 10.0f, test function UpdateTabBarOffset.
      * @tc.expected: Related function runs ok.
      */
+    auto renderContext = tabBarNode_->GetRenderContext();
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(renderContext);
+    mockRenderContext->paintRect_ = RectF(0.f, 0.f, TABS_WIDTH, TABS_HEIGHT);
     auto offset1 = 10.0f;
     tabBarPattern_->UpdateTabBarHiddenOffset(offset1);
-    auto renderContext = tabBarNode_->GetRenderContext();
     auto options = renderContext->GetTransformTranslateValue(TranslateOptions(0.0f, 0.0f, 0.0f));
     auto size = renderContext->GetPaintRectWithoutTransform().Height();
     EXPECT_EQ(options.y.ConvertToPx(), offset1);

@@ -39,6 +39,7 @@ public:
     void SetTitleHeight(const Dimension& height, bool isValid = true) override;
     void SetTitleMode(NG::NavigationTitleMode mode) override;
     void SetSubtitle(const std::string& subtitle) override;
+    void SetEnableModeChangeAnimation(bool isEnable) override;
     void SetHideTitleBar(bool hideTitleBar, bool animated = false) override;
     void SetHideNavBar(bool hideNavBar) override;
     void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const std::string& src,
@@ -75,6 +76,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNavigationStack(FrameNode* frameNode);
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar, bool animated);
+    static void SetEnableModeChangeAnimation(FrameNode* frameNode, bool isEnable);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMaxNavBarWidth(FrameNode* frameNode, const Dimension& value);
@@ -108,6 +110,8 @@ private:
     bool CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     bool CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
+    static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
+    static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

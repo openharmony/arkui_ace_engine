@@ -67,6 +67,7 @@ public:
     void ExecuteUpdateWithValueParams(const std::string& jsonData);
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
+    void ExecuteAboutToReuse(void* params);
     void ExecuteSetActive(bool active);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
@@ -120,6 +121,7 @@ private:
     JSWeak<JSFunc> jsSetInitiallyProvidedValueFunc_;
     JSWeak<JSFunc> jsRecycleFunc_;
     JSWeak<JSFunc> jsAboutToRecycleFunc_;
+    JSWeak<JSFunc> jsAboutToReuseFunc_;
     JSWeak<JSFunc> jsSetActive_;
     JSWeak<JSFunc> jsOnDumpInfo_;
     JSWeak<JSFunc> jsOnDumpInspector_;

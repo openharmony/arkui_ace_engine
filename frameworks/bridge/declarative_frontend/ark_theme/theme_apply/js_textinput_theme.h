@@ -49,18 +49,6 @@ public:
         }
         TextFieldModel::GetInstance()->SetSelectedBackgroundColor(selectedColor);
 
-        // focused
-        ViewStackModel::GetInstance()->SetVisualState(VisualState::FOCUSED);
-        TextFieldModel::GetInstance()->SetBackgroundColor(themeColors->CompBackgroundTertiary(), false);
-        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
-        CalcDimension outerBorderWidth(JSTextInputTheme::outerBorderWidthPx, OHOS::Ace::DimensionUnit::PX);
-        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(outerBorderWidth);
-
-        // pressed
-        ViewStackModel::GetInstance()->SetVisualState(VisualState::PRESSED);
-        TextFieldModel::GetInstance()->SetCaretColor(themeColors->Brand());
-        ViewAbstractModel::GetInstance()->SetOuterBorderWidth({});
-
         // clear state
         ViewStackModel::GetInstance()->ClearVisualState();
     }

@@ -30,10 +30,6 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/option/option_accessibility_property.h" //include option accessibility attributes
-#include "core/components_ng/pattern/option/option_layout_algorithm.h"
-#include "core/components_ng/pattern/option/option_pattern.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_common.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
@@ -43,7 +39,6 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
-#include "core/components_ng/pattern/option/option_view.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -68,10 +63,10 @@ public:
     bool InitOptionTestNg();
     RefPtr<FrameNode> frameNode_;
     RefPtr<MenuItemPattern> optionPattern_;
-    RefPtr<OptionAccessibilityProperty> optionAccessibilityProperty_;
+    RefPtr<MenuItemAccessibilityProperty> optionAccessibilityProperty_;
 
 protected:
-    PaintWrapper* GetPaintWrapper(RefPtr<OptionPaintProperty> paintProperty);
+    PaintWrapper* GetPaintWrapper(RefPtr<MenuItemPaintProperty> paintProperty);
 };
 
 void MenuItemPatternOptionTestNg::SetUp()
@@ -98,10 +93,10 @@ void MenuItemPatternOptionTestNg::TearDownTestCase()
     MockPipelineContext::TearDown();
 }
 
-PaintWrapper* MenuItemPatternOptionTestNg::GetPaintWrapper(RefPtr<OptionPaintProperty> paintProperty)
+PaintWrapper* MenuItemPatternOptionTestNg::GetPaintWrapper(RefPtr<MenuItemPaintProperty> paintProperty)
 {
     WeakPtr<RenderContext> renderContext;
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
     return paintWrapper;
 }
@@ -121,7 +116,7 @@ bool MenuItemPatternOptionTestNg::InitOptionTestNg()
 
     optionPattern_->SetTextNode(textNode);
 
-    optionAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<OptionAccessibilityProperty>();
+    optionAccessibilityProperty_ = frameNode_->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     CHECK_NULL_RETURN(optionAccessibilityProperty_, false);
     return true;
 }
@@ -162,7 +157,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionAccessibilityPropertyGetSupportActio
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionLayoutTest001, TestSize.Level1)
 {
-    OHOS::Ace::NG::OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
+    OHOS::Ace::NG::MenuItemLayoutAlgorithm rosenOptionLayoutAlgorithm(true);
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
@@ -190,7 +185,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, PerformActionTest001, TestSize.Level1)
     ASSERT_TRUE(optionPattern->IsOptionPattern());
     optionPattern->SetAccessibilityAction();
 
-    auto optionAccessibilityProperty = frameNode->GetAccessibilityProperty<OptionAccessibilityProperty>();
+    auto optionAccessibilityProperty = frameNode->GetAccessibilityProperty<MenuItemAccessibilityProperty>();
     ASSERT_NE(optionAccessibilityProperty, nullptr);
 
     EXPECT_TRUE(optionAccessibilityProperty->ActActionSelect());
@@ -243,7 +238,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, PerformActionTest002, TestSize.Level1)
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionLayoutTest002, TestSize.Level1)
 {
-    OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
+    MenuItemLayoutAlgorithm rosenOptionLayoutAlgorithm(true);
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
@@ -273,7 +268,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionLayoutTest002, TestSize.Level1)
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg001, TestSize.Level1)
 {
-    OptionPaintProperty property;
+    MenuItemPaintProperty property(true);
     EXPECT_FALSE(property.GetHover().has_value());
     EXPECT_FALSE(property.GetPress().has_value());
     EXPECT_FALSE(property.GetNeedDivider().has_value());
@@ -296,7 +291,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg001, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg002, TestSize.Level1)
 {
-    OptionPaintProperty property;
+    MenuItemPaintProperty property(true);
     property.UpdateHover(true);
     property.UpdatePress(true);
     property.UpdateNeedDivider(true);
@@ -320,13 +315,13 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg002, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg003, TestSize.Level1)
 {
-    OptionPaintProperty property;
+    MenuItemPaintProperty property(true);
     property.UpdateHover(true);
     property.UpdatePress(true);
     property.UpdateNeedDivider(true);
     property.UpdateHasIcon(true);
 
-    auto cloneProperty = AceType::DynamicCast<OptionPaintProperty>(property.Clone());
+    auto cloneProperty = AceType::DynamicCast<MenuItemPaintProperty>(property.Clone());
     ASSERT_NE(cloneProperty, nullptr);
     EXPECT_TRUE(property.GetHover());
     EXPECT_TRUE(property.GetPress());
@@ -341,7 +336,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg003, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg004, TestSize.Level1)
 {
-    OptionPaintProperty property;
+    MenuItemPaintProperty property(true);
     property.UpdateHover(true);
     property.UpdateNeedDivider(true);
     property.UpdateHasIcon(true);
@@ -360,7 +355,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg004, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg005, TestSize.Level1)
 {
-    OptionPaintProperty property;
+    MenuItemPaintProperty property(true);
     auto json = JsonUtil::Create(true);
     property.ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("hover"), "false");
@@ -375,8 +370,8 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintPropertyTestNg005, TestSize.Lev
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg001, TestSize.Level1)
 {
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
-    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    RefPtr<MenuItemPaintProperty> paintProp = AceType::MakeRefPtr<MenuItemPaintProperty>(true);
+    RefPtr<MenuItemPaintMethod> paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>(true);
     PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
 
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
@@ -396,9 +391,9 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg002, TestSize.Level
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    auto paintProp = optionNode->GetPaintProperty<MenuItemPaintProperty>();
     ASSERT_NE(paintProp, nullptr);
-    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    auto paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>(true);
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
     paintProp->UpdateNeedDivider(true);
@@ -408,9 +403,10 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg002, TestSize.Level
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
 
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    RSPath path;
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
@@ -418,7 +414,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg002, TestSize.Level
 
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
@@ -448,7 +444,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg003, TestSize.Level
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionLayoutTest003, TestSize.Level1)
 {
-    OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
+    MenuItemLayoutAlgorithm rosenOptionLayoutAlgorithm(true);
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
 
@@ -501,7 +497,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
 
-    OptionView::CreatePasteButton(false, option, row, []() {});
+    MenuView::CreatePasteButton(false, option, row, []() {});
     auto PasteButtonNode = option->GetChildAtIndex(0)->GetChildren();
     EXPECT_FALSE(PasteButtonNode.empty());
 }
@@ -513,14 +509,14 @@ HWTEST_F(MenuItemPatternOptionTestNg, CreatePasteButton001, TestSize.Level1)
  */
 HWTEST_F(MenuItemPatternOptionTestNg, OptionLayoutTest005, TestSize.Level1)
 {
-    OptionLayoutAlgorithm rosenOptionLayoutAlgorithm;
+    MenuItemLayoutAlgorithm rosenOptionLayoutAlgorithm;
     rosenOptionLayoutAlgorithm.horInterval_ = 2.0;
     EXPECT_FLOAT_EQ(rosenOptionLayoutAlgorithm.horInterval_, 2.0);
     auto rosenMakeRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::LayoutProperty>();
     auto rosenRefPtr = AceType::MakeRefPtr<OHOS::Ace::NG::GeometryNode>();
     rosenRefPtr->margin_ = nullptr;
     SelectParam param = { "optiontest", " " };
-    RefPtr<FrameNode> optionNode = OptionView::CreateSelectOption(param, 2);
+    RefPtr<FrameNode> optionNode = MenuView::CreateSelectOption(param, 2);
     LayoutWrapperNode* rosenLayoutWrapper = new LayoutWrapperNode(optionNode, rosenRefPtr, rosenMakeRefPtr);
     auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(optionNode, rosenRefPtr, rosenMakeRefPtr);
     rosenLayoutWrapper->AppendChild(childWrapper);
@@ -599,9 +595,9 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg004, TestSize.Level
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    auto paintProp = optionNode->GetPaintProperty<MenuItemPaintProperty>();
     ASSERT_NE(paintProp, nullptr);
-    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    auto paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>(true);
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
     paintProp->UpdateNeedDivider(true);
@@ -611,9 +607,10 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg004, TestSize.Level
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
 
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    RSPath path;
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
@@ -631,9 +628,9 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg005, TestSize.Level
     ASSERT_NE(optionNode, nullptr);
     auto renderContext = optionNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
-    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    auto paintProp = optionNode->GetPaintProperty<MenuItemPaintProperty>();
     ASSERT_NE(paintProp, nullptr);
-    RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
+    auto paintMethod = AceType::MakeRefPtr<MenuItemPaintMethod>(true);
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
     paintProp->UpdateNeedDivider(true);
@@ -650,9 +647,10 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg005, TestSize.Level
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
 
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    RSPath path;
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
@@ -660,7 +658,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg005, TestSize.Level
 
     paintProp->UpdateHover(true);
     paintWrapper = GetPaintWrapper(paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;
@@ -668,7 +666,7 @@ HWTEST_F(MenuItemPatternOptionTestNg, OptionPaintMethodTestNg005, TestSize.Level
 
     paintProp->UpdatePress(true);
     paintWrapper = GetPaintWrapper(paintProp);
-    paintMethod->PaintDivider(canvas, paintWrapper);
+    paintMethod->HandleOption(paintWrapper, paintProp, AceType::MakeRefPtr<SelectTheme>(), path, canvas);
     result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
     delete paintWrapper;

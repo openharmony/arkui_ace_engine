@@ -187,20 +187,56 @@ void ResetTrackShadow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDataPanelModifier* GetDataPanelModifier()
 {
-    static const ArkUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIDataPanelModifier* GetCJUIDataPanelModifier()
 {
-    static const CJUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

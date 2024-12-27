@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_IMAGE_DECODER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_IMAGE_PROVIDER_ADAPTER_IMAGE_DECODER_H
 
+#include "base/image/pixel_map.h"
 #include "core/components_ng/image_provider/image_object.h"
 #include "core/components_ng/render/adapter/rosen/drawing_image.h"
 
@@ -27,8 +28,8 @@ public:
     RefPtr<CanvasImage> MakeDrawingImage();
 
     // decode image using ImageFramework, return true if process is successful.
-    RefPtr<CanvasImage> MakePixmapImage(
-        AIImageQuality imageQuality = AIImageQuality::NONE, bool isHdrDecoderNeed = false);
+    RefPtr<CanvasImage> MakePixmapImage(AIImageQuality imageQuality = AIImageQuality::NONE,
+        bool isHdrDecoderNeed = false, PixelFormat photoDecodeFormat = PixelFormat::UNKNOWN);
 
 private:
     static std::shared_ptr<RSImage> ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info);

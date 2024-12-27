@@ -20,7 +20,10 @@ ohos_unittest("ui_service_mgr_stub_test") {
 
   include_dirs = []
 
-  sources = [ "ui_service_mgr_stub_test.cpp" ]
+  sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "ui_service_mgr_stub_test.cpp",
+  ]
 
   configs = [ "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservicems_config" ]
   cflags = []
@@ -30,8 +33,6 @@ ohos_unittest("ui_service_mgr_stub_test") {
   deps = [
     "//foundation/arkui/ace_engine/adapter/ohos/services/uiservice:uiservice",
     "//foundation/arkui/ace_engine/interfaces/inner_api/ui_service_manager:ui_service_mgr",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -39,6 +40,8 @@ ohos_unittest("ui_service_mgr_stub_test") {
     "bundle_framework:appexecfwk_base",
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
+    "googletest:gtest_main",
     "ipc:ipc_core",
   ]
 }

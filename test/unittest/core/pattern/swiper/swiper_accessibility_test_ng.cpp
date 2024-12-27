@@ -143,7 +143,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: ShowNext is triggered
      */
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
 
     /**
@@ -151,7 +151,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: ShowPrevious is triggered
      */
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -176,7 +176,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.expected: ShowNext is not triggered
      */
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 
     /**
@@ -184,7 +184,7 @@ HWTEST_F(SwiperAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
      * @tc.expected: ShowPrevious is not triggered
      */
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
@@ -207,15 +207,15 @@ HWTEST_F(SwiperAccessibilityTestNg, UpdateFocusable001, TestSize.Level1)
     EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "auto");
 
     frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(indicatorFocusHub->GetFocusable());
 
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->TotalCount(), 0);
 
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_FALSE(indicatorFocusHub->GetFocusable());
     EXPECT_EQ(accessibilityProperty->GetAccessibilityLevel(), "no");
 }

@@ -67,6 +67,8 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("fontWeight", &JSTextField::SetFontWeight);
     JSClass<JSTextInput>::StaticMethod("fontStyle", &JSTextField::SetFontStyle);
     JSClass<JSTextInput>::StaticMethod("fontFamily", &JSTextField::SetFontFamily);
+    JSClass<JSTextInput>::StaticMethod("minFontScale", &JSTextField::SetMinFontScale);
+    JSClass<JSTextInput>::StaticMethod("maxFontScale", &JSTextField::SetMaxFontScale);
     JSClass<JSTextInput>::StaticMethod("inputFilter", &JSTextField::SetInputFilter);
     JSClass<JSTextInput>::StaticMethod("showPasswordIcon", &JSTextField::SetShowPasswordIcon);
     JSClass<JSTextInput>::StaticMethod("textAlign", &JSTextField::SetTextAlign);
@@ -79,6 +81,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("barState", &JSTextField::SetBarState);
     JSClass<JSTextInput>::StaticMethod("maxLines", &JSTextField::SetMaxLines);
     JSClass<JSTextInput>::StaticMethod("wordBreak", &JSTextField::SetWordBreak);
+    JSClass<JSTextInput>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     // API7 onEditChanged deprecated
     JSClass<JSTextInput>::StaticMethod("onEditChanged", &JSTextField::SetOnEditChanged);
     JSClass<JSTextInput>::StaticMethod("onEditChange", &JSTextField::SetOnEditChanged);
@@ -119,6 +122,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::StaticMethod("heightAdaptivePolicy", &JSTextField::SetHeightAdaptivePolicy);
     JSClass<JSTextInput>::StaticMethod("letterSpacing", &JSTextField::SetLetterSpacing);
     JSClass<JSTextInput>::StaticMethod("lineHeight", &JSTextField::SetLineHeight);
+    JSClass<JSTextInput>::StaticMethod("halfLeading", &JSTextField::SetHalfLeading);
     JSClass<JSTextInput>::StaticMethod("textOverflow", &JSTextField::SetTextOverflow);
     JSClass<JSTextInput>::StaticMethod("textIndent", &JSTextField::SetTextIndent);
     JSClass<JSTextInput>::StaticMethod("showPassword", &JSTextField::ShowPasswordText);

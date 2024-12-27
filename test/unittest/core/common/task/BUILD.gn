@@ -25,6 +25,7 @@ ohos_unittest("thread_test") {
     "$ace_root/frameworks/core/common/thread_container.cpp",
     "$ace_root/frameworks/core/common/thread_model_impl.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
     "$ace_root/test/unittest/core/common/task/thread_test.cpp",
@@ -35,11 +36,11 @@ ohos_unittest("thread_test") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "c_utils:utils",
     "eventhandler:libeventhandler",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 }

@@ -453,14 +453,14 @@ Local<panda::ObjectRef> CreateSpanResultObject(EcmaVM *vm, const ResultObject& r
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "spanPosition"), spanPositionObj);
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
-            panda::StringRef::NewFromUtf8(vm, resultObject.valueString.c_str()));
+            panda::StringRef::NewFromUtf16(vm, resultObject.valueString.c_str()));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
             CreateTextStyleResult(vm, resultObject.textStyle));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
             CreateParagraphStyle(vm, resultObject.textStyle));
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
-            panda::StringRef::NewFromUtf8(vm, resultObject.valueString.c_str()));
+            panda::StringRef::NewFromUtf16(vm, resultObject.valueString.c_str()));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "symbolSpanStyle"),
             CreateSymbolSpanStyleResult(vm, resultObject.symbolSpanStyle));
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResource"),
@@ -476,7 +476,7 @@ Local<panda::ObjectRef> CreateSpanResultObject(EcmaVM *vm, const ResultObject& r
 #endif
         } else {
             resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "valueResourceStr"),
-                panda::StringRef::NewFromUtf8(vm, resultObject.valueString.c_str()));
+                panda::StringRef::NewFromUtf16(vm, resultObject.valueString.c_str()));
         }
         resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageStyle"),
             CreateImageStyleResult(vm, resultObject.imageStyle));
@@ -1155,7 +1155,7 @@ ArkUINativeModuleValue RichEditorBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runti
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "text", "keepEditableState" };
-        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()),
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf16(vm, event.GetText().c_str()),
             panda::FunctionRef::New(vm, Framework::JSRichEditor::JsKeepEditableState) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, NUM_1);

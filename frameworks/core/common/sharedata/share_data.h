@@ -16,8 +16,11 @@
 #ifndef FRAMEWORKS_CORE_COMMON_SHARE_DATA_SHARE_DATA_H
 #define FRAMEWORKS_CORE_COMMON_SHARE_DATA_SHARE_DATA_H
 
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 #include "base/memory/ace_type.h"
 

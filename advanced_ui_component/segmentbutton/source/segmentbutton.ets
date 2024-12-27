@@ -324,13 +324,13 @@ export class SegmentButtonOptions {
 
   public onButtonsUpdated() {
     this.buttons?.forEach(button => {
-        this.showText ||= button.text !== void 0;
-        this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
-      })
-      if (this.showText && this.showIcon) {
-        this.iconTextRadius = 12;
-        this.iconTextBackgroundRadius = 14;
-      }
+      this.showText ||= button.text !== void 0;
+      this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
+    })
+    if (this.showText && this.showIcon) {
+      this.iconTextRadius = 12;
+      this.iconTextBackgroundRadius = 14;
+    }
   }
 
   static tab(options: TabSegmentButtonConstructionOptions): SegmentButtonOptions {
@@ -527,21 +527,15 @@ struct SegmentButtonItem {
     }
   }
 
-  private getAccessibilityText(): string {
-    try {
-      if (this.selectedIndexes.includes(this.index) && this.itemOptions.selectedIconAccessibilityText) {
-        return (typeof this.itemOptions.selectedIconAccessibilityText === 'string') ?
-        this.itemOptions.selectedIconAccessibilityText :
-        getContext(this).resourceManager.getStringSync((this.itemOptions.selectedIconAccessibilityText as Resource).id)
-      } else if (this.itemOptions.iconAccessibilityText) {
-        return (typeof this.itemOptions.iconAccessibilityText === 'string') ?
-        this.itemOptions.iconAccessibilityText :
-        getContext(this).resourceManager.getStringSync((this.itemOptions.iconAccessibilityText as Resource).id)
-      }
-    } catch (error) {
-      console.error(`Ace SegmentButton getAccessibilityText, error: ${error.toString()}`);
+  private getAccessibilityText(): Resource | undefined {
+    if (this.selectedIndexes.includes(this.index) &&
+      typeof this.itemOptions.selectedIconAccessibilityText !== undefined) {
+      return this.itemOptions.selectedIconAccessibilityText as Resource
+    } else if (!this.selectedIndexes.includes(this.index) &&
+      typeof this.itemOptions.iconAccessibilityText !== undefined) {
+      return this.itemOptions.iconAccessibilityText as Resource
     }
-    return '';
+    return undefined;
   }
 
   build() {
@@ -550,7 +544,6 @@ struct SegmentButtonItem {
         Image(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon)
           .direction(this.options.direction)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
-          .focusable(!this.options.showText)
           .draggable(false)
           .fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
           segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) : (this.options.fontColor ??
@@ -569,7 +562,6 @@ struct SegmentButtonItem {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(1)
           .textAlign(TextAlign.Center)
-          .focusable(true)
           .padding(this.getTextPadding())
       }
     }
@@ -603,6 +595,39 @@ struct PressAndHoverEffect {
       .size(this.buttonItemsSize[this.pressIndex])
       .backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.hoverColor)
       .borderRadius(this.buttonBorderRadius[this.pressIndex])
+  }
+}
+
+@Component
+struct PressAndHoverEffectArray {
+  @ObjectLink buttons: SegmentButtonItemOptionsArray
+  @ObjectLink options: SegmentButtonOptions
+  @Link pressArray: boolean[]
+  @Link hoverArray: boolean[]
+  @Link hoverColorArray: HoverColorProperty[]
+  @Consume zoomScaleArray:number[]
+
+  build() {
+    Row({ space: 1 }) {
+      ForEach(this.buttons, (item: SegmentButtonItemOptions, index) => {
+        if (index < MAX_ITEM_COUNT) {
+          Stack() {
+            PressAndHoverEffect({
+              pressIndex: index,
+              colorProperty: this.hoverColorArray[index],
+              press: this.pressArray[index],
+              hover: this.hoverArray[index],
+              options: this.options,
+            })
+          }
+          .direction(this.options.direction)
+          .scale({
+            x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
+            y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
+          })
+        }
+      })
+    }.direction(this.options.direction)
   }
 }
 
@@ -730,10 +755,12 @@ struct SegmentButtonItemArrayComponent {
   private getBorderRadius(index: number): LocalizedBorderRadiuses {
     let borderRadius: LocalizedBorderRadiuses = this.buttonBorderRadius[index]
     if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
-      borderRadius.topStart = LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4)
-      borderRadius.topEnd = LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4)
-      borderRadius.bottomStart = LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4)
-      borderRadius.bottomEnd = LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+      return {
+        topStart: LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4),
+        topEnd: LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4),
+        bottomStart: LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4),
+        bottomEnd: LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+      }
     }
     return borderRadius
   }
@@ -797,16 +824,9 @@ struct SegmentButtonItemArrayComponent {
     this.buttonBorderRadius = borderRadiusArray
   }
 
-  getAccessibilityDescription(value?: ResourceStr): string {
-    if (value) {
-      try {
-        return (typeof value === 'string') ? value :
-        getContext(this).resourceManager.getStringSync((value as Resource).id)
-      } catch (error) {
-        console.error(`Ace SegmentButton getAccessibilityDescription, error: ${error.toString()}`);
-      }
-    }
-    return '';
+
+  getAccessibilityDescription(value?: ResourceStr): Resource | undefined {
+    return (typeof value !== undefined) ? value as Resource : undefined
   }
 
   build() {
@@ -1128,26 +1148,13 @@ export struct SegmentButton {
         } else {
           Stack() {
             if (this.options.buttons !== void 0 && this.options.buttons.length > 1) {
-              Row({ space: 1 }) {
-                ForEach(this.options.buttons, (item: SegmentButtonItemOptions, index) => {
-                  if (index < MAX_ITEM_COUNT) {
-                    Stack() {
-                      PressAndHoverEffect({
-                        pressIndex: index,
-                        colorProperty: this.hoverColorArray[index],
-                        press: this.pressArray[index],
-                        hover: this.hoverArray[index],
-                        options: this.options,
-                      })
-                    }
-                    .direction(this.options.direction)
-                    .scale({
-                      x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
-                      y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
-                    })
-                  }
-                })
-              }.direction(this.options.direction)
+              PressAndHoverEffectArray({
+                options:this.options,
+                buttons:this.options.buttons,
+                pressArray:this.pressArray,
+                hoverArray:this.hoverArray,
+                hoverColorArray:this.hoverColorArray
+              })
             }
           }
           .direction(this.options.direction)

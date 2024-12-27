@@ -41,7 +41,7 @@ bool TextStyle::operator==(const TextStyle& rhs) const
            baselineOffset_ == rhs.baselineOffset_ && adaptHeight_ == rhs.adaptHeight_ &&
            textIndent_ == rhs.textIndent_ && verticalAlign_ == rhs.verticalAlign_ && wordSpacing_ == rhs.wordSpacing_ &&
            ellipsisMode_ == rhs.ellipsisMode_ && lineBreakStrategy_ == rhs.lineBreakStrategy_ &&
-           textShadows_== rhs.textShadows_;
+           textBackgroundStyle_ == rhs.textBackgroundStyle_;
 }
 
 bool TextStyle::operator!=(const TextStyle& rhs) const
@@ -80,6 +80,9 @@ void TextStyle::UpdateColorByResourceId()
 {
     textColor_.UpdateColorByResourceId();
     textDecorationColor_.UpdateColorByResourceId();
+    if (textBackgroundStyle_.has_value()) {
+        textBackgroundStyle_->UpdateColorByResourceId();
+    }
     std::for_each(renderColors_.begin(), renderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     std::for_each(textShadows_.begin(), textShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
 }

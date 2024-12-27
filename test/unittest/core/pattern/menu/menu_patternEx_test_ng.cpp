@@ -1796,7 +1796,7 @@ HWTEST_F(MenuPattern1TestNg, MenuPatternTestNg039, TestSize.Level1)
     foreachchildNode->MountToParent(foreachNode);
     auto menuPatternEx = MenuNode2->GetPattern<MenuPattern>();
     menuPatternEx->type_ = MenuType::CONTEXT_MENU;
-    menuPatternEx->OnItemPressed(foreachNode, -1, false);
+    menuPatternEx->OnItemPressed(foreachNode, 1, false);
     EXPECT_EQ(parentNode->GetTag(), V2::JS_SYNTAX_ITEM_ETS_TAG);
 }
 
