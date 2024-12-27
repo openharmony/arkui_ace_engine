@@ -34,6 +34,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -917,9 +920,41 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->FlushCurrentOptions();
 }
 
+bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("year", dataJson->GetUInt("year"));
+    value->Put("month", dataJson->GetUInt("month") + 1); // month: 1-12
+    value->Put("day", dataJson->GetUInt("day"));
+    value->Put("hour", dataJson->GetUInt("hour"));
+    value->Put("minute", dataJson->GetUInt("minute"));
+    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+#endif
+    return true;
+}
+
+bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
+    if ((datePickerEventHub != nullptr) && datePickerEventHub->HasSetDialogChange()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+}
+
 void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
+        ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);

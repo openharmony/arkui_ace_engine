@@ -1766,7 +1766,7 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButton(const std::vector<Bu
     std::map<std::string, NG::DialogEvent> dialogEvent, std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto changeEvent = dialogEvent["changeId"];
-    auto dateChangeEvent = dialogEvent["dateChangeId"];
+    DialogEvent dateChangeEvent = GetDateChangeEvent(dialogNode, dialogEvent);
     if (settingData.showTime) {
         auto changeEventSame = changeEvent;
         auto dateChangeEventSame = dateChangeEvent;
@@ -1825,7 +1825,7 @@ void DatePickerDialogView::BuildDialogAcceptAndCancelButtonForAging(const std::v
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent)
 {
     auto changeEvent = dialogEvent["changeId"];
-    auto dateChangeEvent = dialogEvent["dateChangeId"];
+    DialogEvent dateChangeEvent = GetDateChangeEvent(dialogNode, dialogEvent);
     if (settingData.showTime) {
         auto changeEventSame = changeEvent;
         auto dateChangeEventSame = dateChangeEvent;
@@ -2161,4 +2161,19 @@ void DatePickerDialogView::GetUserSettingLimit()
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
 }
 
+DialogEvent DatePickerDialogView::GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,
+    const std::map<std::string, NG::DialogEvent>& dialogEvent)
+{
+    auto dateChangeIter = dialogEvent.find("dateChangeId");
+    DialogEvent dateChangeEvent = dateChangeIter == dialogEvent.end() ? nullptr : dateChangeIter->second;
+    dateChangeEvent = [weak = WeakPtr<FrameNode>(frameNode), dateChangeEvent](const std::string& info) -> void {
+        auto uiNode = weak.Upgrade();
+        if (uiNode != nullptr) {
+            DatePickerPattern::ReportDateChangeEvent(uiNode->GetId(), "DatePickerDialog", "onDateChange", info);
+        }
+        CHECK_NULL_VOID(dateChangeEvent);
+        dateChangeEvent(info);
+    };
+    return dateChangeEvent;
+}
 } // namespace OHOS::Ace::NG

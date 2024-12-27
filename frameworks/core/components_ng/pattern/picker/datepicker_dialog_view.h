@@ -169,6 +169,8 @@ private:
     static void UpdateTimePickerChildrenStatus(const RefPtr<FrameNode>& timePickerNode);
     static void SwitchFocusStatus(
         const RefPtr<FrameNode>& timePickerNode, const RefPtr<FrameNode>& monthAndDayPickerNode);
+    static DialogEvent GetDateChangeEvent(const RefPtr<FrameNode>& frameNode,
+        const std::map<std::string, NG::DialogEvent>& dialogEvent);
     static bool switchTimePickerFlag_;
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
