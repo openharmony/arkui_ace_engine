@@ -215,6 +215,8 @@ private:
     void NextDateBySelectedType(PickerDate& date);
 
     std::string GetEntryDateInfo();
+    bool ReportChangeEvent(const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
 
     uint32_t yearEnterCount_ = 0;
     uint32_t yearPrefixZeroCount_ = 0;
@@ -239,6 +241,7 @@ private:
     RefPtr<ClickEvent> clickListener_;
     RefPtr<InputEvent> hoverListener_;
     CalendarPickerSelectedType selected_ = CalendarPickerSelectedType::OTHER;
+    PickerDate reportedPickerDate_;
     ACE_DISALLOW_COPY_AND_MOVE(CalendarPickerPattern);
 };
 } // namespace OHOS::Ace::NG
