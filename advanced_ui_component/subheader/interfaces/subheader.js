@@ -517,7 +517,7 @@ export class SubHeader extends ViewPU {
     updateFontScale() {
         try {
             let x14 = this.getUIContext();
-            let y14 = x14.getHostContext()?.config.fontSizeScale ?? 1;
+            let y14 = x14.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
