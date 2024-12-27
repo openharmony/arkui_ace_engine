@@ -1430,7 +1430,7 @@ HWTEST_F(PanRecognizerTestNg, PanGestureTest002, TestSize.Level1)
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
     auto onActionEnd = [](GestureEvent& info) { return true; };
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
     panGesture->SetOnActionStartId(onActionStart);
     panGesture->SetOnActionUpdateId(onActionUpdate);
     panGesture->SetOnActionEndId(onActionEnd);

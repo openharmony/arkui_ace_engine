@@ -1308,7 +1308,8 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         MouseAction::RELEASE,
         MouseAction::MOVE,
         MouseAction::WINDOW_ENTER,
-        MouseAction::WINDOW_LEAVE
+        MouseAction::WINDOW_LEAVE,
+        MouseAction::CANCEL
     };
     if (validAction.find(event.action) == validAction.end()) {
         return false;

@@ -523,7 +523,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -541,7 +541,7 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -683,7 +683,7 @@ void PanRecognizer::OnResetStatus()
 
 void PanRecognizer::OnSucceedCancel()
 {
-    SendCancelMsg();
+    SendCallbackMsg(onActionCancel_);
 }
 
 GestureEvent PanRecognizer::GetGestureEventInfo()
@@ -814,7 +814,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_);
         }
         ResetStatus();
         return false;
