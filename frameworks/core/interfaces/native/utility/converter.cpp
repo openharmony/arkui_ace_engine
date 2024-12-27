@@ -475,6 +475,15 @@ std::optional<Color> ResourceConverter::ToColor()
     return result;
 }
 
+std::optional<bool> ResourceConverter::ToBoolean()
+{
+    CHECK_NULL_RETURN(themeConstants_, std::nullopt);
+    if (type_ == ResourceType::BOOLEAN) {
+        return themeConstants_->GetBoolean(id_);
+    }
+    return std::nullopt;
+}
+
 template<>
 ScaleOpt Convert(const Ark_ScaleOptions& src)
 {
@@ -539,6 +548,29 @@ Shadow Convert(const Ark_ShadowOptions& src)
     }
 
     return shadow;
+}
+
+template<>
+SheetHeight Convert(const Ark_SheetSize& src)
+{
+    SheetHeight detent;
+    detent.sheetMode = OptConvert<SheetMode>(src);
+    detent.height.reset();
+    return detent;
+}
+
+template<>
+SheetHeight Convert(const Ark_Length& src)
+{
+    SheetHeight detent;
+    detent.sheetMode.reset();
+    detent.height = Convert<Dimension>(src);
+    Validator::ValidateNonNegative(detent.height);
+    if (!detent.height.has_value()) {
+        detent.sheetMode = NG::SheetMode::LARGE;
+        detent.height.reset();
+    }
+    return detent;
 }
 
 template<>

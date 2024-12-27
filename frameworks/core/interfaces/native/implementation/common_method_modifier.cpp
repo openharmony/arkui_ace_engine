@@ -88,6 +88,21 @@ struct GeometryTransitionOptions {
     std::optional<TransitionHierarchyStrategy> hierarchyStrategy;
 };
 
+struct SheetCallbacks {
+    std::function<void()> onAppearCallback;
+    std::function<void()> onDisappearCallback;
+    std::function<void()> onWillAppearCallback;
+    std::function<void()> onWillDisappearCallback;
+    std::function<void()> shouldDismissFunc;
+    std::function<void(const int32_t)> onWillDismissCallback;
+    std::function<void(const float)> onHeightDidChangeCallback;
+    std::function<void(const float)> onDetentsDidChangeCallback;
+    std::function<void(const float)> onWidthDidChangeCallback;
+    std::function<void(const float)> onTypeDidChangeCallback;
+    std::function<void()> titleBuilderFunction;
+    std::function<void()> sheetSpringBackFunc;
+};
+
 using PositionWithLocalization = std::pair<std::optional<OffsetT<Dimension>>, bool>;
 
 using ColorOrStrategy = std::variant<std::monostate, std::optional<Color>, std::optional<ForegroundColorStrategy>>;
@@ -347,6 +362,141 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOpt
             LOGE("Ark_ContextMenuAnimationOptions is not supported yet");
         },
         []() {});
+};
+
+auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
+    auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
+    if (onAppear) {
+        callbacks.onAppearCallback = [arkCallback = CallbackHelper(onAppear.value())]() {
+            arkCallback.Invoke();
+        };
+    }
+    auto onDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onDisappear);
+    if (onDisappear) {
+        callbacks.onDisappearCallback = [arkCallback = CallbackHelper(onDisappear.value())]() {
+            arkCallback.Invoke();
+        };
+    }
+    auto onWillAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillAppear);
+    if (onWillAppear) {
+        callbacks.onWillAppearCallback = [arkCallback = CallbackHelper(onWillAppear.value())]() {
+            arkCallback.Invoke();
+        };
+    }
+    auto onWillDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillDisappear);
+    if (onWillDisappear) {
+        callbacks.onWillDisappearCallback = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
+            arkCallback.Invoke();
+        };
+    }
+    auto shouldDismiss = Converter::OptConvert<Callback_SheetDismiss_Void>(sheetOptions.shouldDismiss);
+    if (shouldDismiss) {
+        callbacks.shouldDismissFunc = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
+            Ark_SheetDismiss parameter;
+            auto dismiss = []() {
+                ViewAbstractModelNG::DismissSheetStatic();
+            };
+            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            arkCallback.Invoke(parameter);
+            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
+        };
+    }
+    auto onTypeDidChange = Converter::OptConvert<Callback_SheetType_Void>(sheetOptions.onTypeDidChange);
+    if (onTypeDidChange) {
+        callbacks.onTypeDidChangeCallback = [arkCallback = CallbackHelper(onTypeDidChange.value())](int32_t value) {
+            arkCallback.Invoke(Converter::ArkValue<Ark_SheetType>(static_cast<SheetType>(value)));
+        };
+    }
+};
+
+auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
+    auto onWillDismiss = Converter::OptConvert<Callback_DismissSheetAction_Void>(sheetOptions.onWillDismiss);
+    if (onWillDismiss) {
+        callbacks.onWillDismissCallback = [arkCallback = CallbackHelper(onWillDismiss.value())](const int32_t reason) {
+            Ark_DismissSheetAction parameter;
+            auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
+            parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
+            auto dismiss = []() { ViewAbstractModelNG::DismissSheetStatic(); };
+            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            arkCallback.Invoke(parameter);
+            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
+        };
+    }
+    auto onWillSpringBackWhenDismiss = Converter::OptConvert<Callback_SpringBackAction_Void>(
+        sheetOptions.onWillSpringBackWhenDismiss);
+    if (onWillSpringBackWhenDismiss) {
+        callbacks.sheetSpringBackFunc = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
+            Ark_SpringBackAction parameter;
+            auto springBack = []() {
+                ViewAbstractModelNG::SheetSpringBackStatic();
+            };
+            parameter.springBack = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(springBack));
+            arkCallback.Invoke(parameter);
+            CallbackKeeper::Release(parameter.springBack.resource.resourceId);
+        };
+    }
+    auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
+    if (onHeightDidChange) {
+        callbacks.onHeightDidChangeCallback = [arkCallback = CallbackHelper(onHeightDidChange.value())](int32_t value) {
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+        };
+    }
+    auto onWidthDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onWidthDidChange);
+    if (onWidthDidChange) {
+        callbacks.onWidthDidChangeCallback = [arkCallback = CallbackHelper(onWidthDidChange.value())](int32_t value) {
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+        };
+    }
+    auto onDetentsDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onDetentsDidChange);
+    if (onDetentsDidChange) {
+        callbacks.onDetentsDidChangeCallback = [arkCallback = CallbackHelper(onDetentsDidChange.value())](
+            int32_t value) {
+            arkCallback.Invoke(Converter::ArkValue<Ark_Number>(value));
+        };
+    }
+};
+
+auto g_bindSheetParams = [](SheetStyle sheetStyle, const Ark_SheetOptions& sheetOptions) {
+    sheetStyle.showInPage = OptConvert<SheetLevel>(sheetOptions.mode).value_or(SheetLevel::EMBEDDED);
+    std::vector<SheetHeight> detents;
+    auto detentsOpt = OptConvert<Ark_Type_SheetOptions_detents>(sheetOptions.detents);
+    if (detentsOpt) {
+        auto value0 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value0);
+        if (value0) {
+            detents.emplace_back(value0.value());
+        }
+        auto value1 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value1);
+        if (value1) {
+            detents.emplace_back(value1.value());
+        }
+        auto value2 = Converter::OptConvert<SheetHeight>(detentsOpt.value().value2);
+        if (value2) {
+            detents.emplace_back(value2.value());
+        }
+    }
+    sheetStyle.detents = detents;
+    sheetStyle.backgroundBlurStyle = OptConvert<BlurStyleOption>(sheetOptions.blurStyle);
+    sheetStyle.showCloseIcon = OptConvert<bool>(sheetOptions.showClose);
+    sheetStyle.interactive = OptConvert<bool>(sheetOptions.enableOutsideInteractive);
+    sheetStyle.showDragBar = OptConvert<bool>(sheetOptions.dragBar);
+    sheetStyle.sheetType = OptConvert<SheetType>(sheetOptions.preferType);
+    sheetStyle.scrollSizeMode = OptConvert<ScrollSizeMode>(sheetOptions.scrollSizeMode);
+    sheetStyle.sheetKeyboardAvoidMode = OptConvert<SheetKeyboardAvoidMode>(sheetOptions.keyboardAvoidMode);
+    sheetStyle.backgroundColor = OptConvert<Color>(sheetOptions.backgroundColor);
+    sheetStyle.maskColor = OptConvert<Color>(sheetOptions.maskColor);
+    sheetStyle.borderWidth = OptConvert<BorderWidthProperty>(sheetOptions.borderWidth);
+    sheetStyle.borderColor = OptConvert<BorderColorProperty>(sheetOptions.borderColor);
+    sheetStyle.borderStyle = OptConvert<BorderStyleProperty>(sheetOptions.borderStyle);
+    sheetStyle.shadow = OptConvert<Shadow>(sheetOptions.shadow);
+    sheetStyle.enableHoverMode = OptConvert<bool>(sheetOptions.enableHoverMode);
+    sheetStyle.hoverModeArea = OptConvert<HoverModeAreaType>(sheetOptions.hoverModeArea);
+    sheetStyle.width = OptConvert<Dimension>(sheetOptions.width);
+    Validator::ValidateNonNegative(sheetStyle.width);
+    auto height = OptConvert<SheetHeight>(sheetOptions.height);
+    if (height) {
+        sheetStyle.sheetMode = height->sheetMode;
+        sheetStyle.height = height->height;
+    }
 };
 
 namespace Validator {
@@ -4589,9 +4739,52 @@ void BindSheetImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(isShow);
-    //auto convValue = Converter::OptConvert<type>(isShow); // for enums
-    //CommonMethodModelNG::SetBindSheet(frameNode, convValue);
+    CHECK_NULL_VOID(builder);
+    bool isShowValue = isShow && Converter::OptConvert<Ark_Boolean>(*isShow).value_or(false);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    auto buildFunc = [callback = CallbackHelper(*builder, frameNode), node, weakNode]() {
+        PipelineContext::SetCallBackNode(weakNode);
+        auto uiNode = callback.BuildSync(node);
+        ViewStackProcessor::GetInstance()->Push(uiNode);
+    };
+    SheetStyle sheetStyle;
+    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.showDragBar = true;
+    sheetStyle.showCloseIcon = true;
+    sheetStyle.showInPage = false;
+    SheetCallbacks callbacks;
+    auto sheetOptions = options ? Converter::OptConvert<Ark_SheetOptions>(*options) : std::nullopt;
+    if (sheetOptions) {
+        g_bindSheetCallbacks1(callbacks, sheetOptions.value());
+        g_bindSheetCallbacks2(callbacks, sheetOptions.value());
+        Converter::VisitUnion(sheetOptions->title,
+            [&sheetStyle](const Ark_SheetTitleOptions& value) {
+                sheetStyle.sheetTitle = OptConvert<std::string>(value.title);
+                sheetStyle.sheetSubtitle = OptConvert<std::string>(value.title);
+            },
+            [frameNode, node, &callbacks](const CustomNodeBuilder& value) {
+                callbacks.titleBuilderFunction = [callback = CallbackHelper(value, frameNode), node]() {
+                    auto uiNode = callback.BuildSync(node);
+                    ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+            }, []() {});
+        auto offsetVal =
+            OptConvert<std::pair<std::optional<Dimension>, std::optional<Dimension>>>(sheetOptions->offset);
+        if (offsetVal) {
+            OffsetF sheetOffset;
+            sheetOffset.SetX(offsetVal.value().first->ConvertToPx());
+            sheetOffset.SetY(offsetVal.value().second->ConvertToPx());
+            sheetStyle.bottomOffset = sheetOffset;
+        }
+        g_bindSheetParams(sheetStyle, sheetOptions.value());
+    }
+    ViewAbstractModelNG::BindSheet(frameNode, isShow, nullptr, std::move(buildFunc),
+        std::move(callbacks.titleBuilderFunction), sheetStyle, std::move(callbacks.onAppearCallback),
+        std::move(callbacks.onDisappearCallback), std::move(callbacks.shouldDismissFunc),
+        std::move(callbacks.onWillDismissCallback),  std::move(callbacks.onWillAppearCallback),
+        std::move(callbacks.onWillDisappearCallback), std::move(callbacks.onHeightDidChangeCallback),
+        std::move(callbacks.onDetentsDidChangeCallback), std::move(callbacks.onWidthDidChangeCallback),
+        std::move(callbacks.onTypeDidChangeCallback), std::move(callbacks.sheetSpringBackFunc));
 }
 void OnVisibleAreaChangeImpl(Ark_NativePointer node,
                              const Array_Number* ratios,

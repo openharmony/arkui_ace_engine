@@ -146,6 +146,7 @@ namespace Converter {
             std::optional<int32_t> ToInt();
             std::optional<uint32_t> ToSymbol();
             std::optional<Color> ToColor();
+            std::optional<bool> ToBoolean();
 
             const std::string& BundleName() { return bundleName_; }
             const std::string& ModuleName() { return moduleName_; }
@@ -364,6 +365,13 @@ namespace Converter {
     }
 
     template<>
+    inline void AssignCast(std::optional<bool>& dst, const Ark_Resource& src)
+    {
+        ResourceConverter converter(src);
+        dst = converter.ToBoolean();
+    }
+
+    template<>
     inline void AssignCast(std::optional<Dimension>& dst, const Ark_CustomObject& src)
     {
         LOGE("ARKOALA Converter Ark_CustomObject -> Dimension is not implemented.");
@@ -462,6 +470,8 @@ namespace Converter {
     template<> ScaleOpt Convert(const Ark_ScaleOptions& src);
     template<> SelectionOptions Convert(const Ark_SelectionOptions& options);
     template<> Shadow Convert(const Ark_ShadowOptions& src);
+    template<> SheetHeight Convert(const Ark_SheetSize& src);
+    template<> SheetHeight Convert(const Ark_Length& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
@@ -530,6 +540,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<BlendMode>& dst, const Ark_BlendMode& src);
     template<> void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleActivePolicy& src);
+    template<> void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src);
     template<> void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src);
     template<> void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src);
     template<> void AssignCast(std::optional<ButtonRole>& dst, const Ark_ButtonRole& src);
@@ -603,6 +614,7 @@ namespace Converter {
     template<> void AssignCast(
         std::optional<RenderProcessNotRespondingReason>& dst, const Ark_RenderProcessNotRespondingReason& src);
     template<> void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src);
+    template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollSizeMode& src);
     template<> void AssignCast(std::optional<ScrollSnapAlign>& dst, const Ark_ScrollSnapAlign& src);
     template<> void AssignCast(std::optional<ScrollState>& dst, const Ark_ScrollState& src);
     template<> void AssignCast(std::optional<SelectionMenuType>& dst, const Ark_MenuType& src);
@@ -610,6 +622,10 @@ namespace Converter {
     template<> void AssignCast(std::optional<ShadowColorStrategy>& dst, const Ark_ColoringStrategy& src);
     template<> void AssignCast(std::optional<ShadowStyle>& dst, const Ark_ShadowStyle& src);
     template<> void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src);
+    template<> void AssignCast(std::optional<SheetKeyboardAvoidMode>& dst, const Ark_SheetKeyboardAvoidMode& src);
+    template<> void AssignCast(std::optional<SheetLevel>& dst, const Ark_SheetMode& src);
+    template<> void AssignCast(std::optional<SheetMode>& dst, const Ark_SheetSize& src);
+    template<> void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src);
     template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
     template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
     template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
