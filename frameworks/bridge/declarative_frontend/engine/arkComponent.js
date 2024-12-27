@@ -8852,6 +8852,42 @@ class RichEditorBarStateModifier extends ModifierWithKey {
 }
 RichEditorBarStateModifier.identity = Symbol('richEditorBarState');
 
+class RichEditorMaxLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLength(node);
+    }
+    else {
+      getUINativeModule().richEditor.setMaxLength(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorMaxLengthModifier.identity = Symbol('richEditorMaxLength');
+
+class RichEditorMaxLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLines(node);
+    }
+    else {
+      getUINativeModule().richEditor.setMaxLines(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorMaxLinesModifier.identity = Symbol('richEditorMaxLines');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8980,6 +9016,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   barState(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
+    return this;
+  }
+  maxLength(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLengthModifier.identity, RichEditorMaxLengthModifier, value);
+    return this;
+  }
+  maxLines(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
     return this;
   }
 }

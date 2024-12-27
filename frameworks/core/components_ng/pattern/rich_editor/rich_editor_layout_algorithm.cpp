@@ -274,6 +274,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
 {
     auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
+    style.maxLines = textStyle.GetMaxLines();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
