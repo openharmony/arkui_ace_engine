@@ -28,6 +28,8 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
 namespace OHOS {
@@ -231,6 +233,11 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
+    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
+    void HandleLockEvent(bool isLock);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
@@ -239,6 +246,7 @@ private:
     RefPtr<FormManagerDelegate> formManagerBridge_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
+    FormSpecialStyle formSpecialStyle_;
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
