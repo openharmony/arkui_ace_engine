@@ -56,7 +56,7 @@ export struct BindPopupBootcamp {
   @State enableCompBindPopupPopupColor: boolean = false;
   @State compBindPopupPopupColor: ResourceStr = '#ff000000';
   @State enableCompBindPopupAutoCancel: boolean = false;
-  @State compBindPopupAutoCancel: boolean = false;
+  @State compBindPopupAutoCancel: boolean = true;
   @State enableCompBindPopupWidth: boolean = false;
   @State compBindPopupWidth: number = 0;
   @State enableCompBindPopupArrowPointPosition: boolean = false;
@@ -311,10 +311,6 @@ export struct BindPopupBootcamp {
               this.compEventTriggeredLog('cancel Button click触发')
             }
           } : null,
-          onWillDismiss:()=>{
-            console.info('onWillDismiss触发')
-            this.compEventTriggeredLog('onWillDismiss触发')
-          },
         })
     }
   }
