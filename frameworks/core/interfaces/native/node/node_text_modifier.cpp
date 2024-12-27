@@ -122,6 +122,8 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
 }
 
 void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
