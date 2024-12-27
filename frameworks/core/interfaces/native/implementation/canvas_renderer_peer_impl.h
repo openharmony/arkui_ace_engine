@@ -113,6 +113,10 @@ public:
     void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
     std::optional<OHOS::Ace::TextMetrics> GetTextMetrics(const std::string& text);
     std::optional<TransformParam> GetTransform();
+    void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    void SetImageSmoothingQuality(const std::string& quality);
+    void SetLineCap(const std::string& quality);
+    void SetLineJoin(const std::string& quality);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;

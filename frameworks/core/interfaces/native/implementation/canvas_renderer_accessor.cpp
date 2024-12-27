@@ -24,6 +24,7 @@
 #include "matrix2d_peer.h"
 #include "image_bitmap_peer_impl.h"
 #include "base/utils/utils.h"
+#include "pixel_map_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -813,6 +814,20 @@ void TranslateImpl(CanvasRendererPeer* peer,
 void SetPixelMapImpl(CanvasRendererPeer* peer,
                      const Opt_PixelMap* value)
 {
+#if !defined(PREVIEW)
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(value);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto opt = Converter::OptConvert<Ark_PixelMap>(*value);
+    CHECK_NULL_VOID(opt);
+    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(opt->ptr);
+    CHECK_NULL_VOID(pixelMapPeer);
+    peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
+#else
+    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl he function 'setPixelMap'"
+         " is not supported on the current platform.");
+#endif
 }
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
                                  const Ark_ImageBitmap* bitmap)
@@ -955,8 +970,12 @@ Ark_NativePointer GetImageSmoothingQualityImpl(CanvasRendererPeer* peer)
 void SetImageSmoothingQualityImpl(CanvasRendererPeer* peer,
                                   const Ark_String* imageSmoothingQuality)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetImageSmoothingQualityImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for ImageSmoothingQuality type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(imageSmoothingQuality);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto quality = Converter::Convert<std::string>(*imageSmoothingQuality);
+    peerImpl->SetImageSmoothingQuality(quality);
 }
 Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 {
@@ -969,8 +988,12 @@ Ark_NativePointer GetLineCapImpl(CanvasRendererPeer* peer)
 void SetLineCapImpl(CanvasRendererPeer* peer,
                     const Ark_String* lineCap)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetLineCapImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark enum for CanvasLineCap type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(lineCap);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto capStr = Converter::Convert<std::string>(*lineCap);
+    peerImpl->SetLineCap(capStr);
 }
 Ark_Int32 GetLineDashOffsetImpl(CanvasRendererPeer* peer)
 {
@@ -1005,8 +1028,12 @@ Ark_NativePointer GetLineJoinImpl(CanvasRendererPeer* peer)
 void SetLineJoinImpl(CanvasRendererPeer* peer,
                      const Ark_String* lineJoin)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetLineJoinImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasLineJoin type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(lineJoin);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto joinStr = Converter::Convert<std::string>(*lineJoin);
+    peerImpl->SetLineJoin(joinStr);
 }
 Ark_Int32 GetLineWidthImpl(CanvasRendererPeer* peer)
 {
