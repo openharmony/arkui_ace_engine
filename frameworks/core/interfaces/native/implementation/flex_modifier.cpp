@@ -91,19 +91,22 @@ FlexOptions Convert(
     const Ark_FlexOptions& src)
 {
     FlexOptions flexOptions;
-    flexOptions.direction = Converter::OptConvert<FlexDirection>(src.direction.value);
-    flexOptions.wrap = Converter::OptConvert<FlexWrap>(src.wrap.value);
+    flexOptions.direction = Converter::OptConvert<FlexDirection>(src.direction);
+    flexOptions.wrap = Converter::OptConvert<FlexWrap>(src.wrap);
     if (src.wrap.value != Ark_FlexWrap::ARK_FLEX_WRAP_NO_WRAP) {
-        flexOptions.wrapAlignment = Converter::OptConvert<WrapAlignment>(src.justifyContent.value);
-        flexOptions.wrapAlignItems = Converter::OptConvert<WrapAlignment>(src.alignItems.value);
-        flexOptions.alignContent = Converter::OptConvert<WrapAlignment>(src.alignContent.value);
+        flexOptions.wrapAlignment = Converter::OptConvert<WrapAlignment>(src.justifyContent);
+        flexOptions.wrapAlignItems = Converter::OptConvert<WrapAlignment>(src.alignItems);
+        flexOptions.alignContent = Converter::OptConvert<WrapAlignment>(src.alignContent);
     } else {
-        flexOptions.align = Converter::OptConvert<FlexAlign>(src.justifyContent.value);
-        flexOptions.alignItems = Converter::OptConvert<FlexAlign>(src.alignItems.value);
+        flexOptions.align = Converter::OptConvert<FlexAlign>(src.justifyContent);
+        flexOptions.alignItems = Converter::OptConvert<FlexAlign>(src.alignItems);
     }
 
-    flexOptions.crossSpace = Converter::OptConvert<Dimension>(src.space.value.cross);
-    flexOptions.mainSpace = Converter::OptConvert<Dimension>(src.space.value.main);
+    auto space = Converter::OptConvert<Ark_FlexSpaceOptions>(src.space);
+    if (space) {
+        flexOptions.crossSpace = Converter::OptConvert<Dimension>(space.value().cross);
+        flexOptions.mainSpace = Converter::OptConvert<Dimension>(space.value().main);
+    }
     return flexOptions;
 }
 }
@@ -128,17 +131,17 @@ void SetFlexOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<FlexOptions>(*value);
     CHECK_NULL_VOID(options);
-    int32_t wrap = static_cast<int32_t>(options->wrap.value());
-    int32_t direction = static_cast<int32_t>(options->direction.value());
 
-    if (options->wrap == FlexWrap::NO_WRAP) {
+    if (!options->wrap.has_value() || options->wrap.value() == FlexWrap::NO_WRAP) {
         FlexModelNG::SetFlexRow(frameNode);
         FlexModelNG::SetFlexDirection(frameNode, options->direction);
         FlexModelNG::SetMainAxisAlign(frameNode, options->align);
         FlexModelNG::SetCrossAxisAlign(frameNode, options->alignItems);
-    } else if (options->wrap == FlexWrap::WRAP or options->wrap == FlexWrap::WRAP_REVERSE) {
+    } else if (options->wrap.value() == FlexWrap::WRAP || options->wrap.value() == FlexWrap::WRAP_REVERSE) {
         FlexModelNG::SetFlexWrap(frameNode);
-        if (options->direction != std::nullopt) {
+        int32_t wrap = static_cast<int32_t>(options->wrap.value());
+        if (options->direction.has_value()) {
+            int32_t direction = static_cast<int32_t>(options->direction.value());
             FlexModelNG::SetFlexDirection(frameNode, options->direction);
             // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
             direction <= 1 ? direction += NUM_2 * (wrap - NUM_1) : direction -= NUM_2 * (wrap - NUM_1);
