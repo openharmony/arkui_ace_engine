@@ -508,6 +508,9 @@ namespace Converter {
     template<> ShadowColorStrategy Convert(const Ark_String& src);
     template<> ShadowColorStrategy Convert(const Ark_Resource& src);
     template<> DimensionOffset Convert(const Ark_ActionSheetOffset& src);
+    template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
+
+
 
     // SORTED_SECTION: Non-enum specializations. No multiline declarations, please!
     template<> void AssignCast(std::optional<Color>& dst, const Ark_String& src);

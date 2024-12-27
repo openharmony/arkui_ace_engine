@@ -66,6 +66,16 @@ public:
         return result;
     }
 
+    int32_t AddBuilderSpanImpl(FrameNode* frameNode, const SpanOptionBase& options)
+    {
+        int32_t result = 0;
+        if (auto controller = handler_.Upgrade(); controller) {
+            auto spanNode = SpanNode::GetOrCreateSpanNode(frameNode->GetId());
+            result = controller->AddPlaceholderSpan(spanNode, options);
+        }
+        return result;
+    }
+
     int32_t AddSymbolSpanImpl(const SymbolSpanOptions& options)
     {
         int32_t result = 0;
@@ -143,6 +153,11 @@ public:
             ret = controller->ToStyledString(start, end);
         }
         return ret;
+    }
+
+    Ace::WeakPtr<RichEditorController> GetController() const
+    {
+        return handler_.Upgrade();
     }
 
 private:

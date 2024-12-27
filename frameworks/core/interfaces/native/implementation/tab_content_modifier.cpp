@@ -231,19 +231,17 @@ void TabBar0Impl(Ark_NativePointer node,
     std::optional<std::string> icon = std::nullopt;
     TabBarBuilderFunc builder = nullptr;
     auto options = Converter::OptConvert<TabBarOptionsVariant>(*value);
-    if (auto arkText = std::get_if<Ark_String>(&options.value());
-        arkText != nullptr) {
+    if (auto arkText = std::get_if<Ark_String>(&options.value()); arkText) {
         label = Converter::Convert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<Ark_Resource>(&options.value());
-        arkText != nullptr) {
+    } else if (auto arkText = std::get_if<Ark_Resource>(&options.value()); arkText) {
         label = Converter::OptConvert<std::string>(*arkText);
-    } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value());
-        arkText != nullptr) {
-        LOGE("ARKOALA TabContentAttributeModifier.CustomBuilder not implemented.");
-    } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value());
-        iconLabel != nullptr) {
-        auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel);
-        if (tabBarOptions) {
+    } else if (auto arkText = std::get_if<CustomNodeBuilder>(&options.value()); arkText) {
+        builder = [callback = CallbackHelper(*arkText, frameNode), node]() {
+            auto builderNode = callback.BuildSync(node);
+            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+        };
+    } else if (auto iconLabel = std::get_if<Ark_TabBarOptions>(&options.value()); iconLabel) {
+        if (auto tabBarOptions = Converter::OptConvert<TabBarOptions>(*iconLabel); tabBarOptions) {
             label = tabBarOptions->text;
             icon = tabBarOptions->icon;
         }

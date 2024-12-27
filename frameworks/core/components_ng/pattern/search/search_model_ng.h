@@ -163,6 +163,7 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static void SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance);
 
 private:
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::string>& value,

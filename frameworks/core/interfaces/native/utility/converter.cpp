@@ -1873,4 +1873,13 @@ TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src)
     dst.children = optionsOpt.value_or(empty);
     return dst;
 }
+
+template<>
+KeyboardOptions Convert(const Ark_KeyboardOptions& src)
+{
+    KeyboardOptions keyboardOptions;
+    auto supportAvoidance = Converter::OptConvert<bool>(src.supportAvoidance);
+    keyboardOptions.supportAvoidance = supportAvoidance.has_value() ? supportAvoidance.value() : false;
+    return keyboardOptions;
+}
 } // namespace OHOS::Ace::NG::Converter

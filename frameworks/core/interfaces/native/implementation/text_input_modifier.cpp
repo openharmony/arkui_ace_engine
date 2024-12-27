@@ -767,7 +767,13 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    LOGE("TextInputInterfaceModifier::CustomKeyboardImpl not implemented");
+    CHECK_NULL_VOID(value);
+    KeyboardOptions keyboardOptions = {.supportAvoidance = false};
+    auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
+    auto customNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+    bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
+    TextFieldModelNG::SetCustomKeyboard(frameNode, customFrameNode, supportAvoidance);
 }
 void ShowCounterImpl(Ark_NativePointer node,
                      Ark_Boolean value,

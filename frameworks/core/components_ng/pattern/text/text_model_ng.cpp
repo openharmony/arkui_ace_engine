@@ -725,6 +725,16 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     }
 }
 
+void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
+                                    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+    }
+}
+
 void TextModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();

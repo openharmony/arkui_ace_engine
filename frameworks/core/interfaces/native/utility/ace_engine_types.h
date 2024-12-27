@@ -21,6 +21,12 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_v2/list/list_properties.h"
 
+namespace OHOS::Ace::NG {
+struct KeyboardOptions {
+    bool supportAvoidance;
+};
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 class WebCookiePeerImpl : public Referenced {
     // this is a stub because all WebCookieAccessor interfaces are deprecated
@@ -148,6 +154,5 @@ struct ScaleOpt {
     std::optional<Dimension> centerX;
     std::optional<Dimension> centerY;
 };
-
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H
