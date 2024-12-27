@@ -1926,6 +1926,12 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     scrollBarColor(value: string | number | Color): this;
     scrollBar(value: BarState): this;
     flingSpeedLimit(value: number): this;
+    onWillScroll(callback: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this;
+    onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this;
+    onScrollStart(event: () => void): this;
+    onScrollStop(event: () => void): this;
+    onScrollIndex(event: (first: number, last: number) => void): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

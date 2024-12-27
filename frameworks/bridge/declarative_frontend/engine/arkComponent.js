@@ -30702,6 +30702,118 @@ class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey {
 }
 WaterFlowFlingSpeedLimitModifier.identity = Symbol('waterFlowFlingSpeedLimit');
 
+class WaterFlowOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollFrameBeginModifier.identity = Symbol('waterFlowOnScrollFrameBegin');
+
+class WaterFlowOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnWillScroll(node);
+    } else {
+      getUINativeModule().waterFlow.setOnWillScroll(node, this.value);
+    }
+  }
+}
+WaterFlowOnWillScrollModifier.identity = Symbol('waterFlowOnWillScroll');
+
+class WaterFlowOnDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnDidScroll(node);
+    } else {
+      getUINativeModule().waterFlow.setOnDidScroll(node, this.value);
+    }
+  }
+}
+WaterFlowOnDidScrollModifier.identity = Symbol('waterFlowOnDidScroll');
+
+class WaterFlowOnReachStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnReachStart(node);
+    } else {
+      getUINativeModule().waterFlow.setOnReachStart(node, this.value);
+    }
+  }
+}
+WaterFlowOnReachStartModifier.identity = Symbol('waterFlowOnReachStart');
+
+class WaterFlowOnReachEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnReachEnd(node);
+    } else {
+      getUINativeModule().waterFlow.setOnReachEnd(node, this.value);
+    }
+  }
+}
+WaterFlowOnReachEndModifier.identity = Symbol('waterFlowOnReachEnd');
+
+class WaterFlowOnScrollStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollStart(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollStart(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollStartModifier.identity = Symbol('waterFlowOnScrollStart');
+
+class WaterFlowOnScrollStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollStop(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollStopModifier.identity = Symbol('waterFlowOnScrollStop');
+
+class WaterFlowOnScrollIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollIndex(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollIndexModifier.identity = Symbol('waterFlowOnScrollIndex');
+
 class WaterFlowInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30781,13 +30893,16 @@ class ArkWaterFlowComponent extends ArkScrollable {
     return this;
   }
   onReachStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnReachStartModifier.identity, WaterFlowOnReachStartModifier, event);
+    return this;
   }
   onReachEnd(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnReachEndModifier.identity, WaterFlowOnReachEndModifier, event);
+    return this;
   }
   onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollFrameBeginModifier.identity, WaterFlowOnScrollFrameBeginModifier, event);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
@@ -30807,6 +30922,26 @@ class ArkWaterFlowComponent extends ArkScrollable {
   }
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
+    return this;
+  }
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnWillScrollModifier.identity, WaterFlowOnWillScrollModifier, callback);
+    return this;
+  }
+  onDidScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnDidScrollModifier.identity, WaterFlowOnDidScrollModifier, callback);
+    return this;
+  }
+  onScrollStart(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollStartModifier.identity, WaterFlowOnScrollStartModifier, event);
+    return this;
+  }
+  onScrollStop(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollStopModifier.identity, WaterFlowOnScrollStopModifier, event);
+    return this;
+  }
+  onScrollIndex(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollIndexModifier.identity, WaterFlowOnScrollIndexModifier, event);
     return this;
   }
   initialize(value) {

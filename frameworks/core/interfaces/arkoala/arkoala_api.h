@@ -2878,16 +2878,6 @@ struct ArkUIGridModifier {
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetGridFadingEdge)(ArkUINodeHandle node);
-    void (*setOnGridScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
-    void (*resetOnGridScrollFrameBegin)(ArkUINodeHandle node);
-    void (*setOnGridReachStartCallBack)(ArkUINodeHandle node, void* callback);
-    void (*resetOnGridReachStart)(ArkUINodeHandle node);
-    void (*setOnGridReachEndCallBack)(ArkUINodeHandle node, void* callback);
-    void (*resetOnGridReachEnd)(ArkUINodeHandle node);
-    void (*setOnGridScrollStartCallBack)(ArkUINodeHandle node, void* callback);
-    void (*resetOnGridScrollStart)(ArkUINodeHandle node);
-    void (*setOnGridScrollStopCallBack)(ArkUINodeHandle node, void* callback);
-    void (*resetOnGridScrollStop)(ArkUINodeHandle node);
     void (*setOnGridScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnGridScrollIndex)(ArkUINodeHandle node);
     void (*setOnGridScrollBarUpdateCallBack)(ArkUINodeHandle node, void* callback);
@@ -2941,6 +2931,12 @@ struct ArkUIScrollableModifier {
     void (*resetOnWillScrollCallBack)(ArkUINodeHandle node);
     void (*setOnDidScrollCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnDidScrollCallBack)(ArkUINodeHandle node);
+    void (*setOnScrollFrameBeginCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollFrameBeginCallBack)(ArkUINodeHandle node);
+    void (*setOnScrollStartCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollStartCallBack)(ArkUINodeHandle node);
+    void (*setOnScrollStopCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnScrollStopCallBack)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
@@ -3933,6 +3929,8 @@ struct ArkUIWaterFlowModifier {
     void (*setWaterFlowFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
         ArkUI_Int32 fadingEdgeLengthUnit);
     void (*resetWaterFlowFadingEdge)(ArkUINodeHandle node);
+    void (*setOnWaterFlowScrollIndexCallBack)(ArkUINodeHandle node, void* callback);
+    void (*resetOnWaterFlowScrollIndex)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemModifier {
