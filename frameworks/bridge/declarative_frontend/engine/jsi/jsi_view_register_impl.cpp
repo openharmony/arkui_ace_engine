@@ -567,8 +567,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
+#endif
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
@@ -622,7 +625,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
