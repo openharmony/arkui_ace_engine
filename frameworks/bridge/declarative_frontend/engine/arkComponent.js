@@ -5353,6 +5353,12 @@ globalThis.applyTextModifierToNode = function (modifier, nodePtr) {
   component.applyModifierPatch();
 };
 
+globalThis.applyCommonModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
