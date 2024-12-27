@@ -595,20 +595,17 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 
         CHECK_NULL_VOID(appearCb);
         auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
+        CHECK_NULL_VOID(appearCbPtr);
         menuParam.onAppear =
             [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
-            if (appearCbPtr) {
                 arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
-            }
         };
 
         CHECK_NULL_VOID(disappearCb);
         auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
-        menuParam.onDisappear =
-            [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
-            if (disappearCbPtr) {
-                arkCallback.Invoke();
-            }
+        CHECK_NULL_VOID(disappearCbPtr);
+        menuParam.onDisappear = [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
+            arkCallback.Invoke();
         };
     }
     auto builder = [callback = CallbackHelper(*content, frameNode), node]() {

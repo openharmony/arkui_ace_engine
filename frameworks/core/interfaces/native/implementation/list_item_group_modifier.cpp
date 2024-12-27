@@ -57,7 +57,7 @@ void SetListItemGroupOptionsImpl(Ark_NativePointer node,
         ListItemGroupModelNG::SetHeader(frameNode, std::move(builder));
     }
     auto footer = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().footer);
-    if (header.has_value()) {
+    if (footer.has_value()) {
         auto builder = [callback = CallbackHelper(footer.value(), frameNode), node]() -> RefPtr<UINode> {
             return callback.BuildSync(node);
         };
