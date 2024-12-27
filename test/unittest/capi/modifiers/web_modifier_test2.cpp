@@ -38,6 +38,7 @@
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/unittest/capi/stubs/mock_web_entities.h"
@@ -291,24 +292,31 @@ HWTEST_F(WebModifierTest2, onOverrideUrlLoadingTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_WebResourceRequest parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     OnOverrideUrlLoadingCallback arkCallback =
-        Converter::ArkValue<OnOverrideUrlLoadingCallback>(checkCallback, contextId);
+        Converter::ArkValue<OnOverrideUrlLoadingCallback>(nullptr, checkCallback, contextId);
 
     modifier_->setOnOverrideUrlLoading(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnOverrideUrlLoadingEvent(std::make_shared<LoadOverrideEvent>(webRequest));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnOverrideUrlLoadingEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<LoadOverrideEvent>(webRequest)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->peer->webRequest, webRequest);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<LoadOverrideEvent>(webRequest)));
     delete checkEvent->peer;
 }
 
@@ -447,26 +455,38 @@ HWTEST_F(WebModifierTest2, onInterceptKeyboardAttachTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_WebKeyboardCallbackInfo parameter,
-        const Callback_WebKeyboardOptions_Void continuation) {
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_WebKeyboardCallbackInfo parameter, const Callback_WebKeyboardOptions_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .peer = reinterpret_cast<WebKeyboardControllerPeer*>(parameter.controller.ptr),
             .attributes = Converter::Convert<std::map<std::string, std::string>>(parameter.attributes)
         };
+        CallbackHelper(continuation).Invoke(Ark_WebKeyboardOptions {
+            .useSystemKeyboard = Converter::ArkValue<Ark_Boolean>(callResult),
+            .enterKeyType = Converter::ArkValue<Opt_Number>(Ark_Empty()),
+            .customKeyboard = Converter::ArkValue<Opt_CustomNodeBuilder>(Ark_Empty()),
+        });
     };
 
-    WebKeyboardCallback arkCallback = Converter::ArkValue<WebKeyboardCallback>(checkCallback, contextId);
+    WebKeyboardCallback arkCallback = Converter::ArkValue<WebKeyboardCallback>(nullptr, checkCallback, contextId);
 
     modifier_->setOnInterceptKeyboardAttach(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnInterceptKeyboardAttachEvent(std::make_shared<InterceptKeyboardEvent>(
-        customKeyboardHandler, attributes));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnInterceptKeyboardAttachEvent();
+    ASSERT_NE(event, nullptr);
+    auto result = event(std::make_shared<InterceptKeyboardEvent>(customKeyboardHandler, attributes));
+    EXPECT_FALSE(result.isSystemKeyboard_);
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->peer->handler, customKeyboardHandler);
     EXPECT_EQ(checkEvent->attributes, attributes);
+    delete checkEvent->peer;
+    callResult = true;
+    result = event(std::make_shared<InterceptKeyboardEvent>(customKeyboardHandler, attributes));
+    EXPECT_TRUE(result.isSystemKeyboard_);
     delete checkEvent->peer;
 }
 

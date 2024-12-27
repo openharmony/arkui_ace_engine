@@ -37,6 +37,7 @@
 #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
 #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "test/unittest/capi/stubs/mock_web_entities.h"
@@ -388,7 +389,8 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnAlertEvent parameter,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_OnAlertEvent parameter,
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
@@ -396,20 +398,26 @@ HWTEST_F(WebModifierTest, onAlertTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnAlertEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnAlertEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnAlertEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnAlert(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnCommonDialogEvent(std::make_shared<WebDialogEvent>(url, message, value, type, result), type);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->url, url);
     EXPECT_EQ(checkEvent->message, message);
     EXPECT_EQ(checkEvent->peer->result, result);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
     delete checkEvent->peer;
 }
 
@@ -436,7 +444,8 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnBeforeUnloadEvent parameter,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_OnBeforeUnloadEvent parameter,
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
@@ -444,20 +453,26 @@ HWTEST_F(WebModifierTest, onBeforeUnloadTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnBeforeUnloadEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnBeforeUnloadEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnBeforeUnloadEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnBeforeUnload(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnCommonDialogEvent(std::make_shared<WebDialogEvent>(url, message, value, type, result), type);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->url, url);
     EXPECT_EQ(checkEvent->message, message);
     EXPECT_EQ(checkEvent->peer->result, result);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
     delete checkEvent->peer;
 }
 
@@ -484,7 +499,8 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnConfirmEvent parameter,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_OnConfirmEvent parameter,
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
@@ -492,20 +508,26 @@ HWTEST_F(WebModifierTest, onConfirmTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnConfirmEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnConfirmEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnConfirmEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnConfirm(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnCommonDialogEvent(std::make_shared<WebDialogEvent>(url, message, value, type, result), type);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->url, url);
     EXPECT_EQ(checkEvent->message, message);
     EXPECT_EQ(checkEvent->peer->result, result);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
     delete checkEvent->peer;
 }
 
@@ -532,7 +554,8 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnPromptEvent parameter,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_OnPromptEvent parameter,
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
@@ -540,20 +563,26 @@ HWTEST_F(WebModifierTest, onPromptTest, TestSize.Level1)
             .message = Converter::Convert<std::string>(parameter.message),
             .peer = reinterpret_cast<JsResultPeer*>(parameter.result.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnPromptEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnPromptEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnPromptEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnPrompt(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnCommonDialogEvent(std::make_shared<WebDialogEvent>(url, message, value, type, result), type);
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    EXPECT_FALSE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->url, url);
     EXPECT_EQ(checkEvent->message, message);
     EXPECT_EQ(checkEvent->peer->result, result);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(webEventHub->FireOnCommonDialogEvent(
+        std::make_shared<WebDialogEvent>(url, message, value, type, result), type));
     delete checkEvent->peer;
 }
 
@@ -579,23 +608,30 @@ HWTEST_F(WebModifierTest, onConsoleTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnConsoleEvent parameter,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_OnConsoleEvent parameter,
         const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .peer = reinterpret_cast<ConsoleMessagePeer*>(parameter.message.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnConsoleEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnConsoleEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnConsoleEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnConsole(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnConsoleEvent(std::make_shared<LoadWebConsoleLogEvent>(param));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnConsoleEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<LoadWebConsoleLogEvent>(param)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->peer->webConsoleLog, param);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<LoadWebConsoleLogEvent>(param)));
     delete checkEvent->peer;
 }
 
@@ -807,7 +843,8 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Opt_Literal_Union_String_WebResourceRequest_data parameter, const Callback_Boolean_Void continuation) {
         auto dataOpt = Converter::OptConvert<Ark_Literal_Union_String_WebResourceRequest_data>(parameter);
         if (dataOpt) {
@@ -822,18 +859,23 @@ HWTEST_F(WebModifierTest, onUrlLoadInterceptTest, TestSize.Level1)
                 []() {}
             );
         }
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Type_WebAttribute_onUrlLoadIntercept_callback arkCallback =
-        Converter::ArkValue<Type_WebAttribute_onUrlLoadIntercept_callback>(checkCallback, contextId);
+        Converter::ArkValue<Type_WebAttribute_onUrlLoadIntercept_callback>(nullptr, checkCallback, contextId);
 
     modifier_->setOnUrlLoadIntercept(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnUrlLoadInterceptEvent(std::make_shared<UrlLoadInterceptEvent>(dataStr));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnUrlLoadInterceptEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<UrlLoadInterceptEvent>(dataStr)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->data, dataStr);
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<UrlLoadInterceptEvent>(dataStr)));
 }
 
 /*
@@ -893,25 +935,33 @@ HWTEST_F(WebModifierTest, onShowFileSelectorTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnShowFileSelectorEvent parameter,
-        const Callback_Boolean_Void continuation) {
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_OnShowFileSelectorEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .resultPeer = reinterpret_cast<FileSelectorResultPeer*>(parameter.result.ptr),
             .paramPeer = reinterpret_cast<FileSelectorParamPeer*>(parameter.fileSelector.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnShowFileSelectorEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnShowFileSelectorEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnShowFileSelectorEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnShowFileSelector(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnFileSelectorShowEvent(std::make_shared<FileSelectorEvent>(param, result));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnFileSelectorShowEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<FileSelectorEvent>(param, result)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resultPeer->handler, result);
     EXPECT_EQ(checkEvent->paramPeer->handler, param);
+    delete checkEvent->resultPeer;
+    delete checkEvent->paramPeer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<FileSelectorEvent>(param, result)));
     delete checkEvent->resultPeer;
     delete checkEvent->paramPeer;
 }
@@ -1091,7 +1141,8 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_OnHttpAuthRequestEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
@@ -1099,20 +1150,26 @@ HWTEST_F(WebModifierTest, onHttpAuthRequestTest, TestSize.Level1)
             .host = Converter::Convert<std::string>(parameter.host),
             .realm = Converter::Convert<std::string>(parameter.realm)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnHttpAuthRequestEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnHttpAuthRequestEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnHttpAuthRequestEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnHttpAuthRequest(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnHttpAuthRequestEvent(std::make_shared<WebHttpAuthEvent>(result, host, realm));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnHttpAuthRequestEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<WebHttpAuthEvent>(result, host, realm)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->peer->handler, result);
     EXPECT_EQ(checkEvent->host, host);
     EXPECT_EQ(checkEvent->realm, realm);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<WebHttpAuthEvent>(result, host, realm)));
     delete checkEvent->peer;
 }
 
@@ -1126,13 +1183,8 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     std::map<std::string, std::string> headers = {};
-    std::string method = "method";
-    std::string url = "url";
-    bool hasGesture = true;
-    bool isMainFrame = true;
-    bool isRedirect = true;
     RefPtr<WebRequest> webRequest = Referenced::MakeRefPtr<WebRequest>(
-        headers, method, url, hasGesture, isMainFrame, isRedirect);
+        headers, "method", "url", true, true, true);
 
     struct CheckEvent {
         int32_t resourceId;
@@ -1140,25 +1192,45 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId,
+    static auto callResult = new WebResourceResponsePeer {
+        .handler = Referenced::MakeRefPtr<WebResponse>()
+    };
+    callResult->handler->SetStatusCode(404);
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_OnInterceptRequestEvent parameter, const Callback_WebResourceResponse_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.request.ptr)
         };
+        CallbackHelper(continuation).Invoke(Ark_WebResourceResponse {
+            .ptr = reinterpret_cast<Ark_NativePointer>(callResult)
+        });
     };
 
     Callback_OnInterceptRequestEvent_WebResourceResponse arkCallback =
-        Converter::ArkValue<Callback_OnInterceptRequestEvent_WebResourceResponse>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnInterceptRequestEvent_WebResourceResponse>(nullptr, checkCallback, contextId);
 
     modifier_->setOnInterceptRequest(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnInterceptRequestEvent(std::make_shared<OnInterceptRequestEvent>(webRequest));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnInterceptRequestEvent();
+    ASSERT_NE(event, nullptr);
+    auto result = event(std::make_shared<OnInterceptRequestEvent>(webRequest));
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetStatusCode(), 404);
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->peer->webRequest, webRequest);
     delete checkEvent->peer;
+    delete callResult;
+    callResult = new WebResourceResponsePeer {
+        .handler = Referenced::MakeRefPtr<WebResponse>()
+    };
+    result = event(std::make_shared<OnInterceptRequestEvent>(webRequest));
+    ASSERT_NE(result, nullptr);
+    EXPECT_EQ(result->GetStatusCode(), 0);
+    delete checkEvent->peer;
+    delete callResult;
 }
 
 /*
@@ -1254,26 +1326,34 @@ HWTEST_F(WebModifierTest, onContextMenuShowTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId, const Ark_OnContextMenuShowEvent parameter,
-        const Callback_Boolean_Void continuation) {
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_OnContextMenuShowEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .paramPeer = reinterpret_cast<WebContextMenuParamPeer*>(parameter.param.ptr),
             .resultPeer = reinterpret_cast<WebContextMenuResultPeer*>(parameter.result.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnContextMenuShowEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnContextMenuShowEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnContextMenuShowEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnContextMenuShow(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnContextMenuShowEvent(std::make_shared<ContextMenuEvent>(param, result));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnContextMenuShowEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<ContextMenuEvent>(param, result)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->paramPeer->handler, param);
     EXPECT_EQ(checkEvent->resultPeer->handler, result);
+    delete checkEvent->paramPeer;
+    delete checkEvent->resultPeer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<ContextMenuEvent>(param, result)));
     delete checkEvent->paramPeer;
     delete checkEvent->resultPeer;
 }
@@ -1954,24 +2034,31 @@ HWTEST_F(WebModifierTest, onLoadInterceptTest, TestSize.Level1)
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     static constexpr int32_t contextId = 123;
-    auto checkCallback = [](const Ark_Int32 resourceId,
+    static auto callResult = false;
+    auto checkCallback = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_OnLoadInterceptEvent parameter, const Callback_Boolean_Void continuation) {
         checkEvent = {
             .resourceId = resourceId,
             .peer = reinterpret_cast<WebResourceRequestPeer*>(parameter.data.ptr)
         };
+        CallbackHelper(continuation).Invoke(Converter::ArkValue<Ark_Boolean>(callResult));
     };
 
     Callback_OnLoadInterceptEvent_Boolean arkCallback =
-        Converter::ArkValue<Callback_OnLoadInterceptEvent_Boolean>(checkCallback, contextId);
+        Converter::ArkValue<Callback_OnLoadInterceptEvent_Boolean>(nullptr, checkCallback, contextId);
 
     modifier_->setOnLoadIntercept(node_, &arkCallback);
 
-    EXPECT_EQ(checkEvent.has_value(), false);
-    webEventHub->FireOnLoadInterceptEvent(std::make_shared<LoadInterceptEvent>(webRequest));
-    EXPECT_EQ(checkEvent.has_value(), true);
+    EXPECT_FALSE(checkEvent.has_value());
+    const auto event = webEventHub->GetOnLoadInterceptEvent();
+    ASSERT_NE(event, nullptr);
+    EXPECT_FALSE(event(std::make_shared<LoadInterceptEvent>(webRequest)));
+    EXPECT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->resourceId, contextId);
     EXPECT_EQ(checkEvent->peer->webRequest, webRequest);
+    delete checkEvent->peer;
+    callResult = true;
+    EXPECT_TRUE(event(std::make_shared<LoadInterceptEvent>(webRequest)));
     delete checkEvent->peer;
 }
 
