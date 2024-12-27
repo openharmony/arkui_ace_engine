@@ -742,7 +742,8 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, b
     }
 }
 
-void SearchModelNG::SetCustomKeyboard(FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance)
+void SearchModelNG::SetCustomKeyboard(FrameNode* frameNode,
+                                      const std::function<void()>&& buildFunc, bool supportAvoidance)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());

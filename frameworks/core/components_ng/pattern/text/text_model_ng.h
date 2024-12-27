@@ -185,7 +185,7 @@ public:
     static bool GetHalfLeading(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
-        std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+        std::function<void()>&& buildFunc, SelectMenuParam& menuParam);
 };
 } // namespace OHOS::Ace::NG
 

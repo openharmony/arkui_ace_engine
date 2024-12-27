@@ -726,7 +726,7 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
 }
 
 void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType, TextResponseType& responseType,
-                                    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+                                    std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextPattern>();
@@ -1286,15 +1286,5 @@ void TextModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetEnableHapticFeedback(state);
-}
-
-void TextModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
-    TextResponseType& responseType, std::function<void()>&& buildFunc, SelectMenuParam& menuParam)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    if (pattern) {
-        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
-    }
 }
 } // namespace OHOS::Ace::NG

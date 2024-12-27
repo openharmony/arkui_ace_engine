@@ -1749,41 +1749,40 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
     WebModelNG::RegisterNativeEmbedRule(frameNode, convValueTag, convValueType);
 #endif // WEB_SUPPORTED
 }
-void BindSelectionMenuImpl(Ark_NativePointer node,
-                           Ark_WebElementType elementType,
-                           const CustomNodeBuilder* content,
-                           Ark_WebResponseType responseType,
-                           const Opt_SelectionMenuOptionsExt* options)
+void InitCallbackParams_(FrameNode* frameNode, MenuParam& dst, const Opt_Callback_Void& onAppear,
+                         const Opt_Callback_Void& onDisappear)
 {
-// #ifdef WEB_SUPPORTED
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto arkOnDisappear = Converter::OptConvert<Callback_Void>(onDisappear);
+    if (arkOnDisappear) {
+        auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        dst.onDisappear = std::move(onDisappear);
+    }
+    auto arkOnAppear = Converter::OptConvert<Callback_Void>(onAppear);
+    if (arkOnAppear) {
+        auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
+            PipelineContext::SetCallBackNode(weakNode);
+            arkCallback.Invoke();
+        };
+        dst.onAppear = std::move(onAppear);
+    }
+}
+void BindSelectionMenuImpl(Ark_NativePointer node, Ark_WebElementType elementType, const CustomNodeBuilder* content,
+                           Ark_WebResponseType responseType, const Opt_SelectionMenuOptionsExt* options)
+{
+#ifdef WEB_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto elType = Converter::OptConvert<WebElementType>(elementType);
-    if (!elType.has_value()) {
-        return;
-    }
+    CHECK_EQUAL_VOID(elType.has_value(), false);
     MenuParam menuParam;
-    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
     auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
-    std::function<void()> contentNodeBuilder = nullptr;
-    std::function<void()> previewNodeBuilder = nullptr;
+    std::function<void()> contentNodeBuilder = nullptr, previewNodeBuilder = nullptr;
     if (arkOptions) {
-        auto arkOnDisappear = Converter::OptConvert<Callback_Void>(arkOptions.value().onDisappear);
-        if (arkOnDisappear) {
-            auto onDisappear = [arkCallback = CallbackHelper(arkOnDisappear.value()), weakNode]() {
-                PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke();
-            };
-            menuParam.onDisappear = std::move(onDisappear);
-        }
-        auto arkOnAppear = Converter::OptConvert<Callback_Void>(arkOptions.value().onAppear);
-        if (arkOnAppear) {
-            auto onAppear = [arkCallback = CallbackHelper(arkOnAppear.value()), weakNode]() {
-                PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke();
-            };
-            menuParam.onAppear = std::move(onAppear);
-        }
+        InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
         auto menuType = Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType);
         bool isPreviewMenu = menuType && menuType.value() == SelectionMenuType::PREVIEW_MENU;
         if (menuType) {
@@ -1792,8 +1791,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
         auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
         if (preview.has_value()) {
             previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
-                auto builderNode = callback.BuildSync(node);
-                NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+                NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
             };
         }
     }
@@ -1808,14 +1806,13 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     WebModelNG::SetNewDragStyle(frameNode, true);
     if (content) {
         contentNodeBuilder = [callback = CallbackHelper(*content, frameNode), node]() {
-            auto builderNode = callback.BuildSync(node);
-            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+            NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
         };
     }
     auto previewSelectionMenuParam = std::make_shared<WebPreviewSelectionMenuParam>(
         elType.value(), resType.value(), contentNodeBuilder, previewNodeBuilder, menuParam);
     WebModelNG::SetPreviewSelectionMenu(frameNode, previewSelectionMenuParam);
-// #endif // WEB_SUPPORTED
+#endif // WEB_SUPPORTED
 }
 } // WebAttributeModifier
 const GENERATED_ArkUIWebModifier* GetWebModifier()

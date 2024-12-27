@@ -145,23 +145,22 @@ template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
     SelectMenuParam selectMenuParam;
-    selectMenuParam.onAppear = [&src](int32_t start, int32_t end){
+    selectMenuParam.onAppear = [&src](int32_t start, int32_t end) {
         auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
         if (optOnAppear.has_value()) {
-            Ark_Int32  resourceId = optOnAppear->resource.resourceId;
             Ark_Number arkStart = Converter::ArkValue<Ark_Number>(start);
             Ark_Number arkEnd = Converter::ArkValue<Ark_Number>(end);
-            optOnAppear->call(resourceId, arkStart, arkEnd);
+            auto onAppearShared = std::make_shared<MenuOnAppearCallback>(optOnAppear.value());
+            CallbackHelper(*onAppearShared).Invoke(arkStart, arkEnd);
         }
     };
-    selectMenuParam.onDisappear = [&src](){
+    selectMenuParam.onDisappear = [&src]() {
         auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
         if (optOnDisappear.has_value()) {
-            Ark_Int32  resourceId = optOnDisappear->resource.resourceId;
-            optOnDisappear->call(resourceId);
+            auto onDisappearShared = std::make_shared<Callback_Void>(optOnDisappear.value());
+            CallbackHelper(*onDisappearShared).Invoke();
         }
     };
-    
     return selectMenuParam;
 }
 }
@@ -636,7 +635,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(options);
     auto convSpanType = Converter::Convert<TextSpanType>(spanType);
     auto convResponseType = Converter::Convert<TextResponseType>(responseType);
-    std::function<void()> convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
