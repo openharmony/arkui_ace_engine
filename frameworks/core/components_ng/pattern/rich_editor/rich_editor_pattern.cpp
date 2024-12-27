@@ -1081,11 +1081,8 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
     CHECK_NULL_VOID(customNode);
     auto frameNode = DynamicCast<FrameNode>(customNode);
     if (frameNode) {
-        auto eventHub = frameNode->GetEventHub<EventHub>();
-        CHECK_NULL_VOID(eventHub);
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        gestureEventHub->SetDragForbiddenForcely(true);
+        auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+        IF_PRESENT(gestureEventHub, SetDragForbiddenForcely(true));
     }
     for (const auto& child : customNode->GetChildren()) {
         SetSelfAndChildDraggableFalse(child);
