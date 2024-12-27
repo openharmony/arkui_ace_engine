@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
@@ -71,9 +72,32 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //MenuItemModelNG::SetSetMenuItemOptions(frameNode, convValue);
-    LOGE("MenuItemModifier::SetMenuItemOptionsImpl is not implemented, Ark_CustomObject is not supported!");
+    CHECK_NULL_VOID(value);
+    Converter::VisitUnion(value->value,
+        [frameNode, node](const Ark_MenuItemOptions& value0) {
+            std::optional<std::string> startIcon = Converter::OptConvert<std::string>(value0.startIcon);
+            auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
+            std::optional<std::string> content = Converter::OptConvert<std::string>(value0.content);
+            std::optional<std::string> endIcon = Converter::OptConvert<std::string>(value0.endIcon);
+            auto symbolEnd = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
+            std::optional<std::string> labelInfo = Converter::OptConvert<std::string>(value0.labelInfo);
+            auto builderOpt = Converter::OptConvert<CustomNodeBuilder>(value0.builder);
+            if (builderOpt.has_value()) {
+            auto builder = [callback = CallbackHelper(builderOpt.value(), frameNode), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+            }
+        },
+        [frameNode, node](const CustomNodeBuilder& value1) {
+            RefPtr<UINode> customNode;
+            customNode = CallbackHelper(value1, frameNode).BuildSync(node);
+            if (customNode) {
+            MenuItemModelNG::Create(frameNode, customNode);
+            }
+        },
+        []() {}
+    );
 }
 } // MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
