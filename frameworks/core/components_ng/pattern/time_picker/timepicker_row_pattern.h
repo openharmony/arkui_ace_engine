@@ -23,6 +23,7 @@
 #include "base/i18n/time_format.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_pattern.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
@@ -586,6 +587,14 @@ private:
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
     void ColumnPatternInitHapticController();
+    void UpdateConfirmButtonMargin(
+        const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
+    void UpdateCancelButtonMargin(
+        const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void CalcLeftTotalColumnWith(const RefPtr<FrameNode>& host, float &leftTotalColumnWith, float childSize);
+    bool CheckFocusID(int32_t childSize);
+    bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
+                          int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

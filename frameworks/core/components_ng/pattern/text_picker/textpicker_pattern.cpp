@@ -944,18 +944,20 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
 {
     std::string result = "";
     result = std::string("{\"value\":") + "[";
-    for (uint32_t i = 0; i < values.size(); i++) {
+    const size_t valueSize = values.size();
+    for (uint32_t i = 0; i < valueSize; i++) {
         result += "\"" + values[i];
-        if (values.size() > 0 && i != values.size() - 1) {
+        if (valueSize > 0 && i != valueSize - 1) {
             result += "\",";
         } else {
             result += "\"]";
         }
     }
     result += std::string(",\"index\":") + "[";
-    for (uint32_t i = 0; i < indexs.size(); i++) {
+    const size_t indexSize = indexs.size();
+    for (uint32_t i = 0; i < indexSize; i++) {
         result += std::to_string(indexs[i]);
-        if (indexs.size() > 0 && indexs.size() != i + 1) {
+        if (indexSize > 0 && indexSize != i + 1) {
             result += ",";
         } else {
             result += "]";
@@ -1072,7 +1074,8 @@ std::string TextPickerPattern::GetOptionsCascadeStr(
 std::string TextPickerPattern::GetOptionsMultiStrInternal() const
 {
     std::string result = "[";
-    for (uint32_t i = 0; i < cascadeOptions_.size(); i++) {
+    const size_t size = cascadeOptions_.size();
+    for (uint32_t i = 0; i < size; i++) {
         result += "[";
         for (uint32_t j = 0; j < cascadeOptions_[i].rangeResult.size(); j++) {
             result += "\"" + cascadeOptions_[i].rangeResult[j];
@@ -1082,7 +1085,7 @@ std::string TextPickerPattern::GetOptionsMultiStrInternal() const
                 result += "\"]";
             }
         }
-        if (cascadeOptions_.size() > 0 && i != cascadeOptions_.size() - 1) {
+        if (size > 0 && i != size - 1) {
             result += ",";
         } else {
             result += "]";
