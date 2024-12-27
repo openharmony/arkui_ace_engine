@@ -703,7 +703,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
+#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
