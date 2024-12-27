@@ -62,7 +62,7 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 
 class DerivedNavPathStack extends NavPathStack {
   // usr defined property 'id'
-  id: string = '__default__'
+  private  id: string = '__default__'
 
   // new function in derived class
   setId(id: string) {
