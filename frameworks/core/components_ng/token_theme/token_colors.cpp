@@ -87,6 +87,18 @@ void TokenColors::SetColors(const std::vector<Color>& colors)
     colors_ = colors;
 }
 
+void TokenColors::SetColor(int32_t idx, const Color& color)
+{
+    if (idx >= 0 && idx < colors_.size()) {
+        colors_[idx] = color;
+    }
+}
+
+const std::vector<Color>& TokenColors::GetColors()
+{
+    return colors_;
+}
+
 Color TokenColors::Brand() const
 {
     return colors_[BRAND];
@@ -355,5 +367,10 @@ int32_t TokenColors::GetSystemColorResIdByIndex(int32_t idx)
 const TokenColorData& TokenColors::GetTokenColorDataByIndex(int32_t idx)
 {
     return (idx >= 0 && idx < TokenColors::TOTAL_NUMBER) ? colorData[idx] : colorData[TokenColors::TOTAL_NUMBER];
+}
+
+Color TokenColors::GetByIndex(int32_t idx)
+{
+    return (idx >= 0 && idx < colors_.size()) ? colors_[idx] : Color{};
 }
 } // namespace OHOS::Ace::NG

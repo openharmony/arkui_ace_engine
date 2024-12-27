@@ -33,8 +33,8 @@ const DEFAULT_SYMBOL_FONT_SCALE = 1;
 
 export var MarginType;
 (function (z1) {
-    z1[z1['DEFAULT_MARGIN'] = 0] = 'DEFAULT_MARGIN';
-    z1[z1['FIT_MARGIN'] = 1] = 'FIT_MARGIN';
+    z1[z1.DEFAULT_MARGIN = 0] = 'DEFAULT_MARGIN';
+    z1[z1.FIT_MARGIN = 1] = 'FIT_MARGIN';
 })(MarginType || (MarginType = {}));
 
 export class ExceptionPrompt extends ViewPU {

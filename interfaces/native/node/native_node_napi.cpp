@@ -405,4 +405,23 @@ ArkUI_ErrorCode OH_ArkUI_GetRouterPageId(
         navigationAPI->getRouterPageId(node->uiNodeHandle, buffer, bufferSize, writeLength);
     return static_cast<ArkUI_ErrorCode>(ret);
 }
+
+int32_t OH_ArkUI_PostFrameCallback(ArkUI_ContextHandle uiContext, void* userData,
+    void (*callback)(uint64_t nanoTimestamp, uint32_t frameCount, void* userData))
+{
+    CHECK_NULL_RETURN(uiContext, ARKUI_ERROR_CODE_UI_CONTEXT_INVALID);
+    CHECK_NULL_RETURN(callback, ARKUI_ERROR_CODE_CALLBACK_INVALID);
+    auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto basicAPI = fullImpl->getBasicAPI();
+    CHECK_NULL_RETURN(basicAPI, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto* context = reinterpret_cast<ArkUI_Context*>(uiContext);
+    auto id = context->id;
+    auto ret = basicAPI->postFrameCallback(id, userData, callback);
+    if (ret == OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD) {
+        LOGF("OH_ArkUI_PostFrameCallback doesn't run on UI thread!");
+        abort();
+    }
+    return static_cast<ArkUI_ErrorCode>(ret);
+}
 }

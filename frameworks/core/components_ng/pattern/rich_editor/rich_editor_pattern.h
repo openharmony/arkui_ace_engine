@@ -619,6 +619,7 @@ public:
     }
 
     RectF GetCaretRect() const override;
+    void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -696,6 +697,7 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    RectF GetCaretRelativeRect();
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
@@ -766,6 +768,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
@@ -993,6 +996,8 @@ public:
     {
         return lastRichTextRect_;
     }
+    HoverInfo CreateHoverInfo(const MouseInfo& info);
+    std::pair<int32_t, int32_t> GetSpanRangeByLocalOffset(Offset localOffset);
 
 protected:
     bool CanStartAITask() override;
@@ -1083,6 +1088,7 @@ private:
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
+    void HandleImageHoverEvent(const MouseInfo& info);
     void HandleTouchEvent(const TouchEventInfo& info);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
@@ -1260,10 +1266,10 @@ private:
     RectF GetSelectArea();
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
-    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
     int32_t HandleOnDragDeleteForward();
-    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect);
+    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
     void HandleOnDragInsertValueOperation(const std::string& insertValue);
@@ -1287,11 +1293,11 @@ private:
     void AddSpanByPasteData(const RefPtr<SpanString>& spanString);
     void CompleteStyledString(RefPtr<SpanString>& spanString);
     void InsertStyledStringByPaste(const RefPtr<SpanString>& spanString);
-    void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString);
+    void HandleOnDragInsertStyledString(const RefPtr<SpanString>& spanString, bool isCopy = false);
     void AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans);
     TextSpanOptions GetTextSpanOptions(const RefPtr<SpanItem>& spanItem);
     void HandleOnCopyStyledString();
-    void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
@@ -1334,6 +1340,7 @@ private:
     bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
+    void UpdateSelectionAndHandleVisibility();
 
 #if defined(ENABLE_STANDARD_INPUT)
     sptr<OHOS::MiscServices::OnTextChangedListener> richEditTextChangeListener_;
@@ -1366,6 +1373,8 @@ private:
     bool isOnlyRequestFocus_ = false;
 
     int32_t moveLength_ = 0;
+    int32_t insertValueLength_ = 0;
+    int32_t lastCaretPosition_ = 0;
     int32_t caretPosition_ = 0;
     int32_t caretSpanIndex_ = -1;
     long long timestamp_ = 0;
@@ -1380,6 +1389,7 @@ private:
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1453,6 +1463,8 @@ private:
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
 };
 } // namespace OHOS::Ace::NG
 

@@ -338,18 +338,20 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     auto swiperPattern = GetSwiperPattern();
     CHECK_NULL_VOID(swiperPattern);
     auto displayCount = swiperPattern->GetDisplayCount();
-    auto leftIndex = 0;
-    auto rightIndex = swiperPattern->TotalCount() - displayCount;
-    if (swiperPattern->IsHorizontalAndRightToLeft()) {
-        leftIndex = swiperPattern->TotalCount() - displayCount;
-        rightIndex = 0;
+    bool leftArrowIsHidden = (index_ == 0);
+    bool rightArrowIsHidden = (index_ == swiperPattern->TotalCount() - displayCount);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && swiperPattern->IsSwipeByGroup()) {
+        leftArrowIsHidden = (index_ < displayCount);
+        rightArrowIsHidden = (index_ >= swiperPattern->TotalCount() - displayCount);
     }
-
+    if (swiperPattern->IsHorizontalAndRightToLeft()) {
+        std::swap(leftArrowIsHidden, rightArrowIsHidden);
+    }
     auto isLeftArrow = host->GetTag() == V2::SWIPER_LEFT_ARROW_ETS_TAG;
     auto isRightArrow = host->GetTag() == V2::SWIPER_RIGHT_ARROW_ETS_TAG;
     auto isLoop = swiperArrowLayoutProperty->GetLoopValue(true);
     auto needHideArrow =
-        (((isLeftArrow && index_ == leftIndex) || (isRightArrow && index_ == rightIndex)) && !isLoop) ||
+        (((isLeftArrow && leftArrowIsHidden) || (isRightArrow && rightArrowIsHidden)) && !isLoop) ||
         (swiperPattern->RealTotalCount() <= displayCount);
     if (needHideArrow) {
         renderContext->SetVisible(false);

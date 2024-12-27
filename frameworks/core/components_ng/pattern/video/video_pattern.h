@@ -111,6 +111,12 @@ public:
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
+
+    void UpdateShowFirstFrame(bool showFirstFrame)
+    {
+        showFirstFrame_ = showFirstFrame;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -404,6 +410,7 @@ private:
 
     // Video src.
     VideoSourceInfo videoSrcInfo_;
+    bool showFirstFrame_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
     bool isPrepared_ = false;

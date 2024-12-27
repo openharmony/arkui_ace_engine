@@ -297,7 +297,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
             auto fontStyle = ConvertStrToFontStyle(fontProp);
             paintState_.SetFontStyle(fontStyle);
             renderingContext2DModel_->SetFontStyle(fontStyle);
-        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end() || IsCustomFont(fontProp)) {
             auto families = ConvertStrToFontFamilies(fontProp);
             paintState_.SetFontFamilies(families);
             renderingContext2DModel_->SetFontFamilies(families);
@@ -1619,5 +1619,47 @@ Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
         return Dimension(dimension.Value() * GetDensity(true));
     }
     return Dimension(0.0);
+}
+
+bool JSCanvasRenderer::IsCustomFont(const std::string& fontName)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto fontManager = pipeline->GetFontManager();
+    CHECK_NULL_RETURN(fontManager, false);
+    auto fontNames = fontManager->GetFontNames();
+    return std::find(fontNames.begin(), fontNames.end(), fontName) != fontNames.end();
+}
+
+bool JSCanvasRenderer::IsValidLetterSpacing(const std::string& letterSpacing)
+{
+    std::regex pattern(R"(^[+-]?(\d+(\.\d+)?|\.\d+)((vp|px)$)?$)", std::regex::icase);
+    return std::regex_match(letterSpacing, pattern);
+}
+
+// letterSpacing: string | LengthMetrics
+void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
+{
+    std::string letterSpacingStr;
+    if (info.GetStringArg(0, letterSpacingStr) && IsValidLetterSpacing(letterSpacingStr)) {
+        if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
+            renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
+            return;
+        } else {
+            renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
+            return;
+        }
+    }
+    
+    CalcDimension letterSpacingCal;
+    if (info[0]->IsObject() && JSViewAbstract::ParseLengthMetricsToDimension(info[0], letterSpacingCal)) {
+        if (letterSpacingCal.Unit() != DimensionUnit::PX && letterSpacingCal.Unit() != DimensionUnit::VP) {
+            letterSpacingCal.Reset();
+        }
+        renderingContext2DModel_->SetLetterSpacing(letterSpacingCal);
+        return;
+    }
+
+    renderingContext2DModel_->SetLetterSpacing(Dimension(0.0));
 }
 } // namespace OHOS::Ace::Framework

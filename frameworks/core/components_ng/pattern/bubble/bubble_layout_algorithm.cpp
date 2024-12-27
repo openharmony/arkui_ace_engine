@@ -271,6 +271,10 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
+    float minHeight = minHeight_.ConvertToPx();
+    if (minHeight > 0.0f) {
+        childLayoutConstraint.minSize.SetHeight(minHeight);
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -340,7 +344,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-Dimension GetMaxWith()
+Dimension GetMaxWith(uint32_t maxColumns)
 {
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
     auto parent = gridColumnInfo->GetParent();
@@ -348,6 +352,9 @@ Dimension GetMaxWith()
         parent->BuildColumnWidth();
     }
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+    if (maxColumns > 0) {
+        maxWidth = Dimension(gridColumnInfo->GetWidth(maxColumns));
+    }
     return maxWidth;
 }
 
@@ -364,7 +371,7 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     if (showInSubWindow) {
         maxHeight = SystemProperties::GetDeviceHeight();
     }
-    auto popupMaxWidth = GetMaxWith().Value();
+    auto popupMaxWidth = GetMaxWith(maxColumns_).Value();
     if (useCustom_) {
         popupMaxWidth = width;
     }
@@ -617,6 +624,8 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
     showArrow_ = false;
+    minHeight_ = popupTheme->GetMinHeight();
+    maxColumns_ = popupTheme->GetMaxColumns();
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
     InitWrapperRect(layoutWrapper);
     UpdateScrollHeight(layoutWrapper, showInSubWindow);
@@ -1611,7 +1620,6 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
 {
     Edge edge;
     double arrowOffset;
-    double edgeValue = 0.0;
     double maxMotionRange = 0.0;
     double minMotionRange = 0.0;
     double targetOffsetXOrY = 0.0;
@@ -1625,24 +1633,20 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            edgeValue = edge.Top().Value();
             bHorizontal = true;
             break;
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            edgeValue = edge.Bottom().Value();
             bHorizontal = true;
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            edgeValue = edge.Left().Value();
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            edgeValue = edge.Right().Value();
             break;
         default:
             break;

@@ -38,7 +38,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     }
 }
 
-static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -480,8 +479,8 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
-        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
-        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.left = NG::CalcLength(pattern->GetSelectLeftRightMargin());
+        paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
         ViewAbstract::SetPadding(paddings);
     }
     

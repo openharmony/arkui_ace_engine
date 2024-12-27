@@ -102,6 +102,7 @@ void CheckBoxPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -258,6 +259,77 @@ void CheckBoxPattern::HandleMouseEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void CheckBoxPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    focusEventInitialized_ = true;
+}
+
+void CheckBoxPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(paintMethod_);
+    AddIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(true);
+}
+
+void CheckBoxPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(paintMethod_);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void CheckBoxPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(host, isFocusActiveUpdateEvent_);
+}
+
+void CheckBoxPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(host);
+}
+
+void CheckBoxPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(paintMethod_);
+    auto modifier = paintMethod_->GetCheckBoxModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->SetIsFocused(isFocusAcitve);
 }
 
 void CheckBoxPattern::OnClick()
@@ -658,6 +730,22 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
 }
 
+bool CheckBoxPattern::IsSquareStyleBox()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    CheckBoxStyle checkboxStyle = CheckBoxStyle::CIRCULAR_STYLE;
+    if (paintProperty->HasCheckBoxSelectedStyle()) {
+        checkboxStyle = paintProperty->GetCheckBoxSelectedStyleValue(CheckBoxStyle::CIRCULAR_STYLE);
+    } else {
+        checkboxStyle = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ?
+            CheckBoxStyle::CIRCULAR_STYLE : CheckBoxStyle::SQUARE_STYLE;
+    }
+    return checkboxStyle == CheckBoxStyle::SQUARE_STYLE;
+}
+
 void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 {
     auto host = GetHost();
@@ -668,6 +756,12 @@ void CheckBoxPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(checkBoxTheme);
     auto borderRadius = checkBoxTheme->GetFocusRadius().ConvertToPx();
     auto focusPaintPadding = checkBoxTheme->GetFocusPaintPadding().ConvertToPx();
+    auto isSquare = IsSquareStyleBox();
+    auto squareFocusBoardSize = checkBoxTheme->GetFocusBoardSize();
+    auto roundFocusBoardSize = checkBoxTheme->GetRoundFocusBoardSize();
+    if ((squareFocusBoardSize > roundFocusBoardSize) && isSquare) {
+        focusPaintPadding += (squareFocusBoardSize.ConvertToPx() - roundFocusBoardSize.ConvertToPx());
+    }
     float originX = offset_.GetX() - focusPaintPadding;
     float originY = offset_.GetY() - focusPaintPadding;
     float width = size_.Width() + 2 * focusPaintPadding;
@@ -687,7 +781,7 @@ FocusPattern CheckBoxPattern::GetFocusPattern() const
     CHECK_NULL_RETURN(pipeline, FocusPattern());
     auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
     CHECK_NULL_RETURN(checkBoxTheme, FocusPattern());
-    auto activeColor = checkBoxTheme->GetActiveColor();
+    auto activeColor = checkBoxTheme->GetFocusLineColor();
     FocusPaintParam focusPaintParam;
     focusPaintParam.SetPaintColor(activeColor);
     return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };

@@ -15,6 +15,8 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/core/rosen/mock_canvas.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -1898,7 +1900,7 @@ HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
      * @tc.steps: step4. escape when select all value
      */
     pattern_->HandleOnSelectAll(true);
-    EXPECT_FALSE(pattern_->HandleOnEscape());
+    EXPECT_TRUE(pattern_->HandleOnEscape());
 }
 
 /**
@@ -2157,6 +2159,27 @@ HWTEST_F(TextFieldUXTest, TextInputLineHeight001, TestSize.Level1)
      * @tc.step: step2. test maxLength
      */
     EXPECT_EQ(layoutProperty_->GetLineHeight(), 2.0_fp);
+}
+
+/**
+ * @tc.name: TextInputHalfLeading001
+ * @tc.desc: test TextInput halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextInputHalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set halfLeading true
+     * @tc.expected: halfLeading is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(true);
+    });
+
+    /**
+     * @tc.step: step2. test halfLeading
+     */
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), true);
 }
 
 /**

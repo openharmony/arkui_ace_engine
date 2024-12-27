@@ -159,7 +159,9 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD));
+    auto shadowStyle = toastTheme->GetToastShadowStyle();
+    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(shadowStyle));
+
     if (toastInfo.isTypeStyleShadow) {
         auto colorMode = SystemProperties::GetColorMode();
         auto shadowStyle = shadow.GetStyle();
@@ -170,11 +172,15 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     }
     toastContext->UpdateBackShadow(shadow);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
+        toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(toastTheme->GetDefaultBGColor()));
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
-            toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+            toastInfo.backgroundBlurStyle.value_or(toastTheme->GetToastBackgroundBlurStyle()));
+        styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+        if (!toastInfo.backgroundColor.has_value()) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
+        }
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

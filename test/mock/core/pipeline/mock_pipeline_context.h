@@ -61,12 +61,26 @@ public:
         return useFlushUITasks_;
     }
 
+    void SetBackCallback(std::function<void()> callback)
+    {
+        backCallback_ = callback;
+    }
+
+    bool CallRouterBackToPopPage() override
+    {
+        if (backCallback_) {
+            backCallback_();
+            return true;
+        }
+        return false;
+    }
     void SetEnableSwipeBack(bool isEnable) {}
 
 protected:
     float fontScale_ = 1.0f;
     bool isDeclarative_ = false;
     double dipScale_ = 1.0;
+    std::function<void()> backCallback_;
     RefPtr<TaskExecutor> taskExecutor_;
     bool useFlushUITasks_ = false;
 };

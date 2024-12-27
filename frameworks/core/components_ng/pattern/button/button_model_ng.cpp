@@ -118,10 +118,9 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto padding = buttonTheme->GetPadding(controlSize.value());
-        PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+        auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_VOID(frameNode);
+        SetButtonSize(frameNode, controlSize, buttonTheme);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(fontSize);
     }
@@ -163,6 +162,26 @@ void ButtonModelNG::SetButtonStyle(FrameNode* frameNode, const std::optional<But
     }
 }
 
+void ButtonModelNG::SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+    RefPtr<ButtonTheme> buttonTheme)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = buttonTheme->GetPadding(controlSize.value());
+    ButtonStyleMode buttonStyle = layoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    PaddingProperty defaultPadding;
+    if (buttonStyle == ButtonStyleMode::TEXT && controlSize.value() == ControlSize::SMALL) {
+        float leftPadding =  buttonTheme->GetPaddingText().ConvertToPx();
+        float rightPadding = buttonTheme->GetPaddingText().ConvertToPx();
+        defaultPadding = { CalcLength(leftPadding), CalcLength(rightPadding),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    } else {
+        defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+            CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+}
+
 void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
 {
     if (controlSize.has_value()) {
@@ -171,10 +190,7 @@ void ButtonModelNG::SetControlSize(FrameNode* frameNode, const std::optional<Con
         CHECK_NULL_VOID(context);
         auto buttonTheme = context->GetTheme<ButtonTheme>();
         CHECK_NULL_VOID(buttonTheme);
-        auto padding = buttonTheme->GetPadding(controlSize.value());
-        PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
-            CalcLength(padding.Top()), CalcLength(padding.Bottom()), std::nullopt, std::nullopt };
-        ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+        SetButtonSize(frameNode, controlSize, buttonTheme);
         Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
         SetFontSize(frameNode, fontSize);
     }
@@ -571,9 +587,11 @@ Color ButtonModelNG::GetFontColor(FrameNode* frameNode)
     return value;
 }
 
-void ButtonModelNG::GetAutoDisable(FrameNode* frameNode, bool autoDisable)
+bool ButtonModelNG::GetAutoDisable(FrameNode* frameNode)
 {
-    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, autoDisable, frameNode);
+    bool value = false;
+    ACE_GET_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, AutoDisable, value, frameNode);
+    return value;
 }
 
 void ButtonModelNG::SetBuilderFunc(FrameNode* frameNode, NG::ButtonMakeCallback&& makeFunc)

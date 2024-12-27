@@ -1003,6 +1003,82 @@ HWTEST_F(SwiperIndicatorModifierTestNg, GetStartAndEndIndex002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetIndex001
+ * @tc.desc: get point start and end index when SwipeByGroup is true and isLoop_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    model.SetLoop(false);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
+    EXPECT_EQ(displayIndicatorCount, 3);
+
+    // change last page
+    ChangeIndex(4);
+    pattern_->UpdateCurrentOffset(40.0f);
+    FlushLayoutTask(frameNode_);
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
+
+    int32_t indicatorIndex = displayIndicatorCount - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, indicatorIndex);
+    EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
+ * @tc.name: GetIndex002
+ * @tc.desc: get point start and end index when SwipeByGroup is true and isLoop_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, GetIndex002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    model.SetLoop(true);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_EQ(pattern_->TotalCount(), 6);
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+    auto displayIndicatorCount = pattern_->DisplayIndicatorTotalCount();
+    EXPECT_EQ(displayIndicatorCount, 3);
+
+    // change last page
+    ChangeIndex(4);
+    pattern_->UpdateCurrentOffset(40.0f);
+    FlushLayoutTask(frameNode_);
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto nodePaintMethod = indicatorPattern->CreateNodePaintMethod();
+    auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(nodePaintMethod);
+    ASSERT_NE(paintMethod, nullptr);
+
+    int32_t indicatorIndex = displayIndicatorCount - 1;
+    auto expectVal = std::pair<int32_t, int32_t>(indicatorIndex, 0);
+    EXPECT_EQ(paintMethod->GetIndex(indicatorIndex), expectVal);
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+}
+
+/**
  * @tc.name: AdjustPointCenterXForTouchBottom
  * @tc.desc: adjust long point centerX for touch bottom
  * @tc.type: FUNC

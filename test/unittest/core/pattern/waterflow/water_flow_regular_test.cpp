@@ -173,6 +173,98 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest001
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest002
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest003
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode2;
+    if (footer2) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer2();
+        footerNode2 = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode2);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest004
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer2));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
  * @tc.name: ChangeFooter001
  * @tc.desc: Test changing the footer of the WaterFlow layout.
  * @tc.type: FUNC
@@ -407,6 +499,7 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 17), 200.0f);
     EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(info->startIndex_, 36);
     EXPECT_EQ(info->endIndex_, 49);
@@ -547,6 +640,7 @@ HWTEST_F(WaterFlowTestNg, Jump002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateWaterFlowItems(100);
     CreateDone();
+    pattern_->isAnimationStop_ = false; // to disable skipping
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
@@ -591,6 +685,7 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
     CreateWaterFlowItems(100);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
@@ -714,6 +809,7 @@ HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
     CreateWaterFlowItems(43);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-4000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);

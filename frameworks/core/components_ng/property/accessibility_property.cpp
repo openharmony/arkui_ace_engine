@@ -313,6 +313,7 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
     V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::WEB_ETS_TAG,
 };
 
@@ -427,6 +428,7 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::XCOMPONENT_ETS_TAG,
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
 
@@ -576,6 +578,26 @@ bool AccessibilityProperty::HasAccessibilityRole()
 std::string AccessibilityProperty::GetAccessibilityRole() const
 {
     return accessibilityRole_.value_or("");
+}
+
+void AccessibilityProperty::SetAccessibilityCustomRole(const std::string& role)
+{
+    accessibilityCustomRole_ = role;
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomRole()
+{
+    accessibilityCustomRole_ = "";
+}
+
+bool AccessibilityProperty::HasAccessibilityCustomRole()
+{
+    return accessibilityCustomRole_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilityCustomRole() const
+{
+    return accessibilityCustomRole_.value_or("");
 }
 
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
@@ -818,6 +840,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
+{
+    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+        return;
+    }
+    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+}
+
 void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
 {
     if (text == accessibilityText_.value_or("")) {
@@ -935,6 +966,9 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     if (onAccessibilityFocusCallbackImpl_) {
         onAccessibilityFocusCallbackImpl_(isFocus);
     }
+    if (onUserAccessibilityFocusCallbackImpl_) {
+        onUserAccessibilityFocusCallbackImpl_(isFocus);
+    }
 }
 
 void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
@@ -954,6 +988,17 @@ void AccessibilityProperty::SetOnAccessibilityFocusCallback(
     const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
 {
     onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::SetUserOnAccessibilityFocusCallback(
+    const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl)
+{
+    onUserAccessibilityFocusCallbackImpl_ = onUserAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::ResetUserOnAccessibilityFocusCallback()
+{
+    onUserAccessibilityFocusCallbackImpl_ = nullptr;
 }
 
 bool AccessibilityProperty::ActActionClearSelection()

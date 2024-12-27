@@ -436,6 +436,13 @@ struct SetFontSizeOp final : Op {
     void Draw(CanvasPaintMethod* method) const;
 };
 
+struct SetLetterSpacingOp final : Op {
+    static constexpr auto kType = Type::SetLetterSpacingOp;
+    explicit SetLetterSpacingOp(const Dimension& letterSpacing): letterSpacing(std::move(letterSpacing)) {}
+    Dimension letterSpacing;
+    void Draw(CanvasPaintMethod* method) const;
+};
+
 struct SetFontStyleOp final : Op {
     static constexpr auto kType = Type::SetFontStyleOp;
     explicit SetFontStyleOp(OHOS::Ace::FontStyle style): style(std::move(style)) {}

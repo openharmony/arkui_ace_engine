@@ -151,40 +151,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnDragMove001, TestSize.L
 }
 
 /**
- * @tc.name: RichEditorPatternTestOnDragEnd001
- * @tc.desc: test OnDragEnd
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestOnDragEnd001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    bool isTestAddObject = false;
-    ResultObject resultObject;
-    if (richEditorPattern->recoverDragResultObjects_.empty()) {
-        isTestAddObject = true;
-        richEditorPattern->recoverDragResultObjects_.emplace_back(resultObject);
-    }
-
-    RefPtr<Ace::DragEvent> event = nullptr;
-    richEditorPattern->showSelect_ = false;
-    richEditorPattern->OnDragEnd(event);
-    ASSERT_EQ(richEditorPattern->showSelect_, false);
-
-    event = AceType::MakeRefPtr<Ace::DragEvent>();
-    event->SetResult(DragRet::DRAG_SUCCESS);
-    richEditorPattern->showSelect_ = false;
-    richEditorPattern->OnDragEnd(event);
-    ASSERT_EQ(richEditorPattern->showSelect_, false);
-
-    if (isTestAddObject) {
-        richEditorPattern->recoverDragResultObjects_.clear();
-    }
-}
-
-/**
  * @tc.name: RichEditorPatternTestResetDragSpanItems001
  * @tc.desc: test ResetDragSpanItems
  * @tc.type: FUNC
@@ -305,47 +271,6 @@ HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestCloseCustomKeyboard001, T
     ASSERT_EQ(richEditorPattern->CloseCustomKeyboard(), true);
 
     richEditorPattern->customKeyboardBuilder_ = oldFunc;
-}
-
-/**
- * @tc.name: RichEditorPatternTestUpdatePreviewText001
- * @tc.desc: test UpdatePreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, RichEditorPatternTestUpdatePreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    property->UpdatePreviewTextStyle("underline");
-
-    std::string previewTextValue = INIT_VALUE_1;
-    PreviewRange previewRange;
-    previewRange.start = -1;
-    previewRange.end = -1;
-    richEditorPattern->SetPreviewText(PREVIEW_TEXT_VALUE1, previewRange);
-
-    previewRange.start = -1;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = 0;
-    previewRange.end = -1;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = -1;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), false);
-
-    previewRange.start = 0;
-    previewRange.end = 0;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
-
-    previewRange.start = richEditorPattern->previewTextRecord_.startOffset;
-    previewRange.end = richEditorPattern->previewTextRecord_.endOffset;
-    EXPECT_EQ(richEditorPattern->UpdatePreviewText(previewTextValue, previewRange), true);
 }
 
 /**
@@ -597,51 +522,6 @@ HWTEST_F(RichEditorPatternTestNg, HandleOnDragStatusCallback001, TestSize.Level1
     notifyDragEvent->SetY(15.0f);
     richEditorPattern->HandleOnDragStatusCallback(dragEventType4, notifyDragEvent);
     EXPECT_EQ(richEditorPattern->isDragging_, false);
-}
-
-/**
- * @tc.name: HandleCursorOnDragEnded001
- * @tc.desc: test HandleCursorOnDragEnded
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, HandleCursorOnDragEnded001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    auto focusHub = richEditorPattern->GetFocusHub();
-    EXPECT_NE(focusHub, nullptr);
-    RefPtr<NotifyDragEvent> notifyDragEvent = AceType::MakeRefPtr<NotifyDragEvent>();
-    EXPECT_NE(notifyDragEvent, nullptr);
-    /**
-     * @tc.steps: step2. change parameter and call function.
-     */
-    richEditorPattern->isCursorAlwaysDisplayed_ = false;
-    richEditorPattern->HandleCursorOnDragEnded(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->caretTwinkling_, false);
-
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    richEditorPattern->isCursorAlwaysDisplayed_ = true;
-
-    focusHub->currentFocus_ = false;
-    richEditorPattern->HandleCursorOnDragEnded(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
-
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    richEditorPattern->isCursorAlwaysDisplayed_ = true;
-    focusHub->currentFocus_ = true;
-    richEditorPattern->HandleCursorOnDragEnded(notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isCursorAlwaysDisplayed_, false);
 }
 
 /**
@@ -1537,37 +1417,6 @@ HWTEST_F(RichEditorPatternTestNg, GetPreviewTextUnderlineWidth001, TestSize.Leve
     );
 
     PipelineBase::GetCurrentContext()->themeManager_ = oldThemeManager;
-}
-
-/**
- * @tc.name: FromStyledString001
- * @tc.desc: test FromStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestNg, FromStyledString001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    Selection selection;
-    RefPtr<SpanString> spanString;
-
-    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
-    EXPECT_EQ(selection.selection[0], 0);
-    EXPECT_EQ(selection.selection[1], 0);
-
-    spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
-    ASSERT_NE(spanString, nullptr);
-    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
-    EXPECT_EQ(selection.selection[0], 0);
-    EXPECT_EQ(selection.selection[1], INIT_U16VALUE_1.size());
-
-    auto imageSpanItem = AceType::MakeRefPtr<NG::ImageSpanItem>();
-    spanString->AppendSpanItem(imageSpanItem);
-    selection = richEditorPattern->FromStyledString(spanString).GetSelection();
-    EXPECT_EQ(selection.selection[0], 0);
-    EXPECT_EQ(selection.selection[1], 0);
 }
 
 /**

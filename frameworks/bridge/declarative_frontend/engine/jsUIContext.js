@@ -340,8 +340,23 @@ class UIContext {
     }
 
     getOverlayManager() {
-        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        this.overlayManager_.setOverlayManagerOptions();
         return this.overlayManager_;
+    }
+    setOverlayManagerOptions(options) {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.setOverlayManagerOptions(options);
+    }
+    getOverlayManagerOptions() {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.getOverlayManagerOptions();
     }
 
     animateTo(value, event) {
@@ -1238,6 +1253,20 @@ class OverlayManager {
     constructor(instanceId) {
         this.instanceId_ = instanceId;
         this.ohos_overlayManager = globalThis.requireNapi('overlay');
+    }
+
+    setOverlayManagerOptions(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.setOverlayManagerOptions(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
+    }
+
+    getOverlayManagerOptions() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.getOverlayManagerOptions();
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
     }
 
     addComponentContent(content, index) {

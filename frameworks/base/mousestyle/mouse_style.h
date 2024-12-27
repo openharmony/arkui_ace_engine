@@ -16,9 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
+#include <list>
+
 #include "base/memory/ace_type.h"
 #include "base/image/pixel_map.h"
-#include <list>
 
 namespace OHOS::Ace {
 
@@ -88,17 +89,17 @@ public:
 };
 
 enum class MouseStyleChangeReason {
-    INNER_SET_MOUSESTYLE = 0,
-    USER_SET_MOUSESTYLE = 1,
-    WINDOW_DESTROY_RESET_MOUSESTYLE = 2,
+    INNER_SET_MOUSESTYLE = 0, // inner frameNode call mouseStyle change
+    USER_SET_MOUSESTYLE = 1, // user call setCursor change mouseStyle
+    WINDOW_DESTROY_RESET_MOUSESTYLE = 2, // window is destroyed, reset mouse style
 };
 
 struct MouseStyleChangeLog {
-    int32_t windowId;
-    int32_t changeNodeId;
-    MouseFormat beforeMouseStyle;
-    MouseFormat afterMouseStyle;
-    MouseStyleChangeReason reason;
+    int32_t windowId; // the id of window which change mouseStyle
+    int32_t changeNodeId; // the id of node which change mouseStyle
+    MouseFormat beforeMouseStyle; // before this change, the mouseFormat of mouseStyle
+    MouseFormat afterMouseStyle; // after this change, the mouseFormat of mouseStyle
+    MouseStyleChangeReason reason; // the reason of this mouseStyle change
 };
 
 class ACE_EXPORT MouseStyleManager : public AceType {
@@ -143,8 +144,8 @@ private:
     std::optional<int32_t> mouseStyleNodeId_;
     MouseFormat lastVsyncMouseFormat_ = MouseFormat::DEFAULT;
     MouseFormat mouseFormat_ = MouseFormat::DEFAULT;
-    std::list<MouseStyleChangeLog> vsyncMouseStyleChange_;
-    std::list<MouseStyleChangeLog> mouseStyleChangeLog_;
+    std::list<MouseStyleChangeLog> vsyncMouseStyleChanges_;
+    std::list<MouseStyleChangeLog> mouseStyleChangeLogs_;
 };
 } // namespace OHOS::Ace
 

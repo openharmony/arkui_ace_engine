@@ -17,7 +17,6 @@ ace_unittest("event_manager_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
-    "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
@@ -38,9 +37,17 @@ ace_unittest("drag_event_test_ng") {
   module_output = "events"
   sources = [
     "drag_event_test_ng.cpp",
-    "drag_event_test_ng_issue.cpp",
     "drag_event_test_ng_property_config.cpp",
     "drag_event_test_ng_property_config_coverage.cpp",
+  ]
+}
+
+ace_unittest("drag_event_test_ng_base") {
+  type = "new"
+  module_output = "events"
+  sources = [
+    "./drag_event/drag_event_test_ng_base.cpp",
+    "./drag_event/drag_event_test_ng_issue.cpp",
   ]
 }
 

@@ -15,6 +15,11 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace {
+namespace {
+static std::atomic<int32_t> gGestureSpanId = 0;
+constexpr int32_t GESTURES_SPAN_DIVIDE_SIZE = 10000000;
+}
+
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
 {
@@ -410,6 +415,12 @@ GestureStyle GestureSpan::GetGestureStyle() const
 RefPtr<SpanBase> GestureSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<GestureSpan>(gestureInfo_, start, end);
+    auto gestureSpan = DynamicCast<GestureSpan>(spanBase);
+    CHECK_NULL_RETURN(gestureSpan, spanBase);
+    if (gestureSpanId_ == -1) {
+        gestureSpanId_ = gGestureSpanId.fetch_add(1) % GESTURES_SPAN_DIVIDE_SIZE;
+    }
+    gestureSpan->SetGestureSpanId(gestureSpanId_);
     return spanBase;
 }
 
@@ -418,6 +429,9 @@ bool GestureSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto gestureSpan = DynamicCast<GestureSpan>(other);
     if (!gestureSpan) {
         return false;
+    }
+    if (gestureSpanId_ != -1 && gestureSpanId_ == gestureSpan->GetGestureSpanId()) {
+        return true;
     }
     auto gestureInfo = gestureSpan->GetGestureStyle();
     return gestureInfo_.IsEqual(gestureInfo);
