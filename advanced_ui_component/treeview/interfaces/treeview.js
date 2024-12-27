@@ -26,6 +26,7 @@ var t = (this && this.t) || function (f19, target, key, desc) {
 if (!('finalizeConstruction' in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+
 const hilog = requireNapi('hilog');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const resourceManager = requireNapi('resourceManager');
@@ -796,8 +797,8 @@ export class TreeView extends ViewPU {
             this.item = this.treeController.v7().w7;
         }
         let w17 = this.getUIContext();
-        this.followingSystemFontScale = true;
-        this.maxAppFontScale = 1;
+        this.followingSystemFontScale = w17.isFollowingSystemFontScale();
+        this.maxAppFontScale = w17.getMaxFontScale();
         accessibility.on('accessibilityStateChange', (state) => {
             this.isAccessibilityEnabled = state;
         });
@@ -1182,9 +1183,6 @@ export class TreeView extends ViewPU {
                 if (this.viewLastIndex !== -1 && o16 !== this.viewLastIndex) {
                     this.listNodeDataSource.w7[this.viewLastIndex].k6().w3?.j8(false);
                     this.listNodeDataSource.w7[this.viewLastIndex].k6().w3?.q9(false);
-                }
-                if (this.listNodeDataSource.w7[this.viewLastIndex] !== null) {
-                    this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
                 }
                 this.listNodeDataSource.lastIndex = this.viewLastIndex;
                 if (this.listNodeDataSource.w7[this.viewLastIndex]) {
@@ -2245,27 +2243,47 @@ class h3 extends g3 {
         return k3.join(',');
     }
     p16(w20) {
-        let k1 = [];
-        while (w20 !== -1) {
-            if (w20 === undefined) {
-                return;
-            }
-            let y20 = this.f10(w20);
-            let p1 = this.findIndex(y20);
-            let a21 = this.v10.get(y20);
-            if (a21 === undefined || y20 === undefined) {
-                return;
-            }
-            let primaryTitle = this.getData(p1)?.t6()?.primaryTitle === undefined
-                ? '' : this.getData(p1)?.t6()?.primaryTitle;
-            let secondaryTitle = this.getData(p1)?.t6()?.secondaryTitle === undefined
-                ? '' : this.getData(p1)?.t6()?.secondaryTitle;
-            let z20 = this.s16(primaryTitle);
-            let c21 = this.s16(secondaryTitle);
-            k1.unshift(`${z20}, ${c21}`);
-            w20 = a21.currentNodeId;
+        if (w20 === undefined) {
+            return '';
         }
-        return k1.join(',');
+        let x3 = this.f10(w20);
+        if (x3 === -1) {
+            let e5 = [];
+            let f5 = this.v10.get(w20);
+            if (f5 === undefined || x3 === undefined) {
+                return '';
+            }
+            let primaryTitle = this.a15(f5).t6()?.primaryTitle === undefined
+                ? '' : this.a15(f5).t6().primaryTitle;
+            let secondaryTitle = this.a15(f5).t6()?.secondaryTitle === undefined
+                ? '' : this.a15(f5).t6().secondaryTitle;
+            let g5 = this.s16(primaryTitle);
+            let k5 = this.s16(secondaryTitle);
+            e5.unshift(`${g5}, ${k5}`);
+            return e5.join(',');
+        }
+        else {
+            let y3 = [];
+            while (w20 !== -1) {
+                if (w20 === undefined) {
+                    return '';
+                }
+                let z3 = this.f10(w20);
+                let a4 = this.v10.get(z3);
+                if (a4 === undefined || z3 === undefined) {
+                    return '';
+                }
+                let primaryTitle = this.a15(a4).t6()?.primaryTitle === undefined
+                    ? '' : this.a15(a4).t6().primaryTitle;
+                let secondaryTitle = this.a15(a4).t6()?.secondaryTitle === undefined
+                    ? '' : this.a15(a4).t6().secondaryTitle;
+                let b4 = this.s16(primaryTitle);
+                let c4 = this.s16(secondaryTitle);
+                y3.unshift(`${b4}, ${c4}`);
+                w20 = a4.currentNodeId;
+            }
+            return y3.join(',');
+        }
     }
     h16(q20, r20, v3) {
         this.g16(v3);
@@ -2399,7 +2417,6 @@ class h3 extends g3 {
     t8(currentIndex, currentNodeId, b11) {
         let c11 = currentIndex !== this.o11 ? true : false;
         let d11 = this.getData(b11)?.c7();
-        let k22 = this.w7[currentIndex + 1].e6();
         if (d11) {
             this.o11 = this.INITIAL_INVALID_VALUE;
         }
@@ -2414,9 +2431,16 @@ class h3 extends g3 {
                 this.q12(currentIndex, this.w7[currentIndex].l6().h5);
                 this.g9(b11);
                 let i11 = this.e11 ? 1000 : 0;
+                let k22 = this.w7[currentIndex + 1].e6();
+                let w3 = this.f10(currentNodeId);
                 this.s11 = setTimeout(() => {
                     this.c14(currentIndex);
-                    this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.g16(k22), 1));
+                    if (w3 === -1) {
+                        this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.p16(currentNodeId), 1));
+                    }
+                    else {
+                        this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.p16(k22), 1));
+                    }
                 }, i11);
             }
             if (d11 || (this.t11 !== this.INITIAL_INVALID_VALUE &&
@@ -3485,8 +3509,8 @@ export class i3 extends ViewPU {
             this.item.y16 = this.item.k6().v3?.y16;
         }
         let j7 = this.getUIContext();
-        this.followingSystemFontScale = true;
-        this.maxAppFontScale = 1;
+        this.followingSystemFontScale = j7.isFollowingSystemFontScale();
+        this.maxAppFontScale = j7.getMaxFontScale();
     }
     decideFontScale() {
         let h7 = this.getUIContext();
@@ -3538,7 +3562,7 @@ export class i3 extends ViewPU {
         let h20 = g20.indexOf(currentNodeId) + 1;
         let i20 = this.listNodeDataSource.g16(currentNodeId);
         if (i20 === undefined) {
-            return '';
+            return ' ';
         }
         if (this.accessibilityNodeType === q17.PLACE) {
             if (this.listNodeDataSource.f10(currentNodeId) === -1) {
@@ -3566,7 +3590,7 @@ export class i3 extends ViewPU {
             return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
         }
         else {
-            return ' ';
+            return ',';
         }
     }
     getAccessibilityReadButtonText(a20) {

@@ -1560,10 +1560,6 @@ export struct TreeView {
           .mainTitleNode?.setMainTitleHighLight(false);
       }
 
-      if (this.listNodeDataSource.listNode[this.viewLastIndex] !== null) {
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
-      }
-
       this.listNodeDataSource.lastIndex = this.viewLastIndex;
       if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
         if (this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
@@ -3004,28 +3000,47 @@ class ListNodeDataSource extends BasicDataSource {
     return accessibleTitleList.join(',');
   }
 
-  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string | undefined {
-    let accessibleTitleList: string[] = [];
-    while (insertNodeCurrentNodeId !== -1) {
-      if (insertNodeCurrentNodeId === undefined) {
-        return;
-      }
-      let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
-      let parentNodeIndex = this.findIndex(insertNodeParentNodeId);
-      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
+    if (insertNodeCurrentNodeId === undefined) {
+      return '';
+    }
+    let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+    if (insertNodeParentNodeId === -1) {
+      let accessibleTitleList: string[] = [];
+      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
       if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
-        return;
+        return '';
       }
-      let primaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle;
-      let secondaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle;
+      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
       let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
       let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
       accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
-      insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      return accessibleTitleList.join(',');
+    } else {
+      let accessibleTitleList: string[] = [];
+      while (insertNodeCurrentNodeId !== -1) {
+        if (insertNodeCurrentNodeId === undefined) {
+          return '';
+        }
+        let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+        if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+          return '';
+        }
+        let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+        let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
+        let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+        let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+        accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+        insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      }
+      return accessibleTitleList.join(',');
     }
-    return accessibleTitleList.join(',');
   }
 
   getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: number | undefined,
@@ -3162,6 +3177,7 @@ class ListNodeDataSource extends BasicDataSource {
     let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
     let isOverBorder: boolean | undefined = this.getData(showIndex)?.getIsOverBorder();
     let insertNodeId: number = this.listNode[currentIndex + 1].getNodeCurrentNodeId();
+    let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
     if (isOverBorder) {
       this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
     } else {
@@ -3181,8 +3197,13 @@ class ListNodeDataSource extends BasicDataSource {
         let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
         this.timeoutHighLightId = setTimeout(() => {
           this.delayHighLight(currentIndex);
-          this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
-            this.getAccessibleTitle(insertNodeId), 1))
+          if (insertNodeParentNodeId === -1) {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(currentNodeId), 1))
+          } else {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(insertNodeId), 1))
+          }
         }, delayHighLightTime);
       }
       if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
