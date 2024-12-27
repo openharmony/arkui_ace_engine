@@ -66,20 +66,18 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     return handleInfo;
 }
 
-RectF TextSelectOverlay::GetFirstHandleLocalPaintRect()
+RectF TextSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex)
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, RectF());
-    auto localPaintRect = textPattern->GetTextSelector().firstHandle;
-    localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
-    return localPaintRect;
-}
-
-RectF TextSelectOverlay::GetSecondHandleLocalPaintRect()
-{
-    auto textPattern = GetPattern<TextPattern>();
-    CHECK_NULL_RETURN(textPattern, RectF());
-    auto localPaintRect = textPattern->GetTextSelector().secondHandle;
+    RectF localPaintRect;
+    if (dragHandleIndex == DragHandleIndex::FIRST) {
+        localPaintRect = textPattern->GetTextSelector().firstHandle;
+    } else if (dragHandleIndex == DragHandleIndex::SECOND) {
+        localPaintRect = textPattern->GetTextSelector().secondHandle;
+    } else { // dragHandleIndex::NONE
+        return RectF();
+    }
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     return localPaintRect;
 }
@@ -230,7 +228,6 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     if (textPattern->GetMagnifierController()) {
         textPattern->GetMagnifierController()->RemoveMagnifierFrameNode();
     }
-    textPattern->SetTextResponseType(TextResponseType::LONG_PRESS);
     auto textSelector = textPattern->GetTextSelector();
     textPattern->UpdateSelectionSpanType(textSelector.GetTextStart(), textSelector.GetTextEnd());
     textPattern->CalculateHandleOffsetAndShowOverlay();
@@ -259,7 +256,7 @@ std::string TextSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textPattern, "");
     auto start = textPattern->GetTextSelector().GetTextStart();
     auto end = textPattern->GetTextSelector().GetTextEnd();
-    return textPattern->GetSelectedText(start, end);
+    return UtfUtils::Str16ToStr8(textPattern->GetSelectedText(start, end));
 }
 
 RectF TextSelectOverlay::GetSelectArea()
@@ -320,6 +317,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     CHECK_NULL_VOID(textPattern);
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
     menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
+    menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
@@ -374,6 +372,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
         case OptionMenuActionId::SELECT_ALL:
             textPattern->HandleOnSelectAll();
             break;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
+            break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
             break;
@@ -398,7 +399,7 @@ void TextSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchTyp
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
-    if (IsMouseClickDown(sourceType, touchType) && touchInside) {
+    if (IsMouseClickDown(sourceType, touchType) && !touchInside) {
         textPattern->ResetSelection();
     }
     BaseTextSelectOverlay::OnHandleGlobalTouchEvent(sourceType, touchType);
@@ -535,7 +536,7 @@ const RefPtr<ScrollablePattern> TextSelectOverlay::FindScrollableParent()
     auto parent = host->GetAncestorNodeOfFrame(true);
     while (parent) {
         auto scrollablePattern = parent->GetPattern<ScrollablePattern>();
-        if (scrollablePattern) {
+        if (scrollablePattern && scrollablePattern->IsScrollable()) {
             return scrollablePattern;
         }
         parent = parent->GetAncestorNodeOfFrame(true);

@@ -42,7 +42,7 @@ public:
     virtual void SetScrollBar(DisplayMode scrollBar) = 0;
     virtual void SetScrollBarColor(const std::string& value) = 0;
     virtual void SetScrollBarWidth(const std::string& value) = 0;
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     virtual void SetEditMode(bool editMode) = 0;
     virtual void SetDivider(const V2::ItemDivider& divider) = 0;
     virtual void SetChainAnimation(bool enableChainAnimation) = 0;
@@ -80,7 +80,7 @@ public:
     virtual void SetOnItemDragLeave(OnItemDragLeaveFunc&& onItemDragLeave) = 0;
     virtual void SetOnItemDragMove(OnItemDragMoveFunc&& onItemDragMove) = 0;
     virtual void SetOnItemDrop(OnItemDropFunc&& onItemDrop) = 0;
-    virtual void SetScrollSnapAlign(V2::ScrollSnapAlign scrollSnapAlign) {};
+    virtual void SetScrollSnapAlign(ScrollSnapAlign scrollSnapAlign) {};
     virtual RefPtr<NG::ListChildrenMainSize> GetOrCreateListChildrenMainSize()
     {
         return nullptr;

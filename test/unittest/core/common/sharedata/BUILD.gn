@@ -22,6 +22,7 @@ ohos_unittest("share_data_test") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "sharedata_test.cpp",
   ]
@@ -31,10 +32,10 @@ ohos_unittest("share_data_test") {
   deps = [
     "$ace_root/adapter/ohos/osal:ace_osal_ohos_ohos",
     "$ace_root/frameworks/base:ace_base_ohos",
-    "//third_party/googletest:gmock_main",
   ]
   external_deps = [
     "c_utils:utils",
+    "googletest:gmock_main",
     "hilog:libhilog",
   ]
 

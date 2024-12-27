@@ -16,6 +16,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/components_ng/image_provider/pixel_map_image_object.h"
@@ -72,7 +73,8 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 ImageLoadingContext::ImageLoadingContext(
     const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
-      imageDfxConfig_(imageDfxConfig)
+      imageDfxConfig_(imageDfxConfig),
+      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);
@@ -91,7 +93,10 @@ ImageLoadingContext::~ImageLoadingContext()
             // cancel CreateImgObj task
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
             if (Downloadable()) {
-                DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), imageDfxConfig_.nodeId_);
+                usePreload_
+                    ? DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(
+                          src_.GetSrc(), imageDfxConfig_.nodeId_)
+                    : DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), imageDfxConfig_.nodeId_);
             }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task
@@ -223,7 +228,8 @@ bool ImageLoadingContext::Downloadable()
 
 void ImageLoadingContext::DownloadImage()
 {
-    if (NotifyReadyIfCacheHit()) {
+    // If the preload module is not used for downloading the image, check the cache.
+    if (!usePreload_ && NotifyReadyIfCacheHit()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "%{private}s hit the Cache, not need DownLoad.", src_.GetSrc().c_str());
         return;
     }
@@ -296,7 +302,11 @@ void ImageLoadingContext::DownloadImageSuccess(const std::string& imageData)
         FailCallback("After download successful, imageObject Create fail");
         return;
     }
-    downloadedUrlData_ = imageData;
+    // Save the downloaded data only if the preload module is not used for downloading the URL.
+    // The data will be written to the cache after successful decoding.
+    if (!usePreload_) {
+        downloadedUrlData_ = imageData;
+    }
     DataReadyCallback(imageObj);
 }
 
@@ -385,7 +395,9 @@ void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 void ImageLoadingContext::SuccessCallback(const RefPtr<CanvasImage>& canvasImage)
 {
     canvasImage_ = canvasImage;
-    CacheDownloadedImage();
+    if (!usePreload_) {
+        CacheDownloadedImage();
+    }
     stateManager_->HandleCommand(ImageLoadingCommand::MAKE_CANVAS_IMAGE_SUCCESS);
 }
 

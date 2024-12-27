@@ -291,7 +291,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg007, TestSize.Level1)
     std::string state = "current";
     std::string disposal = "mainThread";
 
-    eventTreeRecord->AddGestureProcedure(finger, procedure, state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, procedure, "", state, disposal, DEFAULT_TIME_STAMP);
     ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
     auto iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger);
     ASSERT_TRUE(iter != eventTreeRecord->eventTreeList.back().gestureMap.end());
@@ -327,7 +327,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg008, TestSize.Level2)
     std::string procedure = "HandleTouchMove";
     std::string state = "current";
     std::string disposal = "mainThread";
-    eventTreeRecord->AddGestureProcedure(finger, procedure, state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, procedure, "", state, disposal, DEFAULT_TIME_STAMP);
     ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
     auto iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger);
     ASSERT_TRUE(iter != eventTreeRecord->eventTreeList.back().gestureMap.end());
@@ -362,7 +362,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg009, TestSize.Level1)
     std::string state = "current";
     std::string disposal = "mainThread";
 
-    eventTreeRecord->AddGestureProcedure(finger, event, state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, event, "", state, disposal, DEFAULT_TIME_STAMP);
     ASSERT_FALSE(eventTreeRecord->eventTreeList.empty());
     auto iter = eventTreeRecord->eventTreeList.back().gestureMap.find(finger);
     ASSERT_TRUE(iter != eventTreeRecord->eventTreeList.back().gestureMap.end());
@@ -394,7 +394,7 @@ HWTEST_F(EventDumpTestNg, EventDumpTestNg010, TestSize.Level1)
     eventTreeRecord->AddGestureSnapshot(finger, std::move(gestureSnapshot));
     std::string state = "current";
     std::string disposal = "mainThread";
-    eventTreeRecord->AddGestureProcedure(finger, event, state, disposal, DEFAULT_TIME_STAMP);
+    eventTreeRecord->AddGestureProcedure(finger, event, "", state, disposal, DEFAULT_TIME_STAMP);
 
     /**
      * @tc.steps: step2. Invoke dump function.

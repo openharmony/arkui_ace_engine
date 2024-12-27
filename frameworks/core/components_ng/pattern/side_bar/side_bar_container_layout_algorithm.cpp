@@ -49,7 +49,11 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    auto idealSize = PipelineContext::GetCurrentContext()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto idealSize = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
     CreateIdealSize(
@@ -61,7 +65,6 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto parentWidth = idealSize.Width();
     realSideBarWidth_ = ConvertToPx(realSideBarWidthDimension_, constraint->scaleProperty, parentWidth).value_or(-1.0f);
     if (needInitRealSideBarWidth_ || NearZero(realSideBarWidth_)) {
-        auto pipeline = PipelineContext::GetCurrentContext();
         if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
             GetAllPropertyValue(layoutProperty, parentWidth);
         } else {
@@ -579,13 +582,6 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     }
     auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
     auto controlButtonTop = controlImageTop - CONTROL_BUTTON_PADDING;
-    auto sideBarPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(sideBarPattern);
-    if (controlImageLeft != DEFAULT_CONTROL_BUTTON_LEFT || controlImageTop != DEFAULT_CONTROL_BUTTON_TOP) {
-        sideBarPattern->SetControlButtonPosCustom(true);
-    } else {
-        sideBarPattern->SetControlButtonPosCustom(false);
-    }
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);

@@ -180,45 +180,63 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
 namespace NodeModifier {
 const ArkUITextTimerModifier* GetTextTimerModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUITextTimerModifier modifier = {
-        TextTimerModifier::SetFontColor,
-        TextTimerModifier::ResetFontColor,
-        TextTimerModifier::SetFontSize,
-        TextTimerModifier::ResetFontSize,
-        TextTimerModifier::SetFontStyle,
-        TextTimerModifier::ResetFontStyle,
-        TextTimerModifier::SetFontWeight,
-        TextTimerModifier::ResetFontWeight,
-        TextTimerModifier::SetFontFamily,
-        TextTimerModifier::ResetFontFamily,
-        TextTimerModifier::SetFormat,
-        TextTimerModifier::ResetFormat,
-        TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow,
-        TextTimerModifier::setTextTimerOptions
+        .setFontColor = TextTimerModifier::SetFontColor,
+        .resetFontColor = TextTimerModifier::ResetFontColor,
+        .setFontSize = TextTimerModifier::SetFontSize,
+        .resetFontSize = TextTimerModifier::ResetFontSize,
+        .setFontStyle = TextTimerModifier::SetFontStyle,
+        .resetFontStyle = TextTimerModifier::ResetFontStyle,
+        .setFontWeight = TextTimerModifier::SetFontWeight,
+        .resetFontWeight = TextTimerModifier::ResetFontWeight,
+        .setFontFamily = TextTimerModifier::SetFontFamily,
+        .resetFontFamily = TextTimerModifier::ResetFontFamily,
+        .setFormat = TextTimerModifier::SetFormat,
+        .resetFormat = TextTimerModifier::ResetFormat,
+        .setTextShadow = TextTimerModifier::SetTextShadow,
+        .resetTextShadow = TextTimerModifier::ResetTextShadow,
+        .setTextTimerOptions = TextTimerModifier::setTextTimerOptions,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUITextTimerModifier* GetCJUITextTimerModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUITextTimerModifier modifier = {
-        TextTimerModifier::SetFontColor,
-        TextTimerModifier::ResetFontColor,
-        TextTimerModifier::SetFontSize,
-        TextTimerModifier::ResetFontSize,
-        TextTimerModifier::SetFontStyle,
-        TextTimerModifier::ResetFontStyle,
-        TextTimerModifier::SetFontWeight,
-        TextTimerModifier::ResetFontWeight,
-        TextTimerModifier::SetFontFamily,
-        TextTimerModifier::ResetFontFamily,
-        TextTimerModifier::SetFormat,
-        TextTimerModifier::ResetFormat,
-        TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow
+        .setFontColor = TextTimerModifier::SetFontColor,
+        .resetFontColor = TextTimerModifier::ResetFontColor,
+        .setFontSize = TextTimerModifier::SetFontSize,
+        .resetFontSize = TextTimerModifier::ResetFontSize,
+        .setFontStyle = TextTimerModifier::SetFontStyle,
+        .resetFontStyle = TextTimerModifier::ResetFontStyle,
+        .setFontWeight = TextTimerModifier::SetFontWeight,
+        .resetFontWeight = TextTimerModifier::ResetFontWeight,
+        .setFontFamily = TextTimerModifier::SetFontFamily,
+        .resetFontFamily = TextTimerModifier::ResetFontFamily,
+        .setFormat = TextTimerModifier::SetFormat,
+        .resetFormat = TextTimerModifier::ResetFormat,
+        .setTextShadow = TextTimerModifier::SetTextShadow,
+        .resetTextShadow = TextTimerModifier::ResetTextShadow,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

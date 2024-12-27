@@ -12,7 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,10 +31,9 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
-const Ace::TextDecoration TEXT_DECORATION_VALUE_2 = Ace::TextDecoration::UNDERLINE;
-const Dimension IMAGE_WIDTH = 50.0_vp;
-const Dimension IMAGE_HEIGHT = 50.0_vp;
-const ImageSpanSize TEST_IMAGE_SIZE_1 = { .width = 50.0_vp, .height = 50.0_vp };
+int32_t callBack1 = 0;
+int32_t callBack2 = 0;
+int32_t callBack3 = 0;
 } // namespace
 
 class RichEditorClickTestNg : public RichEditorCommonTestNg {
@@ -179,7 +185,7 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton001, TestSize.Level1)
 HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     MouseInfo mouseInfo;
@@ -321,7 +327,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     richEditorPattern->isMouseSelect_ = false;
@@ -329,7 +335,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 
-    AddSpan(INIT_VALUE_3);
+    AddSpan(INIT_U16VALUE_3);
     info.localLocation_ = Offset(50, 50);
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
@@ -345,45 +351,6 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
-}
-
-/*
- * @tc.name: DoubleHandleClickEvent002
- * @tc.desc: test Mouse Double Click
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    AddSpan(TEST_INSERT_VALUE);
-
-    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
-        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
-        .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-
-    GestureEvent info;
-    richEditorPattern->isMousePressed_ = true;
-    info.SetSourceDevice(SourceType::MOUSE);
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->caretPosition_ = 0;
-    info.localLocation_ = Offset(0, 0);
-    richEditorPattern->isMouseSelect_ = false;
-    richEditorPattern->caretVisible_ = true;
-    richEditorPattern->contentRect_ = { -500.0, -500.0, 500.0, 500.0 };
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = -1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
 }
 
 /**
@@ -448,27 +415,6 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnHover001
- * @tc.desc: test on hover
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, OnHover001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto id = host->GetId();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
-    richEditorPattern->OnHover(true);
-    EXPECT_EQ(pipeline->mouseStyleNodeId_.value(), id);
-    richEditorPattern->OnHover(false);
-    EXPECT_FALSE(pipeline->mouseStyleNodeId_.has_value());
-}
-
-/**
  * @tc.name: MouseRightFocus001
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
@@ -478,7 +424,7 @@ HWTEST_F(RichEditorClickTestNg, MouseRightFocus001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("test1");
+    AddSpan(u"test1");
     AddImageSpan();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
@@ -489,168 +435,6 @@ HWTEST_F(RichEditorClickTestNg, MouseRightFocus001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = 0;
     richEditorPattern->MouseRightFocus(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: RichEditorController019
- * @tc.desc: test UpdateImageStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorController019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. initalize span properties and add image span
-     */
-    AddImageSpan();
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-
-    /**
-     * @tc.steps: step3. test UpdateImageStyle
-     */
-    struct UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateImageWidth = IMAGE_WIDTH;
-    updateSpanStyle.updateImageHeight = IMAGE_HEIGHT;
-    updateSpanStyle.updateImageFit = ImageFit::CONTAIN;
-    updateSpanStyle.updateImageVerticalAlign = VerticalAlign::BOTTOM;
-    std::optional<Ace::NG::MarginProperty> marginProp = std::nullopt;
-    std::optional<Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
-    marginProp = { CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC, CALC_LENGTH_CALC };
-    borderRadius = { CALC_TEST, CALC_TEST, CALC_TEST, CALC_TEST };
-    updateSpanStyle.borderRadius = borderRadius;
-    updateSpanStyle.marginProp = marginProp;
-
-    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
-
-    ImageSpanAttribute imageStyle;
-    imageStyle.size = TEST_IMAGE_SIZE_1;
-    imageStyle.verticalAlign = VerticalAlign::BOTTOM;
-    imageStyle.objectFit = ImageFit::CONTAIN;
-    imageStyle.marginProp = marginProp;
-    imageStyle.borderRadius = borderRadius;
-    TextStyle style;
-
-    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
-
-    /**
-     * @tc.steps: step4. test image span style
-     */
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto child = host->GetChildren().begin();
-    auto imageNode = AceType::DynamicCast<FrameNode>(*child);
-    ASSERT_NE(imageNode, nullptr);
-    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
-    ASSERT_NE(imageLayoutProperty, nullptr);
-    EXPECT_EQ(imageLayoutProperty->calcLayoutConstraint_->selfIdealSize, TEST_IMAGE_SIZE_1.GetSize());
-    EXPECT_EQ(imageLayoutProperty->GetVerticalAlignValue(), VerticalAlign::BOTTOM);
-    EXPECT_EQ(imageLayoutProperty->GetImageFitValue(), ImageFit::CONTAIN);
-    EXPECT_EQ(imageLayoutProperty->GetMarginProperty()->left->ToString(), CALC_LENGTH_CALC.ToString());
-
-    auto imageRenderCtx = imageNode->GetRenderContext();
-    ASSERT_NE(imageRenderCtx, nullptr);
-    EXPECT_EQ(imageRenderCtx->GetBorderRadius(), borderRadius);
-
-    ClearSpan();
-}
-
-/**
- * @tc.name: RichEditorController020
- * @tc.desc: test add image span
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorController020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-
-    /**
-     * @tc.steps: step3. test AddImageSpan when isPaste is false
-     * @tc.expected: textSelector_ is reset
-     */
-    ImageSpanAttribute imageStyle;
-    ImageSpanOptions options;
-    options.imageAttribute = imageStyle;
-    options.image = IMAGE_VALUE;
-    options.bundleName = BUNDLE_NAME;
-    options.moduleName = MODULE_NAME;
-    options.offset = 1;
-    auto index1 = richEditorPattern->AddImageSpan(options, false, 0, true);
-    EXPECT_EQ(index1, 1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 2);
-    EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: RichEditorController021
- * @tc.desc: test AddTextSpan with UpdateParagraphStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorController021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add span and initalize UpdateParagraphStyle
-     */
-    AddSpan("test");
-    TextSpanOptions options;
-    options.value = INIT_VALUE_1;
-    TextStyle style;
-    options.style = style;
-    struct UpdateParagraphStyle paragraphStyle;
-    paragraphStyle.wordBreak = WordBreak::NORMAL;
-    paragraphStyle.textAlign = TextAlign::END;
-    options.paraStyle = paragraphStyle;
-
-    /**
-     * @tc.steps: step3. set userGestureOption
-     */
-    GestureEventFunc callback2 = [](GestureEvent& info) {};
-    options.userGestureOption.onClick = callback2;
-
-    /**
-     * @tc.steps: step4. test AddTextSpan
-     */
-    auto index1 = richEditorPattern->AddTextSpan(options, true, 5);
-    EXPECT_EQ(index1, 5);
-    auto info = richEditorController->GetSpansInfo(5, sizeof(INIT_VALUE_1));
-    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
-    auto textStyle = info.selection_.resultObjects.begin()->textStyle;
-    EXPECT_EQ(textStyle.wordBreak, int(WordBreak::NORMAL));
-    EXPECT_EQ(textStyle.textAlign, int(TextAlign::END));
 }
 
 /**
@@ -697,116 +481,6 @@ HWTEST_F(RichEditorClickTestNg, HandleEnabled, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapper002
- * @tc.desc: test on dirty layout wrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, OnDirtyLayoutWrapper002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorPattern.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. create layoutWrapper and config.
-     */
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-
-    /**
-     * @tc.steps: step3. set currentFocus_ true and test OnDirtyLayoutWrapperSwap.
-     */
-    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
-    focusHub->currentFocus_ = true;
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-
-    /**
-     * @tc.steps: step4. change scene and test OnDirtyLayoutWrapperSwap.
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-    richEditorPattern->isShowMenu_ = true;
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-
-    richEditorPattern->textSelector_ = TextSelector(-1, -1);
-    auto host = richEditorPattern->GetHost();
-    ASSERT_NE(host, nullptr);
-    auto renderContext = host->GetRenderContext();
-    ASSERT_NE(renderContext, nullptr);
-    renderContext->UpdateClipEdge(true);
-
-    richEditorNode_->GetGeometryNode()->SetContentSize(SizeF(BUILDER_WIDTH, BUILDER_HEIGHT));
-    TestParagraphRect paragraphRect = { .start = 0, .end = 6, .rects = { { 0.0, 0.0, 70.0, 70.0 } } };
-    TestParagraphItem paragraphItem = { .start = 0, .end = 6, .testParagraphRects = { paragraphRect } };
-    AddParagraph(paragraphItem);
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-}
-
-/**
- * @tc.name: AddPlaceholderSpan001
- * @tc.desc: test AddPlaceholderSpan
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, AddPlaceholderSpan001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create richEditorNode_ and layoutWrapper.
-     */
-    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
-    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
-        V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode_, nullptr);
-
-    RefPtr<GeometryNode> containerGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_FALSE(containerGeometryNode == nullptr);
-    containerGeometryNode->SetFrameSize(SizeF(CONTAINER_WIDTH, CONTAINER_HEIGHT));
-    ASSERT_NE(richEditorNode_->GetLayoutProperty(), nullptr);
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(richEditorNode_, containerGeometryNode, richEditorNode_->GetLayoutProperty());
-
-    /**
-     * @tc.steps: step2. get richEditorPattern and richEditorController.
-     */
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
-    AddSpan("test");
-
-    /**
-     * @tc.steps: step3. test AddPlaceholderSpan.
-     */
-    auto builderId1 = ElementRegister::GetInstance()->MakeUniqueId();
-    auto builderNode1 = FrameNode::GetOrCreateFrameNode(
-        V2::ROW_ETS_TAG, builderId1, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
-
-    auto index1 = richEditorController->AddPlaceholderSpan(builderNode1, {});
-    EXPECT_EQ(index1, 1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
-    auto builderSpanChildren = richEditorNode_->GetChildren();
-    ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
-    auto eventHub = builderNode1->GetEventHub<EventHub>();
-    EXPECT_NE(eventHub, nullptr);
-}
-
-/**
  * @tc.name: OnVisibleChange
  * @tc.desc: test OnVisibleChange
  * @tc.type: FUNC
@@ -823,7 +497,7 @@ HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span and Select text
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->textSelector_ = TextSelector(0, 2);
@@ -848,91 +522,6 @@ HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateStyledStringByTextStyle
- * @tc.desc: test CreateStyledStringByTextStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, CreateStyledStringByTextStyle, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. get richEditor controller
-     */
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step3. add text
-     */
-    AddSpan(INIT_VALUE_1);
-    EXPECT_EQ(richEditorNode_->children_.size(), 1);
-
-    /**
-     * @tc.steps: step4. initalize style
-     */
-    TextStyle textStyle;
-    textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textStyle.SetFontFamilies(FONT_FAMILY_VALUE);
-
-    struct UpdateSpanStyle updateSpanStyle;
-    updateSpanStyle.updateTextColor = TEXT_COLOR_VALUE;
-    updateSpanStyle.updateFontFamily = FONT_FAMILY_VALUE;
-
-    /**
-     * @tc.steps: step5. test CreateStyledStringByTextStyle
-     */
-    richEditorPattern->CreateStyledStringByTextStyle(INIT_VALUE_2, updateSpanStyle, textStyle);
-    auto spanItem = richEditorPattern->spans_.back();
-    auto& fontStyle = spanItem->fontStyle;
-    ASSERT_NE(fontStyle, nullptr);
-    EXPECT_EQ(fontStyle->GetFontFamily(), FONT_FAMILY_VALUE);
-    EXPECT_EQ(fontStyle->GetTextColor(), TEXT_COLOR_VALUE);
-}
-
-/**
- * @tc.name: HandleDraggableFlag
- * @tc.desc: test InsertValueInStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, HandleDraggableFlag, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. add span
-     */
-    AddSpan(INIT_VALUE_1);
-    AddImageSpan();
-
-    /**
-     * @tc.steps: step3. select text
-     */
-    richEditorPattern->textSelector_.Update(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
-
-    /**
-     * @tc.steps: step4. test HandleDraggableFlag
-     */
-    richEditorPattern->copyOption_ = CopyOptions::InApp;
-    richEditorPattern->HandleDraggableFlag(true);
-    auto gestureHub = richEditorPattern->GetGestureEventHub();
-    ASSERT_NE(gestureHub, nullptr);
-    EXPECT_TRUE(richEditorPattern->JudgeContentDraggable());
-    EXPECT_TRUE(gestureHub->GetIsTextDraggable());
-}
-
-/**
  * @tc.name: MoveCaretOnLayoutSwap
  * @tc.desc: test MoveCaretOnLayoutSwap
  * @tc.type: FUNC
@@ -949,7 +538,7 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan(INIT_VALUE_1);
+    AddSpan(INIT_U16VALUE_1);
     AddImageSpan();
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 
@@ -983,7 +572,7 @@ HWTEST_F(RichEditorClickTestNg, SetCaretOffset, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan("test");
+    AddSpan(u"test");
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 
     /**
@@ -1017,7 +606,7 @@ HWTEST_F(RichEditorClickTestNg, HandleBlurEvent, TestSize.Level1)
     /**
      * @tc.steps: step2. add span and select
      */
-    AddSpan("test");
+    AddSpan(u"test");
     richEditorPattern->textSelector_.Update(1, 3);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 3);
 
@@ -1082,153 +671,5 @@ HWTEST_F(RichEditorClickTestNg, JudgeContentDraggable, TestSize.Level1)
      */
     bool testSelectAreaVisible = richEditorPattern->JudgeContentDraggable();
     EXPECT_FALSE(testSelectAreaVisible);
-}
-
-/**
- * @tc.name: RichEditorKeyBoardShortCuts205
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts205, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. initialize style and add text span
-     */
-    TextStyle style;
-    style.SetFontWeight(FONT_WEIGHT_BOLD);
-    style.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
-    style.SetTextDecoration(TEXT_DECORATION_VALUE_2);
-
-    TextSpanOptions textOptions;
-    textOptions.value = INIT_VALUE_1;
-    textOptions.style = style;
-    richEditorController->AddTextSpan(textOptions);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle when select nothing
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
-    ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(newSpan1->GetFontWeight(), Ace::FontWeight::BOLD);
-
-    /**
-     * @tc.steps: step4. test HandleSelectFontStyle again when select text
-     */
-    richEditorPattern->textSelector_.Update(0, 6);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
-    ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetTextDecoration(), TextDecoration::NONE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(newSpan2->GetItalicFontStyle(), OHOS::Ace::FontStyle::NORMAL);
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::NORMAL);
-}
-
-/**
- * @tc.name: RichEditorKeyBoardShortCuts206
- * @tc.desc: test HandleSelectFontStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add text span without setting style
-     */
-    AddSpan(INIT_VALUE_2);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
-    richEditorPattern->textSelector_.Update(0, 6);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
-}
-
-/**
- * @tc.name: RichEditorKeyBoardShortCuts207 about Handle Select FontStyle
- * @tc.desc: test the text font style
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor pattern and controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    /**
-     * @tc.steps: step2. add different type span and select
-     */
-    AddSpan(INIT_VALUE_1);
-    AddImageSpan();
-    AddSpan(INIT_VALUE_2);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
-
-    richEditorPattern->textSelector_.Update(4, 10);
-    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
-
-    /**
-     * @tc.steps: step3. test HandleSelectFontStyle
-     */
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
-    ASSERT_NE(newSpan1, nullptr);
-    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
-    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
-    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
-    ASSERT_NE(newSpan2, nullptr);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
-
-    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_R);
-    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
 }
 } // namespace OHOS::Ace::NG

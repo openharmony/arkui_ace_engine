@@ -107,7 +107,7 @@ void ListSwipeTestNg::HandleDragUpdate(float dragDelta)
     GestureEvent info;
     info.SetMainDelta(dragDelta);
     handleDragUpdate(info);
-    FlushLayoutTask(dragItem_);
+    FlushUITasks();
 }
 
 void ListSwipeTestNg::HandleDragEnd(float velocityDelta)
@@ -117,7 +117,7 @@ void ListSwipeTestNg::HandleDragEnd(float velocityDelta)
     GestureEvent info;
     info.SetMainVelocity(velocityDelta);
     handleDragEnd(info);
-    FlushLayoutTask(dragItem_);
+    FlushUITasks();
 }
 
 /**
@@ -1316,7 +1316,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus002, TestSize.Level1)
      */
     model.SetLanes(AceType::RawPtr(frameNode_), 2);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 
@@ -1372,7 +1372,7 @@ HWTEST_F(ListSwipeTestNg, ResetSwipeStatus004, TestSize.Level1)
      * @tc.expected: Rest status
      */
     model.SetListDirection(AceType::RawPtr(frameNode_), static_cast<int32_t>(Axis::HORIZONTAL));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(itemPattern_->GetSwiperIndex(), ListItemSwipeIndex::ITEM_CHILD);
 }
 
@@ -1477,7 +1477,7 @@ HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
     const float startDeleteDistance = DELETE_AREA_DISTANCE - 1.f;
     itemModel.SetDeleteArea(AceType::RawPtr(item_), AceType::RawPtr(startNode), nullptr, nullptr, nullptr, nullptr,
         Dimension(startDeleteDistance), true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto itemLayoutProperty = itemPattern_->GetLayoutProperty<ListItemLayoutProperty>();
     EXPECT_EQ(itemLayoutProperty->GetStartDeleteAreaDistance(), Dimension(startDeleteDistance));
     const int32_t startNodeIndex = 0;
@@ -1494,7 +1494,7 @@ HWTEST_F(ListSwipeTestNg, OtherTest004, TestSize.Level1)
     const float endDeleteDistance = END_NODE_LEN - 1.f;
     itemModel.SetDeleteArea(AceType::RawPtr(item_), AceType::RawPtr(endNode), nullptr, nullptr, nullptr, nullptr,
         Dimension(endDeleteDistance), false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(itemLayoutProperty->GetEndDeleteAreaDistance(), Dimension(endDeleteDistance));
     const int32_t endNodeIndex = 2;
     EXPECT_EQ(GetChildFrameNode(item_, endNodeIndex), endNode);
@@ -1661,5 +1661,65 @@ HWTEST_F(ListSwipeTestNg, ClickJudge006, TestSize.Level1)
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, 10.f)));
     EXPECT_FALSE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT - 10.f)));
     EXPECT_TRUE(itemPattern_->ClickJudge(PointF(10.f, LIST_HEIGHT + 10.f)));
+}
+
+/**
+ * @tc.name: SetBuilderComponent01
+ * @tc.desc: Test BuilderComponent of start in swipeAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListSwipeTestNg, SetBuilderComponent01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Creat swipeItemts with component content in List.
+     */
+    const int32_t startNodeIndex = 0;
+    const int32_t itemNodeIndex = 1;
+    CreateList();
+    auto startBuilder = CreateCustomNode("Start", START_NODE_LEN, ITEM_MAIN_SIZE);
+    CreateSwipeItemsWithComponentContent(startBuilder, nullptr, V2::SwipeEdgeEffect::None);
+    CreateSwipeDone();
+    const RectF itemNodeInitialRect = RectF(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const RectF itemNodeSwipeStartRect = RectF(START_NODE_LEN, 0, LIST_WIDTH, ITEM_MAIN_SIZE);
+    const float slightSwipeDelta = START_NODE_LEN * SWIPER_TH;
+    const float obviousSwipeDelta = START_NODE_LEN * SWIPER_TH + 1;
+
+    /**
+     * @tc.steps: step2. Swipe start.
+     * @tc.expected: StartNode can be added and moved successfully.
+     */
+    DragSwiperItem(item_, slightSwipeDelta, SWIPER_SPEED_TH);
+    RectF startNodeRect = GetChildRect(item_, startNodeIndex);
+    RectF itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    RectF expectStartNodeRect = RectF(slightSwipeDelta - START_NODE_LEN, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    RectF expectItemNodeRect = itemNodeInitialRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    ListItemSwipeIndex swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
+
+    DragSwiperItem(item_, obviousSwipeDelta, SWIPER_SPEED_TH);
+    startNodeRect = GetChildRect(item_, startNodeIndex);
+    itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    expectStartNodeRect = RectF(0, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    expectItemNodeRect = itemNodeSwipeStartRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::SWIPER_START);
+
+    /**
+     * @tc.steps: step3. Collapse start.
+     * @tc.expected: StartNode can be collapse.
+     */
+    DragSwiperItem(item_, -obviousSwipeDelta, SWIPER_SPEED_TH);
+    startNodeRect = GetChildRect(item_, startNodeIndex);
+    itemNodeRect = GetChildRect(item_, itemNodeIndex);
+    expectStartNodeRect = RectF(-obviousSwipeDelta, 0, START_NODE_LEN, ITEM_MAIN_SIZE);
+    expectItemNodeRect = itemNodeInitialRect;
+    EXPECT_TRUE(IsEqual(startNodeRect, expectStartNodeRect));
+    EXPECT_TRUE(IsEqual(itemNodeRect, expectItemNodeRect));
+    swiperIndex = itemPattern_->GetSwiperIndex();
+    EXPECT_EQ(swiperIndex, ListItemSwipeIndex::ITEM_CHILD);
 }
 } // namespace OHOS::Ace::NG

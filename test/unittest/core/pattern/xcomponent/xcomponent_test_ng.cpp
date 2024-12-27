@@ -212,7 +212,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
@@ -228,7 +228,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 
@@ -239,7 +239,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
      */
 
     auto onLoad2 = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = ""; };
-    auto onDestroy2 = [&onDestroyKey]() { onDestroyKey = ""; };
+    auto onDestroy2 = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = ""; };
     testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad2);
     testProperty.destroyEvent = std::move(onDestroy2);
@@ -249,7 +249,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest002, TestSize.Level1)
     xComponentEventHub = frameNode2->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 }
@@ -611,7 +611,7 @@ HWTEST_F(XComponentTestNg, XComponentOnAreaChangedInnerTest019, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     testProperty.loadEvent = std::move(onLoad);
@@ -794,7 +794,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
     std::string onLoadKey;
     std::string onDestroyKey;
     auto onLoad = [&onLoadKey](const std::string& /* xComponentId */) { onLoadKey = CHECK_KEY; };
-    auto onDestroy = [&onDestroyKey]() { onDestroyKey = CHECK_KEY; };
+    auto onDestroy = [&onDestroyKey](const std::string& /* xComponentId */) { onDestroyKey = CHECK_KEY; };
 
     /**
      * @tc.steps: step1. set the testProperty and CreateXComponentNode
@@ -822,7 +822,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
     auto xComponentEventHub = frameNode->GetEventHub<XComponentEventHub>();
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_FALSE(onLoadKey == CHECK_KEY);
     EXPECT_FALSE(onDestroyKey == CHECK_KEY);
 
@@ -841,7 +841,7 @@ HWTEST_F(XComponentTestNg, XComponentEventTest023, TestSize.Level1)
      */
     ASSERT_TRUE(xComponentEventHub);
     xComponentEventHub->FireLoadEvent(XCOMPONENT_ID);
-    xComponentEventHub->FireDestroyEvent();
+    xComponentEventHub->FireDestroyEvent(XCOMPONENT_ID);
     EXPECT_EQ(onLoadKey, CHECK_KEY);
     EXPECT_EQ(onDestroyKey, CHECK_KEY);
 }
@@ -1320,13 +1320,15 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
     std::string onSurfaceCreatedSurfaceId = "";
     std::string onSurfaceChangedSurfaceId = "";
     std::string onSurfaceDestroyedSurfaceId = "";
-    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](
-                                const std::string& surfaceId) { onSurfaceCreatedSurfaceId = surfaceId; };
+    auto onSurfaceCreated = [&onSurfaceCreatedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceCreatedSurfaceId = surfaceId;
+    };
     auto onSurfaceChanged = [&onSurfaceChangedSurfaceId](const std::string& surfaceId, const RectF& /* rect */) {
         onSurfaceChangedSurfaceId = surfaceId;
     };
-    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](
-                                  const std::string& surfaceId) { onSurfaceDestroyedSurfaceId = surfaceId; };
+    auto onSurfaceDestroyed = [&onSurfaceDestroyedSurfaceId](const std::string& surfaceId, const std::string& xcId) {
+        onSurfaceDestroyedSurfaceId = surfaceId;
+    };
     testProperty.surfaceCreatedEvent = std::move(onSurfaceCreated);
     testProperty.surfaceChangedEvent = std::move(onSurfaceChanged);
     testProperty.surfaceDestroyedEvent = std::move(onSurfaceDestroyed);
@@ -1369,73 +1371,5 @@ HWTEST_F(XComponentTestNg, XComponentSurfaceLifeCycleCallback, TestSize.Level1)
      */
     pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
     EXPECT_STREQ(SURFACE_ID.c_str(), onSurfaceDestroyedSurfaceId.c_str());
-}
-
-/**
- * @tc.name: XComponentCreateTypeNodeTest001
- * @tc.desc: Test create typeNode xcomponent, type = XComponentType::SURFACE
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentCreateTypeNodeTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create typeNode xcomponent.
-     *            case: type = XComponentType::SURFACE
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    auto xComponentController = std::make_shared<XComponentControllerNG>();
-    ArkUI_XComponent_Params xcParams = {
-        .id = XCOMPONENT_ID,
-        .type = XCOMPONENT_SURFACE_TYPE_VALUE,
-        .libraryName = XCOMPONENT_LIBRARY_NAME,
-        .controller = xComponentController
-    };
-    ArkUI_Int32 nodeId = 0;
-
-    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, &xcParams);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
-    
-    /**
-     * @tc.steps: step2. get xcomponent type.
-     * @tc.expected: xcomponent type is XComponentType::SURFACE
-     */
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-    auto xcType = pattern->GetType();
-    EXPECT_EQ(xcType, XComponentType::SURFACE);
-}
-
-/**
- * @tc.name: XComponentCreateTypeNodeTest002
- * @tc.desc: Test create typeNode xcomponent, type = XComponentType::TEXTURE
- * @tc.type: FUNC
- */
-HWTEST_F(XComponentTestNg, XComponentCreateTypeNodeTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create typeNode xcomponent.
-     *            case: type = XComponentType::TEXTURE
-     * @tc.expected: xcomponent frameNode create successfully
-     */
-    auto xComponentController = std::make_shared<XComponentControllerNG>();
-    ArkUI_XComponent_Params xcParams = {
-        .id = XCOMPONENT_ID,
-        .type = XCOMPONENT_TEXTURE_TYPE_VALUE,
-        .libraryName = XCOMPONENT_LIBRARY_NAME,
-        .controller = xComponentController
-    };
-    ArkUI_Int32 nodeId = 0;
-
-    auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, &xcParams);
-    EXPECT_TRUE(frameNode != nullptr && frameNode->GetTag() == V2::XCOMPONENT_ETS_TAG);
-    
-    /**
-     * @tc.steps: step2. get xcomponent type.
-     * @tc.expected: xcomponent type is XComponentType::TEXTURE
-     */
-    auto pattern = frameNode->GetPattern<XComponentPattern>();
-    ASSERT_TRUE(pattern);
-    auto xcType = pattern->GetType();
-    EXPECT_EQ(xcType, XComponentType::TEXTURE);
 }
 } // namespace OHOS::Ace::NG

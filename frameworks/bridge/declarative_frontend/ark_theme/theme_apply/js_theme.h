@@ -336,8 +336,9 @@ private:
 class JSThemeScope {
 public:
     static std::map<int32_t, JSTheme> jsThemes;
-    // indicates whether application use WithTheme containers
-    inline static bool jsThemeScopeEnabled = false;
+    // keeps the current theme in static optional object
+    inline static std::optional<JSTheme> jsCurrentTheme = std::nullopt;
+    inline static bool isCurrentThemeDefault = true;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_THEME_H

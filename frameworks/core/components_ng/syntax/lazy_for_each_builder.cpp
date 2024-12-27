@@ -47,7 +47,7 @@ namespace OHOS::Ace::NG {
             }
             CHECK_NULL_RETURN(itemInfo.second, itemInfo);
             if (isCache) {
-                expiringItem_[itemInfo.first] = LazyForEachCacheChild(index, itemInfo.second);
+                expiringItem_.emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
                 cachedItems_[index] = LazyForEachChild(itemInfo.first, nullptr);
             } else {
                 cachedItems_[index] = itemInfo;
@@ -246,27 +246,27 @@ namespace OHOS::Ace::NG {
             return;
         }
         decltype(cachedItems_) temp(std::move(cachedItems_));
-        if (from < to) {
-            for (const auto& [itemIndex, child] : temp) {
-                auto position = static_cast<size_t>(itemIndex);
-                if (position > from && position <= to && position >= 1) {
-                    cachedItems_.emplace(position - 1, child);
-                } else if (position == from) {
-                    cachedItems_.emplace(to, child);
-                } else {
-                    cachedItems_.emplace(itemIndex, child);
-                }
+        for (const auto& [itemIndex, child] : temp) {
+            auto position = static_cast<size_t>(itemIndex);
+            if (position > from && position <= to && position >= 1) { // from < position <= to
+                cachedItems_.emplace(position - 1, child);
+            } else if (position >= to && position < from) { // to <= position < from
+                cachedItems_.emplace(position + 1, child);
+            } else if (position == from) {
+                cachedItems_.emplace(to, child);
+            } else {
+                cachedItems_.emplace(itemIndex, child);
             }
-        } else {
-            for (const auto& [itemIndex, child] : temp) {
-                auto position = static_cast<size_t>(itemIndex);
-                if (position >= to && position < from) {
-                    cachedItems_.emplace(position + 1, child);
-                } else if (position == from) {
-                    cachedItems_.emplace(to, child);
-                } else {
-                    cachedItems_.emplace(itemIndex, child);
-                }
+        }
+
+        for (const auto& [key, child] : expiringItem_) {
+            auto position = static_cast<size_t>(child.first);
+            if (position > from && position <= to && position >= 1) { // from < position <= to
+                expiringItem_[key] = LazyForEachCacheChild(position - 1, std::move(child.second));
+            } else if (position >= to && position < from) { // to <= position < from
+                expiringItem_[key] = LazyForEachCacheChild(position + 1, std::move(child.second));
+            } else if (position == from) {
+                expiringItem_[key] = LazyForEachCacheChild(to, std::move(child.second));
             }
         }
     }
@@ -862,9 +862,11 @@ namespace OHOS::Ace::NG {
             if (frameNode) {
                 frameNode->SetActive(false);
             }
+            auto tempNode = node.second;
             auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
             if (!pair.second) {
                 TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                ProcessOffscreenNode(tempNode, true);
             }
         }
     }
@@ -888,9 +890,11 @@ namespace OHOS::Ace::NG {
                 if (frameNode) {
                     frameNode->SetActive(false);
                 }
+                auto tempNode = node.second;
                 auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
                 if (!pair.second) {
                     TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                    ProcessOffscreenNode(tempNode, true);
                 }
                 needBuild = true;
                 continue;
@@ -945,7 +949,7 @@ namespace OHOS::Ace::NG {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
         auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
-        cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
+        auto pair = cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         auto context = itemInfo.second->GetContext();
         CHECK_NULL_RETURN(context, itemInfo.second);
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
@@ -955,7 +959,12 @@ namespace OHOS::Ace::NG {
             context->ResetPredictNode();
             return itemInfo.second;
         }
-        ProcessOffscreenNode(itemInfo.second, false);
+        if (pair.second) {
+            ProcessOffscreenNode(itemInfo.second, false);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+        }
+
         itemInfo.second->Build(nullptr);
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);

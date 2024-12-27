@@ -81,7 +81,7 @@ protected:
             ss << "[";
             for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
                 ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(item->content) << "], ";
+                   << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << "], ";
             });
             ss << "], ";
         }
@@ -100,11 +100,13 @@ protected:
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     RefPtr<ParagraphManager> paragraphManager_;
     std::optional<TextStyle> textStyle_;
+    TextStyle inheritTextStyle_;
     float baselineOffset_ = 0.0f;
     float shadowOffset_ = 0.0f;
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
     bool isMarquee_ = false;
+    bool needReCreateParagraph_ = true;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
@@ -112,10 +114,8 @@ private:
     {
         return 0.0f;
     }
-    template<typename T>
-    static TextDirection GetTextDirection(const T& content, LayoutWrapper* layoutWrapper);
+    static TextDirection GetTextDirection(const std::u16string& content, LayoutWrapper* layoutWrapper);
     static TextDirection GetTextDirectionByContent(const std::u16string& content);
-    static TextDirection GetTextDirectionByContent(const std::string& content);
 
     void UpdateSymbolSpanEffect(
         RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph, const std::list<RefPtr<SpanItem>>& spans);
@@ -143,7 +143,7 @@ private:
         const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& paragraph);
 
     void GetChildrenPlaceholderIndex(std::vector<int32_t>& placeholderIndex);
-    TextStyle InheritParentTextStyle();
+    void InheritParentTextStyle(const TextStyle& textStyle);
 
     int32_t preParagraphsPlaceholderCount_ = 0;
     int32_t currentParagraphPlaceholderCount_ = 0;
@@ -152,20 +152,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(MultipleParagraphLayoutAlgorithm);
 };
-
-template<typename T>
-TextDirection MultipleParagraphLayoutAlgorithm::GetTextDirection(const T& content, LayoutWrapper* layoutWrapper)
-{
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
-
-    auto direction = textLayoutProperty->GetLayoutDirection();
-    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
-        return direction;
-    }
-
-    return GetTextDirectionByContent(content);
-}
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_MULTIPLE_PARAGRAPH_LAYOUT_ALGORITHM_H

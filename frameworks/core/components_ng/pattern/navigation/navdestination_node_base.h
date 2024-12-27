@@ -185,7 +185,13 @@ public:
     {
         return animationId_;
     }
-
+    
+    virtual void InitSystemTransitionPush(bool transitionIn) {}
+    virtual void EndSystemTransitionPush(bool transitionIn) {}
+    virtual void InitSystemTransitionPop(bool transitionIn) {}
+    virtual void EndSystemTransitionPop(bool transitionIn) {}
+    virtual void FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
+        bool transitionIn, const int32_t animationId) {}
 protected:
     RefPtr<UINode> contentNode_;
     RefPtr<UINode> menu_;

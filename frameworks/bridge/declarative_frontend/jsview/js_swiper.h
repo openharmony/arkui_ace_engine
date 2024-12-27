@@ -69,8 +69,8 @@ protected:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentDidScroll(const JSCallbackInfo& info);
+    static void SetPageFlipMode(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
-    static void SetIndicatorController(const JSCallbackInfo& info);
 };
 
 class JSSwiperController final : public Referenced {
@@ -113,6 +113,8 @@ public:
     void ChangeIndex(const JSCallbackInfo& args);
 
     void FinishAnimation(const JSCallbackInfo& args);
+    void OldPreloadItems(const JSCallbackInfo& args);
+    void NewPreloadItems(const JSCallbackInfo& args);
     void PreloadItems(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)

@@ -37,6 +37,12 @@ struct ModalUIExtensionConfig {
     bool prohibitedRemoveByRouter = false;
     bool isAllowAddChildBelowModalUec = false;
     bool isDensityFollowHost = false;
+    bool prohibitedRemoveByNavigation = true;
+};
+
+struct ModalUIExtensionAllowedUpdateConfig {
+    bool prohibitedRemoveByRouter = false;
+    bool prohibitedRemoveByNavigation = true;
 };
 
 struct ModalUIExtensionCallbacks {

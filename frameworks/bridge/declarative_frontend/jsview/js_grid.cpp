@@ -492,14 +492,16 @@ void JSGrid::SetDragAnimation(bool value)
 void JSGrid::SetEdgeEffect(const JSCallbackInfo& info)
 {
     auto edgeEffect = EdgeEffect::NONE;
+    auto effectEdge = EffectEdge::ALL;
     if (info.Length() > 0) {
         edgeEffect = JSScrollable::ParseEdgeEffect(info[0], EdgeEffect::NONE);
     }
     auto alwaysEnabled = false;
     if (info.Length() > 1) {
         alwaysEnabled = JSScrollable::ParseAlwaysEnable(info[1], false);
+        effectEdge = JSScrollable::ParseEffectEdge(info[1]);
     }
-    GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    GridModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
 void JSGrid::SetLayoutDirection(int32_t value)

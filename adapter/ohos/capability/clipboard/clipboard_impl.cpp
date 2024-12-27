@@ -133,11 +133,9 @@ void ClipboardImpl::SetPixelMapData(const RefPtr<PixelMap>& pixmap, CopyOptions 
 
 void ClipboardImpl::GetData(const std::function<void(const std::string&)>& callback, bool syncMode)
 {
+    CHECK_NULL_VOID(callback);
 #ifdef SYSTEM_CLIPBOARD_SUPPORTED
-    if (!taskExecutor_ || !callback) {
-        return;
-    }
-
+    CHECK_NULL_VOID(taskExecutor_);
     if (syncMode) {
         GetDataSync(callback);
     } else {
@@ -436,7 +434,6 @@ void ClipboardImpl::GetDataAsync(const std::function<void(const std::string&)>& 
                 clip->ProcessPasteDataRecord(pasteDataRecord, resText, hasPlainRecord);
             }
             if (resText.empty()) {
-                TAG_LOGW(AceLogTag::ACE_CLIPBOARD, "Get SystemKeyboardTextData fail from MiscServices");
                 taskExecutor->PostTask(
                     [callback]() { callback(""); }, TaskExecutor::TaskType::UI, "ArkUIClipboardGetTextDataFailed");
                 return;
@@ -462,8 +459,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
         if (!hasPlainRecord) {
             resText = "";
         }
-        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "textData:%{private}s, length:%{public}zu", textData->c_str(),
-            textData->length());
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessPlainText, length:%{public}zu", textData->length());
         resText.append(*textData);
         hasPlainRecord = true;
     }
@@ -472,8 +468,7 @@ void ClipboardImpl::ProcessPasteDataRecord(const std::shared_ptr<MiscServices::P
     }
     if (pasteDataRecord->GetHtmlText() != nullptr) {
         auto htmlText = pasteDataRecord->GetHtmlText();
-        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "htmlText:%{private}s, length=%{public}zu", htmlText->c_str(),
-            htmlText->length());
+        TAG_LOGI(AceLogTag::ACE_CLIPBOARD, "ProcessHtmlText, length=%{public}zu", htmlText->length());
         HtmlToSpan toSpan;
         auto spanStr = toSpan.ToSpanString(*htmlText);
         if (spanStr) {

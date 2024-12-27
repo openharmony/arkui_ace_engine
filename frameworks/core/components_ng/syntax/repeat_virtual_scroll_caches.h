@@ -143,7 +143,7 @@ public:
 
     void RemoveKeyFromL1(const std::string& key, bool shouldTriggerRecycle = true);
 
-    bool hasTTypeChanged(uint32_t index);
+    bool CheckTTypeChanged(uint32_t index);
 
     bool IsInL1Cache(const std::string& key) const
     {
@@ -315,6 +315,9 @@ private:
 
     // for tracking reused/recycled nodes
     std::unordered_set<int32_t> reusedNodeIds_;
+
+    // used to record whether a PostIdleTask is requeired after RebuildL1WithKey
+    bool isModified_ = false;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

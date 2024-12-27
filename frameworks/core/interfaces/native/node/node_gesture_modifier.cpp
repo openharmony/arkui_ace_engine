@@ -366,7 +366,7 @@ void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
         eventData.nodeId = 0;
         eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
         eventData.gestureAsyncEvent.subKind = ON_ACTION_CANCEL;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
     };
     gestureRef->SetOnActionCancelId(onActionCancel);
 }
@@ -425,21 +425,21 @@ void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
         ArkUIAxisEvent rawInputEvent;
         ConvertIMMEventToAxisEvent(info, rawInputEvent);
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
         return;
     }
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         ArkUIMouseEvent rawInputEvent;
         ConvertIMMEventToMouseEvent(info, rawInputEvent);
         eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-        SendArkUIAsyncEvent(&eventData);
+        SendArkUISyncEvent(&eventData);
         return;
     }
     ArkUITouchEvent rawInputEvent;
     std::array<ArkUITouchPoint, MAX_POINTS> points;
     ConvertIMMEventToTouchEvent(info, rawInputEvent, points);
     eventData.gestureAsyncEvent.rawPointerEvent = &rawInputEvent;
-    SendArkUIAsyncEvent(&eventData);
+    SendArkUISyncEvent(&eventData);
 }
 
 void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, void* extraParam)
@@ -783,64 +783,84 @@ ArkUI_Int32 setArkUIGestureRecognizerDisposeNotify(ArkUIGestureRecognizer* recog
 namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIGestureModifier modifier = {
-        createTapGesture,
-        createTapGestureWithDistanceThreshold,
-        createLongPressGesture,
-        createPanGesture,
-        createPinchGesture,
-        createRotationGesture,
-        createSwipeGesture,
-        createSwipeGestureByModifier,
-        createGestureGroup,
-        addGestureToGestureGroup,
-        removeGestureFromGestureGroup,
-        dispose,
-        registerGestureEvent,
-        addGestureToNode,
-        removeGestureFromNode,
-        removeGestureFromNodeByTag,
-        clearGestures,
-        setGestureInterrupterToNode,
-        setInnerGestureParallelTo,
-        setGestureRecognizerEnabled,
-        getGestureRecognizerEnabled,
-        getGestureRecognizerState,
-        gestureEventTargetInfoIsScrollBegin,
-        gestureEventTargetInfoIsScrollEnd,
-        getPanGestureDirectionMask,
-        isBuiltInGesture,
-        getGestureTag,
-        getGestureBindNodeId,
-        isGestureRecognizerValid,
-        setArkUIGestureRecognizerDisposeNotify,
-        addGestureToGestureGroupWithRefCountDecrease,
-        addGestureToNodeWithRefCountDecrease,
-        };
+        .createTapGesture = createTapGesture,
+        .createTapGestureWithDistanceThreshold = createTapGestureWithDistanceThreshold,
+        .createLongPressGesture = createLongPressGesture,
+        .createPanGesture = createPanGesture,
+        .createPinchGesture = createPinchGesture,
+        .createRotationGesture = createRotationGesture,
+        .createSwipeGesture = createSwipeGesture,
+        .createSwipeGestureByModifier = createSwipeGestureByModifier,
+        .createGestureGroup = createGestureGroup,
+        .addGestureToGestureGroup = addGestureToGestureGroup,
+        .removeGestureFromGestureGroup = removeGestureFromGestureGroup,
+        .dispose = dispose,
+        .registerGestureEvent = registerGestureEvent,
+        .addGestureToNode = addGestureToNode,
+        .removeGestureFromNode = removeGestureFromNode,
+        .removeGestureFromNodeByTag = removeGestureFromNodeByTag,
+        .clearGestures = clearGestures,
+        .setGestureInterrupterToNode = setGestureInterrupterToNode,
+        .setInnerGestureParallelTo = setInnerGestureParallelTo,
+        .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
+        .getGestureRecognizerEnabled = getGestureRecognizerEnabled,
+        .getGestureRecognizerState = getGestureRecognizerState,
+        .gestureEventTargetInfoIsScrollBegin = gestureEventTargetInfoIsScrollBegin,
+        .gestureEventTargetInfoIsScrollEnd = gestureEventTargetInfoIsScrollEnd,
+        .getPanGestureDirectionMask = getPanGestureDirectionMask,
+        .isBuiltInGesture = isBuiltInGesture,
+        .getGestureTag = getGestureTag,
+        .getGestureBindNodeId = getGestureBindNodeId,
+        .isGestureRecognizerValid = isGestureRecognizerValid,
+        .setArkUIGestureRecognizerDisposeNotify = setArkUIGestureRecognizerDisposeNotify,
+        .addGestureToGestureGroupWithRefCountDecrease = addGestureToGestureGroupWithRefCountDecrease,
+        .addGestureToNodeWithRefCountDecrease = addGestureToNodeWithRefCountDecrease,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
+
     return &modifier;
 }
 
 const CJUIGestureModifier* GetCJUIGestureModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIGestureModifier modifier = {
-        createTapGesture,
-        createLongPressGesture,
-        createPanGesture,
-        createPinchGesture,
-        createRotationGesture,
-        createSwipeGesture,
-        createSwipeGestureByModifier,
-        createGestureGroup,
-        addGestureToGestureGroup,
-        removeGestureFromGestureGroup,
-        dispose,
-        registerGestureEvent,
-        addGestureToNode,
-        removeGestureFromNode,
-        removeGestureFromNodeByTag,
-        clearGestures,
-        setGestureInterrupterToNode,
+        .createTapGesture = createTapGesture,
+        .createLongPressGesture = createLongPressGesture,
+        .createPanGesture = createPanGesture,
+        .createPinchGesture = createPinchGesture,
+        .createRotationGesture = createRotationGesture,
+        .createSwipeGesture = createSwipeGesture,
+        .createSwipeGestureByModifier = createSwipeGestureByModifier,
+        .createGestureGroup = createGestureGroup,
+        .addGestureToGestureGroup = addGestureToGestureGroup,
+        .removeGestureFromGestureGroup = removeGestureFromGestureGroup,
+        .dispose = dispose,
+        .registerGestureEvent = registerGestureEvent,
+        .addGestureToNode = addGestureToNode,
+        .removeGestureFromNode = removeGestureFromNode,
+        .removeGestureFromNodeByTag = removeGestureFromNodeByTag,
+        .clearGestures = clearGestures,
+        .setGestureInterrupterToNode = setGestureInterrupterToNode,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
+
     return &modifier;
 }
 

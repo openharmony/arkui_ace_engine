@@ -91,6 +91,10 @@ class ComputedV2 {
     return this.prop_;
   }
 
+  public getComputedFuncName(): string {
+    return this.propertyComputeFunc_.name;
+  }
+
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
@@ -107,6 +111,17 @@ class ComputedV2 {
     }
 
     return ret;
+  }
+
+  public static clearComputedFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== 'object' ||
+        !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((computed: ComputedV2) => ObserveV2.getObserve().clearWatch(computed.computedId_));
   }
 }
 

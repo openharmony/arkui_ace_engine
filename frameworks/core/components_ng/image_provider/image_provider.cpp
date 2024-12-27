@@ -312,7 +312,6 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
     RefPtr<ImageObject> imageObject;
     if (codec.frameCount > 1) {
         auto imageObject = MakeRefPtr<AnimatedImageObject>(src, codec.imageSize, data);
-        imageObject->SetOrientation(codec.orientation);
         imageObject->SetFrameCount(codec.frameCount);
         return imageObject;
     }
@@ -351,7 +350,8 @@ void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const 
     RefPtr<CanvasImage> image;
     // preview and ohos platform
     if (SystemProperties::GetImageFrameworkEnabled()) {
-        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed);
+        image = decoder.MakePixmapImage(imageDecoderOptions.imageQuality, imageDecoderOptions.isHdrDecoderNeed,
+            imageDecoderOptions.photoDecodeFormat);
     } else {
         image = decoder.MakeDrawingImage();
     }

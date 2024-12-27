@@ -99,11 +99,9 @@ struct ACE_FORCE_EXPORT AceRunArgs {
     std::map<std::string, std::string> pkgContextInfoJsonStringMap;
     std::map<std::string, std::string> packageNameList;
 
-#ifdef COMPONENT_TEST_ENABLED
     // Component test
     bool isComponentTestMode = false;
     std::string componentTestConfig = "";
-#endif // COMPONENT_TEST_ENABLED
 };
 
 } // namespace OHOS::Ace::Platform

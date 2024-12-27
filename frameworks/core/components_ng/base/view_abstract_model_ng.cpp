@@ -69,7 +69,8 @@ void ViewAbstractModelNG::BindMenuGesture(
     gestureHub->BindMenu(std::move(showMenu));
 }
 
-bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId)
+bool ViewAbstractModelNG::CheckMenuIsShow(
+    const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode)
 {
     RefPtr<NG::PipelineContext> pipeline = nullptr;
     if (menuParam.isShowInSubWindow) {
@@ -80,7 +81,8 @@ bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t ta
         CHECK_NULL_RETURN(childContainer, false);
         pipeline = AceType::DynamicCast<NG::PipelineContext>(childContainer->GetPipelineContext());
     } else {
-        pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(targetNode, false);
+        pipeline = targetNode->GetContextRefPtr();
     }
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
@@ -88,6 +90,7 @@ bool ViewAbstractModelNG::CheckMenuIsShow(const MenuParam& menuParam, int32_t ta
     auto menuNode = overlayManager->GetMenuNode(targetId);
     CHECK_NULL_RETURN(menuNode, false);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(wrapperPattern, false);
     if (menuParam.hasTransitionEffect) {
         auto renderContext = menuNode->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
@@ -107,7 +110,7 @@ void ViewAbstractModelNG::BindMenu(
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-    if (CheckMenuIsShow(menuParam, targetId)) {
+    if (CheckMenuIsShow(menuParam, targetId, targetNode)) {
         TAG_LOGI(AceLogTag::ACE_MENU, "hide menu done %{public}d %{public}d.", menuParam.isShowInSubWindow, targetId);
     } else if (menuParam.isShow) {
         if (!params.empty()) {
@@ -316,8 +319,12 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         TAG_LOGI(AceLogTag::ACE_MENU, "Execute longPress task for menu");
                         auto targetNode = weakTarget.Upgrade();
                         CHECK_NULL_VOID(targetNode);
-                        auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                        auto pipelineContext = targetNode->GetContext();
                         CHECK_NULL_VOID(pipelineContext);
+                        if (pipelineContext->IsDragging()) {
+                            TAG_LOGI(AceLogTag::ACE_MENU, "TargetNode is dragging, menu is no longer show");
+                            return;
+                        }
                         if (menuParam.previewMode == MenuPreviewMode::IMAGE || menuParam.isShowHoverImage) {
                             auto context = targetNode->GetRenderContext();
                             CHECK_NULL_VOID(context);
@@ -328,8 +335,6 @@ void ViewAbstractModelNG::BindContextMenu(const RefPtr<FrameNode>& targetNode, R
                         }
                         NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
                             info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-                        auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-                        menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
                         NG::ViewAbstract::BindMenuWithCustomNode(
                             std::move(builder), targetNode, menuPosition, menuParam, std::move(previewBuildFunc));
                     },
@@ -628,6 +633,15 @@ void ViewAbstractModelNG::SetAccessibilityDescription(const std::string& descrip
     accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
 }
 
+void ViewAbstractModelNG::SetAccessibilityNextFocusId(const std::string& nextFocusId)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityNextFocusInspectorKey(nextFocusId);
+}
+
 void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importance)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -703,12 +717,52 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue) {
+        accessibilityProperty->ResetAccessibilityCustomRole();
+    } else {
+        accessibilityProperty->SetAccessibilityCustomRole(role);
+    }
+}
+
+void ViewAbstractModelNG::SetOnAccessibilityFocus(
+    NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserOnAccessibilityFocusCallback(onAccessibilityFocusCallbackImpl);
+}
+
+void ViewAbstractModelNG::ResetOnAccessibilityFocus()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityDescriptionWithEvent(description);
+}
+
+void ViewAbstractModelNG::SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityNextFocusInspectorKey(nextFocusId);
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(FrameNode* frameNode, bool accessible)
@@ -783,6 +837,35 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
     }
+}
+
+void ViewAbstractModelNG::SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue) {
+        accessibilityProperty->ResetAccessibilityCustomRole();
+    } else {
+        accessibilityProperty->SetAccessibilityCustomRole(role);
+    }
+}
+
+void ViewAbstractModelNG::SetOnAccessibilityFocus(
+    FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserOnAccessibilityFocusCallback(onAccessibilityFocusCallbackImpl);
+}
+
+void ViewAbstractModelNG::ResetOnAccessibilityFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
 }
 
 } // namespace OHOS::Ace::NG

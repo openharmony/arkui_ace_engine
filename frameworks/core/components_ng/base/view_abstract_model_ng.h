@@ -951,18 +951,24 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override
+    {
+        ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    }
+#endif
     void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
-        focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+        focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override
@@ -1016,6 +1022,11 @@ public:
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override
     {
         ViewAbstract::SetOnBlur(std::move(onBlurCallback));
+    }
+
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override
+    {
+        ViewAbstract::SetOnFocusAxisEvent(std::move(onFocusAxisCallback));
     }
 
     void SetDraggable(bool draggable) override
@@ -1304,7 +1315,11 @@ public:
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityRole(const std::string& role, bool resetValue) override;
+    void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
+    void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void ResetOnAccessibilityFocus() override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1335,6 +1350,13 @@ public:
     {
         ViewAbstract::DisableOnKeyEvent();
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override
+    {
+        ViewAbstract::DisableOnCrownEvent();
+    }
+#endif
 
     void DisableOnKeyPreIme() override
     {
@@ -1398,6 +1420,18 @@ public:
     void DisableOnBlur() override
     {
         ViewAbstract::DisableOnBlur();
+    }
+
+    void DisableOnFocusAxisEvent() override
+    {
+        ViewAbstract::DisableOnFocusAxisEvent();
+    }
+
+    static void DisableOnFocusAxisEvent(FrameNode* frameNode)
+    {
+        auto focusHub = frameNode->GetOrCreateFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->ClearOnFocusAxisCallback();
     }
 
     static void SetAccessibilityText(FrameNode* frameNode, const std::string& text);
@@ -1475,6 +1509,11 @@ public:
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
+    static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
+    static void SetOnAccessibilityFocus(
+        FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
+    static void ResetOnAccessibilityFocus(FrameNode* frameNode);
+    static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {
@@ -1492,7 +1531,7 @@ public:
     static std::string GetAccessibilityImportance(FrameNode* frameNode);
 
 private:
-    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
+    bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId, const RefPtr<FrameNode>& targetNode);
     void RegisterContextMenuKeyEvent(
         const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam);
 

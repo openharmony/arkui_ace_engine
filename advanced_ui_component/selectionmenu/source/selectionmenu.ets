@@ -158,6 +158,13 @@ struct SelectionMenuComponent {
     this.fontScale = this.getFontScale()
   }
 
+  hasSystemMenu(): boolean {
+    let showMenuOption = this.showCustomerIndex === -1 &&
+        (this.controller || (this.expandedMenuOptions && this.expandedMenuOptions.length > 0))
+    let showBuilder = this.showCustomerIndex > -1 && this.builder
+    return Boolean(showMenuOption || showBuilder)
+  }
+
   build() {
     Column() {
       if (this.editorMenuOptions && this.editorMenuOptions.length > 0) {
@@ -169,6 +176,8 @@ struct SelectionMenuComponent {
       .backgroundColor(this.theme.backGroundColor)
       .shadow(this.theme.iconPanelShadowStyle)
       .borderRadius(this.theme.containerBorderRadius)
+      .outline(this.hasSystemMenu() ? { width: this.theme.outlineWidth, color: this.theme.outlineColor,
+        radius: this.theme.containerBorderRadius } : undefined)
       .constraintSize({
         maxHeight: `calc(100% - ${this.horizontalMenuHeight > 0 ? this.horizontalMenuHeight + this.theme.menuSpacing : 0}vp)`,
         minWidth: this.theme.defaultMenuWidth
@@ -537,8 +546,6 @@ struct SelectionMenuComponent {
     .width(this.fontScale > MAX_FONT_SCALE ? 'auto' : this.theme.defaultMenuWidth)
     .shadow(this.theme.iconPanelShadowStyle)
     .border({ width: this.theme.borderWidth, color: this.theme.borderColor,
-      radius: this.theme.containerBorderRadius })
-    .outline({ width: this.theme.outlineWidth, color: this.theme.outlineColor,
       radius: this.theme.containerBorderRadius })
     .constraintSize({
       minWidth: this.theme.defaultMenuWidth

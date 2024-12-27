@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_content_slot.h"
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_bindings.h"
 #include "core/components_ng/syntax/content_slot_model_ng.h"
@@ -39,6 +40,9 @@ void JSContentSlot::Create(const JSCallbackInfo& info)
         if (hasNativePtr) {
             auto nodeContent = JSRef<JSObject>::Cast(info[0])->GetProperty("nativePtr_");
             auto contentHandle = nodeContent.Get().GetLocalHandle();
+            if (!contentHandle->IsNativePointer(info.GetVm())) {
+                return;
+            }
             content = reinterpret_cast<NG::NodeContent*>(contentHandle->ToNativePointer(info.GetVm())->Value());
         }
     }

@@ -62,5 +62,9 @@ void SetAttachNodePtr(ArkUINodeHandle nodePtr, void* attachNode);
 
 void* GetAttachNodePtr(ArkUINodeHandle nodePtr);
 
+void* CreateCustomNode(ArkUI_CharPtr tag);
+
+void* GetOrCreateCustomNode(ArkUI_CharPtr tag);
+
 } // namespace OHOS::Ace::NG::ViewModel
 #endif

@@ -238,7 +238,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
     GatherNodeChildInfo gatherNodeInfo;
     auto imageNodeId = GetElmtId();
     auto textNodeId = GetElmtId();
-    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(-1, "Menu", MenuType::MENU);
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_TRUE(frameNode != nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textNodeId,
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
@@ -255,8 +257,48 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_TRUE(textLayoutProperty != nullptr);
-    auto content = textLayoutProperty->GetContentValue(u"2");
+    auto content = textLayoutProperty->GetContentValue();
     EXPECT_STREQ(StringUtils::Str16ToStr8(content).c_str(),
         std::to_string(overlayManager->GetGatherNodeChildrenInfo().size() + 1).c_str());
+}
+
+/**
+ * @tc.name: CalcBadgeTextPosition002
+ * @tc.desc: test CalcBadgeTextPosition func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition002, TestSize.Level1)
+{
+    std::vector<GatherNodeChildInfo> gatherNodeInfos;
+    GatherNodeChildInfo gatherNodeInfo;
+    auto imageNodeId = GetElmtId();
+    auto textNodeId = GetElmtId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto menuPattern = AceType::MakeRefPtr<MenuPattern>(frameNode->GetId(), frameNode->GetTag(), MenuType::MENU);
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, textNodeId,
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId,
+        []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(menuPattern, nullptr);
+
+    gatherNodeInfo.imageNode =  AceType::WeakClaim(AceType::RawPtr(imageNode));
+    gatherNodeInfos.emplace_back(gatherNodeInfo);
+    frameNode->previewOption_.isNumber = true;
+    frameNode->previewOption_.badgeNumber = 3;
+
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->MountGatherNodeToRootNode(textNode, gatherNodeInfos);
+    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    auto content = textLayoutProperty->GetContentValue();
+
+    EXPECT_STREQ(StringUtils::Str16ToStr8(content).c_str(),
+        std::to_string(3).c_str());
 }
 } // namespace OHOS::Ace::NG

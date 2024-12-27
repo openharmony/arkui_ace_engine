@@ -170,6 +170,7 @@ int32_t UIContentServiceProxy::RegisterWebUnfocusEventCallback(
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
     }
     report_->RegisterWebUnfocusEventCallback(eventCallback);
     if (Remote()->SendRequest(REGISTER_WEB_UNFOCUS_EVENT, data, reply, option) != ERR_NONE) {
@@ -274,6 +275,7 @@ int32_t UIContentServiceProxy::UnregisterWebUnfocusEventCallback()
     }
     if (report_ == nullptr) {
         LOGW("reportStub is nullptr,connect is not execute");
+        return FAILED;
     }
     report_->UnregisterComponentChangeEventCallback();
     if (Remote()->SendRequest(UNREGISTER_COMPONENT_EVENT, data, reply, option) != ERR_NONE) {

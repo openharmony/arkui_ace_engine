@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-
 #include "core/components_ng/manager/drag_drop/drag_drop_behavior_reporter/drag_drop_behavior_reporter.h"
 
 #include "base/log/event_report.h"

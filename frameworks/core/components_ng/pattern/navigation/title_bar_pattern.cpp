@@ -27,8 +27,6 @@
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/utils.h"
@@ -268,11 +266,8 @@ void CreateDefaultBackButton(const RefPtr<FrameNode>& backButtonNode, const RefP
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
 
         ImageSourceInfo imageSourceInfo;
-        auto iconColor = theme->GetBackButtonIconColor();
-        auto backResourceId = theme->GetBackResourceId();
-
-        imageSourceInfo.SetResourceId(backResourceId);
-        imageSourceInfo.SetFillColor(iconColor);
+        imageSourceInfo.SetResourceId(theme->GetBackResourceId());
+        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
         backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
         backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         backButtonIconNode->MarkModifyDone();
@@ -378,12 +373,12 @@ void TitleBarPattern::MountSubTitle(const RefPtr<TitleBarNode>& hostNode)
 
     // set titleBar subTitle inspectorId
     auto parentType = titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR);
-    std::string parentId = hostNode->GetInnerParentId();
     std::string field = NG::NAV_FIELD;
     if (parentType == TitleBarParentType::NAV_DESTINATION) {
         field = NG::DES_FIELD;
     }
-    NavigationTitleUtil::SetInnerChildId(subtitleNode, field, subtitleNode->GetTag(), "SubTitle", parentId);
+    NavigationTitleUtil::SetInnerChildId(subtitleNode, field, subtitleNode->GetTag(),
+        "SubTitle", hostNode->GetInnerParentId());
 
     if (options_.textOptions.subTitleApplyFunc || shouldResetSubTitleProperty_) {
         auto titleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
@@ -417,6 +412,7 @@ void TitleBarPattern::InitTitleParam()
 bool TitleBarPattern::IsHidden()
 {
     auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
     CHECK_NULL_RETURN(navBarNode, false);
     auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -440,8 +436,8 @@ void TitleBarPattern::UpdateNavBarTitleProperty(const RefPtr<TitleBarNode>& host
     }
 
     // set navbar titleBar main title inspectorId
-    std::string parentId = hostNode->GetInnerParentId();
-    NavigationTitleUtil::SetInnerChildId(titleNode, NG::NAV_FIELD, titleNode->GetTag(), "MainTitle", parentId);
+    NavigationTitleUtil::SetInnerChildId(titleNode, NG::NAV_FIELD, titleNode->GetTag(),
+        "MainTitle", hostNode->GetInnerParentId());
 
     // update main title layout property
     if (options_.textOptions.mainTitleApplyFunc || shouldResetMainTitleProperty_) {
@@ -535,31 +531,19 @@ void TitleBarPattern::ResetMainTitleProperty(const RefPtr<FrameNode>& textNode,
         titleLayoutProperty->UpdateHeightAdaptivePolicy(hasSubTitle ? TextHeightAdaptivePolicy::MAX_LINES_FIRST :
             TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
     } else if (titleMode == NavigationTitleMode::MINI) {
-        if (titleBarLayoutProperty->HasHideBackButton() && titleBarLayoutProperty->GetHideBackButtonValue()) {
-            titleLayoutProperty->UpdateFontSize(miniTitleFontSize);
-            titleLayoutProperty->UpdateAdaptMaxFontSize(miniTitleFontSize);
-        } else {
-            titleLayoutProperty->UpdateFontSize(miniTitleFontSizeMin);
-            titleLayoutProperty->UpdateAdaptMaxFontSize(miniTitleFontSizeMin);
-        }
+        auto hideBackButtonValid = titleBarLayoutProperty->HasHideBackButton() &&
+            titleBarLayoutProperty->GetHideBackButtonValue();
+        titleLayoutProperty->UpdateFontSize(hideBackButtonValid ? miniTitleFontSize : miniTitleFontSizeMin);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(hideBackButtonValid ? miniTitleFontSize : miniTitleFontSizeMin);
         UpdateSubTitleOpacity(1.0);
     } else if (titleMode == NavigationTitleMode::FULL) {
         titleLayoutProperty->UpdateFontSize(titleFontSize);
         titleLayoutProperty->UpdateAdaptMaxFontSize(maxFontSize);
         UpdateSubTitleOpacity(1.0);
     } else {
-        if (fontSize_.has_value()) {
-            titleLayoutProperty->UpdateFontSize(fontSize_.value());
-            titleLayoutProperty->UpdateAdaptMaxFontSize(fontSize_.value());
-        } else {
-            titleLayoutProperty->UpdateFontSize(titleFontSize);
-            titleLayoutProperty->UpdateAdaptMaxFontSize(maxFontSize);
-        }
-        if (opacity_.has_value()) {
-            UpdateSubTitleOpacity(opacity_.value());
-        } else {
-            UpdateSubTitleOpacity(1.0);
-        }
+        titleLayoutProperty->UpdateFontSize(fontSize_.has_value() ? fontSize_.value() : titleFontSize);
+        titleLayoutProperty->UpdateAdaptMaxFontSize(fontSize_.has_value() ? fontSize_.value() : maxFontSize);
+        UpdateSubTitleOpacity(opacity_.has_value() ? opacity_.value() : 1.0);
     }
 }
 
@@ -610,6 +594,17 @@ void TitleBarPattern::MountTitle(const RefPtr<TitleBarNode>& hostNode)
     CHECK_NULL_VOID(hostNode);
     UpdateNavDesTitleProperty(hostNode);
     UpdateNavBarTitleProperty(hostNode);
+}
+
+RefPtr<LayoutAlgorithm> TitleBarPattern::CreateLayoutAlgorithm()
+{
+    auto titleBarLayoutAlgorithm = MakeRefPtr<TitleBarLayoutAlgorithm>();
+    titleBarLayoutAlgorithm->SetInitialTitleOffsetY(initialTitleOffsetY_);
+    titleBarLayoutAlgorithm->MarkIsInitialTitle(isInitialTitle_);
+    titleBarLayoutAlgorithm->SetInitialSubtitleOffsetY(initialSubtitleOffsetY_);
+    titleBarLayoutAlgorithm->MarkIsInitialSubtitle(isInitialSubtitle_);
+    titleBarLayoutAlgorithm->SetMinTitleHeight(minTitleHeight_);
+    return titleBarLayoutAlgorithm;
 }
 
 void TitleBarPattern::OnModifyDone()
@@ -726,11 +721,8 @@ void TitleBarPattern::ProcessTitleDragUpdate(float offset)
     }
     SetTempTitleBarHeight(offset);
     titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
-    titleMoveDistanceX_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatioX_;
     SetTempTitleOffsetY();
     SetTempSubTitleOffsetY();
-    SetTempTitleOffsetX();
-    SetTempSubTitleOffsetX();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // title font size
@@ -806,12 +798,7 @@ void TitleBarPattern::SpringAnimation(float startPos, float endPos)
     constexpr float velocity = 0.0f;
     constexpr float mass = 1.0f;        // The move animation spring curve mass is 1.0f
     constexpr float stiffness = 228.0f; // The move animation spring curve stiffness is 228.0f
-    float damping = 30.0f;    // The move animation spring curve damping is 30.0f
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) &&
-        needToAvoidSideBar_) {
-        // animation parameter of avoid SideBar
-        damping = 27.0f;
-    }
+    constexpr float damping = 30.0f;    // The move animation spring curve damping is 30.0f
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     AnimationOption option;
     option.SetCurve(springCurve);
@@ -851,6 +838,7 @@ void TitleBarPattern::UpdateScaleByDragOverDragOffset(float overDragOffset)
         return;
     }
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
     CHECK_NULL_VOID(navBarNode);
     if (navBarNode->GetPrevTitleIsCustomValue(true)) {
@@ -946,21 +934,6 @@ void TitleBarPattern::SetTempTitleOffsetY()
     }
 }
 
-void TitleBarPattern::SetTempTitleOffsetX()
-{
-    if (!needToAvoidSideBar_) {
-        tempTitleOffsetX_ = minTitleOffsetX_;
-        return;
-    }
-    tempTitleOffsetX_ = defaultTitleOffsetX_ - titleMoveDistanceX_;
-    if (tempTitleOffsetX_ < minTitleOffsetX_) {
-        tempTitleOffsetX_ = minTitleOffsetX_;
-    }
-    if (tempTitleOffsetX_ > maxTitleOffsetX_) {
-        tempTitleOffsetX_ = maxTitleOffsetX_;
-    }
-}
-
 void TitleBarPattern::SetTempSubTitleOffsetY()
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -974,21 +947,6 @@ void TitleBarPattern::SetTempSubTitleOffsetY()
     }
     if (tempTitleOffsetY_ > maxTitleOffsetY_) {
         tempSubTitleOffsetY_ = maxTitleOffsetY_;
-    }
-}
-
-void TitleBarPattern::SetTempSubTitleOffsetX()
-{
-    if (!needToAvoidSideBar_) {
-        tempSubTitleOffsetX_ = minTitleOffsetX_;
-        return;
-    }
-    tempSubTitleOffsetX_ = tempTitleOffsetX_;
-    if (tempTitleOffsetX_ < minTitleOffsetX_) {
-        tempSubTitleOffsetX_ = minTitleOffsetX_;
-    }
-    if (tempTitleOffsetX_ > maxTitleOffsetX_) {
-        tempSubTitleOffsetX_ = maxTitleOffsetX_;
     }
 }
 
@@ -1147,7 +1105,6 @@ void TitleBarPattern::OnCoordScrollStart()
     coordScrollOffset_ = 0.0f;
     coordScrollFinalOffset_ = 0.0f;
     isFreeTitleUpdated_ = true;
-    isScrolling_ = true;
 
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
@@ -1165,7 +1122,15 @@ void TitleBarPattern::OnCoordScrollStart()
         animation_.reset();
     }
 
-    UpdateTitlePositionInfo();
+    defaultTitleBarHeight_ = currentTitleBarHeight_;
+    defaultTitleOffsetY_ = currentTitleOffsetY_;
+    SetMaxTitleBarHeight();
+    SetTempTitleBarHeight(0);
+    minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
+    maxTitleOffsetY_ = initialTitleOffsetY_;
+    moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
+                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
 }
 
 float TitleBarPattern::OnCoordScrollUpdate(float offset)
@@ -1204,12 +1169,8 @@ float TitleBarPattern::OnCoordScrollUpdate(float offset)
 void TitleBarPattern::OnCoordScrollEnd()
 {
     if (NearZero(coordScrollOffset_)) {
-        isScrolling_ = false;
         return;
     }
-    // update current offsetX after drag finish
-    currentTitleOffsetX_ = tempTitleOffsetX_;
-    isScrolling_ = false;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     float middleHeight =
         (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) + maxTitleBarHeight_) / TITLE_RATIO;
@@ -1255,18 +1216,13 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
     if (Positive(overDragOffset_)) {
         SetTempTitleBarHeightVp(maxTitleBarHeight_ + overDragOffset_ / 6.0f);
         titleMoveDistance_ = (maxTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_ + overDragOffset_ / 6.0f;
-        // moveDistanceX is no need to calc overDrag value
-        titleMoveDistanceX_ = (maxTitleBarHeight_ - defaultTitleBarHeight_) * moveRatioX_;
     } else {
         SetTempTitleBarHeight(offset);
         titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
-        titleMoveDistanceX_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatioX_;
     }
 
     SetTempTitleOffsetY();
     SetTempSubTitleOffsetY();
-    SetTempTitleOffsetX();
-    SetTempSubTitleOffsetX();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 
     // title font size
@@ -1342,42 +1298,38 @@ float TitleBarPattern::CalculateHandledOffsetMinTitle(float offset, float lastCo
 
 float TitleBarPattern::CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset)
 {
-    float offsetHandled = 0.0f;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     if (GreatOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, maxTitleBarHeight_)) {
         // The starting height of this update is greater than the maxTitleBarHeight_, so the navigation component
         // does not handle the offset.
-        offsetHandled = 0.0f;
-    } else if (LessOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, minHeight)) {
+        return 0.0f;
+    }
+    if (LessOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, minHeight)) {
         // The starting position height of this update is smaller than the minHeight, so the navigation component
         // only handles offsets from minHeight to maxTitleBarHeight_.
-        offsetHandled = maxTitleBarHeight_ - minHeight;
-    } else {
-        // The starting position height of this update is between the minHeight and the maxTitleBarHeight_, so the
-        // navigation component only handles offsets from defaultTitleBarHeight_ to maxTitleBarHeight_.
-        offsetHandled = offset - (coordScrollOffset_ - (maxTitleBarHeight_ - defaultTitleBarHeight_));
+        return maxTitleBarHeight_ - minHeight;
     }
-    return offsetHandled;
+    // The starting position height of this update is between the minHeight and the maxTitleBarHeight_, so the
+    // navigation component only handles offsets from defaultTitleBarHeight_ to maxTitleBarHeight_.
+    return offset - (coordScrollOffset_ - (maxTitleBarHeight_ - defaultTitleBarHeight_));
 }
 
 float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset)
 {
-    float offsetHandled = 0.0f;
     float minHeight = static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     if (LessOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, minHeight)) {
         // The starting height of this update is smaller than the minHeight, so the navigation component only
         // handles offsets from minHeight to target height.
-        offsetHandled = defaultTitleBarHeight_ + coordScrollOffset_ - minHeight;
-    } else if (GreatOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, maxTitleBarHeight_)) {
+        return defaultTitleBarHeight_ + coordScrollOffset_ - minHeight;
+    }
+    if (GreatOrEqual(defaultTitleBarHeight_ + lastCordScrollOffset, maxTitleBarHeight_)) {
         // The starting position height of this update is greater than the maxTitleBarHeight_, so the navigation
         // component only handles offsets from maxTitleBarHeight_ to target height.
-        offsetHandled = coordScrollOffset_ - (maxTitleBarHeight_ - defaultTitleBarHeight_);
-    } else {
-        // The starting position height of this update is between the minHeight and the maxTitleBarHeight_, so the
-        // navigation component handles all of the offset.
-        offsetHandled = offset;
+        return coordScrollOffset_ - (maxTitleBarHeight_ - defaultTitleBarHeight_);
     }
-    return offsetHandled;
+    // The starting position height of this update is between the minHeight and the maxTitleBarHeight_, so the
+    // navigation component handles all of the offset.
+    return offset;
 }
 
 void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
@@ -1555,172 +1507,6 @@ void TitleBarPattern::OnFontScaleConfigurationUpdate()
         return;
     }
     InitBackButtonLongPressEvent(backButtonNode);
-}
-
-void TitleBarPattern::InitSideBarButtonUpdateCallbackIfNeeded()
-{
-    auto titleBarNode = DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto sideBarContainerNode = GetParentSideBarContainerNode(titleBarNode);
-    CHECK_NULL_VOID(sideBarContainerNode);
-    auto sideBarPattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
-    CHECK_NULL_VOID(sideBarPattern);
-
-    // this callback will be called when sideBar is changed(position or size).
-    auto updateSideBarInfo = [weak = WeakClaim(this)] (const RefPtr<FrameNode>& sideBarContainerNode) {
-        auto titleBarPattern = weak.Upgrade();
-        CHECK_NULL_VOID(titleBarPattern);
-        bool lastNeedToAvoidSideBar = titleBarPattern->IsNecessaryToAvoidSideBar();
-        titleBarPattern->ResetSideBarControlButtonInfo();
-        auto layoutProperty = sideBarContainerNode->GetLayoutProperty<SideBarContainerLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
-        auto sideBarPattern = sideBarContainerNode->GetPattern<SideBarContainerPattern>();
-        CHECK_NULL_VOID(sideBarPattern);
-        auto titleBarNode = titleBarPattern->GetHost();
-        CHECK_NULL_VOID(titleBarNode);
-        auto titleBarAbsoluteRect = titleBarNode->GetTransformRectRelativeToWindow();
-        auto controlButtonNode = sideBarPattern->GetControlButtonNode();
-        CHECK_NULL_VOID(controlButtonNode);
-        auto controlButtonAbsoluteRect = controlButtonNode->GetTransformRectRelativeToWindow();
-        /*
-         * conditions that do not need to avoid sideBar:
-         * 1. control button is hide
-         * 2. control button positon is SideBarPosition::END
-         * 3. control button size or position is customed
-         * 4. titleBar is not itersectWith sideBarButton
-        */
-        if (!layoutProperty->GetShowControlButton().value_or(true) ||
-            layoutProperty->GetSideBarPosition().value_or(SideBarPosition::START) == SideBarPosition::END ||
-            sideBarPattern->IsControlButtonCustomed() ||
-            !titleBarAbsoluteRect.IsIntersectWith(controlButtonAbsoluteRect)) {
-            // if needToAvoidSidebar flag changed, reLayout is needed to recover title offsetX
-            if (lastNeedToAvoidSideBar) {
-                // update offsetX info After the sideBar position and the needToAvoidSideBar flag change
-                titleBarPattern->UpdateOffsetXToAvoidSideBar();
-                auto titleBarNode = titleBarPattern->GetHost();
-                CHECK_NULL_VOID(titleBarNode);
-                titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-            }
-            return;
-        }
-
-        auto geometryNode = controlButtonNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto buttonOffset = geometryNode->GetFrameOffset();
-        auto buttonSize = geometryNode->GetFrameSize();
-        if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
-            auto sideBarGeometryNode = sideBarContainerNode->GetGeometryNode();
-            CHECK_NULL_VOID(sideBarGeometryNode);
-            auto sideBarWidth = sideBarGeometryNode->GetFrameSize().Width();
-            // title offsetX when dragging is the absolute value, so buttonRect info need to be the absolute value
-            buttonOffset.SetX(sideBarWidth - buttonOffset.GetX() - buttonSize.Width());
-        }
-        titleBarPattern->UpdateSideBarControlButtonInfo(true, buttonOffset, buttonSize);
-        titleBarPattern->UpdateOffsetXToAvoidSideBar();
-        titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    };
-    sideBarPattern->SetControlButtonInfoUpdateCallback(updateSideBarInfo);
-}
-
-void TitleBarPattern::ResetSideBarControlButtonInfo()
-{
-    needToAvoidSideBar_ = false;
-    controlButtonRect_.Reset();
-}
-
-void TitleBarPattern::UpdateSideBarControlButtonInfo(bool needToAvoidSideBar, OffsetF offset, SizeF size)
-{
-    needToAvoidSideBar_ = needToAvoidSideBar;
-    controlButtonRect_.SetRect(offset, size);
-}
-
-RefPtr<FrameNode> TitleBarPattern::GetParentSideBarContainerNode(const RefPtr<TitleBarNode>& titleBarNode)
-{
-    auto currentNode = AceType::DynamicCast<UINode>(titleBarNode);
-    while (currentNode) {
-        if (currentNode->GetTag() == V2::SIDE_BAR_ETS_TAG) {
-            break;
-        }
-        currentNode = currentNode->GetParent();
-    }
-    CHECK_NULL_RETURN(currentNode, nullptr);
-    return AceType::DynamicCast<FrameNode>(currentNode);
-}
-
-void TitleBarPattern::UpdateTitlePositionInfo()
-{
-    defaultTitleBarHeight_ = currentTitleBarHeight_;
-
-    // init the title offsetY info
-    defaultTitleOffsetY_ = currentTitleOffsetY_;
-    SetMaxTitleBarHeight();
-    SetTempTitleBarHeight(0.0f);
-    minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
-    maxTitleOffsetY_ = initialTitleOffsetY_;
-    moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
-                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatio_;
-
-    // init the title offsetX info referring to title offsetY
-    defaultTitleOffsetX_ = currentTitleOffsetX_;
-    auto host = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(host);
-
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(host->GetParent());
-    CHECK_NULL_VOID(navBarNode);
-    auto isCustom = navBarNode->GetPrevTitleIsCustomValue(false);
-    auto titleBarNode = navBarNode->GetTitleBarNode();
-    auto frameNode = DynamicCast<FrameNode>(titleBarNode);
-    CHECK_NULL_VOID(frameNode);
-    auto titleWidth = frameNode->GetGeometryNode()->GetFrameSize().Width();
-    minTitleOffsetX_ = isCustom ? 0.0f : GetNavLeftPadding(titleWidth);
-    if (needToAvoidSideBar_) {
-        maxTitleOffsetX_ = controlButtonRect_.GetX() + controlButtonRect_.Width() +
-            DISTANCE_FROM_SIDE_BAR_BUTTON.ConvertToPx();
-        moveRatioX_ = (maxTitleOffsetX_ - minTitleOffsetX_) /
-                    (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-        titleMoveDistanceX_ = (GetTempTitleBarHeight() - defaultTitleBarHeight_) * moveRatioX_;
-    } else {
-        maxTitleOffsetX_ = minTitleOffsetX_;
-        moveRatioX_ = 0.0f;
-        titleMoveDistanceX_ = 0.0f;
-    }
-}
-
-void TitleBarPattern::UpdateOffsetXToAvoidSideBar()
-{
-    // update offsetX info when navigation is not scrolling and sideBarPos change
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN) ||
-        isScrolling_) {
-        return;
-    }
-    // Update information related to sideBar on the x-axis
-    UpdateTitlePositionInfo();
-    if (needToAvoidSideBar_ && currentTitleOffsetY_ < initialTitleOffsetY_) {
-        // when title need to avoid sideBar and titleOffsetY = minTitleOffsetY, titleOffsetX = maxTitleOffsetX
-        tempTitleOffsetX_ = maxTitleOffsetX_;
-    } else {
-        tempTitleOffsetX_ = minTitleOffsetX_;
-    }
-    tempSubTitleOffsetX_ = tempTitleOffsetX_;
-    currentTitleOffsetX_ = tempTitleOffsetX_;
-}
-
-float TitleBarPattern::GetNavLeftPadding(float parentWidth)
-{
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_RETURN(theme, 0.0f);
-    auto navLeftPadding = theme->GetMaxPaddingStart().ConvertToPx();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto options = GetTitleBarOptions();
-        auto paddingStart = options.brOptions.paddingStart;
-        if (paddingStart.has_value()) {
-            navLeftPadding = NavigationTitleUtil::ParseCalcDimensionToPx(paddingStart, parentWidth);
-        } else {
-            navLeftPadding = theme->GetMarginLeft().ConvertToPx();
-        }
-    }
-    return navLeftPadding;
 }
 
 void TitleBarPattern::InitMenuDragAndLongPressEvent(

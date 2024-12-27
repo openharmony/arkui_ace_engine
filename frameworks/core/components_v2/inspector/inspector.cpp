@@ -22,7 +22,6 @@
 
 namespace OHOS::Ace::V2 {
 namespace {
-const char IFELSE_ELEMENT_TAG[] = "IfElseElement";
 const char INSPECTOR_TYPE[] = "$type";
 const char INSPECTOR_ROOT[] = "root";
 const char INSPECTOR_WIDTH[] = "width";
@@ -118,23 +117,6 @@ void ToJsonValue(const RefPtr<Element>& element,
         jsonNodeArray->Put(jsonChild);
     }
     json->Put(INSPECTOR_CHILDREN, jsonNodeArray);
-}
-
-void DumpElementTree(
-    int32_t depth, const RefPtr<Element>& element, std::map<int32_t, std::list<RefPtr<Element>>>& depthElementMap)
-{
-    if (element->GetChildren().empty()) {
-        return;
-    }
-    const auto& children = element->GetChildren();
-    for (auto& depthElement : children) {
-        if (strcmp(AceType::TypeName(depthElement), IFELSE_ELEMENT_TAG) == 0) {
-            DumpElementTree(depth, depthElement, depthElementMap);
-            continue;
-        }
-        depthElementMap[depth].insert(depthElementMap[depth].end(), depthElement);
-        DumpElementTree(depth + 1, depthElement, depthElementMap);
-    }
 }
 } // namespace
 
@@ -271,7 +253,7 @@ bool Inspector::SendKeyEvent(const RefPtr<PipelineContext>& context, const JsKey
     keyEvent.SetTimeStamp(event.timeStamp);
     keyEvent.sourceType = static_cast<SourceType>(event.sourceDevice);
     return context->GetTaskExecutor()->PostTask(
-        [context, keyEvent]() { context->OnKeyEvent(keyEvent); },
+        [context, keyEvent]() { context->OnNonPointerEvent(keyEvent); },
         TaskExecutor::TaskType::UI, "ArkUIInspectorSendKeyEvent");
 }
 } // namespace OHOS::Ace::V2

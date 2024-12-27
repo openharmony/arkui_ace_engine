@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void DragEventTestNg::SetUpTestSuite()
 {
     GTEST_LOG_(INFO) << "DragEventTestNg SetUpTestCase";
+    testing::FLAGS_gmock_verbose = "error";
 }
 
 void DragEventTestNg::TearDownTestSuite()
@@ -242,7 +243,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     ASSERT_NE(pipeline, nullptr);
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
     /**
      * @tc.steps: step6. Invoke onActionStart, onActionUpdate, onActionEnd, onActionCancel when the onActionStart
      * function exists.
@@ -658,7 +659,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg006, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
 
     /**
      * @tc.steps: step4. Invoke onActionStart callback, when info.GetSourceDevice() is SourceType::MOUSE.
@@ -954,21 +955,21 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest001, TestSize.Level1)
     auto pipeline = PipelineContext::GetMainPipelineContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_DETECTING_STATUS);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_DETECTING_STATUS, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::READY_TO_TRIGGER_DRAG_ACTION, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_STARTED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_STARTED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_STARTED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_FINISHED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LIFT_FINISHED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LIFT_FINISHED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_STARTED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_STARTED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_STARTED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_FINISHED);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::PREVIEW_LANDING_FINISHED);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::PREVIEW_LANDING_FINISHED, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
     DragEventActuator::ExecutePreDragAction(PreDragStatus::ACTION_CANCELED_BEFORE_DRAG, frameNode);
-    EXPECT_EQ(dragDropManager->GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().GetPreDragStatus(), PreDragStatus::ACTION_CANCELED_BEFORE_DRAG);
 }
 
 /**
@@ -993,7 +994,8 @@ HWTEST_F(DragEventTestNg, DragEventExecutePreDragActionTest002, TestSize.Level1)
     auto pipeline = PipelineContext::GetMainPipelineContext();
     auto dragDropManager = pipeline->GetDragDropManager();
     ASSERT_NE(dragDropManager, nullptr);
-    dragDropManager->SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
+    DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     /**
      * @tc.steps: step2. Create onPreDrag function and bind to eventHub.
      * @tc.expected: Bind onPreDrag function successful.
@@ -1062,7 +1064,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
-    auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, childSize, DEFALUT_DRAG_PPIXELMAP_SCALE, false);
+    auto textNode = dragEventActuator->CreateBadgeTextNode(childSize);
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
@@ -1966,5 +1968,45 @@ HWTEST_F(DragEventTestNg, GetSetPressedKeyCodesTest001, TestSize.Level1)
     auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
     EXPECT_EQ(pressedKeyCodes.size(), 2);
     EXPECT_EQ(pressedKeyCodes[1], KeyCode::KEY_DPAD_RIGHT);
+}
+
+/**
+ * @tc.name: SetResponseRegionFullTest
+ * @tc.desc: Test ResetResponseRegion function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, ReSetResponseRegion, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragEventActuator.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+
+    /**
+     * @tc.steps: step2. Set frameNode response region.
+     */
+    auto setRect = DimensionRect(Dimension(100.0f), Dimension(100.0f));
+    auto originRect = DimensionRect(Dimension(1.0f), Dimension(1.0f));
+    dragEventActuator->isResponseRegionFull_ = true;
+    dragEventActuator->responseRegion_ = { originRect };
+    gestureEventHub->responseRegion_ = { setRect };
+    ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, setRect.width_);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, setRect.height_);
+
+    /**
+     * @tc.steps: step3. call ResetResponseRegion.
+     */
+    dragEventActuator->ResetResponseRegion();
+    EXPECT_EQ(dragEventActuator->isResponseRegionFull_, false);
+    ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, originRect.width_);
+    EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, originRect.height_);
 }
 } // namespace OHOS::Ace::NG

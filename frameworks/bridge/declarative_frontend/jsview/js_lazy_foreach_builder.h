@@ -131,7 +131,7 @@ public:
     }
 
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& cachedItems) override
     {
         std::pair<std::string, RefPtr<NG::UINode>> info;
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, info);
@@ -143,10 +143,11 @@ public:
         params[paramType::Data] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
         params[paramType::Index] = JSRef<JSVal>::Make(ToJSValue(index));
         std::string key = keyGenFunc_(params[paramType::Data], index);
-
-        GetChildFromExpiringItems(key, expiringItems, info);
-        // if info.second is null, the following ui node creation process is needed to fill info.second
-        if (info.second != nullptr) {
+        auto cachedIter = cachedItems.find(key);
+        if (cachedIter != cachedItems.end()) {
+            info.first = key;
+            info.second = cachedIter->second.second;
+            cachedItems.erase(cachedIter);
             return info;
         }
 
@@ -161,7 +162,7 @@ public:
             auto jsElmtIds = itemGenFunc_->Call(JSRef<JSObject>(), paramType::MAX_PARAMS_SIZE, params);
             std::string lastKey = UpdateDependElmtIds(info.second, jsElmtIds, key);
             changedLazyForEachNodes_.erase(nodeIter);
-            expiringItems.erase(lastKey);
+            cachedItems.erase(lastKey);
             return info;
         }
 
@@ -205,11 +206,15 @@ public:
         } else {
             key = keyGenFunc_(params[paramType::Data], index);
         }
-
-        GetChildFromExpiringItems(key, expiringItems, info);
-        // if info.second is null, the following ui node creation process is needed to fill info.second
-        if (info.second != nullptr) {
-            return info;
+        auto expiringIter = expiringItems.find(key);
+        if (expiringIter != expiringItems.end()) {
+            info.first = key;
+            info.second = expiringIter->second.second;
+            expiringItems.erase(expiringIter);
+            // if info.second is null, the following ui node creation process is needed to fill info.second
+            if (info.second != nullptr) {
+                return info;
+            }
         }
 
         NG::ScopedViewStackProcessor scopedViewStackProcessor;
@@ -250,17 +255,6 @@ private:
     std::map<int32_t, RefPtr<NG::UINode>> changedLazyForEachNodes_;
     std::map<RefPtr<NG::UINode>, std::pair<std::set<uint32_t>, std::string>> dependElementIds_;
     enum paramType {Data = 0, Index, Initialize, ElmtIds, MIN_PARAMS_SIZE = ElmtIds, MAX_PARAMS_SIZE};
-    void GetChildFromExpiringItems(std::string key,
-        std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems,
-        std::pair<std::string, RefPtr<NG::UINode>>& info)
-    {
-        auto expiringIter = expiringItems.find(key);
-        if (expiringIter != expiringItems.end()) {
-            info.first = key;
-            info.second = expiringIter->second.second;
-            expiringIter->second.second = nullptr;
-        }
-    }
 };
 
 } // namespace OHOS::Ace::Framework

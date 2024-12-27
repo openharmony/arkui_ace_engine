@@ -93,7 +93,7 @@ std::string DatePickerColumnAccessibilityProperty::GetText() const
     auto options = pattern->GetOptions();
     auto it = options.find(frameNode);
     if (it != options.end()) {
-        if (it->second.size() < index) {
+        if (it->second.size() <= index) {
             return "";
         }
         auto date = it->second.at(index);

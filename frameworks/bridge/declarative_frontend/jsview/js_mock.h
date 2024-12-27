@@ -79,5 +79,14 @@ public:
     void Close(const JSCallbackInfo& info) {}
 };
 
+class JSMockNativeCustomSpan {
+public:
+    JSMockNativeCustomSpan() = default;
+    ~JSMockNativeCustomSpan() = default;
+
+    static void JSBind(BindingTarget globalObj);
+    void Invalidate(const JSCallbackInfo& info) {}
+};
+
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_MOCK_H

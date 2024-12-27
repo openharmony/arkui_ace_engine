@@ -734,7 +734,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleKeyEventValidSession, Test
     ASSERT_TRUE(pipeline->GetIsFocusActive());
     pattern->HandleFocusEvent();
     pattern->isKeyAsync_ = true;
-    event.code = KeyCode::KEY_TAB;
+    event.code = { KeyCode::KEY_TAB };
+    pattern->DispatchKeyEventSync(event);
+    event.code = { KeyCode::KEY_SPACE };
     pattern->DispatchKeyEventSync(event);
 #endif
 }
@@ -1211,6 +1213,12 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest005, TestSize.Level
     /**
      * @tc.steps: step2. Test DumpInfo
      */
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
     pattern->DumpInfo();
 
     std::string testJson = "";
@@ -1582,6 +1590,75 @@ HWTEST_F(UIExtensionComponentTestNg, SecurityUIExtensionComponentNgTest002, Test
      */
     pattern->instanceId_ = 4;
     EXPECT_EQ(pattern->CheckConstraint(), false);
+#endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest010
+ * @tc.desc: Test pattern Test OnExtensionEvent, OnUeaAccessibilityEventAsync, OnExtensionDetachToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. test OnExtensionEvent
+     */
+    UIExtCallbackEventId eventId = UIExtCallbackEventId::ON_AREA_CHANGED;
+    pattern->OnExtensionEvent(eventId);
+    eventId = UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY;
+    pattern->OnExtensionEvent(eventId);
+
+    /**
+     * @tc.steps: step3. test OnUeaAccessibilityEventAsync
+     */
+    pattern->AttachToFrameNode(uiExtensionNode);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    ASSERT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
+    ASSERT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
+
+    auto frameNode = pattern->frameNode_.Upgrade();
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    ASSERT_EQ(accessibilityProperty->GetChildTreeId(), -1);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->InitializeAccessibility();
+    pattern->OnSetAccessibilityChildTree(1, 1);
+    pattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    pattern->OnAccessibilityChildTreeDeregister();
+    EXPECT_EQ(accessibilityProperty->GetChildTreeId(), 1);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->frameNode_ = nullptr;
+    ASSERT_EQ(pattern->frameNode_.Upgrade(), nullptr);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    /**
+     * @tc.steps: step4. test OnExtensionDetachToDisplay
+     */
+    pattern->contentNode_ = FrameNode::CreateFrameNode(V2::UI_EXTENSION_SURFACE_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<UIExtensionPattern>());
+    ASSERT_NE(pattern->contentNode_, nullptr);
+    pattern->OnExtensionDetachToDisplay();
+
+    pattern->contentNode_ = nullptr;
+    ASSERT_EQ(pattern->contentNode_, nullptr);
+    pattern->OnExtensionDetachToDisplay();
 #endif
 }
 } // namespace OHOS::Ace::NG

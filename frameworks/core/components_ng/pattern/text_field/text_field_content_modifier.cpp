@@ -48,7 +48,7 @@ constexpr float ROUND_VALUE = 0.5f;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
-    return FONT_WEIGHT_CONVERT_MAP[(int)fontWeight];
+    return FONT_WEIGHT_CONVERT_MAP[static_cast<int>(fontWeight)];
 }
 } // namespace
 
@@ -65,6 +65,7 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(textFieldPattern);
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
+    CHECK_NULL_VOID(contentOffset_);
     auto contentOffset = contentOffset_->Get();
     auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;
@@ -138,7 +139,7 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     TextStyle textStyle;
-    if (!textFieldPattern->GetTextValue().empty()) {
+    if (!textFieldPattern->GetTextUtf16Value().empty()) {
         textStyle = CreateTextStyleUsingTheme(
             textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
     } else {
@@ -173,9 +174,9 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     contentOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(
         OffsetF(textFieldPattern->GetTextRect().GetX(), textFieldPattern->GetTextRect().GetY()));
     contentSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
-    textValue_ = AceType::MakeRefPtr<PropertyString>("");
-    errorTextValue_ = AceType::MakeRefPtr<PropertyString>("");
-    placeholderValue_ = AceType::MakeRefPtr<PropertyString>("");
+    textValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
+    errorTextValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
+    placeholderValue_ = AceType::MakeRefPtr<PropertyU16String>(u"");
     textRectY_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetY());
     textRectX_ = AceType::MakeRefPtr<PropertyFloat>(textFieldPattern->GetTextRect().GetX());
     textAlign_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(TextAlign::START));
@@ -203,12 +204,10 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
-        }
+        fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     } else {
         fontSizeValue = textStyle.GetFontSize().ConvertToPx();
     }
@@ -219,14 +218,24 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
 void TextFieldContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 {
-    float minFontSizeValue = 0.0f;
+    float minFontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipelineContext) {
+        minFontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
     adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(minFontSizeValue);
     AttachProperty(adaptMinFontSizeFloat_);
 }
 
 void TextFieldContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 {
-    float maxFontSizeValue = 0.0f;
+    float maxFontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipelineContext) {
+        maxFontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
     adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(maxFontSizeValue);
     AttachProperty(adaptMaxFontSizeFloat_);
 }
@@ -294,31 +303,28 @@ void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& v
     fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
-void TextFieldContentModifier::SetFontSize(const Dimension& value)
+void TextFieldContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
 }
 
-void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
+void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMinFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(valPx);
 }
 
-void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMaxFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(valPx);
@@ -371,21 +377,21 @@ void TextFieldContentModifier::SetContentSize(SizeF& value)
     }
 }
 
-void TextFieldContentModifier::SetTextValue(std::string& value)
+void TextFieldContentModifier::SetTextValue(std::u16string& value)
 {
     if (textValue_->Get() != value) {
         textValue_->Set(value);
     }
 }
 
-void TextFieldContentModifier::SetErrorTextValue(const std::string& value)
+void TextFieldContentModifier::SetErrorTextValue(const std::u16string& value)
 {
     if (errorTextValue_->Get() != value) {
         errorTextValue_->Set(value);
     }
 }
 
-void TextFieldContentModifier::SetPlaceholderValue(std::string&& value)
+void TextFieldContentModifier::SetPlaceholderValue(std::u16string&& value)
 {
     if (placeholderValue_->Get() != value) {
         placeholderValue_->Set(value);

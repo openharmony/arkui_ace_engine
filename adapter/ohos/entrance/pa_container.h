@@ -145,6 +145,11 @@ public:
         return "";
     }
 
+    ResourceConfiguration GetResourceConfiguration() const override
+    {
+        return ResourceConfiguration();
+    }
+
     static bool Register();
     static void CreateContainer(int32_t instanceId, void* paAbility, const PaContainerOptions& options,
         std::unique_ptr<PlatformEventCallback> callback);

@@ -84,9 +84,13 @@ void KeyboardPattern::OnAreaChangedInner()
     auto boundaryHeight = 0.0f;
     // Check that the effective height of the keyboard is captured
     if (std::abs(customHeight) > boundaryHeight) {
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, customHeight);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->SetRawKeyboardHeight(customHeight);
+        }
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
             customHeight, safeHeight_);
         pipeline->OnVirtualKeyboardAreaChange(keyboardRect, nullptr, safeHeight_, supportAvoidance_, true);
@@ -100,8 +104,12 @@ void KeyboardPattern::SetKeyboardAreaChange(bool keyboardAvoidance)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto keyboardHeight = GetKeyboardHeight();
-        auto pipeline = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
+        auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        if (safeAreaManager) {
+            safeAreaManager->SetRawKeyboardHeight(keyboardHeight);
+        }
         Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, keyboardHeight);
         TAG_LOGI(ACE_KEYBOARD, "customKeyboardHeight Change to %{public}f, safeHeight: %{public}f",
             keyboardHeight, safeHeight_);

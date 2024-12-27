@@ -77,11 +77,11 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     }
     layoutProperty->UpdatePadding(padding);
     BorderWidthProperty borderWidth;
-    borderWidth.SetBorderWidth(isShow ? CONTAINER_BORDER_WIDTH : 0.0_vp);
     layoutProperty->UpdateBorderWidth(borderWidth);
 
     auto renderContext = containerNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToBounds(true);
     renderContext->UpdateBackgroundColor(GetContainerColor(isFocus_));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(isShow ? CONTAINER_OUTER_RADIUS : 0.0_vp);
@@ -266,43 +266,24 @@ void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsN
     PanDirection panDirection;
     panDirection.type = PanDirection::ALL;
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_VOID(windowManager);
-    // touch the title to move the floating window
-    auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
-        auto windowManager = wk.Upgrade();
+    if (!panEvent_) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto windowManager = pipeline->GetWindowManager();
         CHECK_NULL_VOID(windowManager);
-        if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
-            (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
-            windowManager->WindowStartMove();
-            SubwindowManager::GetInstance()->ClearToastInSubwindow();
-        }
-    };
-
-    std::vector<RefPtr<Gesture>> gestures;
-    auto mousePanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 0);
-    mousePanGesture->SetTag("mousePanGesture");
-    gestures.emplace_back(mousePanGesture);
-    auto fingerPanGesture = AceType::MakeRefPtr<PanGesture>(DEFAULT_PAN_FINGER, panDirection, 5);
-    fingerPanGesture->SetTag("fingerPanGesture");
-    gestures.emplace_back(fingerPanGesture);
-    auto gestureGroup = AceType::MakeRefPtr<GestureGroup>(GestureMode::Exclusive, gestures);
-    mousePanGesture->SetOnActionStartId(panActionStart);
-    fingerPanGesture->SetOnActionStartId(panActionStart);
-    eventHub->AddGesture(gestureGroup);
-    eventHub->SetOnGestureJudgeNativeBegin([](
-        const RefPtr<NG::GestureInfo>& gestureInfo,
-        const std::shared_ptr<BaseGestureEvent>& info)->GestureJudgeResult {
-            // MousePanGesture has higher priority. When using touch, should reject mousePanGesture.
-            // This means only fingerPanGesture or SourceTool::MOUSE are accepted.
-            if (gestureInfo->GetTag() == "mousePanGesture" && info->GetSourceTool() != SourceTool::MOUSE) {
-                TAG_LOGD(AceLogTag::ACE_APPBAR, "AddPanEvent: GestureJudgeResult REJECT");
-                return GestureJudgeResult::REJECT;
+        // touch the title to move the floating window
+        auto panActionStart = [wk = WeakClaim(RawPtr(windowManager))](const GestureEvent& event) {
+            auto windowManager = wk.Upgrade();
+            CHECK_NULL_VOID(windowManager);
+            if ((windowManager->GetCurrentWindowMaximizeMode() != MaximizeMode::MODE_AVOID_SYSTEM_BAR) &&
+                (event.GetSourceTool() != SourceTool::TOUCHPAD)) {
+                windowManager->WindowStartMove();
+                SubwindowManager::GetInstance()->ClearToastInSubwindow();
             }
-            return GestureJudgeResult::CONTINUE;
-    });
+        };
+        panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
+    }
+    eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
@@ -330,7 +311,9 @@ void ContainerModalPattern::OnWindowForceUnfocused() {}
 
 void ContainerModalPattern::WindowFocus(bool isFocus)
 {
-    auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<ContainerModalTheme>();
     isFocus_ = isFocus;
     auto containerNode = GetHost();
     CHECK_NULL_VOID(containerNode);
@@ -366,6 +349,7 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     // update leftSplit button
     auto leftSplitButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, LEFT_SPLIT_BUTTON_INDEX));
+    CHECK_NULL_VOID(leftSplitButton);
     ChangeTitleButtonIcon(leftSplitButton,
         isFocus ? InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT
                 : InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_DEFOCUS_SPLIT_LEFT,
@@ -378,6 +362,7 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     // update maximize button
     auto maximizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MAX_RECOVER_BUTTON_INDEX));
+    CHECK_NULL_VOID(maximizeButton);
     auto pipeline = PipelineContext::GetCurrentContext();
     auto windowManager = pipeline->GetWindowManager();
     MaximizeMode mode = windowManager->GetCurrentWindowMaximizeMode();
@@ -392,11 +377,13 @@ void ContainerModalPattern::ChangeControlButtons(bool isFocus)
     // update minimize button
     auto minimizeButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, MINIMIZE_BUTTON_INDEX));
+    CHECK_NULL_VOID(minimizeButton);
     ChangeTitleButtonIcon(minimizeButton,
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, isFocus, false);
 
     // update close button
     auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
     ChangeTitleButtonIcon(closeButton,
         InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_CLOSE, isFocus, true);
 }
@@ -454,7 +441,7 @@ bool ContainerModalPattern::CanShowFloatingTitle()
 
 void ContainerModalPattern::SetAppTitle(const std::string& title)
 {
-    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully, title is %{public}s", title.c_str());
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "SetAppTitle successfully");
     auto customTitleNode = GetCustomTitleNode();
     CHECK_NULL_VOID(customTitleNode);
     customTitleNode->FireAppTitleCallback(title);
@@ -707,13 +694,15 @@ void ContainerModalPattern::GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect
 
 void ContainerModalPattern::CallButtonsRectChange()
 {
-    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
     RectF containerModal;
     RectF buttons;
     GetContainerModalButtonsRect(containerModal, buttons);
-    if (buttonsRect_ == buttons) {
+    NotifyButtonsRectChange(containerModal, buttons);
+    CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
+    if (isInitButtonsRect_ && buttonsRect_ == buttons) {
         return;
     }
+    isInitButtonsRect_ = true;
     buttonsRect_ = buttons;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -977,5 +966,4 @@ void ContainerModalPattern::UpdateRowHeight(const RefPtr<FrameNode>& row, Dimens
     row->MarkModifyDone();
     row->MarkDirtyNode();
 }
-
 } // namespace OHOS::Ace::NG

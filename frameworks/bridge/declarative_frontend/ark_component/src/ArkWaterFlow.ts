@@ -177,44 +177,6 @@ class FrictionModifier extends ModifierWithKey<number | Resource> {
   }
 }
 
-class WaterFlowEdgeEffectModifier extends ModifierWithKey<ArkWaterFlowEdgeEffect> {
-  constructor(value: ArkWaterFlowEdgeEffect) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('waterFlowEdgeEffect');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().waterFlow.resetEdgeEffect(node);
-    } else {
-      getUINativeModule().waterFlow.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
-    }
-  }
-
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
-class WaterFlowFadingEdgeModifier extends ModifierWithKey<ArkFadingEdge> {
-  constructor(value: ArkFadingEdge) {
-    super(value);
-  }
-  static identity: Symbol = Symbol('waterFlowFadingEdge');
-  applyPeer(node: KNode, reset: boolean): void {
-    if (reset) {
-      getUINativeModule().waterFlow.resetFadingEdge(node);
-    } else {
-      getUINativeModule().waterFlow.setFadingEdge(node, this.value.value!, this.value.options?.fadingEdgeLength);
-    }
-  }
-  checkObjectDiff(): boolean {
-    return !((this.stageValue.value === this.value.value) &&
-      (this.stageValue.options === this.value.options));
-  }
-}
-
-
 class WaterFlowScrollBarWidthModifier extends ModifierWithKey<string | number> {
   constructor(value: string | number) {
     super(value);
@@ -295,7 +257,7 @@ class WaterFlowInitializeModifier extends ModifierWithKey<WaterFlowParam> {
       getUINativeModule().waterFlow.resetWaterFlowInitialize(node);
     } else {
       getUINativeModule().waterFlow.setWaterFlowInitialize(node,
-        this.value?.scroller, this.value?.sections, this.value?.layoutMode);
+        this.value?.scroller, this.value?.sections, this.value?.layoutMode, this.value?.footerContent);
     }
   }
 }
@@ -304,6 +266,7 @@ interface WaterFlowParam {
   scroller?: Scroller;
   sections?: WaterFlowSections;
   layoutMode?: WaterFlowLayoutMode;
+  footerContent?: ComponentContent;
 }
 
 class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements WaterFlowAttribute {
@@ -382,20 +345,6 @@ class ArkWaterFlowComponent extends ArkScrollable<WaterFlowAttribute> implements
   }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
-    return this;
-  }
-  edgeEffect(value: EdgeEffect, options?: EdgeEffectOptions | undefined): this {
-    let effect: ArkWaterFlowEdgeEffect = new ArkWaterFlowEdgeEffect();
-    effect.value = value;
-    effect.options = options;
-    modifierWithKey(this._modifiersWithKeys, WaterFlowEdgeEffectModifier.identity, WaterFlowEdgeEffectModifier, effect);
-    return this;
-  }
-  fadingEdge(value: boolean, options?: FadingEdgeOptions | undefined): this {
-    let fadingEdge: ArkFadingEdge = new ArkFadingEdge();
-    fadingEdge.value = value;
-    fadingEdge.options = options;
-    modifierWithKey(this._modifiersWithKeys, WaterFlowFadingEdgeModifier.identity, WaterFlowFadingEdgeModifier, fadingEdge);
     return this;
   }
   scrollBarWidth(value: string | number): this {

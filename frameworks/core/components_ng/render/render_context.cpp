@@ -28,6 +28,13 @@ std::string RenderFitToString(RenderFit renderFit)
         "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
     return RenderFitStyles[static_cast<int>(renderFit)];
 }
+
+std::string UseEffectTypeToString(EffectType effectType)
+{
+    static const std::string UseEffectTypeStyles[] = { "EffectType.DEFAULT", "EffectType.WINDOW_EFFECT" };
+    return UseEffectTypeStyles[static_cast<int>(effectType)];
+}
+
 } // namespace
 
 void RenderContext::SetRequestFrame(const std::function<void()>& requestFrame)
@@ -41,7 +48,8 @@ void RenderContext::RequestNextFrame() const
         requestFrame_();
         auto node = GetHost();
         CHECK_NULL_VOID(node);
-        if (node->GetInspectorId().has_value()) {
+        auto eventHub = node->GetEventHub<NG::EventHub>();
+        if (node->GetInspectorId().has_value() || (eventHub && eventHub->HasNDKDrawCompletedCallback())) {
             auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContext());
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(WeakPtr<FrameNode>(node));
@@ -159,6 +167,9 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     json->PutExtAttr("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str(), filter);
     json->PutExtAttr("useShadowBatching", propUseShadowBatching_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("useEffect", propUseEffect_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("useEffectType",
+        UseEffectTypeToString(propUseEffectType_.value_or(EffectType::DEFAULT)).c_str(), filter);
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const

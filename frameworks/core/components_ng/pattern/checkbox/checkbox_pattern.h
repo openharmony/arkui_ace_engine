@@ -208,6 +208,17 @@ public:
         json->PutExtAttr("select", select ? "true" : "false", filter);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        Pattern::ToTreeJson(json, config);
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<CheckBoxPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto select = paintProperty->GetCheckBoxSelectValue(false);
+        json->Put(TreeKey::CHECKED, select ? "true" : "false");
+    }
+
     void SetOriginalCheckboxStyle(OriginalCheckBoxStyle style)
     {
         originalStyle_ = style;
@@ -241,10 +252,16 @@ private:
     void InitClickEvent();
     void InitTouchEvent();
     void InitMouseEvent();
+    void InitFocusEvent();
     void OnClick();
     void OnTouchDown();
     void OnTouchUp();
     void HandleMouseEvent(bool isHover);
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     void CheckPageNode();
     void LoadBuilder();
     void UpdateIndicator();
@@ -257,6 +274,7 @@ private:
     void SetPrePageIdToLastPageId();
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool IsSquareStyleBox();
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;
@@ -291,6 +309,7 @@ private:
     bool isHover_ = false;
     bool isFirstCreated_ = true;
     bool isUserSetResponseRegion_ = false;
+    bool focusEventInitialized_ = false;
     UIStatus uiStatus_ = UIStatus::UNSELECTED;
     Dimension hotZoneHorizontalPadding_;
     Dimension hotZoneVerticalPadding_;
@@ -302,6 +321,7 @@ private:
     OriginalCheckBoxStyle originalStyle_ = OriginalCheckBoxStyle::CIRCULAR_STYLE;
     RefPtr<FrameNode> builderNode_;
     std::optional<std::function<void()>> builder_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     RefPtr<CheckBoxPaintMethod> paintMethod_;
     WeakPtr<GroupManager> groupManager_;

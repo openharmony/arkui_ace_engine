@@ -35,7 +35,7 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
     let xPoint = [];
     let yPoint = [];
     if (Array.isArray(this.value)) {
-      for (let i = 0; i <= this.value.length; i++) {
+      for (let i = 0; i < this.value.length; i++) {
         let item = this.value[i];
         if (!Array.isArray(item)) {
           continue;

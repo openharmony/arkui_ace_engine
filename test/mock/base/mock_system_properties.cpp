@@ -222,12 +222,27 @@ double SystemProperties::GetSrollableFriction()
     return 0.0;
 }
 
+double SystemProperties::GetScrollableDistance()
+{
+    return 0.0;
+}
+
 bool SystemProperties::IsNeedResampleTouchPoints()
 {
     return true;
 }
 
 bool SystemProperties::IsNeedSymbol()
+{
+    return true;
+}
+
+bool SystemProperties::GetResourceDecoupling()
+{
+    return true;
+}
+
+bool SystemProperties::GetFocusCanBeActive()
 {
     return true;
 }

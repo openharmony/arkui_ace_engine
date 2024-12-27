@@ -15,6 +15,7 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 
 @Component
 export struct BindSheetBootcamp {
@@ -37,6 +38,10 @@ export struct BindSheetBootcamp {
   @State sheetHeight: SheetSize | Length = SheetSize.LARGE;
   @State enableSheetDetents: boolean = false;
   @State sheetDetents: SheetSize | Length = SheetSize.LARGE;
+  @State enableRadiusLengthValue: boolean = false;
+  @State radiusLengthValue: number = 32;
+  @State enableRadiusLengthUnit: boolean = false;
+  @State radiusLengthUnit: LengthUnit = LengthUnit.VP;
 
   build() {
     NavDestination() {
@@ -72,6 +77,8 @@ export struct BindSheetBootcamp {
           borderWidth: useEnabled(this.enableBorderWidth, this.borderWidthValue),
           borderColor: useEnabled(this.enableBorderColor, this.borderColorValue),
           backgroundColor: useEnabled(this.enableBackgroundColorColor, this.backgroundColorColor),
+          radius: new LengthMetrics(useEnabled(this.enableRadiusLengthValue, this.radiusLengthValue),
+            useEnabled(this.enableRadiusLengthUnit, this.radiusLengthUnit)),
         })
     }
   }
@@ -162,6 +169,27 @@ export struct BindSheetBootcamp {
             { label: '1000vp', value: 1000 },
             { label: '700vp', value: 700 },
             { label: '250vp', value: 250 },
+          ]
+        })
+
+        SliderBlock({
+          title: '圆角半径值',
+          isEnabled: this.enableRadiusLengthValue,
+          value: this.radiusLengthValue,
+          min: -10,
+          max: 900,
+        })
+
+        RadioBlock({
+          title: '圆角半径单位',
+          isEnabled: this.enableRadiusLengthUnit,
+          value: this.radiusLengthUnit,
+          dataSource: [
+            { label: 'px', value: LengthUnit.PX },
+            { label: 'vp', value: LengthUnit.VP },
+            { label: 'fp', value: LengthUnit.FP },
+            { label: 'percent', value: LengthUnit.PERCENT },
+            { label: 'lpx', value: LengthUnit.LPX },
           ]
         })
       }.width('100%')

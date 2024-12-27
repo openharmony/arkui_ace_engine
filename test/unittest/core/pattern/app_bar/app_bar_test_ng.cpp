@@ -485,10 +485,6 @@ HWTEST_F(AppBarTestNg, TestUpdateIconLayout018, TestSize.Level1)
     for (const auto& callback : Events) {
         (*callback)(info);
     }
-    MockContainer::Current()->isUIExtensionWindow_ = false;
-    for (const auto& callback : Events) {
-        (*callback)(info);
-    }
     MockContainer::TearDown();
     EXPECT_EQ(appBar->sessionId_, 0);
 }

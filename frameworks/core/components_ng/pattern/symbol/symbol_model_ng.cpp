@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void SymbolModelNG::Create(const std::uint32_t& unicode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     auto symbolNode = FrameNode::GetOrCreateFrameNode(
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });

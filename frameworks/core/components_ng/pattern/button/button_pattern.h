@@ -42,6 +42,11 @@ public:
 
     ~ButtonPattern() override = default;
 
+    void SetApplyShadow(bool shadow)
+    {
+        isApplyShadow_ = shadow;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -86,10 +91,6 @@ public:
         CHECK_NULL_RETURN(host, false);
         auto isNeedAdjust = layoutProperty->HasAspectRatio() &&
                layoutProperty->GetType().value_or(ButtonType::CAPSULE) != ButtonType::CIRCLE;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            isNeedAdjust = layoutProperty->HasAspectRatio() &&
-                layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE) != ButtonType::CIRCLE;
-        }
 
         return isNeedAdjust;
     }
@@ -138,9 +139,6 @@ public:
         CHECK_NULL_VOID(buttonTheme);
         auto textStyle = buttonTheme->GetTextStyle();
         auto buttonType = layoutProperty->GetType().value_or(ButtonType::CAPSULE);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            buttonType = layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE);
-        }
         json->PutExtAttr("type", host->GetTag() == "Toggle" ? "ToggleType.Button" :
             ConvertButtonTypeToString(buttonType).c_str(), filter);
         json->PutExtAttr("fontSize",
@@ -162,15 +160,8 @@ public:
         json->PutExtAttr("stateEffect", eventHub->GetStateEffect() ? "true" : "false", filter);
 
         auto optionJson = JsonUtil::Create(true);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-            optionJson->Put(
-                "type",
-                ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::ROUNDED_RECTANGLE)).c_str());
-        } else {
-            optionJson->Put(
-                "type",
-                ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
-        }
+        optionJson->Put(
+            "type", ConvertButtonTypeToString(layoutProperty->GetType().value_or(ButtonType::CAPSULE)).c_str());
 
         optionJson->Put("stateEffect", eventHub->GetStateEffect() ? "true" : "false");
         json->PutExtAttr("options", optionJson->ToString().c_str(), filter);
@@ -300,6 +291,8 @@ public:
         return result;
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
+
     void SetLocalLocation(const Offset& localLocation)
     {
         localLocation_ = localLocation;
@@ -371,12 +364,16 @@ public:
         return hasCustomPadding_;
     }
 
-protected:
-    bool IsNeedInitClickEventRecorder() const override
+    void SetIsFocus(bool isFocus)
     {
-        return true;
+        isFocus_ = isFocus;
     }
 
+    bool IsDynamicSwitchButtonStyle(const BorderColorProperty& color, RefPtr<ButtonTheme>& buttonTheme);
+
+    bool IsDynamicSwitchButtonStyle(const BorderWidthProperty& width, RefPtr<ButtonTheme>& buttonTheme);
+
+protected:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -386,6 +383,7 @@ protected:
     void OnTouchUp();
     void HandleHoverEvent(bool isHover);
     void HandleBackgroundColor();
+    void UpdateTexOverflow(bool isMarqueeStart);
     void HandleEnabled();
     void InitButtonLabel();
     void CheckLocalizedBorderRadiuses();
@@ -420,7 +418,10 @@ private:
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<InputEvent> hoverListener_;
     bool isHover_ = false;
+    bool isFocus_ = false;
     bool isPress_ = false;
+    bool isApplyShadow_ = true;
+    bool isLayoutUpdate_ = false;
 
     bool isInHover_ = false;
     Offset localLocation_;
@@ -429,10 +430,32 @@ private:
     std::optional<Color> blendClickColor_ = std::nullopt;
     std::optional<Color> blendHoverColor_ = std::nullopt;
 
+    bool isTextFadeOut_ = false;
     bool isColorUpdateFlag_ = false;
     SizeF preFrameSize_;
     bool hasCustomPadding_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ButtonPattern);
+    bool focusTextColorModify_ = false;
+    bool bgColorModify_ = false;
+    bool scaleModify_ = false;
+    bool shadowModify_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+
+    void HandleBorderAndShadow();
+    void HandleFocusStatusStyle();
+    void HandleFocusStyleTask();
+    void HandleBlurStyleTask();
+    void UpdateButtonStyle();
+    void SetFocusButtonStyle(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme,
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<FrameNode>& textNode);
+    void SetBlurButtonStyle(RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme,
+        RefPtr<ButtonLayoutProperty>& layoutProperty, RefPtr<FrameNode>& textNode);
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void HandleShadowStyle(ButtonStyleMode buttonStyle, ShadowStyle shadowStyle,
+        RefPtr<RenderContext>& renderContext, RefPtr<ButtonTheme>& buttonTheme);
+    Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
+    void HandleFocusActiveStyle();
 };
 } // namespace OHOS::Ace::NG
 

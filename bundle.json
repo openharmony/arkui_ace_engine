@@ -2,7 +2,7 @@
     "name": "@ohos/ace_engine",
     "description": "ArkUI Cross-Platform Engine for UI layout measure and paint",
     "version": "3.1",
-    "license": "Apache 2.0",
+    "license": "Apache-2.0",
     "publishAs": "code-segment",
     "segment": {
         "destPath": "foundation/arkui/ace_engine"
@@ -28,7 +28,11 @@
             "ace_engine_feature_enable_split_mode",
             "ace_engine_feature_enable_nav_split_mode",
             "ace_engine_feature_asbng_path",
-            "ace_engine_feature_sched_model"
+            "ace_engine_feature_sched_model",
+            "ace_engine_feature_wearable",
+            "ace_engine_feature_enable_gpu",
+            "ace_engine_feature_enable_form_size_change_animation",
+            "ace_engine_feature_form_menu_enable"
         ],
         "adapted_system_type": [
             "standard"
@@ -106,7 +110,8 @@
                 "libuv",
                 "resource_schedule_service",
                 "background_task_mgr",
-                "egl"
+                "egl",
+                "request"
             ],
             "third_party": []
         },
@@ -114,7 +119,8 @@
             "group_type": {
                 "base_group": [],
                 "fwk_group": [
-                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages"
+                    "//foundation/arkui/ace_engine/adapter/ohos/build:ace_packages",
+                    "//foundation/arkui/ace_engine/frameworks/bridge/cj_frontend:cj_frontend_ohos"
                 ],
                 "service_group": [
                     "//foundation/arkui/ace_engine/adapter/ohos/services:services_target",
