@@ -168,18 +168,18 @@ void ScrollBarImpl(Ark_NativePointer node,
 void OnScrollBarUpdateImpl(Ark_NativePointer node,
                            const Callback_Number_Number_ComputedBarAttribute* value)
 {
+    using namespace Converter;
+    using ResType = std::pair<std::optional<float>, std::optional<float>>;
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollBarUpdate = [frameNode](int32_t index, const Dimension& offset) {
-        auto arkIndex = Converter::ArkValue<Ark_Number>(index);
-        auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollBarUpdate(
-            frameNode->GetId(), arkIndex, arkOffset);
-        // onScrollBarUpdate should return value [totalOffset, totalLength] but it is a void
-        // that is a reason why we return [0, 0] pair value as the temporary stub
-        LOGE("ARKOALA onScrollBarUpdate doesn`t handle ComputedBarAttribute returned values");
-        return std::pair<float, float>(0, 0);
+    auto onScrollBarUpdate =
+        [callback = CallbackHelper(*value, frameNode)](int32_t index, const Dimension& offset) -> ResType {
+        auto arkIndex = ArkValue<Ark_Number>(index);
+        auto arkOffset = ArkValue<Ark_Number>(offset);
+        auto arkResult = callback.InvokeWithObtainResult<Ark_ComputedBarAttribute, Callback_ComputedBarAttribute_Void>(
+            arkIndex, arkOffset);
+        return ResType(Convert<float>(arkResult.totalOffset), Convert<float>(arkResult.totalLength));
     };
     GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(onScrollBarUpdate));
 }
@@ -437,16 +437,16 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onScrollFrameBegin = [frameNode](const Dimension& offset, const ScrollState& state) -> ScrollFrameResult {
-        ScrollFrameResult scrollRes { .offset = offset };
+    auto onScrollFrameBegin = [callback = CallbackHelper(*value, frameNode)](
+            const Dimension& offset, const ScrollState& state
+        ) -> ScrollFrameResult {
         auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
         auto arkState = Converter::ArkValue<Ark_ScrollState>(state);
-        GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScrollFrameBegin(
-            frameNode->GetId(), arkOffset, arkState);
-        // onScrollFrameBegin should return value [offsetRemain] but it is a void
-        // that is a reason why we return [offset] value as the temporary stub
-        LOGE("ARKOALA onScrollFrameBegin doesn`t handle offsetRemain returned value");
-        return scrollRes;
+        auto arkResult = callback.InvokeWithObtainResult<Ark_Literal_Number_offsetRemain,
+            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState);
+        return {
+            .offset = Converter::Convert<Dimension>(arkResult.offsetRemain)
+        };
     };
     GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
@@ -502,5 +502,4 @@ const GENERATED_ArkUIGridModifier* GetGridModifier()
     };
     return &ArkUIGridModifierImpl;
 }
-
 }

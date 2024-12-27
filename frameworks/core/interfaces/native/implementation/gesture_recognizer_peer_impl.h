@@ -15,15 +15,7 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_GESTURE_RECOGNIZER_PEER_IMPL_H
 
-#include <optional>
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-
-#include "arkoala_api_generated.h"
 
 struct GestureRecognizerPeer {
     using GestureRecognizerPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>;

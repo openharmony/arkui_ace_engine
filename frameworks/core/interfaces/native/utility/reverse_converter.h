@@ -45,6 +45,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/list/list_properties.h"
+#include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 
 #include "core/gestures/drag_event.h"
@@ -131,6 +132,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_BarMode& dst, const TabBarMode& src);
     void AssignArkValue(Ark_BarPosition& dst, const BarPosition& src);
     void AssignArkValue(Ark_BarState& dst, const DisplayMode& src);
+    void AssignArkValue(Ark_BaseGestureEvent &dst, const BaseGestureEvent &src);
     void AssignArkValue(Ark_BlurStyle& dst, const BlurStyle& src);
     void AssignArkValue(Ark_ClickEvent& dst, const OHOS::Ace::GestureEvent& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
@@ -144,8 +146,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_EdgeEffectOptions& dst, const bool& src);
     void AssignArkValue(Ark_EnterKeyType& dst, const TextInputAction& src);
     void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src);
+    void AssignArkValue(Ark_FingerInfo& dst, const FingerInfo& src);
     void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
+    void AssignArkValue(Ark_GestureControl_GestureType &dst, const GestureTypeName &src);
+    void AssignArkValue(Ark_GestureInfo &dst, const GestureInfo &src);
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
     void AssignArkValue(Ark_ImageAnalyzerType& dst, const ImageAnalyzerType& src);
     void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src);
     void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src);
@@ -184,6 +190,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
+    void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
@@ -225,6 +232,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
+    void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& src);
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src);
@@ -534,6 +542,8 @@ namespace OHOS::Ace::NG::Converter {
                 }
             });
         }
+        template<typename P>
+        explicit ArkArrayHolder(const std::list<P>& data) {}
 
         T ArkValue() &
         {

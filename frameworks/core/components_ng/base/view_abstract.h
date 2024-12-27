@@ -501,6 +501,7 @@ public:
     static void ResetPosition(FrameNode* frameNode);
     static void SetTransformMatrix(FrameNode* frameNode, const std::optional<Matrix4>& matrix);
     static void SetHitTestMode(FrameNode* frameNode, HitTestMode hitTestMode);
+    static void SetOnTouchTestFunc(FrameNode* frameNode, NG::OnChildTouchTestFunc&& onChildTouchTest);
     static void SetOpacity(FrameNode* frameNode, double opacity);
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
@@ -659,7 +660,7 @@ public:
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
     static void SetOnGestureRecognizerJudgeBegin(
-        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc);
+        FrameNode* frameNode, GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool innerGestureFlag = false);
     static void SetShouldBuiltInRecognizerParallelWith(
         FrameNode* frameNode, NG::ShouldBuiltInRecognizerParallelWithFunc&& shouldBuiltInRecognizerParallelWithFunc);
     static void SetSystemColorModeChangeEvent(FrameNode* frameNode, std::function<void(int32_t)>&& onColorModeChange);

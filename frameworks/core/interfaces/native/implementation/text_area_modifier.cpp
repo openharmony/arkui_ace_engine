@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -480,14 +481,13 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [frameNode](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
-        LOGE("ARKOALA TextAreaAttributeModifier.OnWillInsert -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+            .value_or(true);
     };
     TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
@@ -512,15 +512,14 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [frameNode](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onWillDelete(frameNode->GetId(), deleteValue);
-        LOGE("ARKOALA TextAreaAttributeModifier.OnWillDeleteImpl -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
+            .value_or(true);
     };
     TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }

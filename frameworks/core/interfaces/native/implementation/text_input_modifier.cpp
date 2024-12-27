@@ -666,9 +666,15 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetOnWillInsert(frameNode, convValue);
-    LOGE("TextInputInterfaceModifier::OnWillInsertImpl not implemented");
+    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+        Ark_InsertValue insertValue = {
+            .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+        };
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+            .value_or(true);
+    };
+    TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
 void OnDidInsertImpl(Ark_NativePointer node,
                      const Callback_InsertValue_Void* value)
@@ -690,9 +696,16 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetOnWillDelete(frameNode, convValue);
-    LOGE("TextInputInterfaceModifier::OnWillDeleteImpl not implemented");
+    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+        Ark_DeleteValue deleteValue = {
+            .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
+            .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+        };
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
+            .value_or(true);
+    };
+    TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
 void OnDidDeleteImpl(Ark_NativePointer node,
                      const Callback_DeleteValue_Void* value)

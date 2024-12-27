@@ -141,6 +141,7 @@ public:
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
+    static void SetOnItemDelete(FrameNode* frameNode, OnItemDeleteEvent&& onItemDelete);
     static void SetListChildrenMainSize(
         FrameNode* frameNode, float defaultSize, const std::vector<float>& mainSize);
     static void ResetListChildrenMainSize(FrameNode* frameNode);
