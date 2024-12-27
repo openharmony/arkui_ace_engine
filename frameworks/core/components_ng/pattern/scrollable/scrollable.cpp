@@ -466,10 +466,10 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto currentVsyncTime = context->GetVsyncTime();
-    CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
-    lastAxisVsyncTime_ = currentVsyncTime;
     auto snapType = GetSnapType();
     if (snapType != SnapType::NONE_SNAP && startSnapAnimationCallback_) {
+        CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
+        lastAxisVsyncTime_ = currentVsyncTime;
         auto snapDelta = 0.f;
         auto snapDirection = SnapDirection::NONE;
         auto isInitScroll = (snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
@@ -507,6 +507,7 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
         }
         return;
     }
+    lastAxisVsyncTime_ = currentVsyncTime;
     if (axisAnimator_) {
         ACE_SCOPED_TRACE("ProcessAxisUpdateEvent onAxis, mainDelta:%f, currentPos_:%f, id:%d, tag:%s", mainDelta,
             currentPos_, nodeId_, nodeTag_.c_str());
