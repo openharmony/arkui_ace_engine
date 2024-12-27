@@ -1424,4 +1424,23 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.L
     clickRecognizer.CleanRecognizerState();
     EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
 }
+
+/**
+ * @tc.name: ClickEventRecordTest001
+ * @tc.desc: test RecordClickEventIfNeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickEventRecordTest001, TestSize.Level1)
+{
+    int32_t componentIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    int32_t rectIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_RECT);
+    Recorder::EventRecorder::Get().eventSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[rectIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[rectIndex] = true;
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    GestureEvent info = GestureEvent();
+    clickRecognizer.RecordClickEventIfNeed(info);
+    EXPECT_TRUE(clickRecognizer.GetAttachedNode().Upgrade() == nullptr);
+}
 } // namespace OHOS::Ace::NG
