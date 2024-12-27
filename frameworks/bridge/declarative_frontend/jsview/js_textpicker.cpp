@@ -49,6 +49,7 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
@@ -227,6 +228,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextPicker>::StaticMethod("enableHapticFeedback", &JSTextPicker::SetEnableHapticFeedback);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1430,6 +1432,14 @@ void JSTextPicker::OnEnterSelectedArea(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
     info.ReturnSelf();
 }
+void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 {
@@ -1735,6 +1745,12 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
 
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -1876,6 +1892,12 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     } else {
         ParseShowDataMultiContent(param.options, param.selecteds, param.values, attr, settingData);
     }
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     return true;
 }
 

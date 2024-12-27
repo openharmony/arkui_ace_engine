@@ -101,6 +101,7 @@ struct TextPickerSettingData {
     std::vector<NG::TextCascadePickerOptions> options;
     NG::TextCascadePickerOptionsAttr attr;
     bool isDisableTextStyleAnimation = false;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TimePickerSettingData {

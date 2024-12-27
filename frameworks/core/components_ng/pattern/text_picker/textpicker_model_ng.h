@@ -96,6 +96,7 @@ public:
 
     void SetDisableTextStyleAnimation(const bool value) override;
     void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
 
     static void SetCanLoop(FrameNode* frameNode, const bool value);
     static void SetSelected(FrameNode* frameNode, uint32_t value);
@@ -144,6 +145,9 @@ public:
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
     static void SetColumnWidths(FrameNode* frameNode, const std::vector<Dimension>& widths);
     static std::vector<Dimension> GetColumnWidths(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

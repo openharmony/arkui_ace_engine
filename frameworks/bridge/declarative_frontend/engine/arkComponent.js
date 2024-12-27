@@ -20433,6 +20433,10 @@ class ArkTextPickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, TextpickerEnableHapticFeedbackModifier.identity, TextpickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class TextpickerCanLoopModifier extends ModifierWithKey {
   constructor(value) {
@@ -20695,6 +20699,20 @@ class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey {
   }
 }
 TextpickerDefaultPickerItemHeightModifier.identity = Symbol('textpickerDefaultPickerItemHeight');
+class TextpickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textpicker.resetTextpickerEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().textpicker.setTextpickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+TextpickerEnableHapticFeedbackModifier.identity = Symbol('textpickerEnableHapticFeedback');
 // @ts-ignore
 if (globalThis.TextPicker !== undefined) {
   globalThis.TextPicker.attributeModifier = function (modifier) {

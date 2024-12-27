@@ -93,6 +93,7 @@ public:
     virtual void SetColumnWidths(const std::vector<Dimension>& widths) = 0;
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
