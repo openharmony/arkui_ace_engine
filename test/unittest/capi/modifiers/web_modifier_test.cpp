@@ -1183,13 +1183,8 @@ HWTEST_F(WebModifierTest, onInterceptRequestTest, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     std::map<std::string, std::string> headers = {};
-    std::string method = "method";
-    std::string url = "url";
-    bool hasGesture = true;
-    bool isMainFrame = true;
-    bool isRedirect = true;
     RefPtr<WebRequest> webRequest = Referenced::MakeRefPtr<WebRequest>(
-        headers, method, url, hasGesture, isMainFrame, isRedirect);
+        headers, "method", "url", true, true, true);
 
     struct CheckEvent {
         int32_t resourceId;
