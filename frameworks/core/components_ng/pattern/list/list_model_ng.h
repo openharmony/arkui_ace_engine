@@ -32,7 +32,7 @@ public:
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
@@ -88,7 +88,7 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
     static void SetSticky(FrameNode* frameNode, int32_t stickyStyle);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static int32_t GetListDirection(FrameNode* frameNode);
     static void SetListDirection(FrameNode* frameNode, int32_t axis);
     static float GetListFriction(FrameNode* frameNode);

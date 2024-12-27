@@ -577,6 +577,15 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnGetRectRelativeToWindow(parentRectInfo);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
+        auto formManagerDelegate = weak.Upgrade();
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            checkFlag = false;
+        }
+    };
+    renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -892,6 +901,13 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
 {
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
+}
+
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM

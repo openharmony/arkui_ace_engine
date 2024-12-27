@@ -29,6 +29,7 @@ class ACE_EXPORT RichEditorBaseController : virtual public RichEditorBaseControl
 public:
     void SetPattern(const WeakPtr<RichEditorPattern>& pattern);
     int32_t GetCaretOffset() override;
+    RectF GetCaretRect() override;
     bool SetCaretOffset(int32_t caretPosition) override;
     void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle, std::optional<TextStyle> textStyle) override;
     std::optional<struct UpdateSpanStyle> GetTypingStyle() override;

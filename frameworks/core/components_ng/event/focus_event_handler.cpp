@@ -17,7 +17,9 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/event/focus_axis_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 {
@@ -116,6 +118,12 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const FocusAxisEvent& focusAxisEvent = static_cast<const FocusAxisEvent&>(focusEvent.event);
         return HandleFocusAxisEvent(focusAxisEvent);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (focusEvent.event.eventType == UIInputEventType::CROWN) {
+        const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
+        return HandleCrownEvent(crownEvent);
+    }
+#endif
     return ret ? true : HandleFocusTravel(focusEvent);
 }
 
@@ -144,7 +152,7 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
         return true;
     }
     // Handle on click
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
         !pipeline->GetIsFocusActive()) {
         return false;
     }
@@ -178,6 +186,38 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     onFocusAxisCallback(info);
     return info.IsStopPropagation();
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool FocusEventHandler::HandleCrownEvent(const CrownEvent& CrownEvent)
+{
+    ACE_DCHECK(IsCurrentFocus());
+    bool retCallback = false;
+    auto onCrownEventCallback = GetOnCrownCallback();
+    if (onCrownEventCallback) {
+        CrownEventInfo crownInfo(CrownEvent);
+        onCrownEventCallback(crownInfo);
+        retCallback = crownInfo.IsStopPropagation();
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnCrownEventUser: Node %{public}s/%{public}d handle CrownAction:%{public}d",
+            GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
+    } else {
+        retCallback = ProcessOnCrownEventInternal(CrownEvent);
+    }
+    return retCallback;
+}
+
+bool FocusEventHandler::ProcessOnCrownEventInternal(const CrownEvent& event)
+{
+    bool result = false;
+    auto onCrownEventCallbackInternal = GetOnCrownEventInternal();
+    if (onCrownEventCallbackInternal) {
+        onCrownEventCallbackInternal(event);
+        result = true;
+    }
+    return result;
+}
+
+#endif
 
 bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 {

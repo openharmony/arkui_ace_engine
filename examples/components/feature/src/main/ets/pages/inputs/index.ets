@@ -17,9 +17,11 @@ import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { TextInputBootcamp } from './TextInputBootcamp';
 import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
+import { ContainerSpanBootcamp } from './ContainerSpanBootcamp';
+
 import { RichEditorSpanUrlBootcamp } from './RichEditorSpanUrlBootcamp';
 import { SelectionMenuBootcamp } from './SelectionMenuBootcamp';
-
+import { SearchBootcamp } from './SearchBootcamp';
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -27,9 +29,12 @@ export const inputsRoute: RouteGroup = {
   children: [
     { name: 'textInput', label: '单行文本框/TextInput' },
     { name: 'textArea', label: '多行文本框/TextArea' },
+    { name: 'richEditor', label: '富文本/RichEditor' },
+    { name: 'containerSpan', label: 'ContainerSpan/ContainerSpan' },
     { name: 'richeditor', label: '富文本/RichEditor' },
     { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
-    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'}
+    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'},
+    { name: 'search', label: '搜索框/Search' }
   ]
 };
 
@@ -39,11 +44,15 @@ export function InputsDestination(name: string, route: Route) {
     TextInputBootcamp({ title: route.label })
   } else if (name === 'inputs/textArea') {
     TextAreaBootcamp({ title: route.label })
-  } else if (name === 'inputs/richeditor') {
+  } else if (name === 'inputs/richEditor') {
     RichEditorBootcamp({ title: route.label })
+  }else if (name === 'inputs/containerSpan') {
+    ContainerSpanBootcamp({ title: route.label })
   } else if (name === 'inputs/richeditorSpanurl') {
     RichEditorSpanUrlBootcamp({ title: route.label })
   } else if (name === 'inputs/SelectionMenu'){
     SelectionMenuBootcamp({ title: route.label})
+  } else if (name === 'inputs/search') {
+    SearchBootcamp({ title: route.label })
   }
 }

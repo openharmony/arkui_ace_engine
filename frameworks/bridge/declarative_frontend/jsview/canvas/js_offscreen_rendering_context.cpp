@@ -88,6 +88,8 @@ void JSOffscreenRenderingContext::JSBind(BindingTarget globalObj)
         "imageSmoothingEnabled", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSOffscreenRenderingContext>::CustomProperty(
         "imageSmoothingQuality", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingQuality);
+    JSClass<JSOffscreenRenderingContext>::CustomProperty(
+        "letterSpacing", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLetterSpacing);
 
     // Define all methods of the "OffscreenCanvasRenderingContext2D"
     JSClass<JSOffscreenRenderingContext>::CustomMethod(

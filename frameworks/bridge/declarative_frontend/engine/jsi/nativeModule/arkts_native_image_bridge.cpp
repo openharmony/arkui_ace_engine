@@ -528,6 +528,41 @@ ArkUINativeModuleValue ImageBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ImageBridge::SetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
+
+    if (!jsValue->IsArray(vm)) {
+        GetArkUINodeModifiers()->getImageModifier()->resetImageMatrix(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    float matrix[matrix4Len];
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    for (size_t i = 0; i < transArray->Length(vm); i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
+        matrix[i] = value->ToNumber(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getImageModifier()->setImageMatrix(nativeNode, matrix);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getImageModifier()->resetImageMatrix(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ImageBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

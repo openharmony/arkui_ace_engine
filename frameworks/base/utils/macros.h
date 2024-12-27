@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
-#include "foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/ui/base/macros.h"
+#include "ui/base/macros.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H

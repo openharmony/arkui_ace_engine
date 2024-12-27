@@ -1184,6 +1184,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest027, TestSize.Level1)
      * @tc.steps: step2. Update Video controllerBar while controllerBar is show or not.
      * @tc.expected: Visibility value is changed.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .WillOnce(Return(false));
     layoutProperty->UpdateControls(false);
     auto controller = AceType::DynamicCast<FrameNode>(videoNode->GetControllerRow());
     ASSERT_NE(controller, nullptr);
@@ -1233,6 +1235,17 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest028, TestSize.Level1)
     videoPattern->UpdateVideoProperty();
     videoPattern->autoPlay_ = true;
     videoPattern->UpdateVideoProperty();
+
+    /**
+     * @tc.steps: step2. Call OnRebuildFrame while renderSurface_ in different status.
+     * @tc.expected: IsSurfaceValid function is called only once.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
+    videoPattern->OnRebuildFrame();
+    videoPattern->renderSurface_ = nullptr;
+    videoPattern->OnRebuildFrame();
 }
 
 /**
@@ -1256,6 +1269,9 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest029, TestSize.Level1)
      * @tc.steps: step2. Call OnColorConfigurationUpdate with different childNode in controlBar_.
      * @tc.expected: BackgroundColor of renderContext is set.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
     ASSERT_NE(videoPattern->controlBar_, nullptr);

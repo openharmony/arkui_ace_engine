@@ -596,16 +596,6 @@ private:
     bool eventResult_ = false;
 };
 
-class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -1024,6 +1014,10 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
+    void JavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentEndByOrder();
+    void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
         TouchEventInfo& touchEventInfo);
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
@@ -1031,6 +1025,7 @@ public:
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     void SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface);
@@ -1153,6 +1148,8 @@ public:
         const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh);
 
     void UnRegisterNativeArkJSFunction(const std::string& objName);
+
+    bool IsActivePolicyDisable();
 
 private:
     void InitWebEvent();
@@ -1341,6 +1338,8 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

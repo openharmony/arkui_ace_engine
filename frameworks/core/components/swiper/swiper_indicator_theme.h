@@ -36,6 +36,7 @@ constexpr Dimension SWIPER_INDICATOR_DIGIT_VERTICAL_PADDING_DEFAULT = 8.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DIGIT_HEIGHT = 32.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_PADDING_DEFAULT = 12.0_vp;
 constexpr Dimension SWIPER_INDICATOR_DOT_ITEM_SPACE = 8.0_vp;
+constexpr float INDICATOR_ZOOM_IN_SCALE = 1.33;
 } // namespace
 
 enum class OverlongType {
@@ -96,6 +97,16 @@ public:
                 LOGW("find pattern of swiper fail");
                 return;
             }
+            theme->indicatorPaddingDot_ = swiperPattern->GetAttr<Dimension>("indicator_padding_dot", 12.0_vp);
+            theme->unSelectedColor_ = swiperPattern->GetAttr<Color>("color_focus_unselected", Color::TRANSPARENT);
+            theme->focusedBgColor_ = swiperPattern->GetAttr<Color>("color_focus_bg", Color::TRANSPARENT);
+            theme->indicatorBgHeight_ = swiperPattern->GetAttr<Dimension>("indicator_bg_height", 12.0_vp);
+            theme->focusedSelectedColor_ =
+                swiperPattern->GetAttr<Color>("indicator_color_focused_selected", Color::TRANSPARENT);
+            theme->scaleSwiper_ = swiperPattern->GetAttr<double>("indicator_scale_swiper", INDICATOR_ZOOM_IN_SCALE);
+            theme->indicatorFocusedPadding_ = swiperPattern->GetAttr<Dimension>("indicator_focused_padding", 0.0_vp);
+            theme->clipToBounds_ = static_cast<bool>(swiperPattern->GetAttr<int>("clip_bounds", 1));
+            theme->focusStyleType_ = swiperPattern->GetAttr<int>("swiper_focus_style_type", 0);
             theme->size_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_size", 0.0_vp);
             theme->selectedSize_ = swiperPattern->GetAttr<Dimension>("swiper_indicator_selected_size", 0.0_vp);
             theme->isHasMask_ = static_cast<bool>(swiperPattern->GetAttr<double>("swiper_indicator_mask", 0.0));
@@ -407,6 +418,51 @@ public:
         return downSymbolId_;
     }
 
+    const Color& GetFocusedBgColor() const
+    {
+        return focusedBgColor_;
+    }
+
+    const Color& GetFocusUnSelectedColor() const
+    {
+        return unSelectedColor_;
+    }
+
+    const Color& GetFocusedSelectedColor() const
+    {
+        return focusedSelectedColor_;
+    }
+
+    float GetIndicatorScale() const
+    {
+        return scaleSwiper_;
+    }
+
+    const Dimension& GetIndicatorPaddingDot() const
+    {
+        return indicatorPaddingDot_;
+    }
+
+    const Dimension& GetIndicatorBgHeight() const
+    {
+        return indicatorBgHeight_;
+    }
+
+    const Dimension& GetIndicatorFocusedPadding() const
+    {
+        return indicatorFocusedPadding_;
+    }
+
+    bool GetClipEdge() const
+    {
+        return clipToBounds_;
+    }
+
+    int GetFocusStyleType() const
+    {
+        return focusStyleType_;
+    }
+
 protected:
     SwiperIndicatorTheme() = default;
 
@@ -460,6 +516,15 @@ private:
     uint32_t rightSymbolId_ = 0;
     uint32_t upSymbolId_ = 0;
     uint32_t downSymbolId_ = 0;
+    Color unSelectedColor_;
+    Color focusedBgColor_;
+    Color focusedSelectedColor_;
+    Dimension indicatorBgHeight_;
+    float scaleSwiper_ = INDICATOR_ZOOM_IN_SCALE;
+    Dimension indicatorPaddingDot_;
+    Dimension indicatorFocusedPadding_;
+    bool clipToBounds_ = true;
+    int focusStyleType_ = 0;
 };
 
 } // namespace OHOS::Ace

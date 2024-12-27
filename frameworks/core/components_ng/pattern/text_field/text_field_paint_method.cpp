@@ -174,6 +174,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
 
+    SetFloatingCursor();
+
     InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     textFieldOverlayModifier_->SetInputStyle(inputStyle);
 
@@ -195,6 +197,21 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::SetFloatingCursor()
+{
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldOverlayModifier_->GetFloatCaretLanding()) {
+        auto floatingCursorRect = textFieldPattern->GetFloatingCaretRect();
+        textFieldOverlayModifier_->SetFloatingCursorOffset(floatingCursorRect.GetOffset());
+    }
+    auto floatingCursorVisible = textFieldPattern->GetFloatingCursorVisible();
+    textFieldOverlayModifier_->SetFloatingCursorVisible(floatingCursorVisible);
+    auto showOriginCursor = textFieldPattern->GetShowOriginCursor();
+    textFieldOverlayModifier_->SetShowOriginCursor(showOriginCursor);
 }
 
 void TextFieldPaintMethod::UpdateScrollBar()

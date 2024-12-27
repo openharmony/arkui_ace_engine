@@ -52,7 +52,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(layoutProperty, false);
     bool isHideRightClickMenu = layoutProperty->GetSelectionMenuHiddenValue(false) && IsUsingMouse();
     bool isFontSizeZero = layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value());
-    if (isHideRightClickMenu || isFontSizeZero) {
+    if (isHideRightClickMenu || (isFontSizeZero && !SelectOverlayIsOn())) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
             "The selection menu is not displayed cause Font size is zero or selectionMenuHidden is true");
         return false;
@@ -543,6 +543,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     }
     pattern->ScheduleDisappearDelayTask();
     pattern->UpdateCaretInfoToController();
+    pattern->FloatingCaretLand();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

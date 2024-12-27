@@ -347,6 +347,7 @@ const std::unordered_map<std::string, std::string> COMPONENT_TAG_TO_ETS_TAG_MAP 
     { CONTAINER_SPAN_COMPONENT_TAG, CONTAINER_SPAN_ETS_TAG },
     { EMBEDDED_COMPONENT_TAG, EMBEDDED_COMPONENT_ETS_TAG },
     { MOVING_PHOTO_COMPONENT_TAG, MOVING_PHOTO_ETS_TAG },
+    { LINEARINDICATOR_COMPONENT_TAG, LINEARINDICATOR_ETS_TAG },
 };
 
 thread_local int32_t InspectorComposedComponent::composedElementId_ = 1;

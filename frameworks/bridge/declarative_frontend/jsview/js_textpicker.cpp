@@ -240,11 +240,13 @@ void JSTextPicker::SetDisableTextStyleAnimation(const JSCallbackInfo& info)
 
 void JSTextPicker::SetDefaultTextStyle(const JSCallbackInfo& info)
 {
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle textStyle;
     if (info[0]->IsObject()) {
         JSTextPickerParser::ParseTextStyle(info[0], textStyle, "defaultTextStyle");
     }
-    TextPickerModel::GetInstance()->SetDefaultTextStyle(textStyle);
+    TextPickerModel::GetInstance()->SetDefaultTextStyle(theme, textStyle);
 }
 
 void JSTextPicker::PickerBackgroundColor(const JSCallbackInfo& info)

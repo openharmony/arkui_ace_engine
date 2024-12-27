@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
 
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -77,7 +78,7 @@ public:
     }
 
     void SetDisableTextStyleAnimation(const bool value) override {};
-    void SetDefaultTextStyle(const NG::PickerTextStyle& value) override {};
+    void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override {};
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {

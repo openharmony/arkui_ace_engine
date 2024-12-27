@@ -55,6 +55,7 @@ const std::vector<float> DEFAULT_COLORFILTER_MATRIX = { 1, 0, 0, 0, 0, 0, 1, 0, 
 constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr float DEFAULT_SMOOTHEDGE_VALUE = 0.0f;
+constexpr uint32_t FIT_MATRIX = 16;
 } // namespace
 
 namespace OHOS::Ace {
@@ -178,11 +179,65 @@ void JSImage::SetObjectFit(const JSCallbackInfo& args)
     }
     int32_t parseRes = 2;
     ParseJsInteger(args[0], parseRes);
-    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::BOTTOM_END)) {
+    if (parseRes < static_cast<int32_t>(ImageFit::FILL) || parseRes > static_cast<int32_t>(ImageFit::MATRIX)) {
         parseRes = 2;
     }
     auto fit = static_cast<ImageFit>(parseRes);
+    if (parseRes == FIT_MATRIX) {
+        fit = ImageFit::MATRIX;
+    }
     ImageModel::GetInstance()->SetImageFit(fit);
+}
+
+void JSImage::SetImageMatrix(const JSCallbackInfo& args)
+{
+    if (args.Length() > 0) {
+        auto jsVal = args[0];
+        if (!jsVal->IsObject()) {
+            SetDefaultImageMatrix();
+            return;
+        }
+        JSRef<JSVal> array = JSRef<JSObject>::Cast(jsVal)->GetProperty(static_cast<int32_t>(ArkUIIndex::MATRIX4X4));
+        const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+        if (!array->IsArray()) {
+            return;
+        }
+        JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(array);
+        if (jsArray->Length() != matrix4Len) {
+            return;
+        }
+        std::vector<float> matrix(matrix4Len);
+        for (int32_t i = 0; i < matrix4Len; i++) {
+            double value = 0.0;
+            ParseJsDouble(jsArray->GetValueAt(i), value);
+            matrix[i] = static_cast<float>(value);
+        }
+        Matrix4 setValue = Matrix4(
+            matrix[0], matrix[4], matrix[8], matrix[12],
+            matrix[1], matrix[5], matrix[9], matrix[13],
+            matrix[2], matrix[6], matrix[10], matrix[14],
+            matrix[3], matrix[7], matrix[11], matrix[15]);
+        ImageModel::GetInstance()->SetImageMatrix(setValue);
+    } else {
+        SetDefaultImageMatrix();
+        return;
+    }
+}
+
+void JSImage::SetDefaultImageMatrix()
+{
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 setValue = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModel::GetInstance()->SetImageMatrix(setValue);
 }
 
 void JSImage::SetMatchTextDirection(bool value)
@@ -815,6 +870,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("create", &JSImage::Create, opt);
     JSClass<JSImage>::StaticMethod("alt", &JSImage::SetAlt, opt);
     JSClass<JSImage>::StaticMethod("objectFit", &JSImage::SetObjectFit, opt);
+    JSClass<JSImage>::StaticMethod("imageMatrix", &JSImage::SetImageMatrix, opt);
     JSClass<JSImage>::StaticMethod("matchTextDirection", &JSImage::SetMatchTextDirection, opt);
     JSClass<JSImage>::StaticMethod("fitOriginalSize", &JSImage::SetFitOriginalSize, opt);
     JSClass<JSImage>::StaticMethod("sourceSize", &JSImage::SetSourceSize, opt);
@@ -866,7 +922,7 @@ void JSImage::JSBind(BindingTarget globalObj)
 
 void JSImage::JsSetDraggable(const JSCallbackInfo& info)
 {
-    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN);
+    bool draggable = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
     if (info.Length() > 0 && info[0]->IsBoolean()) {
         draggable = info[0]->ToBoolean();
     }

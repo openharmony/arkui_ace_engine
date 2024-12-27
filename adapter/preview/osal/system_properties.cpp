@@ -362,4 +362,9 @@ bool SystemProperties::IsNeedSymbol()
 {
     return true;
 }
+
+bool SystemProperties::GetFocusCanBeActive()
+{
+    return true;
+}
 } // namespace OHOS::Ace

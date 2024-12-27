@@ -271,6 +271,8 @@ private:
     Dimension targetSpace_;
     Dimension borderRadius_;
     Dimension userSetTargetSpace_;
+    Dimension minHeight_;
+    uint32_t maxColumns_ = 0;
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;

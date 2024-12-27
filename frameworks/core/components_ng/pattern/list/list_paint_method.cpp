@@ -91,17 +91,18 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
     }
-    UpdateDividerList(dividerInfo);
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    UpdateDividerList(dividerInfo, clip);
 }
 
-void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
+void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool clip)
 {
     listContentModifier_->SetDividerPainter(
         dividerInfo.constrainStrokeWidth, dividerInfo.isVertical, dividerInfo.color);
     int32_t lanes = dividerInfo.lanes;
     int32_t laneIdx = 0;
     bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition_.begin()->first == 0);
+    bool isFirstItem = (itemPosition_.begin()->first == 0) || !clip;
     std::map<int32_t, int32_t> lastLineIndex;
     ListDividerMap dividerMap;
     bool nextIsPressed = false;
@@ -119,7 +120,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
         laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
     }
-    if (!lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
+    if (clip && !lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
             if (index.first + lanes >= dividerInfo.totalItemCount) {

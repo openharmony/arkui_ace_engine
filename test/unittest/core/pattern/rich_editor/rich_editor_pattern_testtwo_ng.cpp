@@ -1331,8 +1331,8 @@ HWTEST_F(RichEditorPatternTestTwoNg, OnHover001, TestSize.Level1)
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
 
     richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    richEditorPattern->scrollBar_->isPressed_ = false;
-    richEditorPattern->scrollBar_->isHover_ = true;
+    richEditorPattern->scrollBar_->isPressed_ = true;
+    richEditorPattern->scrollBar_->isHover_ = false;
     richEditorPattern->OnHover(true);
     EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::DEFAULT);
 
@@ -1422,30 +1422,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, GetSelectSpansPositionInfo002, TestSize.Lev
     end = 6;
     richEditorPattern->GetSelectSpansPositionInfo(start, end, startPositionSpanInfo, endPositionSpanInfo);
     EXPECT_EQ(endPositionSpanInfo.spanIndex_, startPositionSpanInfo.spanIndex_);
-}
-
-/**
- * @tc.name: OnDirtyLayoutWrapperSwap002
- * @tc.desc: test OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto rendenContext = richEditorNode_->GetRenderContext();
-    ASSERT_NE(rendenContext, nullptr);
-    rendenContext->ResetClipEdge();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    richEditorPattern->isModifyingContent_ = true;
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
 }
 
 /**

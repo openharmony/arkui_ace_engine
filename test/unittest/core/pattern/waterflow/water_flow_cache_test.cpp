@@ -190,6 +190,7 @@ HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
     CreateDone();
     frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 18);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 25);

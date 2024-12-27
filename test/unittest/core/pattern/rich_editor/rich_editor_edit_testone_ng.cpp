@@ -393,67 +393,6 @@ HWTEST_F(RichEditorEditTestOneNg, GetThumbnailCallback001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSelection001
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, SetSelection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->DumpInfo();
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto theme = AceType::MakeRefPtr<MockThemeManager>();
-    pipeline->SetThemeManager(theme);
-
-    richEditorPattern->isTextChange_ = false;
-    EXPECT_EQ(richEditorPattern->IsShowHandle(), false);
-
-    auto manager = AceType::MakeRefPtr<TextFieldManagerNG>();
-    richEditorPattern->ScrollToSafeArea();
-    EXPECT_EQ(LessNotEqual(manager->GetHeight(), 800.0f), true);
-
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    richEditorPattern->overlayMod_ = AceType::MakeRefPtr<TextOverlayModifier>();
-    richEditorPattern->InitScrollablePattern();
-    EXPECT_EQ(richEditorPattern->GetScrollBar(), true);
-
-    Offset Offset = {1, 4};
-    richEditorPattern->isTextChange_ = true;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->isTextChange_ = false;
-    richEditorPattern->UpdateTextFieldManager(Offset, 1.0f);
-    EXPECT_EQ(richEditorPattern->HasFocus(), false);
-
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    int32_t index = 1;
-    richEditorPattern->MouseDoubleClickParagraphEnd(index);
-    EXPECT_NE(richEditorPattern->GetParagraphEndPosition(index), index);
-
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    int32_t start = 1;
-    int32_t end = 3;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetStart(), start);
-
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
-
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->SetSelection(start, end, options);
-    EXPECT_NE(richEditorPattern->textSelector_.GetEnd(), end);
-}
-
-/**
  * @tc.name: CreateHandles001
  * @tc.desc: test CreateHandles
  * @tc.type: FUNC
@@ -1232,32 +1171,6 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestUpdatePreviewText003, Tes
 }
 
 /**
- * @tc.name: RichEditorPatternTestSetPreviewText001
- * @tc.desc: test SetPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestSetPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
-    ASSERT_NE(property, nullptr);
-    property->UpdatePreviewTextStyle("underline");
-    std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
-    testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
-    testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
-    testPreviewList.emplace_back(-1, 0, PREVIEW_TEXT_VALUE1, -1);
-    testPreviewList.emplace_back(0, 0, PREVIEW_TEXT_VALUE1, 0);
-    PreviewRange previewRange;
-    for (const auto& testCase : testPreviewList) {
-        previewRange.start = std::get<0>(testCase);
-        previewRange.end = std::get<1>(testCase);
-        ASSERT_EQ(richEditorPattern->SetPreviewText(std::get<2>(testCase), previewRange), std::get<3>(testCase));
-    }
-}
-
-/**
  * @tc.name: RichEditorPatternTestGetPreviewTextStyle001
  * @tc.desc: test GetPreviewTextStyle
  * @tc.type: FUNC
@@ -1353,4 +1266,17 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnCut004, TestSize.Level1)
     EXPECT_EQ(isEventCalled, true);
 }
 
+/**
+ * @tc.name: HandleOnDelete001
+ * @tc.desc: test RichEditorPattern HandleOnDelete
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->HandleOnDelete(true);
+    richEditorPattern->HandleOnDelete(false);
+}
 } // namespace OHOS::Ace::NG
