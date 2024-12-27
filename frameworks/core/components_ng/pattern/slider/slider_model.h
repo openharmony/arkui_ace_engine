@@ -88,6 +88,7 @@ public:
     virtual void SetTrackBackgroundColor(const Color& value) = 0;
     virtual void SetTrackBackgroundColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetSelectColor(const Color& value) = 0;
+    virtual void SetSelectColor(const NG::Gradient& value, bool isResourceColor = false) = 0;
     virtual void SetMinLabel(float value) = 0;
     virtual void SetMaxLabel(float value) = 0;
     virtual void SetMinResponsiveDistance(float value) {};
