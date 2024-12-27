@@ -15,6 +15,9 @@
 
 #include "core/components_ng/event/click_event.h"
 
+#include "core/accessibility/accessibility_utils.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
@@ -61,6 +64,33 @@ std::optional<GestureJudgeFunc> ClickEventActuator::GetSysJudgeFunc() const
     return nullptr;
 }
 
+void ClickEventActuator::RecordClickEventIfNeed(const GestureEvent& info) const
+{
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto gestureHub = gestureEventHub_.Upgrade();
+        CHECK_NULL_VOID(gestureHub);
+        auto host = gestureHub->GetFrameNode();
+        CHECK_NULL_VOID(host);
+        auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true);
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(host->GetInspectorId().value_or(""))
+            .SetType(host->GetTag())
+            .SetText(text)
+            .SetDescription(host->GetAutoEventParamValue(""))
+            .SetHost(host);
+        auto rectSwitch =
+            Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
+        if (rectSwitch) {
+            static const int32_t precision = 2;
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","
+               << info.GetGlobalPoint().GetY();
+            builder.SetExtra(Recorder::KEY_POINT, ss.str());
+        }
+        Recorder::EventRecorder::Get().OnClick(std::move(builder));
+    }
+}
+
 GestureEventFunc ClickEventActuator::GetClickEvent()
 {
     auto callback = [weak = WeakClaim(this)](GestureEvent& info) {
@@ -77,6 +107,7 @@ GestureEventFunc ClickEventActuator::GetClickEvent()
             auto userCallback = actuator->userCallback_;
             (*userCallback)(info);
         }
+        actuator->RecordClickEventIfNeed(info);
         if (actuator->clickAfterEvents_) {
             auto clickAfterEvents = actuator->clickAfterEvents_;
             (*clickAfterEvents)(info);

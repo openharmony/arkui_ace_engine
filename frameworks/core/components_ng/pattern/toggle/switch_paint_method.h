@@ -40,6 +40,7 @@ public:
     {
         if (!switchModifier_) {
             auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+            CHECK_NULL_RETURN(paintProperty, nullptr);
             auto size = paintWrapper->GetContentSize();
             auto offset = paintWrapper->GetContentOffset();
             bool isRtl = direction_ == TextDirection::AUTO ? AceApplicationInfo::GetInstance().IsRightToLeft()
@@ -97,6 +98,7 @@ public:
     {
         CHECK_NULL_VOID(switchModifier_);
         auto paintProperty = DynamicCast<SwitchPaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
         switchModifier_->SetUseContentModifier(useContentModifier_);
         if (paintProperty->HasUnselectedColor()) {
             switchModifier_->SetInactiveColor(paintProperty->GetUnselectedColor().value());

@@ -343,7 +343,9 @@ void BuildToolbarMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool enabl
     } else {
         BuildImageToolbarMoreItemNode(barItemNode, enabled);
     }
-    auto textNode = CreateToolbarItemTextNode(Localization::GetInstance()->GetEntryLetters("common.more"));
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto textNode = CreateToolbarItemTextNode(theme->GetMoreMessage());
     CHECK_NULL_VOID(textNode);
     barItemNode->SetTextNode(textNode);
     barItemNode->SetBarItemUsedInToolbarConfiguration(true);

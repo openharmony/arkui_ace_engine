@@ -18,7 +18,7 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
-  tabBar(value: SubTabBarStyle | BottomTabBarStyle): this {
+  tabBar(value: SubTabBarStyle | BottomTabBarStyle | ComponentContent): this {
     modifierWithKey(this._modifiersWithKeys, TabContentTabBarModifier.identity, TabContentTabBarModifier, value);
     return this;
   }

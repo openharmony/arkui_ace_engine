@@ -157,14 +157,13 @@ void NavToolbarPattern::ShowDialogWithNode(const RefPtr<BarItemNode>& barItemNod
 {
     HandleLongPressActionEnd();
     CHECK_NULL_VOID(barItemNode);
-    std::string message;
     auto accessibilityProperty = barItemNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
-    message = accessibilityProperty->GetAccessibilityText();
+    std::string message = accessibilityProperty->GetAccessibilityText();
     if (barItemNode->IsMoreItemNode()) {
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
-        message = Localization::GetInstance()->GetEntryLetters("common.more");
+        message = theme->GetMoreMessage();
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto symbolNode = AceType::DynamicCast<FrameNode>(barItemNode->GetFirstChild());
             CHECK_NULL_VOID(symbolNode);

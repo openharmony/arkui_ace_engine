@@ -92,7 +92,22 @@ public:
 
     void MarkIsInitialTitle(bool isInitialTitle);
 
-    void OnAttachToMainTree(bool recursive) override;
+    void SetUseContainerModalTitleHeight(bool use)
+    {
+        useContainerModalTitleHeight_ = use;
+    }
+    bool UseContainerModalTitleHeight() const
+    {
+        return useContainerModalTitleHeight_;
+    }
+    void SetNeedAvoidContainerModal(bool need)
+    {
+        needAvoidContainerModal_ = need;
+    }
+    bool NeedAvoidContainerModal() const
+    {
+        return needAvoidContainerModal_;
+    }
 
 private:
     RefPtr<UINode> backButton_;
@@ -100,6 +115,8 @@ private:
     RefPtr<UINode> subtitle_;
     RefPtr<UINode> menu_;
     std::string innerChildId_;
+    bool needAvoidContainerModal_ = false;
+    bool useContainerModalTitleHeight_ = false;
 };
 
 } // namespace OHOS::Ace::NG

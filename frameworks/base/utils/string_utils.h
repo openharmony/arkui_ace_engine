@@ -85,6 +85,11 @@ inline bool IsLetterOrNumberForWchar(wchar_t chr)
     return (chr >= L'0' && chr <= L'9') || (chr >= L'a' && chr <= L'z') || (chr >= L'A' && chr <= L'Z');
 }
 
+inline bool IsLetterOrNumberForChar16(char16_t chr)
+{
+    return (chr >= u'0' && chr <= u'9') || (chr >= u'a' && chr <= u'z') || (chr >= u'A' && chr <= u'Z');
+}
+
 inline std::string ToString(const std::wstring& str)
 {
     if (str == DEFAULT_WSTRING) {

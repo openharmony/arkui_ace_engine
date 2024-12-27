@@ -99,6 +99,7 @@ void DOMSpan::OnChildNodeAdded(const RefPtr<DOMNode>& child, int32_t slot)
         // Get current span's styles to compare with its parent span.
         TextStyle currentSpanStyle = spanComponent->GetTextStyle();
         auto domSpan = AceType::DynamicCast<DOMSpan>(child);
+        CHECK_NULL_VOID(domSpan);
         CheckAndSetCurrentSpanStyle(domSpan, currentSpanStyle, parentSpanStyle);
         domSpan->SetTextStyle(currentSpanStyle);
         spanComponent->SetTextStyle(currentSpanStyle);

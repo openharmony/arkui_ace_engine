@@ -404,7 +404,7 @@ void TabBarPattern::SetTabBarFinishCallback()
             }
         }
 
-        pattern->StopTranslateAnimation();
+        pattern->StopTranslateAnimation(true);
         pattern->ResetIndicatorAnimationState();
         auto swiperPattern = pattern->GetSwiperPattern();
         CHECK_NULL_VOID(swiperPattern);
@@ -500,6 +500,24 @@ void TabBarPattern::AddTabBarItemClickEvent(const RefPtr<FrameNode>& tabBarItem)
     gestureHub->AddClickEvent(clickEvent);
 }
 
+void TabBarPattern::AddTabBarItemCallBack(const RefPtr<FrameNode>& tabBarItem)
+{
+    CHECK_NULL_VOID(tabBarItem);
+    auto tabBarItemId = tabBarItem->GetId();
+    auto columnAccessibilityProperty = tabBarItem->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(columnAccessibilityProperty);
+    columnAccessibilityProperty->SetOnAccessibilityFocusCallback([weak = WeakClaim(this), tabBarItemId](bool focus) {
+        if (focus) {
+            auto tabBar = weak.Upgrade();
+            CHECK_NULL_VOID(tabBar);
+            auto host = tabBar->GetHost();
+            CHECK_NULL_VOID(host);
+            auto index = host->GetChildFlatIndex(tabBarItemId).second;
+            tabBar->FocusCurrentOffset(index);
+        }
+    });
+}
+
 void TabBarPattern::AddMaskItemClickEvent()
 {
     auto host = GetHost();
@@ -556,6 +574,7 @@ void TabBarPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
     CHECK_NULL_VOID(!dragEvent_);
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto tabBar = weak.Upgrade();
+        CHECK_NULL_VOID(tabBar);
         auto index = tabBar->CalculateSelectedIndex(info.GetLocalLocation());
         auto host = tabBar->GetHost();
         CHECK_NULL_VOID(host);
@@ -653,7 +672,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(axis);
     auto scrollable = MakeRefPtr<Scrollable>(task, axis);
     scrollable->SetNodeId(host->GetAccessibilityId());
-    scrollable->Initialize(host->GetContextRefPtr());
+    scrollable->Initialize(host);
     scrollable->SetMaxFlingVelocity(MAX_FLING_VELOCITY);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -720,10 +739,28 @@ void TabBarPattern::InitTouch(const RefPtr<GestureEventHub>& gestureHub)
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->HandleTouchEvent(info.GetTouches().front());
+        for (auto touchInfo : info.GetTouches()) {
+            auto touchType = touchInfo.GetTouchType();
+            if ((!pattern->touchingIndex_.has_value() && pattern->InsideTabBarRegion(touchInfo)) ||
+                touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+                pattern->HandleTouchEvent(touchInfo);
+            }
+        }
     };
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+bool TabBarPattern::InsideTabBarRegion(const TouchLocationInfo& locationInfo)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto hotRegion = geometryNode->GetFrameRect();
+    auto touchPoint = PointF(static_cast<float>(locationInfo.GetLocalLocation().GetX()),
+        static_cast<float>(locationInfo.GetLocalLocation().GetY()));
+    return hotRegion.IsInRegion(touchPoint);
 }
 
 void TabBarPattern::InitHoverEvent()
@@ -917,8 +954,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
     CHECK_NULL_RETURN(host, false);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_LEFT
-                              : KeyCode::KEY_DPAD_UP) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT) : KeyCode::KEY_DPAD_UP) ||
         event.IsShiftWith(KeyCode::KEY_TAB)) {
         if (focusIndicator_ <= 0) {
             return false;
@@ -928,11 +964,11 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ -= 1;
         PaintFocusState();
+        FocusCurrentOffset(focusIndicator_);
         return true;
     }
     if (event.code == (tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL
-                              ? KeyCode::KEY_DPAD_RIGHT
-                              : KeyCode::KEY_DPAD_DOWN) ||
+                    ? (isRTL_ ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT) : KeyCode::KEY_DPAD_DOWN) ||
         event.code == KeyCode::KEY_TAB) {
         if (focusIndicator_ >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
@@ -942,6 +978,7 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         }
         focusIndicator_ += 1;
         PaintFocusState();
+        FocusCurrentOffset(focusIndicator_);
         return true;
     }
     return OnKeyEventWithoutClick(host, event);
@@ -1015,6 +1052,38 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         jumpIndex_ = index;
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+}
+
+void TabBarPattern::FocusCurrentOffset(int32_t index)
+{
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto barMode = layoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED);
+    auto axis = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
+    auto geometryNode = tabBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis);
+
+    if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
+        auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
+        auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
+        auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
+        auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
+        if (index == visibleItemStartIndex) {
+            index == 0 ? UpdateCurrentOffset(scrollMargin_ - visibleItemStartPos) :
+                UpdateCurrentOffset(-visibleItemStartPos);
+        } else if (index == visibleItemEndIndex) {
+            index == childCount - 1 ? UpdateCurrentOffset(mainSize - scrollMargin_ - visibleItemEndPos) :
+                UpdateCurrentOffset(mainSize - visibleItemEndPos);
+        } else if ((index >= 0  && index < visibleItemStartIndex) ||
+            (index <= childCount - 1 && index > visibleItemEndIndex)) {
+            focusIndex_ = index;
+            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -1097,7 +1166,7 @@ void TabBarPattern::OnModifyDone()
         auto defaultBlurStyle = static_cast<BlurStyle>(theme->GetBottomTabBackgroundBlurStyle());
         if (defaultBlurStyle != BlurStyle::NO_MATERIAL &&
             !tabBarPaintProperty->GetTabBarBlurStyleOption().has_value()) {
-            BlurStyleOption styleOption = tabBarPaintProperty->GetTabBarBlurStyleOption().value();
+            BlurStyleOption styleOption;
             styleOption.blurStyle = defaultBlurStyle;
             tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
         }
@@ -1283,20 +1352,26 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
+    if (targetIndex_) {
+        TriggerTranslateAnimation(indicator_, targetIndex_.value());
+        targetIndex_.reset();
+    }
+
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
     }
-
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
-
-    if (targetIndex_) {
-        TriggerTranslateAnimation(indicator_, targetIndex_.value());
-        targetIndex_.reset();
+    if (focusIndex_) {
+        focusIndex_.reset();
+        if (accessibilityScroll_) {
+            host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            accessibilityScroll_ = false;
+        }
     }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 
@@ -1310,6 +1385,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             prevRootSize_.second != PipelineContext::GetCurrentRootHeight()) {
             StopTranslateAnimation();
             jumpIndex_ = indicator_;
+            focusIndicator_ = indicator_;
             UpdateSubTabBoard(indicator_);
             UpdateIndicator(indicator_);
             windowSizeChangeReason_.reset();
@@ -2176,7 +2252,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
         CHECK_NULL_VOID(columnNode);
         auto columnId = columnNode->GetId();
         auto iter = tabBarType_.find(columnId);
-        if (iter != tabBarType_.end() && iter->second) {
+        if (iter != tabBarType_.end() && iter->second != TabBarParamType::NORMAL) {
             index++;
             continue;
         }
@@ -2199,7 +2275,7 @@ void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
             textLayoutProperty->UpdateTextColor(
                 labelStyles_[columnId].unselectedColor.value_or(tabTheme->GetSubTabTextOffColor()));
         }
-        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE &&
+        if (index < static_cast<int32_t>(tabBarStyles_.size()) && tabBarStyles_[index] == TabBarStyle::SUBTABBATSTYLE &&
             !labelStyles_[columnId].fontWeight.has_value()) {
             textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
@@ -2399,14 +2475,14 @@ SelectedMode TabBarPattern::GetSelectedMode() const
 
 bool TabBarPattern::IsContainsBuilder()
 {
-    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(),
+        [](const auto& isBuilder) { return isBuilder.second == TabBarParamType::CUSTOM_BUILDER; });
 }
 
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
 {
     auto weak = AceType::WeakClaim(this);
-    const auto& pattern = weak.Upgrade();
-    auto host = pattern->GetHost();
+    auto host = GetHost();
 
     currentOffset_ = 0.0f;
     host->CreateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, 0, [weak](float value) {
@@ -2495,13 +2571,32 @@ void TabBarPattern::CreateIndicatorTranslateProperty(const RefPtr<FrameNode>& ho
     }
 }
 
-void TabBarPattern::StopTranslateAnimation()
+void TabBarPattern::StopTranslateAnimation(bool isImmediately)
 {
-    if (translateAnimation_)
-        AnimationUtils::StopAnimation(translateAnimation_);
+    if (isImmediately) {
+        AnimationOption option;
+        option.SetDuration(0);
+        option.SetCurve(Curves::LINEAR);
+        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
 
-    if (tabbarIndicatorAnimation_)
-        AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+            auto indicatorCurrentValue =
+                pattern->turnPageRate_ * (pattern->indicatorEndPos_ - pattern->indicatorStartPos_) +
+                pattern->indicatorStartPos_;
+            host->UpdateAnimatablePropertyFloat(INDICATOR_WIDTH_PROPERTY_NAME, indicatorCurrentValue);
+            host->UpdateAnimatablePropertyFloat(INDICATOR_OFFSET_PROPERTY_NAME, indicatorCurrentValue);
+        });
+    } else {
+        if (translateAnimation_)
+            AnimationUtils::StopAnimation(translateAnimation_);
+
+        if (tabbarIndicatorAnimation_)
+            AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+    }
 
     indicatorAnimationIsRunning_ = false;
     translateAnimationIsRunning_ = false;
@@ -2887,8 +2982,10 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto index = pattern->GetIndicator() + 1;
-            pattern->FocusIndexChange(index);
+            auto visibleItemEndIndex = pattern->visibleItemPosition_.rbegin()->first;
+            visibleItemEndIndex == frameNode->TotalChildCount() - MASK_COUNT - 1 ?
+                pattern->FocusCurrentOffset(visibleItemEndIndex) : pattern->FocusCurrentOffset(visibleItemEndIndex + 1);
+            pattern->accessibilityScroll_ = true;
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -2902,8 +2999,10 @@ void TabBarPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(frameNode);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE &&
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
-            auto index = pattern->GetIndicator() - 1;
-            pattern->FocusIndexChange(index);
+            auto visibleItemStartIndex = pattern->visibleItemPosition_.begin()->first;
+            visibleItemStartIndex == 0 ? pattern->FocusCurrentOffset(visibleItemStartIndex) :
+                pattern->FocusCurrentOffset(visibleItemStartIndex - 1);
+            pattern->accessibilityScroll_ = true;
             // AccessibilityEventType::SCROLL_END
         }
     });
@@ -3177,7 +3276,8 @@ void TabBarPattern::InitTurnPageRateEvent()
             [weak = WeakClaim(this)](int32_t index, const AnimationCallbackInfo& info) {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 auto pattern = weak.Upgrade();
-                if (pattern && (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f))) {
+                CHECK_NULL_VOID(pattern);
+                if (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f)) {
                     pattern->isTouchingSwiper_ = false;
                 }
                 pattern->SetMaskAnimationExecuted(false);

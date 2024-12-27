@@ -38,8 +38,7 @@ public:
     bool CheckAndAdjustHandle(RectF& paintRect);
     bool CheckAndAdjustHandleWithContent(const RectF& contentRect, RectF& paintRect);
     void OnResetTextSelection() override;
-    RectF GetFirstHandleLocalPaintRect() override;
-    RectF GetSecondHandleLocalPaintRect() override;
+    RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex) override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
     // override SelectOverlayHolder

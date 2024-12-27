@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 class ACE_FORCE_EXPORT DisplayInfoUtils final {
 public:
     static DisplayInfoUtils& GetInstance();
-    RefPtr<DisplayInfo> GetDisplayInfo();
+    RefPtr<DisplayInfo> GetDisplayInfo(int32_t displayId = 0);
     void InitIsFoldable();
     bool IsFoldable();
     FoldStatus GetCurrentFoldStatus();

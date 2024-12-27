@@ -53,7 +53,7 @@ void OffscreenCanvasPaintMethod::InitBitmap()
     bool ret = bitmap_.Build(width_, height_, bitmapFormat);
     if (!ret) {
         TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
-        return ;
+        return;
     }
     bitmap_.ClearWithColor(RSColor::COLOR_TRANSPARENT);
     bitmapSize_ = bitmap_.ComputeByteSize();
@@ -109,7 +109,11 @@ void OffscreenCanvasPaintMethod::DrawPixelMap(RefPtr<PixelMap> pixelMap, const A
     CHECK_NULL_VOID(pixelMap);
     auto rsBitmapFormat = Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(pixelMap);
     auto rsBitmap = std::make_shared<RSBitmap>();
-    rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
+    bool ret = rsBitmap->Build(pixelMap->GetWidth(), pixelMap->GetHeight(), rsBitmapFormat, pixelMap->GetRowStride());
+    if (!ret) {
+        TAG_LOGE(AceLogTag::ACE_CANVAS, "The width and height exceed the limit size.");
+        return;
+    }
     rsBitmap->SetPixels(const_cast<void*>(reinterpret_cast<const void*>(pixelMap->GetPixels())));
 
     // Step2: Create Image and draw it, using gpu or cpu

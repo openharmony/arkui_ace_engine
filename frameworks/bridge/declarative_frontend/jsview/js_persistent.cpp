@@ -23,6 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 constexpr int32_t DATA_REQUIRED_ARGS = 2;
+constexpr int32_t ARGS_AREAMODE = 2;
 
 void JSPersistent::JSBind(BindingTarget globalObj)
 {
@@ -67,12 +68,16 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     std::string key = args[0]->ToString();
     auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
+    int areaMode = -1;
+    if (args.Length() > DATA_REQUIRED_ARGS && args[ARGS_AREAMODE]->IsNumber()) {
+        areaMode = std::stoi(args[ARGS_AREAMODE]->ToString());
+    }
     std::string value = serializedValue->ToString(args.GetVm())->ToString(args.GetVm());
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage()->SetString(key, value);
+    StorageProxy::GetInstance()->GetStorage(areaMode)->SetString(key, value);
 }
 
 void JSPersistent::Get(const JSCallbackInfo& args)
@@ -85,7 +90,11 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
-    auto storage = StorageProxy::GetInstance()->GetStorage();
+    int areaMode = -1;
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        areaMode = std::stoi(args[1]->ToString());
+    }
+    auto storage = StorageProxy::GetInstance()->GetStorage(areaMode);
     if (!storage) {
         LOGW("no storage available");
         return;
@@ -112,12 +121,16 @@ void JSPersistent::Has(const JSCallbackInfo& args)
         LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
+    int areaMode = -1;
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        areaMode = std::stoi(args[1]->ToString());
+    }
     std::string key = args[0]->ToString();
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return;
     }
-    std::string value = StorageProxy::GetInstance()->GetStorage()->GetString(key);
+    std::string value = StorageProxy::GetInstance()->GetStorage(areaMode)->GetString(key);
     args.SetReturnValue(value.empty()? JSVal::False() : JSVal::True());
 }
 
@@ -132,11 +145,16 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         return;
     }
     std::string key = args[0]->ToString();
-    if (!StorageProxy::GetInstance()->GetStorage()) {
+    int areaMode = -1;
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        areaMode = std::stoi(args[1]->ToString());
+    }
+
+    if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
         LOGW("no storage available");
         return;
     }
-    StorageProxy::GetInstance()->GetStorage()->Delete(key);
+    StorageProxy::GetInstance()->GetStorage(areaMode)->Delete(key);
 }
 
 void JSPersistent::Clear(const JSCallbackInfo& args)

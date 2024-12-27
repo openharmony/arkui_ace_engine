@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/search_modifier.h"
 
+#include "base/utils/utf_helper.h"
 #include "core/components/search/search_theme.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
@@ -490,7 +491,7 @@ void SetSearchOnSubmitWithEvent(ArkUINodeHandle node, void* callback)
     CHECK_NULL_VOID(frameNode);
     if (callback) {
         auto onSubmit =
-            reinterpret_cast<std::function<void(const std::string&, NG::TextFieldCommonEvent&)>*>(callback);
+            reinterpret_cast<std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>*>(callback);
         SearchModelNG::SetOnSubmit(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnSubmit(frameNode, nullptr);
@@ -509,7 +510,7 @@ void SetSearchOnCopy(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCopy = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCopy = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         SearchModelNG::SetOnCopy(frameNode, std::move(*onCopy));
     } else {
         SearchModelNG::SetOnCopy(frameNode, nullptr);
@@ -528,7 +529,7 @@ void SetSearchOnCut(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onCut = reinterpret_cast<std::function<void(const std::string&)>*>(callback);
+        auto onCut = reinterpret_cast<std::function<void(const std::u16string&)>*>(callback);
         SearchModelNG::SetOnCut(frameNode, std::move(*onCut));
     } else {
         SearchModelNG::SetOnCut(frameNode, nullptr);
@@ -548,7 +549,7 @@ void SetSearchOnPaste(ArkUINodeHandle node, void* callback)
     CHECK_NULL_VOID(frameNode);
     if (callback) {
         auto onPasteWithEvent = reinterpret_cast<std::function<void(
-                const std::string&, NG::TextCommonEvent&)>*>(callback);
+                const std::u16string&, NG::TextCommonEvent&)>*>(callback);
         SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(*onPasteWithEvent));
     } else {
         SearchModelNG::SetOnPasteWithEvent(frameNode, nullptr);
@@ -567,7 +568,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::string&, PreviewText&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -806,17 +807,16 @@ void SetSearchSelectionMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallb
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    NG::OnCreateMenuCallback* onCreateMenu = nullptr;
-    NG::OnMenuItemClickCallback* onMenuItemClick = nullptr;
     if (onCreateMenuCallback) {
-        onCreateMenu = reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback);
-        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(*onCreateMenu));
+        NG::OnCreateMenuCallback onCreateMenu = *(reinterpret_cast<NG::OnCreateMenuCallback*>(onCreateMenuCallback));
+        SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, std::move(onCreateMenu));
     } else {
         SearchModelNG::OnCreateMenuCallbackUpdate(frameNode, nullptr);
     }
     if (onMenuItemClickCallback) {
-        onMenuItemClick = reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback);
-        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(*onMenuItemClick));
+        NG::OnMenuItemClickCallback onMenuItemClick =
+            *(reinterpret_cast<NG::OnMenuItemClickCallback*>(onMenuItemClickCallback));
+        SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
     } else {
         SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, nullptr);
     }
@@ -848,60 +848,209 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
-    static const ArkUISearchModifier modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
-        SetSearchTextFont, ResetSearchTextFont, SetSearchSelectionMenuHidden, ResetSearchSelectionMenuHidden,
-        SetSearchCaretStyle, ResetSearchCaretStyle, SetSearchTextAlign, ResetSearchTextAlign, SetSearchCancelButton,
-        ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
-        SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
-        SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
-        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
-        SetSearchInspectorId, ResetSearchInspectorId, SetSearchDecoration, ResetSearchDecoration,
-        SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
-        SetSearchFontFeature, ResetSearchFontFeature, SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
-        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize, SetSearchSelectedBackgroundColor,
-        ResetSearchSelectedBackgroundColor, SetSearchTextIndent, ResetSearchTextIndent, SetSearchValue,
-        ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon,
-        SetSearchCaretPosition, ResetSearchCaretPosition, SetSearchMaxLength, ResetSearchMaxLength, SetSearchType,
-        ResetSearchType, SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent,
-        ResetSearchOnSubmitWithEvent, SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
-        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange, SetSearchOnTextSelectionChange,
-        ResetSearchOnTextSelectionChange, SetSearchOnContentScroll, ResetSearchOnContentScroll,
-        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchOnWillInsert,
-        ResetSearchOnWillInsert, SetSearchOnDidInsert, ResetSearchOnDidInsert, SetSearchOnWillDelete,
-        ResetSearchOnWillDelete, SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText,
-        ResetSearchEnablePreviewText, SetSearchSelectionMenuOptions, ResetSearchSelectionMenuOptions,
-        SetSearchEnableHapticFeedback, ResetSearchEnableHapticFeedback };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUISearchModifier modifier = {
+        .setSearchPlaceholderColor = SetSearchPlaceholderColor,
+        .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
+        .setSearchTextFont = SetSearchTextFont,
+        .resetSearchTextFont = ResetSearchTextFont,
+        .setSearchSelectionMenuHidden = SetSearchSelectionMenuHidden,
+        .resetSearchSelectionMenuHidden = ResetSearchSelectionMenuHidden,
+        .setSearchCaretStyle = SetSearchCaretStyle,
+        .resetSearchCaretStyle = ResetSearchCaretStyle,
+        .setSearchTextAlign = SetSearchTextAlign,
+        .resetSearchTextAlign = ResetSearchTextAlign,
+        .setSearchCancelButton = SetSearchCancelButton,
+        .resetSearchCancelButton = ResetSearchCancelButton,
+        .setSearchEnableKeyboardOnFocus = SetSearchEnableKeyboardOnFocus,
+        .resetSearchEnableKeyboardOnFocus = ResetSearchEnableKeyboardOnFocus,
+        .setSearchPlaceholderFont = SetSearchPlaceholderFont,
+        .resetSearchPlaceholderFont = ResetSearchPlaceholderFont,
+        .setSearchSearchIcon = SetSearchSearchIcon,
+        .resetSearchSearchIcon = ResetSearchSearchIcon,
+        .setSearchSearchButton = SetSearchSearchButton,
+        .resetSearchSearchButton = ResetSearchSearchButton,
+        .setSearchFontColor = SetSearchFontColor,
+        .resetSearchFontColor = ResetSearchFontColor,
+        .setSearchCopyOption = SetSearchCopyOption,
+        .resetSearchCopyOption = ResetSearchCopyOption,
+        .setSearchEnterKeyType = SetSearchEnterKeyType,
+        .resetSearchEnterKeyType = ResetSearchEnterKeyType,
+        .setSearchHeight = SetSearchHeight,
+        .resetSearchHeight = ResetSearchHeight,
+        .setSearchInspectorId = SetSearchInspectorId,
+        .resetSearchInspectorId = ResetSearchInspectorId,
+        .setSearchDecoration = SetSearchDecoration,
+        .resetSearchDecoration = ResetSearchDecoration,
+        .setSearchLetterSpacing = SetSearchLetterSpacing,
+        .resetSearchLetterSpacing = ResetSearchLetterSpacing,
+        .setSearchLineHeight = SetSearchLineHeight,
+        .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchFontFeature = SetSearchFontFeature,
+        .resetSearchFontFeature = ResetSearchFontFeature,
+        .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
+        .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
+        .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
+        .resetSearchAdaptMaxFontSize = ResetSearchAdaptMaxFontSize,
+        .setSearchSelectedBackgroundColor = SetSearchSelectedBackgroundColor,
+        .resetSearchSelectedBackgroundColor = ResetSearchSelectedBackgroundColor,
+        .setSearchTextIndent = SetSearchTextIndent,
+        .resetSearchTextIndent = ResetSearchTextIndent,
+        .setSearchValue = SetSearchValue,
+        .resetSearchValue = ResetSearchValue,
+        .setSearchPlaceholder = SetSearchPlaceholder,
+        .resetSearchPlaceholder = ResetSearchPlaceholder,
+        .setSearchIcon = SetSearchIcon,
+        .resetSearchIcon = ResetSearchIcon,
+        .setSearchCaretPosition = SetSearchCaretPosition,
+        .resetSearchCaretPosition = ResetSearchCaretPosition,
+        .setSearchMaxLength = SetSearchMaxLength,
+        .resetSearchMaxLength = ResetSearchMaxLength,
+        .setSearchType = SetSearchType,
+        .resetSearchType = ResetSearchType,
+        .setSearchOnEditChange = SetSearchOnEditChange,
+        .resetSearchOnEditChange = ResetSearchOnEditChange,
+        .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEvent,
+        .resetSearchOnSubmitWithEvent = ResetSearchOnSubmitWithEvent,
+        .setSearchOnCopy = SetSearchOnCopy,
+        .resetSearchOnCopy = ResetSearchOnCopy,
+        .setSearchOnCut = SetSearchOnCut,
+        .resetSearchOnCut = ResetSearchOnCut,
+        .setSearchOnPaste = SetSearchOnPaste,
+        .resetSearchOnPaste = ResetSearchOnPaste,
+        .setSearchOnChange = SetSearchOnChange,
+        .resetSearchOnChange = ResetSearchOnChange,
+        .setSearchOnTextSelectionChange = SetSearchOnTextSelectionChange,
+        .resetSearchOnTextSelectionChange = ResetSearchOnTextSelectionChange,
+        .setSearchOnContentScroll = SetSearchOnContentScroll,
+        .resetSearchOnContentScroll = ResetSearchOnContentScroll,
+        .setSearchShowCounter = SetSearchShowCounterOptions,
+        .resetSearchShowCounter = ResetSearchShowCounterOptions,
+        .getSearchController = GetSearchController,
+        .setSearchOnWillInsert = SetSearchOnWillInsert,
+        .resetSearchOnWillInsert = ResetSearchOnWillInsert,
+        .setSearchOnDidInsert = SetSearchOnDidInsert,
+        .resetSearchOnDidInsert = ResetSearchOnDidInsert,
+        .setSearchOnWillDelete = SetSearchOnWillDelete,
+        .resetSearchOnWillDelete = ResetSearchOnWillDelete,
+        .setSearchOnDidDelete = SetSearchOnDidDelete,
+        .resetSearchOnDidDelete = ResetSearchOnDidDelete,
+        .setSearchEnablePreviewText = SetSearchEnablePreviewText,
+        .resetSearchEnablePreviewText = ResetSearchEnablePreviewText,
+        .setSearchSelectionMenuOptions = SetSearchSelectionMenuOptions,
+        .resetSearchSelectionMenuOptions = ResetSearchSelectionMenuOptions,
+        .setSearchEnableHapticFeedback = SetSearchEnableHapticFeedback,
+        .resetSearchEnableHapticFeedback = ResetSearchEnableHapticFeedback,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUISearchModifier* GetCJUISearchModifier()
 {
-    static const CJUISearchModifier modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
-        SetSearchTextFont, ResetSearchTextFont, SetSearchSelectionMenuHidden, ResetSearchSelectionMenuHidden,
-        SetSearchCaretStyle, ResetSearchCaretStyle, SetSearchTextAlign, ResetSearchTextAlign, SetSearchCancelButton,
-        ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
-        SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
-        SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
-        ResetSearchCopyOption, SetSearchEnterKeyType, ResetSearchEnterKeyType, SetSearchHeight, ResetSearchHeight,
-        SetSearchFontFeature, ResetSearchFontFeature, SetSearchDecoration, ResetSearchDecoration,
-        SetSearchLetterSpacing, ResetSearchLetterSpacing, SetSearchLineHeight, ResetSearchLineHeight,
-        SetSearchAdaptMinFontSize, ResetSearchAdaptMinFontSize,
-        SetSearchAdaptMaxFontSize, ResetSearchAdaptMaxFontSize,
-        SetSearchSelectedBackgroundColor, ResetSearchSelectedBackgroundColor, SetSearchTextIndent,
-        ResetSearchTextIndent,
-        SetSearchMaxLength, ResetSearchMaxLength, SetSearchType, ResetSearchType,
-        SetSearchOnEditChange, ResetSearchOnEditChange, SetSearchOnSubmitWithEvent, ResetSearchOnSubmitWithEvent,
-        SetSearchOnCopy, ResetSearchOnCopy, SetSearchOnCut, ResetSearchOnCut,
-        SetSearchOnPaste, ResetSearchOnPaste, SetSearchOnChange, ResetSearchOnChange,
-        SetSearchOnTextSelectionChange, ResetSearchOnTextSelectionChange,
-        SetSearchOnContentScroll, ResetSearchOnContentScroll,
-        SetSearchShowCounterOptions, ResetSearchShowCounterOptions, GetSearchController, SetSearchValue,
-        ResetSearchValue, SetSearchPlaceholder, ResetSearchPlaceholder, SetSearchIcon, ResetSearchIcon,
-        SetSearchOnWillInsert, ResetSearchOnWillInsert,
-        SetSearchOnDidInsert, ResetSearchOnDidInsert,
-        SetSearchOnWillDelete, ResetSearchOnWillDelete,
-        SetSearchOnDidDelete, ResetSearchOnDidDelete, SetSearchEnablePreviewText, ResetSearchEnablePreviewText,
-        SetSearchCaretPosition, ResetSearchCaretPosition };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUISearchModifier modifier = {
+        .setSearchPlaceholderColor = SetSearchPlaceholderColor,
+        .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
+        .setSearchTextFont = SetSearchTextFont,
+        .resetSearchTextFont = ResetSearchTextFont,
+        .setSearchSelectionMenuHidden = SetSearchSelectionMenuHidden,
+        .resetSearchSelectionMenuHidden = ResetSearchSelectionMenuHidden,
+        .setSearchCaretStyle = SetSearchCaretStyle,
+        .resetSearchCaretStyle = ResetSearchCaretStyle,
+        .setSearchTextAlign = SetSearchTextAlign,
+        .resetSearchTextAlign = ResetSearchTextAlign,
+        .setSearchCancelButton = SetSearchCancelButton,
+        .resetSearchCancelButton = ResetSearchCancelButton,
+        .setSearchEnableKeyboardOnFocus = SetSearchEnableKeyboardOnFocus,
+        .resetSearchEnableKeyboardOnFocus = ResetSearchEnableKeyboardOnFocus,
+        .setSearchPlaceholderFont = SetSearchPlaceholderFont,
+        .resetSearchPlaceholderFont = ResetSearchPlaceholderFont,
+        .setSearchSearchIcon = SetSearchSearchIcon,
+        .resetSearchSearchIcon = ResetSearchSearchIcon,
+        .setSearchSearchButton = SetSearchSearchButton,
+        .resetSearchSearchButton = ResetSearchSearchButton,
+        .setSearchFontColor = SetSearchFontColor,
+        .resetSearchFontColor = ResetSearchFontColor,
+        .setSearchCopyOption = SetSearchCopyOption,
+        .resetSearchCopyOption = ResetSearchCopyOption,
+        .setSearchEnterKeyType = SetSearchEnterKeyType,
+        .resetSearchEnterKeyType = ResetSearchEnterKeyType,
+        .setSearchHeight = SetSearchHeight,
+        .resetSearchHeight = ResetSearchHeight,
+        .setSearchFontFeature = SetSearchFontFeature,
+        .resetSearchFontFeature = ResetSearchFontFeature,
+        .setSearchDecoration = SetSearchDecoration,
+        .resetSearchDecoration = ResetSearchDecoration,
+        .setSearchLetterSpacing = SetSearchLetterSpacing,
+        .resetSearchLetterSpacing = ResetSearchLetterSpacing,
+        .setSearchLineHeight = SetSearchLineHeight,
+        .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
+        .resetSearchAdaptMinFontSize = ResetSearchAdaptMinFontSize,
+        .setSearchAdaptMaxFontSize = SetSearchAdaptMaxFontSize,
+        .resetSearchAdaptMaxFontSize = ResetSearchAdaptMaxFontSize,
+        .setSearchSelectedBackgroundColor = SetSearchSelectedBackgroundColor,
+        .resetSearchSelectedBackgroundColor = ResetSearchSelectedBackgroundColor,
+        .setSearchTextIndent = SetSearchTextIndent,
+        .resetSearchTextIndent = ResetSearchTextIndent,
+        .setSearchMaxLength = SetSearchMaxLength,
+        .resetSearchMaxLength = ResetSearchMaxLength,
+        .setSearchType = SetSearchType,
+        .resetSearchType = ResetSearchType,
+        .setSearchOnEditChange = SetSearchOnEditChange,
+        .resetSearchOnEditChange = ResetSearchOnEditChange,
+        .setSearchOnSubmitWithEvent = SetSearchOnSubmitWithEvent,
+        .resetSearchOnSubmitWithEvent = ResetSearchOnSubmitWithEvent,
+        .setSearchOnCopy = SetSearchOnCopy,
+        .resetSearchOnCopy = ResetSearchOnCopy,
+        .setSearchOnCut = SetSearchOnCut,
+        .resetSearchOnCut = ResetSearchOnCut,
+        .setSearchOnPaste = SetSearchOnPaste,
+        .resetSearchOnPaste = ResetSearchOnPaste,
+        .setSearchOnChange = SetSearchOnChange,
+        .resetSearchOnChange = ResetSearchOnChange,
+        .setSearchOnTextSelectionChange = SetSearchOnTextSelectionChange,
+        .resetSearchOnTextSelectionChange = ResetSearchOnTextSelectionChange,
+        .setSearchOnContentScroll = SetSearchOnContentScroll,
+        .resetSearchOnContentScroll = ResetSearchOnContentScroll,
+        .setSearchShowCounter = SetSearchShowCounterOptions,
+        .resetSearchShowCounter = ResetSearchShowCounterOptions,
+        .getSearchController = GetSearchController,
+        .setSearchValue = SetSearchValue,
+        .resetSearchValue = ResetSearchValue,
+        .setSearchPlaceholder = SetSearchPlaceholder,
+        .resetSearchPlaceholder = ResetSearchPlaceholder,
+        .setSearchIcon = SetSearchIcon,
+        .resetSearchIcon = ResetSearchIcon,
+        .setSearchOnWillInsert = SetSearchOnWillInsert,
+        .resetSearchOnWillInsert = ResetSearchOnWillInsert,
+        .setSearchOnDidInsert = SetSearchOnDidInsert,
+        .resetSearchOnDidInsert = ResetSearchOnDidInsert,
+        .setSearchOnWillDelete = SetSearchOnWillDelete,
+        .resetSearchOnWillDelete = ResetSearchOnWillDelete,
+        .setSearchOnDidDelete = SetSearchOnDidDelete,
+        .resetSearchOnDidDelete = ResetSearchOnDidDelete,
+        .setSearchEnablePreviewText = SetSearchEnablePreviewText,
+        .resetSearchEnablePreviewText = ResetSearchEnablePreviewText,
+        .setSearchCaretPosition = SetSearchCaretPosition,
+        .resetSearchCaretPosition = ResetSearchCaretPosition,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
@@ -909,13 +1058,14 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, NG::TextFieldCommonEvent& commonEvent) {
+    auto onEvent = [extraParam](const std::u16string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_SUBMIT;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
-        SendArkUIAsyncEvent(&event);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
+        SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onEvent));
 }
@@ -924,13 +1074,14 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, PreviewText&) {
+    auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
-        SendArkUIAsyncEvent(&event);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
+        SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnChange(frameNode, std::move(onEvent));
 }
@@ -939,13 +1090,14 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_COPY;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
-        SendArkUIAsyncEvent(&event);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
+        SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onEvent));
 }
@@ -954,13 +1106,14 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text) {
+    auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CUT;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
-        SendArkUIAsyncEvent(&event);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
+        SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onEvent));
 }
@@ -969,13 +1122,14 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::string& text, NG::TextCommonEvent& textEvent) {
+    auto onEvent = [extraParam](const std::u16string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
+        std::string utf8Text = UtfUtils::Str16ToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_PASTE;
-        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(text.c_str());
-        SendArkUIAsyncEvent(&event);
+        event.textInputEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8Text.c_str());
+        SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));
 }

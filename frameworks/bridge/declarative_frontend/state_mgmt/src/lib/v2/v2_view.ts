@@ -51,7 +51,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     private onWillApplyThemeInternally(): void {
-        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__());
+        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this);
         if (theme) {
             this.onWillApplyTheme(theme);
         }
@@ -86,8 +86,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
     }
 
-
-    private get isViewV2(): boolean {
+    protected get isViewV2(): boolean {
         return true;
     }
 
@@ -152,6 +151,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
 
         MonitorV2.clearWatchesFromTarget(this);
+        ComputedV2.clearComputedFromTarget(this);
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
@@ -262,7 +262,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         stateMgmtProfiler.begin(`ViewV2.uiNodeNeedUpdate ${this.debugInfoElmtId(elmtId)}`);
 
-        if (!this.isActive_) {
+        if (!this.isViewActive()) {
             this.scheduleDelayedUpdate(elmtId);
             return;
         }
@@ -378,13 +378,13 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.computedIdsDelayedUpdate.add(watchId);
     }
 
-    public setActiveInternal(newState: boolean): void {
+    public setActiveInternal(active: boolean): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
 
         if (this.isCompFreezeAllowed()) {
-            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${newState ? ' inActive -> active' : 'active -> inActive'}`);
-            this.isActive_ = newState;
-            if (this.isActive_) {
+            stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
+            this.setActiveCount(active);
+            if (this.isViewActive()) {
                 this.performDelayedUpdate();
                 ViewV2.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
             } else {
@@ -394,9 +394,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView: IView | undefined = child.deref();
             if (childView) {
-              childView.setActiveInternal(newState);
+                childView.setActiveInternal(active);
             }
-          }
+        }
         stateMgmtProfiler.end();
     }
 
@@ -408,7 +408,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }
         if(this.monitorIdsDelayedUpdate.size) {
           // exec monitor functions
-          ObserveV2.getObserve().runDirtyMonitors(this.monitorIdsDelayedUpdate);
+          ObserveV2.getObserve().updateDirtyMonitors(this.monitorIdsDelayedUpdate);
         }
         if(this.elmtIdsDelayedUpdate.size) {
           // update re-render of updated element ids once the view gets active
@@ -478,17 +478,17 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             return retVal;
         }
         Object.getOwnPropertyNames(meta)
-            .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
+            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
             .forEach((varName) => {
-                const prop: Object = Reflect.get(meta, varName);
+                const prop: any = Reflect.get(meta, varName);
                 if ('deco' in prop) {
-                    retVal += ` ${prop['deco']}`; // main decorator
+                    retVal += ` ${prop.deco}`; // main decorator
                 }
                 if ('deco2' in prop) {
-                    retVal += ` ${prop['deco2']}`; // sub decorator like @Once
+                    retVal += ` ${prop.deco2}`; // sub decorator like @Once
                 }
                 if ('aliasName' in prop) {
-                    retVal += `(${prop['aliasName']})`; // aliasName for provider & consumer
+                    retVal += `(${prop.aliasName})`; // aliasName for provider & consumer
                 }
                 retVal += ` varName: ${varName}`;
                 let dependentElmtIds = this[ObserveV2.SYMBOL_REFS][varName];

@@ -38,6 +38,11 @@ public:
         return false;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     void SetBranchId(int32_t value, std::list<int32_t>& removedElmtId);
 
     int32_t GetBranchId() const

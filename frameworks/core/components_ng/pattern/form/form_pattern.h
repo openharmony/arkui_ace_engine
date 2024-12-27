@@ -20,6 +20,7 @@
 
 #include "transaction/rs_interfaces.h"
 
+#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -27,6 +28,8 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
 namespace OHOS {
@@ -116,7 +119,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -141,6 +144,9 @@ public:
     void GetTimeLimitResource(std::string &content);
 
     void UnregisterAccessibility();
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -227,6 +233,11 @@ private:
     void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
     void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
+    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
+    void HandleLockEvent(bool isLock);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
@@ -235,6 +246,7 @@ private:
     RefPtr<FormManagerDelegate> formManagerBridge_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
+    FormSpecialStyle formSpecialStyle_;
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
@@ -253,6 +265,7 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
+    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
@@ -261,6 +274,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace

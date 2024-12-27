@@ -72,9 +72,8 @@ public:
     void NotifyScrollStop() const;
     /*
      * Notify scroll bar to update state, called by scrollable node.
-     * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar() const;
+    void NotifyScrollBar(int32_t scrollSource) const;
 
     /*
      * Start animation of ScrollBar.
@@ -91,6 +90,8 @@ public:
      */
     bool NotifySnapScroll(float delta, float velocity, float barScrollableDistance, float dragDistance) const;
 
+    bool NotifySnapScrollWithoutChild(SnapAnimationOptions snapAnimationOptions) const;
+
     float CalcPatternOffset(float controlDistance, float barScrollableDistance, float delta) const;
 
     void NotifyScrollBarNode(float distance, int32_t source) const;
@@ -100,10 +101,7 @@ public:
         scrollSnapTrigger_ = scrollSnapTrigger;
     }
 
-    bool IsScrollSnapTrigger() const
-    {
-        return scrollSnapTrigger_;
-    }
+    bool IsScrollSnapTrigger() const;
 
     void ScrollPage(bool reverse, bool smooth);
 

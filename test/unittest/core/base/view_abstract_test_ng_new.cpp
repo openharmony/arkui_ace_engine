@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/base/view_abstract_test_ng.h"
+#include "core/components_ng/event/focus_hub.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1775,5 +1776,30 @@ HWTEST_F(ViewAbstractTestNg, SetForegroundEffectTest, TestSize.Level1)
     ViewStackProcessor::GetInstance()->visualState_ = std::nullopt;
     ViewAbstract::SetForegroundEffect(1.1f);
     ASSERT_EQ(frameNode->GetRenderContext()->GetForegroundEffect(), 1.1f);
+}
+
+/**
+ * @tc.name: ViewAbstractTest045
+ * @tc.desc: Test SetNeedFocus of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    frameNode->GetOrCreateFocusHub();
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->currentFocus_ = true;
+
+    /**
+    * @tc.steps: Set frameNode attached context null
+    * @tc.expected: do not set scop instanceId and excute lost focus to view root.
+    */
+    frameNode->DetachContext(true);
+    ViewAbstract::SetNeedFocus(AceType::RawPtr(frameNode), false);
+    EXPECT_EQ(ContainerScope::CurrentId(), -1);
 }
 } // namespace OHOS::Ace::NG

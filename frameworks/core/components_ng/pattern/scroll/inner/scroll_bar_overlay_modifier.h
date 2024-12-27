@@ -89,8 +89,13 @@ public:
 
     void SetOpacity(uint8_t opacity)
     {
-        CHECK_NULL_VOID(opacity_);
-        opacity_->Set(opacity);
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), opacity]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            auto modifierOpacity = modifier->opacity_;
+            CHECK_NULL_VOID(modifierOpacity);
+            modifierOpacity->Set(opacity);
+        });
     }
 
     uint8_t GetOpacity() const
@@ -134,6 +139,11 @@ public:
         isScrollable_ = isScrollable;
     }
 
+    void SetNavDestinationShow(bool isNavDestinationShow)
+    {
+        isNavDestinationShow_ = isNavDestinationShow;
+    }
+
 private:
     Offset GetHoverOffset(const Size& size) const;
     void CheckMainModeNearEqual();
@@ -159,6 +169,7 @@ private:
     PositionMode positionMode_ = PositionMode::RIGHT;
 
     bool isScrollable_ = true;
+    bool isNavDestinationShow_;
 };
 } // namespace OHOS::Ace::NG
 

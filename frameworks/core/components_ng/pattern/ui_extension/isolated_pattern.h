@@ -33,8 +33,6 @@ public:
     IsolatedPattern();
     ~IsolatedPattern() override;
 
-    void InitializeDynamicComponent(const std::string& hapPath,
-        const std::string& abcPath, const std::string& entryPoint, void* runtime);
     void InitializeIsolatedComponent(
         const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
     bool OnDirtyLayoutWrapperSwap(

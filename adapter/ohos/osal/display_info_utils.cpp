@@ -26,9 +26,12 @@ DisplayInfoUtils& DisplayInfoUtils::GetInstance()
     return instance;
 }
 
-RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo()
+RefPtr<DisplayInfo> DisplayInfoUtils::GetDisplayInfo(int32_t displayId)
 {
-    auto displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    auto displayManager = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    if (!displayManager) {
+        displayManager = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+    }
     CHECK_NULL_RETURN(displayManager, nullptr);
     auto dmRotation = displayManager->GetRotation();
     auto isFoldable = Rosen::DisplayManager::GetInstance().IsFoldable();

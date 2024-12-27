@@ -33,6 +33,8 @@ FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     : uiContent_(uiContent), formRenderer_(formRenderer), eventHandler_(eventHandler)
 {}
 
+std::recursive_mutex FormRendererDispatcherImpl::globalLock_;
+
 void FormRendererDispatcherImpl::DispatchPointerEvent(
     const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
     SerializedGesture& serializedGesture)
@@ -114,49 +116,21 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
+#ifdef FORM_SIZE_CHANGE_ANIMATION
     // form existed in Sceneboard window always get undefined sizeChangeReason, use Visible to control anim instead
     reason = isVisible_ ? static_cast<uint32_t>(Rosen::WindowSizeChangeReason::ROTATION) :
         static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#else
+    reason = static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#endif
     handler->PostTask([content = uiContent_, width, height, reason, rsTransaction, borderWidth, this]() {
         auto uiContent = content.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        
-        int32_t duration = DEFAULT_FORM_ROTATION_ANIM_DURATION;
-        bool needSync = false;
-        if (rsTransaction && rsTransaction->GetSyncId() > 0) {
-            // extract high 32 bits of SyncId as pid
-            auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
-            if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetParentPid()) {
-                needSync = true;
-            }
-        }
 
-        if (needSync) {
-            duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
-            Rosen::RSTransaction::FlushImplicitTransaction();
-            rsTransaction->Begin();
-        }
-        Rosen::RSAnimationTimingProtocol protocol;
-        protocol.SetDuration(duration);
-        // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
-        auto curve = Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
-        Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
-        
-        float uiWidth = width - borderWidth * DOUBLE;
-        float uiHeight = height - borderWidth * DOUBLE;
-        uiContent->SetFormWidth(uiWidth);
-        uiContent->SetFormHeight(uiHeight);
-        uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
-            rsTransaction);
-        Rosen::RSNode::CloseImplicitAnimation();
-        if (needSync) {
-            rsTransaction->Commit();
-        } else {
-            Rosen::RSTransaction::FlushImplicitTransaction();
-        }
+        HandleSurfaceChangeEvent(uiContent, width, height, reason, rsTransaction, borderWidth);
     });
 
     auto formRenderer = formRenderer_.lock();
@@ -164,6 +138,46 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
     formRenderer->OnSurfaceChange(width, height, borderWidth);
+}
+
+void FormRendererDispatcherImpl::HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width,
+    float height, uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth)
+{
+    int32_t duration = DEFAULT_FORM_ROTATION_ANIM_DURATION;
+    bool needSync = false;
+    if (rsTransaction && rsTransaction->GetSyncId() > 0) {
+        // extract high 32 bits of SyncId as pid
+        auto SyncTransactionPid = static_cast<int32_t>(rsTransaction->GetSyncId() >> 32);
+        if (rsTransaction->IsOpenSyncTransaction() || SyncTransactionPid != rsTransaction->GetParentPid()) {
+            needSync = true;
+        }
+    }
+
+    if (needSync) {
+        duration = rsTransaction->GetDuration() ? rsTransaction->GetDuration() : duration;
+        globalLock_.lock();
+        Rosen::RSTransaction::FlushImplicitTransaction();
+        rsTransaction->Begin();
+    }
+    Rosen::RSAnimationTimingProtocol protocol;
+    protocol.SetDuration(duration);
+    // animation curve: cubic [0.2, 0.0, 0.2, 1.0]
+    auto curve = Rosen::RSAnimationTimingCurve::CreateCubicCurve(0.2, 0.0, 0.2, 1.0);
+    Rosen::RSNode::OpenImplicitAnimation(protocol, curve, []() {});
+    
+    float uiWidth = width - borderWidth * DOUBLE;
+    float uiHeight = height - borderWidth * DOUBLE;
+    uiContent->SetFormWidth(uiWidth);
+    uiContent->SetFormHeight(uiHeight);
+    uiContent->OnFormSurfaceChange(uiWidth, uiHeight, static_cast<OHOS::Rosen::WindowSizeChangeReason>(reason),
+        rsTransaction);
+    Rosen::RSNode::CloseImplicitAnimation();
+    if (needSync) {
+        rsTransaction->Commit();
+        globalLock_.unlock();
+    } else {
+        Rosen::RSTransaction::FlushImplicitTransaction();
+    }
 }
 
 void FormRendererDispatcherImpl::SetObscured(bool isObscured)
@@ -201,13 +215,13 @@ void FormRendererDispatcherImpl::OnAccessibilityChildTreeRegister(
         }
         HILOG_INFO("OnAccessibilityChildTreeRegister: %{public}d %{public}" PRId64, treeId, accessibilityId);
         uiContent->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
-        uiContent->SetAccessibilityGetParentRectHandler([formRenderer](int32_t &top, int32_t &left) {
+        uiContent->SetAccessibilityGetParentRectHandler([formRenderer](AccessibilityParentRectInfo &parentRectInfo) {
             auto formRendererPtr = formRenderer.lock();
             if (!formRendererPtr) {
                 HILOG_ERROR("formRenderer is nullptr");
                 return;
             }
-            formRendererPtr->GetRectRelativeToWindow(top, left);
+            formRendererPtr->GetRectRelativeToWindow(parentRectInfo);
         });
     });
 }
@@ -265,6 +279,25 @@ void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX,
         }
         HILOG_INFO("OnAccessibilityTransferHoverEvent");
         uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    });
+}
+
+void FormRendererDispatcherImpl::OnNotifyDumpInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostSyncTask([content = uiContent_, params, &info]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnNotifyDumpInfo");
+        uiContent->DumpInfo(params, info);
     });
 }
 } // namespace Ace

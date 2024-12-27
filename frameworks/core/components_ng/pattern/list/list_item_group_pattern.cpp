@@ -646,13 +646,14 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         .backwardCachedIndex = backwardCachedIndex_,
         .deadline = deadline,
     };
+    itemGroup->SetContentOffset(listSizeValues.contentStartOffset, listSizeValues.contentEndOffset);
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,
         listSizeValues.prevContentMainSize, listSizeValues.forward);
     host->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     host->GetGeometryNode()->SetParentLayoutConstraint(constraint);
-    FrameNode::ProcessOffscreenNode(host);
+    FrameNode::ProcessOffscreenNode(host, true);
     if ((!NearZero(adjustRefPos_) || !NearZero(adjustTotalSize_)) && !(childrenSize_ && ListChildrenSizeExist())) {
         listPattern->UpdateChildPosInfo(indexInList_, adjustRefPos_, adjustTotalSize_);
         adjustRefPos_ = 0.0f;

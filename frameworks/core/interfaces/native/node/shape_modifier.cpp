@@ -61,13 +61,41 @@ void ResetShapeMesh(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIShapeModifier* GetShapeModifier()
 {
-    static const ArkUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIShapeModifier* GetCJUIShapeModifier()
 {
-    static const CJUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

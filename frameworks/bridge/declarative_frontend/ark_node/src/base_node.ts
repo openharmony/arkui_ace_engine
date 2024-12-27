@@ -35,6 +35,8 @@ declare class __JSBaseNode__ {
   disposeNode(): void;
   updateStart(): void;
   updateEnd(): void;
+  onRecycleWithBindObject(): void;
+  onReuseWithBindObject(object: Object): void;
 }
 
 class BaseNode extends __JSBaseNode__ {

@@ -22,7 +22,6 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension INDICATOR_PADDING = 8.0_vp;
@@ -81,26 +80,20 @@ void DigitIndicatorLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(frontTextGeometryNode);
     auto layoutGeometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(layoutGeometryNode);
-
-    auto indicatorPattern = frameNode->GetPattern<SwiperIndicatorPattern>();
-    CHECK_NULL_VOID(indicatorPattern);
-    SizeF frameSize = { 0.0f, 0.0f };
-    auto success = indicatorPattern->GetDigitFrameSize(layoutGeometryNode, frameSize);
-    CHECK_NULL_VOID(success);
-    auto height = frameSize.Height();
     auto frontCurrentOffset = OffsetF { INDICATOR_PADDING.ConvertToPx(),
-        (height - frontTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
+        (layoutGeometryNode->GetMarginFrameSize().Height() - frontTextGeometryNode->GetMarginFrameSize().Height()) *
+            0.5 };
     frontTextGeometryNode->SetMarginFrameOffset(frontCurrentOffset);
     frontTextWrapper->Layout();
-
     auto backTextWrapper = textWrapperList.back();
     CHECK_NULL_VOID(backTextWrapper);
     auto backTextGeometryNode = backTextWrapper->GetGeometryNode();
     CHECK_NULL_VOID(backTextGeometryNode);
-    auto width = frameSize.Width();
-    auto backTextCurrentOffset =
-        OffsetF { width - backTextGeometryNode->GetMarginFrameSize().Width() - INDICATOR_PADDING.ConvertToPx(),
-            (height - backTextGeometryNode->GetMarginFrameSize().Height()) * 0.5 };
+    auto backTextCurrentOffset = OffsetF {
+        layoutGeometryNode->GetMarginFrameSize().Width() - backTextGeometryNode->GetMarginFrameSize().Width() -
+            INDICATOR_PADDING.ConvertToPx(),
+        (layoutGeometryNode->GetMarginFrameSize().Height() - backTextGeometryNode->GetMarginFrameSize().Height()) * 0.5
+    };
     backTextGeometryNode->SetMarginFrameOffset(backTextCurrentOffset);
     backTextWrapper->Layout();
 }

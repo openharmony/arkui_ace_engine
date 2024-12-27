@@ -65,11 +65,6 @@ public:
     }
 
 private:
-    ContentClipMode GetDefaultContentClip() const override
-    {
-        return ContentClipMode::BOUNDARY;
-    }
-
     RefPtr<GridContentModifier> gridContentModifier_;
     WeakPtr<ScrollBar> scrollBar_;
     WeakPtr<ScrollEdgeEffect> edgeEffect_;

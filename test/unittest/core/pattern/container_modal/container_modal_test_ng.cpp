@@ -298,24 +298,6 @@ HWTEST_F(ContainerModelTestNg, Test002, TestSize.Level1)
     EXPECT_FALSE(windowMaximize);
     EXPECT_FALSE(windowMinimize);
     EXPECT_FALSE(windowClose);
-
-    /**
-     * @tc.steps: step2. set callback
-     * @tc.expected: call is triggered
-     */
-    maximizeMode = MaximizeMode::MODE_FULL_FILL;
-    windowManager->SetCurrentWindowMaximizeMode(maximizeMode);
-    windowMode = WindowMode::WINDOW_MODE_SPLIT_PRIMARY;
-    CreateContainerModal();
-    pattern_->ShowTitle(true, true);
-    auto container_modal_control_buttons = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(2));
-    auto eventHub = container_modal_control_buttons->GetOrCreateGestureEventHub();
-    auto panEvents = eventHub->panEventActuator_->panEvents_;
-    GestureEvent info;
-    panEvents.front()->GetActionStartEventFunc()(info);
-    ClickBtn(1);
-    EXPECT_TRUE(isWindowStartMove);
-    EXPECT_FALSE(windowMaximize);
 }
 
 /**

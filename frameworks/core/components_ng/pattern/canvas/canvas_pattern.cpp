@@ -708,6 +708,7 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 #else
     paintMethod_->PushTask<SetTextAlignOp>(align);
 #endif
+    paintMethod_->SetMeasureTextAlign(align);
 }
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
@@ -720,6 +721,7 @@ void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 #else
     paintMethod_->PushTask<SetTextBaselineOp>(baseline);
 #endif
+    paintMethod_->SetMeasureTextBaseline(baseline);
 }
 
 void CanvasPattern::UpdateStrokePattern(const std::weak_ptr<Ace::Pattern>& pattern)
@@ -748,6 +750,7 @@ void CanvasPattern::UpdateStrokeColor(const Color& color)
 
 void CanvasPattern::SetStrokeGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetStrokeGradient(gradientObj);
@@ -768,6 +771,7 @@ void CanvasPattern::UpdateFontWeight(FontWeight weight)
 #else
     paintMethod_->PushTask<SetFontWeightOp>(weight);
 #endif
+    paintMethod_->SetMeasureFontWeight(weight);
 }
 
 void CanvasPattern::UpdateFontStyle(FontStyle style)
@@ -780,6 +784,7 @@ void CanvasPattern::UpdateFontStyle(FontStyle style)
 #else
     paintMethod_->PushTask<SetFontStyleOp>(style);
 #endif
+    paintMethod_->SetMeasureFontStyle(style);
 }
 
 void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
@@ -792,6 +797,7 @@ void CanvasPattern::UpdateFontFamilies(const std::vector<std::string>& families)
 #else
     paintMethod_->PushTask<SetFontFamiliesOp>(families);
 #endif
+    paintMethod_->SetMeasureFontFamilies(families);
 }
 
 void CanvasPattern::UpdateFontSize(const Dimension& size)
@@ -803,6 +809,19 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
     paintMethod_->PushTask(task);
 #else
     paintMethod_->PushTask<SetFontSizeOp>(size);
+#endif
+    paintMethod_->SetMeasureFontSize(size);
+}
+
+void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
+{
+#ifndef USE_FAST_TASKPOOL
+    auto task = [letterSpacing](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetLetterSpacing(letterSpacing);
+    };
+    paintMethod_->PushTask(task);
+#else
+    paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
 #endif
 }
 
@@ -820,6 +839,7 @@ void CanvasPattern::UpdateFillColor(const Color& color)
 
 void CanvasPattern::SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient)
 {
+    CHECK_NULL_VOID(gradient);
 #ifndef USE_FAST_TASKPOOL
     auto task = [gradientObj = *gradient](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillGradient(gradientObj);
@@ -1139,11 +1159,13 @@ void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnaly
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUICanvasStartImageAnalyzer");
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUICanvasStartImageAnalyzer", PriorityType::VIP);
 }
 
 void CanvasPattern::StopImageAnalyzer()
@@ -1213,6 +1235,7 @@ void CanvasPattern::Reset()
 #endif
     paintMethod_->ResetTransformMatrix();
     paintMethod_->ResetLineDash();
+    paintMethod_->ResetMeasureTextState();
     SetTextDirection(TextDirection::INHERIT);
 }
 

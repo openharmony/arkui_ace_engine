@@ -25,12 +25,11 @@ class MockImageSource : public ImageSource {
 public:
 
     MOCK_METHOD1(GetProperty, std::string(const std::string& key));
-    MOCK_METHOD3(
-        CreatePixelMap,
-        RefPtr<PixelMap>(const ImageSource::Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed));
-    MOCK_METHOD4(
-        CreatePixelMap, RefPtr<PixelMap>(uint32_t index,
-        const ImageSource::Size& size, AIImageQuality imageQuality, bool isHdrDecoderNeed));
+    MOCK_METHOD4(CreatePixelMap, RefPtr<PixelMap>(const ImageSource::Size& size, AIImageQuality imageQuality,
+                                     bool isHdrDecoderNeed, PixelFormat photoDecodeFormat));
+    MOCK_METHOD5(
+        CreatePixelMap, RefPtr<PixelMap>(uint32_t index, const ImageSource::Size& size, AIImageQuality imageQuality,
+                            bool isHdrDecoderNeed, PixelFormat photoDecodeFormat));
     MOCK_METHOD0(CreatePixelMap, RefPtr<PixelMap>());
     MOCK_METHOD0(GetImageSize, ImageSource::Size());
     MOCK_METHOD0(GetFrameCount, uint32_t());

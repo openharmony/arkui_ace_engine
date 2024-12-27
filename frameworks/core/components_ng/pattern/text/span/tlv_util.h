@@ -168,8 +168,9 @@ public:
         return buff[cursor++];
     }
 
-    static void WriteInt32(std::vector<uint8_t>& buff, int32_t value)
+    static void WriteInt32(std::vector<uint8_t>& buff, int32_t oriValue)
     {
+        uint32_t value = static_cast<uint32_t>(oriValue);
         while (value > TLV_VARINT_MASK) {
             buff.push_back(TLV_VARINT_MORE | uint8_t(value & TLV_VARINT_MASK));
             value >>= TLV_VARINT_BITS;
@@ -179,18 +180,18 @@ public:
 
     static int32_t ReadInt32(std::vector<uint8_t>& buff, int32_t& cursor)
     {
-        int32_t value = 0;
+        uint32_t value = 0;
         uint8_t shift = 0;
-        int32_t item = 0;
+        uint32_t item = 0;
         do {
             if (static_cast<size_t>(cursor + 1) > buff.size()) {
                 return static_cast<int32_t>(TLV_END);
             }
-            item = int32_t(buff[cursor++]);
+            item = uint32_t(buff[cursor++]);
             value |= (item & TLV_VARINT_MASK) << shift;
             shift += TLV_VARINT_BITS;
         } while ((item & TLV_VARINT_MORE) != 0);
-        return value;
+        return static_cast<int32_t>(value);
     }
 
     TLV_DEFINE_ENUM_TYPE(FontStyle, TLV_ITALICSFONTSTYLE_TAG);

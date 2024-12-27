@@ -152,6 +152,8 @@ private:
 
     bool GetNeedUpdatePathInfo(int32_t index);
     void SetNeedUpdatePathInfo(int32_t index, bool need);
+    int32_t ExecuteBuilderByConfig(const std::string& name,
+        const WeakPtr<NG::UINode>& customNode, const JSRef<JSVal>& param);
 
     JSRef<JSArray> GetPathArray();
     JSRef<JSObject> GetPathInfo(int32_t index);

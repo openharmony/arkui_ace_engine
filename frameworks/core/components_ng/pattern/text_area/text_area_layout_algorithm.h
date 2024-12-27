@@ -32,7 +32,7 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 protected:
-    bool CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+    bool CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 };
 } // namespace OHOS::Ace::NG

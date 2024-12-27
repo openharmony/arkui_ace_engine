@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 const std::pair<std::string, std::string> UI_ENTENSION_TYPE = {"ability.want.params.uiExtensionType", "sys/commonUI"};
-const std::wstring BOUNDARY_SYMBOLS = L",.?，。？！";
+const std::u16string BOUNDARY_SYMBOLS = u",.?，。？！";
 const std::string API_VERSION = "apiVersion";
 const std::string RESULT_BUFFER = "resultBuffer";
 const std::string SHEET_DISMISS = "sheetDismiss";
@@ -46,9 +46,9 @@ const std::string LONG_SELECT_END = "longSelectEnd";
 const std::string KEY_PACKAGE_NAME = "keyPackageApp";
 const std::string START_COMPONONT_TYPE = "startComponentType";
 
-bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
+bool AIWriteAdapter::IsSentenceBoundary(const char16_t value)
 {
-    for (wchar_t item: BOUNDARY_SYMBOLS) {
+    for (char16_t item: BOUNDARY_SYMBOLS) {
         if (value == item) {
             return true;
         }
@@ -56,11 +56,11 @@ bool AIWriteAdapter::IsSentenceBoundary(const wchar_t value)
     return false;
 }
 
-uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::wstring& content)
+uint32_t AIWriteAdapter::GetSelectLengthOnlyText(const std::u16string& content)
 {
     uint32_t length = 0;
     for (uint32_t i = 0; i < content.length(); i++) {
-        if (content[i] != L' ' && content[i] != L'\n') {
+        if (content[i] != u' ' && content[i] != u'\n') {
             length++;
         }
     }

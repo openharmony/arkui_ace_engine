@@ -70,6 +70,7 @@ declare interface XComponentController { }
 declare interface BuildOptions {
   nestingBuilderSupported?: boolean;
   lazyBuildSupported?: boolean;
+  bindedViewOfBuilderNode?:ViewPU;
 }
 declare abstract class ViewPU {
   id__(): number;

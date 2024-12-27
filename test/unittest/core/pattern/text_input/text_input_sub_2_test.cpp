@@ -14,6 +14,9 @@
  */
 
 #include "text_input_base.h"
+
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -39,7 +42,7 @@ HWTEST_F(TextFieldUXTest, testUnderlineColor007, TestSize.Level1)
         model.SetMaxLength(10);
         model.SetMaxLines(5);
         model.SetFontSize(Dimension(20));
-        model.SetShowError("error", false);
+        model.SetShowError(u"error", false);
 
     /**
      * @tc.step: step1. Set UnderlineColor is null
@@ -395,7 +398,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill001, TestSize.Level1)
      * As if model.SetType ACE_USER_NAME, isPopup is true, MockContainer::RequestAutoFill return false.
      */
     TextFieldModelNG model;
-    model.CreateTextInput("", "");
+    model.CreateTextInput(u"", u"");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -437,7 +440,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
      * As if model.SetType ACE_NEW_PASSWORD, isPopup is true, MockContainer::RequestAutoFill return false.
      */
     TextFieldModelNG model;
-    model.CreateTextInput("", "");
+    model.CreateTextInput(u"", u"");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::NEW_PASSWORD);
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
@@ -475,7 +478,7 @@ HWTEST_F(TextFieldUXTest, DoProcessAutoFill002, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
 {
     TextFieldModelNG model;
-    model.CreateTextInput("placeholder", "text");
+    model.CreateTextInput(u"placeholder", u"text");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
 
@@ -518,7 +521,7 @@ HWTEST_F(TextFieldUXTest, OnAttachToMainTree001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
 {
     TextFieldModelNG model;
-    model.CreateTextInput("placeholder", "text");
+    model.CreateTextInput(u"placeholder", u"text");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
 
@@ -542,7 +545,7 @@ HWTEST_F(TextFieldUXTest, OnCut001, TestSize.Level1)
 HWTEST_F(TextFieldUXTest, OnCut002, TestSize.Level1)
 {
     TextFieldModelNG model;
-    model.CreateTextInput("placeholder", "text");
+    model.CreateTextInput(u"placeholder", u"text");
     model.SetEnableAutoFill(true);
     model.SetType(TextInputType::USER_NAME);
 

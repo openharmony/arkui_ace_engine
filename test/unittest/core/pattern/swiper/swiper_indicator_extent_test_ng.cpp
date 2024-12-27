@@ -2009,7 +2009,7 @@ HWTEST_F(SwiperIndicatorExtentTestNg, SwiperIndicatorPaintHoverIndicator009, Tes
 {
     CreateDefaultSwiper();
     ASSERT_NE(indicatorNode_, nullptr);
-    auto wrapper = FlushLayoutTask(indicatorNode_);
+    auto wrapper = indicatorNode_->CreatePaintWrapper();
     auto paintMethod = AceType::DynamicCast<DotIndicatorPaintMethod>(wrapper->nodePaintImpl_);
     ASSERT_NE(paintMethod, nullptr);
     paintMethod->currentIndex_ = 9;

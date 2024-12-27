@@ -111,6 +111,16 @@ public:
         return caretInfo_.rect;
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return floatingCaretInfo_.rect;
+    }
+
+    void UpdateFloatingCaretInfo(const OffsetF& offset)
+    {
+        floatingCaretInfo_.UpdateOffset(offset);
+    }
+
     double GetSelectHeight() const
     {
         return std::max(firstHandleInfo_.rect.Height(), secondHandleInfo_.rect.Height());
@@ -131,10 +141,10 @@ public:
     {
         return firstHandleInfo_.index == 0 && secondHandleInfo_.index >= 0 &&
                abs(firstHandleInfo_.index - secondHandleInfo_.index) ==
-                   static_cast<int32_t>(contentController_->GetWideText().length());
+                   static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
 
-    bool IsHandleSamePosition()
+    bool IsHandleSamePosition() const
     {
         bool sameX = NearEqual(firstHandleInfo_.rect.GetX(), secondHandleInfo_.rect.GetX());
         bool sameY = NearEqual(firstHandleInfo_.rect.GetY(), secondHandleInfo_.rect.GetY());
@@ -172,21 +182,21 @@ public:
         return caretInfo_;
     }
 
-    bool HasReverse()
+    bool HasReverse() const
     {
         return firstHandleInfo_.index > secondHandleInfo_.index;
     }
 
     bool CaretAtLast() const
     {
-        return caretInfo_.index == static_cast<int32_t>(contentController_->GetWideText().length());
+        return caretInfo_.index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     }
     
-    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false);
+    int32_t ConvertTouchOffsetToPosition(const Offset& localOffset, bool isSelectionPos = false) const;
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
-    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true);
+    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true, bool floatCaret = true);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity = std::nullopt);
@@ -206,12 +216,13 @@ public:
     void MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment = 0.0f) const;
     void AdjustHandleAtEdge(RectF& handleRect) const;
     void AdjustHandleOffset(RectF& handleRect) const;
-    static int32_t GetGraphemeClusterLength(const std::wstring& text, int32_t extend, bool checkPrev = false);
+    static int32_t GetGraphemeClusterLength(const std::u16string& text, int32_t extend, bool checkPrev = false);
     void CalculateHandleOffset();
     std::vector<RectF> GetSelectedRects() const;
     RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
-    bool IsTouchAtLineEnd(const Offset& localOffset);
+    bool IsTouchAtLineEnd(const Offset& localOffset) const;
+    bool IsTouchAtLineEndOrBegin(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     void UpdateSelectWithBlank(const Offset& localOffset);
 
@@ -233,7 +244,7 @@ private:
     void AdjustCursorPosition(int32_t& index, const Offset& touchOffset);
     bool AdjustWordSelection(int32_t& index, int32_t& start, int32_t& end, const Offset& touchOffset);
     bool IsClickAtBoundary(int32_t index, const Offset& touchOffset);
-    const TimeStamp& GetLastClickTime();
+    const TimeStamp& GetLastClickTime() const;
     void UpdateCaretOriginalRect(const OffsetF& offset);
     void SetCaretRectAtEmptyValue();
 
@@ -244,6 +255,7 @@ private:
     HandleInfoNG firstHandleInfo_;
     HandleInfoNG secondHandleInfo_;
     HandleInfoNG caretInfo_;
+    HandleInfoNG floatingCaretInfo_;
     RefPtr<Paragraph> paragraph_;
     RefPtr<ContentController> contentController_;
     OnAccessibilityCallback onAccessibilityCallback_;

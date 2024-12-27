@@ -81,7 +81,7 @@ def run_single_test(tests_path, test_suite_name):
         print("TestSuite {} did not compile successfully.".format(test_suite_name))
 
 
-def run_tests_parallel(test_directory):
+def run_tests_parallel(test_directory, process_number: int):
     """
     Run all gtest test binaries in parallel.
     """
@@ -93,7 +93,7 @@ def run_tests_parallel(test_directory):
             if ext == "":
                 test_binaries.append(test_suite_path)
     start = time.time()
-    with multiprocessing.Pool(processes=64) as pool:
+    with multiprocessing.Pool(processes=process_number) as pool:
         pool.map(run_command, iter(test_binaries))
     end = time.time()
     test_result = {
@@ -152,14 +152,16 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-t", "--target", nargs='+', type=str, default=None)
+    parser.add_argument("-p", "--process", nargs='+', type=int, default=64)
     tests_out_path = get_tests_out_path()
     args = parser.parse_args()
     targets = args.target
+    process = args.process
     if targets is not None:
         for target in targets:
             run_single_test(tests_out_path, target)
     else:
-        run_tests_parallel(tests_out_path)
+        run_tests_parallel(tests_out_path, process)
 
 
 if __name__ == "__main__":

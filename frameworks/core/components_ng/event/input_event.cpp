@@ -39,6 +39,10 @@ void InputEventActuator::OnCollectMouseEvent(
     if (inputEvents_.empty() && !userCallback_ && !userJSFrameNodeCallback_) {
         return;
     }
+    auto inputEventHub = inputEventHub_.Upgrade();
+    CHECK_NULL_VOID(inputEventHub);
+    auto frameNode = inputEventHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
 
     auto onMouseCallback = [weak = WeakClaim(this)](MouseInfo& info) {
         auto actuator = weak.Upgrade();
@@ -58,6 +62,7 @@ void InputEventActuator::OnCollectMouseEvent(
             (*userJSFrameNodeCallback)(info);
         }
     };
+    mouseEventTarget_->AttachFrameNode(frameNode);
     mouseEventTarget_->SetCallback(onMouseCallback);
     mouseEventTarget_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     mouseEventTarget_->SetGetEventTargetImpl(getEventTargetImpl);

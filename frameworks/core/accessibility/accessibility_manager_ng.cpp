@@ -283,6 +283,10 @@ void AccessibilityManagerNG::NotifyHoverEventToNodeSession(const RefPtr<FrameNod
     }
     auto sessionAdapter = AccessibilitySessionAdapter::GetSessionAdapter(node);
     CHECK_NULL_VOID(sessionAdapter);
+    // mouse event will not be hover and may be transformed by component self through touch event transform
+    if ((sourceType == SourceType::MOUSE) && (sessionAdapter->IgnoreTransformMouseEvent())) {
+        return;
+    }
     PointF pointNode(pointRoot);
     if (AccessibilityManagerNG::ConvertPointFromAncestorToNode(rootNode, node, pointRoot, pointNode)) {
         sessionAdapter->TransferHoverEvent(pointNode, sourceType, eventType, time);

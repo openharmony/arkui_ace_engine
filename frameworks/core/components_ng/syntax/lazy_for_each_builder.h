@@ -295,6 +295,11 @@ public:
         endShowCached_ = end;
     }
 
+    int32_t GetHistoryTotalCount() const
+    {
+        return historicalTotalCount_;
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -306,7 +311,7 @@ protected:
     }
 
     virtual LazyForEachChild OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& expiringItems) = 0;
+        int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
     
     virtual LazyForEachChild OnGetChildByIndexNew(int32_t index,
         std::map<int32_t, LazyForEachChild>& cachedItems,
