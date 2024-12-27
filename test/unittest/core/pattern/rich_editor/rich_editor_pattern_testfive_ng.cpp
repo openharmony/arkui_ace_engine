@@ -1645,9 +1645,9 @@ HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretTwinkling_ = true;
-    Offset offset;
+    Offset offset = Offset(50.0, 50.0);
     RectF lastCaretRect;
-    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, 1, lastCaretRect));
+    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, lastCaretRect));
 }
 
 /**

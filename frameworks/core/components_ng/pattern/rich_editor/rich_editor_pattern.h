@@ -207,6 +207,43 @@ public:
         }
     };
 
+    struct FloatingCaretState {
+        bool isFloatingCaretVisible = false;
+        bool isOriginCaretVisible = false;
+        std::optional<Offset> touchMoveOffset = std::nullopt;
+        Color originCaretColor = Color(0x4D000000);
+        const Dimension showFloatingCaretDistance = 10.0_vp;
+
+        void Reset()
+        {
+            isFloatingCaretVisible = false;
+            isOriginCaretVisible = false;
+            touchMoveOffset.reset();
+        }
+
+        void UpdateOriginCaretColor(ColorMode colorMode)
+        {
+            originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
+        }
+
+        void UpdateByTouchMove(const Offset& offset, double distance)
+        {
+            isFloatingCaretVisible = true;
+            touchMoveOffset = offset;
+            isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+        }
+    };
+
+    const FloatingCaretState& GetFloatingCaretState() const
+    {
+        return floatingCaretState_;
+    }
+
+    void ResetFloatingCaretState()
+    {
+        floatingCaretState_.Reset();
+    }
+
     class ContentModifyLock {
     public:
         ContentModifyLock();
@@ -1038,7 +1075,6 @@ private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
         const RectF& lastCaretRect, bool isCaretTwinkling);
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
     bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
     void CreateAndShowSingleHandle();
     void MoveCaretAndStartFocus(const Offset& offset);
@@ -1093,10 +1129,12 @@ private:
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
+    void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
+    void SetCaretTouchMoveOffset(const Offset& localOffset);
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1428,6 +1466,7 @@ private:
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatingCaretState_;
     // Recorded when touch down or mouse left button press.
     OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};

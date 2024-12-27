@@ -2762,7 +2762,11 @@ bool RichEditorPattern::IsShowSingleHandleByClick(
     auto offset = info.GetLocalLocation();
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto position = paragraphs_.GetIndex(textOffset);
-    CHECK_NULL_RETURN(position == lastCaretPosition, false);
+    if (position != lastCaretPosition) {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "clickCaretPosition=%{public}d but lastCaretPosition=%{public}d",
+            position, lastCaretPosition);
+        return false;
+    }
     auto paragraphEndPos = GetParagraphEndPosition(lastCaretPosition);
     if (lastCaretPosition == paragraphEndPos || IsTouchAtLineEnd(lastCaretPosition, textOffset)) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "repeat click lineEnd or paragraphEndPos=%{public}d", paragraphEndPos);
@@ -2771,23 +2775,11 @@ bool RichEditorPattern::IsShowSingleHandleByClick(
     return RepeatClickCaret(offset, lastCaretRect);
 }
 
-bool RichEditorPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect)
+bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
 {
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "caretTwinkling=%{public}d offset=%{public}s lastCaretRect=%{public}s",
         caretTwinkling_, offset.ToString().c_str(), lastCaretRect.ToString().c_str());
     CHECK_NULL_RETURN(caretTwinkling_, false);
-    Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
-    auto position = paragraphs_.GetIndex(textOffset);
-    if (position != lastCaretPosition) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "clickCaretPosition=%{public}d but lastCaretPosition=%{public}d",
-            position, lastCaretPosition);
-        return false;
-    }
-    return RepeatClickCaret(offset, lastCaretRect);
-}
-
-bool RichEditorPattern::RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect)
-{
     auto lastCaretHeight = lastCaretRect.Height();
     auto handleHotZone = selectOverlay_->GetHandleHotZoneRadius();
     auto caretHotZoneRect =
@@ -3048,6 +3040,7 @@ void RichEditorPattern::HandleBlurEvent()
     editingLongPress_ = false;
     shiftFlag_ = false;
     moveCaretState_.Reset();
+    floatingCaretState_.Reset();
     StopTwinkling();
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
@@ -4638,6 +4631,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(scrollBar && scrollbarTheme);
     scrollBar->SetForegroundColor(scrollbarTheme->GetForegroundColor());
     scrollBar->SetBackgroundColor(scrollbarTheme->GetBackgroundColor());
+    floatingCaretState_.UpdateOriginCaretColor(SystemProperties::GetColorMode());
 }
 
 void RichEditorPattern::UpdateCaretInfoToController()
@@ -6650,7 +6644,7 @@ void RichEditorPattern::HandleTouchDown(const TouchLocationInfo& info)
     auto touchDownOffset = info.GetLocalLocation();
     moveCaretState_.touchDownOffset = touchDownOffset;
     RectF lastCaretRect = GetCaretRect();
-    if (RepeatClickCaret(touchDownOffset, caretPosition_, lastCaretRect)) {
+    if (RepeatClickCaret(touchDownOffset, lastCaretRect)) {
         moveCaretState_.isTouchCaret = true;
         auto host = GetHost();
         CHECK_NULL_VOID(host);
@@ -6674,6 +6668,13 @@ void RichEditorPattern::HandleTouchUp()
 #endif
 }
 
+void RichEditorPattern::StartFloatingCaretLand()
+{
+    CHECK_NULL_VOID(floatingCaretState_.isFloatingCaretVisible);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    IF_PRESENT(overlayMod, StartFloatingCaretLand());
+}
+
 void RichEditorPattern::ResetTouchAndMoveCaretState()
 {
     if (moveCaretState_.isMoveCaret) {
@@ -6681,6 +6682,7 @@ void RichEditorPattern::ResetTouchAndMoveCaretState()
         IF_TRUE(isEditing_, StartTwinkling());
     }
     moveCaretState_.Reset();
+    StartFloatingCaretLand();
 }
 
 void RichEditorPattern::HandleTouchUpAfterLongPress()
@@ -6733,11 +6735,22 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
+    SetCaretTouchMoveOffset(offset);
     MoveCaretToContentRect();
     StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
     SetMagnifierLocalOffset(offset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
+{
+    double moveDistance = 0.0;
+    if (GetPositionTypeFromLine() != PositionType::DEFAULT) {
+        auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+        moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());
+    }
+    floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
 }
 
 void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
