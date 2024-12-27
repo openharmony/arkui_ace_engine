@@ -2586,6 +2586,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
         textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     }
+    textStyle.halfLeading = node->GetHalfLeadingValue(false);
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = lm.size.Height().ToString();

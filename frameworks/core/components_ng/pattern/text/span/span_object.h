@@ -41,6 +41,7 @@ enum class SpanType {
     LineHeight = 5,
     BackgroundColor = 6,
     Url = 7,
+    HalfLeading = 8,
     Gesture = 100,
     ParagraphStyle = 200,
     Image = 300,
@@ -367,6 +368,27 @@ private:
     void RemoveLineHeightStyle(const RefPtr<NG::SpanItem>& spanItem) const;
 
     Dimension lineHeight_;
+};
+
+class HalfLeadingSpan : public SpanBase {
+    DECLARE_ACE_TYPE(HalfLeadingSpan, SpanBase);
+
+public:
+    HalfLeadingSpan() = default;
+    explicit HalfLeadingSpan(bool halfLeading);
+    HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end);
+    bool GetHalfLeading() const;
+    RefPtr<SpanBase> GetSubSpan(int32_t start, int32_t end) override;
+    bool IsAttributesEqual(const RefPtr<SpanBase>& other) const override;
+    SpanType GetSpanType() const override;
+    std::string ToString() const override;
+    void ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const override;
+
+private:
+    void AddHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+    void RemoveHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const;
+
+    bool halfLeading_;
 };
 
 class ExtSpan : public SpanBase {

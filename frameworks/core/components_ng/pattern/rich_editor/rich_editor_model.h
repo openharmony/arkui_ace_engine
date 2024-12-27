@@ -82,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextBackgroundStyle.reset();
 
         updateLineHeight.reset();
+        updateHalfLeading.reset();
         updateLetterSpacing.reset();
 
         updateImageWidth.reset();
@@ -112,6 +113,7 @@ struct UpdateSpanStyle {
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<bool> updateHalfLeading = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
