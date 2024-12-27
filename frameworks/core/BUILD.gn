@@ -283,6 +283,14 @@ template("ace_core_source_set") {
       "text/text_emoji_processor.cpp",
     ]
 
+    if (ace_engine_feature_enable_event_extra_handling &&
+        defined(
+            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
+    } else {
+      sources += [ "event/event_info_convertor.cpp" ]
+    }
+
     if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
     }
