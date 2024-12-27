@@ -162,7 +162,8 @@ void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<i
             if (!child) {
                 continue;
             }
-            if (AceType::InstanceOf<CustomSpanItem>(child)) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            if (customSpanItem && !customSpanItem->isFrameNode) {
                 continue;
             }
             if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
@@ -515,6 +516,9 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                 UpdateParagraphByCustomSpan(
                     customSpanItem, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
                 customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
+                if (customSpanItem->isFrameNode) {
+                    iterItems++; // CAPI custom span is frameNode，need to move the iterator backwards
+                }
             } else if (AceType::InstanceOf<PlaceholderSpanItem>(child)) {
                 if (iterItems == children.end() || !(*iterItems)) {
                     continue;
