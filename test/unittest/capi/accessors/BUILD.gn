@@ -53,6 +53,7 @@ ace_unittest("capi_all_accessors_test") {
     "nav_destination_context_accessor_test.cpp",
     "navigation_transition_proxy_accessor_test.cpp",
     "pan_gesture_options_accessor_test.cpp",
+    "path2d_accessor_test.cpp",
     "patternlock_controller_accessor_test.cpp",
     "permission_request_accessor_test.cpp",
     "progress_mask_accessor_test.cpp",
