@@ -136,6 +136,10 @@ public:
             return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
         }
     }
+    RefPtr<CanvasPattern> GetCanvasPattern()
+    {
+          return pattern_;  
+    }
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
@@ -149,10 +153,10 @@ public:
 
 public:
     Ace::ImageData imageData;
+    std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> patterns;
+    uint32_t patternCount = 0;
 
 protected:
-    std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> patterns_;
-    unsigned int patternCount_ = 0;
     RefPtr<CanvasPattern> pattern_;
 
 private:

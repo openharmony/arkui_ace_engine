@@ -126,6 +126,8 @@ Rect Convert(const Ark_Custom_Rect& src)
 } // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
+const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
+
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
 {
@@ -256,63 +258,32 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
                                     const Ark_ImageBitmap* image,
                                     const Opt_String* repetition)
 {
-    CHECK_NULL_VOID(peer);
+    CHECK_NULL_RETURN(peer, nullptr);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
-    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(image, nullptr);
     auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
     CHECK_NULL_RETURN(bitmap, nullptr);
-    auto opt  = Converter::OptConvert<std::string>(*repetitin);
+    auto opt = Converter::OptConvert<std::string>(*repetition);
     CHECK_NULL_RETURN(opt, nullptr);
     std::string repeat = *opt;
- 
-    auto pattern = std::make_shared<Pattern>();
-    pattern->SetImgSrc(jsImage->GetSrc());
-    pattern->SetImageWidth(jsImage->GetWidth());
-    pattern->SetImageHeight(jsImage->GetHeight());
+    auto pattern = std::make_shared<OHOS::Ace::Pattern>();
+    pattern->SetImgSrc(bitmap->GetSrc());
+    pattern->SetImageWidth(bitmap->GetWidth());
+    pattern->SetImageHeight(bitmap->GetHeight());
     pattern->SetRepetition(repeat);
 #if !defined(PREVIEW)
-        auto pixelMap = bitmap->GetPixelMap();
-        pattern->SetPixelMap(pixelMap);
+    auto pixelMap = bitmap->GetPixelMap();
+    pattern->SetPixelMap(pixelMap);
 #endif
-    peerImpl->AddPattern(pattern);
-    
-
-    
-   
-    
-
-    auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
-    CHECK_NULL_VOID(jsImage);
-    std::string repeat;
-    info.GetStringArg(1, repeat);
-    auto pattern = std::make_shared<Pattern>();
-    pattern->SetImgSrc(jsImage->GetSrc());
-    pattern->SetImageWidth(jsImage->GetWidth());
-    pattern->SetImageHeight(jsImage->GetHeight());
-    pattern->SetRepetition(repeat);
-#if !defined(PREVIEW)
-        auto pixelMap = jsImage->GetPixelMap();
-        pattern->SetPixelMap(pixelMap);
-#endif
-        pattern_[patternCount_] = pattern;
-
-        auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
-
-
-        JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();
-        obj->SetProperty("__type", "pattern");
-        auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
-        canvasPattern->SetCanvasRenderer(AceType::WeakClaim(this));
-        canvasPattern->SetId(patternCount_);
-        canvasPattern->SetUnit(GetUnit());
-        patternCount_++;
-        info.SetReturnValue(obj);
-
-
-
-    
-    return 0;
+    peerImpl->patterns[peerImpl->patternCount];
+    auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
+    CHECK_NULL_RETURN(peerPattern, nullptr);
+    peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));
+    peerPattern->SetId(peerImpl->patternCount);
+    peerPattern->SetUnit(peerImpl->GetUnit());
+    peerImpl->patternCount++;
+    return reinterpret_cast<Ark_NativePointer>(peerPattern);
 }
 Ark_NativePointer CreateRadialGradientImpl(CanvasRendererPeer* peer,
                                            const Ark_Number* x0,

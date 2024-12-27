@@ -51,6 +51,11 @@ double ImageBitmapPeer::GetWidth()
     return width;
 }
 
+const std::string& ImageBitmapPeer::GetSrc()
+{
+    return src_;
+}
+
 void ImageBitmapPeer::SetCloseCallback(std::function<void()>&& callback)
 {
     closeCallbacks_.emplace_back(std::move(callback));
@@ -60,6 +65,7 @@ void ImageBitmapPeer::LoadImage(const std::string& src)
 {
     auto sourceInfo = ImageSourceInfo(src);
     LoadImage(sourceInfo);
+    src_ = src;
 }
 
 void ImageBitmapPeer::LoadImage(const ImageSourceInfo& sourceInfo)
