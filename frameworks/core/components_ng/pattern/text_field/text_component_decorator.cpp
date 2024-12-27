@@ -414,7 +414,7 @@ void ErrorDecorator::UpdateErrorStyle()
     textLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
     textLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
     textLayoutProperty->UpdateMaxFontScale(theme->GetErrorTextMaxFontScale());
-    textLayoutProperty->UpdateTextAlign(TextAlign::START);
+    textLayoutProperty->UpdateTextAlign(errorTextStyle.GetTextAlign());
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateIsAnimationNeeded(false);

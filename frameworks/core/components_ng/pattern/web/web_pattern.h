@@ -115,6 +115,8 @@ enum class WebInfoType : int32_t {
     TYPE_UNKNOWN
 };
 
+using CursorStyleInfo = std::tuple<OHOS::NWeb::CursorType, std::shared_ptr<OHOS::NWeb::NWebCursorInfo>>;
+
 class WebPattern : public NestableScrollContainer,
                    public TextBase,
                    public Magnifier,
@@ -594,6 +596,12 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
+    void UpdateJavaScriptOnDocumentStartByOrder();
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnDocumentEndByOrder();
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -641,6 +649,7 @@ public:
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
     void OnPopupShow(bool show);
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
@@ -985,6 +994,7 @@ private:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void PostTaskToUI(const std::function<void()>&& task, const std::string& name) const;
+    void LoadUrlInOfflineMode();
     void InitInOfflineMode();
     void OnOverScrollFlingVelocityHandler(float velocity, bool isFling);
     bool FilterScrollEventHandleOffset(float offset);
@@ -1041,6 +1051,8 @@ private:
     void OnMagnifierHandleMove(const RectF& handleRect, bool isFirst);
     int32_t GetBufferSizeByDeviceType();
     void UpdateTouchpadSlidingStatus(const GestureEvent& event);
+    CursorStyleInfo GetAndUpdateCursorStyleInfo(
+        const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
 
     std::optional<std::string> webSrc_;
     std::optional<std::string> webData_;
@@ -1157,6 +1169,8 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
@@ -1212,6 +1226,8 @@ private:
     bool imageOverlayIsSelected_ = false;
     bool isLayoutModeChanged_ = false;
     bool isDragEnd_ = false;
+    std::shared_ptr<OHOS::NWeb::NWebCursorInfo> nweb_cursorInfo_;
+    bool isMouseLocked_ = false;
     OHOS::NWeb::CursorType cursorType_;
     float touchPointX = 0;
     float touchPointY = 0;

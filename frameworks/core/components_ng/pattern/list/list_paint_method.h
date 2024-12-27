@@ -57,7 +57,7 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override;
 
-    void UpdateDividerList(const DividerInfo& dividerInfo);
+    void UpdateDividerList(const DividerInfo& dividerInfo, bool clip);
 
     ListDivider HandleDividerList(int32_t index, bool lastIsGroup, int32_t laneIdx, const DividerInfo& dividerInfo);
     ListDivider HandleLastLineIndex(int32_t index, int32_t laneIdx, const DividerInfo& dividerInfo);
@@ -90,11 +90,13 @@ public:
     }
 
     void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
-        const std::set<int32_t>& pressedItem)
+        const std::set<int32_t>& pressedItem, bool showCached)
     {
         itemPosition_ = positionMap;
-        for (auto& [index, pos] : cachedPositionMap) {
-            itemPosition_[index] = pos;
+        if (showCached) {
+            for (auto& [index, pos] : cachedPositionMap) {
+                itemPosition_[index] = pos;
+            }
         }
         if (!pressedItem.empty()) {
             for (auto& child : itemPosition_) {

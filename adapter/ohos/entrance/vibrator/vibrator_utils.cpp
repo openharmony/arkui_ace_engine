@@ -80,4 +80,14 @@ void VibratorUtils::StartVibraFeedback(const std::string& vibratorType)
         Sensors::StartVibrator(realVibratorType);
     }
 }
+
+bool VibratorUtils::StartExclusiveVibraFeedback(const char* effectId)
+{
+    bool state { false };
+    Sensors::IsSupportEffect(effectId, &state);
+    if (state) {
+        Sensors::StartVibrator(effectId);
+    }
+    return state;
+}
 } // namespace OHOS::Ace::NG

@@ -316,6 +316,8 @@ public:
 
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
 
+    void CleanHoverStatusForDragBegin();
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -402,6 +404,8 @@ private:
     SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
     // used to pseudo cancel event.
     TouchEvent lastTouchEvent_;
+    // used to pseudo hover out event.
+    MouseEvent lastMouseEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
 };

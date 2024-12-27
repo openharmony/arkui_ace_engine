@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components/image/image_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -308,6 +309,20 @@ void ImageAnimatorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Pattern::OnModifyDone();
+
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto imageTheme = context->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderRadius() && imageTheme->GetCornerRadius() > 0.0_vp) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCornerRadius()));
+    }
+    if (!renderContext->HasClipEdge() && imageTheme->GetClipEdge()) {
+        renderContext->UpdateClipEdge(imageTheme->GetClipEdge());
+    }
+
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");
@@ -340,9 +355,20 @@ void ImageAnimatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
-    context->SetClipToFrame(true);
+    auto imageTheme = context->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    if (!renderContext->HasBorderRadius() && imageTheme->GetCornerRadius() > 0.0_vp) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCornerRadius()));
+    }
+    if (!renderContext->HasClipEdge() && imageTheme->GetClipEdge()) {
+        renderContext->UpdateClipEdge(imageTheme->GetClipEdge());
+    }
 }
 
 void ImageAnimatorPattern::UpdateEventCallback()

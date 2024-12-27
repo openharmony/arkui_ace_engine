@@ -40,6 +40,7 @@ enum class DragPreviewMode : int32_t {
     DISABLE_SCALE = 2,
     ENABLE_DEFAULT_SHADOW = 3,
     ENABLE_DEFAULT_RADIUS = 4,
+    ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
 };
 
 struct BlurBackGroundInfo {
@@ -79,6 +80,7 @@ struct DragPreviewOption {
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
     bool isDragPreviewEnabled = true;
+    bool isDefaultDragItemGrayEffectEnabled = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
@@ -99,6 +101,7 @@ struct DragPreviewOption {
         isScaleEnabled = true;
         isDefaultShadowEnabled = false;
         isDefaultRadiusEnabled = false;
+        isDefaultDragItemGrayEffectEnabled = false;
     }
 };
 

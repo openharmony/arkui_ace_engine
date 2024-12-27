@@ -68,6 +68,7 @@ struct GatherNodeChildInfo {
     float height = 0.0f;
     float halfWidth = 0.0f;
     float halfHeight = 0.0f;
+    WeakPtr<FrameNode> preImageNode;
 };
 
 struct DismissTarget {
@@ -92,6 +93,9 @@ struct CustomKeyboardOffsetInfo {
     float finalOffset = 0.0f;
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
+};
+struct OverlayManagerInfo {
+    bool renderRootOverlay = true;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -252,6 +256,7 @@ public:
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
@@ -514,6 +519,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
     static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
         bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
@@ -634,6 +641,18 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+    {
+        if (overlayInfo_.has_value()) {
+            return false;
+        }
+        overlayInfo_ = overlayInfo;
+        return true;
+    }
+    std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return overlayInfo_;
+    }
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
@@ -888,6 +907,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG
 

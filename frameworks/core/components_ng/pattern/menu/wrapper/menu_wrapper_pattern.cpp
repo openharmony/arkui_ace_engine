@@ -346,7 +346,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     }
     // SelectOverlay's custom menu does not need to be focused.
     auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
-    if (!isCustomMenu) {
+    auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
+    if (!isCustomMenu && !isRightClickMenu) {
         auto menuPattern = focusMenu->GetPattern<MenuPattern>();
         CHECK_NULL_RETURN(menuPattern, nullptr);
         menuPattern->FocusViewShow();
@@ -736,6 +737,13 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     return menuPattern->IsSelectOverlayCustomMenu();
 }
 
+bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayRightClickMenu();
+}
+
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
@@ -928,5 +936,28 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
+}
+
+void MenuWrapperPattern::SetDumpInfo(const MenuDumpInfo& dumpInfo)
+{
+    dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+    dumpInfo_.menuType = dumpInfo.menuType;
+    dumpInfo_.enableArrow = dumpInfo.enableArrow;
+    dumpInfo_.targetNode = dumpInfo.targetNode;
+    dumpInfo_.targetOffset = dumpInfo.targetOffset;
+    dumpInfo_.targetSize = dumpInfo.targetSize;
+    dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
+    dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
+    dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+    dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+    dumpInfo_.top = dumpInfo.top;
+    dumpInfo_.bottom = dumpInfo.bottom;
+    dumpInfo_.left = dumpInfo.left;
+    dumpInfo_.right = dumpInfo.right;
+    dumpInfo_.globalLocation = dumpInfo.globalLocation;
+    dumpInfo_.originPlacement = dumpInfo.originPlacement;
+    dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
+    dumpInfo_.finalPosition = dumpInfo.finalPosition;
+    dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
 }
 } // namespace OHOS::Ace::NG

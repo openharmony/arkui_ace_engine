@@ -122,12 +122,6 @@ void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayou
         property->GetBackgroundBottomPadding().has_value(), size, borderWidth);
 
     size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
-    if (!property->GetTextIconSpace().has_value() ||
-        LessNotEqual(property->GetTextIconSpace().value().ConvertToPx(), 0.0)) {
-        size = theme->GetTextIconSpace().ConvertToPx();
-    } else {
-        size = property->GetTextIconSpace().value().ConvertToPx();
-    }
     middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
 }
 
@@ -810,6 +804,13 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
+
+    // has value and less equal 0.0
+    if (LessOrEqual(constraint_->selfIdealSize.Width().value_or(1.0), 0.0) &&
+        LessOrEqual(constraint_->selfIdealSize.Height().value_or(1.0), 0.0)) {
+        return;
+    }
+
     isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
         SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
     isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(

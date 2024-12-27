@@ -399,6 +399,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
@@ -441,6 +446,9 @@ public:
     void UpdateColorByResourceId()
     {
         spanItem_->fontStyle->UpdateColorByResourceId();
+        if (spanItem_->backgroundStyle) {
+            spanItem_->backgroundStyle->UpdateColorByResourceId();
+        }
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
@@ -724,6 +732,7 @@ public:
     static RefPtr<ImageSpanItem> DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor);
 
     ImageSpanOptions options;
+    OnHoverFunc onHover_;
 private:
     ImageSpanOptions GetImageSpanOptionsFromImageNode() const;
     ImageSpanAttribute CreateImageSpanAttribute(const  RefPtr<ImageLayoutProperty>& layoutProperty) const;

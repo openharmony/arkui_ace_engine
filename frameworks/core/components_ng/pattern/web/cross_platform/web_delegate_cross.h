@@ -465,6 +465,13 @@ private:
     Method touchCancelMethod_;
     Method updateLayoutMethod_;
     Method zoomMethod_;
+    Method onBlockNetworkUpdateMethod_;
+    Method onUpdateMixedContentModeMethod_;
+    Method updateBlockNetworkImageMethod_;
+    Method UpdateGeolocationEnabledMethod_;
+    Method updateDomStorageEnabledMethod_;
+    Method updateCacheModeMethod_;
+    Method updateLoadsImagesAutomaticallyMethod_;
 
     Method updateZoomAccess_;
     Method updateJavaScriptEnabled_;

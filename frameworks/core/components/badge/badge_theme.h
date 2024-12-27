@@ -64,6 +64,8 @@ public:
             theme->badgeTextColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::BLACK);
             theme->badgeBorderColor_ = pattern->GetAttr<Color>(BADGE_BORDER_COLOR, Color::BLACK);
             theme->badgeBorderWidth_ = pattern->GetAttr<Dimension>(BADGE_BORDER_WIDTH, 0.0_vp);
+            theme->littleBadgeSize_ = pattern->GetAttr<Dimension>(LITTLE_BADGE_SIZE, 6.0_vp);
+            theme->numericalBadgePadding_ = pattern->GetAttr<Dimension>(NUMERICAL_BADGE_PADDING_SIZE, 6.0_vp);
         }
     };
 
@@ -178,8 +180,8 @@ private:
     Dimension badgeSize_ = 16.0_vp;
     Dimension badgeAgeSize_;
     Dimension badgeAgeAddPadding_;
-    Dimension littleBadgeSize_ = 6.0_vp;
-    Dimension numericalBadgePadding_ = 6.0_vp;
+    Dimension littleBadgeSize_;
+    Dimension numericalBadgePadding_;
     int maxCount_ = 99;
 };
 

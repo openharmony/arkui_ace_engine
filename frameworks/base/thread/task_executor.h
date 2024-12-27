@@ -362,6 +362,19 @@ public:
     }
 
     /**
+     * Post a task to the specified thread with priority.
+     *
+     * @param task Task which need execution.
+     * @param name Name of the task.
+     * @param priorityType Priority of the task.
+     * @return Returns 'true' whether task has been post successfully.
+     */
+    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType) const
+    {
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType) : false;
+    }
+
+    /**
      * Post a task to the specified thread.
      *
      * @param task Task which need execution.

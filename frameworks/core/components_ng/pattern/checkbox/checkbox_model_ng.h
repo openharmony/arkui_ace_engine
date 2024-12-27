@@ -74,6 +74,8 @@ public:
     static Dimension GetCheckMarkSize(FrameNode* frameNode);
     static Dimension GetCheckMarkWidth(FrameNode* frameNode);
     static CheckBoxStyle GetCheckboxStyle(FrameNode* frameNode);
+    static std::string GetCheckboxName(FrameNode* frameNode);
+    static std::string GetCheckboxGroup(FrameNode* frameNode);
 
     static void SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange);
 };

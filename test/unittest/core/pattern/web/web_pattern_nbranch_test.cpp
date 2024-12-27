@@ -1099,6 +1099,7 @@ HWTEST_F(WebPatternBranchTestUT, ShowMagnifierAndOnColor, TestSize.Level1)
     OffsetT offset(20.0f, 20.0f);
     EXPECT_EQ(webPattern->magnifierController_->GetLocalOffset(), offset);
     EXPECT_TRUE(webPattern->magnifierController_->colorModeChange_);
+    webPattern->magnifierController_.Reset();
 #endif
 }
 } // namespace OHOS::Ace::NG
