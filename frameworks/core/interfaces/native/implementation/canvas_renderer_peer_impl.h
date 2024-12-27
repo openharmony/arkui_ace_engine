@@ -112,6 +112,7 @@ public:
     double GetDimension(const Dimension& value, const bool force = false);
     void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
     std::optional<OHOS::Ace::TextMetrics> GetTextMetrics(const std::string& text);
+    std::optional<TransformParam> GetTransform();
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;

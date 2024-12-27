@@ -624,7 +624,7 @@ std::optional<OHOS::Ace::TextMetrics> CanvasRendererPeerImpl::GetTextMetrics(con
         return textMetrics;
     }
     auto density = GetDensity();
-    if (NonPositive(density)) {
+    if (NonPositive(density) || density == 0) {
         return textMetrics;
     }
     textMetrics = pattern_->MeasureTextMetrics(text, paintState_);
@@ -641,5 +641,15 @@ std::optional<OHOS::Ace::TextMetrics> CanvasRendererPeerImpl::GetTextMetrics(con
     textMetrics->fontBoundingBoxAscent /= density;
     textMetrics->fontBoundingBoxDescent /= density;
     return textMetrics;
+}
+std::optional<TransformParam> CanvasRendererPeerImpl::GetTransform()
+{
+    std::optional<TransformParam> param = std::nullopt;
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetTransform pattern not bound to component.");
+        return param;
+    }
+    param = pattern_->GetTransform();
+    return param;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

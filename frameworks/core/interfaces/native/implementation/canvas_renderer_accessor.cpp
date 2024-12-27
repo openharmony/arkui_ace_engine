@@ -127,6 +127,7 @@ Rect Convert(const Ark_Custom_Rect& src)
 namespace OHOS::Ace::NG::GeneratedModifier {
 const GENERATED_ArkUICanvasGradientAccessor* GetCanvasGradientAccessor();
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor();
+const GENERATED_ArkUIMatrix2DAccessor* GetMatrix2DAccessor();
 
 namespace CanvasRendererAccessor {
 void DestroyPeerImpl(CanvasRendererPeer* peer)
@@ -670,9 +671,18 @@ void StrokeTextImpl(CanvasRendererPeer* peer,
 }
 Ark_NativePointer GetTransformImpl(CanvasRendererPeer* peer)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::GetTransformImpl return type Ark_NativePointer "
-        "should be replaced with a valid ark type for Matrix2D.");
-    return nullptr;
+    CHECK_NULL_RETURN(peer, nullptr);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, nullptr);
+    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(GetMatrix2DAccessor()->ctor());
+    CHECK_NULL_RETURN(matrixPeer, nullptr);
+    if (Container::IsCurrentUseNewPipeline()) {
+        auto opt = peerImpl->GetTransform();
+        if (opt) {
+            matrixPeer->transform = *opt;
+        }
+    }
+    return reinterpret_cast<Ark_NativePointer>(matrixPeer);
 }
 void ResetTransformImpl(CanvasRendererPeer* peer)
 {
