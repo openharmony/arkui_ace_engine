@@ -145,15 +145,15 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto isReverse = paramObject->GetProperty("reverse");
     JSRef<JSVal> changeEventVal;
 
-    if (!getValue->IsNull() && getValue->IsNumber()) {
-        value = getValue->ToNumber<double>();
-    } else if (!getValue->IsNull() && getValue->IsObject()) {
+    if (!getValue->IsNull() && getValue->IsObject()) {
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         changeEventVal = valueObj->GetProperty("changeEvent");
         auto valueProperty = valueObj->GetProperty("value");
         value = valueProperty->ToNumber<double>();
     } else if (paramObject->HasProperty("$value")) {
         changeEventVal = paramObject->GetProperty("$value");
+        value = getValue->ToNumber<double>();
+    } else if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
     }
 
