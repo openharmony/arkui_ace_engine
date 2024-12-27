@@ -62,7 +62,7 @@ import { CompAttributeModifierBlocks } from '../../components/CompAttributeModif
 
 class DerivedNavPathStack extends NavPathStack {
   // usr defined property 'id'
-  id: string = "__default__"
+  id: string = '__default__'
 
   // new function in derived class
   setId(id: string) {
@@ -98,7 +98,7 @@ class DerivedNavPathStack extends NavPathStack {
 }
 
 class Param {
-  info: string = '__default_param__';
+  private info: string = '__default_param__';
 
   constructor(info: string) {
     this.info = info
@@ -180,14 +180,14 @@ struct PageOne {
   build() {
     NavDestination() {
       Column() {
-        Text("event: " + this.eventStr)
+        Text('event: ' + this.eventStr)
         Button('pushPath', { stateEffect: true, type: ButtonType.Capsule })
           .width('80%')
           .height(40)
           .margin(20)
           .onClick(() => {
             if (this.stack) {
-              this.stack.pushPath({ name: "pageOne" });
+              this.stack.pushPath({ name: 'pageOne' });
             }
           })
         Button('pop', { stateEffect: true, type: ButtonType.Capsule })
@@ -204,27 +204,27 @@ struct PageOne {
     .title('pageOne')
     .onShown(() => {
       this.eventTriggeredLog('NavDestination页面显示事件触发')
-      this.eventStr += "<onShown>";
+      this.eventStr += '<onShown>';
     })
     .onHidden(() => {
       this.eventTriggeredLog('NavDestination页面隐藏事件触发')
-      this.eventStr += "<onHidden>";
+      this.eventStr += '<onHidden>';
     })
     .onWillAppear(() => {
       this.eventTriggeredLog('NavDestination即将挂载事件触发')
-      this.eventStr += "<onWillAppear>";
+      this.eventStr += '<onWillAppear>';
     })
     .onWillShow(() => {
       this.eventTriggeredLog('NavDestination即将显示事件触发')
-      this.eventStr += "<onWillShow>";
+      this.eventStr += '<onWillShow>';
     })
     .onWillHide(() => {
       this.eventTriggeredLog('NavDestination即将隐藏事件触发')
-      this.eventStr += "<onWillHide>";
+      this.eventStr += '<onWillHide>';
     })
     .onWillDisappear(() => {
       this.eventTriggeredLog('NavDestination即将卸载事件触发')
-      this.eventStr += "<onWillDisappear>";
+      this.eventStr += '<onWillDisappear>';
     })
     .onBackPressed(() => {
       this.eventTriggeredLog('点击返回键事件触发')
@@ -234,7 +234,7 @@ struct PageOne {
     .onReady((ctx: NavDestinationContext) => {
       this.eventTriggeredLog('NavDestination即将构建子组件事件触发')
       try {
-        this.eventStr += "<onReady>";
+        this.eventStr += '<onReady>';
         this.stack = ctx.pathStack;
       } catch (e) {
         console.log(`testTag onReady catch exception: ${JSON.stringify(e)}`)
@@ -245,7 +245,7 @@ struct PageOne {
     })
     .onAppear(() => {
       this.eventTriggeredLog('挂载事件触发')
-      this.eventStr += "<onAppear>";
+      this.eventStr += '<onAppear>';
     })
     .onDisAppear(() => {
       this.eventTriggeredLog('卸载事件触发')
