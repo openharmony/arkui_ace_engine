@@ -1320,6 +1320,40 @@ void JSRichEditor::SetBarState(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetBarState(static_cast<DisplayMode>(barState));
 }
 
+void JSRichEditor::SetMaxLength(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (jsValue->IsUndefined()) {
+        RichEditorModel::GetInstance()->ResetMaxLength();
+        return;
+    } else if (!jsValue->IsNumber()) {
+        RichEditorModel::GetInstance()->ResetMaxLength();
+        return;
+    }
+    int32_t maxLength = jsValue->ToNumber<int32_t>();
+    if (std::isinf(jsValue->ToNumber<float>())) {
+        maxLength = INT32_MAX;
+    }
+    if (GreatOrEqual(maxLength, 0)) {
+        RichEditorModel::GetInstance()->SetMaxLength(maxLength);
+    } else {
+        RichEditorModel::GetInstance()->ResetMaxLength();
+    }
+}
+
+void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
+{
+    auto normalMaxLines = Infinity<uint32_t>();
+    auto isValid = info.Length() >= 1 && info[0]->IsNumber() && info[0]->ToNumber<int32_t>() > 0;
+    if (isValid) {
+        normalMaxLines = info[0]->ToNumber<uint32_t>();
+    }
+    RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1363,6 +1397,8 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
+    JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
+    JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

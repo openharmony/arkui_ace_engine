@@ -153,7 +153,6 @@ HWTEST_F(WaterFlowTestNg, Cache007, TestSize.Level1)
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetCachedCount(2);
-    CreateItemsInRepeat(50, [](int32_t i) { return 50.0f; });
     CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
 
@@ -173,6 +172,37 @@ HWTEST_F(WaterFlowTestNg, Cache007, TestSize.Level1)
     EXPECT_EQ(ctx->paintRect_, item->GetGeometryNode()->GetFrameRect()); // should be synced with layout
     EXPECT_EQ(GetChildFrameNode(frameNode_, 32), item);
     EXPECT_EQ(ctx, GetItem(32)->GetRenderContext());
+}
+
+/*
+ * @tc.name: ShowCache004
+ * @tc.desc: Test cache items active state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCache004, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 100.0f; });
+    model.SetCachedCount(1, true);
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+
+    UpdateCurrentOffset(-300.0f);
+    UpdateCurrentOffset(110.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 23);
+        for (int i = 0; i < 50; ++i) {
+        if (i < 5 || i > 24) {
+            if (GetItem(i, true)) {
+                EXPECT_FALSE(GetItem(i, true)->IsActive());
+            }
+        } else {
+            EXPECT_TRUE(GetItem(i, true));
+            EXPECT_TRUE(GetItem(i, true)->IsActive());
+        }
+    }
 }
 
 /**

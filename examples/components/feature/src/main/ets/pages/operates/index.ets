@@ -27,6 +27,7 @@ import { ActionMenuBootcamp } from './ActionMenuBootcamp';
 import { DialogBootcamp } from './DialogBootcamp';
 import { ActionDialogBootcamp } from './ActionDialogBootcamp';
 import { AlertDialogBootcamp } from './AlertDialogBootcamp';
+import { CustomDialogBootcamp } from './CustomDialogBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
@@ -45,6 +46,7 @@ export const operatesRoute: RouteGroup = {
     { name: 'ActionMenu', label: '菜单弹窗/ActionMenu' },
     { name: 'Dialog', label: '对话框/Dialog' },
     { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet' },
+    { name: 'customDialog', label: '自定义弹窗/CustomDialog' },
   ]
 };
 
@@ -76,6 +78,8 @@ export function OperatesDestination(name: string, route: Route) {
     DialogBootcamp({ title: route.label })
   } else if (name === 'operates/ActionSheet') {
     ActionDialogBootcamp({ title: route.label })
+  } else if (name === 'operates/customDialog') {
+    CustomDialogBootcamp({ title: route.label })
   }
 }
 

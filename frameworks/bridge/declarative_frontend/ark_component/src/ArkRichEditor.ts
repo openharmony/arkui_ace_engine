@@ -386,6 +386,40 @@ class RichEditorBarStateModifier extends ModifierWithKey<BarState> {
   }
 }
 
+class RichEditorMaxLengthModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorMaxLength');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLength(node);
+    } else {
+      getUINativeModule().richEditor.setMaxLength(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class RichEditorMaxLinesModifier extends ModifierWithKey<number | undefined> {
+  constructor(value: number | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('richEditorMaxLines');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLines(node);
+    } else {
+      getUINativeModule().richEditor.setMaxLines(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -506,6 +540,14 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
   }
   barState(value: BarState): RichEditorAttribute {
     modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
+    return this;
+  }
+  maxLength(value: number): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLengthModifier.identity, RichEditorMaxLengthModifier, value);
+    return this;
+  }
+  maxLines(value: number): RichEditorAttribute {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
     return this;
   }
 }
