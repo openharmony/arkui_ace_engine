@@ -94,6 +94,9 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+struct OverlayManagerInfo {
+    bool renderRootOverlay = true;
+};
 
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
@@ -638,6 +641,18 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+    {
+        if (overlayInfo_.has_value()) {
+            return false;
+        }
+        overlayInfo_ = overlayInfo;
+        return true;
+    }
+    std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return overlayInfo_;
+    }
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
@@ -892,6 +907,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG
 

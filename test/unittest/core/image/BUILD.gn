@@ -25,6 +25,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/frameworks/core/components_ng/image_provider/pixel_map_image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/static_image_object.cpp",
     "$ace_root/frameworks/core/components_ng/image_provider/svg_image_object.cpp",
+    "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_monitor.cpp",
     "$ace_root/test/mock/base/mock_download_manager.cpp",

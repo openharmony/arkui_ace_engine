@@ -69,7 +69,6 @@ constexpr int32_t SHEET_INFO_IDX = -2;
 constexpr Dimension SHEET_IMAGE_MARGIN = 16.0_vp;
 constexpr Dimension SHEET_DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension SHEET_LIST_PADDING = 24.0_vp;
-constexpr Dimension DIALOG_BUTTON_TEXT_SIZE = 16.0_fp;
 constexpr Color DEFAULT_BUTTON_COLOR = Color(0xff007dff);
 const CalcLength SHEET_IMAGE_SIZE(40.0_vp);
 constexpr int32_t THREE_BUTTON_MODE = 3;
@@ -84,11 +83,12 @@ constexpr Dimension DIALOG_CONTENT_PADDING_TOP = 0.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
-constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
 constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
 constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
 constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 constexpr Dimension DIALOG_BUTTON_BORDER_RADIUS = 20.0_vp;
+constexpr int32_t TEXT_ALIGN_TITLE_CENTER = 1;
+constexpr int32_t BUTTON_TYPE_NORMAL = 1;
 
 std::string GetBoolStr(bool isTure)
 {
@@ -311,7 +311,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
         styleOption.blurStyle = static_cast<BlurStyle>(
             props.backgroundBlurStyle.value_or(dialogTheme_->GetDialogBackgroundBlurStyle()));
         contentRenderContext->UpdateBackBlurStyle(styleOption);
-        contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(Color::TRANSPARENT));
+        contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetColorBgWithBlur()));
     } else {
         contentRenderContext->UpdateBackgroundColor(props.backgroundColor.value_or(dialogTheme_->GetBackgroundColor()));
     }
@@ -348,6 +348,12 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
             BorderWidthProperty outerWidthProp;
             outerWidthProp.SetBorderWidth(Dimension(dialogTheme_->GetDialogOuterBorderWidth()));
             contentRenderContext->UpdateOuterBorderWidth(outerWidthProp);
+        } else {
+            borderWidth.SetBorderWidth(dialogTheme_->GetBackgroudBorderWidth());
+            auto layoutProps = contentNode->GetLayoutProperty<LinearLayoutProperty>();
+            if (layoutProps) {
+                layoutProps->UpdateBorderWidth(borderWidth);
+            }
         }
         contentRenderContext->UpdateBorderWidth(borderWidth);
     }
@@ -367,11 +373,16 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
             BorderColorProperty outerColorProp;
             outerColorProp.SetColor(dialogTheme_->GetDialogOuterBorderColor());
             contentRenderContext->UpdateOuterBorderColor(outerColorProp);
+        } else {
+            borderColor.SetColor(dialogTheme_->GetBackgroudBorderColor());
         }
         contentRenderContext->UpdateBorderColor(borderColor);
     }
     if (props.shadow.has_value()) {
         contentRenderContext->UpdateBackShadow(props.shadow.value());
+    } else {
+        Shadow shadow = Shadow::CreateShadow(static_cast<ShadowStyle>(dialogTheme_->GetShadowDialog()));
+        contentRenderContext->UpdateBackShadow(shadow);
     }
     contentRenderContext->SetClipToBounds(true);
 }
@@ -536,11 +547,14 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     titlePadding.left = CalcLength(paddingInTheme.Left());
     titlePadding.right = CalcLength(paddingInTheme.Right());
     if (!dialogProperties.title.empty() && !dialogProperties.subtitle.empty()) {
-        titlePadding.top = CalcLength(DIALOG_TWO_TITLE_SPACE);
+        titlePadding.top = CalcLength(dialogTheme_->GetPaddingTopTitle());
         titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
     } else {
         auto padding =
             DIALOG_ONE_TITLE_ALL_HEIGHT - Dimension(DIALOG_TITLE_CONTENT_HEIGHT.ConvertToVp(), DimensionUnit::VP);
+        if (dialogTheme_->GetPaddingSingleTitle().ConvertToVp() > 0) {
+            padding = dialogTheme_->GetPaddingSingleTitle();
+        }
         titlePadding.top = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
         titlePadding.bottom = CalcLength(padding / DIALOG_TITLE_AVE_BY_2);
     }
@@ -553,7 +567,8 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto titleRowProps = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(titleRowProps, nullptr);
-    titleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProps->UpdateMainAxisAlign(
+        dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     titleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     title->MountToParent(titleRow);
     title->MarkModifyDone();
@@ -583,7 +598,7 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
     titlePadding.right = CalcLength(DIALOG_SUBTITLE_PADDING_RIGHT);
     titlePadding.top = CalcLength(DIALOG_TWO_TITLE_ZERO_SPACE);
-    titlePadding.bottom = CalcLength(DIALOG_TWO_TITLE_SPACE);
+    titlePadding.bottom = CalcLength(dialogTheme_->GetPaddingTopTitle());
     titleProp->UpdatePadding(titlePadding);
 
     // XTS inspector value
@@ -594,7 +609,8 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     CHECK_NULL_RETURN(subtitleRow, nullptr);
     auto subtitleRowProps = subtitleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(subtitleRowProps, nullptr);
-    subtitleRowProps->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    subtitleRowProps->UpdateMainAxisAlign(
+        dialogTheme_->GetTextAlignTitle() == TEXT_ALIGN_TITLE_CENTER ? FlexAlign::CENTER : FlexAlign::FLEX_START);
     subtitleRowProps->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
     subtitle->MountToParent(subtitleRow);
     subtitle->MarkModifyDone();
@@ -784,6 +800,9 @@ void DialogPattern::UpdateDialogButtonProperty(
     // update button padding
     auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
     buttonProp->UpdateType(ButtonType::NORMAL);
+    if (dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) {
+        buttonProp->UpdateButtonStyle(ButtonStyleMode::NORMAL);
+    }
     buttonProp->UpdateBorderRadius(BorderRadiusProperty(DIALOG_BUTTON_BORDER_RADIUS));
     PaddingProperty buttonPadding;
     buttonPadding.left = CalcLength(SHEET_LIST_PADDING);
@@ -912,9 +931,21 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
-    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    Dimension buttonTextSize =
-        dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize() : DIALOG_BUTTON_TEXT_SIZE;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, nullptr);
+    if (textTheme->GetIsTextFadeout()) {
+        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        textProps->UpdateTextMarqueeFadeout(true);
+    } else {
+        textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+    }
+    Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
+                                                                           : dialogTheme_->GetNormalButtonFontSize();
     textProps->UpdateFontSize(buttonTextSize);
 
     // update text color

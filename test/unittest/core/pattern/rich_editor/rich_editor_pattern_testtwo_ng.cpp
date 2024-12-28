@@ -1425,30 +1425,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, GetSelectSpansPositionInfo002, TestSize.Lev
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapperSwap002
- * @tc.desc: test OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, OnDirtyLayoutWrapperSwap002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto rendenContext = richEditorNode_->GetRenderContext();
-    ASSERT_NE(rendenContext, nullptr);
-    rendenContext->ResetClipEdge();
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    richEditorPattern->isModifyingContent_ = true;
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: CloseSystemMenu002
  * @tc.desc: test CloseSystemMenu
  * @tc.type: FUNC

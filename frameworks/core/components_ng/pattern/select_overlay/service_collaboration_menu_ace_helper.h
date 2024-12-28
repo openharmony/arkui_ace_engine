@@ -53,6 +53,11 @@ public:
     RefPtr<FrameNode> CreateSubDeviceMenuOnCol(const RefPtr<FrameNode>& column, const RefPtr<FrameNode>& menuWrapper);
     void SubMeunMountToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
         std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    void AddHoverEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+        std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    void AddClickEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+        std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    
 
     bool subMenuIsHover_ = false;
     bool subMenuIsShow_ = false;

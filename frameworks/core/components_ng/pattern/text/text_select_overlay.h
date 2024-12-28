@@ -91,6 +91,7 @@ protected:
         return !HasRenderTransform();
     }
     void UpdateClipHandleViewPort(RectF& rect) override;
+    bool AllowSearch() override;
     bool selectTextUseTopHandle = false;
 
 private:

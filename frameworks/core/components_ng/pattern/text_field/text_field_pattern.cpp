@@ -1986,7 +1986,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
 
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
-        selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset);
+        selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset, true, true);
         if (moveCaretState_.isMoveCaret) {
             StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
         }
@@ -2000,7 +2000,7 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
             static_cast<double>(contentRect_.Bottom()) - yOffset);
         selectController_->UpdateCaretInfoByOffset(
             !contentScroller_.isScrolling ? Offset(touchCaretX, touchCaretY) : touchOffset,
-            !contentScroller_.isScrolling);
+            !contentScroller_.isScrolling, true);
         if (magnifierController_ && HasText()) {
             auto floatCaretRectCenter = GetFloatingCaretRect().Center();
             magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
@@ -4700,8 +4700,11 @@ void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
         NearEqual(contentRect.Right() - caretInfo.rect.Width(), static_cast<float>(offsetX));
     bool distanceMoreThenTenVp = floatingCaretInfo.rect.GetOffset().GetDistance(caretInfo.rect.GetOffset())
         >= FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE.ConvertToPx();
-    SetShowOriginCursor(reachBoundary ||
-        (selectController_->IsTouchAtLineEndOrBegin(localOffset) && distanceMoreThenTenVp));
+    TouchPosition pos = selectController_->GetTouchLinePos(localOffset);
+    bool FloatCursorOnOriginLeft = floatingCaretInfo.rect.GetX() < caretInfo.rect.GetX();
+    bool FloatCursorNotInText = ((pos == TouchPosition::LEFT && FloatCursorOnOriginLeft) ||
+        (pos == TouchPosition::RIGHT && !FloatCursorOnOriginLeft));
+    SetShowOriginCursor(reachBoundary || (distanceMoreThenTenVp && FloatCursorNotInText));
     SetFloatingCursorVisible(true);
 }
 
@@ -5721,7 +5724,7 @@ void TextFieldPattern::HandleOnPageDown()
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
 {
     TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
-        start, end - start, GetTextUtf16Value(), true, true);
+        start, end - start, GetTextUtf16Value(), false, true);
     start = range.startIndex;
     end = range.endIndex;
 }
@@ -8203,6 +8206,7 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     CHECK_NULL_VOID(host);
     InitEditingValueText(u"");
     CloseSelectOverlay();
+    SetFloatingCursorVisible(false);
     StartTwinkling();
     UpdateCaretInfoToController();
     if (!HasFocus()) {

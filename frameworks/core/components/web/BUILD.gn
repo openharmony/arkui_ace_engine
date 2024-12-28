@@ -19,6 +19,7 @@ build_component("web") {
   sources = [
     "render_web.cpp",
     "render_web_creator.cpp",
+    "resource/web_area_changed.cpp",
     "resource/web_client_impl.cpp",
     "resource/web_configuration_observer.cpp",
     "resource/web_delegate.cpp",

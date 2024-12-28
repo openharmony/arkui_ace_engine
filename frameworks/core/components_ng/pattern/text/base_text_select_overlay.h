@@ -333,6 +333,10 @@ protected:
     }
     bool IsNeedMenuSearch();
     void HandleOnSearch();
+    virtual bool AllowSearch()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

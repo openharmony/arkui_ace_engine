@@ -372,6 +372,25 @@ class SearchLineHeightModifier extends ModifierWithKey<number | string | Resourc
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class SearchHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetHalfLeading(node);
+    } else {
+      getUINativeModule().search.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -382,6 +401,42 @@ class SearchMaxFontSizeModifier extends ModifierWithKey<number | string | Resour
       getUINativeModule().search.resetSearchMaxFontSize(node);
     } else {
       getUINativeModule().search.setSearchMaxFontSize(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMinFontScale(node);
+    } else {
+      getUINativeModule().textArea.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SearchMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().textArea.setMaxFontScale(node, this.value!);
     }
   }
 
@@ -916,12 +971,24 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
     return this;
   }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
+    return this;
+  }
   minFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
     return this;
   }
   maxFontSize(value: number | string | Resource): this {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMinFontScaleModifier.identity, SearchMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, SearchMaxFontScaleModifier.identity, SearchMaxFontScaleModifier, value);
     return this;
   }
   selectedBackgroundColor(value: ResourceColor): this {

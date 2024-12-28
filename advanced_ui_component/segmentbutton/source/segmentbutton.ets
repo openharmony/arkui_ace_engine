@@ -599,6 +599,39 @@ struct PressAndHoverEffect {
 }
 
 @Component
+struct PressAndHoverEffectArray {
+  @ObjectLink buttons: SegmentButtonItemOptionsArray
+  @ObjectLink options: SegmentButtonOptions
+  @Link pressArray: boolean[]
+  @Link hoverArray: boolean[]
+  @Link hoverColorArray: HoverColorProperty[]
+  @Consume zoomScaleArray:number[]
+
+  build() {
+    Row({ space: 1 }) {
+      ForEach(this.buttons, (item: SegmentButtonItemOptions, index) => {
+        if (index < MAX_ITEM_COUNT) {
+          Stack() {
+            PressAndHoverEffect({
+              pressIndex: index,
+              colorProperty: this.hoverColorArray[index],
+              press: this.pressArray[index],
+              hover: this.hoverArray[index],
+              options: this.options,
+            })
+          }
+          .direction(this.options.direction)
+          .scale({
+            x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
+            y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
+          })
+        }
+      })
+    }.direction(this.options.direction)
+  }
+}
+
+@Component
 struct SegmentButtonItemArrayComponent {
   @ObjectLink @Watch('onOptionsArrayChange') optionsArray: SegmentButtonItemOptionsArray
   @ObjectLink @Watch('onOptionsChange') options: SegmentButtonOptions
@@ -1115,26 +1148,13 @@ export struct SegmentButton {
         } else {
           Stack() {
             if (this.options.buttons !== void 0 && this.options.buttons.length > 1) {
-              Row({ space: 1 }) {
-                ForEach(this.options.buttons, (item: SegmentButtonItemOptions, index) => {
-                  if (index < MAX_ITEM_COUNT) {
-                    Stack() {
-                      PressAndHoverEffect({
-                        pressIndex: index,
-                        colorProperty: this.hoverColorArray[index],
-                        press: this.pressArray[index],
-                        hover: this.hoverArray[index],
-                        options: this.options,
-                      })
-                    }
-                    .direction(this.options.direction)
-                    .scale({
-                      x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index],
-                      y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 : this.zoomScaleArray[index]
-                    })
-                  }
-                })
-              }.direction(this.options.direction)
+              PressAndHoverEffectArray({
+                options:this.options,
+                buttons:this.options.buttons,
+                pressArray:this.pressArray,
+                hoverArray:this.hoverArray,
+                hoverColorArray:this.hoverColorArray
+              })
             }
           }
           .direction(this.options.direction)

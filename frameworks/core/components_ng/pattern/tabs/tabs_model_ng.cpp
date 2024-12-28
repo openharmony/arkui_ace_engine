@@ -45,10 +45,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -250,6 +250,16 @@ void TabsModelNG::SetTabBarHeight(const Dimension& tabBarHeight)
         tabBarLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, NG::CalcLength(tabBarHeight)));
     }
     tabBarLayoutProperty->UpdateTabBarHeight(tabBarHeight);
+}
+
+void TabsModelNG::SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply)
+{
+    CHECK_NULL_VOID(onApply);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    onApply(tabBarNode);
 }
 
 void TabsModelNG::SetWidthAuto(bool isAuto)

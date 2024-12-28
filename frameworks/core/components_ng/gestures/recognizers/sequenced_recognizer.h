@@ -67,6 +67,7 @@ private:
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void OnResetStatus() override;
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void DeadlineTimer();
     void HandleOverdueDeadline();
     void UpdateCurrentIndex();

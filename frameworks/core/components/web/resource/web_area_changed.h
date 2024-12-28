@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_STUB_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_STUB_H
+#ifndef WEB_AREA_CHANGED_H
+#define WEB_AREA_CHANGED_H
+#include "core/components/web/resource/web_delegate.h"
 
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
-
-namespace OHOS::Ace::NG {
-class TimepickerAudioHapticStub : public ITimepickerAudioHaptic {
+namespace OHOS::Ace {
+class WebAvoidAreaChangedListener : public Referenced, public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
-    TimepickerAudioHapticStub() = default;
-    ~TimepickerAudioHapticStub() = default;
-    void Play(size_t speed) {}
-    void PlayOnce() {}
-    void Stop() {}
-    void HandleDelta(double dy) {}
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    ~WebAvoidAreaChangedListener() = default;
+    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+
+private:
+    WeakPtr<WebDelegate> webDelegate_;
 };
-} // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_STUB_H
+}
+
+#endif

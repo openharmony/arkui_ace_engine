@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <vector>
 
-#include "core/components/web/resource/web_delegate.h"
+#include "core/components/web/resource/web_area_changed.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -1198,4 +1198,5 @@ bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
 }
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 } // namespace OHOS::Ace

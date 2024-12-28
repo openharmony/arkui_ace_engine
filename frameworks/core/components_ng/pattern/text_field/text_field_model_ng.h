@@ -110,6 +110,7 @@ public:
     void SetFontFeature(const FONT_FEATURES_LIST& value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetHalfLeading(bool value) override;
     void SetLineSpacing(const Dimension& value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
@@ -132,6 +133,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
@@ -141,6 +143,8 @@ public:
         const std::optional<std::u16string>& value, bool isTextArea);
     static void SetAdaptMinFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetAdaptMaxFontSize(FrameNode* frameNode, const Dimension& value);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetHeightAdaptivePolicy(FrameNode* frameNode, TextHeightAdaptivePolicy value);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);

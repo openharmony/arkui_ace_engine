@@ -132,12 +132,12 @@ bool NavigationManager::AddInteractiveAnimation(const std::function<void()>& add
     return true;
 }
 
-bool NavigationManager::CheckChildrenAnimationAndTagState(const RefPtr<FrameNode>& node)
+bool NavigationManager::CheckNodeNeedCache(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     auto context = node->GetRenderContext();
     if ((context && context->GetAnimationsCount() != 0) || node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
-        return true;
+        return false;
     }
     std::stack<RefPtr<FrameNode>> nodeStack;
     nodeStack.push(node);
@@ -153,12 +153,12 @@ bool NavigationManager::CheckChildrenAnimationAndTagState(const RefPtr<FrameNode
             auto childContext = child->GetRenderContext();
             if ((childContext && childContext->GetAnimationsCount() != 0) ||
                 child->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
-                return true;
+                return false;
             }
             nodeStack.push(child);
         }
     }
-    return false;
+    return true;
 }
 
 RefPtr<FrameNode> NavigationManager::GetNavDestContentFrameNode(const RefPtr<FrameNode>& node)
@@ -176,9 +176,9 @@ void NavigationManager::UpdatePreNavNodeRenderGroupProperty()
     CHECK_NULL_VOID(preNavNode_);
     auto preNavDestContentNode = GetNavDestContentFrameNode(preNavNode_);
     CHECK_NULL_VOID(preNavDestContentNode);
-    auto state = CheckChildrenAnimationAndTagState(preNavDestContentNode);
-    UpdateRenderGroup(preNavDestContentNode, !state);
-    preNodeAnimationCached_ = !state;
+    auto state = CheckNodeNeedCache(preNavDestContentNode);
+    UpdateAnimationCachedRenderGroup(preNavDestContentNode, state);
+    preNodeAnimationCached_ = state;
     preNodeNeverSet_ = false;
     TAG_LOGD(AceLogTag::ACE_NAVIGATION,
         "Cache PreNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
@@ -190,9 +190,9 @@ void NavigationManager::UpdateCurNavNodeRenderGroupProperty()
     CHECK_NULL_VOID(curNavNode_);
     auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
     CHECK_NULL_VOID(curNavDestContentNode);
-    auto state = CheckChildrenAnimationAndTagState(curNavDestContentNode);
-    UpdateRenderGroup(curNavDestContentNode, !state);
-    curNodeAnimationCached_ = !state;
+    auto state = CheckNodeNeedCache(curNavDestContentNode);
+    UpdateAnimationCachedRenderGroup(curNavDestContentNode, state);
+    curNodeAnimationCached_ = state;
     currentNodeNeverSet_ = false;
     TAG_LOGD(AceLogTag::ACE_NAVIGATION,
         "Cache CurNavNode node(id=%{public}d name=%{public}s) childrenAnimationAndTagState=%{public}d",
@@ -204,7 +204,7 @@ void NavigationManager::ResetCurNavNodeRenderGroupProperty()
     CHECK_NULL_VOID(curNavNode_);
     auto curNavDestContentNode = GetNavDestContentFrameNode(curNavNode_);
     CHECK_NULL_VOID(curNavDestContentNode);
-    UpdateRenderGroup(curNavDestContentNode, false);
+    UpdateAnimationCachedRenderGroup(curNavDestContentNode, false);
     curNodeAnimationCached_ = false;
     TAG_LOGD(AceLogTag::ACE_NAVIGATION, "Cancel Cache CurNavNode node(id=%{public}d name=%{public}s)",
         curNavDestContentNode->GetId(), curNavDestContentNode->GetTag().c_str());
@@ -238,12 +238,13 @@ void NavigationManager::CacheNavigationNodeAnimation()
     }
 }
 
-void NavigationManager::UpdateRenderGroup(const RefPtr<FrameNode>& node, bool isSet)
+void NavigationManager::UpdateAnimationCachedRenderGroup(const RefPtr<FrameNode>& node, bool isSet)
 {
     auto context = node->GetRenderContext();
     CHECK_NULL_VOID(context);
-    TAG_LOGD(AceLogTag::ACE_NAVIGATION, "UpdateRenderGroup node(id=%{public}d name=%{public}s), isSet=%{public}d",
-        node->GetId(), node->GetTag().c_str(), isSet);
+    TAG_LOGD(AceLogTag::ACE_NAVIGATION,
+        "UpdateAnimationCachedRenderGroup node(id=%{public}d name=%{public}s), isSet=%{public}d", node->GetId(),
+        node->GetTag().c_str(), isSet);
     context->OnRenderGroupUpdate(isSet);
 }
 

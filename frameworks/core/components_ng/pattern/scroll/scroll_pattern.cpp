@@ -45,6 +45,9 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -77,7 +80,6 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -1343,7 +1345,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
     CHECK_NULL_VOID(scrollable);
     if (scrollable->IsSnapAnimationRunning()) {
         scrollable->UpdateScrollSnapEndWithOffset(
-            -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
         scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
         if (!IsScrolling()) {

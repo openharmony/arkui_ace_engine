@@ -145,6 +145,7 @@ public:
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
     virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

@@ -82,6 +82,7 @@ public:
     void SetType(TextInputType value) override;
     void SetLetterSpacing(const Dimension& value) override;
     void SetLineHeight(const Dimension& value) override;
+    void SetHalfLeading(bool value) override;
     void SetAdaptMinFontSize(const Dimension& value) override;
     void SetAdaptMaxFontSize(const Dimension& value) override;
     void SetTextDecoration(Ace::TextDecoration value) override;
@@ -124,6 +125,8 @@ public:
     static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
@@ -137,6 +140,7 @@ public:
     static void SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecorationStyle value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
     static void SetOnSubmit(FrameNode* frameNode,

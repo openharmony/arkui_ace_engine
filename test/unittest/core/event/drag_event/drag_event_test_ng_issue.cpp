@@ -38,6 +38,13 @@ struct DragStatusTestCase {
         : dragInfo(dragInfo), inputEventType(inputEventType), expectResult(expectResult) {}
 };
 
+struct MenuStatusTestCase {
+    bool isBindCustomMenu = false;
+    bool isShow = false;
+    MenuPreviewMode previewMode = MenuPreviewMode::NONE;
+    bool expectResult = false;
+};
+
 const std::vector<DragStatusTestCase> DRAG_STATUS_IMAGE_TEST_CASES = {
     DragStatusTestCase(DragInfo(true, true, true, false), InputEventType::TOUCH_SCREEN, false),   // case 0
     DragStatusTestCase(DragInfo(true, true, true, false), InputEventType::TOUCH_PAD, false),      // case 1
@@ -174,6 +181,21 @@ const std::vector<DragStatusTestCase> DRAG_STATUS_TEXT_TEST_CASES = {
     DragStatusTestCase(DragInfo(false, false, false, false), InputEventType::KEYBOARD, false),     // case 79
 };
 
+const std::vector<MenuStatusTestCase> MENU_STATUS_TEST_CASES = {
+    { false, false, MenuPreviewMode::NONE, true},
+    { false, false, MenuPreviewMode::IMAGE, true},
+    { false, false, MenuPreviewMode::CUSTOM, true},
+    { false, true, MenuPreviewMode::NONE, true},
+    { false, true, MenuPreviewMode::IMAGE, true},
+    { false, true, MenuPreviewMode::CUSTOM, true},
+    { true, false, MenuPreviewMode::NONE, false},
+    { true, false, MenuPreviewMode::IMAGE, false},
+    { true, false, MenuPreviewMode::CUSTOM, false},
+    { true, true, MenuPreviewMode::NONE, true},
+    { true, true, MenuPreviewMode::IMAGE, true},
+    { true, true, MenuPreviewMode::CUSTOM, true}
+};
+
 class DragEventTestNgIssue : public DragEventCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -269,6 +291,64 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue002, TestSize.Level1)
         dragTouchRestrict.inputEventType = testCase.inputEventType;
         auto status = dragEventActuator->IsCurrentNodeStatusSuitableForDragging(frameNode, dragTouchRestrict);
         EXPECT_TRUE(IsDragEventStateEqual(caseNum, status, testCase.expectResult));
+        caseNum++;
+    }
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue003
+ * @tc.desc: Test SetDragPreviewOptions function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 1.0f);
+    /**
+     * @tc.steps: step2. call SetDragPreviewOptions function.
+     * @tc.expected: step2. drag status equals.
+     */
+    DragPreviewOption dragPreviewOption;
+    dragPreviewOption.options.opacity = 0.5f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption, false);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 1.0f);
+
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.5f);
+
+    dragPreviewOption.options.opacity = 0.3f;
+    frameNode->SetDragPreviewOptions(dragPreviewOption, true);
+    EXPECT_EQ(frameNode->GetDragPreviewOption().options.opacity, 0.3f);
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue004
+ * @tc.desc: Test SetBindMenuStatus function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue004, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : MENU_STATUS_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create GestureEventHub.
+         */
+        auto eventHub = AceType::MakeRefPtr<EventHub>();
+        ASSERT_NE(eventHub, nullptr);
+        auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+        ASSERT_NE(gestureEventHub, nullptr);
+        /**
+         * @tc.steps: step2. call SetBindMenuStatus function.
+         * @tc.expected: step2. drag status equals.
+         */
+        gestureEventHub->SetBindMenuStatus(testCase.isBindCustomMenu, testCase.isShow, testCase.previewMode);
+        EXPECT_TRUE(IsDragEventStateEqual(caseNum, gestureEventHub->bindMenuStatus_.IsNotNeedShowPreview(),
+            testCase.expectResult));
         caseNum++;
     }
 };

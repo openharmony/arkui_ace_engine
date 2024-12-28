@@ -3556,5 +3556,25 @@ std::unique_ptr<JsonValue> FrontendDelegateDeclarative::GetNavigationJsonInfo()
     CHECK_NULL_RETURN(navigationManager, nullptr);
     return navigationManager->GetNavigationJsonInfo();
 }
+bool FrontendDelegateDeclarative::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->SetOverlayManagerOptions(overlayInfo);
+};
+std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayManagerOptions()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, std::nullopt);
+    return overlayManager->GetOverlayManagerOptions();
+};
 
 } // namespace OHOS::Ace::Framework

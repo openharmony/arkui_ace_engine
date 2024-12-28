@@ -64,6 +64,9 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -344,7 +347,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetDirection(true);
     }
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
@@ -642,8 +644,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-    if (chainAnimation_) {
+    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
+    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
+    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
@@ -2189,7 +2192,7 @@ void ListPattern::SetChainAnimation()
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
-    if (!enable) {
+    if (!enable || GetEffectEdge() != EffectEdge::ALL) {
         chainAnimation_.Reset();
         return;
     }

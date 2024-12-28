@@ -457,6 +457,16 @@ void TextFieldModelNG::SetMaxFontScale(const float value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
 }
 
+void TextFieldModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextFieldModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value, frameNode);
+}
+
 void TextFieldModelNG::SetInputFilter(const std::string& value,
     const std::function<void(const std::u16string&)>&& func)
 {
@@ -912,6 +922,11 @@ Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+}
+
+void TextFieldModelNG::SetHalfLeading(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
@@ -1700,6 +1715,11 @@ void TextFieldModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& v
 void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
+}
+
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
 }
 
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)

@@ -659,6 +659,8 @@ public:
         return textStyle_.value_or(TextStyle());
     }
 
+    bool DidExceedMaxLines() const override;
+
     std::optional<ParagraphStyle> GetExternalParagraphStyle()
     {
         return externalParagraphStyle_;
@@ -958,7 +960,6 @@ private:
     void CreateModifier();
 
     bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
-    bool DidExceedMaxLines() const override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();

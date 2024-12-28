@@ -13,23 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_IMPL_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_IMPL_H
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_IMPL_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_IMPL_H
 
-#include "adapter/ohos/entrance/timepicker/timepicker_haptic_controller.h"
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 
 namespace OHOS::Ace::NG {
-class TimepickerAudioHapticImpl : public ITimepickerAudioHaptic {
+class PickerAudioHapticImpl : public IPickerAudioHaptic {
 public:
-    TimepickerAudioHapticImpl();
-    ~TimepickerAudioHapticImpl() = default;
+    PickerAudioHapticImpl();
+    ~PickerAudioHapticImpl() = default;
     void Play(size_t speed) override;
     void PlayOnce() override;
     void Stop() override;
     void HandleDelta(double dy) override;
 private:
-    std::unique_ptr<TimePickerHapticController> handler_ = nullptr;
+    std::unique_ptr<PickerHapticController> handler_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_IMPL_H
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_IMPL_H

@@ -437,6 +437,16 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
     enableFormCallback_ = std::move(callback);
 }
 
+
+void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EnableFormCallback is null");
+        return;
+    }
+    lockFormCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
@@ -847,6 +857,15 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
     enableFormCallback_(enable);
 }
 
+void FormManagerDelegate::HandleLockFormCallback(bool lock)
+{
+    if (!lockFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "lockFormCallback_. is null");
+        return;
+    }
+    lockFormCallback_(lock);
+}
+
 void FormManagerDelegate::ReAddForm()
 {
     formRendererDispatcher_ = nullptr; // formRendererDispatcher_ need reset, otherwise PointerEvent will disable
@@ -901,6 +920,11 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
 {
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
+}
+
+bool FormManagerDelegate::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleLocked(bundleName, formId);
 }
 
 void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
@@ -1112,6 +1136,12 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
         auto instantId = context->GetInstanceId();
         formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
     }
+}
+
+void FormManagerDelegate::ProcessLockForm(bool lock)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}" PRId64, runningCardId_);
+    HandleLockFormCallback(lock);
 }
 #endif
 } // namespace OHOS::Ace

@@ -170,9 +170,9 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -476,9 +476,9 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     pattern->SetSupportAnimation(supportAnimation);
 }
 
-void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -600,5 +600,85 @@ void GridModelNG::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& opti
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
+}
+
+void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollBarUpdate(std::move(value));
+}
+
+void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto onDragStart = [func = std::move(value)](const ItemDragInfo& dragInfo, int32_t index) -> RefPtr<UINode> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        {
+            func(dragInfo, index);
+        }
+        return ViewStackProcessor::GetInstance()->Finish();
+    };
+    eventHub->SetOnItemDragStart(std::move(onDragStart));
+
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    eventHub->InitItemDragEvent(gestureEventHub);
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragEnter(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragMove(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDragLeave(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnItemDrop(std::move(value));
+
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 } // namespace OHOS::Ace::NG

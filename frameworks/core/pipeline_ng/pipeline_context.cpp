@@ -3427,6 +3427,9 @@ void PipelineContext::OnFlushMouseEvent(
                     static_cast<uint64_t>(stamp), targetTimeStamp);
                 continue;
             }
+            if (idIter.second.button == MouseButton::NONE_BUTTON) {
+                continue;
+            }
             MouseEvent newMouseEvent = eventManager_->GetResampleMouseEvent(
                 historyMousePointsById_[idIter.first], idIter.second.history, targetTimeStamp);
             if (newMouseEvent.x != 0 && newMouseEvent.y != 0) {

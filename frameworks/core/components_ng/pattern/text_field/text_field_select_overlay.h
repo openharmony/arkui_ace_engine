@@ -96,6 +96,9 @@ public:
     }
     std::optional<Color> GetHandleColor() override;
 
+protected:
+    bool AllowSearch() override;
+
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
     void UpdatePattern(const OverlayRequest& request);
