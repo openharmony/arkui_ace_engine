@@ -70,6 +70,8 @@ public:
         pixelMap = nullptr;
         param = nullptr;
         lineDash = nullptr;
+        lineCap = std::nullopt;
+        lineJoin = std::nullopt;
     }
 
     void TearDown()
@@ -82,6 +84,8 @@ public:
         pixelMap = nullptr;
         param = nullptr;
         lineDash = nullptr;
+        lineCap = std::nullopt;
+        lineJoin = std::nullopt;
     }
 
     void* config = nullptr;
@@ -121,6 +125,8 @@ public:
     OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> pixelMap = nullptr;
     std::shared_ptr<OHOS::Ace::TransformParam> param = nullptr;
     std::shared_ptr<OHOS::Ace::LineDashParam> lineDash = nullptr;
+    std::optional<OHOS::Ace::LineCapStyle> lineCap = std::nullopt;
+    std::optional<OHOS::Ace::LineJoinStyle> lineJoin = std::nullopt;
 };
 
 } // namespace OHOS::Ace::NG

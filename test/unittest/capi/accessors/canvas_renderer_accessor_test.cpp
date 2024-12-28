@@ -207,6 +207,28 @@ std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TES
     { "invalid", {} },
 };
 
+std::vector<std::tuple<Ark_String, std::string>> IMAGE_SMOOTHING_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("low"), "low" },
+    { Converter::ArkValue<Ark_String>("medium"), "medium" },
+    { Converter::ArkValue<Ark_String>("high"), "high" },
+    { Converter::ArkValue<Ark_String>(""), INVALID_STRING_VALUE },
+    { Converter::ArkValue<Ark_String>("invalid"), INVALID_STRING_VALUE }
+};
+std::vector<std::tuple<Ark_String, LineCapStyle>> LINE_CAP_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("butt"), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("round"), LineCapStyle::ROUND },
+    { Converter::ArkValue<Ark_String>("square"), LineCapStyle::SQUARE },
+    { Converter::ArkValue<Ark_String>(""), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("invalid"), LineCapStyle::BUTT }
+};
+std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("bevel"), LineJoinStyle::BEVEL },
+    { Converter::ArkValue<Ark_String>("miter"), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("round"), LineJoinStyle::ROUND },
+    { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
+};
+
 class MockCanvasPattern : public CanvasPattern {
 public:
     MockCanvasPattern() = default;
@@ -1919,5 +1941,110 @@ HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
         EXPECT_EQ(offset, expected);
     }
     holder->TearDown();
+}
+
+
+//createPattern
+//measureText
+//getTransform
+//setPixelMap
+//setImageSmoothingQuality
+//setLineCap
+//setLineJoin
+
+
+
+/**
+ * @tc.name: setImageSmoothingQualityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingQualityTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setImageSmoothingQuality, nullptr);
+    for (const auto& [actual, expected] : IMAGE_SMOOTHING_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setImageSmoothingQuality(peer_, &actual);
+
+        std::printf("imageSmoothing: holder text: %s==%s isCalled: %d\n", holder->text.c_str(), expected.c_str(), holder->isCalled);
+
+        if (expected == INVALID_STRING_VALUE) {
+            EXPECT_FALSE(holder->isCalled);
+            continue;
+        }
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->text, expected);
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: setLineCapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineCapTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setLineCap, nullptr);
+    for (const auto& [actual, expected] : LINE_CAP_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setLineCap(peer_, &actual);
+
+        auto lineCap = holder->lineCap ? *holder->lineCap : static_cast<LineCapStyle>(-1);
+        std::printf("lineCap: holder lineCap: %d==%d isCalled: %d\n", lineCap, expected, holder->isCalled);
+
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->lineCap, expected);
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: setLineJoinTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setLineJoin, nullptr);
+    for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setLineJoin(peer_, &actual);
+
+        auto lineJoin = holder->lineJoin ? *holder->lineJoin : static_cast<LineJoinStyle>(-1);
+        std::printf("lineCap: holder lineCap: %d==%d isCalled: %d\n", lineJoin, expected, holder->isCalled);
+        
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->lineJoin, expected);
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: getLineDashOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, get1Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    holder->TearDown();
+}
+/**
+ * @tc.name: getLineDashOffsetTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, get2Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    holder->TearDown();
+}
+
+HWTEST_F(CanvasRendererAccessorTest, holdTest, TestSize.Level1){
+    char *p =  nullptr;
+    *p = '\0';
 }
 } // namespace OHOS::Ace::NG

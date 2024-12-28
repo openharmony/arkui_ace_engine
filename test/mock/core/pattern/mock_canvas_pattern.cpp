@@ -693,6 +693,13 @@ void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 
 void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->text = quality;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [quality](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingQuality(quality);
@@ -705,6 +712,13 @@ void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 
 void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->lineCap = cap;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [cap](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineCap(cap);
@@ -737,6 +751,13 @@ void CanvasPattern::UpdateLineDashOffset(double dash)
 
 void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->lineJoin = join;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [join](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineJoin(join);
