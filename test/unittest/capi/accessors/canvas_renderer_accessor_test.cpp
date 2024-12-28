@@ -207,6 +207,28 @@ std::vector<std::pair<std::string, std::vector<std::string>>>  FONT_FAMILIES_TES
     { "invalid", {} },
 };
 
+std::vector<std::tuple<Ark_String, std::string>> IMAGE_SMOOTHING_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("low"), "low" },
+    { Converter::ArkValue<Ark_String>("medium"), "medium" },
+    { Converter::ArkValue<Ark_String>("high"), "high" },
+    { Converter::ArkValue<Ark_String>(""), INVALID_STRING_VALUE },
+    { Converter::ArkValue<Ark_String>("invalid"), INVALID_STRING_VALUE }
+};
+std::vector<std::tuple<Ark_String, LineCapStyle>> LINE_CAP_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("butt"), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("round"), LineCapStyle::ROUND },
+    { Converter::ArkValue<Ark_String>("square"), LineCapStyle::SQUARE },
+    { Converter::ArkValue<Ark_String>(""), LineCapStyle::BUTT },
+    { Converter::ArkValue<Ark_String>("invalid"), LineCapStyle::BUTT }
+};
+std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("bevel"), LineJoinStyle::BEVEL },
+    { Converter::ArkValue<Ark_String>("miter"), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("round"), LineJoinStyle::ROUND },
+    { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
+    { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
+};
+
 class MockCanvasPattern : public CanvasPattern {
 public:
     MockCanvasPattern() = default;
@@ -1917,6 +1939,121 @@ HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
         auto expected = static_cast<int32_t>(actual);
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(offset, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: createPatternTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->createPattern, nullptr);
+    holder->SetUp();
+    Ark_Materialized arkBitmap;
+    auto bitmapPeer = new MockImageBitmapPeer();
+    arkBitmap.ptr = bitmapPeer;
+    auto repetition = Converter::ArkValue<Opt_String>("repeat");
+    bitmapPeer->SetWidth(NUMBER_TEST_PLAN[0]);
+    bitmapPeer->SetHeight(NUMBER_TEST_PLAN[1]);
+    auto result = accessor_->createPattern(peer_, &arkBitmap, &repetition);
+    ASSERT_NE(result, nullptr);
+    auto patternPeer = reinterpret_cast<CanvasPatternPeer*>(result);
+    ASSERT_NE(patternPeer, nullptr);
+    auto rendererPeer = patternPeer->GetCanvasRenderer();
+    ASSERT_NE(rendererPeer, nullptr);
+    auto pattern = rendererPeer->patterns[rendererPeer->patternCount - 1];
+    ASSERT_NE(patternPeer, nullptr);
+    ASSERT_FALSE(holder->isCalled);
+    rendererPeer->TriggerRestoreImpl();
+    ASSERT_TRUE(holder->isCalled);
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: getTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, getTransformTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->measureText, nullptr);
+    for (const auto& expectedX : NUMBER_TEST_PLAN) {
+        for (const auto& expectedY : NUMBER_TEST_PLAN) {
+            holder->SetUp();
+            auto param = TransformParam {
+                .scaleX = expectedX,
+                .scaleY = expectedY,
+            };
+            holder->param = std::make_shared<TransformParam>(param);
+            auto container = Container::Current();
+            container->SetUseNewPipeline();
+            auto result = accessor_->getTransform(peer_);
+            auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(result);
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleX, holder->param->scaleX));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleY, holder->param->scaleY));
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setImageSmoothingQualityTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingQualityTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setImageSmoothingQuality, nullptr);
+    for (const auto& [actual, expected] : IMAGE_SMOOTHING_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setImageSmoothingQuality(peer_, &actual);
+        if (expected == INVALID_STRING_VALUE) {
+            EXPECT_FALSE(holder->isCalled);
+            continue;
+        }
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->text, expected);
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: setLineCapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineCapTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setLineCap, nullptr);
+    for (const auto& [actual, expected] : LINE_CAP_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setLineCap(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->lineCap, expected);
+    }
+    holder->TearDown();
+}
+/**
+ * @tc.name: setLineJoinTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setLineJoin, nullptr);
+    for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setLineJoin(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(holder->lineJoin, expected);
     }
     holder->TearDown();
 }

@@ -29,6 +29,7 @@ public:
     void Close();
     double GetHeight();
     double GetWidth();
+    const std::string& GetSrc();
 
     void LoadImage(const std::string& src);
     const PixelMapRefPtr& GetPixelMap() const
@@ -54,4 +55,5 @@ private:
     OHOS::Ace::RefPtr<OHOS::Ace::NG::ImageLoadingContext> loadingCtx_;
     std::list<std::function<void()>> closeCallbacks_;
     PixelMapRefPtr pixelMap_;
+    std::string src_;
 };

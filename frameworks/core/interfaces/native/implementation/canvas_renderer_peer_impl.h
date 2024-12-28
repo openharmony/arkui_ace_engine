@@ -111,6 +111,12 @@ public:
     void GetPixelMap(const ImageSize& imageSize);
     double GetDimension(const Dimension& value, const bool force = false);
     void PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext);
+    std::optional<OHOS::Ace::TextMetrics> GetTextMetrics(const std::string& text);
+    std::optional<TransformParam> GetTransform();
+    void SetPixelMap(RefPtr<PixelMap> pixelMap);
+    void SetImageSmoothingQuality(const std::string& quality);
+    void SetLineCap(const std::string& quality);
+    void SetLineJoin(const std::string& quality);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;
@@ -136,6 +142,10 @@ public:
             return ((GetUnit() == CanvasUnit::DEFAULT) && !NearZero(density_)) ? density_ : 1.0;
         }
     }
+    RefPtr<CanvasPattern> GetCanvasPattern()
+    {
+        return pattern_;
+    }
     void SetCanvasPattern(const RefPtr<AceType>& pattern)
     {
         CHECK_NULL_VOID(pattern);
@@ -149,17 +159,21 @@ public:
 
 public:
     Ace::ImageData imageData;
+    std::unordered_map<int32_t, std::shared_ptr<Ace::Pattern>> patterns;
+    uint32_t patternCount = 0;
 
 protected:
-    RefPtr<CanvasPattern> pattern_;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> pattern_;
 
 private:
     void ParseImageData(const ImageSizeExt& ext);
     Dimension GetDimensionValue(const std::string& str);
 
-    CanvasUnit unit_ = CanvasUnit::DEFAULT;
+    OHOS::Ace::CanvasUnit unit_ = CanvasUnit::DEFAULT;
     double density_ = 1.0;
     int32_t densityCallbackId_ = 0;
+    std::vector<OHOS::Ace::PaintState> savePaintState_;
+    OHOS::Ace::PaintState paintState_;
 };
 
 } // namespace OHOS::Ace::NG::GeneratedModifier

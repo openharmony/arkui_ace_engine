@@ -49,9 +49,12 @@ public:
         mockPattern_ = new MockCanvasPattern();
         mockPatternKeeper_ = AceType::Claim(mockPattern_);
         ASSERT_NE(mockPatternKeeper_, nullptr);
+        rendererKeeper_ = Referenced::MakeRefPtr<GeneratedModifier::CanvasRendererPeerImpl>();
+        ASSERT_NE(rendererKeeper_, nullptr);
+        rendererKeeper_->SetCanvasPattern(mockPatternKeeper_);
         auto peerImpl = reinterpret_cast<CanvasPatternPeer*>(peer_);
         ASSERT_NE(peerImpl, nullptr);
-        peerImpl->SetPattern(mockPatternKeeper_);
+        peerImpl->SetCanvasRenderer(rendererKeeper_);
         ASSERT_NE(mockPattern_, nullptr);
     }
 
@@ -59,11 +62,13 @@ public:
     {
         AccessorTestBaseParent::TearDown();
         mockPatternKeeper_ = nullptr;
+        rendererKeeper_ = nullptr;
         mockPattern_ = nullptr;
     }
 
     MockCanvasPattern* mockPattern_ = nullptr;
     RefPtr<MockCanvasPattern> mockPatternKeeper_ = nullptr;
+    RefPtr<GeneratedModifier::CanvasRendererPeerImpl> rendererKeeper_ = nullptr;
 };
 
 /**
@@ -90,7 +95,6 @@ HWTEST_F(CanvasPatternAccessorTest, setTransformTest, TestSize.Level1)
     peer->transform.translateX = valD;
     peer->transform.translateY = valD;
     accessor_->setTransform(peer_, &optMatrix);
-
     EXPECT_TRUE(holder->isCalled);
     EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleX, SCALE_VALUE));
     EXPECT_TRUE(LessOrEqualCustomPrecision(holder->scaleY, SCALE_VALUE));

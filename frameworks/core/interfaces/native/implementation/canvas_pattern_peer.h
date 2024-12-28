@@ -15,35 +15,57 @@
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
 
+#include "canvas_renderer_peer_impl.h"
 #include "core/components/common/properties/decoration.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
 
 struct CanvasPatternPeer {
 public:
     using CanvasPatternPtr = OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>;
     using TransformParamCls = OHOS::Ace::TransformParam;
+    using CanvasRendererCls = OHOS::Ace::NG::GeneratedModifier::CanvasRendererPeerImpl;
 
     CanvasPatternPeer() = default;
     virtual ~CanvasPatternPeer() = default;
-    const CanvasPatternPtr& GetPattern() const
-    {
-        return pattern_;
-    }
-    void SetPattern(const CanvasPatternPtr& pattern)
-    {
-        pattern_ = pattern;
-    }
     virtual void SetTransform(const TransformParamCls& param)
     {
-        if (!pattern_) {
-        LOGE("ARKOALA CanvasPatternPeer::SetTransform pattern "
-             "not bound to component.");
-        return;
+        auto renderer = canvasRenderer_.Upgrade();
+        if (!renderer) {
+            LOGE("ARKOALA CanvasPatternPeer::SetTransform canvas renderer not bound to component.");
+            return;
         }
-        pattern_->SetTransform(param);
+        auto pattern = renderer->GetCanvasPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetTransform(param);
     }
+    OHOS::Ace::RefPtr<CanvasRendererCls> GetCanvasRenderer()
+    {
+        return canvasRenderer_.Upgrade();
+    }
+    void SetCanvasRenderer(const OHOS::Ace::WeakPtr<CanvasRendererCls>& canvasRenderer)
+    {
+        canvasRenderer_ = canvasRenderer;
+    }
+    void SetId(int32_t id)
+    {
+        id_ = id;
+    }
+    int32_t GetId() const
+    {
+        return id_;
+    }
+    void SetUnit(OHOS::Ace::CanvasUnit unit)
+    {
+        unit_ = unit;
+    }
+    OHOS::Ace::CanvasUnit GetUnit()
+    {
+        return unit_;
+    }
+
 private:
-    CanvasPatternPtr pattern_ = nullptr;
+    int32_t id_ = 0;
+    OHOS::Ace::CanvasUnit unit_ = OHOS::Ace::CanvasUnit::DEFAULT;
+    OHOS::Ace::WeakPtr<CanvasRendererCls> canvasRenderer_ = nullptr;
 };
 
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CANVAS_PATTERN_PEER_IMPL_H
