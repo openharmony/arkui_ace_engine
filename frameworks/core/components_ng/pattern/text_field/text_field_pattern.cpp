@@ -2184,9 +2184,8 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (!(firstIsShow && secondIsShow) ||
-        paintProperty->GetInputStyleValue(InputStyle::DEFAULT) == InputStyle::INLINE) {
-        info.isInline = false;
+    if (!(firstIsShow && secondIsShow)) {
+        info.isHandleAnimation = false;
     }
     info.selectedBackgroundColor = selectedBackgroundColor;
     info.handleColor = handleColor;
