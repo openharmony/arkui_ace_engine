@@ -4049,6 +4049,32 @@ typedef enum {
      */
     NODE_CALENDAR_PICKER_TEXT_STYLE,
     /**
+     * @brief Defines the start date of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: date. The value like <b>"1970-1-1"</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: date. \n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_START = 16004,
+    /**
+     * @brief Defines the end date of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: date. The value like <b>"2100-12-31"</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: date. \n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_END = 16005,
+    /**
      * @brief Defines the color of the slider. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
