@@ -32,7 +32,7 @@ void FfiOHOSAceFrameworkGridCreate()
     if (!GridModel::GetInstance()) {
         GridModel::GetInstance()->Create(positionController, scrollBarProxy);
     } else {
-        LOGE("Grid Instance is null")
+        LOGE("Grid Instance is null");
     }
 }
 

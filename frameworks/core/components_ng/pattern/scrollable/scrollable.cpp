@@ -355,7 +355,6 @@ void Scrollable::HandleScrollEnd(const std::optional<float>& velocity)
 
 void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
-    ACE_SCOPED_TRACE("HandleDragStart, id:%d, tag:%s", nodeId_, nodeTag_.c_str());
     if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
         HandleTouchDown();
     }
@@ -384,7 +383,10 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     }
 #endif
     JankFrameReport::GetInstance().SetFrameJankFlag(JANK_RUNNING_SCROLL);
-    if (IsMouseWheelScroll(info)) {
+    auto isAxisEvent = IsMouseWheelScroll(info);
+    ACE_SCOPED_TRACE("HandleDragStart, inputEventType:%d, sourceTool:%d, IsMouseWheelScroll:%u, id:%d, tag:%s",
+        info.GetInputEventType(), info.GetSourceTool(), isAxisEvent, nodeId_, nodeTag_.c_str());
+    if (isAxisEvent) {
         InitAxisAnimator();
         if (!IsAxisAnimationRunning() && !IsSnapAnimationRunning()) {
             axisSnapDistance_ = currentPos_;
@@ -445,13 +447,17 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     auto isReverse = isReverseCallback_ && isReverseCallback_();
     mainDelta = isReverse ? Round(-mainDelta) : Round(mainDelta);
     JankFrameReport::GetInstance().RecordFrameUpdate();
-    if (IsMouseWheelScroll(info)) {
+    auto source = SCROLL_FROM_UPDATE;
+    auto isAxisEvent = IsMouseWheelScroll(info);
+    if (isAxisEvent) {
+        source = SCROLL_FROM_AXIS;
+    }
+    ACE_SCOPED_TRACE(
+        "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
+    if (isAxisEvent) {
         ProcessAxisUpdateEvent(mainDelta);
         return;
     }
-    auto source = SCROLL_FROM_UPDATE;
-    ACE_SCOPED_TRACE(
-        "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
 
@@ -460,10 +466,10 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     auto currentVsyncTime = context->GetVsyncTime();
-    CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
-    lastAxisVsyncTime_ = currentVsyncTime;
     auto snapType = GetSnapType();
     if (snapType != SnapType::NONE_SNAP && startSnapAnimationCallback_) {
+        CHECK_NULL_VOID(lastAxisVsyncTime_ != currentVsyncTime);
+        lastAxisVsyncTime_ = currentVsyncTime;
         auto snapDelta = 0.f;
         auto snapDirection = SnapDirection::NONE;
         auto isInitScroll = (snapType == SnapType::LIST_SNAP && snapDirection_ == SnapDirection::NONE) ||
@@ -484,8 +490,9 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
                 snapDirection = SnapDirection::NONE;
             }
         }
-        ACE_SCOPED_TRACE("ProcessAxisUpdateEvent start SnapAnimation, snapDelta:%f, snapDirection:%d, id:%d, tag:%s",
-            snapDelta, snapDirection, nodeId_, nodeTag_.c_str());
+        ACE_SCOPED_TRACE("ProcessAxisUpdateEvent start SnapAnimation, snapDelta:%f, snapDirection:%d, "
+                         "lastSnapDirection:%d, id:%d, tag:%s",
+            snapDelta, snapDirection, snapDirection_, nodeId_, nodeTag_.c_str());
         SnapAnimationOptions snapAnimationOptions = {
             .snapDelta = snapDelta,
             .animationVelocity = currentVelocity_,
@@ -500,6 +507,7 @@ void Scrollable::ProcessAxisUpdateEvent(float mainDelta)
         }
         return;
     }
+    lastAxisVsyncTime_ = currentVsyncTime;
     if (axisAnimator_) {
         ACE_SCOPED_TRACE("ProcessAxisUpdateEvent onAxis, mainDelta:%f, currentPos_:%f, id:%d, tag:%s", mainDelta,
             currentPos_, nodeId_, nodeTag_.c_str());

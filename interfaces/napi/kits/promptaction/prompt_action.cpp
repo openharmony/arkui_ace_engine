@@ -510,10 +510,10 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         return nullptr;
     }
     int32_t alignment = -1;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    if (pipeline != nullptr) {
-        auto toastTheme = pipeline->GetTheme<ToastTheme>();
-        if (toastTheme != nullptr) {
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    if (pipelineContext) {
+        auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
+        if (toastTheme) {
             alignment = toastTheme->GetAlign();
         }
     }

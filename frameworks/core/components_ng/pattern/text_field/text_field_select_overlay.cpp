@@ -674,4 +674,11 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
     }
     BaseTextSelectOverlay::UpdateSecondHandleOffset();
 }
+
+bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
 } // namespace OHOS::Ace::NG
