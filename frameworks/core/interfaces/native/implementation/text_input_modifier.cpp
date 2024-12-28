@@ -541,8 +541,13 @@ void CancelButton1Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextInputModelNG::SetCancelButton1(frameNode, convValue);
+    auto cleanButtonStyle = Converter::OptConvert<CleanNodeStyle>(value->style);
+    auto symbol = Converter::OptConvert<Ark_SymbolGlyphModifier>(value->icon);
+    TextFieldModelNG::SetCleanNodeStyle(frameNode, cleanButtonStyle);
+    if (symbol) {
+        TextFieldModelNG::SetCancelSymbolIcon(frameNode, nullptr);
+        LOGE("TextInputModifier::CancelButton1Impl need to know what data is in value->icon");
+    }
 }
 void SelectAllImpl(Ark_NativePointer node,
                    Ark_Boolean value)

@@ -2103,9 +2103,6 @@
                 "setFontFeatureTestFontFeatureValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
                 "setMaxLinesTestDefaultValues",
-
-                // New override in API 105?
-                "setCancelButton1TestCancelButtonStyleValidValues",
             ]
         },
         {
