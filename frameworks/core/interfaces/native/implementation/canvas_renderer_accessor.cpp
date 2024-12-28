@@ -268,7 +268,6 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
     auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
     CHECK_NULL_RETURN(bitmap, nullptr);
     auto opt = Converter::OptConvert<std::string>(*repetition);
-    CHECK_NULL_RETURN(opt, nullptr);
     std::string repeat = opt ? *opt : EMPTY_STRING;
     auto pattern = std::make_shared<OHOS::Ace::Pattern>();
     pattern->SetImgSrc(bitmap->GetSrc());
