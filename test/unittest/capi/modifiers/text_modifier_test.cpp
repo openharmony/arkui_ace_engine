@@ -25,6 +25,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -99,15 +100,22 @@ const auto ATTRIBUTE_CONTENT_NAME = "content";
 const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
 
-    struct EventsTracker {
-        static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
+static constexpr int TEST_RESOURCE_ID = 1000;
+static bool g_isCalled = false;
+struct CheckEvent {
+    int32_t resourceId;
+    Ark_NativePointer parentNode;
+};
+static std::optional<CheckEvent> checkEvent = std::nullopt;
+struct EventsTracker {
+    static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
 
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
-                return &textEventReceiver;
-            }
-        };
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+        .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
+            return &textEventReceiver;
+        }
     };
+};
 } // namespace
 
 class TextModifierTest : public ModifierTestBase<GENERATED_ArkUITextModifier,
@@ -130,6 +138,29 @@ public:
 
         // setup the test event handler
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+    }
+    CustomNodeBuilder getBuilderCb()
+    {
+        int32_t nodeId = 555;
+        auto node = BlankModelNG::CreateFrameNode(nodeId);
+        EXPECT_NE(node, nullptr);
+        static std::optional<RefPtr<UINode>> uiNode = node;
+        auto checkCallback = [](
+            Ark_VMContext context,
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
+        CustomNodeBuilder customBuilder =
+            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+        return customBuilder;
     }
 };
 
@@ -1212,5 +1243,54 @@ HWTEST_F(TextModifierTest, setDataDetectorConfigTestCallback, TestSize.Level1)
 
     EXPECT_EQ(actualResourceId, expectedResourceId);
     EXPECT_EQ(actualArg, expectedArg);
+/**
+ * @tc.name: setBindSelectionMenuTest
+ * @tc.desc: Check the functionality of setBindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    // Prepare callbacks
+    auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
+        g_isCalled = true;
+    };
+    auto onDisappearCallback = [](const Ark_Int32 resourceId) {
+        g_isCalled = true;
+    };
+    // Prepare options
+    Ark_SelectionMenuOptions value;
+    value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
+    auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
+    value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
+    auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
+    value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
+    auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    auto buildFunc = getBuilderCb();
+    modifier_->setBindSelectionMenu(node_,
+        Ark_TextSpanType::ARK_TEXT_SPAN_TYPE_TEXT, &buildFunc,
+        Ark_TextResponseType::ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK, &options);
+    // The testing part begins here:
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SelectOverlayInfo selectInfo;
+    // responseType and selectedType accord in setBindSelectionMenu
+    pattern->SetSelectedType(TextSpanType::TEXT);
+    pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
+    pattern->CopySelectionMenuParams(selectInfo);
+    ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
+    checkEvent = std::nullopt;
+    selectInfo.menuInfo.menuBuilder();
+    ASSERT_EQ(checkEvent.has_value(), true);
+    EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
+    g_isCalled = false;
+    ASSERT_NE(selectInfo.menuCallback.onAppear, nullptr);
+    selectInfo.menuCallback.onAppear();
+    EXPECT_TRUE(g_isCalled);
+    g_isCalled = false;
+    ASSERT_NE(selectInfo.menuCallback.onDisappear, nullptr);
+    selectInfo.menuCallback.onDisappear();
+    EXPECT_TRUE(g_isCalled);
 }
 }

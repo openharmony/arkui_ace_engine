@@ -16,11 +16,12 @@
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
 
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
-
-#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 
@@ -58,6 +59,12 @@ const std::string RADIO_GROUP_ATTR = "group";
 const std::string RADIO_VALUE_ATTR = "value";
 const auto RADIO_GROUP_VALUE = "test_value";
 const auto RADIO_VALUE_VALUE = "test_group";
+static constexpr int TEST_RESOURCE_ID = 1000;
+struct CheckEvent {
+    int32_t resourceId;
+    Ark_NativePointer parentNode;
+};
+static std::optional<CheckEvent> checkEvent = std::nullopt;
 
 static bool g_isCheckedTest = true;
 static auto radioOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
@@ -90,6 +97,30 @@ public:
         AddResource(RES_NAME, COLOR_BY_STRING);
 
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
+    }
+
+    CustomNodeBuilder getBuilderCb()
+    {
+        int32_t nodeId = 555;
+        auto node = BlankModelNG::CreateFrameNode(nodeId);
+        EXPECT_NE(node, nullptr);
+        static std::optional<RefPtr<UINode>> uiNode = node;
+        auto checkCallback = [](
+            Ark_VMContext context,
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
+        CustomNodeBuilder customBuilder =
+            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+        return customBuilder;
     }
 };
 
@@ -144,6 +175,33 @@ HWTEST_F(RadioModifierTest, RadioOptionsTest001, TestSize.Level1)
         EXPECT_EQ(indicatorTypeInvalid, INDICATOR_TYPE_TICK);
     }
 }
+
+/*
+ * @tc.name: RadioOptionsCustomBuilderTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
+{
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        Ark_RadioOptions radioOptions = {
+            .group = Converter::ArkValue<Ark_String>(RADIO_GROUP_VALUE),
+            .value = Converter::ArkValue<Ark_String>(RADIO_VALUE_VALUE),
+            .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_CUSTOM),
+        };
+        auto builder = getBuilderCb();
+        radioOptions.indicatorBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
+        modifier_->setRadioOptions(node_, &radioOptions);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        auto pattern = frameNode->GetPattern<RadioPattern>();
+        ASSERT_NE(pattern, nullptr);
+        checkEvent = std::nullopt;
+        pattern->SetRadioChecked(true);
+        ASSERT_EQ(checkEvent.has_value(), true);
+        EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
+    }
+}
+
 /**
  * @tc.name: RadioModifierTest001
  * @tc.desc: Test Radio setChecked.

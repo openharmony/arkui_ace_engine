@@ -530,6 +530,7 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     pattern->SetSelectedType(TextSpanType::TEXT); // Needed for logic of CopySelectionMenuParams()
     SelectOverlayInfo selectInfo;
     pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
     checkEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
     ASSERT_EQ(checkEvent.has_value(), true);
