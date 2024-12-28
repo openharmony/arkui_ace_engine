@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
-  
+
 #include <numeric>
 
 #include "base/utils/utils.h"
@@ -490,11 +490,11 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     if (gridMatrix_.empty()) {
         return { -1, -1 };
     }
-    for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
-        const auto& row = gridMatrix_.at(r);
-        for (const auto& it : row) {
-            if (it.second == target) {
-                return { r, it.first };
+    auto end = gridMatrix_.upper_bound(endMainLineIndex_);
+    for (auto row = gridMatrix_.lower_bound(startMainLineIndex_); row != end; ++row) {
+        for (const auto& cell : row->second) {
+            if (cell.second == target) {
+                return { row->first, cell.first };
             }
         }
     }
@@ -740,14 +740,18 @@ std::pair<int32_t, int32_t> GridLayoutInfo::GetItemPos(int32_t itemIdx) const
 
 GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 {
-    if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
+    auto it = gridMatrix_.find(endLine);
+    if (it == gridMatrix_.end()) {
         return {};
     }
-    for (int32_t rowIdx = endLine; rowIdx >= 0; --rowIdx) {
-        const auto& row = gridMatrix_.at(rowIdx);
-        for (auto it = row.rbegin(); it != row.rend(); ++it) {
-            if (it->second > 0) {
-                return { .itemIdx = it->second, .y = rowIdx, .x = it->first };
+
+    // Create reverse iterator starting from endLine position
+    for (auto rIt = std::make_reverse_iterator(++it); rIt != gridMatrix_.rend(); ++rIt) {
+        const auto& row = rIt->second;
+        // Search backwards in the row for first positive index
+        for (auto cell = row.rbegin(); cell != row.rend(); ++cell) {
+            if (cell->second > 0) {
+                return { .itemIdx = cell->second, .y = rIt->first, .x = cell->first };
             }
         }
     }
@@ -989,13 +993,9 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.lower_bound(endLine);
-    auto it = lineHeightMap_.find(startLine);
-    if (it == lineHeightMap_.end()) {
-        return 0.0f;
-    }
     float totalHeight = 0.0f;
-    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
+    auto endIt = lineHeightMap_.lower_bound(endLine);
+    for (auto it = lineHeightMap_.lower_bound(startLine); it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;
