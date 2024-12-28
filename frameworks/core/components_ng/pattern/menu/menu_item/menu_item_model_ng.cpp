@@ -54,6 +54,13 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     menuItem->AddChild(customNode);
 }
 
+void MenuItemModelNG::AddChild(FrameNode* frameNode, const RefPtr<NG::UINode>& customNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(customNode);
+    frameNode->AddChild(customNode);
+}
+
 /*
  * The structure of menu item is designed as follows :
  * |--menu_item
@@ -118,6 +125,12 @@ void MenuItemModelNG::Create(const MenuItemProperties& menuItemProps)
     }
 
     UpdateMenuProperty(menuItem, menuItemProps);
+}
+
+void MenuItemModelNG::UpdateMenuProperty(FrameNode* frameNode, const MenuItemProperties& menuItemProps)
+{
+    CHECK_NULL_VOID(frameNode);
+    UpdateMenuProperty(frameNode, menuItemProps);
 }
 
 RefPtr<FrameNode> MenuItemModelNG::CreateFrameNode(int32_t nodeId)

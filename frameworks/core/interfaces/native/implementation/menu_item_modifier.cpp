@@ -15,6 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 
@@ -52,6 +53,13 @@ SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
 {
     return nullptr;
 }
+
+template<>
+void AssignCast(std::optional<std::function<void(WeakPtr<NG::FrameNode>)>>& dst, const Ark_SymbolGlyphModifier& src)
+{
+    LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+    dst = std::nullopt;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -71,9 +79,48 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //MenuItemModelNG::SetSetMenuItemOptions(frameNode, convValue);
-    LOGE("MenuItemModifier::SetMenuItemOptionsImpl is not implemented, Ark_CustomObject is not supported!");
+    CHECK_NULL_VOID(value);
+    Converter::VisitUnion(value->value,
+        [frameNode, node](const Ark_MenuItemOptions& value0) {
+            MenuItemProperties menuItemProps;
+            std::optional<std::string> content = Converter::OptConvert<std::string>(value0.content);
+            menuItemProps.content = content ? content.value() : "";
+            menuItemProps.startIcon = Converter::OptConvert<ImageSourceInfo>(value0.startIcon);
+            menuItemProps.endIcon = Converter::OptConvert<ImageSourceInfo>(value0.endIcon);
+            menuItemProps.labelInfo = Converter::OptConvert<std::string>(value0.labelInfo);
+            menuItemProps.buildFunc = std::nullopt;
+            auto builderOpt = Converter::OptConvert<CustomNodeBuilder>(value0.builder);
+            if (builderOpt.has_value()) {
+                auto builder = [callback = CallbackHelper(builderOpt.value(), frameNode), node]() -> RefPtr<UINode> {
+                    return callback.BuildSync(node);
+                };
+                menuItemProps.buildFunc = builder;
+            }
+            menuItemProps.startApply = nullptr;
+            auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
+            if (symbolStart.has_value()) {
+                auto startApply =
+                    Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolStart.value());
+                menuItemProps.startApply = startApply ? startApply.value() : nullptr;
+            }
+            menuItemProps.endApply = nullptr;
+            auto symbolEnd = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolEndIcon);
+            if (symbolEnd.has_value()) {
+                auto endApply = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolEnd.value());
+                menuItemProps.endApply = endApply ? endApply.value() : nullptr;
+            }
+            LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
+            MenuItemModelNG::UpdateMenuProperty(frameNode, menuItemProps);
+        },
+        [frameNode, node](const CustomNodeBuilder& value1) {
+            RefPtr<UINode> customNode;
+            customNode = CallbackHelper(value1, frameNode).BuildSync(node);
+            if (customNode) {
+                MenuItemModelNG::AddChild(frameNode, customNode);
+            }
+        },
+        []() {}
+    );
 }
 } // MenuItemInterfaceModifier
 namespace MenuItemAttributeModifier {
