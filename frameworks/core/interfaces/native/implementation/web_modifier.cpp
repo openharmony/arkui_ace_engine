@@ -1788,7 +1788,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     if (arkOptions) {
         InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
     }
-    if (arkOptions && menuType) {
+    if (menuType) {
         menuParam.previewMode = MenuPreviewMode::CUSTOM;
         auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
         if (preview.has_value()) {
