@@ -482,6 +482,34 @@ void ViewAbstractModelNG::BindContentCover(bool isShow, std::function<void(const
         contentCoverParam, targetNode);
 }
 
+void ViewAbstractModelNG::BindContentCover(FrameNode* frameNode, bool isShow,
+    std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+    NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+    std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+    const NG::ContentCoverParam& contentCoverParam)
+{
+    auto targetNode = AceType::Claim(frameNode);
+    CHECK_NULL_VOID(targetNode);
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    // delete full screen modal when target node destroy
+    auto destructor = [id = targetNode->GetId()]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteModal(id);
+    };
+    targetNode->PushDestroyCallbackWithTag(destructor, V2::MODAL_PAGE_TAG);
+
+    overlayManager->BindContentCover(isShow, std::move(callback), std::move(buildFunc), modalStyle,
+        std::move(onAppear), std::move(onDisappear), std::move(onWillAppear), std::move(onWillDisappear),
+        contentCoverParam, targetNode);
+}
+
 void ViewAbstractModelNG::RegisterContextMenuKeyEvent(
     const RefPtr<FrameNode>& targetNode, std::function<void()>& buildFunc, const MenuParam& menuParam)
 {
@@ -592,6 +620,11 @@ void ViewAbstractModelNG::DismissSheet()
 }
 
 void ViewAbstractModelNG::DismissContentCover()
+{
+    ViewAbstractModelNG::DismissContentCoverStatic();
+}
+
+void ViewAbstractModelNG::DismissContentCoverStatic()
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);

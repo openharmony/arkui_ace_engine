@@ -1331,6 +1331,7 @@ public:
     RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
     void DismissContentCover() override;
+    static void DismissContentCoverStatic();
     void SheetSpringBack() override;
 
     void SetAccessibilityGroup(bool accessible) override;
@@ -1562,6 +1563,12 @@ public:
     static void BindContextMenuStatic(const RefPtr<FrameNode>& targetNode, ResponseType type,
         std::function<void()>&& buildFunc, const NG::MenuParam& menuParam, std::function<void()>&& previewBuildFunc);
     static void BindDragWithContextMenuParamsStatic(FrameNode* targetNode, const NG::MenuParam& menuParam);
+
+    static void BindContentCover(FrameNode* targetNode, bool isShow,
+        std::function<void(const std::string&)>&& callback, std::function<RefPtr<UINode>()>&& buildFunc,
+        NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        const NG::ContentCoverParam& contentCoverParam);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);
