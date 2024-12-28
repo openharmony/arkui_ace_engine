@@ -609,10 +609,14 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextAreaModelNG::SetCustomKeyboard(frameNode, convValue);
-    LOGE("ARKOALA TextAreaAttributeModifier.CustomKeyboardImpl -> Method is not implemented.");
+    CHECK_NULL_VOID(options);
+    auto keyboardOptions = options ? Converter::OptConvert<Ark_KeyboardOptions>(*options) : std::nullopt;
+    bool supportAvoidance = keyboardOptions &&
+        Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
+    auto uiNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
+    TextFieldModelNG::SetCustomKeyboard(
+        frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
 }
 } // TextAreaAttributeModifier
 
