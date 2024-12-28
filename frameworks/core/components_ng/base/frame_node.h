@@ -473,7 +473,7 @@ public:
 
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
-    OffsetF GetPaintRectOffsetToPage() const;
+    OffsetF GetPaintRectOffsetToStage() const;
 
     RectF GetPaintRectWithTransform() const;
 
