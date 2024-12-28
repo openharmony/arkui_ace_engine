@@ -1943,16 +1943,6 @@ HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
     holder->TearDown();
 }
 
-
-//createPattern
-//measureText
-//getTransform
-//setPixelMap
-//setImageSmoothingQuality
-//setLineCap
-//setLineJoin
-
-
 /**
  * @tc.name: createPatternTest
  * @tc.desc:
@@ -1987,6 +1977,41 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
 
     holder->TearDown();
 }
+
+/**
+ * @tc.name: getTransformTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, getTransformTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->measureText, nullptr);
+    for (const auto& expectedX : NUMBER_TEST_PLAN) {
+        for (const auto& expectedY : NUMBER_TEST_PLAN) {
+            holder->SetUp();
+            auto param = TransformParam {
+                .scaleX = expectedX,
+                .scaleY = expectedY,
+            };
+            holder->param = std::make_shared<TransformParam>(param);
+            auto container = Container::Current();
+            container->SetUseNewPipeline();
+            auto result = accessor_->getTransform(peer_);
+            auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(result);
+
+            std::printf("matrix: result: %s peer: %s w: %.2f h: %.2f %d\n", result == nullptr ? "null" : "exist",
+                matrixPeer == nullptr ? "null" : "exist", matrixPeer->transform.scaleX, matrixPeer->transform.scaleY,
+                holder->isCalled);
+
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleX, holder->param->scaleX));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleY, holder->param->scaleY));
+        }
+    }
+    holder->TearDown();
+}
+
 /**
  * @tc.name: setImageSmoothingQualityTest
  * @tc.desc:
@@ -2000,7 +2025,8 @@ HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingQualityTest, TestSize.Leve
         holder->SetUp();
         accessor_->setImageSmoothingQuality(peer_, &actual);
 
-        std::printf("imageSmoothing: holder text: %s==%s isCalled: %d\n", holder->text.c_str(), expected.c_str(), holder->isCalled);
+        std::printf("imageSmoothing: holder text: %s==%s isCalled: %d\n", holder->text.c_str(), expected.c_str(),
+            holder->isCalled);
 
         if (expected == INVALID_STRING_VALUE) {
             EXPECT_FALSE(holder->isCalled);
@@ -2052,22 +2078,5 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
         EXPECT_EQ(holder->lineJoin, expected);
     }
     holder->TearDown();
-}
-
-/**
- * @tc.name: getLineDashOffsetTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, get2Test, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-    holder->TearDown();
-}
-
-HWTEST_F(CanvasRendererAccessorTest, holdTest, TestSize.Level1){
-    char *p =  nullptr;
-    *p = '\0';
 }
 } // namespace OHOS::Ace::NG

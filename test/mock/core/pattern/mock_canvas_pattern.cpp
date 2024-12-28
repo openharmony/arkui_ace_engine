@@ -1401,6 +1401,11 @@ void CanvasPattern::SetFilterParam(const std::string& filterStr)
 
 TransformParam CanvasPattern::GetTransform() const
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        return *holder->param;
+    }
     return paintMethod_->GetTransform();
 }
 
