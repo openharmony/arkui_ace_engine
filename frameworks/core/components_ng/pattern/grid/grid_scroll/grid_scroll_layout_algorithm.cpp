@@ -307,6 +307,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_);
 
+    if (startIndex == -1 && endIndex == -1) {
+        startIndex = endIndex = info_.childrenCount_;
+    }
     if (!info_.hasMultiLineItem_) {
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
             props->GetShowCachedItemsValue(false));
