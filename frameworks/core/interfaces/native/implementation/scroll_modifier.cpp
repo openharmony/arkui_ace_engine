@@ -66,6 +66,21 @@ void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBegi
     ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
     dst = ret;
 }
+
+template<>
+TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
+{
+    auto xOffset = OptConvert<Dimension>(src.xOffset);
+    auto yOffset = OptConvert<Dimension>(src.yOffset);
+    TwoDimensionScrollResult result;
+    if (xOffset.has_value()) {
+        result.xOffset = xOffset.value();
+    }
+    if (yOffset.has_value()) {
+        result.yOffset = yOffset.value();
+    }
+    return result;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -146,8 +161,26 @@ void OnWillScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
+    auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto call = [arkCallback = CallbackHelper(callValue.value(), frameNode)] (
+            const Dimension& xOffset,
+            const Dimension& yOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                TwoDimensionScrollResult,
+                Ark_OffsetResult,
+                Callback_OffsetResult_Void>(
+                Converter::ArkValue<Ark_Number>(xOffset),
+                Converter::ArkValue<Ark_Number>(yOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            return retVal.value_or(TwoDimensionScrollResult());
+        };
+        ScrollModelNG::SetOnWillScroll(frameNode, call);
+    }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnWillScrollCallback* value)

@@ -1321,4 +1321,79 @@ HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.L
     ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
     EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
 }
+
+/**
+ * @tc.name: OnWillScroll_SetCallback
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    struct ScrollData
+    {
+        Ark_ScrollState state;
+        Ark_ScrollSource source;
+        Ark_Int32 nodeId;
+    };
+    static std::optional<ScrollData> otherState;
+
+    auto callback = [](
+        Ark_VMContext context,
+        const Ark_Int32 resourceId,
+        const Ark_Number xOffset,
+        const Ark_Number yOffset,
+        Ark_ScrollState scrollState,
+        Ark_ScrollSource scrollSource,
+        const Callback_OffsetResult_Void continuation) {
+        otherState = {scrollState, scrollSource, resourceId};
+        Ark_OffsetResult retVal;
+        retVal.xOffset = xOffset;
+        retVal.yOffset = yOffset;
+        CallbackHelper(continuation).Invoke(retVal);
+    };
+
+    auto id = Converter::ArkValue<Ark_Int32>(123);
+
+    auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
+        Converter::ArkValue<ScrollOnWillScrollCallback>(nullptr, callback, id));
+    ASSERT_FALSE(eventHub->GetScrollEdgeEvent());
+
+    ASSERT_NE(modifier_->setOnWillScroll, nullptr);
+    modifier_->setOnWillScroll(node_, &apiCall);
+
+    ASSERT_TRUE(eventHub->GetOnWillScrollEvent());
+    Dimension x(212);
+    Dimension y(984);
+    auto returnValue = eventHub->GetOnWillScrollEvent()(x, y, ScrollState::FLING, ScrollSource::SCROLL_BAR);
+    EXPECT_EQ(returnValue.xOffset.Value(), 212);
+    EXPECT_EQ(returnValue.yOffset.Value(), 984);
+    ASSERT_TRUE(otherState.has_value());
+    EXPECT_EQ(Ark_ScrollState::ARK_SCROLL_STATE_FLING, otherState->state);
+    EXPECT_EQ(Ark_ScrollSource::ARK_SCROLL_SOURCE_SCROLL_BAR, otherState->source);
+    EXPECT_EQ(id, otherState->nodeId);
+}
+
+/**
+ * @tc.name: OnWillScroll_SetNullptrCallback
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+    ASSERT_NE(modifier_->setOnWillScroll, nullptr);
+    modifier_->setOnWillScroll(node_, nullptr);
+    ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
+}
+
 } // namespace OHOS::Ace::NG
