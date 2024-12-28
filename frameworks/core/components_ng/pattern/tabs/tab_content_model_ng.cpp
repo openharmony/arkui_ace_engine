@@ -318,7 +318,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
     if (isFrameNode) {
-        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::SUB_COMPONENT_CONTENT);
     } else {
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
     }
