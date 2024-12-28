@@ -1076,6 +1076,10 @@ void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
     uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
 }
 
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
+}
+
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
