@@ -26,8 +26,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/implementation/scroller_peer_impl.h"
 
-#include "core/interfaces/native/utility/callback_helper.h"
-
 namespace OHOS::Ace::NG {
 
 using namespace testing;
