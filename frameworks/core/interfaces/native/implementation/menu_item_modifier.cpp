@@ -57,6 +57,7 @@ SelectIconType Convert(const Ark_SymbolGlyphModifier& src)
 template<>
 void AssignCast(std::optional<std::function<void(WeakPtr<NG::FrameNode>)>>& dst, const Ark_SymbolGlyphModifier& src)
 {
+    LOGE("MenuItemModifier::SetMenuItemOptionsImpl symbolStart and symbolEnd attributes are stubs.");
     dst = std::nullopt;
 }
 }
