@@ -94,7 +94,8 @@ struct EffectOption {
     std::unique_ptr<JsonValue> ToJsonValue() const
     {
         static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
-        static const char* POLICY[] = { "FOLLOWS_WINDOW_ACTIVE_STATE", "ALWAYS_ACTIVE", "ALWAYS_INACTIVE" };
+        static const char* POLICY[] = { "BlurStyleActivePolicy.FOLLOWS_WINDOW_ACTIVE_STATE",
+            "BlurStyleActivePolicy.ALWAYS_ACTIVE", "BlurStyleActivePolicy.ALWAYS_INACTIVE" };
         static const char* BLUR_TYPE[] = { "WITHIN_WINDOW", "BEHIND_WINDOW" };
         auto jsonEffect = JsonUtil::Create(true);
         auto jsonBrightnessOption = JsonUtil::Create(true);
