@@ -92,9 +92,9 @@ public:
         ResetGestureSelection();
     }
 
-    void EndGestureSelection()
+    void EndGestureSelection(const TouchLocationInfo& locationInfo)
     {
-        OnTextGenstureSelectionEnd();
+        OnTextGenstureSelectionEnd(locationInfo);
         ResetGestureSelection();
     }
 
@@ -106,7 +106,7 @@ protected:
         return -1;
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
-    virtual void OnTextGenstureSelectionEnd() {}
+    virtual void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) {}
     virtual void DoTextSelectionTouchCancel() {}
     int32_t GetSelectingFingerId()
     {

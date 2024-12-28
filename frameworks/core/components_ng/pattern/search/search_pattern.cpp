@@ -652,7 +652,7 @@ void SearchPattern::InitTextFieldClickEvent()
         searchPattern->OnClickTextField();
     };
     textFieldClickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
-    textFieldGesture->AddClickEvent(textFieldClickListener_);
+    textFieldGesture->AddClickAfterEvent(textFieldClickListener_);
 }
 
 void SearchPattern::InitSearchController()

@@ -271,7 +271,8 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
     pattern->SetupMagnifier();
     pattern->magnifierController_->magnifierNodeExist_ = true;
     auto secondHandle_ = pattern->textSelector_.secondHandle;
-    pattern->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_NE(secondHandle_, pattern->textSelector_.secondHandle);
     EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
@@ -289,7 +290,8 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->textForDisplay_ = u"";
     auto secondHandle_ = pattern->textSelector_.secondHandle;
-    pattern->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
 }
 
