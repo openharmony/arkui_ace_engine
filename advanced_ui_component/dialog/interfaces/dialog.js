@@ -73,7 +73,7 @@ const BUTTON_MIN_FONT_SIZE = lazyInit(() => {
         params: ['sys.float.dialog_button_font_min_size'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
-    }, 16);
+    }, 9);
 });
 const BUTTON_MAX_FONT_SIZE = lazyInit(() => {
     return getLengthMetricsByResource({
@@ -82,7 +82,7 @@ const BUTTON_MAX_FONT_SIZE = lazyInit(() => {
         params: ['sys.float.dialog_button_font_max_size'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
-    }, 9);
+    }, 16);
 });
 const DEFAULT_IMAGE_SIZE = lazyInit(() => {
     return getLengthMetricsByResource({
@@ -208,7 +208,7 @@ const ERROR_BUTTON_STYLE = lazyInit(() => {
         params: ['sys.float.dialog_error_button_style'],
         'bundleName': '__harDefaultBundleName__',
         'moduleName': '__harDefaultModuleName__'
-    }, 2);
+    }, 2, true);
 });
 const IS_FADEOUT_ENABLE = lazyInit(() => {
     return getString(125831120) === FADEOUT_ENABLE;
