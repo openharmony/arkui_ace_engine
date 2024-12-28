@@ -1024,6 +1024,7 @@ public:
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
+    void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1366,6 +1367,8 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
     bool isDragResizeStart_ = false;
+    double dragResize_preHight_ = 0.0;
+    double dragResize_preWidth_ = 0.0;
 #endif
 };
 

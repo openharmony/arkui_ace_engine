@@ -1233,6 +1233,9 @@ private:
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;
+    int64_t last_height_ = 0L;
+    int64_t last_width_ = 0L;
+    bool dragWindowFlag_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;
