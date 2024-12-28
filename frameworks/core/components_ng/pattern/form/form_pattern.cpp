@@ -843,8 +843,9 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 
 void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f  borderWidth: %{public}f",
-        info.width.Value(), info.height.Value(), info.borderWidth);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "update size, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
+        info.id, info.width.Value(), info.height.Value(), info.borderWidth);
     cardInfo_.width = info.width;
     cardInfo_.height = info.height;
     cardInfo_.borderWidth = info.borderWidth;
@@ -1323,6 +1324,9 @@ void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node
         boundWidth = size.Width() - cardInfo_.borderWidth * DOUBLE;
         boundHeight = size.Height() - cardInfo_.borderWidth * DOUBLE;
     }
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "attach rs node, id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
+        cardInfo_.id, boundWidth, boundHeight, cardInfo_.borderWidth);
     externalRenderContext->SetBounds(round(cardInfo_.borderWidth), round(cardInfo_.borderWidth),
         round(boundWidth), round(boundHeight));
 
@@ -1437,6 +1441,10 @@ void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float
 {
     auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
     CHECK_NULL_VOID(externalRenderContext);
+    TAG_LOGI(AceLogTag::ACE_FORM,
+        "FireFormSurfaceChangeCallback, "
+        "id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
+        cardInfo_.id, width, height, borderWidth);
     externalRenderContext->SetBounds(round(borderWidth), round(borderWidth), round(width - borderWidth * DOUBLE),
         round(height - borderWidth * DOUBLE));
     auto host = GetHost();
