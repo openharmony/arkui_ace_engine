@@ -1295,11 +1295,6 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSiz
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.Level1)
- * @tc.name: OnWillScroll_SetCallback
- * @tc.desc: Test OnWillScrollImpl
- * @tc.type: FUNC
- */
-HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
@@ -1328,6 +1323,19 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
     ScrollFrameResult result = eventHub->GetOnScrollFrameBegin()(dimension, state);
     EXPECT_EQ(result.offset.ConvertToPx(), dimension.ConvertToPx());
 }
+
+/**
+ * @tc.name: OnWillScroll_SetCallback
+ * @tc.desc: Test OnWillScrollImpl
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
     struct ScrollData
     {
         Ark_ScrollState state;
