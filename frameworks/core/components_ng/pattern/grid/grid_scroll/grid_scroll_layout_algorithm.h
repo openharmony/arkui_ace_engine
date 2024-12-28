@@ -105,6 +105,7 @@ private:
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
+    void FillCurrentLine(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
     int32_t MeasureNewChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,

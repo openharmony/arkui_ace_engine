@@ -620,10 +620,38 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     // fill current line first
+    FillCurrentLine(mainSize, crossSize, layoutWrapper);
+
+    if (GreatNotEqual(mainLength, mainSize)) {
+        if (IsScrollToEndLine()) {
+            TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
+            // scrollToIndex(AUTO) on first layout
+            moveToEndLineIndex_ = -1;
+        }
+        return;
+    }
+    // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
+    // part of the viewport
+    while (LessNotEqual(mainLength, mainSize)) {
+        float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+        if (GreatOrEqual(lineHeight, 0.0)) {
+            mainLength += (lineHeight + mainGap_);
+            continue;
+        }
+        info_.reachEnd_ = true;
+        return;
+    };
+    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
+    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
+}
+
+void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
+{
     auto mainIter = info_.gridMatrix_.find(currentMainLineIndex_);
     auto nextMain = info_.gridMatrix_.find(currentMainLineIndex_ + 1);
     if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_ &&
         nextMain == info_.gridMatrix_.end()) {
+        bool doneFillCurrentLine = false;
         auto currentIndex = info_.endIndex_ + 1;
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
@@ -649,30 +677,12 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
             LargeItemLineHeight(itemWrapper, hasNormalItem);
             info_.endIndex_ = currentIndex;
             currentIndex++;
+            doneFillCurrentLine = true;
+        }
+        if (doneFillCurrentLine) {
+            info_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
         }
     }
-
-    if (GreatNotEqual(mainLength, mainSize)) {
-        if (IsScrollToEndLine()) {
-            TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
-            // scrollToIndex(AUTO) on first layout
-            moveToEndLineIndex_ = -1;
-        }
-        return;
-    }
-    // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
-    // part of the viewport
-    while (LessNotEqual(mainLength, mainSize)) {
-        float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-        if (GreatOrEqual(lineHeight, 0.0)) {
-            mainLength += (lineHeight + mainGap_);
-            continue;
-        }
-        info_.reachEnd_ = true;
-        return;
-    };
-    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
-    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
 }
 
 OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
