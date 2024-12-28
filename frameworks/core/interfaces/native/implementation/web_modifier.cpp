@@ -1783,19 +1783,18 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_EQUAL_VOID(elType.has_value(), false);
     MenuParam menuParam;
     auto arkOptions = options ? Converter::OptConvert<Ark_SelectionMenuOptionsExt>(*options) : std::nullopt;
+    auto menuType = arkOptions ? Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType) : std::nullopt;
     std::function<void()> contentNodeBuilder = nullptr, previewNodeBuilder = nullptr;
     if (arkOptions) {
         InitCallbackParams_(frameNode, menuParam, arkOptions.value().onAppear, arkOptions.value().onDisappear);
-        auto menuType = Converter::OptConvert<SelectionMenuType>(arkOptions.value().menuType);
-        bool isPreviewMenu = menuType && menuType.value() == SelectionMenuType::PREVIEW_MENU;
-        if (menuType) {
-            menuParam.previewMode = MenuPreviewMode::CUSTOM;
-            auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
-            if (preview.has_value()) {
-                previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
-                    NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
-                };
-            }
+    }
+    if (arkOptions && menuType) {
+        menuParam.previewMode = MenuPreviewMode::CUSTOM;
+        auto preview = Converter::OptConvert<CustomNodeBuilder>(arkOptions.value().preview);
+        if (preview.has_value()) {
+            previewNodeBuilder = [callback = CallbackHelper(preview.value(), frameNode), node]() {
+                NG::ViewStackProcessor::GetInstance()->Push(callback.BuildSync(node));
+            };
         }
     }
     auto resType = Converter::OptConvert<ResponseType>(responseType);
