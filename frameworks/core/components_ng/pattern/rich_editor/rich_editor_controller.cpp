@@ -140,7 +140,7 @@ SelectionInfo RichEditorController::FromStyledString(RefPtr<SpanStringBase> span
 
 WeakPtr<RichEditorPattern> RichEditorController::GetPattern() const
 {
-    return pattern_.Upgrade();
+    return pattern_;
 }
 
 } // namespace OHOS::Ace::NG
