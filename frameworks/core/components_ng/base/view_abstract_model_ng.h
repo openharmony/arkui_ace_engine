@@ -1328,11 +1328,13 @@ public:
         std::function<void(const float)>&& onDetentsDidChange,
         std::function<void(const float)>&& onWidthDidChange,
         std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack) override;
-    RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
+    static RefPtr<PipelineContext> GetSheetContext(NG::SheetStyle& sheetStyle);
     void DismissSheet() override;
+    static void DismissSheetStatic();
     void DismissContentCover() override;
     static void DismissContentCoverStatic();
     void SheetSpringBack() override;
+    static void SheetSpringBackStatic();
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
@@ -1569,6 +1571,18 @@ public:
         NG::ModalStyle& modalStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,
         std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
         const NG::ContentCoverParam& contentCoverParam);
+
+    static void BindSheet(FrameNode* frameNode, bool isShow,
+        std::function<void(const std::string&)>&& callback,
+        std::function<void()>&& buildFunc,
+        std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear,
+        std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+        std::function<void(const int32_t info)>&& onWillDismiss,
+        std::function<void()>&& onWillAppear, std::function<void()>&& onWillDisappear,
+        std::function<void(const float)>&& onHeightDidChange,
+        std::function<void(const float)>&& onDetentsDidChange,
+        std::function<void(const float)>&& onWidthDidChange,
+        std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack);
 
 private:
     static bool CheckMenuIsShow(const MenuParam& menuParam, int32_t targetId);

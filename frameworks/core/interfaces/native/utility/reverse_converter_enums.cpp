@@ -450,6 +450,17 @@ void AssignArkValue(Ark_SharedTransitionEffectType& dst, const SharedTransitionE
     }
 }
 
+void AssignArkValue(Ark_SheetType& dst, const SheetType& src)
+{
+    switch (src) {
+        case SheetType::SHEET_BOTTOM: dst = ARK_SHEET_TYPE_BOTTOM; break;
+        case SheetType::SHEET_CENTER: dst = ARK_SHEET_TYPE_CENTER; break;
+        case SheetType::SHEET_POPUP: dst = ARK_SHEET_TYPE_POPUP; break;
+        default: dst = static_cast<Ark_SheetType>(-1);
+            LOGE("Unexpected enum value in SheetType: %{public}d", src);
+    }
+}
+
 void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src)
 {
     switch (src) {

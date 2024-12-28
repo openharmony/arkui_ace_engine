@@ -88,6 +88,17 @@ void AssignCast(std::optional<BlurStyleActivePolicy>& dst, const Ark_BlurStyleAc
 }
 
 template<>
+void AssignCast(std::optional<BlurStyleOption>& dst, const Ark_BlurStyle& src)
+{
+    auto blurStyle = OptConvert<BlurStyle>(src);
+    if (blurStyle) {
+        BlurStyleOption blurStyleOptions;
+        blurStyleOptions.blurStyle = blurStyle.value();
+        dst = blurStyleOptions;
+    }
+}
+
+template<>
 void AssignCast(std::optional<BorderStyle>& dst, const Ark_BorderStyle& src)
 {
     switch (src) {
@@ -336,6 +347,52 @@ void AssignCast(std::optional<ShadowType>& dst, const Ark_ShadowType& src)
         case ARK_SHADOW_TYPE_COLOR: dst = ShadowType::COLOR; break;
         case ARK_SHADOW_TYPE_BLUR: dst = ShadowType::BLUR; break;
         default: LOGE("Unexpected enum value in Ark_ShadowType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SheetKeyboardAvoidMode>& dst, const Ark_SheetKeyboardAvoidMode& src)
+{
+    switch (src) {
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_NONE: dst = SheetKeyboardAvoidMode::NONE; break;
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_RESIZE:
+            dst = SheetKeyboardAvoidMode::TRANSLATE_AND_RESIZE; break;
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_RESIZE_ONLY: dst = SheetKeyboardAvoidMode::RESIZE_ONLY; break;
+        case ARK_SHEET_KEYBOARD_AVOID_MODE_TRANSLATE_AND_SCROLL:
+            dst = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL; break;
+        default: LOGE("Unexpected enum value in Ark_SheetKeyboardAvoidMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SheetLevel>& dst, const Ark_SheetMode& src)
+{
+    switch (src) {
+        case ARK_SHEET_MODE_OVERLAY: dst = SheetLevel::OVERLAY; break;
+        case ARK_SHEET_MODE_EMBEDDED: dst = SheetLevel::EMBEDDED; break;
+        default: LOGE("Unexpected enum value in Ark_SheetMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SheetMode>& dst, const Ark_SheetSize& src)
+{
+    switch (src) {
+        case ARK_SHEET_SIZE_MEDIUM: dst = SheetMode::MEDIUM; break;
+        case ARK_SHEET_SIZE_LARGE: dst = SheetMode::LARGE; break;
+        case ARK_SHEET_SIZE_FIT_CONTENT: dst = SheetMode::AUTO; break;
+        default: LOGE("Unexpected enum value in Ark_SheetSize: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src)
+{
+    switch (src) {
+        case ARK_SHEET_TYPE_BOTTOM: dst = SheetType::SHEET_BOTTOM; break;
+        case ARK_SHEET_TYPE_CENTER: dst = SheetType::SHEET_CENTER; break;
+        case ARK_SHEET_TYPE_POPUP: dst = SheetType::SHEET_POPUP; break;
+        default: LOGE("Unexpected enum value in Ark_SheetType: %{public}d", src);
     }
 }
 
@@ -1285,6 +1342,15 @@ void AssignCast(std::optional<ScrollAlign>& dst, const Ark_ScrollAlign& src)
         case ARK_SCROLL_ALIGN_END: dst = ScrollAlign::END; break;
         case ARK_SCROLL_ALIGN_AUTO: dst = ScrollAlign::AUTO; break;
         default: LOGE("Unexpected enum value in Ark_ScrollAlign: %{public}d", src);
+    }
+}
+
+template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollSizeMode& src)
+{
+    switch (src) {
+        case ARK_SCROLL_SIZE_MODE_FOLLOW_DETENT: dst = ScrollSizeMode::FOLLOW_DETENT; break;
+        case ARK_SCROLL_SIZE_MODE_CONTINUOUS: dst = ScrollSizeMode::CONTINUOUS; break;
+        default: LOGE("Unexpected enum value in Ark_ScrollSizeMode: %{public}d", src);
     }
 }
 

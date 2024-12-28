@@ -560,7 +560,24 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
     std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack)
 {
-    auto targetNode = AceType::Claim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ViewAbstractModelNG::BindSheet(targetNode, isShow, std::move(callback), std::move(buildFunc),
+        std::move(titleBuildFunc), sheetStyle, std::move(onAppear), std::move(onDisappear),
+        std::move(shouldDismiss), std::move(onWillDismiss), std::move(onWillAppear), std::move(onWillDisappear),
+        std::move(onHeightDidChange), std::move(onDetentsDidChange), std::move(onWidthDidChange),
+        std::move(onTypeDidChange), std::move(sheetSpringBack));
+}
+
+void ViewAbstractModelNG::BindSheet(FrameNode* frameNode, bool isShow,
+    std::function<void(const std::string&)>&& callback,
+    std::function<void()>&& buildFunc, std::function<void()>&& titleBuildFunc, NG::SheetStyle& sheetStyle,
+    std::function<void()>&& onAppear, std::function<void()>&& onDisappear, std::function<void()>&& shouldDismiss,
+    std::function<void(const int32_t info)>&& onWillDismiss, std::function<void()>&& onWillAppear,
+    std::function<void()>&& onWillDisappear, std::function<void(const float)>&& onHeightDidChange,
+    std::function<void(const float)>&& onDetentsDidChange, std::function<void(const float)>&& onWidthDidChange,
+    std::function<void(const float)>&& onTypeDidChange, std::function<void()>&& sheetSpringBack)
+{
+    auto targetNode = AceType::Claim(frameNode);
     CHECK_NULL_VOID(targetNode);
     auto instanceId = sheetStyle.instanceId.has_value() ? sheetStyle.instanceId.value() : Container::CurrentId();
     auto buildNodeFunc = [buildFunc, instanceId]() -> RefPtr<UINode> {
@@ -611,6 +628,11 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
 
 void ViewAbstractModelNG::DismissSheet()
 {
+    ViewAbstractModelNG::DismissSheetStatic();
+}
+
+void ViewAbstractModelNG::DismissSheetStatic()
+{
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
     CHECK_NULL_VOID(sheet);
@@ -634,6 +656,11 @@ void ViewAbstractModelNG::DismissContentCoverStatic()
 }
 
 void ViewAbstractModelNG::SheetSpringBack()
+{
+    ViewAbstractModelNG::SheetSpringBackStatic();
+}
+
+void ViewAbstractModelNG::SheetSpringBackStatic()
 {
     auto sheetId = SheetManager::GetInstance().GetDismissSheet();
     auto sheet = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetId);
