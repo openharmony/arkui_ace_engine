@@ -92,6 +92,15 @@ ace_unittest("long_press_event_test_ng") {
   sources = [ "long_press_event_test_ng.cpp" ]
 }
 
+ace_unittest("mouse_style_manager_test_ng") {
+  module_output = "events"
+  type = "new"
+  sources = [
+    "$ace_root/frameworks/base/mousestyle/mouse_style.cpp",
+    "mouse_style_manager_test_ng.cpp",
+  ]
+}
+
 ace_unittest("pan_event_test_ng") {
   type = "new"
   module_output = "events"
@@ -154,6 +163,7 @@ group("core_event_unittest") {
     ":input_event_hub_test_ng",
     ":input_event_test_ng",
     ":long_press_event_test_ng",
+    ":mouse_style_manager_test_ng",
     ":pan_event_test_ng",
     ":response_ctrl_test_ng",
     ":scrollable_event_test_ng",
