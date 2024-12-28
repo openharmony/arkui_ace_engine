@@ -22,6 +22,9 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "ui/view/frame_node.h"
+#include "ui/view/pattern.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -43,6 +46,7 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -6181,5 +6185,10 @@ void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
             pipeline->RemoveVisibleAreaChangeNode(GetId());
         }
     }
+}
+
+void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
+{
+    kitNode_ = node;
 }
 } // namespace OHOS::Ace::NG
