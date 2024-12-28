@@ -466,8 +466,6 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     static const int32_t expectedResourceId = 123;
     static auto expectedCustomNode = CreateNode();
     static const FrameNode *expectedParentNode = frameNode;
-    constexpr DragBehavior buildBehavior = DragBehavior::MOVE;
-    constexpr DragBehavior infoBehavior = DragBehavior::COPY;
     static const std::string expectedInfo("key:value");
 
     static const CustomNodeBuilder builder = {
@@ -479,19 +477,16 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     };
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_DragEvent event,
-        const Opt_String extraParams, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
+        const Opt_String extraP, const Callback_Union_CustomBuilder_DragItemInfo_Void continuation)
     {
-        using namespace TypeHelper;
-        using namespace Converter;
-        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        // the defferent type in return value depending on input data
+        auto isNeedBuilder = Converter::Convert<DragBehavior>(event.dragBehavior) == DragBehavior::MOVE;
         Ark_Union_CustomBuilder_DragItemInfo arkResult;
-        auto dragBehavior = Convert<DragBehavior>(event.dragBehavior);
-        if (dragBehavior == buildBehavior) {
-            WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
-        } else if (dragBehavior == infoBehavior) {
-            WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = ArkValue<Opt_String>(extraParams);
+        if (isNeedBuilder) {
+            TypeHelper::WriteToUnion<CustomNodeBuilder>(arkResult) = builder;
         } else {
-            WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = ArkValue<Opt_String>(std::nullopt);
+            TypeHelper::WriteToUnion<Ark_DragItemInfo>(arkResult).extraInfo = Converter::ArkValue<Opt_String>(extraP);
         }
         CallbackHelper(continuation).Invoke(arkResult);
     };
@@ -506,19 +501,17 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     ASSERT_NE(fireOnDragStart, nullptr);
 
     auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    {
-        dragEvent->SetDragBehavior(buildBehavior);
-        DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
-        EXPECT_EQ(reinterpret_cast<Ark_NativePointer>(ddInfo.customNode.GetRawPtr()),
-            reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-        EXPECT_EQ(ddInfo.extraInfo, std::string());
-    }
-    {
-        dragEvent->SetDragBehavior(infoBehavior);
-        DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
-        EXPECT_EQ(ddInfo.customNode, nullptr);
-        EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
-    }
+    dragEvent->SetDragBehavior(DragBehavior::MOVE);
+    DragDropInfo ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+    EXPECT_EQ(reinterpret_cast<Ark_NativePointer>(ddInfo.customNode.GetRawPtr()),
+        reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+    EXPECT_EQ(ddInfo.extraInfo, std::string());
+
+    dragEvent->SetDragBehavior(DragBehavior::COPY);
+    ddInfo = fireOnDragStart(dragEvent, expectedInfo);
+    EXPECT_EQ(ddInfo.customNode, nullptr);
+    EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
+
     DisposeNode(expectedCustomNode);
 }
 }

@@ -3325,19 +3325,20 @@ void OnDragStartImpl(Ark_NativePointer node,
         CHECK_NULL_RETURN(info, result);
         auto arkDragInfo = Converter::ArkValue<Ark_DragEvent>(*info);
         auto arkExtraParam = Converter::ArkValue<Opt_String>(extraParams);
-        auto handler = [&result, weakNode](const void *rawResultPtr) {
+
+        auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
+            if (auto fnode = weakNode.Upgrade(); fnode) {
+                result.customNode = CallbackHelper(val, fnode.GetRawPtr()).BuildSync(fnode.GetRawPtr());
+            }
+        };
+        auto parseDragI = [&result](const Ark_DragItemInfo& value) {
+            result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
+            result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
+        };
+        auto handler = [custB = std::move(parseCustBuilder), dragI = std::move(parseDragI)](const void *rawResultPtr) {
             auto arkResultPtr = reinterpret_cast<const Ark_Union_CustomBuilder_DragItemInfo*>(rawResultPtr);
             CHECK_NULL_VOID(arkResultPtr);
-            auto parseCustBuilder = [&result, weakNode](const CustomNodeBuilder& val) {
-                if (auto fnode = weakNode.Upgrade(); fnode) {
-                    result.customNode = CallbackHelper(val, fnode.GetRawPtr()).BuildSync(fnode.GetRawPtr());
-                }
-            };
-            auto parseDinfo = [&result](const Ark_DragItemInfo& value) {
-                result.pixelMap = Converter::OptConvert<RefPtr<PixelMap>>(value.pixelMap).value_or(nullptr);
-                result.extraInfo = Converter::OptConvert<std::string>(value.extraInfo).value_or(std::string());
-            };
-            Converter::VisitUnion(*arkResultPtr, parseCustBuilder, parseDinfo, [](){});
+            Converter::VisitUnion(*arkResultPtr, custB, dragI, []() {});
         };
 
         PipelineContext::SetCallBackNode(weakNode);
