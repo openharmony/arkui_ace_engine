@@ -826,7 +826,7 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(pixelMapPeer);
     peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
 #else
-    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl he function 'setPixelMap'"
+    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
          " is not supported on the current platform.");
 #endif
 }
