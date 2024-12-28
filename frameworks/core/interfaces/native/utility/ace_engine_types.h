@@ -154,5 +154,6 @@ struct ScaleOpt {
     std::optional<Dimension> centerX;
     std::optional<Dimension> centerY;
 };
+
 } // namespace OHOS::Ace::NG::Converter
 #endif  // GENERATED_FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_ACE_ENGINE_TYPES_H

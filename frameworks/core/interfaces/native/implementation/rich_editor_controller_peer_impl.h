@@ -157,7 +157,7 @@ public:
 
     Ace::WeakPtr<RichEditorController> GetController() const
     {
-        return handler_.Upgrade();
+        return handler_;
     }
 
 private:

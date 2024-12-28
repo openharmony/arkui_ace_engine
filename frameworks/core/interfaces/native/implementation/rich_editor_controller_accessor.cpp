@@ -336,7 +336,7 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
     auto peerImpl = reinterpret_cast<RichEditorControllerPeerImpl *>(peer);
     CHECK_NULL_RETURN(peerImpl, 0);
     int32_t result = 0;
-    std::optional<SpanOptionBase> locOptions {std::nullopt};
+    std::optional<SpanOptionBase> locOptions;
     if (options) {
         locOptions = Converter::OptConvert<SpanOptionBase>(*options);
     }
@@ -350,7 +350,9 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
             auto frameNode = frameNodePtr.GetRawPtr();
             auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
             auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
-            result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
+            if (customFrameNode) {
+                result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
+            }
         }
     }
     return Converter::ArkValue<Ark_Int32>(result);
