@@ -34,7 +34,6 @@ const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
-const auto EMPTY_STRING = "";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -265,6 +264,7 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
     CHECK_NULL_RETURN(image, nullptr);
+    CHECK_NULL_RETURN(repetition, nullptr);
     auto bitmap = reinterpret_cast<ImageBitmapPeer*>(image->ptr);
     CHECK_NULL_RETURN(bitmap, nullptr);
     auto opt = Converter::OptConvert<std::string>(*repetition);
@@ -278,7 +278,7 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
     auto pixelMap = bitmap->GetPixelMap();
     pattern->SetPixelMap(pixelMap);
 #endif
-    peerImpl->patterns[peerImpl->patternCount] = pattern;
+    peerImpl->patterns[peerImpl->patternCount];
     auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
     CHECK_NULL_RETURN(peerPattern, nullptr);
     peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));
@@ -825,7 +825,7 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(pixelMapPeer);
     peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
 #else
-    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
+    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl he function 'setPixelMap'"
          " is not supported on the current platform.");
 #endif
 }
