@@ -303,9 +303,6 @@ constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE = 5;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
-int64_t last_height_ = 0L;
-int64_t last_width_ = 0L;
-bool g_dragWindowFlag = false;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -5873,20 +5870,21 @@ void WebPattern::OnWindowHide()
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+    TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     switch (type) {
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
             if (!isSmoothDragResizeEnabled) {
                 return;
             }
-            g_dragWindowFlag = true;
+            dragWindowFlag_ = true;
             delegate_->SetDragResizeStartFlag(true);
             WindowDrag(width, height);
             break;
         case WindowSizeChangeReason::DRAG_END:
         default:
             delegate_->SetDragResizeStartFlag(false);
-            g_dragWindowFlag = false;
+            dragWindowFlag_ = false;
             last_height_ = 0;
             last_width_ = 0;
             break;
@@ -5900,10 +5898,10 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
             last_height_ = height;
             last_width_ = width;
         }
-        if (!GetPendingSizeStatus() && g_dragWindowFlag) {
+        if (!GetPendingSizeStatus() && dragWindowFlag_) {
             int64_t pre_height = height - last_height_;
             int64_t pre_width = width - last_width_;
-            delegate_->DragResize(width, height, pre_height, pre_width);
+            delegate_->SetDragResizePreSize(pre_height, pre_width);
             last_height_ = height;
             last_width_ = width;
         }
