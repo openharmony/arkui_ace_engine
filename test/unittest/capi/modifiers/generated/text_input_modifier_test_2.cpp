@@ -1207,7 +1207,7 @@ HWTEST_F(TextInputModifierTest, setCancelButton1TestDefaultValues, TestSize.Leve
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setCancelButton1TestCancelButtonStyleValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setCancelButton1TestCancelButtonStyleValidValues, TestSize.Level1)
 {
     Ark_CancelButtonSymbolOptions initValueCancelButton;
 
