@@ -154,7 +154,7 @@ bool IsWindowRectResizeEnabled()
 
 bool IsFocusCanBeActive()
 {
-    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") == "1";
+    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
 }
 
 bool IsCacheNavigationNodeEnable()
@@ -449,6 +449,7 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
+std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -458,7 +459,6 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
-bool SystemProperties::focusCanBeActive_ = IsFocusCanBeActive();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -604,9 +604,9 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
-    focusCanBeActive_ = IsFocusCanBeActive();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -851,6 +851,19 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
     }
 }
 
+void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, void* context)
+{
+    bool focusCanBeActive = true;
+    if (value && strcmp(value, "0") == 0) {
+        focusCanBeActive = false;
+    }
+    if (focusCanBeActive != focusCanBeActive_) {
+        SetFocusCanBeActive(focusCanBeActive);
+        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
+    }
+    return;
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     // always return density of main screen, don't use this interface unless you need density when no window exists
@@ -885,6 +898,11 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
 {
     acePerformanceMonitorEnable_.store(performanceMonitorEnable);
+}
+
+void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
+{
+    focusCanBeActive_.store(focusCanBeActive);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
@@ -958,10 +976,5 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
-{
-    return focusCanBeActive_;
 }
 } // namespace OHOS::Ace

@@ -556,6 +556,7 @@ public:
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
+    static void OnFocusActiveChanged(const char* key, const char* value, void* context);
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -568,9 +569,16 @@ public:
 
     static void SetPerformanceMonitorEnabled(bool performanceMonitorEnable);
 
+    static void SetFocusCanBeActive(bool focusCanBeActive);
+
     static bool GetAcePerformanceMonitorEnabled()
     {
         return acePerformanceMonitorEnable_.load();
+    }
+
+    static bool GetFocusCanBeActive()
+    {
+        return focusCanBeActive_.load();
     }
 
     static bool GetAceCommercialLogEnabled()
@@ -611,8 +619,6 @@ public:
     static bool IsNeedResampleTouchPoints();
 
     static bool IsNeedSymbol();
-    
-    static bool GetFocusCanBeActive();
 
 private:
     static bool opincEnabled_;
@@ -676,6 +682,7 @@ private:
     static bool sideBarContainerBlurEnable_;
     static std::atomic<bool> stateManagerEnable_;
     static std::atomic<bool> acePerformanceMonitorEnable_;
+    static std::atomic<bool> focusCanBeActive_;
     static bool aceCommercialLogEnable_;
     static bool faultInjectEnabled_;
     static bool imageFrameworkEnable_;
@@ -688,7 +695,6 @@ private:
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
     static double scrollableDistance_;
-    static bool focusCanBeActive_;
 };
 
 } // namespace OHOS::Ace
