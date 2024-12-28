@@ -954,6 +954,54 @@ void ViewAbstract::DisableOnClick(FrameNode* frameNode)
     gestureHub->ClearUserOnClick();
 }
 
+void ViewAbstract::DisableOnDragStart(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragStart();
+}
+
+void ViewAbstract::DisableOnDragEnter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragEnter();
+}
+
+void ViewAbstract::DisableOnDragMove(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragMove();
+}
+
+void ViewAbstract::DisableOnDragLeave(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragLeave();
+}
+
+void ViewAbstract::DisableOnDrop(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDrop();
+}
+
+void ViewAbstract::DisableOnDragEnd(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearCustomerOnDragEnd();
+}
+
 void ViewAbstract::DisableOnTouch(FrameNode* frameNode)
 {
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();

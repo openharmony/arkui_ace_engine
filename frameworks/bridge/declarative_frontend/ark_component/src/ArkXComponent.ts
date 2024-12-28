@@ -166,9 +166,6 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   onKeyEvent(event: (event: KeyEvent) => void): this {
     throw new Error('Method not implemented.');
   }
-  focusable(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   onFocus(event: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -178,13 +175,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   tabIndex(index: number): this {
     throw new Error('Method not implemented.');
   }
-  defaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   groupDefaultFocus(value: boolean): this {
-    throw new Error('Method not implemented.');
-  }
-  focusOnTouch(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   animation(value: AnimateParam): this {
@@ -354,28 +345,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   clickEffect(value: ClickEffect): this {
     throw new Error('Method not implemented.');
   }
-  onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragMove(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragLeave(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDrop(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
-  onDragEnd(event: (event: DragEvent, extraParams?: string) => void): this {
-    throw new Error('Method not implemented.');
-  }
   allowDrop(value: Array<UniformDataType>): this {
-    throw new Error('Method not implemented.');
-  }
-  draggable(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   overlay(value: string | CustomBuilder, options?: { align?: Alignment; offset?: { x?: number; y?: number; }; }): this {
@@ -485,7 +455,8 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode: RenderFit): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
+    return this;
   }
   attributeModifier(modifier: AttributeModifier<CommonAttribute>): this {
     return this;
@@ -909,5 +880,19 @@ class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentRenderFitModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentRenderFit');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetRenderFit(node);
+    } else {
+      getUINativeModule().xComponent.setRenderFit(node, this.value);
+    }
   }
 }
