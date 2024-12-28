@@ -152,7 +152,10 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (LessNotEqual(layoutConstraint->selfIdealSize.Width().value(), MIN_MENU_WIDTH.ConvertToPx())) {
                 RefPtr<GridColumnInfo> columnInfo;
                 columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-                columnInfo->GetParent()->BuildColumnWidth();
+                CHECK_NULL_VOID(columnInfo);
+                auto columnParent = columnInfo->GetParent();
+                CHECK_NULL_VOID(columnParent);
+                columnParent->BuildColumnWidth();
                 auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
                 layoutConstraint->selfIdealSize.SetWidth(minWidth);
 
