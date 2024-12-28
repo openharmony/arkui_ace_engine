@@ -1970,11 +1970,6 @@ HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
     ASSERT_FALSE(holder->isCalled);
     rendererPeer->TriggerRestoreImpl();
     ASSERT_TRUE(holder->isCalled);
-
-    std::printf("create: holder ps: %zu patternCount: %d pattern: w: %.2f h: %.2f r: %s isCalled: %d\n",
-        rendererPeer->patterns.size(), rendererPeer->patternCount, pattern->GetImageWidth(), pattern->GetImageHeight(),
-        pattern->GetRepetition().c_str(), holder->isCalled);
-
     holder->TearDown();
 }
 
@@ -1999,11 +1994,6 @@ HWTEST_F(CanvasRendererAccessorTest, getTransformTest, TestSize.Level1)
             container->SetUseNewPipeline();
             auto result = accessor_->getTransform(peer_);
             auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(result);
-
-            std::printf("matrix: result: %s peer: %s w: %.2f h: %.2f %d\n", result == nullptr ? "null" : "exist",
-                matrixPeer == nullptr ? "null" : "exist", matrixPeer->transform.scaleX, matrixPeer->transform.scaleY,
-                holder->isCalled);
-
             EXPECT_TRUE(holder->isCalled);
             EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleX, holder->param->scaleX));
             EXPECT_TRUE(LessOrEqualCustomPrecision(matrixPeer->transform.scaleY, holder->param->scaleY));
@@ -2024,10 +2014,6 @@ HWTEST_F(CanvasRendererAccessorTest, setImageSmoothingQualityTest, TestSize.Leve
     for (const auto& [actual, expected] : IMAGE_SMOOTHING_TEST_PLAN) {
         holder->SetUp();
         accessor_->setImageSmoothingQuality(peer_, &actual);
-
-        std::printf("imageSmoothing: holder text: %s==%s isCalled: %d\n", holder->text.c_str(), expected.c_str(),
-            holder->isCalled);
-
         if (expected == INVALID_STRING_VALUE) {
             EXPECT_FALSE(holder->isCalled);
             continue;
@@ -2049,10 +2035,6 @@ HWTEST_F(CanvasRendererAccessorTest, setLineCapTest, TestSize.Level1)
     for (const auto& [actual, expected] : LINE_CAP_TEST_PLAN) {
         holder->SetUp();
         accessor_->setLineCap(peer_, &actual);
-
-        auto lineCap = holder->lineCap ? *holder->lineCap : static_cast<LineCapStyle>(-1);
-        std::printf("lineCap: holder lineCap: %d==%d isCalled: %d\n", lineCap, expected, holder->isCalled);
-
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(holder->lineCap, expected);
     }
@@ -2070,10 +2052,6 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
     for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
         holder->SetUp();
         accessor_->setLineJoin(peer_, &actual);
-
-        auto lineJoin = holder->lineJoin ? *holder->lineJoin : static_cast<LineJoinStyle>(-1);
-        std::printf("lineCap: holder lineCap: %d==%d isCalled: %d\n", lineJoin, expected, holder->isCalled);
-
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(holder->lineJoin, expected);
     }
