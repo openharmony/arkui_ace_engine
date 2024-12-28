@@ -21,6 +21,12 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_v2/list/list_properties.h"
 
+namespace OHOS::Ace::NG {
+struct KeyboardOptions {
+    bool supportAvoidance;
+};
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 class WebCookiePeerImpl : public Referenced {
     // this is a stub because all WebCookieAccessor interfaces are deprecated

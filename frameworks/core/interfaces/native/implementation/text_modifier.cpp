@@ -25,6 +25,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 namespace WeightNum {
@@ -112,6 +113,59 @@ std::optional<int32_t> FontWeightToInt(const FontWeight& src)
         default: dst = std::nullopt; break;
     }
     return dst;
+}
+
+template<>
+TextSpanType Convert(const Ark_TextSpanType& src)
+{
+    TextSpanType textSpanType;
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: textSpanType = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: textSpanType = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: textSpanType = TextSpanType::MIXED; break;
+        default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src); break;
+    }
+    return textSpanType;
+}
+
+template<>
+TextResponseType Convert(const Ark_TextResponseType& src)
+{
+    TextResponseType responseType;
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: responseType = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: responseType = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: responseType = TextResponseType::SELECTED_BY_MOUSE; break;
+        default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src); break;
+    }
+    return responseType;
+}
+
+template<>
+SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
+{
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
+    if (optOnAppear.has_value()) {
+        selectMenuParam.onAppear = [&optOnAppear](int32_t start, int32_t end) {
+            if (optOnAppear.has_value()) {
+                Ark_Number arkStart = Converter::ArkValue<Ark_Number>(start);
+                Ark_Number arkEnd = Converter::ArkValue<Ark_Number>(end);
+                auto onAppearShared = std::make_shared<MenuOnAppearCallback>(optOnAppear.value());
+                CallbackHelper(*onAppearShared).Invoke(arkStart, arkEnd);
+            }
+        };
+    }
+    auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
+    if (optOnDisappear.has_value()) {
+        selectMenuParam.onDisappear = [&optOnDisappear]() {
+            if (optOnDisappear.has_value()) {
+                auto onDisappearShared = std::make_shared<Callback_Void>(optOnDisappear.value());
+                CallbackHelper(*onDisappearShared).Invoke();
+            }
+        };
+    }
+    return selectMenuParam;
 }
 }
 
@@ -583,38 +637,17 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
-    auto aceResponseType = Converter::OptConvert<TextResponseType>(responseType);
-    auto arkMenuOptions = Converter::OptConvert<Ark_SelectionMenuOptions>(*options);
-    SelectMenuParam menuParam;
-    menuParam.onAppear = [](int32_t start, int32_t end) {};
-    menuParam.onDisappear = []() {};
-    if (arkMenuOptions) {
-        auto appearCb = Converter::OptConvert<MenuOnAppearCallback>(arkMenuOptions->onAppear);
-        auto disappearCb = Converter::OptConvert<Callback_Void>(arkMenuOptions->onDisappear);
-
-        CHECK_NULL_VOID(appearCb);
-        auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
-        CHECK_NULL_VOID(appearCbPtr);
-        menuParam.onAppear =
-            [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
-        };
-
-        CHECK_NULL_VOID(disappearCb);
-        auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
-        CHECK_NULL_VOID(disappearCbPtr);
-        menuParam.onDisappear = [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
-            arkCallback.Invoke();
-        };
-    }
-    auto builder = [callback = CallbackHelper(*content, frameNode), node]() {
+    auto optSpanType = Converter::OptConvert<TextSpanType>(spanType);
+    auto convResponseType = Converter::Convert<TextResponseType>(responseType);
+    auto convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
         auto builderNode = callback.BuildSync(node);
         NG::ViewStackProcessor::GetInstance()->Push(builderNode);
     };
-    auto span = aceSpanType.value_or(TextSpanType::NONE);
-    auto response = aceResponseType.value_or(TextResponseType::NONE);
-    TextModelNG::BindSelectionMenu(frameNode, span, response, std::move(builder), menuParam);
+    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    if (convMenuParam.has_value() && optSpanType.has_value()) {
+        TextModelNG::BindSelectionMenu(
+            frameNode, optSpanType.value(), convResponseType, convBuildFunc, convMenuParam.value());
+    }
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()

@@ -17,6 +17,8 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "rich_editor_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 
 namespace OHOS::Ace::NG::Converter {
 
@@ -339,7 +341,19 @@ Ark_Int32 AddBuilderSpanImpl(RichEditorControllerPeer* peer,
         locOptions = Converter::OptConvert<SpanOptionBase>(*options);
     }
     if (locOptions) {
-        result = peerImpl->AddBuilderSpanImpl(locOptions.value());
+        auto controller = peerImpl->GetController().Upgrade();
+        auto pattern = controller->GetPattern().Upgrade();
+        auto frameNodePtr = pattern->GetHost();
+        if (!value || !controller || !pattern || !frameNodePtr) {
+            result = peerImpl->AddBuilderSpanImpl(locOptions.value());
+        } else {
+            auto frameNode = frameNodePtr.GetRawPtr();
+            auto customNode = CallbackHelper(*value, frameNode).BuildSync(frameNode);
+            auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode).GetRawPtr();
+            if (customFrameNode) {
+                result = peerImpl->AddBuilderSpanImpl(customFrameNode, locOptions.value());
+            }
+        }
     }
     return Converter::ArkValue<Ark_Int32>(result);
 }

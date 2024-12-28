@@ -742,6 +742,19 @@ void SearchModelNG::SetCustomKeyboard(const std::function<void()>&& buildFunc, b
     }
 }
 
+void SearchModelNG::SetCustomKeyboard(FrameNode* frameNode,
+                                      const std::function<void()>&& buildFunc, bool supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    if (textFieldPattern) {
+        textFieldPattern->SetCustomKeyboard(std::move(buildFunc));
+        textFieldPattern->SetCustomKeyboardOption(supportAvoidance);
+    }
+}
+
 void SearchModelNG::SetType(TextInputType value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
