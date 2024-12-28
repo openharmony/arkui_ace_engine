@@ -692,7 +692,9 @@ void FormManagerDelegate::DispatchPointerEvent(const
     }
 
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
-    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    auto pointAction = pointerEvent->GetPointerAction();
+    if (pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
