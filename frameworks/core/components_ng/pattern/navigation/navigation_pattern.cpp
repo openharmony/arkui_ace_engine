@@ -2483,7 +2483,8 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     bool isNotNeedAnimation = !isAnimated;
 #if defined(ENABLE_NAV_SPLIT_MODE)
     isNotNeedAnimation = !isAnimated ||
-        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 && !isBackPage_);
+        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 &&
+            !isBackPage_ && !isCustomAnimation_);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
         navigationMode_, isNotNeedAnimation);
 #endif
