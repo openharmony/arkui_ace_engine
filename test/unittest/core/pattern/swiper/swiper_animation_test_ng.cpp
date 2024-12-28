@@ -852,8 +852,8 @@ HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation004, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 2; ++i) {
-        EXPECT_EQ(GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(),
-            OffsetF(-240.0f, 0.0f));
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
     }
     EXPECT_EQ(pattern_->currentIndex_, 0);
 
@@ -922,7 +922,6 @@ HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation001, TestSize.Level1)
     EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
     EXPECT_EQ(pattern_->currentIndex_, -1);
 }
-
 
 /**
  * @tc.name: ShowPreviousAnimation
@@ -1060,8 +1059,8 @@ HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation004, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 2; ++i) {
-        EXPECT_EQ(GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(),
-            OffsetF(240.0f, 0.0f));
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
     }
     EXPECT_EQ(pattern_->currentIndex_, 1);
 
@@ -1091,5 +1090,125 @@ HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation004, TestSize.Level1)
     EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: StopAnimate001
+ * @tc.desc: Test change index with animate, and force stop when animate running
+ * @tc.desc: Would change index decided by currentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. ShowNext and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+
+    /**
+     * @tc.steps: step2. ShowNext and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+
+    /**
+     * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+
+    /**
+     * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: StopAnimate002
+ * @tc.desc: Test change index with animate, and force stop when animate running
+ * @tc.desc: Would change index decided by currentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. ShowNext and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+
+    /**
+     * @tc.steps: step2. ShowNext and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+
+    /**
+     * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+
+    /**
+     * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 } // namespace OHOS::Ace::NG

@@ -14,6 +14,7 @@
  */
 
 #include "swiper_test_ng.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
@@ -323,8 +324,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutSkipMeasure001, TestSize.Level1)
      */
     auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode_, geometryNode, frameNode_->GetLayoutProperty());
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm));
 
     LayoutConstraintF layoutConstraint;

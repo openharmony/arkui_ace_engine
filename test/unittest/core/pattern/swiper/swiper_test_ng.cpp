@@ -24,6 +24,7 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()
@@ -62,6 +63,8 @@ void SwiperTestNg::SetUp() {}
 
 void SwiperTestNg::TearDown()
 {
+    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
+    stageNode->RemoveChildAtIndex(0);
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -78,6 +81,8 @@ void SwiperTestNg::TearDown()
 void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
+    stageNode->AddChild(frameNode_);
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
     eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
@@ -170,6 +175,33 @@ void SwiperTestNg::ChangeIndex(int32_t index)
     FlushUITasks();
 }
 
+void SwiperTestNg::RemoveSwiperItem(int32_t index)
+{
+    frameNode_->RemoveChildAtIndex(index);
+    FlushUITasks();
+}
+
+void SwiperTestNg::AddSwiperItem(int32_t slot)
+{
+    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    frameNode_->AddChild(testNode, slot);
+    FlushUITasks();
+}
+
+AssertionResult SwiperTestNg::DigitText(std::u16string expectDigit)
+{
+    auto currentIndexNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetFirstChild());
+    auto totalCountNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetLastChild());
+    auto currentIndexText = currentIndexNode->GetLayoutProperty<TextLayoutProperty>();
+    auto totalCountText = totalCountNode->GetLayoutProperty<TextLayoutProperty>();
+    std::u16string actualDigit = currentIndexText->GetContentValue() + totalCountText->GetContentValue();
+    if (actualDigit == expectDigit) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure() << "Actual: " << UtfUtils::Str16ToStr8(actualDigit)
+                              << " Expected: " << UtfUtils::Str16ToStr8(expectDigit);
+}
+
 /**
  * @tc.name: SwiperPatternComputeNextIndexByVelocity001
  * @tc.desc: ComputeNextIndexByVelocity
@@ -202,6 +234,77 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
     velocity = -780.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
+}
+
+/**
+ * @tc.name: SwiperPatternInitSurfaceChangedCallback001
+ * @tc.desc: InitSurfaceChangedCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Level1)
+{
+    CreateDefaultSwiper();
+    pattern_->leftButtonId_.reset();
+    pattern_->rightButtonId_ = 1;
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
+    auto leftArrowNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_LEFT_ARROW_ETS_TAG, pattern_->GetLeftButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+    auto rightArrowNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_RIGHT_ARROW_ETS_TAG, pattern_->GetRightButtonId(),
+        []() { return AceType::MakeRefPtr<SwiperArrowPattern>(); });
+
+    /**
+     * @tc.steps: step2. call InitSurfaceChangedCallback and then callback.
+     * @tc.expected: Related function is called.
+     */
+    auto pipeline = frameNode_->GetContextRefPtr();
+    pattern_->surfaceChangedCallbackId_.emplace(1);
+    pattern_->InitSurfaceChangedCallback();
+    pipeline->callbackId_ = 0;
+    pattern_->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(pattern_->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    pattern_->InitSurfaceChangedCallback();
+    auto callbackmapnumber = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber, 1);
+    auto testFunction = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction(1, 1, 1, 1, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    auto callbacknumber = pattern_->surfaceChangedCallbackId_;
+    EXPECT_EQ(callbacknumber, 1);
+
+    /**
+     * @tc.steps: step3. call InitSurfaceChangedCallback and then callback in different conditions.
+     * @tc.expected: Related function is called.
+     */
+    pipeline->callbackId_ = 0;
+    pattern_->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(pattern_->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    pattern_->InitSurfaceChangedCallback();
+    auto callbackmapnumber2 = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber2, 1);
+    auto testFunction2 = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction2(1, 1, 1, 1, WindowSizeChangeReason::UNDEFINED);
+    EXPECT_EQ(pattern_->surfaceChangedCallbackId_, 1);
+    testFunction2(1, 1, 1, 1, WindowSizeChangeReason::ROTATION);
+    EXPECT_EQ(pattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
+
+    auto childswiperNode1 = FrameNode::CreateFrameNode("childswiper", 1, AceType::MakeRefPtr<SwiperPattern>(), false);
+    childswiperNode1->MountToParent(frameNode_);
+    auto childswiperNode2 =
+        FrameNode::CreateFrameNode(V2::JS_LAZY_FOR_EACH_ETS_TAG, 2, AceType::MakeRefPtr<SwiperPattern>(), false);
+    childswiperNode2->MountToParent(frameNode_);
+    pipeline->callbackId_ = 0;
+    pattern_->surfaceChangedCallbackId_.reset();
+    EXPECT_FALSE(pattern_->HasSurfaceChangedCallback());
+    pipeline->surfaceChangedCallbackMap_.clear();
+    pattern_->InitSurfaceChangedCallback();
+    auto callbackmapnumber3 = pipeline->callbackId_;
+    EXPECT_EQ(callbackmapnumber3, 1);
+    auto testFunction3 = pipeline->surfaceChangedCallbackMap_[1];
+    testFunction3(1, 1, 1, 1, WindowSizeChangeReason::CUSTOM_ANIMATION);
+    auto callbacknumber3 = pattern_->surfaceChangedCallbackId_;
+    EXPECT_EQ(callbacknumber3, 1);
 }
 
 /**
@@ -855,60 +958,150 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
 }
 
 /**
- * @tc.name: AdjustCurrentIndexWithTotalCountChange001
- * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange001
+ * @tc.name: ChangeItemsCount001
+ * @tc.desc: Test Add/Remove swiper item, the currentIndex is correct
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ChangeItemsCount001, TestSize.Level1)
 {
     CreateDefaultSwiper();
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
+
     /**
-     * @tc.steps: step1. turn page to last, let index change to -1.
+     * @tc.steps: step1. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->currentIndex_, -1);
-    /**
-     * @tc.steps: step2. add child, let totalCount increase.
-     */
-    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    frameNode_->AddChild(testNode, pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER + 1);
-    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+
     /**
-     * @tc.steps: step3. index will need not to be changed.
+     * @tc.steps: step2. Change index and remove child
+     * @tc.expected: The currentIndex would changed to be 0
      */
-    EXPECT_EQ(pattern_->currentIndex_, pattern_->oldChildrenSize_.value() - 1);
+    ShowNext();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+    ShowNext();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 5);
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
 /**
- * @tc.name: AdjustCurrentIndexWithTotalCountChange002
- * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange002
+ * @tc.name: ChangeItemsCount002
+ * @tc.desc: Test Add/Remove swiper item when DIGIT
+ * @tc.desc: The indicator text and currentIndex are correct
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetDisplayCount(2);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_TRUE(DigitText(u"1/6"));
+
     /**
-     * @tc.steps: step1. turn page to last, let index change to -1.
+     * @tc.steps: step1. Change index and remove child
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->currentIndex_, -1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(DigitText(u"6/6"));
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/5"));
+
     /**
-     * @tc.steps: step2. add child, let totalCount decrease.
+     * @tc.steps: step2. Remove child again
+     * @tc.expected: The currentIndex changed to be 0 because page not existed
      */
-    frameNode_->RemoveChildAtIndex(0);
-    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
-    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER - 1);
-    pattern_->BeforeCreateLayoutWrapper();
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/4"));
+
     /**
-     * @tc.steps: step3. index will need to be changed to 0.
+     * @tc.steps: step3. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
      */
-    EXPECT_EQ(pattern_->currentIndex_, 0);
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(DigitText(u"4/4"));
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(DigitText(u"4/5"));
+
+    /**
+     * @tc.steps: step4. Add child again
+     * @tc.expected: The currentIndex would not changed
+     */
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(DigitText(u"4/6"));
+}
+
+/**
+ * @tc.name: ChangeItemsCount003
+ * @tc.desc: Test Add/Remove swiper item when DIGIT/SwipeByGroup
+ * @tc.desc: The indicator text and currentIndex are correct
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_TRUE(DigitText(u"1/6"));
+
+    /**
+     * @tc.steps: step1. Change index and remove child
+     * @tc.expected: The currentIndex would not changed because page existed
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"5/6"));
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"5/5"));
+
+    /**
+     * @tc.steps: step2. Remove child again
+     * @tc.expected: The currentIndex changed to be 0 because page not existed
+     */
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/4"));
+
+    /**
+     * @tc.steps: step3. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"3/4"));
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(DigitText(u"3/5"));
+
+    /**
+     * @tc.steps: step4. Add child again
+     * @tc.expected: The currentIndex would not changed
+     */
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(DigitText(u"3/6"));
 }
 
 /**
@@ -1373,5 +1566,41 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     auto iter = frameRateManager->nodeRateMap_.find(nodeId);
     EXPECT_EQ(iter->second, expectedRate);
     EXPECT_TRUE(frameRateManager->isRateChanged_);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, ToJsonValue001, TestSize.Level1)
+{
+    CreateDefaultSwiper();
+
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("nestedScroll"), "SwiperNestedScrollMode.SELF_ONLY");
+    EXPECT_EQ(json->GetInt("currentIndex"), 0);
+    EXPECT_EQ(json->GetDouble("currentOffset"), 0);
+    EXPECT_EQ(json->GetInt("uiCastJumpIndex"), -1);
+    EXPECT_EQ(json->GetString("indicator"), "");
+
+    pattern_->indicatorIsBoolean_ = false;
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("indicator"), "");
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("indicator"), "");
+
+    json->Replace("uiCastJumpIndex", -1);
+    pattern_->FromJson(json);
+    EXPECT_FALSE(pattern_->jumpIndex_.has_value());
+    json->Replace("uiCastJumpIndex", 2);
+    pattern_->FromJson(json);
+    EXPECT_EQ(pattern_->jumpIndex_, 2);
+    json->Replace("currentOffset", -100.0f);
+    pattern_->FromJson(json);
+    EXPECT_EQ(pattern_->currentDelta_, 100.0f);
 }
 } // namespace OHOS::Ace::NG
