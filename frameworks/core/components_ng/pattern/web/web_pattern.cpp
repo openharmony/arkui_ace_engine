@@ -5872,15 +5872,20 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     switch (type) {
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END: {
+            if (!isSmoothDragResizeEnabled) {
+                return;
+            }
             g_dragWindowFlag = true;
+            delegate_->SetDragResizeStartFlag(true);
             WindowDrag(width, height);
             break;
-        }
+        case WindowSizeChangeReason::DRAG_END:
         default:
+            delegate_->SetDragResizeStartFlag(false);
             g_dragWindowFlag = false;
             last_height_ = 0;
             last_width_ = 0;
@@ -5891,10 +5896,6 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
     if (delegate_) {
-        bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
-        if (!isSmoothDragResizeEnabled) {
-            return;
-        }
         if (last_height_ == 0 && last_width_ == 0) {
             last_height_ = height;
             last_width_ = width;

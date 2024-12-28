@@ -1023,6 +1023,7 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    void SetDragResizeStartFlag(bool isDragResizeStart);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1364,6 +1365,7 @@ private:
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
+    bool isDragResizeStart_ = false;
 #endif
 };
 

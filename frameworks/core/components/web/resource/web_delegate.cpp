@@ -3182,6 +3182,11 @@ bool WebDelegate::GetIsSmoothDragResizeEnabled()
     return isSmoothDragResizeEnabled_;
 }
 
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
+{
+    isDragResizeStart_ = isDragResizeStart;
+}
+
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 {
     auto context = context_.Upgrade();
@@ -6226,6 +6231,9 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
 
 void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
+    if (isDragResizeStart_) {
+        return;
+    }
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         return;
     }
