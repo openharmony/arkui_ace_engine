@@ -55,6 +55,7 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
+constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
@@ -819,6 +820,9 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            ReAddForm();
+            break;
+        case FORM_STATUS_TIME_OUT:
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:
