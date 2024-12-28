@@ -34,6 +34,7 @@ const auto SIZE_LIMIT_MIN = 0.0;
 const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
+const auto EMPTY_STRING = "";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
