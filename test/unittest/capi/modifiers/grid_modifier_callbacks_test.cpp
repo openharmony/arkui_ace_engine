@@ -646,46 +646,38 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollStopTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: DISABLED_setOnScrollFrameBeginTest
+ * @tc.name: setOnScrollFrameBeginTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnScrollFrameBeginTest, TestSize.Level1)
+HWTEST_F(GridModifierCallbacksTest, setOnScrollFrameBeginTest, TestSize.Level1)
 {
-    // test is disabled because onScrollFrameBegin should return value
     Callback_Number_ScrollState_Literal_Number_offsetRemain func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
 
-    struct CheckEvent {
-        int32_t nodeId;
-        Dimension offset;
-        std::optional<ScrollState> state;
-    };
-    static std::optional<CheckEvent> checkEvent = std::nullopt;
-    EventsTracker::gridEventsReceiver.onScrollFrameBegin = [](
-        Ark_Int32 nodeId, const Ark_Number offset, const Ark_ScrollState state)
+    static const int32_t expectedResourceId = 123;
+    static const ScrollState expectedState = ScrollState::SCROLL;
+    auto onScrollFrameBegin = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_Number offset, Ark_ScrollState state, const Callback_Literal_Number_offsetRemain_Void cbReturn)
     {
-        checkEvent = {
-            .nodeId = nodeId,
-            .offset = Converter::Convert<Dimension>(offset),
-            .state = Converter::OptConvert<ScrollState>(state)
+        EXPECT_EQ(Converter::Convert<int32_t>(resourceId), expectedResourceId);
+        EXPECT_EQ(Converter::OptConvert<ScrollState>(state), expectedState);
+        float offsetRemain = Converter::Convert<Dimension>(offset).ConvertToVp();
+        Ark_Literal_Number_offsetRemain arkResult {
+            .offsetRemain = Converter::ArkValue<Ark_Number>(offsetRemain)
         };
+        CallbackHelper(cbReturn).Invoke(arkResult);
     };
-
-    auto onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    EXPECT_EQ(onScrollFrameBegin, nullptr);
+    func = Converter::ArkValue<Callback_Number_ScrollState_Literal_Number_offsetRemain>(
+        nullptr, onScrollFrameBegin, expectedResourceId
+    );
     modifier_->setOnScrollFrameBegin(node_, &func);
-    onScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
-    EXPECT_NE(onScrollFrameBegin, nullptr);
 
-    EXPECT_FALSE(checkEvent.has_value());
-    onScrollFrameBegin(CalcDimension(43), ScrollState::SCROLL);
-    EXPECT_TRUE(checkEvent.has_value());
-    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
-    EXPECT_EQ(checkEvent->offset.Value(), 43);
-    EXPECT_EQ(checkEvent->offset.Unit(), DimensionUnit::VP);
-    EXPECT_TRUE(checkEvent->state.has_value());
-    EXPECT_EQ(checkEvent->state.value(), ScrollState::SCROLL);
+    auto fireOnScrollFrameBegin = eventHub->GetOnScrollFrameBegin();
+    ASSERT_NE(fireOnScrollFrameBegin, nullptr);
+    auto checkValue = CalcDimension(43, DimensionUnit::VP);
+    ScrollFrameResult result = fireOnScrollFrameBegin(checkValue, expectedState);
+    EXPECT_EQ(result.offset.ToString(), checkValue.ToString());
 }
 } // namespace OHOS::Ace::NG
