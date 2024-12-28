@@ -91,6 +91,8 @@ struct ImageSpanAttribute {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius;
     std::optional<OHOS::Ace::NG::PaddingProperty> paddingProp;
     bool syncLoad = false;
+    std::optional<std::vector<float>> colorFilterMatrix;
+    std::optional<RefPtr<DrawingColorFilter>> drawingColorFilter;
 
     bool operator==(const ImageSpanAttribute& attribute) const
     {

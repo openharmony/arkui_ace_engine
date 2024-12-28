@@ -860,6 +860,8 @@ protected:
     void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
+    void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
