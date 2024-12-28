@@ -30,6 +30,21 @@ void SetOnListWillScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListDidScroll(ArkUINodeHandle node, void* extraParam);
 void SetOnListReachStart(ArkUINodeHandle node, void* extraParam);
 void SetOnListReachEnd(ArkUINodeHandle node, void* extraParam);
+void SetOnListScrollIndexCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnScrollVisibleContentChange(ArkUINodeHandle node, void* extraParam);
+void SetOnItemMove(ArkUINodeHandle node, void* extraParam);
+void SetOnItemDragStart(ArkUINodeHandle node, void* extraParam);
+void SetOnItemDragEnter(ArkUINodeHandle node, void* extraParam);
+void SetOnItemDragMove(ArkUINodeHandle node, void* extraParam);
+void SetOnItemDragLeave(ArkUINodeHandle node, void* extraParam);
+void SetOnItemDrop(ArkUINodeHandle node, void* extraParam);
+void SetOnListScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListWillScrollCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListDidScrollCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListReachStartCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListReachEndCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListScrollStartCallBack(ArkUINodeHandle node, void* extraParam);
+void SetOnListScrollStopCallBack(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnListScroll(ArkUINodeHandle node);
 void ResetOnListScrollIndex(ArkUINodeHandle node);
@@ -40,6 +55,13 @@ void ResetOnListWillScroll(ArkUINodeHandle node);
 void ResetOnListDidScroll(ArkUINodeHandle node);
 void ResetOnListReachStart(ArkUINodeHandle node);
 void ResetOnListReachEnd(ArkUINodeHandle node);
+void ResetOnScrollVisibleContentChange(ArkUINodeHandle node);
+void ResetOnItemMove(ArkUINodeHandle node);
+void ResetOnItemDragStart(ArkUINodeHandle node);
+void ResetOnItemDragEnter(ArkUINodeHandle node);
+void ResetOnItemDragMove(ArkUINodeHandle node);
+void ResetOnItemDragLeave(ArkUINodeHandle node);
+void ResetOnItemDrop(ArkUINodeHandle node);
 } // namespace OHOS::Ace::NG::NodeModifier
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_LIST_MODIFIER_H

@@ -29,6 +29,34 @@ class ClipContentModifier extends ModifierWithKey<ContentClipMode | RectShape> {
     }
 }
 
+class OnReachStartModifier extends ModifierWithKey<() => void> {
+    constructor(value: () => void) {
+        super(value);
+    }
+    static identity: Symbol = Symbol('onReachStart');
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            getUINativeModule().scrollable.resetOnReachStart(node);
+        } else {
+            getUINativeModule().scrollable.setOnReachStart(node, this.value);
+        }
+    }
+}
+
+class OnReachEndModifier extends ModifierWithKey<() => void> {
+    constructor(value: () => void) {
+        super(value);
+    }
+    static identity: Symbol = Symbol('onReachEnd');
+    applyPeer(node: KNode, reset: boolean): void {
+        if (reset) {
+            getUINativeModule().scrollable.resetOnReachEnd(node);
+        } else {
+            getUINativeModule().scrollable.setOnReachEnd(node, this.value);
+        }
+    }
+}
+
 /**
  * base class of Grid, Scroll, List, and WaterFlow.
  */
@@ -38,6 +66,15 @@ export class ArkScrollable<T> extends ArkComponent implements ScrollableCommonMe
     }
     clipContent(clip: ContentClipMode | RectShape): T {
         modifierWithKey(this._modifiersWithKeys, ClipContentModifier.identity, ClipContentModifier, clip);
+        return this;
+    }
+    onReachStart(event: () => void): this {
+        modifierWithKey(this._modifiersWithKeys, OnReachStartModifier.identity, OnReachStartModifier, event);
+        return this;
+    }
+
+    onReachEnd(event: () => void): this {
+        modifierWithKey(this._modifiersWithKeys, OnReachEndModifier.identity, OnReachEndModifier, event);
         return this;
     }
 }
