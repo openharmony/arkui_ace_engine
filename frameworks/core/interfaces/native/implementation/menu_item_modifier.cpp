@@ -98,7 +98,8 @@ void SetMenuItemOptionsImpl(Ark_NativePointer node,
             menuItemProps.startApply = nullptr;
             auto symbolStart = Converter::OptConvert<Ark_SymbolGlyphModifier>(value0.symbolStartIcon);
             if (symbolStart.has_value()) {
-                auto startApply = Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolStart.value());
+                auto startApply =
+                    Converter::OptConvert<std::function<void(WeakPtr<NG::FrameNode>)>>(symbolStart.value());
                 menuItemProps.startApply = startApply ? startApply.value() : nullptr;
             }
             menuItemProps.endApply = nullptr;
