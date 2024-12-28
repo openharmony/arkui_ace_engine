@@ -15,27 +15,82 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 using ListItemEditableType = std::variant<bool, uint32_t>;
+
+namespace {
+void AssignVoidCallback(std::function<void()>& dst, const Opt_Callback_Void& src)
+{
+    auto arkCallback = Converter::OptConvert<Callback_Void>(src);
+    if (arkCallback) {
+        dst = [callback = CallbackHelper(arkCallback.value())]() {
+            callback.Invoke();
+        };
+    }
 }
+
+void AssignOnStateChangedEventCallback(OnStateChangedEvent& dst, const Opt_Callback_SwipeActionState_Void& src)
+{
+    auto arkCallback = Converter::OptConvert<Callback_SwipeActionState_Void>(src);
+    if (arkCallback) {
+        dst = [callback = CallbackHelper(arkCallback.value())](SwipeActionState state) {
+            auto arkState = Converter::ArkValue<Ark_SwipeActionState>(state);
+            callback.Invoke(arkState);
+        };
+    }
+}
+
+void SetDeleteArea(const Opt_Union_CustomBuilder_SwipeActionItem& arg, bool isStartArea, FrameNode* frameNode,
+    Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(frameNode);
+
+    Converter::VisitUnion(arg,
+        [isStartArea, frameNode, node](const CustomNodeBuilder& value) {
+            auto customNode = CallbackHelper(value, frameNode).BuildSync(node);
+            CHECK_NULL_VOID(customNode);
+            ListItemModelNG::SetDeleteArea(
+                frameNode, customNode.GetRawPtr(), nullptr, nullptr, nullptr, nullptr,
+                Dimension(0, DimensionUnit::VP), isStartArea);
+        },
+        [isStartArea, frameNode, node](const Ark_SwipeActionItem& value) {
+            auto builder = Converter::OptConvert<CustomNodeBuilder>(value.builder);
+            RefPtr<UINode> customNode;
+            if (builder) {
+                customNode = CallbackHelper(builder.value(), frameNode).BuildSync(node);
+            }
+
+            OnDeleteEvent onActionCallback;
+            AssignVoidCallback(onActionCallback, value.onAction);
+
+            OnEnterDeleteAreaEvent onEnterActionAreaCallback;
+            AssignVoidCallback(onEnterActionAreaCallback, value.onEnterActionArea);
+
+            OnExitDeleteAreaEvent onExitActionAreaCallback;
+            AssignVoidCallback(onExitActionAreaCallback, value.onExitActionArea);
+
+            OnStateChangedEvent onStateChangeCallback;
+            AssignOnStateChangedEventCallback(onStateChangeCallback, value.onStateChange);
+
+            auto length = Converter::OptConvert<Dimension>(value.actionAreaDistance);
+
+            ListItemModelNG::SetDeleteArea(frameNode, customNode.GetRawPtr(), std::move(onActionCallback),
+                std::move(onEnterActionAreaCallback), std::move(onExitActionAreaCallback),
+                std::move(onStateChangeCallback), length, isStartArea);
+        },
+        []() {}
+    );
+}
+} // namespace
+} // namespace OHOS::Ace::NG
 
 namespace OHOS::Ace::NG::Converter {
-struct SwipeActionOptions {
-    std::optional<V2::SwipeEdgeEffect> edgeEffect;
-};
-
-template<>
-inline Converter::SwipeActionOptions Convert(const Ark_SwipeActionOptions& src)
-{
-    return {
-        .edgeEffect = OptConvert<V2::SwipeEdgeEffect>(src.edgeEffect)
-    };
-}
-
 template<>
 inline Converter::ListItemOptions Convert(const Ark_ListItemOptions& src)
 {
@@ -138,12 +193,26 @@ void SelectedImpl(Ark_NativePointer node,
 void SwipeActionImpl(Ark_NativePointer node,
                      const Ark_SwipeActionOptions* value)
 {
-    LOGE("ListItemModifier::SwipeActionImpl is not implemented yet!");
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto options = Converter::Convert<Converter::SwipeActionOptions>(*value);
-    ListItemModelNG::SetSwiperAction(frameNode, nullptr, nullptr, nullptr, options.edgeEffect);
+
+    SetDeleteArea(value->start, true, frameNode, node);
+    SetDeleteArea(value->end, false, frameNode, node);
+
+    using OnOffsetChangeType = std::function<void(int32_t)>;
+    OnOffsetChangeType onOffsetChangeCallback;
+    auto arkOnOffsetChange = Converter::OptConvert<Callback_Number_Void>(value->onOffsetChange);
+    if (arkOnOffsetChange) {
+        onOffsetChangeCallback = [arkCallback = CallbackHelper(*arkOnOffsetChange)](int32_t offset) {
+            auto arkOffset = Converter::ArkValue<Ark_Number>(offset);
+            arkCallback.Invoke(arkOffset);
+        };
+    }
+
+    auto edgeEffect = Converter::OptConvert<V2::SwipeEdgeEffect>(value->edgeEffect);
+    ListItemModelNG::SetSwiperAction(frameNode, nullptr, nullptr,
+        std::move(onOffsetChangeCallback), edgeEffect);
 }
 void OnSelectImpl(Ark_NativePointer node,
                   const Callback_Boolean_Void* value)
