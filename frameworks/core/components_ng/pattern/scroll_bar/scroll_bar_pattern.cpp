@@ -305,7 +305,9 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source);
-        pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        if (source == SCROLL_FROM_START) {
+            pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        }
         return true;
     };
     scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
