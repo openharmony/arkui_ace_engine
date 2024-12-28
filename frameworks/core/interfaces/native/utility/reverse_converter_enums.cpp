@@ -472,6 +472,19 @@ void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src)
     }
 }
 
+void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src)
+{
+    switch (src) {
+        case SwipeActionState::COLLAPSED: dst = ARK_SWIPE_ACTION_STATE_COLLAPSED; break;
+        case SwipeActionState::EXPANDED: dst = ARK_SWIPE_ACTION_STATE_EXPANDED; break;
+        case SwipeActionState::ACTIONING: dst = ARK_SWIPE_ACTION_STATE_ACTIONING; break;
+        default: {
+            dst = static_cast<Ark_SwipeActionState>(-1);
+            LOGE("Unexpected enum value in SwipeActionState: %{public}d", src);
+        }
+    }
+}
+
 void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src)
 {
     switch (src) {

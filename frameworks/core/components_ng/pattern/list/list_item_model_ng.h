@@ -47,9 +47,9 @@ public:
         OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea,
         NG::FrameNode* node = nullptr) override;
     
-    static void SetDeleteArea(FrameNode* frameNode, FrameNode* footerNode, OnDeleteEvent&& onDelete,
+    static void SetDeleteArea(FrameNode* frameNode, UINode* footerNode, OnDeleteEvent&& onDelete,
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
-        OnStateChangedEvent&& onStateChangeEvent, const Dimension& length, bool isStartArea);
+        OnStateChangedEvent&& onStateChangeEvent, const std::optional<Dimension>& length, bool isStartArea);
     static void SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,
         std::function<void()>&& endAction, OnOffsetChangeFunc&& onOffsetChangeFunc,
         const std::optional<V2::SwipeEdgeEffect>& edgeEffect);
