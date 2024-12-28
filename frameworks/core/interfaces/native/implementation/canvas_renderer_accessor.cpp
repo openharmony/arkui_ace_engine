@@ -278,7 +278,7 @@ Ark_NativePointer CreatePatternImpl(CanvasRendererPeer* peer,
     auto pixelMap = bitmap->GetPixelMap();
     pattern->SetPixelMap(pixelMap);
 #endif
-    peerImpl->patterns[peerImpl->patternCount];
+    peerImpl->patterns[peerImpl->patternCount] = pattern;
     auto peerPattern = reinterpret_cast<CanvasPatternPeer*>(GetCanvasPatternAccessor()->ctor());
     CHECK_NULL_RETURN(peerPattern, nullptr);
     peerPattern->SetCanvasRenderer(AceType::WeakClaim(peerImpl));

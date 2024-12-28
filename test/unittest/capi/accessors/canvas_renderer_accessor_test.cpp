@@ -1953,7 +1953,40 @@ HWTEST_F(CanvasRendererAccessorTest, getLineDashOffsetTest, TestSize.Level1)
 //setLineJoin
 
 
+/**
+ * @tc.name: createPatternTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, createPatternTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->createPattern, nullptr);
+    holder->SetUp();
+    Ark_Materialized arkBitmap;
+    auto bitmapPeer = new MockImageBitmapPeer();
+    arkBitmap.ptr = bitmapPeer;
+    auto repetition = Converter::ArkValue<Opt_String>("repeat");
+    bitmapPeer->SetWidth(NUMBER_TEST_PLAN[0]);
+    bitmapPeer->SetHeight(NUMBER_TEST_PLAN[1]);
+    auto result = accessor_->createPattern(peer_, &arkBitmap, &repetition);
+    ASSERT_NE(result, nullptr);
+    auto patternPeer = reinterpret_cast<CanvasPatternPeer*>(result);
+    ASSERT_NE(patternPeer, nullptr);
+    auto rendererPeer = patternPeer->GetCanvasRenderer();
+    ASSERT_NE(rendererPeer, nullptr);
+    auto pattern = rendererPeer->patterns[rendererPeer->patternCount - 1];
+    ASSERT_NE(patternPeer, nullptr);
+    ASSERT_FALSE(holder->isCalled);
+    rendererPeer->TriggerRestoreImpl();
+    ASSERT_TRUE(holder->isCalled);
 
+    std::printf("create: holder ps: %zu patternCount: %d pattern: w: %.2f h: %.2f r: %s isCalled: %d\n",
+        rendererPeer->patterns.size(), rendererPeer->patternCount, pattern->GetImageWidth(), pattern->GetImageHeight(),
+        pattern->GetRepetition().c_str(), holder->isCalled);
+
+    holder->TearDown();
+}
 /**
  * @tc.name: setImageSmoothingQualityTest
  * @tc.desc:
@@ -2014,23 +2047,13 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
 
         auto lineJoin = holder->lineJoin ? *holder->lineJoin : static_cast<LineJoinStyle>(-1);
         std::printf("lineCap: holder lineCap: %d==%d isCalled: %d\n", lineJoin, expected, holder->isCalled);
-        
+
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(holder->lineJoin, expected);
     }
     holder->TearDown();
 }
-/**
- * @tc.name: getLineDashOffsetTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, get1Test, TestSize.Level1)
-{
-    auto holder = TestHolder::GetInstance();
-    holder->SetUp();
-    holder->TearDown();
-}
+
 /**
  * @tc.name: getLineDashOffsetTest
  * @tc.desc:
