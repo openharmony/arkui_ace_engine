@@ -1481,6 +1481,8 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
     json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
+    Matrix4 matrixValue = renderProp->GetImageMatrixValue();
+    json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
 }
 
 void ImagePattern::DumpLayoutInfo()
