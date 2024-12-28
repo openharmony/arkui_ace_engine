@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/gauge/gauge_model_ng.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -235,8 +236,8 @@ void DescriptionImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //GaugeModelNG::SetDescription(frameNode, convValue);
+    auto builderNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    GaugeModelNG::SetDescription(frameNode, builderNode);
 }
 void TrackShadowImpl(Ark_NativePointer node,
                      const Ark_GaugeShadowOptions* value)

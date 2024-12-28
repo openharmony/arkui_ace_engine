@@ -21,9 +21,11 @@
 #include "generated/type_helpers.h"
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
+#include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -65,15 +67,17 @@ const std::string TEXT_SELECTABLE_ATTR = "textSelectable";
 const auto RES_NAME = NamedResourceId("aa.bb.cc", Converter::ResourceType::COLOR);
 const auto RES_NAME1 = NamedResourceId("aa.bb.cc", Converter::ResourceType::FLOAT);
 
-const uint32_t FLOAT_RES_0_ID = 100;
+static constexpr int TEST_RESOURCE_ID = 1000;
+const uint32_t FLOAT_RES_0_ID = 1001;
+const uint32_t FLOAT_RES_1_ID = 1002;
+const uint32_t FLOAT_RES_2_ID = 1003;
+
 const double FLOAT_RES_0_VALUE = 0.705f;
 const Ark_Resource FLOAT_RES_0 = CreateResource(FLOAT_RES_0_ID, Converter::ResourceType::FLOAT);
 
-const uint32_t FLOAT_RES_1_ID = 101;
 const double FLOAT_RES_1_VALUE = 5.2f;
 const Ark_Resource FLOAT_RES_1 = CreateResource(FLOAT_RES_1_ID, Converter::ResourceType::FLOAT);
 
-const uint32_t FLOAT_RES_2_ID = 102;
 const float FLOAT_RES_2_VALUE = 10.f;
 const auto FLOAT_RES_2_STORED_VALUE = Dimension(FLOAT_RES_2_VALUE, DimensionUnit::PX);
 const Ark_Resource FLOAT_RES_2 = CreateResource(FLOAT_RES_2_ID, Converter::ResourceType::FLOAT);
@@ -96,16 +100,31 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME = "offsetX";
 const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
 const auto ATTRIBUTE_CONTENT_NAME = "content";
 const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
 
-    struct EventsTracker {
-        static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
+static constexpr int32_t NODE_ID = 555;
+static bool g_isCalled = false;
+struct CheckCBEvent {
+    int32_t resourceId;
+    Ark_NativePointer parentNode;
+};
+static std::optional<CheckCBEvent> checkCBEvent = std::nullopt;
+static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 
-        static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-            .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
-                return &textEventReceiver;
-            }
-        };
+struct EventsTracker {
+    static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
+
+    static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
+        .getTextEventsReceiver = [] () -> const GENERATED_ArkUITextEventsReceiver* {
+            return &textEventReceiver;
+        }
     };
+};
+
+struct SelectionRange {
+    int32_t start;
+    int32_t end;
+};
 } // namespace
 
 class TextModifierTest : public ModifierTestBase<GENERATED_ArkUITextModifier,
@@ -128,6 +147,25 @@ public:
 
         // setup the test event handler
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
+    }
+    CustomNodeBuilder getBuilderCb()
+    {
+        auto checkCallback = [](
+            Ark_VMContext context,
+            const Ark_Int32 resourceId,
+            const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            checkCBEvent = {
+                .resourceId = resourceId,
+                .parentNode = parentNode
+            };
+            if (uiNode) {
+                CallbackHelper(continuation).Invoke(AceType::RawPtr(uiNode.value()));
+            }
+        };
+        CustomNodeBuilder customBuilder =
+            Converter::ArkValue<CustomNodeBuilder>(nullptr, checkCallback, TEST_RESOURCE_ID);
+        return customBuilder;
     }
 };
 
@@ -1135,5 +1173,174 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
     // no crash should happen
     auto text = ArkUnion<Opt_Union_String_Resource, Ark_String>("text");
     modifier_->setTextOptions(node_, &text, nullptr);
+}
+
+/*
+ * @tc.name: setDataDetectorConfig
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setDataDetectorConfig, TestSize.Level1)
+{
+    Ark_TextDataDetectorConfig config;
+    config.color = ArkUnion<Opt_ResourceColor, Ark_String>("#FFAABBCC");
+    std::vector<Ark_TextDataDetectorType> types;
+    types.push_back(ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER);
+    types.push_back(ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS);
+    config.types.array = types.data();
+    config.types.length = types.size();
+
+    Ark_DecorationStyleInterface decoration;
+    decoration.type = ARK_TEXT_DECORATION_TYPE_LINE_THROUGH;
+    decoration.color = ArkUnion<Opt_ResourceColor, Ark_String>("#FF112233");
+    decoration.style = ArkValue<Opt_TextDecorationStyle>(ARK_TEXT_DECORATION_STYLE_WAVY);
+    config.decoration = ArkValue<Opt_DecorationStyleInterface>(decoration);
+
+    modifier_->setDataDetectorConfig(node_, &config);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    auto json = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
+    auto resultColor = GetAttrValue<std::string>(json, "color");
+    auto resultTypes = GetAttrValue<std::string>(json, "types");
+    auto jsonDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(json, "decoration");
+    auto resultDecorationType = GetAttrValue<std::string>(jsonDecoration, "type");
+    auto resultDecorationColor = GetAttrValue<std::string>(jsonDecoration, "color");
+    auto resultDecorationStyle = GetAttrValue<std::string>(jsonDecoration, "style");
+    EXPECT_EQ(resultColor, "#FFAABBCC");
+    EXPECT_EQ(resultTypes, "phoneNum,location");
+    EXPECT_EQ(resultDecorationType, "3");
+    EXPECT_EQ(resultDecorationColor, "#FF112233");
+    EXPECT_EQ(resultDecorationStyle, "4");
+}
+
+/*
+ * @tc.name: setDataDetectorConfigTestCallback
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setDataDetectorConfigTestCallback, TestSize.Level1)
+{
+    Ark_TextDataDetectorConfig config;
+    static const int32_t expectedResourceId = 123;
+    static const std::string expectedArg = "expected string value";
+    static int32_t actualResourceId = -1;
+    static std::string actualArg = "";
+
+    auto callSyncFunc = [](const Ark_Int32 resourceId,
+        const Ark_String breakpoints)
+    {
+        actualResourceId = Converter::Convert<int32_t>(resourceId);
+        actualArg = Converter::Convert<std::string>(breakpoints);
+    };
+
+    auto func = Converter::ArkValue<Callback_String_Void>(callSyncFunc, expectedResourceId);
+    auto funcOpt = Converter::ArkValue<Opt_Callback_String_Void>(func);
+    config.onDetectResultUpdate = funcOpt;
+
+    modifier_->setDataDetectorConfig(node_, &config);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto adapter = pattern->GetDataDetectorAdapter();
+    adapter->FireOnResult(expectedArg);
+
+    EXPECT_EQ(actualResourceId, expectedResourceId);
+    EXPECT_EQ(actualArg, expectedArg);
+}
+
+/**
+ * @tc.name: setBindSelectionMenuTest
+ * @tc.desc: Check the functionality of setBindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    // Prepare callbacks
+    auto onAppearCallback = [](const Ark_Int32 resourceId, const Ark_Number start, const Ark_Number end) {
+        g_isCalled = true;
+    };
+    auto onDisappearCallback = [](const Ark_Int32 resourceId) {
+        g_isCalled = true;
+    };
+    // Prepare options
+    Ark_SelectionMenuOptions value;
+    value.menuType = Converter::ArkValue<Opt_MenuType>(Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU);
+    auto onAppearCb = Converter::ArkValue<MenuOnAppearCallback>(onAppearCallback, TEST_RESOURCE_ID);
+    value.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(onAppearCb);
+    auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
+    value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
+    auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
+    auto buildFunc = getBuilderCb();
+    modifier_->setBindSelectionMenu(node_,
+        Ark_TextSpanType::ARK_TEXT_SPAN_TYPE_TEXT, &buildFunc,
+        Ark_TextResponseType::ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK, &options);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    SelectOverlayInfo selectInfo;
+    // responseType and selectedType accord in setBindSelectionMenu
+    pattern->SetSelectedType(TextSpanType::TEXT);
+    pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
+    pattern->CopySelectionMenuParams(selectInfo);
+    ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
+    checkCBEvent = std::nullopt;
+    selectInfo.menuInfo.menuBuilder();
+    ASSERT_EQ(checkCBEvent.has_value(), true);
+    EXPECT_EQ(checkCBEvent->resourceId, TEST_RESOURCE_ID);
+    uiNode = std::nullopt;
+    checkCBEvent = std::nullopt;
+    g_isCalled = false;
+    ASSERT_NE(selectInfo.menuCallback.onAppear, nullptr);
+    selectInfo.menuCallback.onAppear();
+    EXPECT_TRUE(g_isCalled);
+    g_isCalled = false;
+    ASSERT_NE(selectInfo.menuCallback.onDisappear, nullptr);
+    selectInfo.menuCallback.onDisappear();
+    EXPECT_TRUE(g_isCalled);
+}
+
+/*
+ * @tc.name: setSelectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setSelectionTest, TestSize.Level1)
+{
+    static std::list<SelectionRange> range;
+
+    auto textOptions = ArkValue<Opt_TextOptions>();
+    auto value = ArkUnion<Opt_Union_String_Resource, Ark_String>("Some text value");
+    modifier_->setTextOptions(node_, &value, &textOptions);
+
+    modifier_->setTextSelectable(node_, ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE);
+    modifier_->setCopyOption(node_, ARK_COPY_OPTIONS_IN_APP);
+    Ark_TextOverflowOptions overflowOptions = {
+        .overflow = ARK_TEXT_OVERFLOW_CLIP
+    };
+    modifier_->setTextOverflow(node_, &overflowOptions);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnSelectionChange([](int32_t start, int32_t end) {
+        range.push_back({ .start = start, .end = end });
+    });
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    const int32_t expectedStart = 4;
+    const int32_t expectedEnd = 10;
+    auto start = ArkValue<Ark_Number>(expectedStart);
+    auto end = ArkValue<Ark_Number>(expectedEnd);
+    modifier_->setSelection(node_, &start, &end);
+    ASSERT_FALSE(range.empty());
+    EXPECT_EQ(range.front().start, expectedStart);
+    EXPECT_EQ(range.front().end, expectedEnd);
 }
 }

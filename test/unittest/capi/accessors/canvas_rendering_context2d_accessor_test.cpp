@@ -27,10 +27,11 @@ namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
+using namespace Converter;
 
 namespace {
 const Opt_RenderingContextSettings DEFAULT_SETTINGS =
-    Converter::ArkValue<Opt_RenderingContextSettings>(Converter::ArkValue<Opt_Boolean>(false));
+    ArkValue<Opt_RenderingContextSettings>(ArkValue<Opt_Boolean>(false));
 
 class MockCanvasPattern : public CanvasPattern {
 public:
@@ -38,13 +39,19 @@ public:
     ~MockCanvasPattern() override = default;
 };
 
+const std::string IMAGE_PNG = "image/png";
+const std::string IMAGE_JPEG = "image/jpeg";
+const std::string IMAGE_WEBP = "image/webp";
+const std::string EMPTY_STRING = "";
+const auto IMAGE_QUALITY_DEFAULT = 0.92f;
+
 // test plans
 typedef std::pair<double, Ark_Int32> DoubleValueTestStep;
 const std::vector<DoubleValueTestStep> DOUBLE_VALUE_TEST_PLAN = {
-    { 0, Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(0)) },
-    { 1.25, Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(1.25)) },
-    { 100.15, Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(100.15)) },
-    { -2.35, Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(-2.35)) },
+    { 0, ArkValue<Ark_Int32>(static_cast<int32_t>(0)) },
+    { 1.25, ArkValue<Ark_Int32>(static_cast<int32_t>(1.25)) },
+    { 100.15, ArkValue<Ark_Int32>(static_cast<int32_t>(100.15)) },
+    { -2.35, ArkValue<Ark_Int32>(static_cast<int32_t>(-2.35)) },
 };
 
 const std::vector<ImageAnalyzerType> IMAGE_TYPE_TEST_PLAN {
@@ -59,6 +66,25 @@ const std::vector<Ark_ImageAnalyzerType> ARK_IMAGE_TYPE_TEST_PLAN {
     static_cast<Ark_ImageAnalyzerType>(-100)
 };
 
+const std::vector<std::pair<Opt_String, std::string>> OPT_IMAGE_TYPE_TEST_PLAN {
+    { Converter::ArkValue<Opt_String>(IMAGE_PNG),  IMAGE_PNG},
+    { Converter::ArkValue<Opt_String>(IMAGE_JPEG),  IMAGE_JPEG},
+    { Converter::ArkValue<Opt_String>(IMAGE_WEBP),  IMAGE_WEBP},
+    { Converter::ArkValue<Opt_String>(EMPTY_STRING),  IMAGE_PNG},
+    { Converter::ArkValue<Opt_String>(Ark_Empty()),  IMAGE_PNG},
+};
+const std::vector<std::pair<Opt_Number, float>> OPT_IMAGE_QUALITY_TEST_PLAN {
+    { Converter::ArkValue<Opt_Number>(-10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(-1.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(-0.75f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(0.0f), 0.0f },
+    { Converter::ArkValue<Opt_Number>(0.5f), 0.5f },
+    { Converter::ArkValue<Opt_Number>(0.92f), 0.92f },
+    { Converter::ArkValue<Opt_Number>(1.0f), 1.0f },
+    { Converter::ArkValue<Opt_Number>(1.25f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(10.0f), IMAGE_QUALITY_DEFAULT },
+    { Converter::ArkValue<Opt_Number>(Ark_Empty()), IMAGE_QUALITY_DEFAULT },
+};
 } // namespace
 
 class CanvasRenderingContext2DAccessorTest
@@ -106,20 +132,21 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, startImageAnalyzerTest, TestSize.
     std::vector<Ark_ImageAnalyzerType> src = ARK_IMAGE_TYPE_TEST_PLAN;
     Ark_ImageAnalyzerConfig arkConfig = {
         .types.array = reinterpret_cast<Ark_ImageAnalyzerType*>(src.data()),
-        .types.length = Converter::ArkValue<Ark_Int32>(static_cast<int32_t>(src.size())),
+        .types.length = ArkValue<Ark_Int32>(static_cast<int32_t>(src.size())),
     };
 
     ASSERT_NE(accessor_->startImageAnalyzer, nullptr);
     Callback_Opt_Array_String_Void cont{};
     accessor_->startImageAnalyzer(peer_, &arkConfig, &cont);
 
-    std::vector<ImageAnalyzerType>* config = reinterpret_cast<std::vector<ImageAnalyzerType>*>(holder->config);
-    std::vector<ImageAnalyzerType> vector = *config;
+    ImageAnalyzerConfig* configPtr = reinterpret_cast<ImageAnalyzerConfig*>(holder->config);
+    ASSERT_NE(configPtr, nullptr);
+    ImageAnalyzerConfig config = *configPtr;
     auto length = IMAGE_TYPE_TEST_PLAN.size();
+    EXPECT_EQ(config.types.size(), length);
     for (int i = 0; i < length; i++) {
-        ImageAnalyzerType actual = vector[i]; //*(config + i);
         ImageAnalyzerType expected = IMAGE_TYPE_TEST_PLAN[i];
-        EXPECT_EQ(actual, expected);
+        EXPECT_TRUE(config.types.count(expected));
     }
     OnAnalyzedCallback onAnalyzed = holder->onAnalyzed;
 
@@ -185,7 +212,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
 
 /**
  * @tc.name: getWidthTest
-    * @tc.desc:
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
@@ -204,4 +231,268 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
     holder->TearDown();
 }
 
+/**
+ * @tc.name: onOnAttachTest
+ * @tc.desc: check add callbacks using onOnAttach
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttachTest, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        checkEvents.emplace_back(std::make_pair(ArkValue<Callback_Void>(callback, i), std::nullopt));
+    }
+    int arkCounter = 0;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        accessor_->onOnAttach(peer_, &checkEvents[i].first);
+        EXPECT_FALSE(checkEvents[i].second);
+        for (size_t j = 0; j <= i; ++j) {
+            mockPatternKeeper_->AttachRenderContext();
+            ++arkCounter;
+            EXPECT_TRUE(checkEvents[j].second);
+            EXPECT_EQ(holder->counter, arkCounter);
+            EXPECT_EQ(checkEvents[j].second->resourceId, j);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: onOnDetachTest
+ * @tc.desc: check add callbacks using onOnDetach
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnDetachTest, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        checkEvents.emplace_back(std::make_pair(ArkValue<Callback_Void>(callback, i), std::nullopt));
+    }
+    int arkCounter = 0;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        accessor_->onOnDetach(peer_, &checkEvents[i].first);
+        EXPECT_FALSE(checkEvents[i].second);
+        for (size_t j = 0; j <= i; ++j) {
+            mockPatternKeeper_->DetachRenderContext();
+            ++arkCounter;
+            EXPECT_TRUE(checkEvents[j].second);
+            EXPECT_EQ(holder->counter, arkCounter);
+            EXPECT_EQ(checkEvents[j].second->resourceId, j);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: offOnAttachTest
+ * @tc.desc: check remove single callback using offOnAttach
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        auto arkCallback = ArkValue<Callback_Void>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
+        accessor_->onOnAttach(peer_, &arkCallback);
+    }
+    int arkCounter = 0;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        accessor_->offOnAttach(peer_, &checkEvents[i].first);
+        checkEvents[i].second = std::nullopt;
+        for (size_t j = 0; j < eventsSize; ++j) {
+            mockPatternKeeper_->AttachRenderContext();
+            ++arkCounter;
+            if (j > i) {
+                EXPECT_TRUE(checkEvents[j].second);
+                EXPECT_EQ(checkEvents[j].second->resourceId, j);
+            } else {
+                EXPECT_FALSE(checkEvents[j].second);
+            }
+            EXPECT_EQ(holder->counter, arkCounter);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: offOnAttachTestAll
+ * @tc.desc: check remove all callbacks using offOnAttachTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        auto arkCallback = ArkValue<Callback_Void>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
+        accessor_->onOnAttach(peer_, &arkCallback);
+    }
+    auto optCallback = ArkValue<Opt_Callback_Void>();
+    accessor_->offOnAttach(peer_, &optCallback);
+    mockPatternKeeper_->AttachRenderContext();
+    for (size_t j = 0; j < eventsSize; ++j) {
+        EXPECT_FALSE(checkEvents[j].second);
+    }
+    EXPECT_EQ(holder->counter, 1);
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: offOnDetachTest
+ * @tc.desc: check remove single callback using offOnDetach
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        auto arkCallback = ArkValue<Callback_Void>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
+        accessor_->onOnDetach(peer_, &arkCallback);
+    }
+    int arkCounter = 0;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        accessor_->offOnDetach(peer_, &checkEvents[i].first);
+        checkEvents[i].second = std::nullopt;
+        for (size_t j = 0; j < eventsSize; ++j) {
+            mockPatternKeeper_->DetachRenderContext();
+            ++arkCounter;
+            if (j > i) {
+                EXPECT_TRUE(checkEvents[j].second);
+                EXPECT_EQ(checkEvents[j].second->resourceId, j);
+            } else {
+                EXPECT_FALSE(checkEvents[j].second);
+            }
+            EXPECT_EQ(holder->counter, arkCounter);
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: offOnDetachTestAll
+ * @tc.desc: check remove all callbacks using offOnDetach
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);
+    struct CheckEvent {
+        int32_t resourceId;
+    };
+    static size_t eventsSize = 10;
+    using TestCallback = std::pair<Opt_Callback_Void, std::optional<CheckEvent>>;
+    static std::vector<TestCallback> checkEvents;
+    for (size_t i = 0; i < eventsSize; ++i) {
+        auto callback = [] (const Ark_Int32 resourceId) {
+            checkEvents[resourceId].second = {
+                .resourceId = resourceId,
+            };
+        };
+        auto arkCallback = ArkValue<Callback_Void>(callback, i);
+        checkEvents.emplace_back(std::make_pair(ArkValue<Opt_Callback_Void>(arkCallback), std::nullopt));
+        accessor_->onOnDetach(peer_, &arkCallback);
+    }
+    auto optCallback = ArkValue<Opt_Callback_Void>();
+    accessor_->offOnDetach(peer_, &optCallback);
+    mockPatternKeeper_->DetachRenderContext();
+    for (size_t j = 0; j < eventsSize; ++j) {
+        EXPECT_FALSE(checkEvents[j].second);
+    }
+    EXPECT_EQ(holder->counter, 1);
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: toDataURLTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, toDataURLTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->toDataURL, nullptr);
+
+    for (auto& [actualType, expectedType] : OPT_IMAGE_TYPE_TEST_PLAN) {
+        for (auto& [actualQuality, expectedQuality] : OPT_IMAGE_QUALITY_TEST_PLAN) {
+            holder->SetUp();
+            EXPECT_FALSE(holder->type.has_value());
+            EXPECT_FALSE(holder->quality.has_value());
+            accessor_->toDataURL(peer_, &actualType, &actualQuality);
+
+            EXPECT_EQ(holder->type.value(), expectedType);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(holder->quality.value(), expectedQuality));
+            EXPECT_TRUE(holder->isCalled);
+            holder->TearDown();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

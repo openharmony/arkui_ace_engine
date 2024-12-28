@@ -14,7 +14,9 @@
  */
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/converter2.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
@@ -23,6 +25,7 @@
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG::Converter {
 namespace WeightNum {
@@ -65,6 +68,27 @@ void AssignCast(std::optional<TextSelectableMode>& dst, const Ark_TextSelectable
 }
 
 template<>
+void AssignCast(std::optional<TextSpanType>& dst, const Ark_TextSpanType& src)
+{
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: dst = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
+        default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src);
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextResponseType>& dst, const Ark_TextResponseType& src)
+{
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src);
+    }
+}
+template<>
 TextOptions Convert(const Ark_TextOptions& src)
 {
     TextOptions options;
@@ -89,6 +113,32 @@ std::optional<int32_t> FontWeightToInt(const FontWeight& src)
         default: dst = std::nullopt; break;
     }
     return dst;
+}
+
+template<>
+TextSpanType Convert(const Ark_TextSpanType& src)
+{
+    TextSpanType textSpanType;
+    switch (src) {
+        case ARK_TEXT_SPAN_TYPE_TEXT: textSpanType = TextSpanType::TEXT; break;
+        case ARK_TEXT_SPAN_TYPE_IMAGE: textSpanType = TextSpanType::IMAGE; break;
+        case ARK_TEXT_SPAN_TYPE_MIXED: textSpanType = TextSpanType::MIXED; break;
+        default: LOGE("Unexpected enum value in Ark_TextSpanType: %{public}d", src); break;
+    }
+    return textSpanType;
+}
+
+template<>
+TextResponseType Convert(const Ark_TextResponseType& src)
+{
+    TextResponseType responseType;
+    switch (src) {
+        case ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK: responseType = TextResponseType::RIGHT_CLICK; break;
+        case ARK_TEXT_RESPONSE_TYPE_LONG_PRESS: responseType = TextResponseType::LONG_PRESS; break;
+        case ARK_TEXT_RESPONSE_TYPE_SELECT: responseType = TextResponseType::SELECTED_BY_MOUSE; break;
+        default: LOGE("Unexpected enum value in Ark_TextResponseType: %{public}d", src); break;
+    }
+    return responseType;
 }
 }
 
@@ -473,9 +523,8 @@ void DataDetectorConfigImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //TextModelNG::SetDataDetectorConfig(frameNode, convValue);
-    LOGW("TextAttributeModifier::EnableDataDetectorImpl not implemented");
+    auto convValue = Converter::Convert<TextDetectConfig>(*value);
+    TextModelNG::SetTextDetectConfig(frameNode, convValue);
 }
 void OnTextSelectionChangeImpl(Ark_NativePointer node,
                                const Callback_Number_Number_Void* value)
@@ -560,9 +609,18 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(spanType);
-    //auto convValue = Converter::OptConvert<type>(spanType); // for enums
-    //TextModelNG::SetBindSelectionMenu(frameNode, convValue);
+    CHECK_NULL_VOID(options);
+    auto optSpanType = Converter::OptConvert<TextSpanType>(spanType);
+    auto convResponseType = Converter::Convert<TextResponseType>(responseType);
+    auto convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    if (convMenuParam.has_value() && optSpanType.has_value()) {
+        TextModelNG::BindSelectionMenu(
+            frameNode, optSpanType.value(), convResponseType, convBuildFunc, convMenuParam.value());
+    }
 }
 } // TextAttributeModifier
 const GENERATED_ArkUITextModifier* GetTextModifier()

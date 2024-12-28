@@ -18,19 +18,16 @@
 #include "base/utils/utils.h"
 #include "core/common/container_consts.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
-#include "core/components_ng/pattern/canvas/canvas_pattern.h"
+#include "core/components/common/properties/decoration.h"
 
-struct CanvasPathPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> GetHandler() const
-    {
-        return handler;
-    }
+namespace OHOS::Ace::NG::GeneratedModifier {
+class CanvasPathPeerImpl : public Referenced {
+public:
+    CanvasPathPeerImpl() = default;
+    ~CanvasPathPeerImpl() override = default;
 
-    void SetHandler(const OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern>& handl)
-    {
-        handler = handl;
-    }
-private:
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::CanvasPattern> handler;
+public:
+    RefPtr<CanvasPath2D> path;
 };
+} // namespace OHOS::Ace::NG::GeneratedModifier
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CANVAS_PATH_ACCESSOR_PEER_IMPL_H

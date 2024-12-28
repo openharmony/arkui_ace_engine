@@ -22,6 +22,12 @@
 #include "core/components_v2/list/list_properties.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
+namespace OHOS::Ace::NG {
+struct KeyboardOptions {
+    bool supportAvoidance;
+};
+}
+
 namespace OHOS::Ace::NG::GeneratedModifier {
 class WebCookiePeerImpl : public Referenced {
     // this is a stub because all WebCookieAccessor interfaces are deprecated
@@ -69,11 +75,6 @@ struct TextDecorationOptions {
 };
 struct ListItemOptions {
     std::optional<V2::ListItemStyle> style;
-};
-
-struct ListItemGroupOptions {
-    std::optional<Dimension> space;
-    std::optional<V2::ListItemGroupStyle> style;
 };
 
 struct AnimateParam {

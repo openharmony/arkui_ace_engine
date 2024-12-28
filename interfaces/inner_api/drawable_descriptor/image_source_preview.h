@@ -16,10 +16,8 @@
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_IMAGE_SOURCE_PREVIEW_H
 
 #include <memory>
-
 #include "js_native_api.h"
 #include "js_native_api_types.h"
-
 namespace OHOS {
 namespace Media {
 enum class PixelFormat : int32_t {

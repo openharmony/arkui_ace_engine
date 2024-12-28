@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,20 @@ enum ResID {
     DIMENSIONS_RES_NON_NEG_NON_PCT_11_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_12_ID,
     DIMENSIONS_RES_NON_NEG_NON_PCT_13_ID,
+    DIMENSIONS_RES_NON_PCT_0_ID,
+    DIMENSIONS_RES_NON_PCT_1_ID,
+    DIMENSIONS_RES_NON_PCT_2_ID,
+    DIMENSIONS_RES_NON_PCT_3_ID,
+    DIMENSIONS_RES_NON_PCT_4_ID,
+    DIMENSIONS_RES_NON_PCT_5_ID,
+    DIMENSIONS_RES_NON_PCT_6_ID,
+    DIMENSIONS_RES_NON_PCT_7_ID,
+    DIMENSIONS_RES_NON_PCT_8_ID,
+    DIMENSIONS_RES_NON_PCT_9_ID,
+    DIMENSIONS_RES_NON_PCT_10_ID,
+    DIMENSIONS_RES_NON_PCT_11_ID,
+    DIMENSIONS_RES_NON_PCT_12_ID,
+    DIMENSIONS_RES_NON_PCT_13_ID,
     MAX_FONT_SCALE_RES_0_ID,
     MAX_FONT_SCALE_RES_1_ID,
     MAX_FONT_SCALE_RES_2_ID,
@@ -178,6 +192,20 @@ inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_10_STR = "DIMENSIONS_RES_NO
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_11_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_12_STR";
 inline constexpr auto DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR = "DIMENSIONS_RES_NON_NEG_NON_PCT_13_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_0_STR = "DIMENSIONS_RES_NON_PCT_0_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_1_STR = "DIMENSIONS_RES_NON_PCT_1_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_2_STR = "DIMENSIONS_RES_NON_PCT_2_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_3_STR = "DIMENSIONS_RES_NON_PCT_3_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_4_STR = "DIMENSIONS_RES_NON_PCT_4_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_5_STR = "DIMENSIONS_RES_NON_PCT_5_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_6_STR = "DIMENSIONS_RES_NON_PCT_6_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_7_STR = "DIMENSIONS_RES_NON_PCT_7_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_8_STR = "DIMENSIONS_RES_NON_PCT_8_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_9_STR = "DIMENSIONS_RES_NON_PCT_9_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_10_STR = "DIMENSIONS_RES_NON_PCT_10_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_11_STR = "DIMENSIONS_RES_NON_PCT_11_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_12_STR = "DIMENSIONS_RES_NON_PCT_12_STR";
+inline constexpr auto DIMENSIONS_RES_NON_PCT_13_STR = "DIMENSIONS_RES_NON_PCT_13_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_0_STR = "MAX_FONT_SCALE_RES_0_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_1_STR = "MAX_FONT_SCALE_RES_1_STR";
 inline constexpr auto MAX_FONT_SCALE_RES_2_STR = "MAX_FONT_SCALE_RES_2_STR";
@@ -330,6 +358,11 @@ extern std::vector<std::tuple<std::string, Ark_Color>> testFixtureColorsAlpha20E
 extern std::vector<std::tuple<std::string, Ark_FontWeight, std::string>> testFixtureVariableFontWeightEnumValidValues;
 extern std::vector<std::tuple<std::string, Ark_FontWeight>> testFixtureVariableFontWeightEnumInvalidValues;
 
+// Fixture 'ImageRotateOrientation' for type 'Ark_ImageRotateOrientation'
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation, std::string>>
+    testFixtureImageRotateOrientationValidValues;
+extern std::vector<std::tuple<std::string, Ark_ImageRotateOrientation>> testFixtureImageRotateOrientationInvalidValues;
+
 // Fixture 'LengthNonNegNonPct' for type 'Ark_Length'
 extern std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues;
@@ -415,6 +448,10 @@ extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsR
 extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonNegNonPctValidValues;
 extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonNegNonPctInvalidValues;
 
+// Fixture 'DimensionsResNonPct' for type 'Ark_Resource'
+extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureDimensionsResNonPctValidValues;
+extern std::vector<std::tuple<std::string, Ark_Resource>> testFixtureDimensionsResNonPctInvalidValues;
+
 // Fixture 'MaxFontScaleNum' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMaxFontScaleNumValidValues;
 
@@ -429,6 +466,12 @@ extern std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtu
 
 // Fixture 'NumberAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberAnythingValidValues;
+
+// Fixture 'MotionBlurRadiusNumber' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurRadiusNumberValidValues;
+
+// Fixture 'MotionBlurAnchorNumber' for type 'Ark_Number'
+extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureMotionBlurAnchorNumberValidValues;
 
 // Fixture 'NumberFloatAnything' for type 'Ark_Number'
 extern std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberFloatAnythingValidValues;

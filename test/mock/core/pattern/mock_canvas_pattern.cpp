@@ -47,6 +47,11 @@ void CanvasPattern::DetachRenderContext()
 
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+    }
     onContext2DAttach_ = std::move(callback);
 }
 
@@ -58,6 +63,11 @@ void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 void CanvasPattern::FireOnContext2DAttach()
 {
     if (onContext2DAttach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DAttach_();
     }
 }
@@ -65,6 +75,11 @@ void CanvasPattern::FireOnContext2DAttach()
 void CanvasPattern::FireOnContext2DDetach()
 {
     if (onContext2DDetach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DDetach_();
     }
 }
@@ -231,6 +246,11 @@ void CanvasPattern::ClearRect(const Rect& rect)
 
 void CanvasPattern::Fill()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill();
@@ -243,6 +263,12 @@ void CanvasPattern::Fill()
 
 void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill(path);
@@ -294,6 +320,11 @@ void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CanvasPattern::Clip()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
@@ -306,6 +337,12 @@ void CanvasPattern::Clip()
 
 void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip(path);
@@ -521,6 +558,14 @@ void CanvasPattern::DrawSvgImage(
 
 void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->pixelMap = pixelMap;
+        holder->canvasImage = image;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawPixelMap(pixelMap, image);
@@ -536,8 +581,12 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
     auto holder = TestHolder::GetInstance();
     if (holder->request) {
         std::unique_ptr<Ace::ImageData> data = std::make_unique<Ace::ImageData>();
+        data->x = left;
+        data->y = top;
         data->dirtyWidth = width;
         data->dirtyHeight = height;
+        holder->imageData = std::make_shared<Ace::ImageData>(*data);
+        holder->isCalled = true;
         return data;
     }
 
@@ -561,6 +610,13 @@ void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageDat
 
 void CanvasPattern::PutImageData(const Ace::ImageData& imageData)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->imageData = std::make_shared<Ace::ImageData>(imageData);
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [imageData](CanvasPaintMethod& paintMethod) {
         paintMethod.PutImageData(imageData);
@@ -682,6 +738,13 @@ void CanvasPattern::UpdateSmoothingEnabled(bool enabled)
 
 void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->text = quality;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [quality](CanvasPaintMethod& paintMethod) {
         paintMethod.SetSmoothingQuality(quality);
@@ -694,6 +757,13 @@ void CanvasPattern::UpdateSmoothingQuality(const std::string& quality)
 
 void CanvasPattern::UpdateLineCap(LineCapStyle cap)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->lineCap = cap;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [cap](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineCap(cap);
@@ -726,6 +796,13 @@ void CanvasPattern::UpdateLineDashOffset(double dash)
 
 void CanvasPattern::UpdateLineJoin(LineJoinStyle join)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->lineJoin = join;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [join](CanvasPaintMethod& paintMethod) {
         paintMethod.SetLineJoin(join);
@@ -858,6 +935,12 @@ void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 
 void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->textAlign = align;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
@@ -870,6 +953,12 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->baseline = baseline;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);
@@ -1034,6 +1123,12 @@ void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern
 
 void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->fillRule = rule;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
@@ -1058,6 +1153,11 @@ void CanvasPattern::UpdateFillRuleForPath2D(const CanvasFillRule rule)
 
 LineDashParam CanvasPattern::GetLineDash() const
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        return *holder->lineDash;
+    }
     return paintMethod_->GetLineDash();
 }
 
@@ -1261,6 +1361,13 @@ void CanvasPattern::Translate(double x, double y)
 
 std::string CanvasPattern::ToDataURL(const std::string& type, double quality)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->type = type;
+        holder->quality = quality;
+        return "";
+    }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
     paintMethod_->FlushUITasks();
     return paintMethod_->ToDataURL(type, quality);
@@ -1321,6 +1428,12 @@ void CanvasPattern::SetInvalidate()
 
 void CanvasPattern::SetTextDirection(TextDirection direction)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->direction = direction;
+        return;
+    }
     currentSetTextDirection_ = direction;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1364,6 +1477,11 @@ void CanvasPattern::SetFilterParam(const std::string& filterStr)
 
 TransformParam CanvasPattern::GetTransform() const
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        return *holder->param;
+    }
     return paintMethod_->GetTransform();
 }
 

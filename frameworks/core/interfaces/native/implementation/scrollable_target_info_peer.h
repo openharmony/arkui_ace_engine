@@ -20,6 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 class ScrollableTargetInfoPeerImpl : public EventTargetInfoPeer {
+    DECLARE_ACE_TYPE(ScrollableTargetInfoPeerImpl, EventTargetInfoPeer);
 public:
     ScrollableTargetInfoPeerImpl() = default;
     ~ScrollableTargetInfoPeerImpl() override = default;
@@ -39,4 +40,6 @@ private:
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
 
-struct ScrollableTargetInfoPeer : public OHOS::Ace::NG::GeneratedModifier::ScrollableTargetInfoPeerImpl {};
+struct ScrollableTargetInfoPeer : public OHOS::Ace::NG::GeneratedModifier::ScrollableTargetInfoPeerImpl {
+    DECLARE_ACE_TYPE(ScrollableTargetInfoPeer, OHOS::Ace::NG::GeneratedModifier::ScrollableTargetInfoPeerImpl);
+};

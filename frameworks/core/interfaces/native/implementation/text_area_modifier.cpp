@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -289,8 +290,19 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    TextFieldModelNG::SetOnPasteWithEvent(frameNode, nullptr);
-    LOGE("ARKOALA TextAreaAttributeModifier.OnPasteImpl -> Method is not fully implemented.");
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
+        NG::TextCommonEvent& event) -> void {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.Invoke(arkContent, arkEvent);
+    };
+    TextFieldModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 
 void CopyOptionImpl(Ark_NativePointer node,
@@ -480,14 +492,13 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [frameNode](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
-        LOGE("ARKOALA TextAreaAttributeModifier.OnWillInsert -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+            .value_or(true);
     };
     TextFieldModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
@@ -512,15 +523,14 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [frameNode](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
         };
-        GetFullAPI()->getEventsAPI()->getTextAreaEventsReceiver()->onWillDelete(frameNode->GetId(), deleteValue);
-        LOGE("ARKOALA TextAreaAttributeModifier.OnWillDeleteImpl -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
+            .value_or(true);
     };
     TextFieldModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
@@ -573,10 +583,17 @@ void InputFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::string& val) {
-        auto errorArkString = Converter::ArkValue<Ark_String>(val);
-    };
-    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
+    std::function<void(const std::u16string&)> onErrorEvent = nullptr;
+    if (error) {
+        auto arkOnError = Converter::OptConvert<Callback_String_Void>(*error);
+        if (arkOnError) {
+            onErrorEvent = [arkCallback = CallbackHelper(arkOnError.value())](const std::u16string& val) {
+                Converter::ConvContext ctx;
+                arkCallback.Invoke(Converter::ArkValue<Ark_String>(val, &ctx));
+            };
+        }
+    }
+    TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), std::move(onErrorEvent));
 }
 void ShowCounterImpl(Ark_NativePointer node,
                      Ark_Boolean value,
@@ -610,10 +627,14 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //TextAreaModelNG::SetCustomKeyboard(frameNode, convValue);
-    LOGE("ARKOALA TextAreaAttributeModifier.CustomKeyboardImpl -> Method is not implemented.");
+    CHECK_NULL_VOID(options);
+    auto keyboardOptions = options ? Converter::OptConvert<Ark_KeyboardOptions>(*options) : std::nullopt;
+    bool supportAvoidance = keyboardOptions &&
+        Converter::OptConvert<bool>(keyboardOptions.value().supportAvoidance).value_or(false);
+    auto uiNode = CallbackHelper(*value, frameNode).BuildSync(node);
+    auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode);
+    TextFieldModelNG::SetCustomKeyboard(
+        frameNode, AceType::RawPtr(customKeyboard), supportAvoidance);
 }
 void __onChangeEvent_textImpl(Ark_NativePointer node,
                               const Callback_ResourceStr_Void* callback)

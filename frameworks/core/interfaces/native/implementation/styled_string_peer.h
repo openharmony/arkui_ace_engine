@@ -17,5 +17,7 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 
 struct StyledStringPeer {
+    virtual ~StyledStringPeer() = default;
+
     OHOS::Ace::RefPtr<OHOS::Ace::SpanString> spanString;
 };

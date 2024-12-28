@@ -207,6 +207,12 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
+    int32_t GetInstanceIdFromHost();
+    void UpdateSessionType(SessionType type)
+    {
+        sessionType_ = type;
+        UpdateSessionWraper(isTransferringCaller_);
+    }
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);

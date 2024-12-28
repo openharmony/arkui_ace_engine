@@ -58,6 +58,29 @@ void AssignTo(std::optional<Dimension>& dst, const Array_Length& from)
 {
     dst.reset();
 }
+
+template<>
+void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_OnScrollFrameBeginHandlerResult& from)
+{
+    ScrollFrameResult ret;
+    ret.offset = Converter::Convert<Dimension>(from.offsetRemain);
+    dst = ret;
+}
+
+template<>
+TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
+{
+    auto xOffset = OptConvert<Dimension>(src.xOffset);
+    auto yOffset = OptConvert<Dimension>(src.yOffset);
+    TwoDimensionScrollResult result;
+    if (xOffset.has_value()) {
+        result.xOffset = xOffset.value();
+    }
+    if (yOffset.has_value()) {
+        result.yOffset = yOffset.value();
+    }
+    return result;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {
@@ -138,16 +161,45 @@ void OnWillScrollImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
+    auto callValue = Converter::OptConvert<ScrollOnWillScrollCallback>(*value);
+    if (callValue.has_value()) {
+        auto call = [arkCallback = CallbackHelper(callValue.value(), frameNode)] (
+            const Dimension& xOffset,
+            const Dimension& yOffset,
+            const ScrollState& scrollState,
+            const ScrollSource& scrollSource) {
+            auto retVal = arkCallback.InvokeWithOptConvertResult<
+                TwoDimensionScrollResult,
+                Ark_OffsetResult,
+                Callback_OffsetResult_Void>(
+                Converter::ArkValue<Ark_Number>(xOffset),
+                Converter::ArkValue<Ark_Number>(yOffset),
+                Converter::ArkValue<Ark_ScrollState>(scrollState),
+                Converter::ArkValue<Ark_ScrollSource>(scrollSource)
+            );
+            return retVal.value_or(TwoDimensionScrollResult());
+        };
+        ScrollModelNG::SetOnWillScroll(frameNode, call);
+    }
 }
 void OnDidScrollImpl(Ark_NativePointer node,
                      const Opt_ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //ScrollModelNG::SetOnDidScroll(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    auto callValue = Converter::OptConvert<ScrollOnScrollCallback>(*value);
+    if (!callValue.has_value()) {
+        return;
+    }
+    auto call = [arkCallback = CallbackHelper(callValue.value())](
+        Dimension xIn, Dimension yIn, ScrollState stateIn) {
+            auto state = Converter::ArkValue<Ark_ScrollState>(stateIn);
+            auto x = Converter::ArkValue<Ark_Number>(xIn);
+            auto y = Converter::ArkValue<Ark_Number>(yIn);
+            arkCallback.Invoke(x, y, state);
+    };
+    ScrollModelNG::SetOnDidScroll(frameNode, std::move(call));
 }
 void OnScrollEdgeImpl(Ark_NativePointer node,
                       const OnScrollEdgeCallback* value)
@@ -231,8 +283,19 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ScrollModelNG::SetOnScrollFrameBegin(frameNode, convValue);
+
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+        Dimension dimension, ScrollState state) -> ScrollFrameResult {
+        ScrollFrameResult result;
+        Ark_Number arkValue = Converter::ArkValue<Ark_Number>(dimension);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_OnScrollFrameBeginHandlerResult,
+            Callback_OnScrollFrameBeginHandlerResult_Void>(arkValue, arkState)
+            .value_or(result);
+    };
+
+    ScrollModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)

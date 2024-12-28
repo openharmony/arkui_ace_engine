@@ -1072,7 +1072,7 @@ HWTEST_F(SelectModifierTest, setOptionFontTestNothingSelected, TestSize.Level1)
  * @tc.desc: Test setOptionFont function
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setOptionFontTestSize, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setOptionFontTestSize, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont, nullptr);
 
@@ -1092,7 +1092,7 @@ HWTEST_F(SelectModifierTest, DISABLED_setOptionFontTestSize, TestSize.Level1)
  * @tc.desc: Test setOptionFont function
  * @tc.type: FUNC
  */
-HWTEST_F(SelectModifierTest, DISABLED_setOptionFontTestWeight, TestSize.Level1)
+HWTEST_F(SelectModifierTest, setOptionFontTestWeight, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setOptionFont, nullptr);
 

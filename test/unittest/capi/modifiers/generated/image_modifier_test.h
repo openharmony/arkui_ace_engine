@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,6 @@ using namespace TypeHelper;
 namespace TestConst::Image {
 const auto ATTRIBUTE_IMAGE_AIOPTIONS_NAME = "imageAIOptions";
 const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
-const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME = "lightSource";
 const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
 const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
 const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
@@ -75,20 +73,6 @@ const auto ATTRIBUTE_COPY_OPTION_NAME = "copyOption";
 const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.None";
 const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
 const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "true";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME = "positionX";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME = "positionY";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME = "positionZ";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE = "0.00vp";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME = "intensity";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE = "0";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME = "color";
-const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE = "#FFFFFFFF";
-const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME = "illuminated";
-const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE = "IlluminatedType.NONE";
-const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME = "bloom";
-const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = "0";
 const auto ATTRIBUTE_EDGE_ANTIALIASING_NAME = "edgeAntialiasing";
 const auto ATTRIBUTE_EDGE_ANTIALIASING_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";

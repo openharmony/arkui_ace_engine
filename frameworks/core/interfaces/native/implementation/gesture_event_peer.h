@@ -16,9 +16,29 @@
 #pragma once
 
 #include "core/gestures/gesture_event.h"
-#include "core/interfaces/native/implementation/base_event_peer.h"
+#include "core/interfaces/native/implementation/base_gesture_event_peer.h"
 
-struct GestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::GestureEvent> {
+struct GestureEventPeer : public BaseGestureEventPeer {
     ~GestureEventPeer() override = default;
+
+    using GestureInfo = OHOS::Ace::GestureEvent;
+
+    OHOS::Ace::BaseEventInfo* GetBaseInfo() override
+    {
+        return GetGestureInfo();
+    }
+
+    GestureInfo* GetGestureInfo()
+    {
+        CHECK_NULL_RETURN(gestureInfo, nullptr);
+        return &gestureInfo.value();
+    }
+
+    void SetGestureInfo(const GestureInfo& info)
+    {
+        gestureInfo = info;
+    }
+
+private:
+    std::optional<GestureInfo> gestureInfo;
 };

@@ -239,4 +239,77 @@ void CustomDialogControllerModelNG::SetCloseDialogForNDK(FrameNode* dialogNode)
         overlay->CloseDialog(dialogRef);
     }
 }
+
+void CustomDialogControllerModelNG::SetOpenDialog(
+    DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, const WeakPtr<AceType>& controller,
+    std::function<RefPtr<UINode>()>&& builder)
+{
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
+        return;
+    }
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
+            return;
+        }
+    }
+    ContainerScope scope(currentId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+
+    dialogProperties.onStatusChanged = [](bool) {};
+    const auto buildFunc = [func = std::move(builder)]() {
+        const auto node = func();
+        NG::ViewStackProcessor::GetInstance()->Push(node);
+    };
+
+    auto executor = context->GetTaskExecutor();
+    if (!executor) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Task executor is null.");
+        return;
+    }
+    auto task = ParseOpenDialogTask(
+        currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
+}
+
+void CustomDialogControllerModelNG::SetCloseDialog(
+    DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, const WeakPtr<AceType>& controller)
+{
+    TAG_LOGI(AceLogTag::ACE_DIALOG, "CustomDialogController SetCloseDialog enter.");
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    if (!container) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Container is null.");
+        return;
+    }
+    if (container->IsSubContainer() && !dialogProperties.isShowInSubWindow) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "ParentContainer is null.");
+            return;
+        }
+    }
+    ContainerScope scope(currentId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto executor = context->GetTaskExecutor();
+    CHECK_NULL_VOID(executor);
+    auto task = ParseCloseDialogTask(controller, dialogProperties, dialogs, overlayManager);
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
+}
 } // namespace OHOS::Ace::NG

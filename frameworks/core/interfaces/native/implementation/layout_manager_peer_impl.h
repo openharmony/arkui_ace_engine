@@ -18,6 +18,6 @@
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 
 struct LayoutManagerPeer {
-    OHOS::Ace::RefPtr<OHOS::Ace::NG::LayoutInfoInterface> handler;
+    OHOS::Ace::WeakPtr<OHOS::Ace::NG::LayoutInfoInterface> handler;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_CLIENT_LAYOUT_MANAGER_PEER_IMPL_H

@@ -20,7 +20,33 @@
 #include "arkoala_api_generated.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "water_flow_scroller_peer_impl.h"
+#include "water_flow_sections_accessor_peer_impl.h"
 
+namespace OHOS::Ace::NG {
+namespace Converter {
+template<>
+void AssignCast(std::optional<WaterFlowLayoutMode>& dst, const Ark_WaterFlowLayoutMode& src)
+{
+    switch (src) {
+        case ARK_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN: dst = WaterFlowLayoutMode::TOP_DOWN; break;
+        case ARK_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW: dst = WaterFlowLayoutMode::SLIDING_WINDOW; break;
+        default: LOGE("Unexpected enum value in Ark_WaterFlowLayoutMode: %{public}d", src);
+    }
+}
+
+template<>
+void AssignTo(std::optional<ScrollFrameResult>& dst, const Ark_Literal_Number_offsetRemain& from)
+{
+    auto offset = Converter::OptConvert<Dimension>(from.offsetRemain);
+    if (offset) {
+        ScrollFrameResult ret;
+        ret.offset = offset.value();
+        dst = ret;
+    }
+}
+} // Converter
+} // OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WaterFlowModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -38,9 +64,40 @@ void SetWaterFlowOptionsImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //WaterFlowModelNG::SetSetWaterFlowOptions(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.SetWaterFlowOptionsImpl -> Method is not implemented. Ark_CustomObject is not supported!");
+    auto convValue = options ? Converter::OptConvert<Ark_WaterFlowOptions>(*options) : std::nullopt;
+    if (convValue) {
+        auto optFooter = Converter::OptConvert<CustomNodeBuilder>(convValue.value().footer);
+        if (optFooter) {
+            auto builder = [callback = CallbackHelper(optFooter.value(), frameNode), node]() -> RefPtr<UINode> {
+                return callback.BuildSync(node);
+            };
+            WaterFlowModelNG::SetFooter(frameNode, std::move(builder));
+        }
+        auto optScroller = Converter::OptConvert<Ark_NativePointer>(convValue.value().scroller);
+        if (optScroller) {
+            RefPtr<ScrollControllerBase> positionController = WaterFlowModelNG::GetOrCreateController(frameNode);
+            RefPtr<ScrollProxy> scrollBarProxy = WaterFlowModelNG::GetOrCreateScrollBarProxy(frameNode);
+            CHECK_NULL_VOID(optScroller.value());
+            auto peerImplPtr = reinterpret_cast<WaterflowScrollerPeer *>(optScroller.value());
+            CHECK_NULL_VOID(peerImplPtr);
+            peerImplPtr->SetController(positionController);
+            peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+        }
+        auto optArkSections = Converter::OptConvert<Ark_NativePointer>(convValue.value().sections);
+        if (optArkSections) {
+            auto peerImplPtr = reinterpret_cast<WaterFlowSectionsPeer *>(optArkSections.value());
+            CHECK_NULL_VOID(peerImplPtr);
+            RefPtr<WaterFlowSections> sections = WaterFlowModelNG::GetOrCreateWaterFlowSections(frameNode);
+            peerImplPtr->SetController(sections);
+        }
+        auto optArkLayoutMode = Converter::OptConvert<Ark_WaterFlowLayoutMode>(convValue.value().layoutMode);
+        if (optArkLayoutMode) {
+            auto optlayoutMode = Converter::OptConvert<WaterFlowLayoutMode>(optArkLayoutMode.value());
+            if (optlayoutMode) {
+                WaterFlowModelNG::SetLayoutMode(frameNode, optlayoutMode.value());
+            }
+        }
+    }
 }
 } // WaterFlowInterfaceModifier
 namespace WaterFlowAttributeModifier {
@@ -197,9 +254,18 @@ void OnScrollFrameBeginImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, convValue);
-    LOGE("ARKOALA WaterFlow.OnScrollFrameBeginImpl -> Method is not implemented. Event with return value!");
+    auto onScrollFrameEvent = [callback = CallbackHelper(*value, frameNode)](
+        Dimension offset, ScrollState state) -> ScrollFrameResult {
+        ScrollFrameResult result;
+        Ark_Number arkOffset = Converter::ArkValue<Ark_Number>(offset);
+        Ark_ScrollState arkState = Converter::ArkValue<Ark_ScrollState>(state);
+        return callback.InvokeWithOptConvertResult<
+            ScrollFrameResult, Ark_Literal_Number_offsetRemain,
+            Callback_Literal_Number_offsetRemain_Void>(arkOffset, arkState)
+            .value_or(result);
+    };
+
+    WaterFlowModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameEvent));
 }
 void OnScrollIndexImpl(Ark_NativePointer node,
                        const Callback_Number_Number_Void* value)

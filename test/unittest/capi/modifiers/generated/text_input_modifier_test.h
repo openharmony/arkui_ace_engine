@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,10 @@ const auto ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_NAME = "size";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_NAME = "weight";
-const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_NAME = "family";
-const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE = "Harmony"
+                                                               "OS Sans";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_NAME = "style";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_ENTER_KEY_TYPE_NAME = "enterKeyType";
@@ -145,19 +146,19 @@ const auto ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE = "TextHeightAdaptiveP
 const auto ATTRIBUTE_ENABLE_AUTO_FILL_NAME = "enableAutoFill";
 const auto ATTRIBUTE_ENABLE_AUTO_FILL_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_DECORATION_I_TYPE_NAME = "type";
-const auto ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_DECORATION_I_TYPE_DEFAULT_VALUE = "TextDecorationType.None";
 const auto ATTRIBUTE_DECORATION_I_COLOR_NAME = "color";
-const auto ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_DECORATION_I_COLOR_DEFAULT_VALUE = "#FF000000";
 const auto ATTRIBUTE_DECORATION_I_STYLE_NAME = "style";
-const auto ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_DECORATION_I_STYLE_DEFAULT_VALUE = "TextDecorationStyle.SOLID";
 const auto ATTRIBUTE_LETTER_SPACING_NAME = "letterSpacing";
-const auto ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE = "0.00px";
+const auto ATTRIBUTE_LETTER_SPACING_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_LINE_HEIGHT_NAME = "lineHeight";
-const auto ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_LINE_HEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PASSWORD_RULES_NAME = "passwordRules";
 const auto ATTRIBUTE_PASSWORD_RULES_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_FONT_FEATURE_NAME = "fontFeature";
-const auto ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_SHOW_PASSWORD_NAME = "showPassword";
 const auto ATTRIBUTE_SHOW_PASSWORD_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_ENABLE_PREVIEW_TEXT_NAME = "enablePreviewText";

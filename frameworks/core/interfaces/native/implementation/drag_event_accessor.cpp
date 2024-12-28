@@ -15,34 +15,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
-#include "core/interfaces/native/implementation/unified_data_peer.h"
-#include "unified_data_peer.h"
-
-namespace OHOS::Ace::NG::GeneratedModifier {
-    const GENERATED_ArkUIUnifiedDataAccessor* GetUnifiedDataAccessor();
-}
-namespace OHOS::Ace::NG::Converter {
-    template<>
-    RefPtr<UnifiedData> Convert(const Ark_UnifiedData& data)
-    {
-        auto unifiedDataPeer = reinterpret_cast<UnifiedDataPeer*>(data.ptr);
-        return (unifiedDataPeer && unifiedDataPeer->unifiedData) ? unifiedDataPeer->unifiedData : nullptr;
-    }
-    template<>
-    void AssignCast(std::optional<DragRet>& dst, const Ark_DragResult& src)
-    {
-        switch (src) {
-            case ARK_DRAG_RESULT_DRAG_SUCCESSFUL: dst = DragRet::DRAG_SUCCESS; break;
-            case ARK_DRAG_RESULT_DRAG_FAILED: dst = DragRet::DRAG_FAIL; break;
-            case ARK_DRAG_RESULT_DRAG_CANCELED: dst = DragRet::DRAG_CANCEL; break;
-            case ARK_DRAG_RESULT_DROP_ENABLED: dst = DragRet::ENABLE_DROP; break;
-            case ARK_DRAG_RESULT_DROP_DISABLED: dst = DragRet::DISABLE_DROP; break;
-            default: LOGE("Unexpected enum value in DragRet: %{public}d", src);
-        }
-    }
-} // namespace Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace DragEventAccessor {

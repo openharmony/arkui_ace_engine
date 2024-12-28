@@ -27,12 +27,18 @@
 
 namespace OHOS::Ace::NG {
 
+void ModelViewNG::SetModelViewContext(FrameNode* frameNode, const ModelViewContext& context)
+{
+    auto pattern = frameNode->GetPattern<ModelPattern>();
+    pattern->SetModelViewContext(context);
+}
+
+
 RefPtr<FrameNode> ModelViewNG::CreateFrameNode(int32_t nodeId)
 {
     static uint32_t staticKey = 0;
-    ModelViewContext context;
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::MODEL_ETS_TAG, nodeId, [&context]() { return AceType::MakeRefPtr<ModelPattern>(staticKey++, context); });
+        V2::MODEL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ModelPattern>(staticKey++); });
     return frameNode;
 }
 

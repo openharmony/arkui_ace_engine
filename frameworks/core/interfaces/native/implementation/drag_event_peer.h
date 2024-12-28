@@ -21,5 +21,5 @@
 struct DragEventPeer {
     virtual ~DragEventPeer() = default;
 
-    OHOS::Ace::RefPtr<OHOS::Ace::DragEvent> dragInfo;
+    std::optional<OHOS::Ace::DragEvent> dragInfo;
 };

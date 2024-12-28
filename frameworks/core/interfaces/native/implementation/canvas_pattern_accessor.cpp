@@ -17,9 +17,11 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 #include "canvas_pattern_peer.h"
+#include "matrix2d_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CanvasPatternAccessor {
+const auto SCALE_LIMIT_MIN = 0.0;
 void DestroyPeerImpl(CanvasPatternPeer* peer)
 {
     if (peer) {
@@ -37,7 +39,18 @@ Ark_NativePointer GetFinalizerImpl()
 void SetTransformImpl(CanvasPatternPeer* peer,
                       const Opt_Matrix2D* transform)
 {
+    CHECK_NULL_VOID(peer);
+    auto opt = Converter::OptConvert<Ark_Matrix2D>(*transform);
+    CHECK_NULL_VOID(opt);
+    auto matrixPeer = reinterpret_cast<Matrix2DPeer*>(opt->ptr);
+    CHECK_NULL_VOID(matrixPeer);
+    auto param = matrixPeer->transform;
+    if (LessNotEqual(param.scaleX, SCALE_LIMIT_MIN) || LessNotEqual(param.scaleY, SCALE_LIMIT_MIN)) {
+        return;
+    }
+    peer->SetTransform(param);
 }
+
 } // CanvasPatternAccessor
 const GENERATED_ArkUICanvasPatternAccessor* GetCanvasPatternAccessor()
 {

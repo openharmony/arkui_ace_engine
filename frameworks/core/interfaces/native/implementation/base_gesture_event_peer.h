@@ -19,28 +19,6 @@
 #include "core/interfaces/native/implementation/base_event_peer.h"
 
 struct BaseGestureEventPeer
-    : public OHOS::Ace::NG::GeneratedModifier::SomeEventPeer<OHOS::Ace::BaseGestureEvent> {
+    : public OHOS::Ace::NG::GeneratedModifier::EventPeer<OHOS::Ace::BaseGestureEvent> {
     ~BaseGestureEventPeer() override = default;
 };
-
-namespace OHOS::Ace::NG::GeneratedModifier {
-template<typename AceGestureInfo>
-class SomeGestureEventPeer : public BaseGestureEventPeer {
-public:
-    ~SomeGestureEventPeer() override = default;
-
-    AceGestureInfo* GetEventInfo()
-    {
-        CHECK_NULL_RETURN(eventInfo, nullptr);
-        return &eventInfo.value();
-    }
-
-    void SetEventInfo(const AceGestureInfo& info)
-    {
-        eventInfo = info;
-    }
-
-private:
-    std::optional<AceGestureInfo> eventInfo;
-};
-} // namespace OHOS::Ace::NG::GeneratedModifier

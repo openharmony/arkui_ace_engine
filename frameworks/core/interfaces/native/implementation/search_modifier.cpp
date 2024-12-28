@@ -21,8 +21,9 @@
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
-#include "core/interfaces/native/implementation/search_controller_accessor_peer_impl.h"
+#include "core/interfaces/native/implementation/search_controller_accessor_peer.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "base/utils/utils.h"
 
@@ -144,7 +145,7 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         SearchModelNG::SetIcon(frameNode, searchOptions->icon);
         auto internalSearchController = SearchModelNG::GetSearchController(frameNode);
         CHECK_NULL_VOID(searchOptions->controller);
-        auto peerImplPtr = reinterpret_cast<GeneratedModifier::SearchControllerPeerImpl *>(
+        auto peerImplPtr = reinterpret_cast<SearchControllerPeer *>(
             searchOptions->controller.value());
         CHECK_NULL_VOID(peerImplPtr);
 
@@ -368,9 +369,19 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnPaste(frameNode, convValue);
-    LOGE("ARKOALA SearchAttributeModifier.OnPasteImpl -> Method is not implemented.");
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
+        NG::TextCommonEvent& event) -> void {
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
+        auto keeper = CallbackKeeper::Claim([&event]() {
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.Invoke(arkContent, arkEvent);
+    };
+    SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
@@ -490,14 +501,13 @@ void OnWillInsertImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillInsert = [frameNode](const InsertValueInfo& value) -> bool {
+    auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
-        LOGE("ARKOALA SearchAttributeModifier.OnWillInsert -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+            .value_or(true);
     };
     SearchModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
 }
@@ -512,7 +522,7 @@ void OnDidInsertImpl(Ark_NativePointer node,
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillInsert(frameNode->GetId(), insertValue);
+        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidInsert(frameNode->GetId(), insertValue);
     };
     SearchModelNG::SetOnDidInsertValueEvent(frameNode, std::move(onDidInsert));
 }
@@ -522,15 +532,14 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onWillDelete = [frameNode](const DeleteValueInfo& value) -> bool {
+    auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
         };
-        GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onWillDelete(frameNode->GetId(), deleteValue);
-        LOGE("ARKOALA SearchAttributeModifier.OnWillDelete -> Method work incorrect.");
-        return true;
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
+            .value_or(true);
     };
     SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
 }
@@ -613,9 +622,15 @@ void CustomKeyboardImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(value);
-    //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SearchModelNG::SetCustomKeyboard(frameNode, convValue);
+    CHECK_NULL_VOID(value);
+    KeyboardOptions keyboardOptions = {.supportAvoidance = false};
+    auto convOptions = options ? Converter::OptConvert<KeyboardOptions>(*options) : keyboardOptions;
+    auto customNodeBuilder = [callback = CallbackHelper(*value, frameNode), node]() {
+        auto builderNode = callback.BuildSync(node);
+        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
+    };
+    bool supportAvoidance = convOptions.has_value() ? convOptions->supportAvoidance : false;
+    SearchModelNG::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
 }
 void __onChangeEvent_valueImpl(Ark_NativePointer node,
                                const Callback_String_Void* callback)

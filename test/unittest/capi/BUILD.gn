@@ -38,6 +38,7 @@ web_components_support_for_test = true
 form_component_support_for_test = true
 component3d_component_support_for_test = true
 plugin_components_support_for_test = true
+window_scene_support_for_test = false
 
 ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
   testonly = true
@@ -101,6 +102,10 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
       "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_model_static_ng.cpp",
       "$ace_root/frameworks/core/components_ng/pattern/plugin/plugin_node.cpp",
     ]
+  }
+
+  if (defined(window_scene_support_for_test) && window_scene_support_for_test) {
+    defines += [ "WINDOW_SCENE_SUPPORTED" ]
   }
 
   cflags_cc = [ "-Wno-unused-variable" ]

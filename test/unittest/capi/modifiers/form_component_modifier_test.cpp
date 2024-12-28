@@ -123,6 +123,12 @@ std::vector<std::tuple<std::int64_t, std::string, std::int32_t>> testFixtureForm
     { -9223372036854775807, "error message -9223372036854775807", -1 },
 };
 
+std::vector<std::tuple<std::string, Ark_String, std::string>> testFixtureFormNameValidValues = {
+    { "valid_name", Converter::ArkValue<Ark_String>("valid_name"), "valid_name" },
+    { "number_name", Converter::ArkValue<Ark_String>("12345"), "12345" },
+    { "empty_name", Converter::ArkValue<Ark_String>(""), "" },
+};
+
 std::string ToJson(const int64_t& id)
 {
     auto json = JsonUtil::Create(true);
@@ -600,5 +606,85 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     eventHub->FireOnLoad(FORM_EMPTY_STRING);
     EXPECT_TRUE(formInfo.has_value());
     EXPECT_TRUE(*formInfo);
+}
+
+/*
+ * @tc.name: setFormComponentOptionsModuleNameValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, TestSize.Level1)
+{
+    Ark_FormInfo initValue;
+    // Initial setup
+    auto id = Converter::ArkValue<Ark_Number>(-1);
+    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+    initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.module = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.dimension = Converter::ArkValue<Opt_FormDimension>(Ark_Empty());
+    initValue.temporary = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
+    initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
+    initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
+    auto checkValue = [this, &initValue](
+                          const std::string& input, const Ark_String& value, const std::string& expected) {
+        Ark_FormInfo inputValue = initValue;
+        inputValue.module = value;
+        modifier_->setFormComponentOptions(node_, &inputValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+        auto result = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
+        EXPECT_EQ(result, expected) <<
+            "Input value is: " << input << ", method: setFormComponentOptions, attribute: module";
+    };
+    for (auto& [input, value, expected] : testFixtureFormNameValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: setFormComponentOptionsDimensionValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, TestSize.Level1)
+{
+    Ark_FormInfo initValue;
+    // Initial setup
+    auto id = Converter::ArkValue<Ark_Number>(-1);
+    initValue.id = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(id);
+    initValue.name = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.bundle = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.ability = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.module = Converter::ArkValue<Ark_String>(FORM_EMPTY_STRING);
+    initValue.dimension = Converter::ArkValue<Opt_FormDimension>(Ark_Empty());
+    initValue.temporary = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
+    initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
+    initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
+    auto checkValue = [this, &initValue](
+                          const std::string& input, const Ark_FormDimension& value, const std::string& expected) {
+        Ark_FormInfo inputValue = initValue;
+        inputValue.dimension = Converter::ArkValue<Opt_FormDimension>(value);
+        modifier_->setFormComponentOptions(node_, &inputValue);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+        auto result = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_DIMENSION_NAME);
+        EXPECT_EQ(result, expected) <<
+            "Input value is: " << input << ", method: setFormComponentOptions, attribute: dimension";
+    };
+    for (auto& [input, value, expected] : testFixtureEnumFormDimensionValidValues) {
+        checkValue(input, value, expected);
+    }
+    auto presetValue = initValue;
+    auto input = std::get<1>(testFixtureEnumFormDimensionValidValues[0]);
+    auto expected = std::get<2>(testFixtureEnumFormDimensionValidValues[0]);
+    presetValue.dimension = Converter::ArkValue<Opt_FormDimension>(input);
+    modifier_->setFormComponentOptions(node_, &presetValue);
+    for (auto& [input, value] : testFixtureEnumFormDimensionInvalidValues) {
+        checkValue(input, value, expected);
+    }
 }
 } // namespace OHOS::Ace::NG

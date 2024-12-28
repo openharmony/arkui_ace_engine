@@ -15,8 +15,45 @@
 
 #include "canvas_renderer_peer_impl.h"
 
+namespace OHOS::Ace::NG {
+const std::set<std::string> FONT_WEIGHTS = {
+    "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    "bold", "bolder", "lighter", "medium", "normal", "regular",
+};
+const std::set<std::string> FONT_STYLES = { "italic", "oblique", "normal" };
+const std::set<std::string> FONT_FAMILIES = { "sans-serif", "serif", "monospace" };
+constexpr double MATH_2_PI = 2 * M_PI;
+constexpr double DIFF = 1e-10;
+constexpr Dimension DEFAULT_FONT_SIZE = 14.0_px;
+const std::set<std::string> QUALITY_TYPE = { "low", "medium", "high" };
+const std::unordered_map<std::string, LineCapStyle> LINE_CAP_MAP = {
+    { "butt", LineCapStyle::BUTT },
+    { "round", LineCapStyle::ROUND },
+    { "square", LineCapStyle::SQUARE },
+};
+const std::unordered_map<std::string, LineJoinStyle> LINE_JOIN_MAP = {
+    { "bevel", LineJoinStyle::BEVEL },
+    { "miter", LineJoinStyle::MITER },
+    { "round", LineJoinStyle::ROUND },
+};
+} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG::GeneratedModifier {
-
+CanvasRendererPeerImpl::CanvasRendererPeerImpl()
+{
+    density_ = PipelineBase::GetCurrentDensity();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
+    }
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    if (pipeline) {
+        densityCallbackId_ = pipeline->RegisterDensityChangedCallback([self = WeakClaim(this)](double density) {
+            auto canvasRender = self.Upgrade();
+            CHECK_NULL_VOID(canvasRender);
+            canvasRender->density_ = density;
+            canvasRender->SetDensity();
+        });
+    }
+}
 void CanvasRendererPeerImpl::TriggerBeginPathImpl()
 {
     if (!pattern_) {
@@ -42,6 +79,10 @@ void CanvasRendererPeerImpl::TriggerRestoreImpl()
              "not bound to component.");
         return;
     }
+    if (!savePaintState_.empty()) {
+        paintState_ = savePaintState_.back();
+        savePaintState_.pop_back();
+    }
     pattern_->Restore();
 }
 void CanvasRendererPeerImpl::TriggerSaveImpl()
@@ -51,6 +92,7 @@ void CanvasRendererPeerImpl::TriggerSaveImpl()
              "not bound to component.");
         return;
     }
+    savePaintState_.push_back(paintState_);
     pattern_->Save();
 }
 void CanvasRendererPeerImpl::TriggerResetTransformImpl()
@@ -237,6 +279,15 @@ void CanvasRendererPeerImpl::TriggerSetImageSmoothingEnabledImpl(bool enabled)
     }
     pattern_->UpdateSmoothingEnabled(enabled);
 }
+double CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl()
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerGetLineDashOffsetImpl pattern "
+             "not bound to component.");
+        return 0;
+    }
+    return pattern_->GetLineDash().dashOffset;
+}
 void CanvasRendererPeerImpl::TriggerSetLineDashOffsetImpl(double dash)
 {
     if (!pattern_) {
@@ -386,42 +437,337 @@ void CanvasRendererPeerImpl::TriggerSetStrokeStyleImpl(const std::weak_ptr<Ace::
     }
     pattern_->UpdateStrokePattern(pattern);
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontWeight(Ace::FontWeight weight)
+Dimension CanvasRendererPeerImpl::GetDimensionValue(const std::string& str)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontWeight pattern "
-             "not bound to component.");
-        return;
+    Dimension dimension = StringUtils::StringToDimension(str);
+    if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+        return Dimension(dimension.Value());
     }
-    pattern_->UpdateFontWeight(weight);
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return Dimension(dimension.Value() * GetDensity(true));
+    }
+    return Dimension(0.0);
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontStyle(Ace::FontStyle style)
+void CanvasRendererPeerImpl::SetFont(std::string fontStr)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontStyle pattern "
-             "not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetFont pattern not bound to component.");
         return;
     }
-    pattern_->UpdateFontStyle(style);
+    bool updateFontweight = false;
+    bool updateFontStyle = false;
+    std::vector<std::string> fontProps;
+    StringUtils::StringSplitter(fontStr.c_str(), ' ', fontProps);
+    for (const auto& fontProp : fontProps) {
+        if (FONT_WEIGHTS.find(fontProp) != FONT_WEIGHTS.end()) {
+            updateFontweight = true;
+            auto weight = StringUtils::StringToFontWeight(fontProp, Ace::FontWeight::NORMAL);
+            pattern_->UpdateFontWeight(weight);
+        } else if (FONT_STYLES.find(fontProp) != FONT_STYLES.end()) {
+            updateFontStyle = true;
+            auto fontStyle =
+                fontProp == DOM_TEXT_FONT_STYLE_ITALIC ? OHOS::Ace::FontStyle::ITALIC : Ace::FontStyle::NORMAL;
+            pattern_->UpdateFontStyle(fontStyle);
+        } else if (FONT_FAMILIES.find(fontProp) != FONT_FAMILIES.end()) {
+            std::vector<std::string> fontFamilies;
+            std::stringstream stream(fontProp);
+            std::string fontFamily;
+            while (getline(stream, fontFamily, ',')) {
+                fontFamilies.emplace_back(fontFamily);
+            }
+            pattern_->UpdateFontFamilies(fontFamilies);
+        } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
+            Dimension size;
+            if (fontProp.find("vp") != std::string::npos) {
+                size = GetDimensionValue(fontProp);
+            } else {
+                std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
+                size = Dimension(StringUtils::StringToDouble(fontProp));
+            }
+            if (size.IsNonNegative()) {
+                pattern_->UpdateFontSize(size);
+            }
+        }
+    }
+    if (!updateFontStyle) {
+        pattern_->UpdateFontStyle(Ace::FontStyle::NORMAL);
+    }
+    if (!updateFontweight) {
+        pattern_->UpdateFontWeight(Ace::FontWeight::NORMAL);
+    }
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontFamilies(const std::vector<std::string>& families)
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateLinearGradient(
+    const double x0, const double y0, const double x1, const double y1)
 {
-    if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontFamilies pattern "
-             "not bound to component.");
-        return;
-    }
-    pattern_->UpdateFontFamilies(families);
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    gradient->SetType(OHOS::Ace::GradientType::LINEAR);
+    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+    return gradient;
 }
-void CanvasRendererPeerImpl::TriggerUpdateFontSize(const Dimension& size)
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateRadialGradient(const std::vector<double> params)
+{
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    auto x0 = params[0];
+    auto y0 = params[1];
+    auto r0 = params[2];
+    auto x1 = params[3];
+    auto y1 = params[4];
+    auto r1 = params[5];
+    gradient->SetType(OHOS::Ace::GradientType::RADIAL);
+    gradient->SetBeginOffset(Offset(x0 * density, y0 * density));
+    gradient->SetEndOffset(Offset(x1 * density, y1 * density));
+    gradient->SetInnerRadius(r0 * density);
+    gradient->SetOuterRadius(r1 * density);
+    return gradient;
+}
+std::shared_ptr<OHOS::Ace::Gradient> CanvasRendererPeerImpl::CreateConicGradient(
+    const double startAngle, const double x, const double y)
+{
+    double density = GetDensity();
+    auto gradient = std::make_shared<OHOS::Ace::Gradient>();
+    gradient->SetType(OHOS::Ace::GradientType::CONIC);
+    gradient->GetConicGradient().startAngle = AnimatableDimension(Dimension(fmod(startAngle, (MATH_2_PI))));
+    gradient->GetConicGradient().centerX = AnimatableDimension(Dimension(x * density));
+    gradient->GetConicGradient().centerY = AnimatableDimension(Dimension(y * density));
+    return gradient;
+}
+void CanvasRendererPeerImpl::ClearImageData()
+{
+    imageData.x = 0;
+    imageData.y = 0;
+    imageData.dirtyX = 0;
+    imageData.dirtyY = 0;
+    imageData.dirtyWidth = 0;
+    imageData.dirtyHeight = 0;
+    imageData.data.clear();
+    imageData.pixelMap = nullptr;
+}
+Ace::ImageSize CanvasRendererPeerImpl::GetImageSize(
+    const double& x, const double& y, const double& width, const double& height)
+{
+    Ace::ImageSize imageSize;
+    double density = GetDensity();
+    imageSize.left = x * density + DIFF;
+    imageSize.top = y * density + DIFF;
+    imageSize.width = width * density + DIFF;
+    imageSize.height = height * density + DIFF;
+    return imageSize;
+}
+std::unique_ptr<Ace::ImageData> CanvasRendererPeerImpl::GetImageData(const ImageSize& imageSize)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::TriggerUpdateFontSize pattern "
-             "not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetImageData pattern not bound to component.");
+        return nullptr;
+    }
+    return pattern_->GetImageData(imageSize.left, imageSize.top, imageSize.width, imageSize.height);
+}
+void CanvasRendererPeerImpl::GetPixelMap(const ImageSize& imageSize)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    LOGE("ARKOALA CanvasRendererPeerImpl::GetPixelMap not implemented because PixelMap not implemented.");
+#endif
+}
+double CanvasRendererPeerImpl::GetDimension(const Dimension& dimension, const bool force)
+{
+    auto value = dimension.Value();
+    if (force) {
+        return value;
+    }
+    double density = GetDensity();
+    return value * density + DIFF;
+}
+void CanvasRendererPeerImpl::ParseImageData(const ImageSizeExt& ext)
+{
+    if (ext.x) {
+        imageData.x = static_cast<int32_t>(*ext.x);
+    }
+    if (ext.y) {
+        imageData.y = static_cast<int32_t>(*ext.y);
+    }
+    if (ext.dirtyX) {
+        imageData.dirtyX = static_cast<int32_t>(*ext.dirtyX);
+    }
+    if (ext.dirtyY) {
+        imageData.dirtyY = static_cast<int32_t>(*ext.dirtyY);
+    }
+    if (ext.dirtyWidth) {
+        imageData.dirtyWidth = static_cast<int32_t>(*ext.dirtyWidth);
+    }
+    if (ext.dirtyHeight) {
+        imageData.dirtyHeight = static_cast<int32_t>(*ext.dirtyHeight);
+    }
+}
+void CanvasRendererPeerImpl::PutImageData(const Ace::ImageData& src, const ImageSizeExt& ext)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::PutImageData pattern not bound to component.");
         return;
     }
+    auto finalWidth = static_cast<int32_t>(std::abs(src.dirtyWidth));
+    auto finalHeight = static_cast<int32_t>(std::abs(src.dirtyHeight));
+    ClearImageData();
+    imageData.dirtyWidth = finalWidth;
+    imageData.dirtyHeight = finalHeight;
+    ParseImageData(ext);
+    imageData.dirtyWidth = imageData.dirtyX < 0 ? std::min(imageData.dirtyX + imageData.dirtyWidth, finalWidth)
+                                                : std::min(finalWidth - imageData.dirtyX, imageData.dirtyWidth);
+    imageData.dirtyHeight = imageData.dirtyY < 0 ? std::min(imageData.dirtyY + imageData.dirtyHeight, finalHeight)
+                                                 : std::min(finalHeight - imageData.dirtyY, imageData.dirtyHeight);
+    auto size = static_cast<uint32_t>(src.data.size());
+    for (int32_t i = std::max(imageData.dirtyY, 0); i < imageData.dirtyY + imageData.dirtyHeight; ++i) {
+        for (int32_t j = std::max(imageData.dirtyX, 0); j < imageData.dirtyX + imageData.dirtyWidth; ++j) {
+            uint32_t idx = static_cast<uint32_t>(j + finalWidth * i);
+            if (size > idx) {
+                imageData.data.emplace_back(src.data[idx]);
+            }
+        }
+    }
+    pattern_->PutImageData(imageData);
+}
+std::optional<OHOS::Ace::TextMetrics> CanvasRendererPeerImpl::GetTextMetrics(const std::string& text)
+{
+    std::optional<OHOS::Ace::TextMetrics> textMetrics = std::nullopt;
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetTextMetrics pattern not bound to component.");
+        return textMetrics;
+    }
+    auto density = GetDensity();
+    if (NonPositive(density) || density == 0) {
+        return textMetrics;
+    }
+    textMetrics = pattern_->MeasureTextMetrics(text, paintState_);
+    textMetrics->height /= density;
+    textMetrics->actualBoundingBoxLeft /= density;
+    textMetrics->actualBoundingBoxRight /= density;
+    textMetrics->actualBoundingBoxAscent /= density;
+    textMetrics->actualBoundingBoxDescent /= density;
+    textMetrics->hangingBaseline /= density;
+    textMetrics->alphabeticBaseline /= density;
+    textMetrics->ideographicBaseline /= density;
+    textMetrics->emHeightAscent /= density;
+    textMetrics->emHeightDescent /= density;
+    textMetrics->fontBoundingBoxAscent /= density;
+    textMetrics->fontBoundingBoxDescent /= density;
+    return textMetrics;
+}
+std::optional<TransformParam> CanvasRendererPeerImpl::GetTransform()
+{
+    std::optional<TransformParam> param = std::nullopt;
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::GetTransform pattern not bound to component.");
+        return param;
+    }
+    param = pattern_->GetTransform();
+    return param;
+}
+void CanvasRendererPeerImpl::SetPixelMap(RefPtr<PixelMap> pixelMap)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetPixelMap pattern not bound to component.");
+        return;
+    }
+    OHOS::Ace::CanvasImage canvasImage;
+    pattern_->DrawPixelMap(pixelMap, canvasImage);
+}
+void CanvasRendererPeerImpl::SetImageSmoothingQuality(const std::string& quality)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetImageSmoothingQuality pattern not bound to component.");
+        return;
+    }
+    if (QUALITY_TYPE.find(quality) == QUALITY_TYPE.end()) {
+        return;
+    }
+    pattern_->UpdateSmoothingQuality(quality);
+}
+void CanvasRendererPeerImpl::SetLineCap(const std::string& capStr)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetLineCap pattern not bound to component.");
+        return;
+    }
+    auto cap = LineCapStyle::BUTT;
+    auto iter = LINE_CAP_MAP.find(capStr);
+    if (iter != LINE_CAP_MAP.end()) {
+        cap = iter->second;
+    }
+    pattern_->UpdateLineCap(cap);
+}
+void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetLineJoin pattern not bound to component.");
+        return;
+    }
+    auto join = LineJoinStyle::MITER;
+    auto iter = LINE_JOIN_MAP.find(joinStr);
+    if (iter != LINE_JOIN_MAP.end()) {
+        join = iter->second;
+    }
+    pattern_->UpdateLineJoin(join);
+}
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip();
+}
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip(path);
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill();
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill(path);
+}
+void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextDirection pattern not bound to component.");
+        return;
+    }
+    pattern_->SetTextDirection(direction);
+}
 
-    pattern_->UpdateFontSize(size);
+void CanvasRendererPeerImpl::SetTextAlign(const TextAlign& align)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextAlign pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextAlign(align);
 }
-
+void CanvasRendererPeerImpl::SetTextBaseline(const TextBaseline& baseline)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextBaseline pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextBaseline(baseline);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

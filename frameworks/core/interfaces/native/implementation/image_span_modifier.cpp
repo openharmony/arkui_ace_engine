@@ -16,9 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/image/image_source_info.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
-#include "arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "pixel_map_peer.h"
+#include "arkoala_api_generated.h"
+
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageSpanModifier {
@@ -38,8 +42,10 @@ void SetImageSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageSpanModelNG::SetSetImageSpanOptions(frameNode, convValue);
+    auto imageSource = Converter::OptConvert<ImageSourceInfo>(*value);
+    if (imageSource) {
+        ImageSpanView::SetImageSpanSrc(frameNode, *imageSource);
+    }
 }
 } // ImageSpanInterfaceModifier
 namespace ImageSpanAttributeModifier {
@@ -98,8 +104,10 @@ void AltImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //ImageSpanModelNG::SetAlt(frameNode, convValue);
+    auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(value->ptr);
+    if (pixelMapPeer) {
+        ImageModelNG::SetAlt(frameNode, ImageSourceInfo(pixelMapPeer->pixelMap));
+    }
 }
 } // ImageSpanAttributeModifier
 const GENERATED_ArkUIImageSpanModifier* GetImageSpanModifier()

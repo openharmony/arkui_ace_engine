@@ -87,6 +87,7 @@ public:
     static void ResetAutoResize(FrameNode *frameNode);
     static void SetImageRepeat(FrameNode *frameNode, const std::optional<ImageRepeat>& imageRepeat);
     static void SetImageRenderMode(FrameNode *frameNode, const std::optional<ImageRenderMode>& imageRenderMode);
+    static void SetOrientation(FrameNode *frameNode, const std::optional<ImageRotateOrientation>& orientation);
     static void SetSyncMode(FrameNode *frameNode, bool syncMode);
     static void SetImageFit(FrameNode *frameNode, ImageFit value);
     static void SetImageFit(FrameNode *frameNode, std::optional<ImageFit> value);
