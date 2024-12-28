@@ -1067,6 +1067,7 @@ class MultiFilterRow extends ViewPU {
                 }
             });
             Button.onClick(() => {
+                this.isSendArrowAccessibility = true;
                 this.replaceEffect += 1;
                 if (this.isArrowIconDown.value) {
                     this.isArrowIconDown.value = false;
