@@ -81,6 +81,7 @@ TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
     }
     return result;
 }
+}
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollModifier {
