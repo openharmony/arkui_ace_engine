@@ -107,6 +107,7 @@ struct TimePickerSettingData {
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback;
     bool showSecond;
     bool isEnableCascade;
 };

@@ -610,6 +610,8 @@ public:
         return isEnableCascade_;
     }
 
+    void ColumnPatternInitHapticController();
+    
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -633,7 +635,6 @@ private:
     void UpdateNodePositionForUg();
     void MountSecondNode(const RefPtr<FrameNode>& stackSecondNode);
     void RemoveSecondNode();
-    void ColumnPatternInitHapticController();
     void UpdateConfirmButtonMargin(
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(

@@ -1818,6 +1818,12 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     settingData.showSecond = showSecond;
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    bool isEnableHapticFeedback = true;
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
@@ -1855,6 +1861,13 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
 
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    bool isEnableHapticFeedback = true;
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
+    
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
