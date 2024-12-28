@@ -92,7 +92,9 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
+#endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_water_flow_bridge.h"
@@ -2832,7 +2834,9 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterListAttributes(object, vm);
     RegisterGridAttributes(object, vm);
     RegisterListItemGroupAttributes(object, vm);
+#ifdef QRCODEGEN_SUPPORT
     RegisterQRCodeAttributes(object, vm);
+#endif
     RegisterLoadingProgressAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
@@ -5383,6 +5387,7 @@ void ArkUINativeModule::RegisterListItemGroupAttributes(Local<panda::ObjectRef> 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "listItemGroup"), listItemGroup);
 }
 
+#ifdef QRCODEGEN_SUPPORT
 void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
     auto qrcode = panda::ObjectRef::New(vm);
@@ -5402,6 +5407,7 @@ void ArkUINativeModule::RegisterQRCodeAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), QRCodeBridge::SetQRValue));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "qrcode"), qrcode);
 }
+#endif
 
 void ArkUINativeModule::RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {

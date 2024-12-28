@@ -81,7 +81,9 @@
 #include "core/interfaces/native/node/polygon_modifier.h"
 #include "core/interfaces/native/node/polyline_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#endif
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/interfaces/native/node/rect_modifier.h"
@@ -234,7 +236,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getListItemModifier = NodeModifier::GetListItemModifier,
         .getListModifier = NodeModifier::GetListModifier,
         .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetLoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetTextClockModifier,
         .getTextTimerModifier = NodeModifier::GetTextTimerModifier,
@@ -301,7 +307,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 15; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
         "ensure all fields are explicitly initialized");
@@ -417,7 +423,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getListItemModifier = NodeModifier::GetCJUIListItemModifier,
         .getListModifier = NodeModifier::GetCJUIListModifier,
         .getListItemGroupModifier = NodeModifier::GetCJUIListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetCJUIQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetCJUILoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetCJUITextClockModifier,
         .getTextTimerModifier = NodeModifier::GetCJUITextTimerModifier,
@@ -487,7 +497,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 15; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
         "ensure all fields are explicitly initialized");
