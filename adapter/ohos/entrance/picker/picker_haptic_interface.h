@@ -12,42 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_INTERFACE_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_INTERFACE_H
 
-#include "adapter/ohos/entrance/timepicker/timepicker_haptic_impl.h"
+#include <stddef.h>
 
 namespace OHOS::Ace::NG {
-
-TimepickerAudioHapticImpl::TimepickerAudioHapticImpl()
-{
-    handler_ = std::make_unique<TimePickerHapticController>();
-}
-
-void TimepickerAudioHapticImpl::Play(size_t speed)
-{
-    if (handler_) {
-        handler_->Play(speed);
-    }
-}
-
-void TimepickerAudioHapticImpl::PlayOnce()
-{
-    if (handler_) {
-        handler_->PlayOnce();
-    }
-}
-
-void TimepickerAudioHapticImpl::Stop()
-{
-    if (handler_) {
-        handler_->Stop();
-    }
-}
-
-void TimepickerAudioHapticImpl::HandleDelta(double dy)
-{
-    if (handler_) {
-        handler_->HandleDelta(dy);
-    }
-}
-
+class IPickerAudioHaptic {
+public:
+    IPickerAudioHaptic() = default;
+    virtual ~IPickerAudioHaptic() = default;
+    virtual void Play(size_t speed) = 0;
+    virtual void PlayOnce() = 0;
+    virtual void Stop() = 0;
+    virtual void HandleDelta(double dy) = 0;
+};
 } // namespace OHOS::Ace::NG
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_INTERFACE_H

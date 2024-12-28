@@ -13,15 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_CONTROLLER_H
-#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_CONTROLLER_H
+#ifndef FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_CONTROLLER_H
+#define FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_CONTROLLER_H
 
 #include <condition_variable>
 #include <cmath>
 #include <mutex>
 #include <thread>
 
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/layout/screen_system_manager.h"
 #include "core/gestures/velocity_tracker.h"
 #include "frameworks/base/memory/ace_type.h"
@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 
-class TimePickerHapticController : public ITimepickerAudioHaptic {
+class PickerHapticController : public IPickerAudioHaptic {
 public:
     enum class ThreadStatus {
         NONE,
@@ -42,8 +42,8 @@ public:
         PLAY_ONCE,
     };
 
-    TimePickerHapticController() noexcept;
-    ~TimePickerHapticController() noexcept;
+    PickerHapticController() noexcept;
+    ~PickerHapticController() noexcept;
     void Play(size_t speed) override;
     void PlayOnce() override;
     void Stop() override;
@@ -71,8 +71,8 @@ private:
     std::shared_ptr<Media::AudioHapticManager> audioHapticManager_ = nullptr;
     std::unique_ptr<std::thread> playThread_ = nullptr;
     std::shared_ptr<AudioStandard::AudioGroupManager> audioGroupMngr_ = nullptr;
-    ACE_DISALLOW_COPY_AND_MOVE(TimePickerHapticController);
+    ACE_DISALLOW_COPY_AND_MOVE(PickerHapticController);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_TIMEPICKER_AUDIO_HAPTIC_CONTROLLER_H
+#endif // FOUNDATION_ACE_ENGINE_ADAPTER_OHOS_ENTRANCE_PICKER_PICKER_AUDIO_HAPTIC_CONTROLLER_H

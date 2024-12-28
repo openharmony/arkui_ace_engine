@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "adapter/ohos/entrance/timepicker/timepicker_haptic_controller.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_controller.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -23,7 +23,7 @@ constexpr size_t SPEED_THRESHOLD_156_MM_PER_SEC = 156;
 constexpr size_t SPEED_PLAY_ONCE_5_MM_PER_SEC = 5;
 } // namespace
 
-TimePickerHapticController::TimePickerHapticController() noexcept
+PickerHapticController::PickerHapticController() noexcept
 {
     audioHapticManager_ = Media::AudioHapticManagerFactory::CreateAudioHapticManager();
     if (audioHapticManager_) {
@@ -46,7 +46,7 @@ TimePickerHapticController::TimePickerHapticController() noexcept
     }
 }
 
-TimePickerHapticController::~TimePickerHapticController() noexcept
+PickerHapticController::~PickerHapticController() noexcept
 {
     ThreadRelease();
     if (effectAudioHapticPlayer_) {
@@ -60,7 +60,7 @@ TimePickerHapticController::~TimePickerHapticController() noexcept
     }
 }
 
-void TimePickerHapticController::ThreadRelease()
+void PickerHapticController::ThreadRelease()
 {
     if (playThread_) {
         {
@@ -73,35 +73,35 @@ void TimePickerHapticController::ThreadRelease()
     playThreadStatus_ = ThreadStatus::NONE;
 }
 
-bool TimePickerHapticController::IsThreadReady()
+bool PickerHapticController::IsThreadReady()
 {
     std::lock_guard<std::recursive_mutex> guard(threadMutex_);
     return playThreadStatus_ == ThreadStatus::READY;
 }
 
-bool TimePickerHapticController::IsThreadPlaying()
+bool PickerHapticController::IsThreadPlaying()
 {
     std::lock_guard<std::recursive_mutex> guard(threadMutex_);
     return playThreadStatus_ == ThreadStatus::PLAYING;
 }
 
-bool TimePickerHapticController::IsThreadPlayOnce()
+bool PickerHapticController::IsThreadPlayOnce()
 {
     std::lock_guard<std::recursive_mutex> guard(threadMutex_);
     return playThreadStatus_ == ThreadStatus::PLAY_ONCE;
 }
 
-bool TimePickerHapticController::IsThreadNone()
+bool PickerHapticController::IsThreadNone()
 {
     std::lock_guard<std::recursive_mutex> guard(threadMutex_);
     return playThreadStatus_ == ThreadStatus::NONE;
 }
 
-void TimePickerHapticController::InitPlayThread()
+void PickerHapticController::InitPlayThread()
 {
     ThreadRelease();
     playThreadStatus_ = ThreadStatus::START;
-    playThread_ = std::make_unique<std::thread>(&TimePickerHapticController::ThreadLoop, this);
+    playThread_ = std::make_unique<std::thread>(&PickerHapticController::ThreadLoop, this);
     if (playThread_) {
         playThread_->detach();
         playThreadStatus_ = ThreadStatus::READY;
@@ -110,7 +110,7 @@ void TimePickerHapticController::InitPlayThread()
     }
 }
 
-void TimePickerHapticController::ThreadLoop()
+void PickerHapticController::ThreadLoop()
 {
     while (!IsThreadNone()) {
         {
@@ -154,7 +154,7 @@ void TimePickerHapticController::ThreadLoop()
     }
 }
 
-void TimePickerHapticController::Play(size_t speed)
+void PickerHapticController::Play(size_t speed)
 {
     if (!playThread_) {
         InitPlayThread();
@@ -170,7 +170,7 @@ void TimePickerHapticController::Play(size_t speed)
     }
 }
 
-void TimePickerHapticController::PlayOnce()
+void PickerHapticController::PlayOnce()
 {
     if (IsThreadPlaying()) {
         return;
@@ -184,7 +184,7 @@ void TimePickerHapticController::PlayOnce()
     threadCv_.notify_one();
 }
 
-void TimePickerHapticController::Stop()
+void PickerHapticController::Stop()
 {
     {
         std::lock_guard<std::recursive_mutex> guard(threadMutex_);
@@ -194,7 +194,7 @@ void TimePickerHapticController::Stop()
     scrollValue_ = 0.0;
 }
 
-void TimePickerHapticController::HandleDelta(double dy)
+void PickerHapticController::HandleDelta(double dy)
 {
     auto startTime = std::chrono::high_resolution_clock::now();
     scrollValue_ += dy;
@@ -207,13 +207,13 @@ void TimePickerHapticController::HandleDelta(double dy)
     }
 }
 
-double TimePickerHapticController::ConvertPxToMillimeters(double px) const
+double PickerHapticController::ConvertPxToMillimeters(double px) const
 {
     auto& manager = ScreenSystemManager::GetInstance();
     return px / manager.GetDensity();
 }
 
-size_t TimePickerHapticController::GetCurrentSpeedInMm()
+size_t PickerHapticController::GetCurrentSpeedInMm()
 {
     double velocityInPixels = velocityTracker_.GetVelocity().GetVelocityY();
     return std::abs(ConvertPxToMillimeters(velocityInPixels));
