@@ -28,6 +28,8 @@ public:
     static RefPtr<FrameNode> Create(int32_t persistentId);
     static void SetAttractionEffect(const AttractionEffect& effect);
     static RefPtr<FrameNode> CreateNode(int32_t nodeId);
+    static int32_t GetPersistentId();
+    static AttractionEffect GetAttractionEffect();
 };
 } // namespace OHOS::Ace::NG
 

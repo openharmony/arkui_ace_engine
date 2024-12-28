@@ -17,9 +17,13 @@
 
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
+
+static int32_t g_persistentId = 0;
+static AttractionEffect g_effect;
 
 RefPtr<FrameNode> WindowSceneModel::Create(int32_t persistentId)
 {
@@ -27,17 +31,29 @@ RefPtr<FrameNode> WindowSceneModel::Create(int32_t persistentId)
     auto nodeId = stack->ClaimNodeId();
     ACE_SCOPED_TRACE("Create[%s][self:%d][TransformScene]", V2::WINDOW_SCENE_ETS_TAG, nodeId);
     auto node = FrameNode::GetOrCreateFrameNode(
-        V2::WINDOW_SCENE_ETS_TAG, nodeId, []() { return nullptr; });
+        V2::WINDOW_SCENE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
     stack->Push(node);
+    g_persistentId = persistentId;
     return node;
 }
 
 void WindowSceneModel::SetAttractionEffect(const AttractionEffect& effect)
-{ // A stub for mocking
+{
+    g_effect = effect;
 }
 
 RefPtr<FrameNode> WindowSceneModel::CreateNode(int32_t nodeId)
 {
     return WindowSceneModel::Create(0);
+}
+
+int32_t WindowSceneModel::GetPersistentId()
+{
+    return g_persistentId;
+}
+
+AttractionEffect WindowSceneModel::GetAttractionEffect()
+{
+    return g_effect;
 }
 } // namespace OHOS::Ace::NG
