@@ -5885,8 +5885,8 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         default:
             delegate_->SetDragResizeStartFlag(false);
             dragWindowFlag_ = false;
-            last_height_ = 0;
-            last_width_ = 0;
+            lastHeight_ = 0;
+            lastWidth_ = 0;
             break;
     }
 }
@@ -5894,16 +5894,16 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
     if (delegate_) {
-        if (last_height_ == 0 && last_width_ == 0) {
-            last_height_ = height;
-            last_width_ = width;
+        if (lastHeight_ == 0 && lastWidth_ == 0) {
+            lastHeight_ = height;
+            lastWidth_ = width;
         }
         if (!GetPendingSizeStatus() && dragWindowFlag_) {
-            int64_t pre_height = height - last_height_;
-            int64_t pre_width = width - last_width_;
+            int64_t pre_height = height - lastHeight_;
+            int64_t pre_width = width - lastWidth_;
             delegate_->SetDragResizePreSize(pre_height, pre_width);
-            last_height_ = height;
-            last_width_ = width;
+            lastHeight_ = height;
+            lastWidth_ = width;
         }
     }
 }
