@@ -4700,8 +4700,11 @@ void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
         NearEqual(contentRect.Right() - caretInfo.rect.Width(), static_cast<float>(offsetX));
     bool distanceMoreThenTenVp = floatingCaretInfo.rect.GetOffset().GetDistance(caretInfo.rect.GetOffset())
         >= FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE.ConvertToPx();
-    SetShowOriginCursor(reachBoundary ||
-        (selectController_->IsTouchAtLineEndOrBegin(localOffset) && distanceMoreThenTenVp));
+    TouchPosition pos = selectController_->GetTouchLinePos(localOffset);
+    bool FloatCursorOnOriginLeft = floatingCaretInfo.rect.GetX() < caretInfo.rect.GetX();
+    bool FloatCursorNotInText = ((pos == TouchPosition::LEFT && FloatCursorOnOriginLeft) ||
+        (pos == TouchPosition::RIGHT && !FloatCursorOnOriginLeft));
+    SetShowOriginCursor(reachBoundary || (distanceMoreThenTenVp && FloatCursorNotInText));
     SetFloatingCursorVisible(true);
 }
 
@@ -8203,6 +8206,7 @@ void TextFieldPattern::CleanNodeResponseKeyEvent()
     CHECK_NULL_VOID(host);
     InitEditingValueText(u"");
     CloseSelectOverlay();
+    SetFloatingCursorVisible(false);
     StartTwinkling();
     UpdateCaretInfoToController();
     if (!HasFocus()) {
