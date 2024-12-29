@@ -36,5 +36,9 @@ RefPtr<V2::InspectorComposedElement> SearchLoader::CreateInspectorElement(const 
 {
     return AceType::MakeRefPtr<V2::SearchComposedElement>(id);
 }
+RefPtr<Declaration> SearchLoader::CreateDeclaration()
+{
+    return AceType::MakeRefPtr<SearchDeclaration>();
+}
 
 } // namespace OHOS::Ace

@@ -28,6 +28,7 @@ public:
     RefPtr<Framework::DOMNode> CreateDomNode(int32_t nodeId, const std::string& nodeName) override;
     void* CreateModel() override;
     RefPtr<V2::InspectorComposedElement> CreateInspectorElement(const std::string& id) override;
+    RefPtr<Declaration> CreateDeclaration() override;
 };
 
 } // namespace OHOS::Ace
