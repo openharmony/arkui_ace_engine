@@ -126,7 +126,7 @@ void EventHub::PostEnabledTask()
         enabledFunc_ = callback;
         return;
     }
-    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState");
+    taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUIUpdateCurrentUIState", PriorityType::VIP);
 }
 
 void EventHub::FireEnabledTask()
@@ -454,7 +454,7 @@ void EventHub::FireOnAppear()
                     onJSFrameNodeAppear();
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent");
+            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent", PriorityType::VIP);
     }
 }
 
