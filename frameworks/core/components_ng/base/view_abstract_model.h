@@ -363,6 +363,10 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
+    virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;

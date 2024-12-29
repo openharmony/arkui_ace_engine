@@ -1138,7 +1138,7 @@ void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
 }
 
 RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
-    const JSRef<JSObject>& object, const JSExecutionContext& context)
+    const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node)
 {
     auto propType = object->GetProperty("type_");
     if (!propType->IsString()) {
@@ -1194,7 +1194,12 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        WeakPtr<NG::FrameNode> targetNode = nullptr;
+        if (node) {
+            targetNode = AceType::WeakClaim(AceType::RawPtr(node));
+        } else {
+            targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        }
         if (onFinish->IsFunction()) {
             RefPtr<JsFunction> jsFunc =
                 AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));

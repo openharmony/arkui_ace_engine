@@ -166,7 +166,7 @@ public:
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
     static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
-        const JSRef<JSObject>& object, const JSExecutionContext& context);
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static bool ParseSheetIsShow(
         const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
@@ -482,6 +482,12 @@ public:
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static panda::Local<panda::JSValueRef> JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseContentPopupCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<NG::UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
 #endif
 
     /**
