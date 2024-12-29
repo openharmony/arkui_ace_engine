@@ -13,17 +13,17 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_MARQUEE_LOADER
-#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_MARQUEE_LOADER
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SEARCH_LOADER
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SEARCH_LOADER
 
 #include "compatible/components/component_loader.h"
 
 namespace OHOS::Ace {
 
-class MarqueeLoader : public ComponentLoader {
+class SearchLoader : public ComponentLoader {
 public:
-    MarqueeLoader() = default;
-    ~MarqueeLoader() = default;
+    SearchLoader() = default;
+    ~SearchLoader() = default;
 
     RefPtr<Framework::DOMNode> CreateDomNode(int32_t nodeId, const std::string& nodeName) override;
     void* CreateModel() override;
@@ -32,4 +32,4 @@ public:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_MARQUEE_LOADER
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SEARCH_LOADER
