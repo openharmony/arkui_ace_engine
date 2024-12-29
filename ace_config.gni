@@ -79,6 +79,9 @@ declare_args() {
 
   # Enable event extra handling
   ace_engine_feature_enable_event_extra_handling = false
+
+  # Enable ace_engine circle feature
+  ace_engine_enable_circle_feature = false
 }
 
 enable_dump_drawcmd = false

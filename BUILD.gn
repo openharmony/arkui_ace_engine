@@ -66,6 +66,10 @@ config("ace_config") {
     }
   }
 
+  if (ace_engine_enable_circle_feature) {
+    cflags += [ "-DARKUI_CIRCLE_FEATURE" ]
+  }
+
   cflags_cc = [
     "-fvisibility-inlines-hidden",
     "-Wno-non-c-typedef-for-linkage",
