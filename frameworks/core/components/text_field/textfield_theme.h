@@ -149,8 +149,8 @@ public:
             theme->underlineFontSize_ = pattern->GetAttr<Dimension>(UNDERLINE_FONT_SIZE, 0.0_fp);
             theme->errorTextStyle_.SetTextColor(pattern->GetAttr<Color>(ERROR_UNDERLINE_TEXT_COLOR, Color()));
             theme->errorTextStyle_.SetFontSize(pattern->GetAttr<Dimension>(ERROR_UNDERLINE_TEXT_SIZE, 0.0_fp));
-            theme->errorTextStyle_.SetTextAlign(
-                static_cast<TextAlign>(pattern->GetAttr<double>("textfield_error_text_align", 0.0)));
+            theme->errorTextAlign_ =
+                static_cast<bool>(pattern->GetAttr<double>("textfield_error_text_align", 0.0));
 
             theme->countTextStyle_.SetTextColor(pattern->GetAttr<Color>("count_text_color", Color()));
             theme->countTextStyle_.SetFontSize(pattern->GetAttr<Dimension>("count_text_font_size", 0.0_fp));
@@ -807,6 +807,12 @@ public:
     {
         return focusPadding_;
     }
+
+    bool GetErrorTextCenter() const
+    {
+        return errorTextAlign_;
+    }
+
 protected:
     TextFieldTheme() = default;
 
@@ -935,6 +941,8 @@ private:
     float errorTextMaxFontScale_ = 2.0f;
     uint32_t counterTextMaxline_ = 1;
     uint32_t errorTextMaxLine_ = 1;
+
+    bool errorTextAlign_ = false;
 
     std::string hasShowedPassword_;
     std::string hasHiddenPassword_;
