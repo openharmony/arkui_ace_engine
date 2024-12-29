@@ -383,7 +383,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     }
     MarginProperty margin;
     margin.top = CalcLength(sheetTheme->GetSheetTitleAeraMargin());
-    margin.bottom = CalcLength(sheetTheme->GetTitleBottomPadding());
+    margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_MARGIN);
     layoutProperty->UpdateMargin(margin);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnProps, nullptr);
@@ -403,7 +403,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             subtitleRow->MountToParent(titleColumn);
             if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
                 layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
-                    SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetDragBarHeight())));
+                    SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
     } else if (sheetStyle.isTitleBuilder.has_value()) {

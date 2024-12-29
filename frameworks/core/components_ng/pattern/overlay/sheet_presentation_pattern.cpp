@@ -1428,7 +1428,7 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
                     CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAeraMargin())));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt,
-                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetDragBarHeight())));
+                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
         UpdateSheetTitle();

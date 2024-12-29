@@ -139,9 +139,7 @@ public:
                 SHEET_DRAG_BAR_HEIGHT);
             theme->titleTopPadding_ = sheetPattern->GetAttr<Dimension>("sheet_double_title_top_padding",
                 SHEET_DOUBLE_TITLE_TOP_PADDING);
-            theme->titleBottomPadding_ = sheetPattern->GetAttr<Dimension>("sheet_double_title_bottom_padding",
-                SHEET_DOUBLE_TITLE_BOTTON_MARGIN);
-            theme->sheetTitleAeraMargin_ = sheetPattern->GetAttr<Dimension>("sheet_title_aera_margin",
+            theme->sheetTitleAeraMargin_ = sheetPattern->GetAttr<Dimension>("sheet_title_area_margin",
                 SHEET_TITLE_AERA_MARGIN);
         }
     };
@@ -331,11 +329,6 @@ public:
         return titleTopPadding_;
     }
 
-    const Dimension& GetTitleBottomPadding() const
-    {
-        return titleBottomPadding_;
-    }
-
     const Dimension& GetSheetTitleAeraMargin() const
     {
         return sheetTitleAeraMargin_;
@@ -351,7 +344,6 @@ private:
     Dimension subtitleTextMargin_;
     Dimension sheetDragBarHeight_;
     Dimension titleTopPadding_;
-    Dimension titleBottomPadding_;
     Dimension sheetTitleAeraMargin_;
     FontWeight sheetTitleFontWeight_ = FontWeight::BOLD;
     Color titleTextFontColor_;
@@ -379,8 +371,8 @@ private:
     Dimension titleTextHorizMargin_;
     Dimension closeIconRadius_;
     Dimension operationAreaHeight_;
-    double largePercent_ = 0.0f;
-    double mediumPercent_ = 0.0f;
+    double largePercent_ = 1.0; // 1.0 is default value
+    double mediumPercent_ = 0.6; // 0.6 is default value
     bool height_apply_full_screen_ = false;
     bool showCloseIcon_ = true;
 };
