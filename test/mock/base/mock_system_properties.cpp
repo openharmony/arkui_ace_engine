@@ -67,6 +67,7 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::developerModeOn_ = false;
@@ -241,11 +242,6 @@ bool SystemProperties::IsNeedSymbol()
 }
 
 bool SystemProperties::GetResourceDecoupling()
-{
-    return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
 {
     return true;
 }
