@@ -174,15 +174,13 @@ void TextPattern::ResetSelection()
 
 void TextPattern::InitSelection(const Offset& pos)
 {
+    CHECK_NULL_VOID(pManager_);
     auto selectionOffset = pos;
     if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
         selectionOffset.SetX(contentRect_.Width());
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
-    if (IsLineBreakOrEndOfParagraph(extend)) {
-        extend--;
-    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -191,13 +189,6 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(textForDisplay_, extend));
     }
     HandleSelectionChange(start, end);
-}
-
-bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
-{
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(textForDisplay_.length() + placeholderCount_), true);
-    CHECK_NULL_RETURN(textForDisplay_[pos] == WIDE_NEWLINE[0], false);
-    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
