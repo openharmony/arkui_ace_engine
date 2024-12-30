@@ -2512,7 +2512,7 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
         }
     }
     int32_t lanesOffset = 0;
-    if (lanes_ > 1) {
+    if (lanes_ > 1 && !NearZero(crossSize + laneGutter_)) {
         lanesOffset = static_cast<int32_t>(crossOffset / ((crossSize + laneGutter_) / lanes_));
     }
     for (auto& pos : itemPosition_) {
