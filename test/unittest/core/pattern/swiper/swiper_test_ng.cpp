@@ -121,6 +121,17 @@ SwiperModelNG SwiperTestNg::CreateSwiper()
     return model;
 }
 
+SwiperModelNG SwiperTestNg::CreateArcSwiper()
+{
+    SwiperModelNG model;
+    model.Create(true);
+    model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    GetSwiper();
+    return model;
+}
+
 void SwiperTestNg::CreateSwiperItems(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
@@ -1602,5 +1613,33 @@ HWTEST_F(SwiperTestNg, ToJsonValue001, TestSize.Level1)
     json->Replace("currentOffset", -100.0f);
     pattern_->FromJson(json);
     EXPECT_EQ(pattern_->currentDelta_, 100.0f);
+}
+
+/**
++ * @tc.name: WearableSwiperOnModifyDone001
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorPattern->GetArcDotIndicatorStyle();
+
+    /**
+     * @tc.steps: step2. call UpdateContentModifier.
+     */
+    indicatorPattern->OnModifyDone();
+    indicatorPattern->swiperController_->removeSwiperEventCallback_();
+    indicatorPattern->swiperController_->addSwiperEventCallback_();
+    indicatorPattern->OnAfterModifyDone();
+    EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
 }
 } // namespace OHOS::Ace::NG
