@@ -320,10 +320,10 @@ void VideoPattern::PrepareMediaPlayer()
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null or the source has not changed.");
         return;
     }
-    auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src = videoSrcInfo.GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo.GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo.GetModuleName();
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
@@ -1875,10 +1875,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     }
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    auto videoSrcInfo = layoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    CHECK_NULL_VOID(layoutProperty);
+    auto videoSrcInfo = layoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src = videoSrcInfo.GetSrc();
+    videoSrcInfo_.bundleName = videoSrcInfo.GetBundleName();
+    videoSrcInfo_.moduleName = videoSrcInfo.GetModuleName();
     isStop_ = videoPattern->GetIsStop();
     muted_ = videoPattern->GetMuted();
     autoPlay_ = videoPattern->GetAutoPlay();

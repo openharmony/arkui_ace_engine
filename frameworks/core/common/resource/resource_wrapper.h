@@ -280,8 +280,10 @@ public:
     bool CloseRawFileDescription(const std::string& rawfileName) const
     {
         if (SystemProperties::GetResourceDecoupling()) {
+            CHECK_NULL_RETURN(resourceAdapter_, false);
             return resourceAdapter_->CloseRawFileDescription(rawfileName);
         }
+        CHECK_NULL_RETURN(themeConstants_, false);
         return themeConstants_->CloseRawFileDescription(rawfileName);
     }
 
