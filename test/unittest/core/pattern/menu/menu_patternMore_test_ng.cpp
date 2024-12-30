@@ -413,7 +413,7 @@ HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu, TestSize.Level1)
 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
 
@@ -456,7 +456,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
 
@@ -531,7 +531,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
 
@@ -585,7 +585,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 
     RefPtr<FrameNode> innerMenuNode =
         FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
-            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
     ASSERT_NE(innerMenuNode, nullptr);
     innerMenuNode->MountToParent(jsViewNode1);
 
