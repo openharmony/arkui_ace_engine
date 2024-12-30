@@ -148,6 +148,16 @@ bool IsSyncDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
 }
 
+bool IsMeasureDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
+}
+
+bool IsSafeAreaDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -400,6 +410,8 @@ std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
@@ -597,6 +609,8 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+    safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
