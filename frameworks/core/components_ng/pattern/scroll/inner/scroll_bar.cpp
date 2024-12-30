@@ -541,7 +541,7 @@ void ScrollBar::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
-    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             GestureEvent info;

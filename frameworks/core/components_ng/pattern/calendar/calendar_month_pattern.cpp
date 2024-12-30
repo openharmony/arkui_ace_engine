@@ -77,7 +77,11 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+#endif
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
@@ -89,8 +93,13 @@ bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
         && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()
+        && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#endif
         return false;
     } else {
         return true;

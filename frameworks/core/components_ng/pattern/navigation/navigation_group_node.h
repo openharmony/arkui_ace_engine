@@ -154,7 +154,7 @@ public:
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
     void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
-    void UnconfigureNavigationAndDisableAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void ResetTransitionAnimationNodeState(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     RefPtr<NavigationManager> FetchNavigationManager();
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);

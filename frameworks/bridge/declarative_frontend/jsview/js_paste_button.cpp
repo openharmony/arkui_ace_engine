@@ -187,6 +187,13 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSPasteButton>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSPasteButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
+    JSClass<JSPasteButton>::StaticMethod("maxFontScale", &JSSecButtonBase::SetMaxFontScale);
+    JSClass<JSPasteButton>::StaticMethod("minFontScale", &JSSecButtonBase::SetMinFontScale);
+    JSClass<JSPasteButton>::StaticMethod("maxLines", &JSSecButtonBase::SetMaxLines);
+    JSClass<JSPasteButton>::StaticMethod("maxFontSize", &JSSecButtonBase::SetMaxFontSize);
+    JSClass<JSPasteButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
+    JSClass<JSPasteButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
+    JSClass<JSPasteButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

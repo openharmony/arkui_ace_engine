@@ -68,7 +68,9 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         CHECK_NULL_VOID(textHost);
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+        RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
             frameNode->RemoveChildAtIndex(0);
@@ -616,6 +618,7 @@ void ProgressModelNG::ProgressInitialize(
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
+        eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
             frameNode->RemoveChildAtIndex(0);

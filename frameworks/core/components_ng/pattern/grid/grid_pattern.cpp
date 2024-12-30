@@ -107,7 +107,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -143,6 +142,9 @@ void GridPattern::OnModifyDone()
     SetAxis(info_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -1049,7 +1051,7 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     preSpring_ = true;
     host->SetActive();
-    auto context = host->GetContext();
+    auto* context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
@@ -1058,20 +1060,20 @@ void GridPattern::SyncLayoutBeforeSpring()
 
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
-    const auto& info = info_;
-    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
-    if (info.reachStart_ && info.currentOffset_ + delta > 0) {
-        offset.end = 0;
-        return;
+    const float mainGap = GetMainGap();
+    const float viewport = info_.lastMainSize_ - info_.contentEndPadding_;
+    float heightInView = info_.totalHeightOfItemsInView_;
+    if (info_.HeightSumSmaller(viewport, mainGap)) {
+        // content < viewport, use viewport height to calculate overScroll
+        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) - mainGap;
     }
-    float disToBot =
-        info.GetDistanceToBottom(info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
-    if (!info.offsetEnd_) {
-        offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+    float disToBot = info_.GetDistanceToBottom(viewport, heightInView, mainGap);
+    if (!info_.IsOutOfEnd(mainGap, true)) {
+        offset.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
         offset.end = delta;
     } else {
-        offset.end = std::min(static_cast<float>(delta), -disToBot);
+        offset.end = std::min(delta, -disToBot);
     }
 }
 

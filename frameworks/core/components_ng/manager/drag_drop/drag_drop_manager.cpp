@@ -891,6 +891,7 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
 {
     Point point = pointerEvent.GetPoint();
     dragDropPointerEvent_ = pointerEvent;
+    auto preTargetFrameNode = preTargetFrameNode_;
     DoDragReset();
     auto container = Container::Current();
     auto containerId = container->GetInstanceId();
@@ -915,8 +916,8 @@ void DragDropManager::OnDragEnd(const DragPointerEvent& pointerEvent, const std:
     UpdateVelocityTrackerPoint(point, true);
     auto dragFrameNode = FindDragFrameNodeByPosition(
         static_cast<float>(point.GetX()), static_cast<float>(point.GetY()), node);
-    if (IsUIExtensionComponent(preTargetFrameNode_) && preTargetFrameNode_ != dragFrameNode) {
-        HandleUIExtensionDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE);
+    if (IsUIExtensionComponent(preTargetFrameNode) && preTargetFrameNode != dragFrameNode) {
+        HandleUIExtensionDragEvent(preTargetFrameNode, pointerEvent, DragEventType::LEAVE);
     }
     if (!dragFrameNode) {
         DragDropBehaviorReporter::GetInstance().UpdateDragStopResult(DragStopResult::APP_DATA_UNSUPPORT);

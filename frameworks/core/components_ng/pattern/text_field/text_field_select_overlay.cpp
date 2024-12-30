@@ -478,7 +478,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
-        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false);
+        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false, true);
         pattern->ShowCaretAndStopTwinkling();
         pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
@@ -673,5 +673,12 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
         return;
     }
     BaseTextSelectOverlay::UpdateSecondHandleOffset();
+}
+
+bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
 }
 } // namespace OHOS::Ace::NG

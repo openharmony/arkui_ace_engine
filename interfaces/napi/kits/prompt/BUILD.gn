@@ -23,8 +23,8 @@ template("napi_prompt_static") {
     configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
 
     sources = [
-      "../promptaction/js_prompt_action.cpp",
       "../promptaction/prompt_action.cpp",
+      "js_prompt.cpp",
     ]
     deps = []
     external_deps = []

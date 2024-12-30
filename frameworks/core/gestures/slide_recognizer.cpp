@@ -46,7 +46,7 @@ void SlideRecognizer::OnAccepted()
     if (slidingEnd_) {
         Reset();
     } else if (slidingCancel_) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         Reset();
     }
 }
@@ -292,7 +292,7 @@ void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         Reset();
     } else {
         slidingCancel_ = true;
@@ -301,7 +301,7 @@ void SlideRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void SlideRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
-    SendCancelMsg();
+    SendCallbackMsg(onActionCancel_);
     Reset();
 }
 

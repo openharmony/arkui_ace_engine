@@ -17,6 +17,7 @@
 
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
@@ -63,9 +64,14 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
 {
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(eventType);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto frameNode = host_.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                frameNode->GetAccessibilityId());
+    }
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -319,7 +325,6 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
 
 static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::MENU_WRAPPER_ETS_TAG,
-    V2::POPUP_ETS_TAG,
     V2::SELECT_ETS_TAG,
     V2::DIALOG_ETS_TAG,
     V2::SHEET_PAGE_TAG,
@@ -578,6 +583,26 @@ bool AccessibilityProperty::HasAccessibilityRole()
 std::string AccessibilityProperty::GetAccessibilityRole() const
 {
     return accessibilityRole_.value_or("");
+}
+
+void AccessibilityProperty::SetAccessibilityCustomRole(const std::string& role)
+{
+    accessibilityCustomRole_ = role;
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomRole()
+{
+    accessibilityCustomRole_ = "";
+}
+
+bool AccessibilityProperty::HasAccessibilityCustomRole()
+{
+    return accessibilityCustomRole_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilityCustomRole() const
+{
+    return accessibilityCustomRole_.value_or("");
 }
 
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
@@ -946,6 +971,9 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     if (onAccessibilityFocusCallbackImpl_) {
         onAccessibilityFocusCallbackImpl_(isFocus);
     }
+    if (onUserAccessibilityFocusCallbackImpl_) {
+        onUserAccessibilityFocusCallbackImpl_(isFocus);
+    }
 }
 
 void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
@@ -965,6 +993,17 @@ void AccessibilityProperty::SetOnAccessibilityFocusCallback(
     const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
 {
     onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::SetUserOnAccessibilityFocusCallback(
+    const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl)
+{
+    onUserAccessibilityFocusCallbackImpl_ = onUserAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::ResetUserOnAccessibilityFocusCallback()
+{
+    onUserAccessibilityFocusCallbackImpl_ = nullptr;
 }
 
 bool AccessibilityProperty::ActActionClearSelection()

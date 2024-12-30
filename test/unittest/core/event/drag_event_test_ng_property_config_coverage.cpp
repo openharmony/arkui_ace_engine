@@ -132,18 +132,18 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest033, TestSize.Le
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
     GestureEvent info = GestureEvent();
     info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
-        [&unknownPropertyValue]() {});
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) {});
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     gestureEventHub->textDraggable_ = true;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
     focusHub->SetOnKeyEventInternal(onKeyEvent, OnKeyEventType::CONTEXT_MENU);
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
@@ -762,10 +762,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragGestureTest001, TestSize.Level1)
     /**
      * @tc.steps: step2. call actionCancel function.
      */
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    GestureEvent info = GestureEvent();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
     frameNode->SetDraggable(false);
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
 
@@ -773,17 +774,16 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragGestureTest001, TestSize.Level1)
      * @tc.steps: step3. call sequenceCancel function.
      */
     dragEventActuator->longPressRecognizer_->refereeState_ = RefereeState::READY;
-    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
     dragEventActuator->longPressRecognizer_->refereeState_ = RefereeState::SUCCEED;
-    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->SequencedRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
 
     /**
      * @tc.steps: step3. call longPressAction function.
      */
-    GestureEvent info = GestureEvent();
     dragEventActuator->isDragPrepareFinish_ = true;
     (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);

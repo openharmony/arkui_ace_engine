@@ -863,28 +863,35 @@ bool TextSelectController::IsTouchAtLineEnd(const Offset& localOffset) const
     return false;
 }
 
-bool TextSelectController::IsTouchAtLineEndOrBegin(const Offset& localOffset)
+TouchPosition TextSelectController::GetTouchLinePos(const Offset& localOffset)
 {
-    CHECK_NULL_RETURN(paragraph_, false);
+    CHECK_NULL_RETURN(paragraph_, TouchPosition::MID);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, TouchPosition::MID);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, TouchPosition::MID);
     if (contentController_->IsEmpty()) {
-        return true;
+        return textField->IsLTRLayout() ? TouchPosition::RIGHT : TouchPosition::LEFT;
     }
     auto index = ConvertTouchOffsetToPosition(localOffset);
-    if (index == 0 || index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
-        return true;
+    if (index == 0) {
+        return textField->IsLTRLayout() ? TouchPosition::LEFT : TouchPosition::RIGHT;
     }
-    auto pattern = pattern_.Upgrade();
-    CHECK_NULL_RETURN(pattern, false);
-    auto textField = DynamicCast<TextFieldPattern>(pattern);
-    CHECK_NULL_RETURN(textField, false);
+    if (index == static_cast<int32_t>(contentController_->GetTextUtf16Value().length())) {
+        return textField->IsLTRLayout() ? TouchPosition::RIGHT : TouchPosition::LEFT;
+    }
     auto textRect = textField->GetTextRect();
     auto offset = localOffset - Offset(textRect.GetX(), textRect.GetY());
     LineMetrics lineMetrics;
     if (paragraph_->GetLineMetricsByCoordinate(offset, lineMetrics)) {
-        return GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width) ||
-            LessNotEqual(offset.GetX(), lineMetrics.x);
+        if (GreatNotEqual(offset.GetX(), lineMetrics.x + lineMetrics.width)) {
+            return TouchPosition::RIGHT;
+        }
+        if (LessNotEqual(offset.GetX(), lineMetrics.x)) {
+            return TouchPosition::LEFT;
+        }
     }
-    return false;
+    return TouchPosition::MID;
 }
 
 void TextSelectController::UpdateSelectWithBlank(const Offset& localOffset)

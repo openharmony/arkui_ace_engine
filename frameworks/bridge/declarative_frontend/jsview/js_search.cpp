@@ -88,6 +88,13 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
+
+void HandleSearchInvalidUTF16(std::optional<std::u16string>& str)
+{
+    if (str.has_value()) {
+        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(str.value().data()), str.value().length(), 0);
+    }
+}
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -237,6 +244,8 @@ void JSSearch::Create(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
+    HandleSearchInvalidUTF16(key);
+    HandleSearchInvalidUTF16(tip);
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
     if (jsController) {
         jsController->SetController(controller);

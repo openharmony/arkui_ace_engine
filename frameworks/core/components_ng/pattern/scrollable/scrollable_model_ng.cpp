@@ -304,4 +304,15 @@ float ScrollableModelNG::GetFadingEdgeLength(FrameNode* frameNode)
     CHECK_NULL_RETURN(paintProperty, DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE.Value());
     return paintProperty->GetFadingEdgeLength().value_or(DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE).Value();
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(sensitivity);
+}
+#endif
 } // namespace OHOS::Ace::NG

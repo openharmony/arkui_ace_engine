@@ -39,10 +39,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 }
@@ -312,8 +312,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->UpdateInspectorId(id);
     } else {
         auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
-        layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
-            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
+        auto subTabItemHorizontalPadding_ = tabTheme->GetSubTabItemHorizontalPadding();
+        layoutProperty->UpdatePadding({ CalcLength(subTabItemHorizontalPadding_),
+            CalcLength(subTabItemHorizontalPadding_), CalcLength(tabBarItemPadding),
+            CalcLength(tabBarItemPadding), {}, {} });
     }
 
     bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
@@ -655,6 +657,9 @@ void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<Te
     }
     if (labelStyle.textOverflow.has_value()) {
         textLayoutProperty->UpdateTextOverflow(labelStyle.textOverflow.value());
+        if (labelStyle.textOverflow.value() == TextOverflow::MARQUEE) {
+            textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
+        }
     }
     if (labelStyle.maxLines.has_value()) {
         textLayoutProperty->UpdateMaxLines(labelStyle.maxLines.value());

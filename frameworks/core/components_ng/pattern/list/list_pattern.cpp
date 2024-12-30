@@ -64,6 +64,9 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -344,7 +347,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetDirection(true);
     }
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();

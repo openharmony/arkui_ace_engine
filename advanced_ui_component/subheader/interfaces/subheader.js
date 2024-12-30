@@ -780,6 +780,7 @@ export class SubHeader extends ViewPU {
                             'moduleName': '__harDefaultModuleName__'
                         });
                         Button.hoverEffect(HoverEffect.None);
+                        Button.accessibilityGroup(true);
                         Button.accessibilityText(this.getRightAreaAccessibilityText());
                         Button.accessibilityDescription(this.getAccessibilityDescription());
                     }, Button);
@@ -941,6 +942,7 @@ export class SubHeader extends ViewPU {
                             'bundleName': '__harDefaultBundleName__',
                             'moduleName': '__harDefaultModuleName__'
                         });
+                        Button.accessibilityGroup(true);
                         Button.accessibilityText(this.getRightAreaAccessibilityText());
                         Button.accessibilityDescription(this.getAccessibilityDescription());
                     }, Button);
