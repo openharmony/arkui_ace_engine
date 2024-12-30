@@ -2358,9 +2358,11 @@ bool FocusHub::UpdateFocusView()
     CHECK_NULL_RETURN(frameNode, false);
     auto focusView = frameNode->GetPattern<FocusView>();
     if (!focusView) {
-        auto focusManager = GetFocusManager();
-        CHECK_NULL_RETURN(focusManager, false);
-        focusManager->FlushFocusView();
+        if (frameNode->IsOnMainTree()) {
+            auto focusManager = GetFocusManager();
+            CHECK_NULL_RETURN(focusManager, false);
+            focusManager->FlushFocusView();
+        }
         return true;
     }
     auto focusedChild = lastWeakFocusNode_.Upgrade();
