@@ -162,6 +162,8 @@ RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>
 const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
     };
+
+std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;
 } // namespace
 
 ThemeManagerImpl::ThemeManagerImpl()
@@ -175,12 +177,29 @@ ThemeManagerImpl::ThemeManagerImpl(RefPtr<ResourceAdapter>& resourceAdapter)
     themeConstants_ = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
 }
 
+void ThemeManagerImpl::RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func)
+{
+    auto findIter = themes_.find(type);
+    if (findIter != themes_.end()) {
+        return;
+    }
+    THEME_BUILDERS_KIT.insert({ type, func });
+}
+
 RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
 {
     auto findIter = themes_.find(type);
     if (findIter != themes_.end()) {
         return findIter->second;
     }
+
+    auto theme = GetThemeKit(type);
+    CHECK_NULL_RETURN(theme, GetThemeOrigin(type));
+    return theme;
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeOrigin(ThemeType type)
+{
     auto builderIter = THEME_BUILDERS.find(type);
     if (builderIter == THEME_BUILDERS.end()) {
         return nullptr;
@@ -206,6 +225,37 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     }
     
     auto theme = builderIter->second(themeConstants_);
+    themes_.emplace(type, theme);
+    return theme;
+}
+
+RefPtr<Theme> ThemeManagerImpl::GetThemeKit(ThemeType type)
+{
+    auto builderIterKit = THEME_BUILDERS_KIT.find(type);
+    if (builderIterKit == THEME_BUILDERS_KIT.end()) {
+        return nullptr;
+    }
+
+    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
+        ColorMode localMode = pipelineContext->GetLocalColorMode();
+        ColorMode systemMode = SystemProperties::GetColorMode();
+        bool needRestore = false;
+        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
+            // Ordinary themes should work in system color mode. Only theme wrappers support local color mode.
+            ResourceManager::GetInstance().UpdateColorMode(systemMode);
+            pipelineContext->SetLocalColorMode(ColorMode::COLOR_MODE_UNDEFINED);
+            needRestore = true;
+        }
+        auto theme = builderIterKit->second();
+        if (needRestore) {
+            pipelineContext->SetLocalColorMode(localMode);
+            ResourceManager::GetInstance().UpdateColorMode(localMode);
+        }
+        themes_.emplace(type, theme);
+        return theme;
+    }
+    
+    auto theme = builderIterKit->second();
     themes_.emplace(type, theme);
     return theme;
 }

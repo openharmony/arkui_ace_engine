@@ -294,6 +294,12 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
         auto state = manager->GetPatternByName(patternTag.c_str(), attrMap);
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternTag.c_str());
+            state = manager->GetPatternByName(patternName.c_str(), attrMap);
+            if (state != Global::Resource::SUCCESS) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+            } else if (attrMap.empty()) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+            }
         } else if (attrMap.empty()) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternTag.c_str());
         }
