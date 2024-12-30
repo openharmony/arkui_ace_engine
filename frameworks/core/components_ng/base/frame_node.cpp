@@ -41,6 +41,9 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
@@ -1566,6 +1569,14 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
         }
         return;
     }
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        DynamicComponentManager::TriggerOnAreaChangeCallback(this, nanoTimestamp);
+        return;
+    }
+#endif
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
@@ -3352,7 +3363,7 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
 OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
@@ -3367,7 +3378,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
         offset = offsetBottom;
     }
-    
+
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3408,7 +3419,7 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
-// returns a node's rect relative to window 
+// returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3425,7 +3436,7 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
     return rect;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3445,7 +3456,7 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
@@ -3463,7 +3474,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // can exclude querying node
 // ancestor will NOT check boundary of window scene
@@ -4449,7 +4460,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    
+
     UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
@@ -5096,6 +5107,9 @@ void FrameNode::InitLastArea()
     }
     if (!lastParentOffsetToWindow_) {
         lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
+    if (!lastHostParentOffsetToWindow_) {
+        lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
     }
 }
 

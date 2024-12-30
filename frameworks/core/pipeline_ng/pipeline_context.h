@@ -204,9 +204,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
-    
+
     void FlushMouseEventVoluntarily();
-    
+
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
@@ -1059,6 +1059,13 @@ public:
 
     void SetEnableSwipeBack(bool isEnable) override;
 
+    Offset GetHostParentOffsetToWindow() const
+    {
+        return lastHostParentOffsetToWindow_;
+    }
+
+    void SetHostParentOffsetToWindow(const Offset& offset);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1200,7 +1207,7 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    
+
     std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
@@ -1337,6 +1344,7 @@ private:
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
+    Offset lastHostParentOffsetToWindow_ { 0, 0 };
 
     friend class ScopedLayout;
     friend class FormGestureManager;

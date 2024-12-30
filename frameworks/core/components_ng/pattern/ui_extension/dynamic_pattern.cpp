@@ -95,6 +95,20 @@ void DynamicPattern::InitializeRender(void* runtime)
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        OnAreaChangedFunc onAreaChangedFunc = [renderer = dynamicComponentRenderer_](
+            const RectF& oldRect,
+            const OffsetF& oldOrigin,
+            const RectF& rect,
+            const OffsetF& origin) {
+                CHECK_NULL_VOID(renderer);
+                renderer->UpdateParentOffsetToWindow(origin + rect.GetOffset());
+        };
+        eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     }
 #else
     PLATFORM_LOGE("DynamicComponent not support preview.");
@@ -190,7 +204,9 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto animationOption = pipeline->GetSyncAnimationOption();
-    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption);
+    auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
+        dirty->GetFrameRectWithSafeArea(true).GetOffset();
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption, parentGlobalOffset);
     return false;
 }
 
