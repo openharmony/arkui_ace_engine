@@ -354,7 +354,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -827,7 +827,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -864,7 +864,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -943,7 +943,7 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         CHECK_NULL_VOID(pipeline);
         auto appTheme = pipeline->GetTheme<AppTheme>();
         CHECK_NULL_VOID(appTheme);
