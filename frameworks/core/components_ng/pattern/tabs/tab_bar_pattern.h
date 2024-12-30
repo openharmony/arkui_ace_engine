@@ -151,7 +151,8 @@ enum class TabBarState {
 enum class TabBarParamType {
     NORMAL = 0,
     CUSTOM_BUILDER,
-    COMPONENT_CONTENT
+    COMPONENT_CONTENT,
+    SUB_COMPONENT_CONTENT
 };
 
 class TabBarPattern : public Pattern {

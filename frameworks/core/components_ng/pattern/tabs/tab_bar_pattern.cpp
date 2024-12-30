@@ -2512,8 +2512,10 @@ SelectedMode TabBarPattern::GetSelectedMode() const
 
 bool TabBarPattern::IsContainsBuilder()
 {
-    return std::any_of(tabBarType_.begin(), tabBarType_.end(),
-        [](const auto& isBuilder) { return isBuilder.second == TabBarParamType::CUSTOM_BUILDER; });
+    return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) {
+        return isBuilder.second == TabBarParamType::CUSTOM_BUILDER ||
+               isBuilder.second == TabBarParamType::COMPONENT_CONTENT;
+    });
 }
 
 void TabBarPattern::PlayTabBarTranslateAnimation(AnimationOption option, float targetCurrentOffset)
