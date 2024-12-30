@@ -131,7 +131,7 @@ struct ImageSpanOptions : SpanOptionBase {
     std::optional<std::string> moduleName;
     std::optional<RefPtr<PixelMap>> imagePixelMap;
     std::optional<ImageSpanAttribute> imageAttribute;
-    bool isUriPureNumber = false;
+    std::optional<bool> isUriPureNumber;
 
     bool HasValue() const
     {
