@@ -70,6 +70,7 @@ public:
     void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
     void SetIndicatorIsBoolean(bool isBoolean) override;
+    void SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions) override;
     void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
@@ -100,6 +101,7 @@ public:
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
     static void ResetDisplayCount(FrameNode* frameNode);
     static void SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
+    static void SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters);
     static void SetDisplayArrow(FrameNode* frameNode, bool displayArrow);
     static void SetHoverShow(FrameNode* frameNode, bool hoverShow);
@@ -122,6 +124,7 @@ public:
     static Axis GetDirection(FrameNode* frameNode);
     static uint32_t GetDuration(FrameNode* frameNode);
     static int GetDisplayCount(FrameNode* frameNode);
+    static SwiperAutoPlayOptions GetAutoPlayOptions(FrameNode* frameNode);
     static int GetAutoPlayInterval(FrameNode* frameNode);
     static RefPtr<Curve> GetCurve(FrameNode* frameNode);
     static bool GetDisableSwipe(FrameNode* frameNode);
