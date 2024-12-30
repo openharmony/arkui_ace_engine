@@ -51,7 +51,7 @@ public:
     static RectF GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect);
 
     template<class T>
-    RefPtr<T> GetPattern()
+    RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(hostTextBase_.Upgrade());
     }

@@ -2031,4 +2031,21 @@ void SearchModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
 }
+
+void SearchModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, textFieldChild);
+}
+
+void SearchModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, textFieldChild);
+}
 } // namespace OHOS::Ace::NG

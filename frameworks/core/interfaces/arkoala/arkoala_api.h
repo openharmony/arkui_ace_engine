@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 135
+#define ARKUI_FULL_API_VERSION 136
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 135
+#define ARKUI_NODE_API_VERSION 136
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -3511,6 +3511,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaMinFontScale)(ArkUINodeHandle node);
     void (*setTextAreaMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextAreaMaxFontScale)(ArkUINodeHandle node);
+    void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
+    void (*resetStopBackPress)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3723,6 +3725,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputMinFontScale)(ArkUINodeHandle node);
     void (*setTextInputMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetTextInputMaxFontScale)(ArkUINodeHandle node);
+    void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 sStopBackPress);
+    void (*resetStopBackPress)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4376,6 +4380,8 @@ struct ArkUISearchModifier {
     void (*resetSearchMinFontScale)(ArkUINodeHandle node);
     void (*setSearchMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number);
     void (*resetSearchMaxFontScale)(ArkUINodeHandle node);
+    void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
+    void (*resetStopBackPress)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

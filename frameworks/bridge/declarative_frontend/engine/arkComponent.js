@@ -10084,6 +10084,25 @@ class SearchEnableHapticFeedbackModifier extends ModifierWithKey {
   }
 }
 SearchEnableHapticFeedbackModifier.identity = Symbol('searchEnableHapticFeedback');
+
+class SearchStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().search.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchStopBackPressModifier.identity = Symbol('searchStopBackPress');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10305,6 +10324,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchStopBackPressModifier.identity, SearchStopBackPressModifier, value);
     return this;
   }
 }
@@ -13950,6 +13973,24 @@ class TextAreaEllipsisModeModifier extends ModifierWithKey {
 }
 TextAreaEllipsisModeModifier.identity = Symbol('textEllipsisMode');
 
+class TextAreaStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().textArea.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaStopBackPressModifier.identity = Symbol('textAreaStopBackPress');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -14288,6 +14329,10 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   ellipsisMode(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaEllipsisModeModifier.identity, TextAreaEllipsisModeModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStopBackPressModifier.identity, TextAreaStopBackPressModifier, value);
     return this;
   }
 }
@@ -15727,6 +15772,24 @@ class TextInputEllipsisModeModifier extends ModifierWithKey {
 }
 TextInputEllipsisModeModifier.identity = Symbol('textInputEllipsisMode');
 
+class TextInputStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().textInput.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputStopBackPressModifier.identity = Symbol('textInputStopBackPress');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -16121,6 +16184,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   ellipsisMode(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputStopBackPressModifier.identity, TextInputStopBackPressModifier, value);
     return this;
   }
 }
