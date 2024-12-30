@@ -387,11 +387,11 @@ HWTEST_F(MenuPattern2TestNg, InitPreviewMenuAnimationInfo, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetFirstInnerMenu
+ * @tc.name: GetFirstInnerMenu001
  * @tc.desc: Test GetFirstInnerMenu.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu, TestSize.Level1)
+HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
@@ -430,11 +430,11 @@ HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetInnerMenuCount
+ * @tc.name: GetInnerMenuCount001
  * @tc.desc: Test GetInnerMenuCount.
  * @tc.type: FUNC
  */
-HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
+HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
@@ -473,11 +473,11 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnTouchEvent
+ * @tc.name: OnTouchEvent001
  * @tc.desc: Test OnTouchEvent.
  * @tc.type: FUNC
  */
- HWTEST_F(MenuPattern2TestNg, OnTouchEvent, TestSize.Level1)
+ HWTEST_F(MenuPattern2TestNg, OnTouchEvent001, TestSize.Level1)
  {
     /**
      * @tc.steps: step1. build frame node
@@ -504,11 +504,11 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 }
 
 /**
- * @tc.name: RecordItemsAndGroups
+ * @tc.name: RecordItemsAndGroups001
  * @tc.desc: Test RecordItemsAndGroups.
  * @tc.type: FUNC
  */
- HWTEST_F(MenuPattern2TestNg, RecordItemsAndGroups, TestSize.Level1)
+ HWTEST_F(MenuPattern2TestNg, RecordItemsAndGroups001, TestSize.Level1)
  {
     /**
      * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
@@ -558,11 +558,11 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetIfElseMenuItem
+ * @tc.name: GetIfElseMenuItem001
  * @tc.desc: Test GetIfElseMenuItem.
  * @tc.type: FUNC
  */
- HWTEST_F(MenuPattern2TestNg, GetIfElseMenuItem, TestSize.Level1)
+ HWTEST_F(MenuPattern2TestNg, GetIfElseMenuItem001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
