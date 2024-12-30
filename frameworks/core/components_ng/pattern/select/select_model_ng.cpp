@@ -468,6 +468,7 @@ RefPtr<FrameNode> SelectModelNG::CreateFrameNode(int32_t nodeId)
 
 void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params)
 {
+    CHECK_NULL_VOID(frameNode);
     auto select = AceType::Claim(frameNode);
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
