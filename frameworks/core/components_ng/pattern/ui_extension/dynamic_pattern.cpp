@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t WORKER_HAS_USED_ERROR = 10011;
+constexpr char DC_DEPTH_PREFIX[] = "dcDepth_";
 constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
 constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two workers are not allowed to run at the same time";
 }
@@ -251,6 +252,22 @@ void DynamicPattern::UnRegisterPipelineEvent(int32_t instanceId)
     auto context = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void DynamicPattern::DumpDynamicRenderer(int32_t depth, bool hasJson)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    std::string deptParam;
+    deptParam.append(DC_DEPTH_PREFIX).append(std::to_string(depth));
+    params.push_back(deptParam);
+    if (hasJson) {
+        params.push_back("-json");
+    }
+    std::vector<std::string> dumpInfo;
+    dynamicComponentRenderer_->NotifyUieDump(params, dumpInfo);
 }
 
 void DynamicPattern::DumpInfo()

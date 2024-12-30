@@ -1866,6 +1866,17 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    bool isDynamicUiContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if (isDynamicUiContent) {
+        return DumpDynamicUiContent(params, info);
+    }
+
+    return DumpCommon(params, info);
+}
+
+bool AceContainer::DumpCommon(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
     if (isDumping_.test_and_set()) {
         LOGW("another dump is still running");
         return false;
@@ -1892,6 +1903,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     isDumping_.clear();
     return true;
+}
+
+bool AceContainer::DumpDynamicUiContent(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    LOGI("DumpDynamicUiContent");
+    ContainerScope scope(instanceId_);
+    return DumpInfo(params);
 }
 
 bool AceContainer::DumpInfo(const std::vector<std::string>& params)

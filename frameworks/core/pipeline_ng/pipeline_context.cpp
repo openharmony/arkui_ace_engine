@@ -81,6 +81,24 @@ constexpr int32_t MAX_MISS_COUNT = 3;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension CARET_AVOID_OFFSET = 24.0_vp;
+
+int32_t GetDepthFromParams(const std::vector<std::string>& params)
+{
+    int32_t depth = 0;
+    std::string prefix = "dcDepth_";
+    for (const auto& param : params) {
+        if (param.find(prefix) == 0) {
+            std::string suffix = param.substr(prefix.length());
+            int32_t suffixInt = StringUtils::StringToInt(suffix);
+            if (suffixInt != 0) {
+                depth = suffixInt;
+                break;
+            }
+        }
+    }
+
+    return depth;
+}
 } // namespace
 
 PipelineContext::PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
@@ -2842,15 +2860,20 @@ void PipelineContext::DumpData(
             LOGD("Find pid in element dump pipeline");
         }
     }
+
+    int32_t depth = 0;
+    if (IsDynamicRender()) {
+        depth = GetDepthFromParams(params);
+    }
     if (pid == "") {
         LOGD("Dump element without pid");
-        node->DumpTree(0, hasJson);
+        node->DumpTree(depth, hasJson);
         if (hasJson) {
             DumpLog::GetInstance().PrintEndDumpInfoNG(true);
         }
         DumpLog::GetInstance().OutPutBySize();
     } else {
-        node->DumpTreeById(0, params[PARAM_NUM], hasJson);
+        node->DumpTreeById(depth, params[PARAM_NUM], hasJson);
     }
 }
 
@@ -2867,6 +2890,11 @@ void PipelineContext::DumpElement(const std::vector<std::string>& params, bool h
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     bool hasJson = params.back() == "-json";
+    int32_t depth = 0;
+    if (IsDynamicRender()) {
+        depth = GetDepthFromParams(params);
+    }
+
     if (window_) {
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
 #ifdef ENABLE_ROSEN_BACKEND
@@ -2956,7 +2984,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
         });
     } else if (params[0] == "-default") {
-        rootNode_->DumpTree(0);
+        rootNode_->DumpTree(depth);
         DumpLog::GetInstance().OutPutDefault();
     } else if (params[0] == "-overlay") {
         if (overlayManager_) {
