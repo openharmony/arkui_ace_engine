@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,14 @@
  * limitations under the License.
  */
 
-#include "third_party/libphonenumber/cpp/src/phonenumbers/base/logging.h"
-#include "core/components_ng/pattern/image/image_event_hub.h"
-#include "core/components_ng/pattern/image/image_overlay_modifier.h"
-#include "core/components_ng/property/border_property.h"
-#include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
-#include <array>
-#include <cstdint>
-#include <memory>
+#include "core/components_ng/pattern/image/image_pattern.h"
 
-#include "base/geometry/dimension_offset.h"
-#include "base/geometry/matrix4.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/vector.h"
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_engine_ext.h"
+#include "core/common/ai/image_analyzer_adapter.h"
 #include "core/common/ai/image_analyzer_manager.h"
 #include "core/common/container.h"
 #include "core/common/frontend.h"
@@ -41,16 +31,12 @@
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/ace_engine_ext.h"
-#include "core/common/ai/image_analyzer_adapter.h"
-#include "core/common/container.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -59,6 +45,52 @@ constexpr uint32_t CRITICAL_TIME = 50;      // ms. If show time of image is less
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t DEFAULT_ITERATIONS = 1;
 constexpr int32_t MEMORY_LEVEL_LOW_STATUS = 1;
+
+std::string GetImageInterpolation(ImageInterpolation interpolation)
+{
+    switch (interpolation) {
+        case ImageInterpolation::LOW:
+            return "LOW";
+        case ImageInterpolation::MEDIUM:
+            return "MEDIUM";
+        case ImageInterpolation::HIGH:
+            return "HIGH";
+        default:
+            return "NONE";
+    }
+}
+
+std::string GetDynamicModeString(DynamicRangeMode dynamicMode)
+{
+    switch (dynamicMode) {
+        case DynamicRangeMode::HIGH:
+            return "HIGH";
+        case DynamicRangeMode::CONSTRAINT:
+            return "CONSTRAINT";
+        case DynamicRangeMode::STANDARD:
+            return "STANDARD";
+        default:
+            return "STANDARD";
+    }
+}
+
+std::string ConvertOrientationToString(ImageRotateOrientation orientation)
+{
+    switch (orientation) {
+        case ImageRotateOrientation::UP:
+            return "UP";
+        case ImageRotateOrientation::RIGHT:
+            return "RIGHT";
+        case ImageRotateOrientation::DOWN:
+            return "DOWN";
+        case ImageRotateOrientation::LEFT:
+            return "LEFT";
+        case ImageRotateOrientation::AUTO:
+            return "AUTO";
+        default:
+            return "UP";
+    }
+}
 } // namespace
 
 constexpr float BOX_EPSILON = 0.5f;
@@ -84,6 +116,7 @@ DataReadyNotifyTask ImagePattern::CreateDataReadyCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -102,6 +135,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -120,6 +154,7 @@ LoadFailNotifyTask ImagePattern::CreateLoadFailCallback()
     return [weak = WeakClaim(this)](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        pattern->isOrientationChange_ = false;
         auto imageLayoutProperty = pattern->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto currentSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -422,6 +457,8 @@ void ImagePattern::OnImageDataReady()
     CHECK_NULL_VOID(host);
     const auto& geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    // update rotate orientation before decoding
+    UpdateOrientation();
 
     if (CheckIfNeedLayout()) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -437,6 +474,30 @@ void ImagePattern::OnImageDataReady()
         isImageAnimator_) {
         StartDecoding(geometryNode->GetContentSize());
     }
+}
+
+// Update the necessary rotate orientation for drawing and measuring.
+void ImagePattern::UpdateOrientation()
+{
+    auto imageObj = loadingCtx_->GetImageObject();
+    CHECK_NULL_VOID(imageObj);
+    if (imageObj->GetFrameCount() > 1) {
+        imageObj->SetOrientation(ImageRotateOrientation::UP);
+        return;
+    }
+    imageObj->SetUserOrientation(userOrientation_);
+    auto selfOrientation_ = imageObj->GetOrientation();
+    if (userOrientation_ == ImageRotateOrientation::UP) {
+        joinOrientation_ = ImageRotateOrientation::UP;
+        return;
+    }
+    if (userOrientation_ == ImageRotateOrientation::AUTO) {
+        joinOrientation_ = selfOrientation_;
+    } else {
+        joinOrientation_ = userOrientation_;
+    }
+    // update image object orientation before decoding
+    imageObj->SetOrientation(joinOrientation_);
 }
 
 void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
@@ -529,17 +590,7 @@ void ImagePattern::SetImagePaintConfig(const RefPtr<CanvasImage>& canvasImage, c
     config.isSvg_ = sourceInfo.IsSvg();
     config.frameCount_ = frameCount;
     config.sourceInfo_ = sourceInfo;
-    auto host = GetHost();
-    if (!host) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-    auto renderContext = host->GetRenderContext();
-    if (!renderContext || !renderContext->HasBorderRadius()) {
-        canvasImage->SetPaintConfig(config);
-        return;
-    }
-
+    config.orientation_ = joinOrientation_;
     canvasImage->SetPaintConfig(config);
 }
 
@@ -684,7 +735,7 @@ void ImagePattern::LoadImageDataIfNeed()
         svgFillColorOpt = src.GetFillColor();
     }
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_ || isOrientationChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
             imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
@@ -1280,6 +1331,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
+    json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -1401,22 +1453,26 @@ void ImagePattern::DumpInfo()
 
     syncLoad_ ? DumpLog::GetInstance().AddDesc("syncLoad:true") : DumpLog::GetInstance().AddDesc("syncLoad:false");
 
-    DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation());
+    DumpLog::GetInstance().AddDesc("imageInterpolation:" + GetImageInterpolation(interpolation_));
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
-        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+        DumpLog::GetInstance().AddDesc(
+            std::string("rawImageSize: ").append(loadingCtx_->GetOriginImageSize().ToString()));
         DumpLog::GetInstance().AddDesc(std::string("LoadErrorMsg: ").append(loadingCtx_->GetErrorMsg()));
     } else {
         DumpLog::GetInstance().AddDesc(std::string("imageLoadingContext: null"));
     }
 
     auto host = GetHost();
-    if (host) {
+if (host) {
         auto enDrage = host->IsDraggable();
         enDrage ? DumpLog::GetInstance().AddDesc("draggable:true") : DumpLog::GetInstance().AddDesc("draggable:false");
     }
-
+    DumpLog::GetInstance().AddDesc(
+        std::string("userOrientation: ").append(ConvertOrientationToString(userOrientation_)));
+    DumpLog::GetInstance().AddDesc(
+        std::string("selfOrientation: ").append(ConvertOrientationToString(selfOrientation_)));
     DumpLog::GetInstance().AddDesc(std::string("enableAnalyzer: ").append(isEnableAnalyzer_ ? "true" : "false"));
     DumpSvgInfo();
 }

@@ -142,6 +142,19 @@ public:
         return imageQuality_;
     }
 
+    void SetOrientation(ImageRotateOrientation orientation)
+    {
+        isOrientationChange_ = (userOrientation_ != orientation);
+        userOrientation_ = orientation;
+    }
+
+    ImageRotateOrientation GetOrientation()
+    {
+        return userOrientation_;
+    }
+
+    void UpdateOrientation();
+
     void SetCopyOption(CopyOptions value)
     {
         copyOption_ = value;
@@ -150,34 +163,6 @@ public:
     void SetImageInterpolation(ImageInterpolation value)
     {
         interpolation_ = value;
-    }
-
-    std::string GetImageInterpolation()
-    {
-        switch (interpolation_) {
-            case ImageInterpolation::LOW:
-                return "LOW";
-            case ImageInterpolation::MEDIUM:
-                return "MEDIUM";
-            case ImageInterpolation::HIGH:
-                return "HIGH";
-            default:
-                return "NONE";
-        }
-    }
-
-    std::string GetDynamicModeString(DynamicRangeMode dynamicMode) const
-    {
-        switch (dynamicMode) {
-            case DynamicRangeMode::HIGH:
-                return "HIGH";
-            case DynamicRangeMode::CONSTRAINT:
-                return "CONSTRAINT";
-            case DynamicRangeMode::STANDARD:
-                return "STANDARD";
-            default:
-                return "STANDARD";
-        }
     }
 
     std::string GetImageFitStr(ImageFit value);
@@ -546,6 +531,9 @@ private:
     bool autoResizeDefault_ = true;
     bool isSensitive_ = false;
     ImageInterpolation interpolationDefault_ = ImageInterpolation::NONE;
+    ImageRotateOrientation userOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation selfOrientation_ = ImageRotateOrientation::UP;
+    ImageRotateOrientation joinOrientation_ = ImageRotateOrientation::UP;
     Color selectedColor_;
     OffsetF parentGlobalOffset_;
     bool isSelected_ = false;
@@ -568,6 +556,7 @@ private:
     bool isLayouted_ = false;
     int64_t formAnimationStartTime_ = 0;
     int32_t formAnimationRemainder_ = 0;
+    bool isOrientationChange_ = false;
     bool isFormAnimationStart_ = true;
     bool isFormAnimationEnd_ = false;
     bool isPixelMapChanged_ = false;

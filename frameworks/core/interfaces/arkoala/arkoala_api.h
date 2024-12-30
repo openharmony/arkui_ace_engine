@@ -1115,7 +1115,7 @@ struct ArkUIKeyEvent {
     ArkUI_Int32* pressedKeyCodes;
     ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
-    
+
     // user input.
     bool isConsumed;
     bool stopPropagation;
@@ -1323,7 +1323,7 @@ struct ArkUIKeyframeState {
     void (*event)(void* userData);
     void* userData;
 };
- 
+
 struct ArkUIKeyframeAnimateOption {
     ArkUI_Int32 delay;
     ArkUI_Int32 iterations;
@@ -1332,14 +1332,14 @@ struct ArkUIKeyframeAnimateOption {
     ArkUIKeyframeState* keyframes;
     ArkUI_Int32 keyframeSize;
 };
- 
+
 struct ArkUIKeyframe {
     ArkUI_Float32 keyTime;
     ArkUI_Float32 keyValue;
     ArkUICurveHandle curve;
     ArkUI_Int32 curveType;
 };
- 
+
 struct ArkUIAnimatorOption {
     ArkUI_Int32 duration;
     ArkUI_Int32 delay;
@@ -1363,7 +1363,7 @@ struct ArkUIAnimatorOption {
     void (*onRepeat)(ArkUI_AnimatorEvent* event);
     void* repeatUserData;
 };
- 
+
 struct ArkUIAnimator {
     void* animator;
     void* context;
@@ -2277,6 +2277,8 @@ struct ArkUIImageModifier {
     void (*resetResizable)(ArkUINodeHandle node);
     void (*setDynamicRangeMode)(ArkUINodeHandle node, ArkUI_Int32 dynamicRangeMode);
     void (*resetDynamicRangeMode)(ArkUINodeHandle node);
+    void (*setImageRotateOrientation)(ArkUINodeHandle node, ArkUI_Int32 orientation);
+    void (*resetImageRotateOrientation)(ArkUINodeHandle node);
     void (*setEnhancedImageQuality)(ArkUINodeHandle node, ArkUI_Int32 imageQuality);
     void (*resetEnhancedImageQuality)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getImageSrc)(ArkUINodeHandle node);

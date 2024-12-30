@@ -740,7 +740,7 @@ void ResetDynamicRangeMode(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageModelNG::SetDynamicRangeMode(frameNode, DynamicRangeMode::STANDARD);
 }
- 
+
 void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -751,7 +751,7 @@ void SetEnhancedImageQuality(ArkUINodeHandle node, ArkUI_Int32 imageQuality)
     }
     ImageModelNG::SetEnhancedImageQuality(frameNode, imageQualityValue);
 }
- 
+
 void ResetEnhancedImageQuality(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -863,29 +863,44 @@ void ResetImageOnFinish(ArkUINodeHandle node)
     ImageModelNG::SetOnSvgPlayFinish(frameNode, nullptr);
 }
 
+void SetImageRotateOrientation(ArkUINodeHandle node, ArkUI_Int32 orientation)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto orientationValue = static_cast<ImageRotateOrientation>(orientation);
+    if (orientationValue < ImageRotateOrientation::AUTO || orientationValue > ImageRotateOrientation::LEFT) {
+        orientationValue = ImageRotateOrientation::UP;
+    }
+    ImageModelNG::SetOrientation(frameNode, orientationValue);
+}
+
+void ResetImageRotateOrientation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetOrientation(frameNode, ImageRotateOrientation::UP);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize,
-        ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
-        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
-        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
+    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption,
+        SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad,
+        ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize,
+        ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
         SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
         ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
         SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
         SetImageBorderWithValues, ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing,
-        ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
-        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
-        GetDrawingColorFilter, ResetImageContent, ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo,
-        SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish
-    };
+        ResetEdgeAntialiasing, SetResizable, ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode,
+        SetImageRotateOrientation, ResetImageRotateOrientation, SetEnhancedImageQuality, ResetEnhancedImageQuality,
+        GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit, GetImageInterpolation, GetColorFilter, GetAlt,
+        GetImageDraggable, GetRenderMode, SetImageResizable, GetImageResizable, GetFitOriginalSize, GetFillColor,
+        SetPixelMap, SetPixelMapArray, SetResourceSrc, EnableAnalyzer, SetImagePrivacySensitve,
+        ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter, GetDrawingColorFilter, ResetImageContent,
+        ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete, SetOnError, ResetOnError, SetImageOnFinish,
+        ResetImageOnFinish };
     return &modifier;
 }
 

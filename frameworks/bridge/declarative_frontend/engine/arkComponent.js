@@ -5121,7 +5121,7 @@ function valueToArkBorder(value) {
       borderValue.arkRadius.topStart = value.radius?.topStart;
       borderValue.arkRadius.topEnd = value.radius?.topEnd;
       borderValue.arkRadius.bottomStart = value.radius?.bottomStart;
-      borderValue.arkRadius.bottomEnd = value.radius?.bottomEnd; 
+      borderValue.arkRadius.bottomEnd = value.radius?.bottomEnd;
       borderValue.arkRadius.topLeft = value.radius?.topLeft;
       borderValue.arkRadius.topRight = value.radius?.topRight;
       borderValue.arkRadius.bottomLeft = value.radius?.bottomLeft;
@@ -7154,6 +7154,19 @@ class ImageDynamicRangeModeModifier extends ModifierWithKey {
   }
 }
 ImageDynamicRangeModeModifier.identity = Symbol('dynamicRangeMode');
+class ImageRotateOrientationModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetOrientation(node);
+    } else {
+      getUINativeModule().image.setOrientation(node, this.value);
+    }
+  }
+}
+ImageRotateOrientationModifier.identity = Symbol('imageOrientaion');
 class ImageEnhancedImageQualityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -7315,6 +7328,10 @@ class ArkImageComponent extends ArkComponent {
   }
   renderMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageRenderModeModifier.identity, ImageRenderModeModifier, value);
+    return this;
+  }
+  orientation(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageRotateOrientationModifier.identity, ImageRotateOrientationModifier, value);
     return this;
   }
   interpolation(value) {

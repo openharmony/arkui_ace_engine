@@ -334,6 +334,7 @@ declare class ArkImageComponent extends ArkComponent implements ImageAttribute {
     fillColor(value: ResourceColor): this;
     objectFit(value: ImageFit): this;
     objectRepeat(value: ImageRepeat): this;
+    orientation(value: ImageRotateOrientation): this;
     autoResize(value: boolean): this;
     renderMode(value: ImageRenderMode): this;
     interpolation(value: ImageInterpolation): this;
