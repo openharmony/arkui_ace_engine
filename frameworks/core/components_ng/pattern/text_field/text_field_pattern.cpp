@@ -2186,9 +2186,13 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (!(firstIsShow && secondIsShow)) {
-        info.isHandleAnimation = false;
+    if (!firstIsShow) {
+        info.isFirstHandleAnimation = firstIsShow;
     }
+    if (!secondIsShow) {
+        info.isSecondHandleAnimation = secondIsShow;
+    }
+
     info.selectedBackgroundColor = selectedBackgroundColor;
     info.handleColor = handleColor;
     return info;
