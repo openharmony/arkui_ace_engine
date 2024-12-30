@@ -104,6 +104,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
 
+let WindowModeFollowStrategy;
+(function (WindowModeFollowStrategy) {
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1] = 'follow-ui-extension-ability-window-mode';
+})(WindowModeFollowStrategy || (WindowModeFollowStrategy = {}));
+
 let EllipsisMode;
 (function (EllipsisMode) {
   EllipsisMode[EllipsisMode.START = 0] = 'start';

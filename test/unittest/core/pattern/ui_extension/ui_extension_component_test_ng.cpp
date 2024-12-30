@@ -819,10 +819,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     pattern->HandleTouchEvent(touchEventInfo);
     focusHub->currentFocus_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pattern->needReSendFocusToUIExtension_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN);
     pattern->HandleTouchEvent(touchEventInfo);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
@@ -1467,7 +1467,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level
      */
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "456", "");
-    
+
     /**
      * @tc.steps: step3. test UpdateWant
      */
@@ -1617,7 +1617,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. test OnExtensionEvent
      */
@@ -1758,5 +1758,41 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level
      * @tc.steps: step4. test RegisterVisibleAreaChange
      */
     pattern->RegisterVisibleAreaChange();
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestNotifyWindowMode
+ * @tc.desc: Test pattern SetIsWindowModeFollowHost/GetIsWindowModeFollowHost function
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTestNotifyWindowMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. default false
+     */
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step3. SetIsWindowModeFollowHost false
+     */
+    pattern->SetIsWindowModeFollowHost(false);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step4. SetIsWindowModeFollowHost true
+     */
+    pattern->SetIsWindowModeFollowHost(true);
+    EXPECT_TRUE(pattern->GetIsWindowModeFollowHost());
 }
 } // namespace OHOS::Ace::NG

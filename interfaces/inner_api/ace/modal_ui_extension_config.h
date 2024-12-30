@@ -38,6 +38,7 @@ struct ModalUIExtensionConfig {
     bool isAllowAddChildBelowModalUec = false;
     bool isDensityFollowHost = false;
     bool prohibitedRemoveByNavigation = true;
+    bool isWindowModeFollowHost = false;
 };
 
 struct ModalUIExtensionAllowedUpdateConfig {

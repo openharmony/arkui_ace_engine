@@ -69,6 +69,7 @@ class ModalUIExtensionProxy;
 namespace OHOS::Rosen {
 class AvoidArea;
 class RSTransaction;
+enum class WindowMode : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
@@ -227,6 +228,18 @@ public:
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
     void SetOnDrawReadyCallback(const std::function<void()>&& callback);
+
+    void SetIsWindowModeFollowHost(bool isWindowModeFollowHost)
+    {
+        isWindowModeFollowHost_ = isWindowModeFollowHost;
+    }
+    bool GetIsWindowModeFollowHost() const
+    {
+        return isWindowModeFollowHost_;
+    }
+    void NotifyHostWindowMode(Rosen::WindowMode mode);
+    void NotifyHostWindowMode();
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -374,6 +387,8 @@ private:
     bool forceProcessOnKeyEventInternal_ = false;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
+
+    bool isWindowModeFollowHost_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

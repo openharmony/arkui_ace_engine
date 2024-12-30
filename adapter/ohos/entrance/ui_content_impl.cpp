@@ -2784,7 +2784,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
             std::move(updateDisplayIdAndAreaTask), TaskExecutor::TaskType::UI, "ArkUIUpdateDisplayIdAndArea");
     }
     RefPtr<NG::SafeAreaManager> safeAreaManager = nullptr;
-    
+
     std::map<OHOS::Rosen::AvoidAreaType, NG::SafeAreaInsets> updatingInsets;
     if (context) {
         safeAreaManager = context->GetSafeAreaManager();
@@ -2928,6 +2928,28 @@ void UIContentImpl::UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowMode: %{public}d, hasDecor: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode, hasDecor);
     UpdateDecorVisible(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDecor);
+    NotifyWindowMode(mode);
+}
+
+void UIContentImpl::NotifyWindowMode(OHOS::Rosen::WindowMode mode)
+{
+    LOGI("[%{public}s][%{public}s][%{public}d]: NotifyWindowMode mode = %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, mode);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    taskExecutor->PostTask(
+        [weak = WeakPtr<NG::PipelineContext>(pipeline), mode]() {
+            auto pipeline = weak.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            auto uiExtMgr = pipeline->GetUIExtensionManager();
+            CHECK_NULL_VOID(uiExtMgr);
+            uiExtMgr->NotifyWindowMode(mode);
+        },
+        TaskExecutor::TaskType::UI, "ArkUINotifyWindowMode");
 }
 
 void UIContentImpl::UpdateWindowBlur()
