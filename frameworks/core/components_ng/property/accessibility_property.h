@@ -449,6 +449,14 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
+
+    bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
+
+    static NG::RectF UpdateHoverTestRect(const RefPtr<FrameNode>& node);
+
+    NG::RectT<int32_t> GetAccessibilityResponseRegionRect(bool isAccessibilityVirtualNode);
+
     bool IsAccessibilityGroup() const;
 
     bool IsAccessibilityTextPreferred() const;
