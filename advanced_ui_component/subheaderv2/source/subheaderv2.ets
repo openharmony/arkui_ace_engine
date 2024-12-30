@@ -132,11 +132,11 @@ export class SubHeaderV2OperationItem {
   @Trace
   public action?: SubHeaderV2OperationItemAction;
   @Trace
-  accessibilityText?: ResourceStr;
+  public accessibilityText?: ResourceStr;
   @Trace
-  accessibilityDescription?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
   @Trace
-  accessibilityLevel?: string;
+  public accessibilityLevel?: string;
 
   constructor(options: SubHeaderV2OperationItemOptions) {
     this.content = options.content;
@@ -501,8 +501,8 @@ export struct SubHeaderV2 {
   }
 
   private getRightAreaMaxWidth(): Length {
-    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP
-      && (this.operationItems && this.operationItems.length > 0)) {
+    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP &&
+      (this.operationItems && this.operationItems.length > 0)) {
       return '100%';
     }
     return MAX_RIGHT_WIDTH;
@@ -660,8 +660,8 @@ export struct SubHeaderV2 {
 
   @Builder
   TextArrowStyle(): void {
-    if (this.operationItems?.[0] && this.operationItems[0] && this.operationItems[0].content
-      && this.operationItems[0].content.toString().length > 0) {
+    if (this.operationItems?.[0] && this.operationItems[0] && this.operationItems[0].content &&
+      this.operationItems[0].content.toString().length > 0) {
       Stack() {
         Button({ type: ButtonType.Normal, stateEffect: false }) {
           TextArrowLayout() {
