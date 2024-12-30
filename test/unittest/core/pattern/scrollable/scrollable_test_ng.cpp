@@ -1389,6 +1389,56 @@ HWTEST_F(ScrollableTestNg, ShouldSelectScrollBeStopped003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateMouseStart001
+ * @tc.desc: Test nested UpdateMouseStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, UpdateMouseStart001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
+    scrollPn->parent_ = mockPn;
+
+    /**
+     * @tc.steps: step2. Call the UpdateMouseStart method
+     * @tc.expected: The GetY is 0.1
+     */
+    scrollPn->SetAxis(Axis::VERTICAL);
+    float offset = 0.1f;
+    scrollPn->UpdateMouseStart(offset);
+    EXPECT_EQ(scrollPn->mouseStartOffset_.GetY(), 0.1f);
+}
+
+/**
+ * @tc.name: UpdateMouseStart002
+ * @tc.desc: Test nested UpdateMouseStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, UpdateMouseStart002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    auto mockPn = mockScroll_->GetPattern<MockNestableScrollContainer>();
+    scrollPn->parent_ = mockPn;
+
+    /**
+     * @tc.steps: step2. Call the UpdateMouseStart method
+     * @tc.expected: The GetX is 0.1
+     */
+    scrollPn->SetAxis(Axis::HORIZONTAL);
+    float offset = 0.2f;
+    scrollPn->UpdateMouseStart(offset);
+    EXPECT_EQ(scrollPn->mouseStartOffset_.GetX(), 0.2f);
+}
+
+/**
  * @tc.name: GetOffsetWithLimit001
  * @tc.desc: Test nested GetOffsetWithLimit
  * @tc.type: FUNC
@@ -1721,8 +1771,8 @@ HWTEST_F(ScrollableTestNg, Fling001, TestSize.Level1)
      * @tc.steps: step1. Initialize ScrollablePattern type pointer
      * @tc.expected: Pointer is not nullptr
      */
+
     auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
-    
     /**
      * @tc.steps: step2. Call the Fling method and the flingVelocity is 3000
      * @tc.expected: The values of finalPosition_ and finalPosition are the same

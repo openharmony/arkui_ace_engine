@@ -70,7 +70,6 @@ void ScrollBarPattern::OnModifyDone()
     if (axis_ == axis && scrollableEvent_) {
         return;
     }
-
     axis_ = axis;
     // scrollPosition callback
     scrollPositionCallback_ = [weak = WeakClaim(this)](double offset, int32_t source) {
@@ -134,6 +133,7 @@ void ScrollBarPattern::OnModifyDone()
                     coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
             }
         });
+
     SetBarCollectClickAndLongPressTargetCallback();
     SetInBarRectRegionCallback();
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -785,6 +785,16 @@ void ScrollBarPattern::SetReverse(bool reverse)
     isReverse_ = reverse;
 }
 
+void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("enableNestedScroll", enableNestedSorll_ ? "true" : "false", filter);
+}
+
 void ScrollBarPattern::OnCollectClickTarget(const OffsetF& coordinateOffset,
     const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
     const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult)
@@ -948,15 +958,5 @@ void ScrollBarPattern::InitMouseEvent()
     };
     mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseCallback));
     inputHub->AddOnMouseEvent(mouseEvent_);
-}
-
-void ScrollBarPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
-        return;
-    }
-
-    json->PutExtAttr("enableNestedScroll", enableNestedSorll_ ? "true" : "false", filter);
 }
 } // namespace OHOS::Ace::NG

@@ -69,7 +69,7 @@ void AnimationUtils::Animate(const AnimationOption& option, const PropertyCallba
     const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
 #endif
     if (callback) {
@@ -116,7 +116,7 @@ std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const 
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
 #ifdef ENHANCED_ANIMATION
-    AnimManager::GetInstance().SetParams(option, { finishCallback, repeatCallback });
+    AnimManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, repeatCallback });
     AnimManager::GetInstance().OpenAnimation();
     if (callback) {
         callback();

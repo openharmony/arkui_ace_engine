@@ -30,7 +30,7 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
         prop->SetUpCallbacks(
             [weak = WeakPtr(prop)]() { return MockAnimationProxy<float>::GetInstance().GetEndValue(weak.Upgrade()); },
             [weak = WeakPtr(prop)](
-                float value) { MockAnimationProxy<float>::GetInstance().RecordPropChange(weak, value); },
+                float value) { MockAnimationProxy<float>::GetInstance().RecordPropChange(weak.Upgrade(), value); },
             [weak = WeakPtr(prop)]() {
                 return MockAnimationProxy<float>::GetInstance().GetStagingValue(weak.Upgrade());
             });
@@ -41,7 +41,7 @@ void InitProp(const RefPtr<PropertyBase>& propBase)
         prop->SetUpCallbacks(
             [weak = WeakPtr(prop)]() { return MockAnimationProxy<OffsetF>::GetInstance().GetEndValue(weak.Upgrade()); },
             [weak = WeakPtr(prop)](
-                OffsetF value) { MockAnimationProxy<OffsetF>::GetInstance().RecordPropChange(weak, value); },
+                OffsetF value) { MockAnimationProxy<OffsetF>::GetInstance().RecordPropChange(weak.Upgrade(), value); },
             [weak = WeakPtr(prop)]() {
                 return MockAnimationProxy<OffsetF>::GetInstance().GetStagingValue(weak.Upgrade());
             });

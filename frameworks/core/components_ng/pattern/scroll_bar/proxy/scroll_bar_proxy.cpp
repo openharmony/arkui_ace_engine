@@ -163,7 +163,7 @@ void ScrollBarProxy::NotifyScrollBar() const
         scrollableNodeOffset += -GetScrollableNodeOffset(pattern);
     }
 
-    float scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
+    double scrollBarOutBoundaryDistance = GetScrollBarOutBoundaryExtent(scrollable);
     for (const auto& weakScrollBar : scrollBars_) {
         auto scrollBar = weakScrollBar.Upgrade();
         if (!scrollBar) {
@@ -263,13 +263,6 @@ void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<Scrollab
     }
 }
 
-void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
-{
-    auto node = scorllableNode_;
-    CHECK_NULL_VOID(node.scrollPageCallback);
-    node.scrollPageCallback(reverse, smooth);
-}
-
 bool ScrollBarProxy::IsNestScroller() const
 {
     for (auto bar : scrollBars_) {
@@ -283,5 +276,12 @@ bool ScrollBarProxy::IsNestScroller() const
         }
     }
     return false;
+}
+
+void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
+{
+    auto node = scorllableNode_;
+    CHECK_NULL_VOID(node.scrollPageCallback);
+    node.scrollPageCallback(reverse, smooth);
 }
 } // namespace OHOS::Ace::NG

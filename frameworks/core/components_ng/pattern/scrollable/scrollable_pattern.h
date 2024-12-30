@@ -606,7 +606,6 @@ public:
     void InitScrollBarMouseEvent();
     virtual void ScrollPage(
         bool reverse, bool smooth = false, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
-
     void PrintOffsetLog(AceLogTag tag, int32_t id, double finalOffset);
 
     void CheckRestartSpring(bool sizeDiminished, bool needNestedScrolling = true);
@@ -671,12 +670,6 @@ public:
         ResponseLinkResult& responseLinkResult);
 
     virtual void SetAccessibilityAction();
-
-    void SetUseTotalOffset(bool useTotalOffset)
-    {
-        useTotalOffset_ = useTotalOffset;
-    }
-
     RefPtr<NG::ScrollBarProxy> GetScrollBarProxy() const
     {
         return scrollBarProxy_;
@@ -696,6 +689,11 @@ public:
 
     void DeleteNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy);
 
+    void SetUseTotalOffset(bool useTotalOffset)
+    {
+        useTotalOffset_ = useTotalOffset;
+    }
+
     bool GetNestedScrolling() const
     {
         CHECK_NULL_RETURN(scrollableEvent_, false);
@@ -704,13 +702,14 @@ public:
         return scrollable->GetNestedScrolling();
     }
 
+    void ScrollEndCallback(bool nestedScroll, float velocity);
+
     virtual SizeF GetChildrenExpandedSize()
     {
         return SizeF();
     }
 
     SizeF GetViewSizeMinusPadding();
-    void ScrollEndCallback(bool nestedScroll, float velocity);
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -772,12 +771,10 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
-    float selectScrollOffset_ = 0.0f;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
     bool animateOverScroll_ = false;
     bool animateCanOverScroll_ = false;
-    bool lastCanOverScroll_ = false;
 
     RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
     {
@@ -810,6 +807,7 @@ protected:
 
     void SetCanOverScroll(bool val);
     bool GetCanOverScroll() const;
+    bool lastCanOverScroll_ = false;
 
     void CheckScrollBarOff();
 
@@ -851,8 +849,6 @@ private:
     float GetOutOfScrollableOffset() const;
     virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
-    void UpdateMouseStartOffset();
-
     void UpdateBorderRadius();
 
     /******************************************************************************

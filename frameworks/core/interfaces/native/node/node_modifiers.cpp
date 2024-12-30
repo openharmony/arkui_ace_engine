@@ -59,7 +59,6 @@
 #include "core/interfaces/native/node/node_list_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_refresh_modifier.h"
-#include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -103,6 +102,7 @@
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_container_span_modifier.h"
+#include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 
 #ifdef MODEL_COMPONENT_SUPPORTED
 #include "core/interfaces/native/node/node_component3d_modifier.h"
