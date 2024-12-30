@@ -6300,6 +6300,7 @@ void TextFieldPattern::SetSelectionFlag(
     moveCaretState_.isTouchCaret = false;
     bool isShowMenu = selectOverlay_->IsCurrentMenuVisibile();
     isTouchPreviewText_ = false;
+    GetEmojiSubStringRange(selectionStart, selectionEnd);
     if (selectionStart == selectionEnd) {
         selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
