@@ -1,4 +1,3 @@
-
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,7 +70,7 @@ export class SubHeaderV2Title {
   @Trace
   public secondaryTitleModifier?: TextModifier;
 
-  constructor(options: SubHeaderV2TitleOptions){
+  constructor(options: SubHeaderV2TitleOptions) {
     this.primaryTitle = options.primaryTitle;
     this.primaryTitleModifier = options.primaryTitleModifier;
     this.secondaryTitle = options.secondaryTitle;
@@ -99,7 +98,7 @@ export class SubHeaderV2Select {
   @Trace
   public onSelect?: SubHeaderV2SelectOnSelect;
 
-  constructor(options: SubHeaderV2SelectOptions){
+  constructor(options: SubHeaderV2SelectOptions) {
     this.options = options.options;
     this.selectedIndex = options.selectedIndex;
     this.selectedContent = options.selectedContent;
@@ -115,6 +114,7 @@ export enum SubHeaderV2OperationType {
 }
 
 export type SubHeaderV2OperationItemAction = () => void;
+
 declare type SubHeaderV2OperationItemType = ResourceStr | SymbolGlyphModifier;
 
 export interface SubHeaderV2OperationItemOptions {
@@ -228,9 +228,7 @@ export struct SubHeaderV2 {
   operationType?: SubHeaderV2OperationType = SubHeaderV2OperationType.BUTTON;
   @Param
   operationItems?: SubHeaderV2OperationItem[] = undefined;
-
   @BuilderParam titleBuilder?: () => void;
-
   @Local fontSize: number = 1;
   @Local ageing: boolean = true;
   // 内部变量
@@ -239,11 +237,9 @@ export struct SubHeaderV2 {
   @Local selectedIndex: number | Resource | undefined = -1;
   @Local selectedContent: ResourceStr | undefined = '';
   @Local symbolWidth: number = LEFT_ICON_SIZE_NUMBER + LEFT_TEXT_NUMBER;
-
   @Local subHeaderModifier: SubHeaderModifier = new SubHeaderModifier();
   isFollowingSystemFontScale: boolean = false;
   appMaxFontScale: number = 3.2;
-
   @Provider('subHeaderV2Theme') subHeaderV2Theme: SubHeaderTheme = new SubHeaderTheme();
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
@@ -449,7 +445,7 @@ export struct SubHeaderV2 {
     } else if (this.title?.secondaryTitle && this.icon) {
       this.IconSecondaryTitleStyle({
         content: this.title?.secondaryTitle,
-        iconOptions:  this.icon,
+        iconOptions: this.icon,
       });
     } else if (this.title?.secondaryTitle && this.title?.primaryTitle) {
       this.SubTitleStyle({ content: this.title?.primaryTitle, subContent: this.title?.secondaryTitle });
@@ -478,7 +474,8 @@ export struct SubHeaderV2 {
   @Styles
   private rightAreaClickEvent() {
     .onClick(() => {
-      if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+      if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW ||
+        this.operationType === SubHeaderV2OperationType.BUTTON) &&
       this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
         this.operationItems[0].action();
       }
@@ -504,7 +501,8 @@ export struct SubHeaderV2 {
   }
 
   private getRightAreaMaxWidth(): Length {
-    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP && (this.operationItems && this.operationItems.length > 0)) {
+    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP
+      && (this.operationItems && this.operationItems.length > 0)) {
       return '100%';
     }
     return MAX_RIGHT_WIDTH;
@@ -525,7 +523,8 @@ export struct SubHeaderV2 {
       minHeight: MIN_HOT_AREA_LENGTH,
     })
     .flexShrink(0)
-    .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON || this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?
+    .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON ||
+      this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?
     this.getRightAreaAccessibilityLevel() : 'no')
   }
 
@@ -783,13 +782,16 @@ export struct SubHeaderV2 {
 
   @Builder
   rightArea(): void {
-    if (this.operationType === SubHeaderV2OperationType.BUTTON && (this.operationItems && this.operationItems.length > 0)) {
+    if (this.operationType === SubHeaderV2OperationType.BUTTON &&
+      (this.operationItems && this.operationItems.length > 0)) {
       this.ButtonStyle();
     }
-    if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW && (this.operationItems && this.operationItems.length > 0)) {
+    if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW &&
+      (this.operationItems && this.operationItems.length > 0)) {
       this.TextArrowStyle();
     }
-    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP && (this.operationItems && this.operationItems.length > 0)) {
+    if (this.operationType === SubHeaderV2OperationType.ICON_GROUP &&
+      (this.operationItems && this.operationItems.length > 0)) {
       this.IconGroupStyle();
     }
     if (this.operationType === SubHeaderV2OperationType.LOADING) {
@@ -799,7 +801,8 @@ export struct SubHeaderV2 {
 
   @Builder
   rightAreaParent(): void {
-    if (this.operationType === SubHeaderV2OperationType.BUTTON || this.operationType === SubHeaderV2OperationType.TEXT_ARROW) {
+    if (this.operationType === SubHeaderV2OperationType.BUTTON ||
+      this.operationType === SubHeaderV2OperationType.TEXT_ARROW) {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.rightArea();
       }
@@ -827,7 +830,8 @@ export struct SubHeaderV2 {
 
   @Builder
   rightAreaParentAging(): void {
-    if (this.operationType === SubHeaderV2OperationType.BUTTON || this.operationType === SubHeaderV2OperationType.TEXT_ARROW) {
+    if (this.operationType === SubHeaderV2OperationType.BUTTON ||
+      this.operationType === SubHeaderV2OperationType.TEXT_ARROW) {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.rightArea();
       }
@@ -861,7 +865,7 @@ export struct SubHeaderV2 {
       end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
     })
     .accessibilityLevel(this.operationType === SubHeaderV2OperationType.BUTTON ||
-      this.operationType === SubHeaderV2OperationType.TEXT_ARROW ?  this.getRightAreaAccessibilityLevel() : 'no')
+      this.operationType === SubHeaderV2OperationType.TEXT_ARROW ? this.getRightAreaAccessibilityLevel() : 'no')
   }
 
   private getRightAreaAccessibilityText(): string | undefined {
@@ -871,7 +875,8 @@ export struct SubHeaderV2 {
     if (this.operationItems[0]?.accessibilityText && this.operationItems[0]?.accessibilityText !== '') {
       return this.toStringFormat(this.operationItems[0].accessibilityText);
     } else {
-      if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW && this.operationItems[0]?.content.toString().length <= 0) {
+      if (this.operationType === SubHeaderV2OperationType.TEXT_ARROW &&
+        this.operationItems[0]?.content.toString().length <= 0) {
         // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
         return Util.getStringByResource(125833704, '');
       }
@@ -919,7 +924,7 @@ export struct SubHeaderV2 {
         })
         .padding({
           start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
-          end:  LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
+          end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
@@ -1007,10 +1012,9 @@ export struct SubHeaderV2 {
 @ComponentV2
 struct SymbolGlyphChild {
   @Param @Require icon: SubHeaderV2IconType;
-  @Param @Require fontColor:  ResourceColor[];
-
-  @Event changeSymbolWidth: (result: SizeResult) => void = () => {};
-
+  @Param @Require fontColor: ResourceColor[];
+  @Event changeSymbolWidth: (result: SizeResult) => void = () => {
+  };
   result: SizeResult = {
     width: 0,
     height: 0
@@ -1024,7 +1028,6 @@ struct SymbolGlyphChild {
     this.changeSymbolWidth(this.result)
     return this.result;
   }
-
 
   build() {
     Column() {
@@ -1078,7 +1081,7 @@ struct SingleIconStyle {
     }
   }
 
-  private  getRightIconAccessibilityDescription(): string | undefined {
+  private getRightIconAccessibilityDescription(): string | undefined {
     if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
       return this.toStringFormat(this.item?.accessibilityDescription);
     }

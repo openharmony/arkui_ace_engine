@@ -26,15 +26,15 @@ es2abc_gen_abc("gen_subheaderv2_abc") {
 }
 
 gen_js_obj("subheaderv2_abc") {
-  input =
-      get_label_info(":gen_subheaderv2_abc", "target_out_dir") + "/subheaderv2.abc"
+  input = get_label_info(":gen_subheaderv2_abc", "target_out_dir") +
+          "/subheaderv2.abc"
   output = target_out_dir + "/subheaderv2_abc.o"
   dep = ":gen_subheaderv2_abc"
 }
 
 gen_obj("subheaderv2_abc_preview") {
-  input =
-      get_label_info(":gen_subheaderv2_abc", "target_out_dir") + "/subheaderv2.abc"
+  input = get_label_info(":gen_subheaderv2_abc", "target_out_dir") +
+          "/subheaderv2.abc"
   output = target_out_dir + "/subheaderv2_abc.c"
   snapshot_dep = [ ":gen_subheaderv2_abc" ]
 }
