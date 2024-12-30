@@ -161,14 +161,11 @@ private:
     int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
-    void LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutBackwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
-    void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
     void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
 
-    static bool PredictBuildItem(const RefPtr<FrameNode>& host, int32_t itemIdx, const GridPredictLayoutParam& param);
+    static bool PredictBuildItem(FrameNode& host, int32_t itemIdx, const GridPredictLayoutParam& param);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
-    void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
+    void CompleteItemCrossPosition(LayoutWrapper* layoutWrapper, const std::map<int32_t, int32_t>& items);
     /**
      * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
      *
@@ -191,6 +188,13 @@ private:
 
     bool SkipLargeLineHeightLines(float mainSize);
 
+    /**
+     * @brief immediately create & measure items in cache range.
+     *
+     * @param cacheLineCnt number of lines to preload above and below viewport.
+     */
+    void SyncPreload(LayoutWrapper* wrapper, int32_t cacheLineCnt, float crossSize, float mainSize);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;
@@ -204,6 +208,19 @@ protected:
     float mainGap_ = 0;
 
 private:
+    /**
+     * @brief Measure items on a line previously recorded
+     *
+     * @param line index of line to measure
+     * updates @param mainLength by adding this line's measured height
+     * updates @param endIdx with max item index in this line
+     * set @param cacheValid to false if line height has changed.
+     * @return false if line isn't recorded.
+     */
+    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
+
+    LayoutWrapper* wrapper_;
+    SizeF frameSize_;
     int32_t currentMainLineIndex_ = 0;        // it equals to row index in vertical grid
     int32_t moveToEndLineIndex_ = -1;         // place index in the last line when scroll to index after matrix
     std::map<int32_t, float> itemsCrossSize_; // grid item's size in cross axis.

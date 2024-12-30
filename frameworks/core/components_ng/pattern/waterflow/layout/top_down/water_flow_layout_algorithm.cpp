@@ -220,7 +220,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (!layoutProperty->HasCachedCount()) {
         layoutInfo_->UpdateDefaultCachedCount();
     }
-    
+
     auto firstIndex = layoutInfo_->endIndex_;
     auto crossSize = size.CrossSize(axis_);
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection();
@@ -249,8 +249,8 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            const bool isCache =
-                !showCache && (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_);
+            const bool inCacheRange = item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_;
+            const bool isCache = !showCache && inCacheRange;
             auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
@@ -270,7 +270,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 layoutInfo_->storedOffset_ = mainOffset;
             }
 
-            if (NonNegative(mainOffset + item.second.second)) {
+            if (!inCacheRange && NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
@@ -288,7 +288,10 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
 void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse)
 {
-    if (layoutInfo_->itemEnd_ && layoutInfo_->footerIndex_ >= 0) {
+    if (layoutInfo_->footerIndex_ < 0) {
+        return;
+    }
+    if (layoutInfo_->itemEnd_) {
         auto footer = layoutWrapper->GetOrCreateChildByIndex(layoutInfo_->footerIndex_);
         CHECK_NULL_VOID(footer);
         auto footerOffset = childFrameOffset;
@@ -299,6 +302,10 @@ void WaterFlowLayoutAlgorithm::LayoutFooter(LayoutWrapper* layoutWrapper, const 
         footerOffset += (axis_ == Axis::VERTICAL) ? OffsetF(0, mainOffset) : OffsetF(mainOffset, 0);
         footer->GetGeometryNode()->SetMarginFrameOffset(footerOffset);
         footer->Layout();
+    } else {
+        auto footer = layoutWrapper->GetChildByIndex(layoutInfo_->footerIndex_);
+        CHECK_NULL_VOID(footer);
+        footer->SetActive(false);
     }
 }
 
