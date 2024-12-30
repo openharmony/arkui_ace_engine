@@ -39,6 +39,7 @@ public:
     void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
     void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
+    void SetEnableCascade(bool isEnableCascade) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
     void HasUserDefinedOpacity() override;
@@ -63,9 +64,11 @@ public:
     static PickerTime getTimepickerSelected(FrameNode* frameNode);
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
+    static int32_t getTimepickerEnableCascade(FrameNode* frameNode);
     static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
+    static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();

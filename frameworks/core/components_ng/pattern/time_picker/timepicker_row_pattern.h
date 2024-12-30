@@ -597,6 +597,19 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetEnableCascade(bool value)
+    {
+        if (isEnableCascade_ != value) {
+            isEnableCascade_ = false;
+        }
+        isEnableCascade_ = value;
+    }
+
+    bool GetEnableCascade() const
+    {
+        return isEnableCascade_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -691,6 +704,7 @@ private:
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     bool isShowInDatePickerDialog_ = false;
+    bool isEnableCascade_ = false;
 };
 } // namespace OHOS::Ace::NG
 
