@@ -58,7 +58,7 @@ public:
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool DownloadSync(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
-    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId);
+    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId, bool isCancel = true);
 
 private:
     static std::unique_ptr<DownloadManager> instance_;
