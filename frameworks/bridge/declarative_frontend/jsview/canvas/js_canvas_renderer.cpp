@@ -1645,10 +1645,9 @@ void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
         if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
             renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
             return;
-        } else {
-            renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
-            return;
         }
+        renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
+        return;
     }
     
     CalcDimension letterSpacingCal;
