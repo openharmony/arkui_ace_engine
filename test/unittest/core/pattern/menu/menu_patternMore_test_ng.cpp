@@ -536,7 +536,8 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
     innerMenuNode->MountToParent(jsViewNode1);
 
     auto menuItemNode =
-        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode, nullptr);
     menuItemNode->MountToParent(innerMenuNode);
@@ -589,7 +590,7 @@ HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount, TestSize.Level1)
     innerMenuNode->MountToParent(jsViewNode1);
 
     auto menuItemNode =
-        FrameNode::GetOrCreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<MenuItemPattern>());
     ASSERT_NE(menuItemNode, nullptr);
     menuItemNode->MountToParent(innerMenuNode);
