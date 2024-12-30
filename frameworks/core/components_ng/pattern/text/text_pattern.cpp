@@ -4517,7 +4517,7 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
 #else
     info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
-    info.SetIsUriPureNumber(options.isUriPureNumber);
+    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
     return info;
 }
 
