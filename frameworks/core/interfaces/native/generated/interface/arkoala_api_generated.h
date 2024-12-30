@@ -1177,6 +1177,8 @@ typedef struct Callback_Tuple_Number_Number_Number_Number_Void Callback_Tuple_Nu
 typedef struct Opt_Callback_Tuple_Number_Number_Number_Number_Void Opt_Callback_Tuple_Number_Number_Number_Number_Void;
 typedef struct Callback_TouchResult_Void Callback_TouchResult_Void;
 typedef struct Opt_Callback_TouchResult_Void Opt_Callback_TouchResult_Void;
+typedef struct Callback_T_Any_this Callback_T_Any_this;
+typedef struct Opt_Callback_T_Any_this Opt_Callback_T_Any_this;
 typedef struct Callback_String_Unknown_Void Callback_String_Unknown_Void;
 typedef struct Opt_Callback_String_Unknown_Void Opt_Callback_String_Unknown_Void;
 typedef struct Callback_Pointer_Void Callback_Pointer_Void;
@@ -9462,6 +9464,15 @@ typedef struct Opt_Callback_TouchResult_Void {
     Ark_Tag tag;
     Callback_TouchResult_Void value;
 } Opt_Callback_TouchResult_Void;
+typedef struct Callback_T_Any_this {
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_CustomObject instance, const Ark_CustomObject args, const Callback_Any_Void continuation);
+    void (*callSync)(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_CustomObject instance, const Ark_CustomObject args, const Callback_Any_Void continuation);
+} Callback_T_Any_this;
+typedef struct Opt_Callback_T_Any_this {
+    Ark_Tag tag;
+    Callback_T_Any_this value;
+} Opt_Callback_T_Any_this;
 typedef struct Callback_String_Unknown_Void {
     Ark_CallbackResource resource;
     void (*call)(const Ark_Int32 resourceId, const Ark_String name, const Ark_CustomObject param);
@@ -18031,7 +18042,10 @@ typedef struct GENERATED_ArkUILazyForEachOpsAccessor {
                                           Ark_NativePointer mark,
                                           Ark_Int32 direction);
     void (*OnRangeUpdate)(Ark_NativePointer node,
+                          Ark_Int32 totalCount,
                           const Callback_RangeUpdate* updater);
+    void (*SetCurrentIndex)(Ark_NativePointer node,
+                            Ark_Int32 index);
 } GENERATED_ArkUILazyForEachOpsAccessor;
 
 typedef struct DrawingCanvasPeer DrawingCanvasPeer;

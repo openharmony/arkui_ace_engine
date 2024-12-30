@@ -18,8 +18,9 @@
 #include "core/pipeline/base/element_register.h"
 
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
-#include "core/common/layout_inspector.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+
+#include "core/common/layout_inspector.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
 #include "base/geometry/ng/offset_t.h"
@@ -39,6 +40,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
@@ -899,20 +901,20 @@ void FrameNode::DumpSimplifyCommonInfo(std::unique_ptr<JsonValue>& json)
     }
 }
 
-void FrameNode::DumpPadding(const std::unique_ptr<NG::PaddingProperty>& padding, std::string label,
-    std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpPadding(
+    const std::unique_ptr<NG::PaddingProperty>& padding, std::string label, std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(padding);
-    NG::CalcLength defaultValue = NG::CalcLength(
-        Dimension(0, padding->left.value_or(CalcLength()).GetDimension().Unit()));
+    NG::CalcLength defaultValue =
+        NG::CalcLength(Dimension(0, padding->left.value_or(CalcLength()).GetDimension().Unit()));
     if (padding->left.value_or(defaultValue) != defaultValue || padding->right.value_or(defaultValue) != defaultValue ||
         padding->top.value_or(defaultValue) != defaultValue || padding->bottom.value_or(defaultValue) != defaultValue) {
         json->Put(label.c_str(), padding->ToString().c_str());
     }
 }
 
-void FrameNode::DumpBorder(const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label,
-    std::unique_ptr<JsonValue>& json)
+void FrameNode::DumpBorder(
+    const std::unique_ptr<NG::BorderWidthProperty>& border, std::string label, std::unique_ptr<JsonValue>& json)
 {
     CHECK_NULL_VOID(border);
     Dimension defaultValue(0, border->leftDimen.value_or(Dimension()).Unit());
@@ -1739,8 +1741,8 @@ void FrameNode::ProcessVisibleAreaChangeEvent(const RectF& visibleRect, const Re
     } else {
         if (!NearEqual(currentVisibleRatio, lastInnerVisibleRatio_)) {
             auto lastVisibleCallbackRatio = lastInnerVisibleCallbackRatio_;
-            ProcessAllVisibleCallback(visibleAreaRatios, visibleAreaCallback, currentVisibleRatio,
-                lastVisibleCallbackRatio, false, true);
+            ProcessAllVisibleCallback(
+                visibleAreaRatios, visibleAreaCallback, currentVisibleRatio, lastVisibleCallbackRatio, false, true);
             lastInnerVisibleRatio_ = currentVisibleRatio;
         }
     }
@@ -1755,13 +1757,14 @@ double FrameNode::CalculateCurrentVisibleRatio(const RectF& visibleRect, const R
 }
 
 void FrameNode::ProcessAllVisibleCallback(const std::vector<double>& visibleAreaUserRatios,
-    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio,
-    bool isThrottled, bool isInner)
+    VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio, double lastVisibleRatio, bool isThrottled,
+    bool isInner)
 {
     bool isHandled = false;
     bool isVisible = false;
-    double* lastVisibleCallbackRatio = isThrottled ? &lastThrottledVisibleCbRatio_ :
-        (isInner ? &lastInnerVisibleCallbackRatio_ : &lastVisibleCallbackRatio_);
+    double* lastVisibleCallbackRatio = isThrottled
+                                           ? &lastThrottledVisibleCbRatio_
+                                           : (isInner ? &lastInnerVisibleCallbackRatio_ : &lastVisibleCallbackRatio_);
 
     for (const auto& callbackRatio : visibleAreaUserRatios) {
         if (GreatNotEqual(currentVisibleRatio, callbackRatio) && LessOrEqual(lastVisibleRatio, callbackRatio)) {
@@ -1806,7 +1809,7 @@ void FrameNode::ThrottledVisibleTask()
     GetVisibleRect(visibleRect, frameRect);
     double ratio = IsFrameDisappear() ? VISIBLE_RATIO_MIN
                                       : std::clamp(CalculateCurrentVisibleRatio(visibleRect, frameRect),
-                                          VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
+                                            VISIBLE_RATIO_MIN, VISIBLE_RATIO_MAX);
     if (NearEqual(ratio, lastThrottledVisibleRatio_)) {
         throttledCallbackOnTheWay_ = false;
         return;
@@ -2785,8 +2788,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     return testResult;
 }
 
-bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint,
-    TouchRestrict& touchRestrict, TouchTestResult& newComingTargets)
+bool FrameNode::ProcessMouseTestHit(const PointF& globalPoint, const PointF& localPoint, TouchRestrict& touchRestrict,
+    TouchTestResult& newComingTargets)
 {
     auto mouseHub = eventHub_->GetInputEventHub();
     if (!mouseHub) {
@@ -2877,7 +2880,7 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
     }
     auto offset = GetPositionToScreen();
     if (gestureHub->GetResponseRegion().empty()) {
-        RectF rectToScreen{round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height())};
+        RectF rectToScreen { round(offset.GetX()), round(offset.GetY()), round(rect.Width()), round(rect.Height()) };
         responseRegionList.emplace_back(rectToScreen);
         ACE_LAYOUT_TRACE_END()
         return responseRegionList;
@@ -2889,8 +2892,8 @@ std::vector<RectF> FrameNode::GetResponseRegionListForTouch(const RectF& rect)
         auto y = ConvertToPx(region.GetOffset().GetY(), scaleProperty, rect.Height());
         auto width = ConvertToPx(region.GetWidth(), scaleProperty, rect.Width());
         auto height = ConvertToPx(region.GetHeight(), scaleProperty, rect.Height());
-        RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()),
-            round(width.value()), round(height.value()));
+        RectF responseRegion(round(offset.GetX() + x.value()), round(offset.GetY() + y.value()), round(width.value()),
+            round(height.value()));
         responseRegionList.emplace_back(responseRegion);
     }
     ACE_LAYOUT_TRACE_END()
@@ -2904,9 +2907,9 @@ void FrameNode::GetResponseRegionListByTraversal(std::vector<RectF>& responseReg
     auto pipelineContext = GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto offset = GetPositionToScreen();
-    RectF rectToScreen{offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height()};
+    RectF rectToScreen { offset.GetX(), offset.GetY(), origRect.Width(), origRect.Height() };
     auto window = pipelineContext->GetCurrentWindowRect();
-    RectF windowRect{window.Left(), window.Top(), window.Width(), window.Height()};
+    RectF windowRect { window.Left(), window.Top(), window.Width(), window.Height() };
 
     if (rectToScreen.Left() >= windowRect.Right() || rectToScreen.Right() <= windowRect.Left() ||
         rectToScreen.Top() >= windowRect.Bottom() || rectToScreen.Bottom() <= windowRect.Top()) {
@@ -2968,7 +2971,6 @@ bool CheckChildHitTestReslut(HitTestResult childHitResult, const RefPtr<OHOS::Ac
     }
     return false;
 }
-
 
 HitTestResult FrameNode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
     const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& axisResult)
@@ -3231,7 +3233,7 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
 OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
@@ -3246,7 +3248,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
         offset = offsetBottom;
     }
-    
+
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3266,7 +3268,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
 
 VectorF FrameNode::GetTransformScaleRelativeToWindow() const
 {
-    VectorF finalScale {1.0f, 1.0f};
+    VectorF finalScale { 1.0f, 1.0f };
     auto context = GetRenderContext();
     if (context) {
         auto scale = GetTransformScale();
@@ -3287,7 +3289,7 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
-// returns a node's rect relative to window 
+// returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3304,7 +3306,7 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
     return rect;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3324,7 +3326,7 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
@@ -3342,7 +3344,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // can exclude querying node
 // ancestor will NOT check boundary of window scene
@@ -3380,7 +3382,7 @@ RectF GetBoundingBox(std::vector<Point>& pointList)
     Point pMax = pointList[0];
     Point pMin = pointList[0];
 
-    for (auto &point: pointList) {
+    for (auto& point : pointList) {
         if (point.GetX() > pMax.GetX()) {
             pMax.SetX(point.GetX());
         }
@@ -3404,7 +3406,7 @@ bool FrameNode::GetRectPointToParentWithTransform(std::vector<Point>& pointList,
     CHECK_NULL_RETURN(renderContext, false);
     auto parentOffset = renderContext->GetPaintRectWithoutTransform().GetOffset();
     auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
-    for (auto& point: pointList) {
+    for (auto& point : pointList) {
         point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
         point = parentMatrix * point;
     }
@@ -3581,8 +3583,7 @@ void FrameNode::OnAccessibilityEvent(
     }
 }
 
-void FrameNode::OnAccessibilityEvent(
-    AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
+void FrameNode::OnAccessibilityEvent(AccessibilityEventType eventType, std::string textAnnouncedForAccessibility)
 {
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         if (eventType != AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY) {
@@ -4161,7 +4162,7 @@ bool FrameNode::SelfExpansive()
 
 bool FrameNode::SelfExpansiveToKeyboard()
 {
-    auto && opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto&& opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
     return opts && opts->ExpansiveToKeyboard();
 }
 
@@ -4289,7 +4290,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    
+
     UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
@@ -4377,21 +4378,34 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree, bool isCache)
 {
-    RefPtr<LayoutWrapper> overrideChild = pattern_->GetOrCreateChildByIndex(index);
-    if (!overrideChild) {
-        overrideChild = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    if (scrollWindowAdapter) {
+        auto child = scrollWindowAdapter->GetChildByIndex(index);
+        if (child) {
+            child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+            if (addToRenderTree) {
+                child->SetActive(true);
+            }
+        }
+        return child;
     }
-    if (overrideChild) {
-        overrideChild->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
+
+    auto child = frameProxy_->GetFrameNodeByIndex(index, true, isCache, addToRenderTree);
+    if (child) {
+        child->SetSkipSyncGeometryNode(SkipSyncGeometryNode());
         if (addToRenderTree) {
-            overrideChild->SetActive(true);
+            child->SetActive(true);
         }
     }
-    return overrideChild;
+    return child;
 }
 
 RefPtr<LayoutWrapper> FrameNode::GetChildByIndex(uint32_t index, bool isCache)
 {
+    auto* scrollWindowAdapter = GetScrollWindowAdapter();
+    if (scrollWindowAdapter) {
+        return scrollWindowAdapter->GetChildByIndex(index);
+    }
     return frameProxy_->GetFrameNodeByIndex(index, false, isCache, false);
 }
 
@@ -4435,11 +4449,16 @@ void FrameNode::RemoveAllChildInRenderTree()
 
 void FrameNode::SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCached)
 {
-    if (showCached) {
-        frameProxy_->SetActiveChildRange(
-            std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
+    auto* adapter = GetScrollWindowAdapter();
+    if (adapter) {
+        MarkNeedSyncRenderTree(true);
     } else {
-        frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+        if (showCached) {
+            frameProxy_->SetActiveChildRange(
+                std::max(0, start - cacheStart), std::min(GetTotalChildCount() - 1, end + cacheEnd), 0, 0);
+        } else {
+            frameProxy_->SetActiveChildRange(start, end, cacheStart, cacheEnd);
+        }
     }
 }
 
@@ -5158,8 +5177,9 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
         if (isCalculateInnerVisibleRectClip_) {
             visibleInnerRect = ApplyFrameNodeTranformToRect(visibleInnerRect, parentUi);
             auto parentContext = parentUi->GetRenderContext();
-            if (!visibleInnerRect.IsEmpty() && ((parentContext && parentContext->GetClipEdge().value_or(false)) ||
-                parentUi->IsWindowBoundary() || parentUi->GetTag() == V2::ROOT_ETS_TAG)) {
+            if (!visibleInnerRect.IsEmpty() &&
+                ((parentContext && parentContext->GetClipEdge().value_or(false)) || parentUi->IsWindowBoundary() ||
+                    parentUi->GetTag() == V2::ROOT_ETS_TAG)) {
                 visibleInnerRect = visibleInnerRect.Constrain(parentRect);
             }
         }
@@ -5184,8 +5204,8 @@ CacheVisibleRectResult FrameNode::GetCacheVisibleRect(uint64_t timestamp, bool l
     auto scale = GetTransformScale();
 
     if (!parentUi || IsWindowBoundary()) {
-        cachedVisibleRectResult_ = {timestamp,
-            {rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent}};
+        cachedVisibleRectResult_ = { timestamp,
+            { rectToParent.GetOffset(), rectToParent, rectToParent, scale, rectToParent, rectToParent } };
         return cachedVisibleRectResult_.second;
     }
 
@@ -5233,10 +5253,10 @@ CacheVisibleRectResult FrameNode::CalculateCacheVisibleRect(CacheVisibleRectResu
     }
     innerVisibleRect = rect.Constrain(innerBoundaryRect);
 
-    scale = {scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y};
+    scale = { scale.x * parentCacheVisibleRect.cumulativeScale.x, scale.y * parentCacheVisibleRect.cumulativeScale.y };
     cachedVisibleRectResult_ = { timestamp,
         { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect } };
-    return {windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect};
+    return { windowOffset, visibleRect, innerVisibleRect, scale, rect, innerBoundaryRect };
 }
 
 bool FrameNode::IsContextTransparent()
@@ -5443,7 +5463,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
                 status = child->FindSuggestOpIncNode(path, boundary, depth + 1);
             }
             if (status == OPINC_INVALID) {
-                    return OPINC_INVALID;
+                return OPINC_INVALID;
             }
         }
         return OPINC_PARENT_POSSIBLE;
@@ -5953,4 +5973,15 @@ bool FrameNode::IsDebugInspectorId()
     auto debugInspectorId = SystemProperties::GetDebugInspectorId();
     return debugInspectorId == GetInspectorId().value_or("");
 }
+
+ScrollWindowAdapter* FrameNode::GetScrollWindowAdapter() const
+{
+    return pattern_->GetScrollWindowAdapter();
+}
+
+ScrollWindowAdapter* FrameNode::GetOrCreateScrollWindowAdapter()
+{
+    return pattern_->GetOrCreateScrollWindowAdapter();
+}
+
 } // namespace OHOS::Ace::NG

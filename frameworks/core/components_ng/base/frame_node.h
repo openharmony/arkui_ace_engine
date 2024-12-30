@@ -68,6 +68,7 @@ class Pattern;
 class StateModifyTask;
 class UITask;
 struct DirtySwapConfig;
+class ScrollWindowAdapter;
 
 struct CacheVisibleRectResult {
     OffsetF windowOffset = OffsetF();
@@ -1119,6 +1120,9 @@ public:
     {
         return exposeInnerGestureFlag_;
     }
+
+    ScrollWindowAdapter* GetScrollWindowAdapter() const;
+    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter();
 
 protected:
     void DumpInfo() override;

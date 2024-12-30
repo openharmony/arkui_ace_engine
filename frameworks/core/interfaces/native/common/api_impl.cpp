@@ -13,10 +13,15 @@
  * limitations under the License.
  */
 
+#include <cstdint>
 #include <sstream>
 #include <vector>
 
 // SORTED_SECTION
+#include "arkoala-macros.h"
+#include "arkoala_api_generated.h"
+#include "extension_companion_node.h"
+
 #include "base/error/error_code.h"
 #include "core/common/card_scope.h"
 #include "core/components_ng/base/group_node.h"
@@ -24,10 +29,6 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/syntax/lazy_for_each_builder.h"
 #include "core/components_ng/syntax/lazy_for_each_node.h"
-
-#include "arkoala_api_generated.h"
-#include "arkoala-macros.h"
-#include "extension_companion_node.h"
 
 namespace OHOS::Ace::NG {
 namespace GeneratedApiImpl {
@@ -70,13 +71,9 @@ Ark_Float32 GetDesignWidthScale(int deviceId)
     return windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
 }
 
-void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Int32 callback)
-{
-}
+void SetCustomCallback(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Int32 callback) {}
 
-void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId))
-{
-}
+void SetCustomNodeDestroyCallback(void (*destroy)(Ark_NodeHandle nodeId)) {}
 
 Ark_NodeHandle GetNodeByViewStack()
 {
@@ -150,17 +147,17 @@ Ark_Int32 InsertChildAfter(Ark_NodeHandle parentNode, Ark_NodeHandle childNode, 
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
     if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
         groupNode->AddChildToGroup(AceType::Claim(child));
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return result;
     }
-    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
-    if (sibling) {
-        parent->AddChildAfter(AceType::Claim(child), AceType::Claim(sibling));
-    } else {
+    if (siblingNode == nullptr ||
+        siblingNode == reinterpret_cast<Ark_NodeHandle>(0x01) /*lazyForEach markItem case.*/) {
         parent->AddChild(AceType::Claim(child));
+    } else {
+        auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+        parent->AddChildAfter(AceType::Claim(child), AceType::Claim(sibling));
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -173,7 +170,7 @@ Ark_Boolean IsBuilderNode(Ark_NodeHandle nodePtr)
 {
     CHECK_NULL_RETURN(nodePtr, false);
     auto* node = reinterpret_cast<UINode*>(nodePtr);
-    return static_cast<Ark_Int32>(node->GetNodeStatus()) != 0 ;
+    return static_cast<Ark_Int32>(node->GetNodeStatus()) != 0;
 }
 
 Ark_Float32 ConvertLengthMetricsUnit(Ark_Float32 value, Ark_Int32 originUnit, Ark_Int32 targetUnit)
@@ -189,17 +186,17 @@ Ark_Int32 InsertChildBefore(Ark_NodeHandle parentNode, Ark_NodeHandle childNode,
     CHECK_NULL_RETURN(childNode, result);
     auto* parent = reinterpret_cast<UINode*>(parentNode);
     auto* child = reinterpret_cast<UINode*>(childNode);
-
     if (auto* groupNode = AceType::DynamicCast<GroupNode>(parent); groupNode) {
         groupNode->AddChildToGroup(AceType::Claim(child));
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return result;
     }
-    auto* sibling = reinterpret_cast<UINode*>(siblingNode);
-    if (sibling) {
-        parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
-    } else {
+    if (siblingNode == nullptr ||
+        siblingNode == reinterpret_cast<Ark_NodeHandle>(0x01) /*lazyForEach markItem case.*/) {
         parent->AddChild(AceType::Claim(child));
+    } else {
+        auto* sibling = reinterpret_cast<UINode*>(siblingNode);
+        parent->AddChildBefore(AceType::Claim(child), AceType::Claim(sibling));
     }
     auto* frameNode = AceType::DynamicCast<FrameNode>(child);
     if (frameNode) {
@@ -245,9 +242,7 @@ Ark_PipelineContext GetPipelineContext(Ark_NodeHandle node)
 
 void SetVsyncCallback(Ark_PipelineContext pipelineContext, Ark_VsyncCallback callback)
 {
-    auto vsync = [pipelineContext, callback]() {
-        callback(pipelineContext);
-    };
+    auto vsync = [pipelineContext, callback]() { callback(pipelineContext); };
     reinterpret_cast<PipelineContext*>(pipelineContext)->SetVsyncListener(vsync);
 }
 
@@ -257,20 +252,20 @@ Ark_Int32 MeasureNode(Ark_VMContext context, Ark_NodeHandle nodePtr, Ark_Float32
     auto* frameNode = AceType::DynamicCast<FrameNode>(reinterpret_cast<UINode*>(nodePtr));
     if (frameNode) {
         std::optional<LayoutConstraintF> constraint = std::make_optional<LayoutConstraintF>();
-        constraint->minSize.SetWidth(data[0]); //minWidth
-        constraint->minSize.SetHeight(data[1]); //minHeight
-        constraint->maxSize.SetWidth(data[2]); //maxWidth
-        constraint->maxSize.SetHeight(data[3]); //maxHeight
-        bool idealWidth = data[0] == data[2]; //minWidth == maxWidth
+        constraint->minSize.SetWidth(data[0]);  // minWidth
+        constraint->minSize.SetHeight(data[1]); // minHeight
+        constraint->maxSize.SetWidth(data[2]);  // maxWidth
+        constraint->maxSize.SetHeight(data[3]); // maxHeight
+        bool idealWidth = data[0] == data[2];   // minWidth == maxWidth
         if (idealWidth) {
             constraint->selfIdealSize.SetWidth(data[0]);
         }
-        bool idealHeight = data[1] == data[3]; //minHeight == maxHeight
+        bool idealHeight = data[1] == data[3]; // minHeight == maxHeight
         if (idealHeight) {
             constraint->selfIdealSize.SetHeight(data[1]);
         }
-        constraint->percentReference.SetWidth(data[4]); //percentReferenceWidth
-        constraint->percentReference.SetHeight(data[5]); //percentReferenceHeight
+        constraint->percentReference.SetWidth(data[4]);  // percentReferenceWidth
+        constraint->percentReference.SetHeight(data[5]); // percentReferenceHeight
         frameNode->SetActive(true);
         frameNode->Measure(constraint);
     }
@@ -431,17 +426,17 @@ void GetLayoutConstraint(Ark_NodeHandle node, Ark_Int32* value)
     CHECK_NULL_VOID(frameNode);
     auto layoutConstraint = frameNode->GetLayoutProperty()->GetContentLayoutConstraint();
     if (layoutConstraint.has_value()) {
-        //min
+        // min
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().minSize.Width());
-        //min
+        // min
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().minSize.Height());
         //.max
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().maxSize.Width());
         //.max
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().maxSize.Height());
-        //percentReference
+        // percentReference
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().percentReference.Width());
-        //percentReference
+        // percentReference
         *value++ = static_cast<Ark_Int32>(layoutConstraint.value().percentReference.Height());
     }
 }
@@ -462,7 +457,7 @@ void SetChildTotalCount(Ark_NodeHandle node, int totalCount)
 
 int IndexerChecker(Ark_VMContext vmContext, Ark_NodeHandle nodePtr)
 {
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NOT IMPLEMENTED! Arkoala IndexerChecker for %{public}p", nodePtr);
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NOT IMPLEMENTED! Arkoala IndexerChecker");
     return 1;
 }
 
@@ -535,15 +530,12 @@ void SetLazyItemIndexer(Ark_VMContext vmContext, Ark_NodeHandle nodePtr, int ind
     }
 }
 
-void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event)
-{
-}
-} // namespace
+void EmitOnClick(Ark_NativePointer node, Ark_ClickEvent event) {}
+} // namespace GeneratedApiImpl
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(
-    GENERATED_Ark_APIVariantKind kind, int version);
+IDLIZE_API_EXPORT const GENERATED_ArkUIAnyAPI* GENERATED_GetArkAnyAPI(GENERATED_Ark_APIVariantKind kind, int version);
 
 __attribute__((constructor)) static void ProvideEntryPoint(void)
 {

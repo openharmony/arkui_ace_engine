@@ -116,8 +116,8 @@ void UINode::DetachContext(bool recursive)
     }
 }
 
-void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
-    bool silently, bool addDefaultTransition, bool addModalUiextension)
+void UINode::AddChild(
+    const RefPtr<UINode>& child, int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(child);
     auto it = std::find(children_.begin(), children_.end(), child);
@@ -133,7 +133,7 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot,
         bool canAddChild = CanAddChildWhenTopNodeIsModalUec(it);
         if (!canAddChild) {
             LOGW("Current Node(id: %{public}d) is prohibited add child(tag %{public}s, id: %{public}d), "
-                "Current modalUiextension count is : %{public}d",
+                 "Current modalUiextension count is : %{public}d",
                 GetId(), child->GetTag().c_str(), child->GetId(), modalUiextensionCount_);
             return;
         } else {
@@ -220,12 +220,45 @@ void UINode::AddChildBefore(const RefPtr<UINode>& child, const RefPtr<UINode>& s
     DoAddChild(it, child, false);
 }
 
+UINode* UINode::GetChildAfter(UINode* node)
+{
+    const auto& children = GetChildren(true);
+    auto iter = children.rbegin();
+    UINode* targetNode = nullptr;
+    while (iter != children_.rend()) {
+        auto* point = iter->GetRawPtr();
+        if (point == node) {
+            break;
+        }
+        targetNode = point;
+        iter++;
+    }
+    return targetNode;
+}
+
+UINode* UINode::GetChildBefore(UINode* node)
+{
+    const auto& children = GetChildren(true);
+    auto iter = children.begin();
+    UINode* targetNode = nullptr;
+    while (iter != children_.end()) {
+        auto* point = iter->GetRawPtr();
+        if (point == node) {
+            break;
+        }
+        targetNode = point;
+        iter++;
+    }
+    return targetNode;
+}
+
 void UINode::TraversingCheck(RefPtr<UINode> node, bool withAbort)
 {
     if (isTraversing_) {
         if (node) {
             LOGF("Try to remove the child([%{public}s][%{public}d]) of node [%{public}s][%{public}d] when its children "
-                "is traversing", node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
+                 "is traversing",
+                node->GetTag().c_str(), node->GetId(), GetTag().c_str(), GetId());
         } else {
             LOGF("Try to remove all the children of node [%{public}s][%{public}d] when its children is traversing",
                 GetTag().c_str(), GetId());
@@ -356,8 +389,8 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
     MarkNeedSyncRenderTree(true);
 }
 
-void UINode::MountToParent(const RefPtr<UINode>& parent,
-    int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
+void UINode::MountToParent(
+    const RefPtr<UINode>& parent, int32_t slot, bool silently, bool addDefaultTransition, bool addModalUiextension)
 {
     CHECK_NULL_VOID(parent);
     parent->AddChild(AceType::Claim(this), slot, silently, addDefaultTransition, addModalUiextension);
@@ -405,8 +438,8 @@ void UINode::ResetParent()
 namespace {
 std::ostream& operator<<(std::ostream& ss, const RefPtr<UINode>& node)
 {
-    return ss << node->GetId() << "(" << node->GetTag() << "," << node->GetDepth()
-        << "," << node->GetChildren().size() << ")";
+    return ss << node->GetId() << "(" << node->GetTag() << "," << node->GetDepth() << "," << node->GetChildren().size()
+              << ")";
 }
 
 std::string ToString(const RefPtr<UINode>& node)
@@ -429,8 +462,8 @@ void LoopDetected(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     static_assert(totalLengthLimit > childLengthLimit, "totalLengthLimit too small");
     constexpr size_t currentLengthLimit = totalLengthLimit - childLengthLimit;
 
-    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]",
-        (int)childLengthLimit, childNode.c_str(), (int)currentLengthLimit, currentNode.c_str());
+    LOGF("Detected loop: child[%{public}.*s] vs current[%{public}.*s]", (int)childLengthLimit, childNode.c_str(),
+        (int)currentLengthLimit, currentNode.c_str());
 
     // log full childNode info in case of hilog length limit reached
     if (childNode.length() > childLengthLimit) {
@@ -467,7 +500,7 @@ bool DetectLoop(const RefPtr<UINode>& child, const RefPtr<UINode>& current)
     }
     return false;
 }
-}
+} // namespace
 
 void UINode::DoAddChild(
     std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently, bool addDefaultTransition)
@@ -862,15 +895,15 @@ void UINode::OnAttachToMainTree(bool)
 void UINode::UpdateGeometryTransition()
 {
     auto children = GetChildren();
-    for (const auto& child: children) {
+    for (const auto& child : children) {
         child->UpdateGeometryTransition();
     }
 }
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
-        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG ||
+           tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -1075,8 +1108,7 @@ void UINode::GenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<FrameNo
     }
 }
 
-void UINode::GenerateOneDepthVisibleFrameWithOffset(
-    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+void UINode::GenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
 {
     if (disappearingChildren_.empty()) {
         // normal child
@@ -1193,7 +1225,6 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     }
     return hitTestResult;
 }
-
 
 int32_t UINode::FrameCount() const
 {
@@ -1443,8 +1474,7 @@ void UINode::OnGenerateOneDepthVisibleFrameWithTransition(std::list<RefPtr<Frame
     GenerateOneDepthVisibleFrameWithTransition(visibleList);
 }
 
-void UINode::OnGenerateOneDepthVisibleFrameWithOffset(
-    std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
+void UINode::OnGenerateOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& visibleList, OffsetF& offset)
 {
     GenerateOneDepthVisibleFrameWithOffset(visibleList, offset);
 }
@@ -1656,8 +1686,8 @@ bool UINode::GetIsRootBuilderNode() const
 
 // Collects  all the child elements of "children" in a recursive manner
 // Fills the "removedElmtId" list with the collected child elements
-void UINode::CollectRemovedChildren(const std::list<RefPtr<UINode>>& children,
-    std::list<int32_t>& removedElmtId, bool isEntry)
+void UINode::CollectRemovedChildren(
+    const std::list<RefPtr<UINode>>& children, std::list<int32_t>& removedElmtId, bool isEntry)
 {
     auto greatOrEqualApi13 = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     for (auto const& child : children) {
