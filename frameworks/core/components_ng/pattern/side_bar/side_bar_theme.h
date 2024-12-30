@@ -91,7 +91,7 @@ public:
                 sideBarPattern->GetAttr<Dimension>("control_button_width_small", 0.0_vp);
             theme->controlButtonHeightSmall_ =
                 sideBarPattern->GetAttr<Dimension>("control_button_height_small", 0.0_vp);
-            theme->sideBarWidth_ = sideBarPattern->GetAttr<Dimension>("side_bar_width", 0.0_vp);
+            theme->sideBarWidth_ = sideBarPattern->GetAttr<Dimension>("side_bar_width", -1.0_vp);
         }
     };
 
