@@ -15,7 +15,6 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { TextInputBootcamp } from './TextInputBootcamp';
-import { TextAreaBootcamp } from './TextAreaBootcamp';
 import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { ContainerSpanBootcamp } from './ContainerSpanBootcamp';
 
@@ -40,9 +39,11 @@ export const inputsRoute: RouteGroup = {
 
 @Builder
 export function InputsDestination(name: string, route: Route) {
-  if (name === 'inputs/textInput') {
+  if (name === 'inputs/richEditor') {
+    RichEditorBootcamp({ title: route.label })
+  }else if (name === 'inputs/textInput') {
     TextInputBootcamp({ title: route.label })
-  } else if (name === 'inputs/textArea') {
+  }else if (name === 'inputs/textArea') {
     TextAreaBootcamp({ title: route.label })
   } else if (name === 'inputs/richEditor') {
     RichEditorBootcamp({ title: route.label })
