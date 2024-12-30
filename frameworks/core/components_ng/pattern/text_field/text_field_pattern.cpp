@@ -1030,7 +1030,7 @@ void TextFieldPattern::HandleFocusEvent()
 
 void TextFieldPattern::SetFocusStyle()
 {
-    if (IsUnderlineMode()) {
+    if (IsUnderlineMode() || IsInlineMode()) {
         return;
     }
     auto host = GetHost();
