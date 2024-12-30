@@ -359,19 +359,27 @@ private:
     WeakPtr<WebPattern> weakPattern_;
 };
 
-WebPattern::WebPattern() = default;
+WebPattern::WebPattern()
+{
+    InitMagnifier();
+    renderMode_ = RenderMode::ASYNC_RENDER;
+}
 
 WebPattern::WebPattern(const std::string& webSrc, const RefPtr<WebController>& webController, RenderMode renderMode,
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), webController_(webController), renderMode_(renderMode), incognitoMode_(incognitoMode),
       sharedRenderProcessToken_(sharedRenderProcessToken)
-{}
+{
+    InitMagnifier();
+}
 
 WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWebIdCallback, RenderMode renderMode,
     bool incognitoMode, const std::string& sharedRenderProcessToken)
     : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), renderMode_(renderMode),
       incognitoMode_(incognitoMode), sharedRenderProcessToken_(sharedRenderProcessToken)
-{}
+{
+    InitMagnifier();
+}
 
 WebPattern::~WebPattern()
 {
@@ -398,6 +406,7 @@ WebPattern::~WebPattern()
     if (pipeline) {
         pipeline->UnregisterDensityChangedCallback(densityCallbackId_);
     }
+    HideMagnifier();
 }
 
 void WebPattern::ShowContextSelectOverlay(const RectF& firstHandle, const RectF& secondHandle,
@@ -2963,7 +2972,6 @@ void WebPattern::OnModifyDone()
     // Initialize web params.
     InitFeatureParam();
     InitializeAccessibility();
-    InitMagnifier();
     // Initialize scrollupdate listener
     if (renderMode_ == RenderMode::SYNC_RENDER) {
         auto task = [weak = AceType::WeakClaim(this)]() {
@@ -4045,6 +4053,7 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
         return false;
     }
     if (params->GetIsLongPressActived()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "ShowMagnifier");
         ShowMagnifier(static_cast<int>(touchPointX), static_cast<int>(touchPointY));
         return false;
     }
@@ -4093,6 +4102,7 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY)
 
 void WebPattern::HideMagnifier()
 {
+    TAG_LOGI(AceLogTag::ACE_WEB, "HideMagnifier");
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
     }
@@ -6759,7 +6769,10 @@ void WebPattern::UnRegisterTextBlurCallback()
 
 void WebPattern::InitMagnifier()
 {
-    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+    TAG_LOGI(AceLogTag::ACE_WEB, "InitMagnifier");
+    if (!magnifierController_) {
+        magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
+    }
 }
 
 void WebPattern::InitializeAccessibility()
