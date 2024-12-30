@@ -62,6 +62,7 @@ public:
     static void SetControlSize(const JSCallbackInfo& info);
     static void SetDirection(const std::string& dir);
     static void BackgroundColor(const JSCallbackInfo& info);
+    static void SetDividerStyle(const JSCallbackInfo& info);
 
     static void ParseFontSize(const JSRef<JSVal>& jsValue, SelectFontType type);
     static void ParseFontWeight(const JSRef<JSVal>& jsValue, SelectFontType type);

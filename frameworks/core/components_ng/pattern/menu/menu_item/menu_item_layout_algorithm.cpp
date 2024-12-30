@@ -346,6 +346,10 @@ float MenuItemLayoutAlgorithm::GetDividerStroke(LayoutWrapper* layoutWrapper)
     CHECK_NULL_RETURN(menuItemNode, 0.0f);
     auto pattern = menuItemNode->GetPattern<MenuItemPattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
+    auto topDivider = pattern->GetTopDivider();
+    if (topDivider && topDivider->GetParent()) {
+        return 0.0f;
+    }
     return pattern->GetDividerStroke();
 }
 

@@ -38,6 +38,7 @@ public:
         paintProperty->propDividerColor_ = CloneDividerColor();
         paintProperty->propStartMargin_ = CloneStartMargin();
         paintProperty->propEndMargin_ = CloneEndMargin();
+        paintProperty->propDividerMode_ = CloneDividerMode();
         return paintProperty;
     }
 
@@ -52,6 +53,7 @@ public:
         ResetDividerColor();
         ResetStartMargin();
         ResetEndMargin();
+        ResetDividerMode();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(NeedHeaderPadding, bool, PROPERTY_UPDATE_RENDER);
@@ -63,6 +65,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerColor, Color, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartMargin, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndMargin, Dimension, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DividerMode, DividerMode, PROPERTY_UPDATE_MEASURE);
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemGroupPaintProperty);
 };

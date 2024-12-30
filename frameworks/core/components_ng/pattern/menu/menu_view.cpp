@@ -1346,9 +1346,8 @@ RefPtr<FrameNode> MenuView::Create(
     scrollPattern->SetIsSelectScroll(true);
     scroll->MountToParent(menuNode);
     scroll->MarkModifyDone();
-    menuNode->MarkModifyDone();
-
     menuPattern->SetIsSelectMenu(true);
+    menuNode->MarkModifyDone();
     return wrapperNode;
 }
 

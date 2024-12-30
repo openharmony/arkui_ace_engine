@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 
+#include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
@@ -37,7 +38,16 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
         if (!needDivider) {
             return;
         }
-    
+        auto renderContext = paintWrapper->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        auto pattern = host->GetPattern<MenuItemPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto topDivider = pattern->GetTopDivider();
+        if (topDivider && topDivider->GetParent()) {
+            return;
+        }
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
@@ -148,12 +158,13 @@ void MenuItemPaintMethod::PaintCustomDivider(SizeF optionSize, float horInterval
     CHECK_NULL_VOID(layoutProperty);
     auto textDirection = layoutProperty->GetNonAutoLayoutDirection();
     auto dividerRtl = static_cast<float>(props->GetDividerValue().isRtl);
+    auto paintWidth = props->GetDividerValue().isDividerStyle ? dividerWidth / 2 : dividerWidth;
     dividerRtl = (textDirection == TextDirection::RTL) ? true : false;
     if (dividerRtl) {
         auto rtlStartMargin = startMargin;
         startMargin = endMargin;
         endMargin = rtlStartMargin;
     }
-    path.AddRect(startMargin, -dividerWidth, optionSize.Width() - endMargin, dividerWidth);
+    path.AddRect(startMargin, -paintWidth, optionSize.Width() - endMargin, paintWidth);
 }
 } // namespace OHOS::Ace::NG

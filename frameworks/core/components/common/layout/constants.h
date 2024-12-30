@@ -1106,6 +1106,11 @@ enum class SwiperAnimationMode {
     FAST_ANIMATION,
     MAX_VALUE,
 };
+
+enum class DividerMode {
+    FLOATING_ABOVE_MENU = 0,
+    EMBEDDED_IN_MENU = 1,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

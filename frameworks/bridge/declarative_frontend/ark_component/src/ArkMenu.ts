@@ -139,7 +139,8 @@ class MenuItemDividerModifier extends ModifierWithKey<DividerStyleOptions> {
     if (reset || !this.value) {
       getUINativeModule().menu.resetMenuItemDivider(node);
     } else {
-      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().menu.setMenuItemDivider(node, this.value.strokeWidth, this.value.color,
+        this.value.startMargin, this.value.endMargin, this.value.mode);
     }
   }
 
@@ -150,7 +151,8 @@ class MenuItemDividerModifier extends ModifierWithKey<DividerStyleOptions> {
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
-        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin);
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin &&
+        (this.stageValue as DividerStyleOptions).mode === (this.value as DividerStyleOptions).mode);
     } else {
       return true;
     }
@@ -166,7 +168,8 @@ class MenuItemGroupDividerModifier extends ModifierWithKey<DividerStyleOptions> 
     if (reset || !this.value) {
       getUINativeModule().menu.resetMenuItemGroupDivider(node);
     } else {
-      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().menu.setMenuItemGroupDivider(node, this.value.strokeWidth, this.value.color,
+        this.value.startMargin, this.value.endMargin, this.value.mode);
     }
   }
 
@@ -177,7 +180,8 @@ class MenuItemGroupDividerModifier extends ModifierWithKey<DividerStyleOptions> 
       return !((this.stageValue as DividerStyleOptions).strokeWidth === (this.value as DividerStyleOptions).strokeWidth &&
         (this.stageValue as DividerStyleOptions).color === (this.value as DividerStyleOptions).color &&
         (this.stageValue as DividerStyleOptions).startMargin === (this.value as DividerStyleOptions).startMargin &&
-        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin);
+        (this.stageValue as DividerStyleOptions).endMargin === (this.value as DividerStyleOptions).endMargin &&
+        (this.stageValue as DividerStyleOptions).mode === (this.value as DividerStyleOptions).mode);
     } else {
       return true;
     }

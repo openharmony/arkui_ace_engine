@@ -423,6 +423,15 @@ void SelectModelNG::SetDivider(const NG::SelectDivider& divider)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
+}
+
+void SelectModelNG::SetDividerStyle(const NG::SelectDivider& divider, const DividerMode& mode)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
 }
 
 void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& divider)
@@ -430,6 +439,35 @@ void SelectModelNG::SetDivider(FrameNode* frameNode, const NG::SelectDivider& di
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
+}
+
+void SelectModelNG::SetDividerStyle(FrameNode* frameNode, const NG::SelectDivider& divider, const DividerMode& mode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(mode);
+}
+
+void SelectModelNG::ResetDividerStyle(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto selectTheme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    NG::SelectDivider divider;
+    Dimension defaultMargin = -1.0_vp;
+    divider.strokeWidth = selectTheme->GetDefaultDividerWidth();
+    divider.color = selectTheme->GetLineColor();
+    divider.startMargin = defaultMargin;
+    divider.endMargin = defaultMargin;
+    pattern->SetDivider(divider);
+    pattern->SetDividerMode(std::nullopt);
 }
 
 void SelectModelNG::SetControlSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize)
