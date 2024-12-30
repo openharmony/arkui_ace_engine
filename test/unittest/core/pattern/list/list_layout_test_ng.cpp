@@ -29,9 +29,6 @@ public:
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
-    AssertionResult IsExist(int32_t index);
-    AssertionResult IsExistAndActive(int32_t index);
-    AssertionResult IsExistAndInActive(int32_t index);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -86,36 +83,6 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
-}
-
-AssertionResult ListLayoutTestNg::IsExist(int32_t index)
-{
-    if (GetChildFrameNode(frameNode_, index)) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure();
-}
-
-AssertionResult ListLayoutTestNg::IsExistAndActive(int32_t index)
-{
-    if (!GetChildFrameNode(frameNode_, index)) {
-        return AssertionFailure();
-    }
-    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure();
-}
-
-AssertionResult ListLayoutTestNg::IsExistAndInActive(int32_t index)
-{
-    if (!GetChildFrameNode(frameNode_, index)) {
-        return AssertionFailure();
-    }
-    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
-        return AssertionFailure();
-    }
-    return AssertionSuccess();
 }
 
 /**
@@ -2153,12 +2120,12 @@ HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(4));
-    EXPECT_TRUE(IsExistAndInActive(5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
     // below cache
-    EXPECT_FALSE(IsExist(6));
+    EXPECT_FALSE(IsExist(frameNode_, 6));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2167,18 +2134,18 @@ HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
     ScrollTo(300.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(1));
-    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(4));
-    EXPECT_TRUE(IsExistAndActive(5));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 5));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(7));
-    EXPECT_TRUE(IsExistAndInActive(8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
     // below cache
-    EXPECT_FALSE(IsExist(9));
+    EXPECT_FALSE(IsExist(frameNode_, 9));
 }
 
 /**
@@ -2195,16 +2162,16 @@ HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(6));
-    EXPECT_TRUE(IsExistAndActive(7));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 7));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(8));
-    EXPECT_TRUE(IsExistAndInActive(9));
-    EXPECT_TRUE(IsExistAndInActive(10));
-    EXPECT_TRUE(IsExistAndInActive(11));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 11));
     // below cache
-    EXPECT_FALSE(IsExist(12));
-    EXPECT_FALSE(IsExist(13));
+    EXPECT_FALSE(IsExist(frameNode_, 12));
+    EXPECT_FALSE(IsExist(frameNode_, 13));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2213,26 +2180,26 @@ HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
     ScrollTo(300.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
-    EXPECT_FALSE(IsExist(1));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_FALSE(IsExist(frameNode_, 1));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(2));
-    EXPECT_TRUE(IsExistAndInActive(3));
-    EXPECT_TRUE(IsExistAndInActive(4));
-    EXPECT_TRUE(IsExistAndInActive(5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(8));
-    EXPECT_TRUE(IsExistAndActive(9));
-    EXPECT_TRUE(IsExistAndActive(10));
-    EXPECT_TRUE(IsExistAndActive(11));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 11));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(14));
-    EXPECT_TRUE(IsExistAndInActive(15));
-    EXPECT_TRUE(IsExistAndInActive(16));
-    EXPECT_TRUE(IsExistAndInActive(17));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 14));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 15));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 16));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 17));
     // below cache
-    EXPECT_FALSE(IsExist(18));
-    EXPECT_FALSE(IsExist(19));
+    EXPECT_FALSE(IsExist(frameNode_, 18));
+    EXPECT_FALSE(IsExist(frameNode_, 19));
 }
 
 /**
@@ -2248,12 +2215,12 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(2));
-    EXPECT_TRUE(IsExistAndInActive(3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
     // below cache
-    EXPECT_FALSE(IsExist(4));
+    EXPECT_FALSE(IsExist(frameNode_, 4));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2262,18 +2229,18 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     ScrollTo(600.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(1));
-    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(3));
-    EXPECT_TRUE(IsExistAndActive(4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(5));
-    EXPECT_TRUE(IsExistAndInActive(6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
     // below cache
-    EXPECT_FALSE(IsExist(7));
+    EXPECT_FALSE(IsExist(frameNode_, 7));
 }
 
 /**

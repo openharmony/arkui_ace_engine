@@ -17,15 +17,8 @@
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
-
 namespace OHOS::Ace::NG {
-namespace {
-const InspectorFilter filter;
-} // namespace
-
-class SwiperAttrTestNg : public SwiperTestNg {
-public:
-};
+class SwiperAttrTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: AttrIndex001
@@ -1268,6 +1261,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
      * @tc.expected: Check the swiper property value
      */
     auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
     paintProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("autoPlay"), "false");
 

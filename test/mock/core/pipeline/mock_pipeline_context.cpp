@@ -348,7 +348,7 @@ void PipelineContext::OnIdle(int64_t deadline)
 {
     const auto tasks(std::move(predictTasks_));
     for (const auto& task : tasks) {
-        task(deadline, false);
+        task(deadline, true);
     }
 }
 

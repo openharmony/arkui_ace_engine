@@ -62,6 +62,9 @@ public:
     void ShowNext();
     void ShowPrevious();
     void ChangeIndex(int32_t index);
+    void RemoveSwiperItem(int32_t index);
+    void AddSwiperItem(int32_t slot);
+    AssertionResult DigitText(std::u16string expectDigit);
 
     void InitCaptureTest();
 
