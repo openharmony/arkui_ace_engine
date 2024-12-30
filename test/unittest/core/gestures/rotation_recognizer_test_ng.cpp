@@ -735,7 +735,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationGestureTest001, TestSize.Level1)
     std::unique_ptr<GestureEventFunc> onActionStartId;
     std::unique_ptr<GestureEventFunc> onActionUpdateId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     rotationGesture.onActionStartId_ = std::move(onActionStartId);
     rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
     rotationGesture.onActionEndId_ = std::move(onActionEndId);
@@ -809,7 +809,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationGestureCreateRecognizerTest002, TestS
     std::unique_ptr<GestureEventFunc> onActionStartId;
     std::unique_ptr<GestureEventFunc> onActionUpdateId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     rotationGesture.onActionStartId_ = std::move(onActionStartId);
     rotationGesture.onActionUpdateId_ = std::move(onActionUpdateId);
     rotationGesture.onActionEndId_ = std::move(onActionEndId);
@@ -819,7 +819,7 @@ HWTEST_F(RotationRecognizerTestNg, RotationGestureCreateRecognizerTest002, TestS
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
     auto onActionEnd = [](GestureEvent& info) { return true; };
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
     rotationGesture.SetOnActionStartId(onActionStart);
     rotationGesture.SetOnActionUpdateId(onActionUpdate);
     rotationGesture.SetOnActionEndId(onActionEnd);

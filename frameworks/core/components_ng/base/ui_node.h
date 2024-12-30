@@ -118,6 +118,8 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    // Determine if the node is a SyntaxNode, default returns false.
+    // SyntaxNode classes need to override the method and return true.
     virtual bool IsSyntaxNode() const
     {
         return false;

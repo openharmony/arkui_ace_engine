@@ -122,11 +122,13 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
-    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+    if (context) {
+        auto theme = context->GetTheme<RefreshTheme>();
+        if (theme) {
+            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+        }
+    }
     InitChildNode();
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
@@ -286,7 +288,7 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
 
     PaddingProperty textpadding;
-    textpadding.top = CalcLength(triggerLoadingDistanceTheme_.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
     prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);

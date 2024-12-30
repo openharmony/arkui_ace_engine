@@ -30,6 +30,7 @@ import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
 import { PatternLockBootcamp } from './PatternLockBootcamp'
 
+import { ProgressLockBootcamp } from './ProgressBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -51,9 +52,10 @@ export const displaysRoute: RouteGroup = {
     { name: 'chip', label: '操作块/Chip' }
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
-    { name: 'dataPanel', label: '数据面板/DataPanel'}
+    { name: 'dataPanel', label: '数据面板/DataPanel'},
     { name: 'gauge', label: '数据量规图/gauge' },
     { name: 'PatternLock', label: '图案密码锁/PatternLock' }
+    { name: 'Progress', label: '进度条/Progress' },
   ]
 };
 
@@ -89,6 +91,8 @@ export function DisplaysDestination(name: string, route: Route) {
     GaugeBootcamp({ title: route.label })
   } else if (name === 'displays/PatternLock') {
     PatternLockBootcamp({ title: route.label })
+  } else if (name === 'displays/Progress') {
+    ProgressLockBootcamp({ title: route.label })
   }
 }
 

@@ -396,6 +396,16 @@ public:
 
     bool IsContextTransparent() override;
 
+    bool IsTrimMemRecycle() const
+    {
+        return isTrimMemRecycle_;
+    }
+
+    void SetTrimMemRecycle(bool isTrimMemRecycle)
+    {
+        isTrimMemRecycle_ = isTrimMemRecycle;
+    }
+
     bool IsVisible() const
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
@@ -1311,6 +1321,7 @@ private:
 
     bool IsDebugInspectorId();
 
+    bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();

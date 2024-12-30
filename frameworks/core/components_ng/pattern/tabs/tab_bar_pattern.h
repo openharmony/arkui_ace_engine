@@ -238,6 +238,8 @@ public:
 
     void UpdateSubTabBoard(int32_t index);
 
+    void GetColumnId(int32_t& selectedColumnId, int32_t& focusedColumnId, int32_t indicator) const;
+
     SelectedMode GetSelectedMode() const;
 
     void AddTabBarItemType(int32_t tabBarItemId, TabBarParamType type)
@@ -559,6 +561,11 @@ public:
     void AdjustTabBarInfo();
     bool CanScroll() const;
 
+    void SetTabBarFocusActive(bool isFocusActive)
+    {
+        isTabBarFocusActive_ = isFocusActive;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -669,6 +676,22 @@ private:
     void SetTabBarTranslate(const TranslateOptions& options);
     void SetTabBarOpacity(float opacity);
 
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool HandleKeyEvent(const KeyEvent& event);
+    void InitTabBarProperties(const RefPtr<TabTheme>& tabTheme);
+    void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
+    const Color& GetSubTabBarHoverColor(int32_t index) const;
+    void UpdateFocusTabBarPageState();
+    void UpdateSubTabBarItemStyles(const RefPtr<FrameNode>& columnNode, int32_t focusedColumnId,
+        int32_t selectedColumnId, OHOS::Ace::Axis axis, int32_t index);
+    void UpdateSelectedTextColor(const RefPtr<TabTheme>& tabTheme, OHOS::Ace::Axis axis,
+        RefPtr<TextLayoutProperty> textLayoutProperty, int32_t index, int32_t columnId);
+    void UpdateSubTabFocusedTextColor(const RefPtr<TabTheme>& tabTheme, int32_t isFocusedItem,
+        RefPtr<TextLayoutProperty> textLayoutProperty, int32_t index, bool isSelected);
+
     template<typename T>
     void UpdateTabBarInfo(std::vector<T>& info, const std::set<int32_t>& retainedIndex);
 
@@ -757,6 +780,11 @@ private:
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     bool accessibilityScroll_ = false;
+    bool isTabBarFocusActive_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
+    Color tabBarItemDefaultBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemFocusBgColor_ = Color::TRANSPARENT;
+    Color tabBarItemHoverColor_ = Color::TRANSPARENT;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

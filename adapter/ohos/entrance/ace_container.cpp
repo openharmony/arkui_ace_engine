@@ -967,13 +967,16 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](
+                                        const NonPointerEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, &event, &result, id]() {
+            [context, &event, &result, id, markProcess]() {
                 ContainerScope scope(id);
                 result = context->OnNonPointerEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;

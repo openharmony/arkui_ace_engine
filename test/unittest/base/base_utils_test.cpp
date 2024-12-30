@@ -18,6 +18,7 @@
 #include <ctime>
 #include <memory>
 #include <regex>
+#include <string>
 #include <sys/time.h>
 
 #include "gtest/gtest.h"
@@ -30,6 +31,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utf.h"
+#include "base/utils/utf_helper.h"
 #include "base/utils/utils.h"
 
 #ifndef WINDOWS_PLATFORM
@@ -1097,6 +1099,85 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest064, TestSize.Level1)
     }
     ConvertIllegalStr(allByteValues);
     EXPECT_TRUE(IsUTF8(allByteValues));
+}
+
+/**
+ * @tc.name: BaseUtilsTest065
+ * @tc.desc: test utf_helper.cpp: Convert u16string and string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest065, TestSize.Level1)
+{
+    ASSERT_EQ(UtfUtils::Str16ToStr8(TEST_INPUT_U16_STRING), TEST_INPUT_U8_STRING);
+    ASSERT_EQ(UtfUtils::Str8ToStr16(TEST_INPUT_U8_STRING), TEST_INPUT_U16_STRING);
+    ASSERT_EQ(UtfUtils::Str16ToStr8(UtfUtils::DEFAULT_U16STR), UtfUtils::DEFAULT_STR);
+    ASSERT_EQ(UtfUtils::Str8ToStr16(UtfUtils::DEFAULT_STR), UtfUtils::DEFAULT_U16STR);
+}
+
+/**
+ * @tc.name: BaseUtilsTest066
+ * @tc.desc: test utf_helper.cpp: Convert u16string and string with debug for nornal string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest066, TestSize.Level1)
+{
+    ASSERT_EQ(UtfUtils::Str16DebugToStr8(TEST_INPUT_U16_STRING), TEST_INPUT_U8_STRING);
+    ASSERT_EQ(UtfUtils::Str8DebugToStr16(TEST_INPUT_U8_STRING), TEST_INPUT_U16_STRING);
+    ASSERT_EQ(UtfUtils::Str16DebugToStr8(UtfUtils::DEFAULT_U16STR), UtfUtils::DEFAULT_STR);
+    ASSERT_EQ(UtfUtils::Str8DebugToStr16(UtfUtils::DEFAULT_STR), UtfUtils::DEFAULT_U16STR);
+}
+
+/**
+ * @tc.name: BaseUtilsTest067
+ * @tc.desc: test utf_helper.cpp: Convert u16string to string with debug for truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest067, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 3);
+    std::string excpectSubEmojiStr = "哈哈\uFFFD"; /* \uFFFD is emoji ? */
+    ASSERT_EQ(UtfUtils::Str16DebugToStr8(subEmojiStr), excpectSubEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest068
+ * @tc.desc: test utf_helper.cpp: Convert string to u6string with debug for truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest068, TestSize.Level1)
+{
+    std::string emojiStr = "环境😁";
+    std::string subEmojiStr = emojiStr.substr(0, 9);
+    std::u16string excpectSubEmojiStr = u"环境\uFFFD"; /* \uFFFD is emoji ? */
+    ASSERT_EQ(UtfUtils::Str8DebugToStr16(subEmojiStr), excpectSubEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest069
+ * @tc.desc: test utf_helper.cpp: Unpaired surrogates are replace with U+FFFD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest069, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 3);
+    std::u16string excpectSubEmojiStr = u"哈哈\uFFFD"; /* \uFFFD is emoji ? */
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(subEmojiStr.data()), subEmojiStr.length(), 0);
+    ASSERT_EQ(subEmojiStr, excpectSubEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest070
+ * @tc.desc: test utf_helper.cpp: Nothing will be changed for normal string without truncation
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string excpectEmojiStr = emojiStr;
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(emojiStr.data()), emojiStr.length(), 0);
+    ASSERT_EQ(emojiStr, excpectEmojiStr);
 }
 
 /**

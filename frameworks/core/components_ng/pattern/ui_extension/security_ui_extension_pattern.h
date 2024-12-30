@@ -70,6 +70,8 @@ public:
     int32_t GetNodeId();
     int32_t GetInstanceId();
     void SetEventProxyFlag(int32_t flag);
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnExtensionDetachToDisplay();
 
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;

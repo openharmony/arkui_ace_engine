@@ -116,6 +116,8 @@ public:
     PaintWrapper* GetPaintWrapper(RefPtr<MenuPaintProperty> paintProperty);
     RefPtr<FrameNode> GetPreviewMenuWrapper(
         SizeF itemSize = SizeF(0.0f, 0.0f), std::optional<MenuPreviewAnimationOptions> scaleOptions = std::nullopt);
+    RefPtr<FrameNode> GetImagePreviewMenuWrapper();
+    RefPtr<FrameNode> GetHoverImagePreviewMenuWrapper();
     RefPtr<FrameNode> menuFrameNode_;
     RefPtr<MenuAccessibilityProperty> menuAccessibilityProperty_;
     RefPtr<FrameNode> menuItemFrameNode_;
@@ -228,6 +230,82 @@ RefPtr<FrameNode> MenuTestNg::GetPreviewMenuWrapper(
     auto customGeometryNode = customNode->GetGeometryNode();
     CHECK_NULL_RETURN(customGeometryNode, nullptr);
     customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
+}
+
+RefPtr<FrameNode> MenuTestNg::GetImagePreviewMenuWrapper()
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto targetGestureHub = targetNode->GetOrCreateGestureEventHub();
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    targetGestureHub->SetPixelMap(pixelMap);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto itemGeometryNode = textNode->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometryNode, nullptr);
+    itemGeometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+
+    targetNode->MountToParent(rootNode);
+    targetNode->GetOrCreateGestureEventHub();
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::IMAGE;
+
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+    auto menuWrapperNode =
+        MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
+    return menuWrapperNode;
+}
+
+RefPtr<FrameNode> MenuTestNg::GetHoverImagePreviewMenuWrapper()
+{
+    auto rootNode = FrameNode::CreateFrameNode(
+        V2::ROOT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<RootPattern>());
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto targetNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(targetNode, nullptr);
+    auto targetGestureHub = targetNode->GetOrCreateGestureEventHub();
+    auto pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    targetGestureHub->SetPixelMap(pixelMap);
+
+    auto textNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto itemGeometryNode = textNode->GetGeometryNode();
+    CHECK_NULL_RETURN(itemGeometryNode, nullptr);
+    itemGeometryNode->SetFrameSize(SizeF(MENU_SIZE_WIDTH, MENU_SIZE_HEIGHT));
+
+    auto customNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    CHECK_NULL_RETURN(customNode, nullptr);
+    auto customGeometryNode = customNode->GetGeometryNode();
+    CHECK_NULL_RETURN(customGeometryNode, nullptr);
+    customGeometryNode->SetFrameSize(SizeF(TARGET_SIZE_WIDTH, TARGET_SIZE_HEIGHT));
+
+    targetNode->MountToParent(rootNode);
+    targetNode->GetOrCreateGestureEventHub();
+
+    MenuParam menuParam;
+    menuParam.type = MenuType::CONTEXT_MENU;
+    menuParam.previewMode = MenuPreviewMode::CUSTOM;
+    menuParam.isShowHoverImage = true;
+    menuParam.hoverImageAnimationOptions = { 1.0f, 0.95f };
+
     auto menuWrapperNode =
         MenuView::Create(textNode, targetNode->GetId(), V2::TEXT_ETS_TAG, menuParam, true, customNode);
     return menuWrapperNode;
@@ -1516,6 +1594,8 @@ HWTEST_F(MenuTestNg, MenuViewTestNg003, TestSize.Level1)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     RefPtr<MenuTheme> menuTheme = AceType::MakeRefPtr<MenuTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(menuTheme));
+    RefPtr<SelectTheme> selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
 
     auto gestureHub = customNode->GetOrCreateGestureEventHub();
     menuTheme->doubleBorderEnable_ = 1;
@@ -1732,5 +1812,101 @@ HWTEST_F(MenuTestNg, MenuViewTestNg007, TestSize.Level1)
      * @tc.steps: step3. check menu preview pan event.
      */
     EXPECT_FALSE(previewGestureEventHub->IsPanEventEmpty());
+}
+
+/**
+ * @tc.name: MenuPreviewTestNg001
+ * @tc.desc: Test menu view create with image preview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPreviewTestNg001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuWrapper with image preview
+     * @tc.expected: menuWrapper node and menuWrapper pattern are not null
+     */
+    auto menuWrapperNode = GetImagePreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call IsContextMenu and GetPreviewMode
+     * @tc.expected: IsContextMenu is true, GetPreviewMode is MenuPreviewMode::IMAGE
+     */
+    EXPECT_TRUE(menuWrapperPattern->IsContextMenu());
+    EXPECT_EQ(menuWrapperPattern->GetPreviewMode(), MenuPreviewMode::IMAGE);
+
+    /**
+     * @tc.steps: step3. call GetMenu
+     * @tc.expected: menuNode is not null, tag is V2::MENU_ETS_TAG
+     */
+    auto menuMode =  menuWrapperPattern->GetMenu();
+    ASSERT_NE(menuMode, nullptr);
+    EXPECT_EQ(menuMode->GetTag(), V2::MENU_ETS_TAG);
+
+    /**
+     * @tc.steps: step4. call GetPreview
+     * @tc.expected: previewMode is not null, tag is V2::IMAGE_ETS_TAG
+     */
+    auto previewMode =  menuWrapperPattern->GetPreview();
+    ASSERT_NE(previewMode, nullptr);
+    EXPECT_EQ(previewMode->GetTag(), V2::IMAGE_ETS_TAG);
+}
+
+/**
+ * @tc.name: MenuPreviewTestNg002
+ * @tc.desc: Test menu view create with hoverimage preview.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuTestNg, MenuPreviewTestNg002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create MenuWrapper with image preview
+     * @tc.expected: menuWrapper node and menuWrapper pattern are not null
+     */
+    auto menuWrapperNode = GetHoverImagePreviewMenuWrapper();
+    ASSERT_NE(menuWrapperNode, nullptr);
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call IsContextMenu and GetPreviewMode
+     * @tc.expected: IsContextMenu is true, GetPreviewMode is MenuPreviewMode::IMAGE
+     */
+    EXPECT_TRUE(menuWrapperPattern->IsContextMenu());
+    EXPECT_EQ(menuWrapperPattern->GetPreviewMode(), MenuPreviewMode::CUSTOM);
+
+    /**
+     * @tc.steps: step3. call GetMenu
+     * @tc.expected: menuNode is not null, tag is V2::MENU_ETS_TAG
+     */
+    auto menuMode =  menuWrapperPattern->GetMenu();
+    ASSERT_NE(menuMode, nullptr);
+    EXPECT_EQ(menuMode->GetTag(), V2::MENU_ETS_TAG);
+
+    /**
+     * @tc.steps: step4. call GetPreview
+     * @tc.expected: previewMode is not null, tag is V2::MENU_PREVIEW_ETS_TAG
+     */
+    auto previewMode =  menuWrapperPattern->GetPreview();
+    ASSERT_NE(previewMode, nullptr);
+    EXPECT_EQ(previewMode->GetTag(), V2::MENU_PREVIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step5. call GetHoverImagePreview
+     * @tc.expected: imageMode is not null, tag is V2::IMAGE_ETS_TAG
+     */
+    auto ImageMode =  menuWrapperPattern->GetHoverImagePreview();
+    ASSERT_NE(ImageMode, nullptr);
+    EXPECT_EQ(ImageMode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    /**
+     * @tc.steps: step6. call GetHoverImageCustomPreview
+     * @tc.expected: customPreview node is not null, tag is V2::MENU_PREVIEW_ETS_TAG
+     */
+    auto customPreview =  menuWrapperPattern->GetHoverImageCustomPreview();
+    ASSERT_NE(customPreview, nullptr);
+    EXPECT_EQ(customPreview->GetTag(), V2::MENU_PREVIEW_ETS_TAG);
 }
 } // namespace OHOS::Ace::NG

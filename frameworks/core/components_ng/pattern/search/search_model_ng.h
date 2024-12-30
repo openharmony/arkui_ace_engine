@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components/search/search_theme.h"
 #include "core/components_ng/pattern/search/search_model.h"
 #include "core/components_ng/pattern/search/search_node.h"
 
@@ -125,6 +126,8 @@ public:
     static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
     static void SetRightIconSrcPath(FrameNode* frameNode, const std::string& src);
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
@@ -169,12 +172,18 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
 
 private:
+    static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);
     static RefPtr<SearchNode> CreateSearchNode(int32_t nodeId, const std::optional<std::u16string>& value,
         const std::optional<std::u16string>& placeholder, const std::optional<std::string>& icon);
+    static void UpdateSearchNodeBorderProps(const RefPtr<SearchNode>& frameNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
     static void CreateTextField(const RefPtr<SearchNode>& parentNode, const std::optional<std::u16string>& placeholder,
-        const std::optional<std::u16string>& value, bool hasTextFieldNode);
-    static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode);
-    static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode);
+        const std::optional<std::u16string>& value, bool hasTextFieldNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static void CreateButton(const RefPtr<SearchNode>& parentNode, bool hasButtonNode,
+        const RefPtr<SearchTheme>& searchTheme = nullptr);
+    static void CreateCancelButton(const RefPtr<SearchNode>& parentNode, bool hasCancelButtonNode,
+        const  RefPtr<SearchTheme>& searchTheme = nullptr);
     static RefPtr<SearchNode> GetOrCreateSearchNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     RefPtr<FrameNode> GetSearchTextFieldFrameNode() const;

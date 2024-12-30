@@ -414,6 +414,10 @@ public:
     bool ActActionClearSelection();
 
     void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl);
+    void ResetUserOnAccessibilityFocusCallback();
+
+    void SetUserOnAccessibilityFocusCallback(
+        const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl);
 
     void OnAccessibilityFocusCallback(bool isFocus);
 
@@ -551,6 +555,10 @@ public:
     void ResetAccessibilityRole();
     bool HasAccessibilityRole();
     std::string GetAccessibilityRole() const;
+    void SetAccessibilityCustomRole(const std::string& role);
+    void ResetAccessibilityCustomRole();
+    bool HasAccessibilityCustomRole();
+    std::string GetAccessibilityCustomRole() const;
 
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
@@ -667,6 +675,7 @@ protected:
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetWindowScenePositionImpl getWindowScenePositionImpl_;
+    OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
 
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
@@ -682,6 +691,7 @@ protected:
     std::optional<std::string> accessibilityNextFocusInspectorKey_;
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
+    std::optional<std::string> accessibilityCustomRole_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 
     std::optional<bool> isDisabled_;

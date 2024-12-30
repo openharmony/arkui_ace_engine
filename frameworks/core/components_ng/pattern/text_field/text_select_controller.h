@@ -35,6 +35,12 @@ namespace {
 using OnAccessibilityCallback = std::function<void()>;
 } // namespace
 
+enum class TouchPosition {
+    LEFT = 0,
+    MID = 1,
+    RIGHT
+};
+
 class TextSelectController : public Property {
     DECLARE_ACE_TYPE(TextSelectController, AceType);
 
@@ -196,7 +202,7 @@ public:
     void ResetHandles();
     void UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex);
     void UpdateCaretIndex(int32_t index);
-    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true, bool floatCaret = true);
+    void UpdateCaretInfoByOffset(const Offset& localOffset, bool moveContent = true, bool floatCaret = false);
     OffsetF CalcCaretOffsetByOffset(const Offset& localOffset);
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index, std::optional<TextAffinity> textAffinity = std::nullopt);
@@ -222,7 +228,7 @@ public:
     RectF CalculateEmptyValueCaretRect(float width = 0.0f);
     std::string ToString() const;
     bool IsTouchAtLineEnd(const Offset& localOffset) const;
-    bool IsTouchAtLineEndOrBegin(const Offset& localOffset);
+    TouchPosition GetTouchLinePos(const Offset& localOffset);
     void GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end);
     void UpdateSelectWithBlank(const Offset& localOffset);
 

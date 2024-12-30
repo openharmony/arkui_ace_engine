@@ -561,4 +561,11 @@ std::optional<Color> TextSelectOverlay::GetHandleColor()
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     return layoutProperty->GetCursorColor();
 }
+
+bool TextSelectOverlay::AllowSearch()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return !textPattern->GetTextSelector().SelectNothing();
+}
 } // namespace OHOS::Ace::NG

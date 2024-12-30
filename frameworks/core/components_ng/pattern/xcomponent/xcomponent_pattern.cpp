@@ -1146,6 +1146,9 @@ void XComponentPattern::HandleMouseEvent(const MouseInfo& info)
         case MouseAction::MOVE:
             mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_MOVE;
             break;
+        case MouseAction::CANCEL:
+            mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_CANCEL;
+            break;
         default:
             mouseEventPoint.action = OH_NativeXComponent_MouseEventAction::OH_NATIVEXCOMPONENT_MOUSE_NONE;
             break;

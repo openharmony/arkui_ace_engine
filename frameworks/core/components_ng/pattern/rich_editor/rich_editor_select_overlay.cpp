@@ -189,9 +189,11 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
         pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
     } else {
         if (IsSingleHandle()) {
-            auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
+            auto localOffset = handleOffset + pattern->contentRect_.GetOffset();
+            auto textOffset = localOffset - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
+            pattern->SetCaretTouchMoveOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         } else {
             pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
@@ -216,6 +218,8 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
         pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
+    } else {
+        pattern->StartFloatingCaretLand();
     }
     pattern->StopAutoScroll();
     pattern->magnifierController_->RemoveMagnifierFrameNode();

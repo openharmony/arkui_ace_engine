@@ -530,7 +530,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
         }
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;
@@ -548,7 +548,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string
             resName.c_str(), state);
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;

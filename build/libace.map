@@ -379,6 +379,7 @@
       OHOS::Ace::Kit::ViewStackProcessor::*;
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
+      OHOS::Ace::Kit::ResourceParser::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;

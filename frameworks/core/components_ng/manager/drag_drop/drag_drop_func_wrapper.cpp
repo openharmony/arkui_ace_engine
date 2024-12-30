@@ -667,7 +667,7 @@ OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToWindow(const RefPtr<FrameNode>&
 
 void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
 {
-    event.rawPointerEvent = touchPoint.pointerEvent;
+    event.rawPointerEvent = touchPoint.GetTouchEventPointerEvent();
     event.pointerEventId = touchPoint.touchEventId;
     event.pointerId = touchPoint.id;
     event.windowX = touchPoint.x;

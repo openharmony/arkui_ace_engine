@@ -17,13 +17,16 @@ import pasteboard from '@ohos.pasteboard'
 import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
+import { SymbolGlyphModifier } from '@kit.ArkUI';
 
 const WITHOUT_BUILDER = -2
 const MAX_FONT_STANDARD = 1.0
 const MAX_FONT_SCALE = 2.0
+const SYMBOL_SIZE: number = 24;
 
 export interface EditorMenuOptions {
   icon: ResourceStr
+  symbolStyle?: SymbolGlyphModifier
   action?: () => void
   builder?: () => void
 }
@@ -44,6 +47,19 @@ export interface SelectionMenuOptions {
   onCopy?: (event?: EditorEventInfo) => void
   onCut?: (event?: EditorEventInfo) => void;
   onSelectAll?: (event?: EditorEventInfo) => void;
+}
+
+interface SelectionMenuSymbolTheme {
+  fontSize: string;
+  fontColor: Array<ResourceColor>;
+  symbolCutIcon: SymbolGlyphModifier;
+  symbolCopyIcon: SymbolGlyphModifier;
+  symbolPasteIcon: SymbolGlyphModifier;
+  symbolSelectAllIcon: SymbolGlyphModifier;
+  symbolShareIcon: SymbolGlyphModifier;
+  symbolTranslateIcon: SymbolGlyphModifier;
+  symbolSearchIcon: SymbolGlyphModifier;
+  symbolArrowDownIcon: SymbolGlyphModifier;
 }
 
 interface SelectionMenuTheme {
@@ -70,6 +86,7 @@ interface SelectionMenuTheme {
   searchIcon: Resource;
   arrowDownIcon: Resource;
   iconPanelShadowStyle: ShadowStyle;
+  defaultSymbolTheme: SelectionMenuSymbolTheme;
 }
 
 const defaultTheme: SelectionMenuTheme = {
@@ -96,6 +113,18 @@ const defaultTheme: SelectionMenuTheme = {
   searchIcon: $r("sys.media.ohos_ic_public_search_filled"),
   arrowDownIcon: $r("sys.media.ohos_ic_public_arrow_down"),
   iconPanelShadowStyle: ShadowStyle.OUTER_DEFAULT_SM,
+  defaultSymbolTheme: {
+    fontSize: `${SYMBOL_SIZE}vp`,
+    fontColor: [$r('sys.color.ohos_id_color_primary')],
+    symbolCutIcon: new SymbolGlyphModifier($r("sys.symbol.cut")),
+    symbolCopyIcon: new SymbolGlyphModifier($r("sys.symbol.plus_square_on_square")),
+    symbolPasteIcon: new SymbolGlyphModifier($r("sys.symbol.plus_square_dashed_on_square")),
+    symbolSelectAllIcon: new SymbolGlyphModifier($r("sys.symbol.checkmark_square_on_square")),
+    symbolShareIcon: new SymbolGlyphModifier($r("sys.symbol.share")),
+    symbolTranslateIcon: new SymbolGlyphModifier($r("sys.symbol.translate_c2e")),
+    symbolSearchIcon: new SymbolGlyphModifier($r("sys.symbol.magnifyingglass")),
+    symbolArrowDownIcon: new SymbolGlyphModifier($r("sys.symbol.chevron_down")),
+  },
 }
 
 @Component
@@ -312,7 +341,7 @@ struct SelectionMenuComponent {
   getFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -342,12 +371,32 @@ struct SelectionMenuComponent {
       if (this.editorMenuOptions) {
         ForEach(this.editorMenuOptions, (item: EditorMenuOptions, index: number) => {
           Button() {
-            Image(item.icon)
-              .width(this.theme.imageSize)
-              .height(this.theme.imageSize)
-              .fillColor(this.theme.imageFillColor)
-              .focusable(true)
-              .draggable(false)
+            if (item.symbolStyle !== undefined) {
+              SymbolGlyph()
+                .fontColor(this.theme.defaultSymbolTheme.fontColor)
+                .attributeModifier(item.symbolStyle)
+                .focusable(true)
+                .draggable(false)
+                .effectStrategy(SymbolEffectStrategy.NONE)
+                .symbolEffect(new SymbolEffect(), false)
+                .fontSize(this.theme.defaultSymbolTheme.fontSize)
+            } else {
+              if (Util.isSymbolResource(item.icon)) {
+                SymbolGlyph(item.icon as Resource)
+                  .fontColor(this.theme.defaultSymbolTheme.fontColor)
+                  .focusable(true)
+                  .draggable(false)
+                  .fontSize(this.theme.defaultSymbolTheme.fontSize)
+              } else {
+                Image(item.icon)
+                  .width(this.theme.imageSize)
+                  .height(this.theme.imageSize)
+                  .fillColor(this.theme.imageFillColor)
+                  .focusable(true)
+                  .draggable(false)
+              }
+
+            }
           }
           .enabled(!(!item.action && !item.builder))
           .type(ButtonType.Normal)
@@ -402,7 +451,12 @@ struct SelectionMenuComponent {
         Menu() {
           if (this.controller) {
             MenuItemGroup() {
-              MenuItem({ startIcon: this.theme.cutIcon, content: "剪切", labelInfo: "Ctrl+X" })
+              MenuItem({
+                startIcon: this.theme.cutIcon,
+                symbolStartIcon: this.theme.defaultSymbolTheme.symbolCutIcon,
+                content: "剪切",
+                labelInfo: "Ctrl+X"
+              })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)
@@ -421,7 +475,12 @@ struct SelectionMenuComponent {
                     })
                   }
                 })
-              MenuItem({ startIcon: this.theme.copyIcon, content: "复制", labelInfo: "Ctrl+C" })
+              MenuItem({
+                startIcon: this.theme.copyIcon,
+                symbolStartIcon: this.theme.defaultSymbolTheme.symbolCopyIcon,
+                content: "复制",
+                labelInfo: "Ctrl+C"
+              })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)
@@ -438,7 +497,12 @@ struct SelectionMenuComponent {
                     this.controller.closeSelectionMenu()
                   }
                 })
-              MenuItem({ startIcon: this.theme.pasteIcon, content: "粘贴", labelInfo: "Ctrl+V" })
+              MenuItem({
+                startIcon: this.theme.pasteIcon,
+                symbolStartIcon: this.theme.defaultSymbolTheme.symbolPasteIcon,
+                content: "粘贴",
+                labelInfo: "Ctrl+V"
+              })
                 .enabled(this.pasteEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)
@@ -455,7 +519,12 @@ struct SelectionMenuComponent {
                     this.controller.closeSelectionMenu()
                   }
                 })
-              MenuItem({ startIcon: this.theme.selectAllIcon, content: "全选", labelInfo: "Ctrl+A" })
+              MenuItem({
+                startIcon: this.theme.selectAllIcon,
+                symbolStartIcon: this.theme.defaultSymbolTheme.symbolSelectAllIcon,
+                content: "全选",
+                labelInfo: "Ctrl+A"
+              })
                 .visibility(this.visibilityValue)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
                 .borderRadius(this.theme.iconBorderRadius)
@@ -477,7 +546,11 @@ struct SelectionMenuComponent {
           }
           if (this.controller && !this.showExpandedMenuOptions &&
           this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
-            MenuItem({ content: "更多", endIcon: this.theme.arrowDownIcon })
+            MenuItem({
+              content: "更多",
+              endIcon: this.theme.arrowDownIcon,
+              symbolEndIcon: this.theme.defaultSymbolTheme.symbolArrowDownIcon
+            })
               .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
               .borderRadius(this.theme.iconBorderRadius)
               .margin({ top: this.theme.menuItemPadding })
@@ -488,8 +561,10 @@ struct SelectionMenuComponent {
             ForEach(this.expandedMenuOptions, (expandedMenuOptionItem: ExpandedMenuOptions, index) => {
               MenuItem({
                 startIcon: expandedMenuOptionItem.startIcon,
+                symbolStartIcon: expandedMenuOptionItem.symbolStartIcon,
                 content: expandedMenuOptionItem.content,
                 endIcon: expandedMenuOptionItem.endIcon,
+                symbolEndIcon: expandedMenuOptionItem.symbolEndIcon,
                 labelInfo: expandedMenuOptionItem.labelInfo,
                 builder: expandedMenuOptionItem.builder
               })
@@ -564,4 +639,26 @@ export function SelectionMenu(options: SelectionMenuOptions) {
     onCut: options.onCut,
     onSelectAll: options.onSelectAll
   })
+}
+
+class Util {
+  private static RESOURCE_TYPE_SYMBOL = 40000;
+
+  public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource = resourceStr as Resource;
+    return resource.type === Util.RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
 }
