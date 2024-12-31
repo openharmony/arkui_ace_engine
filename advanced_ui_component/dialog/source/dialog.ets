@@ -259,7 +259,7 @@ export struct TipsDialog {
       } catch (exception) {
         let code: number = (exception as BusinessError).code;
         let message: string = (exception as BusinessError).message;
-        hilog.error(0x3900, 'Ace', `Faild to send accessibility event, cause, code: ${code}, message: ${message}`);
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
       }
     })
     .padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() })
