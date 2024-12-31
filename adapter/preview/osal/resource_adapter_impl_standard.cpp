@@ -526,7 +526,9 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
 uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
 {
     uint32_t result = 0;
-    resourceManager_->GetSymbolById(resId, result);
+    if (resourceManager_) {
+        resourceManager_->GetSymbolById(resId, result);
+    }
     return result;
 }
 
