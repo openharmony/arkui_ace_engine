@@ -67,7 +67,7 @@ private:
     static constexpr int32_t TEXT_RIGHT_MARGIN = 8;
     static constexpr int32_t TEXT_RIGHT_MARGIN_NO_ENDICON = 12;
     static constexpr int32_t TEXT_LEFT_MARGIN = 0;
-    static constexpr int32_t HEADER_MIN_WIDTH = 224;
+    static constexpr int32_t HEADER_MIN_WIDTH = 64;
     static constexpr int32_t HEADER_MIN_HEIGHT = 24;
     static constexpr int32_t HEADER_MARGIN_TOP = 26;
     static constexpr int32_t HEADER_MARGIN_BOTTOM = 16;

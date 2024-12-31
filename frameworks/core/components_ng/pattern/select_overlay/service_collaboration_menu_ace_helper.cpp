@@ -96,7 +96,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 }
-void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent)
+void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& value, const const RefPtr<FrameNode>& parent)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
     auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
