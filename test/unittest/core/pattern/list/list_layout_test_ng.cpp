@@ -1125,6 +1125,80 @@ HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutDirectionTest01
+ * @tc.desc: Test LayoutDirection
+ */
+HWTEST_F(ListLayoutTestNg, LayoutDirectionTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create an List with the ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroups(4, V2::ListItemGroupStyle::NONE, 7);
+    CreateDone();
+    auto layoutWrapper = LayoutWrapperNode(frameNode_, frameNode_->GetGeometryNode(), layoutProperty_);
+    for (int32_t index = 0; index < frameNode_->GetChildren().size(); index++) {
+        auto child = GetChildFrameNode(frameNode_, index);
+        auto childWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(child, child->GetGeometryNode(), child->GetLayoutProperty());
+        layoutWrapper.AppendChild(childWrapper);
+    }
+    ViewStackProcessor::GetInstance()->Push(frameNode_);
+
+    /**
+     * @tc.steps: step2. scroll to the first item.
+     * @tc.expected: The start index of List is 1 and the start index of the ListItemGroup is 0.
+     */
+    ScrollToIndex(1, false, ScrollAlign::START);
+    auto startIndex = pattern_->GetStartIndex();
+    EXPECT_EQ(startIndex, 1);
+    auto groupWrapper = layoutWrapper.GetOrCreateChildByIndex(1);
+    ASSERT_NE(groupWrapper, nullptr);
+    auto groupHost = groupWrapper->GetHostNode();
+    ASSERT_NE(groupHost, nullptr);
+    auto groupPattern = groupHost->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 0);
+
+    /**
+     * @tc.steps: step3. Set the different target index and target index in group to test the
+     * LayoutDirectionForTargetIndex.
+     * @tc.expected: The result of LayoutDirection is correct.
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->SetTargetIndex(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->SetTargetIndex(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->SetTargetIndex(1);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->SetTargetIndexInGroup(6);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->SetTargetIndexInGroup(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+
+    /**
+     * @tc.steps: step4. test the LayoutDirectionForTargetIndex after executing the ScrollToItemInGroup.
+     * @tc.expected: The result of LayoutDirection is correct.
+     */
+    JumpToItemInGroup(1, 1, false, ScrollAlign::START);
+    startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 1);
+    layoutAlgorithm->SetTargetIndexInGroup(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+}
+
+/**
  * @tc.name: ListItemGroupCreateForCardModeTest001
  * @tc.desc: Test the initialization of listItem in card mode.
  * @tc.type: FUNC
