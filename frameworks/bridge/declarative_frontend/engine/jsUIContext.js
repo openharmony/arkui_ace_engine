@@ -484,6 +484,13 @@ class UIContext {
         return keyBoardAvoidMode;
     }
 
+    dispatchKeyEvent(node, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = JSViewAbstract.dispatchKeyEvent(node, event);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
+    }
+
     getAtomicServiceBar() {
         const bundleMgr = globalThis.requireNapi('bundle.bundleManager');
         if (!bundleMgr || !bundleMgr.BundleFlag) {
