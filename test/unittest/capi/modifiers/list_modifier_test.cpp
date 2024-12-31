@@ -1341,6 +1341,33 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 }
 
 /*
+ * @tc.name: DISABLED_setOnItemDeleteTest
+ * @tc.desc: Check the functionality of ListModifier.setOnItemMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
+{
+    Callback_Number_Boolean func{};
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ListEventHub>();
+    auto dragInfo = ItemDragInfo();
+
+    static const int32_t expectedResourceId = 123;
+    static const int32_t fakeTotalCount = 10;
+    auto callbackSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+            const Ark_Number index, const Callback_Boolean_Void cbReturn
+        ) {
+        EXPECT_EQ(resourceId, expectedResourceId);
+        auto result = Converter::Convert<int32_t>(index) < fakeTotalCount;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+    };
+    func = Converter::ArkValue<Callback_Number_Boolean>(nullptr, callbackSyncFunc, expectedResourceId);
+
+    modifier_->setOnItemDelete(node_, &func);
+    // check is not enable due to the ListEventHub does no support the onItemDelete event
+}
+
+/*
  * @tc.name: setOnScrollVisibleContentChangeTest
  * @tc.desc: Check the functionality of ListModifier.setOnScrollVisibleContentChange
  * @tc.type: FUNC
