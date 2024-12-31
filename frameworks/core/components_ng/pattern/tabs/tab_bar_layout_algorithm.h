@@ -128,6 +128,7 @@ private:
     bool NeedAdaptForAging(RefPtr<FrameNode> host);
     void SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index);
     void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
+    float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;

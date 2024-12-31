@@ -238,9 +238,10 @@ void TabBarLayoutAlgorithm::UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t
 void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize)
 {
     auto childLayoutConstraint = GetChildConstraint(layoutWrapper, frameSize);
+    auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    ScrollableBarModeOptions layoutStyle;
     if (axis_ == Axis::HORIZONTAL) {
-        auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
         auto host = layoutWrapper->GetHostNode();
         CHECK_NULL_VOID(host);
         auto pipelineContext = host->GetContext();
@@ -249,7 +250,7 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
         CHECK_NULL_VOID(tabTheme);
         ScrollableBarModeOptions defaultOptions;
         defaultOptions.margin = tabTheme->GetTabBarDefaultMargin();
-        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(defaultOptions);
+        layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(defaultOptions);
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
         MeasureVisibleItems(layoutWrapper, childLayoutConstraint);
 
@@ -259,12 +260,13 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
             useItemWidth_ = false;
         } else {
             visibleChildrenMainSize_ -= scrollMargin_ * TWO;
-            if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
-                HandleAlwaysAverageSplitLayoutStyle(layoutWrapper);
-            } else if (layoutStyle.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
-                HandleSpaceBetweenOrCenterLayoutStyle(layoutWrapper);
-            } else {
+            if (layoutStyle.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) ==
+                LayoutStyle::ALWAYS_CENTER) {
                 useItemWidth_ = false;
+            } else if (layoutStyle.nonScrollableLayoutStyle.value() == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
+                HandleAlwaysAverageSplitLayoutStyle(layoutWrapper);
+            } else if (layoutStyle.nonScrollableLayoutStyle.value() == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
+                HandleSpaceBetweenOrCenterLayoutStyle(layoutWrapper);
             }
             scrollMargin_ = 0.0f;
         }
@@ -279,12 +281,31 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     if (LessOrEqual(visibleChildrenMainSize_, contentMainSize_) &&
         childCount_ == static_cast<int32_t>(visibleItemPosition_.size())) {
         visibleItemPosition_.clear();
-        auto currentOffset = (contentMainSize_ - visibleChildrenMainSize_) / TWO;
+        float currentOffset = GetCurrentOffset(layoutProperty, layoutStyle);
         for (int32_t index = 0; index < childCount_; index++) {
             visibleItemPosition_[index] = { currentOffset, currentOffset + visibleItemLength_[index] };
             currentOffset += visibleItemLength_[index];
         }
     }
+}
+
+float TabBarLayoutAlgorithm::GetCurrentOffset(
+    RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle)
+{
+    float currentOffset = (contentMainSize_ - visibleChildrenMainSize_) / TWO;
+    if (layoutStyle.nonScrollableLayoutStyle.has_value()) {
+        return currentOffset;
+    }
+    Alignment alignment = Alignment::CENTER;
+    if (layoutProperty->GetPositionProperty()) {
+        alignment = layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+    }
+    if (axis_ == Axis::HORIZONTAL) {
+        currentOffset = (1.0 + alignment.GetHorizontal()) * (contentMainSize_ - visibleChildrenMainSize_) / TWO;
+    } else {
+        currentOffset = (1.0 + alignment.GetVertical()) * (contentMainSize_ - visibleChildrenMainSize_) / TWO;
+    }
+    return currentOffset;
 }
 
 bool TabBarLayoutAlgorithm::NeedAdaptForAging(RefPtr<FrameNode> host)

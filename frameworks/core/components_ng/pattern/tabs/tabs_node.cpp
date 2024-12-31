@@ -74,12 +74,12 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         auto optionsJson = JsonUtil::Create(true);
         auto options = GetScrollableBarModeOptions();
         optionsJson->Put("margin", options.margin.ToString().c_str());
-        if (options.nonScrollableLayoutStyle == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
-            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_AVERAGE_SPLIT");
-        } else if (options.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
-            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.SPACE_BETWEEN_OR_CENTER");
-        } else {
+        if (options.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) == LayoutStyle::ALWAYS_CENTER) {
             optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_CENTER");
+        } else if (options.nonScrollableLayoutStyle.value() == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
+            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_AVERAGE_SPLIT");
+        } else if (options.nonScrollableLayoutStyle.value() == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
+            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.SPACE_BETWEEN_OR_CENTER");
         }
         std::string barMode = "BarMode.Scrollable," + optionsJson->ToString();
         json->PutExtAttr("barMode", barMode.c_str(), filter);

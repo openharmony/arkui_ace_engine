@@ -538,8 +538,10 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
-    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle)) {
-        option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
+        layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
     } else {
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
