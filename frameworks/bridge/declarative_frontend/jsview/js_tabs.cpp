@@ -264,6 +264,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 
     TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
     ParseTabsIndexObject(info, changeEventVal);
+    SetBarModifier(info, jsValue);
 }
 
 void JSTabs::Pop()
@@ -313,8 +314,7 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
         if (info.Length() > 1 && info[1]->IsObject()) {
             SetScrollableBarModeOptions(info[1]);
         } else {
-            ScrollableBarModeOptions option;
-            TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+            TabsModel::GetInstance()->ResetScrollableBarModeOptions();
         }
     }
     TabsModel::GetInstance()->SetTabBarMode(barMode);
@@ -700,6 +700,42 @@ void JSTabs::SetPageFlipMode(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseJsInt32(info[0], value);
     TabsModel::GetInstance()->SetPageFlipMode(value);
+}
+
+void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> val = obj->GetProperty("barModifier");
+    if (!val->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> modifierObj = JSRef<JSObject>::Cast(val);
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply = nullptr;
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                      modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            CHECK_NULL_VOID(func);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[2];
+            params[0] = modifierParam;
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+    }
+    TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
 }
 
 void JSTabs::JSBind(BindingTarget globalObj)

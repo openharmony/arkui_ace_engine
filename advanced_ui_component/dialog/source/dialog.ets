@@ -79,10 +79,10 @@ const TITLE_S = getNumberByResourceId(125830966, 20);
 const PADDING_LEVEL_8 = getNumberByResourceId(125830927, 16);
 
 const BUTTON_MIN_FONT_SIZE = lazyInit<number>(() => {
-  return getLengthMetricsByResource($r('sys.float.dialog_button_font_min_size'), 16);
+  return getLengthMetricsByResource($r('sys.float.dialog_button_font_min_size'), 9);
 });
 const BUTTON_MAX_FONT_SIZE = lazyInit<number>(() => {
-  return getLengthMetricsByResource($r('sys.float.dialog_button_font_max_size'), 9);
+  return getLengthMetricsByResource($r('sys.float.dialog_button_font_max_size'), 16);
 });
 const DEFAULT_IMAGE_SIZE = lazyInit<number>(() => {
   return getLengthMetricsByResource($r('sys.float.dialog_tip_image_size'), 64);
@@ -124,7 +124,7 @@ const ALERT_TITLE_ALIGNMENT = lazyInit<number>(() => {
   return getLengthMetricsByResource($r('sys.float.alert_title_alignment'), 1);
 });
 const ERROR_BUTTON_STYLE = lazyInit<number>(() => {
-  return getLengthMetricsByResource($r('sys.float.dialog_error_button_style'), 2);
+  return getLengthMetricsByResource($r('sys.float.dialog_error_button_style'), 2, true);
 });
 // 'sys.string.ohos_id_text_fadeout_enable_default'
 const IS_FADEOUT_ENABLE = lazyInit<boolean>(() => {

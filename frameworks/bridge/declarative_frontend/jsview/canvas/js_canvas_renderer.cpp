@@ -54,6 +54,12 @@ constexpr double DEFAULT_QUALITY = 0.92;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr double DIFF = 1e-10;
+constexpr uint32_t RGB_SUB_SIZE = 3;
+constexpr uint32_t RGBA_SUB_SIZE = 4;
+constexpr double MIN_RGB_VALUE = 0.0;
+constexpr double MAX_RGB_VALUE = 255.0;
+constexpr double MIN_RGBA_OPACITY = 0.0;
+constexpr double MAX_RGBA_OPACITY = 1.0;
 template<typename T>
 inline T ConvertStrToEnum(const char* key, const LinearMapNode<T>* map, size_t length, T defaultValue)
 {
@@ -101,6 +107,58 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
         result = origin | COLOR_ALPHA_VALUE;
     }
     return result;
+}
+
+static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
+{
+    if (colorStr.rfind("rgb(", 0) != 0 && colorStr.rfind("rgba(", 0) != 0) {
+        return false;
+    }
+    auto startPos = colorStr.find_first_of('(');
+    auto endPos = colorStr.find_last_of(')');
+    if (startPos == std::string::npos || endPos == std::string::npos || endPos != (colorStr.length() - 1)) {
+        return false;
+    }
+    auto valueStr = colorStr.substr(startPos + 1, endPos - startPos - 1);
+    std::vector<std::string> valueProps;
+    StringUtils::StringSplitter(valueStr.c_str(), ',', valueProps);
+    auto size = valueProps.size();
+    auto count = std::count(valueStr.begin(), valueStr.end(), ',');
+    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || size != (count + 1)) {
+        return false;
+    }
+    std::vector<uint8_t> colorInt;
+    double opacity = 1.0;
+    for (uint32_t i = 0; i < size; i++) {
+        StringUtils::TrimStrLeadingAndTrailing(valueProps[i]);
+        char* pEnd = nullptr;
+        errno = 0;
+        double val = std::strtod(valueProps[i].c_str(), &pEnd);
+        if (pEnd == valueProps[i].c_str() || *pEnd != '\0' || errno == ERANGE) {
+            return false;
+        }
+        if (i < RGB_SUB_SIZE) {
+            val = std::clamp(val, MIN_RGB_VALUE, MAX_RGB_VALUE);
+            colorInt.push_back(static_cast<uint8_t>(std::round(val)));
+        } else {
+            opacity = std::clamp(val, MIN_RGBA_OPACITY, MAX_RGBA_OPACITY);
+        }
+    }
+    color = Color::FromRGBO(colorInt[0], colorInt[1], colorInt[2], opacity); // 0: red, 1: green, 2: blue.
+    return true;
+}
+
+static bool ProcessColorFromString(std::string colorStr, Color& color)
+{
+    if (colorStr.empty()) {
+        return false;
+    }
+
+    StringUtils::TrimStrLeadingAndTrailing(colorStr);
+    std::transform(colorStr.begin(), colorStr.end(), colorStr.begin(), ::tolower);
+    return (Color::MatchColorWithMagic(colorStr, COLOR_ALPHA_MASK, color) || MatchColorWithRGBA(colorStr, color) ||
+            Color::MatchColorWithMagicMini(colorStr, COLOR_ALPHA_MASK, color) ||
+            Color::MatchColorSpecialString(colorStr, color));
 }
 
 } // namespace
@@ -1057,9 +1115,18 @@ void JSCanvasRenderer::JsSetShadowBlur(const JSCallbackInfo& info)
 void JSCanvasRenderer::JsSetShadowColor(const JSCallbackInfo& info)
 {
     std::string colorStr;
-    if (info.GetStringArg(0, colorStr)) {
-        renderingContext2DModel_->SetShadowColor(Color::FromString(colorStr));
+    Color color;
+    if (!info.GetStringArg(0, colorStr)) {
+        return;
     }
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN)) {
+        if (!ProcessColorFromString(colorStr, color)) {
+            return;
+        }
+    } else {
+        color = Color::FromString(colorStr);
+    }
+    renderingContext2DModel_->SetShadowColor(color);
 }
 
 // shadowOffsetX: number
@@ -1645,10 +1712,9 @@ void JSCanvasRenderer::JsSetLetterSpacing(const JSCallbackInfo& info)
         if (letterSpacingStr.find("vp") != std::string::npos || letterSpacingStr.find("px") != std::string::npos) {
             renderingContext2DModel_->SetLetterSpacing(GetDimensionValue(letterSpacingStr));
             return;
-        } else {
-            renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
-            return;
         }
+        renderingContext2DModel_->SetLetterSpacing(Dimension(StringToDouble(letterSpacingStr) * GetDensity()));
+        return;
     }
     
     CalcDimension letterSpacingCal;

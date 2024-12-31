@@ -3553,7 +3553,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern6, TestSize.Level1)
     /**
      * @tc.steps: step4. test clipPath.
      */
-    auto popupPath = topSheetPattern->GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
+    auto popupPath = topSheetPattern->GetPopupStyleSheetClipPath(sheetSize, BorderRadiusProperty(sheetRadius));
     EXPECT_EQ(popupPath.length(), 406);
     EXPECT_EQ(popupPath.substr(394, 12), substring);
     auto centerPath = topSheetPattern->GetCenterStyleSheetClipPath(sheetSize, sheetRadius);

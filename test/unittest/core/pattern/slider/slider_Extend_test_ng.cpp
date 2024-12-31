@@ -1011,6 +1011,8 @@ HWTEST_F(SliderExTestNg, SliderPatternOnIsFocusActiveUpdate001, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto sliderPaintProperty = sliderPattern->GetPaintProperty<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
 
     /**
      * @tc.steps: step2. slider is focus,showtip is true.expect bubbleFlag_ is true.
@@ -1891,5 +1893,54 @@ HWTEST_F(SliderExTestNg, SliderTrackBackgroundColor001, TestSize.Level1)
     testGradientColors.at(1).GetLinearColor().ToColor().GetValue());
     EXPECT_EQ(defaultGradientColors.at(0).GetDimension(), testGradientColors.at(0).GetDimension());
     EXPECT_EQ(defaultGradientColors.at(1).GetDimension(), testGradientColors.at(1).GetDimension());
+}
+
+/**
+ * @tc.name: SliderPaintMethodTest004
+ * @tc.desc: Test slider_paint_method UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderExTestNg, SliderPaintMethodTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderPaintMethod.
+     */
+    SliderModelNG sliderModelNG;
+    sliderModelNG.Create(5.0, 10.0, 10.0, 20.0);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    parameters.trackThickness = static_cast<float>(SLIDER_NONE_TRACK_THICKNRESS.ConvertToPx());
+    auto sliderContentModifier = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
+    SliderPaintMethod::TipParameters tipParameters;
+    SliderPaintMethod sliderPaintMethod(
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
+    /**
+     * @tc.steps: step2. create paintWrapper.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, sliderPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    AceType::DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty())
+        ->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
+    /**
+     * @tc.steps: step3. call UpdateContentModifier function.
+     */
+    // set theme
+    MockPipelineContext::SetUp();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    Color color = Color::RED;
+    sliderTheme->markerColor_ = color;
+    // call UpdateContentModifier function
+    sliderPaintMethod.UpdateContentModifier(Referenced::RawPtr(paintWrapper));
+    EXPECT_EQ(sliderPaintMethod.sliderContentModifier_->stepColor_->Get(), LinearColor(Color::RED));
 }
 } // namespace OHOS::Ace::NG

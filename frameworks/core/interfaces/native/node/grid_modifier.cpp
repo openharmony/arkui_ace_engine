@@ -545,16 +545,6 @@ const ArkUIGridModifier* GetGridModifier()
         .resetGridAlignItems = ResetGridAlignItems,
         .setGridFadingEdge = SetGridFadingEdge,
         .resetGridFadingEdge = ResetGridFadingEdge,
-        .setOnGridScrollFrameBeginCallBack = SetOnGridScrollFrameBeginCallBack,
-        .resetOnGridScrollFrameBegin = ResetOnGridScrollFrameBegin,
-        .setOnGridReachStartCallBack = SetOnGridReachStartCallBack,
-        .resetOnGridReachStart = ResetOnGridReachStart,
-        .setOnGridReachEndCallBack = SetOnGridReachEndCallBack,
-        .resetOnGridReachEnd = ResetOnGridReachEnd,
-        .setOnGridScrollStartCallBack = SetOnGridScrollStartCallBack,
-        .resetOnGridScrollStart = ResetOnGridScrollStart,
-        .setOnGridScrollStopCallBack = SetOnGridScrollStopCallBack,
-        .resetOnGridScrollStop = ResetOnGridScrollStop,
         .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,
         .resetOnGridScrollIndex = ResetOnGridScrollIndex,
         .setOnGridScrollBarUpdateCallBack = SetOnGridScrollBarUpdateCallBack,
@@ -668,101 +658,6 @@ void ResetOnGridScrollIndex(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnScrollIndex(frameNode, nullptr);
-}
-
-void SetOnGridScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onScrollFrameBegin = reinterpret_cast<OnScrollFrameBeginEvent*>(extraParam);
-        GridModelNG::SetOnScrollFrameBegin(frameNode, std::move(*onScrollFrameBegin));
-    } else {
-        GridModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
-    }
-}
-
-void ResetOnGridScrollFrameBegin(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
-}
-
-void SetOnGridReachStartCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onReachStart = reinterpret_cast<OnReachEvent*>(extraParam);
-        GridModelNG::SetOnReachStart(frameNode, std::move(*onReachStart));
-    } else {
-        GridModelNG::SetOnReachStart(frameNode, nullptr);
-    }
-}
-
-void ResetOnGridReachStart(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetOnReachStart(frameNode, nullptr);
-}
-
-void SetOnGridReachEndCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onReachEnd = reinterpret_cast<OnReachEvent*>(extraParam);
-        GridModelNG::SetOnReachEnd(frameNode, std::move(*onReachEnd));
-    } else {
-        GridModelNG::SetOnReachEnd(frameNode, nullptr);
-    }
-}
-
-void ResetOnGridReachEnd(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetOnReachEnd(frameNode, nullptr);
-}
-
-void SetOnGridScrollStartCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onScrollStart = reinterpret_cast<OnScrollStartEvent*>(extraParam);
-        GridModelNG::SetOnScrollStart(frameNode, std::move(*onScrollStart));
-    } else {
-        GridModelNG::SetOnScrollStart(frameNode, nullptr);
-    }
-}
-
-void ResetOnGridScrollStart(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetOnScrollStart(frameNode, nullptr);
-}
-
-void SetOnGridScrollStopCallBack(ArkUINodeHandle node, void* extraParam)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (extraParam) {
-        auto onScrollStop = reinterpret_cast<OnScrollStopEvent*>(extraParam);
-        GridModelNG::SetOnScrollStop(frameNode, std::move(*onScrollStop));
-    } else {
-        GridModelNG::SetOnScrollStop(frameNode, nullptr);
-    }
-}
-
-void ResetOnGridScrollStop(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetOnScrollStop(frameNode, nullptr);
 }
 
 void SetOnGridScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)

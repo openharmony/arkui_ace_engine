@@ -57,6 +57,7 @@ public:
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    bool IsStopBackPress() const override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -95,6 +96,9 @@ public:
         return !HasRenderTransform();
     }
     std::optional<Color> GetHandleColor() override;
+
+protected:
+    bool AllowSearch() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

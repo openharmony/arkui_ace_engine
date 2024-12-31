@@ -1255,7 +1255,8 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
         (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showSearch != (isSupportMenuSearch_ && IsNeedMenuSearch())) {
+        if (isSupportMenuSearch_ && AllowSearch() &&
+            info->menuInfo.showSearch != IsNeedMenuSearch()) {
             info->menuInfo.showSearch = !info->menuInfo.showSearch;
             manager->NotifyUpdateToolBar(true);
         }

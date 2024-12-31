@@ -1145,7 +1145,11 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest004, TestSize.Level
     ASSERT_NE(pattern->GetAccessibilitySessionAdapter(), nullptr);
     ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
     ASSERT_FALSE(pattern->IsModalUec());
+    pattern->usage_ = UIExtensionUsage::MODAL;
+    ASSERT_TRUE(pattern->IsModalUec());
     ASSERT_FALSE(pattern->IsForeground());
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
+    ASSERT_TRUE(pattern->IsForeground());
     UIExtensionAccessibilityChildTreeCallback callback = UIExtensionAccessibilityChildTreeCallback(pattern, 1);
     ASSERT_FALSE(callback.isReg_);
 
@@ -1368,6 +1372,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest007, TestSize.Level
     pattern->curVisible_ = true;
     pattern->HandleVisibleAreaChange(true, SHOW_FULL);
     pattern->HandleVisibleAreaChange(true, SHOW_START);
+    pattern->HandleVisibleAreaChange(false, SHOW_FULL);
+    pattern->HandleVisibleAreaChange(false, SHOW_START);
 
     /**
      * @tc.steps: step4. test DispatchPointerEvent
@@ -1660,5 +1666,97 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     ASSERT_EQ(pattern->contentNode_, nullptr);
     pattern->OnExtensionDetachToDisplay();
 #endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest011
+ * @tc.desc: Test pattern Test DumpOthers
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test DumpOthers
+     */
+    pattern->AttachToFrameNode(uiExtNode);
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+    pattern->DumpOthers();
+
+    pattern->instanceId_ = 2;
+    pattern->DumpOthers();
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest012
+ * @tc.desc: Test pattern Test GetUiExtensionId/GetInstanceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtNode);
+    ValidSession(pattern);
+
+    /**
+     * @tc.steps: step2. test GetUiExtensionId
+     */
+    auto uiExtensionId = pattern->uiExtensionId_;
+    ASSERT_EQ(pattern->GetUiExtensionId(), uiExtensionId);
+
+     /**
+     * @tc.steps: step2. test GetInstanceId
+     */
+    auto instanceId = pattern->instanceId_;
+    ASSERT_EQ(pattern->GetInstanceId(), instanceId);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest013
+ * @tc.desc: Test pattern Test OnDisconnect/NotifySizeChangeReason/RegisterVisibleAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnDisconnect
+     */
+    pattern->OnDisconnect(true);
+
+    /**
+     * @tc.steps: step3. test NotifySizeChangeReason
+     */
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    pattern->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
+
+    /**
+     * @tc.steps: step4. test RegisterVisibleAreaChange
+     */
+    pattern->RegisterVisibleAreaChange();
 }
 } // namespace OHOS::Ace::NG

@@ -61,7 +61,7 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using NonPointerEventCallback = std::function<bool(const NonPointerEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&, const std::function<void()>&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,

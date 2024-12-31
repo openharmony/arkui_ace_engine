@@ -480,6 +480,7 @@ export struct SubHeader {
       .rightAreaParentAgingStyles()
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .hoverEffect(HoverEffect.None)
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
     } else {
@@ -519,6 +520,7 @@ export struct SubHeader {
       .rightAreaParentStyles()
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
       .accessibilityDescription(this.getAccessibilityDescription())
     } else {

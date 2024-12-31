@@ -133,6 +133,8 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
     float GetWindowScale() const;
+    void UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const int32_t eventId = -1);
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,

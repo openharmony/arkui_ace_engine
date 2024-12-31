@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_method.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_paint_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -53,7 +54,26 @@ public:
 
     inline FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, focusPattern);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, focusPattern);
+        if (isOptionPattern_) {
+            auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+            CHECK_NULL_RETURN(selectTheme, focusPattern);
+            auto focusStyleType =
+                static_cast<FocusStyleType>(static_cast<int32_t>(selectTheme->GetOptionFocusStyleType_()));
+            focusPattern.SetStyleType(focusStyleType);
+            return focusPattern;
+        } else {
+            auto menuTheme = pipelineContext->GetTheme<MenuTheme>();
+            CHECK_NULL_RETURN(menuTheme, focusPattern);
+            auto focusStyleType =
+                static_cast<FocusStyleType>(static_cast<int32_t>(menuTheme->GetFocusStyleType()));
+            focusPattern.SetStyleType(focusStyleType);
+            return focusPattern;
+        }
     }
 
     inline RefPtr<EventHub> CreateEventHub() override
@@ -241,6 +261,14 @@ public:
     void SetFontSize(const Dimension& value);
     void SetFontWeight(const FontWeight& value);
     void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetSelected(int32_t selected)
+    {
+        rowSelected_ = selected;
+    }
+    void SetBorderColor(const Color& color);
+    Color GetBorderColor() const;
+    void SetBorderWidth(const Dimension& value);
+    Dimension GetBorderWidth() const;
     void UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon);
     void UpdateNextNodeDivider(bool needDivider);
     void UpdateText(const std::string& content);
@@ -327,12 +355,42 @@ public:
     {
         pasteButton_ = pasteButton;
     }
+    inline void SetIsBGColorSetByUser(bool isSet)
+    {
+        isBGColorSetByUser_ = isSet;
+    }
+    inline void SetIsTextColorSetByUser(bool isSet)
+    {
+        isTextColorSetByUser_ = isSet;
+    }
+    inline void SetIsOptionFontColorSetByUser(bool isSet)
+    {
+        isOptionFontColorSetByUser_ = isSet;
+    }
+    inline void SetSelectFontColor(const Color& color)
+    {
+        selectFontColor_ = color;
+    }
+    inline void SetOptionFontColor(const Color& color)
+    {
+        optionFontColor_ = color;
+    }
+    inline void SetIsOptionBgColorSetByUser(bool isSet)
+    {
+        isOptionBgColorSetByUser_ = isSet;
+    }
+    inline void SetOptionBgColor(const Color& color)
+    {
+        optionBgColor_ = color;
+    }
 
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void OnAfterModifyDone() override;
     RefPtr<FrameNode> GetMenuWrapper();
+    void InitFocusPadding();
+    Dimension focusPadding_ = 0.0_vp;
 
 private:
     friend class ServiceCollaborationMenuAceHelper;
@@ -354,8 +412,11 @@ private:
     void AddExpandIcon(RefPtr<FrameNode>& row);
     void AddClickableArea();
     void UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProperty>& menuProperty, bool isLabel);
+    void UpdateTextMarquee(bool isMarqueeStart);
     void UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty, RefPtr<SelectTheme>& theme);
+    void InitTextFadeOut();
     void UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<SelectTheme>& theme, bool isLabel);
+    void SetThemeProps(const RefPtr<FrameNode>& host);
     void UpdateMaxLinesFromTheme(RefPtr<TextLayoutProperty>& textProperty);
     void AddStackSubMenuHeader(RefPtr<FrameNode>& menuNode);
     RefPtr<FrameNode> GetClickableArea();
@@ -382,6 +443,12 @@ private:
     void ParseMenuRadius(MenuParam& param);
     void ModifyDivider();
 
+    void NeedFocusEvent();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
+
     void UpdateSymbolNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateImageNode(RefPtr<FrameNode>& row, RefPtr<FrameNode>& selectIcon);
     void UpdateSymbolIcon(RefPtr<FrameNode>& row, RefPtr<FrameNode>& iconNode, ImageSourceInfo& iconSrc,
@@ -397,6 +464,10 @@ private:
     bool UpdateOptionFocus(KeyCode code);
     void UpdatePasteFontColor(const Color& fontColor);
     void UpdatePasteDisabledOpacity(const double disabledColorAlpha);
+    void OptionHandleFocusEvent();
+    void OptionHandleBlurEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     inline bool IsOptionPattern()
     {
         return isOptionPattern_;
@@ -448,6 +519,10 @@ private:
 
     Color bgBlendColor_ = Color::TRANSPARENT;
     std::optional<Color> bgColor_;
+    std::optional<Color> selectFontColor_;
+    std::optional<Color> optionFontColor_;
+    std::optional<Color> optionBgColor_;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     // src of icon image, used in XTS inspector
     std::string iconSrc_;
     WeakPtr<FrameNode> menuWeak_;
@@ -463,6 +538,16 @@ private:
     bool isOptionPattern_ = false;  // if it is OptionPattern
     bool isSelectOption_ = false;
     bool isWidthModifiedBySelect_ = false;
+
+    bool isFocused_ = false;
+    bool isFocusShadowSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isTextFadeOut_ = false;
+    bool isBGColorSetByUser_ = false;
+    bool isTextColorSetByUser_ = false;
+    bool isOptionFontColorSetByUser_ = false;
+    bool isOptionBgColorSetByUser_ = false;
+    int32_t rowSelected_ = -1;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemPattern);
 };
