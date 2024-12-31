@@ -208,8 +208,8 @@ Local<panda::ObjectRef> CreateAbstractSpanResult(EcmaVM *vm, RichEditorAbstractS
     const char* onIMEInputCompleteObjKeys[] = { "spanPosition", "value", "previewText", "textStyle",
         "offsetInSpan", "paragraphStyle" };
     Local<JSValueRef> onIMEInputCompleteObjValues[] = {
-        spanPositionObj, panda::StringRef::NewFromUtf8(vm, event.GetValue().c_str()),
-        panda::StringRef::NewFromUtf8(vm, event.GetPreviewText().c_str()),
+        spanPositionObj, panda::StringRef::NewFromUtf16(vm, event.GetValue().c_str()),
+        panda::StringRef::NewFromUtf16(vm, event.GetPreviewText().c_str()),
         textStyleObj, offsetInSpan,
         CreateParagraphStyle(vm, event.GetTextStyle())
     };
@@ -308,9 +308,9 @@ void SetTextChangeSpanResult(
     auto textStyleObj = panda::ObjectRef::New(vm);
     CreateTextStyleObj(vm, textStyleObj, spanResult);
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "value"),
-        panda::StringRef::NewFromUtf8(vm, spanResult.GetValue().c_str()));
+        panda::StringRef::NewFromUtf16(vm, spanResult.GetValue().c_str()));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "previewText"),
-        panda::StringRef::NewFromUtf8(vm, spanResult.GetPreviewText().c_str()));
+        panda::StringRef::NewFromUtf16(vm, spanResult.GetPreviewText().c_str()));
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "textStyle"),
         textStyleObj);
     resultObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "paragraphStyle"),
@@ -962,11 +962,10 @@ ArkUINativeModuleValue RichEditorBridge::SetPlaceholder(ArkUIRuntimeCallInfo* ru
     std::optional<uint32_t> colorResourceId = std::nullopt;
     std::string placeholderValue;
     ArkTSUtils::ParseJsString(vm, valueArg, placeholderValue);
-    options.value = placeholderValue;
     ParsePlaceholderStyle(vm, styleArg, options, fontColor, colorResourceId);
     colorResourceId = -1;
     std::vector<ArkUI_CharPtr> stringParameters;
-    stringParameters.push_back(options.value.has_value() ? options.value.value().c_str() : "");
+    stringParameters.push_back(placeholderValue.c_str());
     if (!options.fontFamilies.empty()) {
         for (size_t index = 0; index < options.fontFamilies.size(); index++) {
             stringParameters.push_back(options.fontFamilies[index].c_str());
@@ -1200,8 +1199,8 @@ ArkUINativeModuleValue RichEditorBridge::SetAboutToIMEInput(ArkUIRuntimeCallInfo
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "insertOffset", "insertValue", "previewText" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, insertValue.GetInsertOffset()),
-            panda::StringRef::NewFromUtf8(vm, insertValue.GetInsertValue().c_str()),
-            panda::StringRef::NewFromUtf8(vm, insertValue.GetPreviewText().c_str()) };
+            panda::StringRef::NewFromUtf16(vm, insertValue.GetInsertValue().c_str()),
+            panda::StringRef::NewFromUtf16(vm, insertValue.GetPreviewText().c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[NUM_1] = { eventObject };
         auto ret = func->Call(vm, func.ToLocal(), params, NUM_1);
