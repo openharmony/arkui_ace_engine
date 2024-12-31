@@ -420,7 +420,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     spanItemChildren = layoutAlgorithm->GetSpans();
     EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(StringUtils::Str16ToStr8(spanItemChildren.back()->GetSpanContent()), INIT_VALUE_2);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
 
     // test when richEitor empty again,placeholder Appear again
     RangeOptions rangeoptions;

@@ -353,7 +353,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Lev
     originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
-    richEditorPattern->InsertValue("test\nvalue");
+    richEditorPattern->InsertValue(u"test\nvalue");
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -462,7 +462,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Lev
     richEditorPattern->dragRange_.first = 0;
     richEditorPattern->dragRange_.second = 2;
     richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->HandleOnDragDropTextOperation("he", true);
+    richEditorPattern->HandleOnDragDropTextOperation(u"he", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 1);
@@ -667,7 +667,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Lev
 
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
-    EXPECT_EQ(spanResult.value_, "hhello11");
+    EXPECT_EQ(spanResult.value_, u"hhello11");
     EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
@@ -717,7 +717,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Lev
 
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
-    EXPECT_EQ(spanResult.value_, "hhello1");
+    EXPECT_EQ(spanResult.value_, u"hhello1");
     EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
@@ -1371,7 +1371,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     struct UpdateParagraphStyle style1;
     style1.textAlign = TextAlign::END;
     style1.leadingMargin = std::make_optional<NG::LeadingMargin>();
@@ -1426,7 +1426,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, onIMEInputComplete002, TestSize.Level1)
     /**
      * @tc.steps: step3. add text span
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1569,7 +1569,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1659,7 +1659,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, SetOnSelect003, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     ASSERT_NE(info.selection_.resultObjects.size(), 0);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
@@ -1970,7 +1970,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, CheckScrollable, TestSize.Level1)
     richEditorPattern->CheckScrollable();
     EXPECT_FALSE(richEditorPattern->scrollable_);
 
-    AddSpan(TEST_INSERT_U16VALUE);
+    AddSpan(TEST_INSERT_VALUE);
     richEditorPattern->CheckScrollable();
     EXPECT_TRUE(richEditorPattern->scrollable_);
 
