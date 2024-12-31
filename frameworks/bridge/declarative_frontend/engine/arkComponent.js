@@ -6040,6 +6040,21 @@ class OnReachEndModifier extends ModifierWithKey {
 }
 OnReachStartModifier.identity = Symbol('onReachEnd');
 
+class FlingSpeedLimitModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetFlingSpeedLimit(node);
+    }
+    else {
+      getUINativeModule().scrollable.setFlingSpeedLimit(node, this.value);
+    }
+  }
+}
+FlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6069,6 +6084,11 @@ class ArkScrollable extends ArkComponent {
 
   onReachEnd(event) {
     modifierWithKey(this._modifiersWithKeys, OnReachEndModifier.identity, OnReachEndModifier, event);
+    return this;
+  }
+
+  flingSpeedLimit(value) {
+    modifierWithKey(this._modifiersWithKeys, FlingSpeedLimitModifier.identity, FlingSpeedLimitModifier, value);
     return this;
   }
 }
@@ -6222,10 +6242,6 @@ class ArkGridComponent extends ArkScrollable {
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
-    return this;
-  }
-  flingSpeedLimit(value) {
-    modifierWithKey(this._modifiersWithKeys, GridFlingSpeedLimitModifier.identity, GridFlingSpeedLimitModifier, value);
     return this;
   }
   alignItems(value) {
@@ -6755,20 +6771,6 @@ class GridClipModifier extends ModifierWithKey {
   }
 }
 GridClipModifier.identity = Symbol('gridClip');
-class GridFlingSpeedLimitModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().grid.resetFlingSpeedLimit(node);
-    }
-    else {
-      getUINativeModule().grid.setFlingSpeedLimit(node, this.value);
-    }
-  }
-}
-GridFlingSpeedLimitModifier.identity = Symbol('gridFlingSpeedLimit');
 class GridAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -18573,20 +18575,6 @@ class ScrollInitialOffsetModifier extends ModifierWithKey {
 }
 ScrollInitialOffsetModifier.identity = Symbol('initialOffset');
 
-class ScrollFlingSpeedLimitModifier extends ModifierWithKey {
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().scroll.resetFlingSpeedLimit(node);
-    } else {
-      getUINativeModule().scroll.setFlingSpeedLimit(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-ScrollFlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
-
 class ScrollInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -18842,10 +18830,6 @@ class ArkScrollComponent extends ArkScrollable {
       }
       modifierWithKey(this._modifiersWithKeys, ScrollInitialOffsetModifier.identity, ScrollInitialOffsetModifier, options);
     }
-    return this;
-  }
-  flingSpeedLimit(value) {
-    modifierWithKey(this._modifiersWithKeys, ScrollFlingSpeedLimitModifier.identity, ScrollFlingSpeedLimitModifier, value);
     return this;
   }
 }
@@ -28579,20 +28563,6 @@ class ListScrollBarColorModifier extends ModifierWithKey {
   }
 }
 ListScrollBarColorModifier.identity = Symbol('listScrollBarColor');
-class ListFlingSpeedLimitModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset || isUndefined(this.value)) {
-      getUINativeModule().list.resetFlingSpeedLimit(node);
-    }
-    else {
-      getUINativeModule().list.setFlingSpeedLimit(node, this.value);
-    }
-  }
-}
-ListFlingSpeedLimitModifier.identity = Symbol('listFlingSpeedLimit');
 class ListLanesModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -28943,10 +28913,6 @@ class ArkListComponent extends ArkScrollable {
   }
   scrollBarColor(value) {
     modifierWithKey(this._modifiersWithKeys, ListScrollBarColorModifier.identity, ListScrollBarColorModifier, value);
-    return this;
-  }
-  flingSpeedLimit(value) {
-    modifierWithKey(this._modifiersWithKeys, ListFlingSpeedLimitModifier.identity, ListFlingSpeedLimitModifier, value);
     return this;
   }
   contentStartOffset(value) {
@@ -31030,21 +30996,6 @@ class WaterFlowCachedCountModifier extends ModifierWithKey {
 }
 WaterFlowCachedCountModifier.identity = Symbol('waterFlowCachedCount');
 
-class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().waterFlow.resetFlingSpeedLimit(node);
-    }
-    else {
-      getUINativeModule().waterFlow.setFlingSpeedLimit(node, this.value);
-    }
-  }
-}
-WaterFlowFlingSpeedLimitModifier.identity = Symbol('waterFlowFlingSpeedLimit');
-
 class WaterFlowOnScrollFrameBeginModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -31261,10 +31212,6 @@ class ArkWaterFlowComponent extends ArkScrollable {
   }
   scrollBar(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowScrollBarModifier.identity, WaterFlowScrollBarModifier, value);
-    return this;
-  }
-  flingSpeedLimit(value) {
-    modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
     return this;
   }
   onWillScroll(callback) {
