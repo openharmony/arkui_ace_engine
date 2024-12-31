@@ -5020,6 +5020,8 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
     void (*setXComponentHdrBrightness)(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness);
     void (*resetXComponentHdrBrightness)(ArkUINodeHandle node);
+    void (*setXComponentEnableTransparentLayer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableTransparentLayer)(ArkUINodeHandle node);
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
 };

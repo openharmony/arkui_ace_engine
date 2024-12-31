@@ -5656,6 +5656,10 @@ void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetHdrBrightness));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHdrBrightness"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetHdrBrightness));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableTransparentLayer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetEnableTransparentLayer));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableTransparentLayer"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetEnableTransparentLayer));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderFit"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetRenderFit));
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRenderFit"),
