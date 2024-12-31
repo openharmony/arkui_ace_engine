@@ -1029,6 +1029,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
     if (SelectOverlayIsOn()) {
         HideMenu(true);
         auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [weak = WeakClaim(this), scrollingNode] {
                 auto overlay = weak.Upgrade();

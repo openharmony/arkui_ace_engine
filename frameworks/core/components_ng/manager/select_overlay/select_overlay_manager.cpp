@@ -57,6 +57,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, overlayNode = selectOverlayNode, animation,
             isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
