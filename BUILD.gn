@@ -61,10 +61,17 @@ config("ace_config") {
     "-Werror=int-in-bool-context",
     "-Werror=xor-used-as-pow",
     "-Werror=deprecated-copy",
-    "-Werror=inconsistent-dllimport",
     "-Werror=unknown-warning-option",
     "-Werror=abstract-final-class",
+    "-Werror=range-loop-construct",
+    "-Werror=dangling-gsl",
   ]
+
+  if (is_arkui_x) {
+    cflags -= [
+      "-Werror=deprecated-copy",
+    ]
+  }
 
   if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&
       enhanced_opt) {
