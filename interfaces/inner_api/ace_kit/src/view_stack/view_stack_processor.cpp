@@ -38,7 +38,11 @@ RefPtr<FrameNode> ViewStackProcessor::GetTopNode()
 {
     auto* mainNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(mainNode, nullptr);
-    return mainNode->GetKitNode();
+    auto kitNode = mainNode->GetKitNode();
+    if (!kitNode) {
+        kitNode = Referenced::MakeRefPtr<FrameNodeImpl>(AceType::Claim(mainNode));
+    }
+    return kitNode;
 }
 
 } // namespace OHOS::Ace::Kit
