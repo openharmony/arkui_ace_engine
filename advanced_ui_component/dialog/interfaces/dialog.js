@@ -2168,7 +2168,7 @@ export class AlertDialog extends ViewPU {
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
-            Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
+            Text.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
             Text.textAlign(this.textAlign);
             Text.onKeyEvent((u19) => {
                 if (u19) {
