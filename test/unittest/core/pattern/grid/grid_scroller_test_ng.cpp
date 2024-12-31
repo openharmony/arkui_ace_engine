@@ -922,6 +922,7 @@ HWTEST_F(GridScrollerTestNg, GetOverScrollOffset001, TestSize.Level1)
 {
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
     CreateFixedItems(10);
     CreateDone();
 

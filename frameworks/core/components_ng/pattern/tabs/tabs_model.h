@@ -137,6 +137,7 @@ public:
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
+    virtual void ResetScrollableBarModeOptions() = 0;
     virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
     virtual void SetIsCustomAnimation(bool isCustom) {}
     virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) {}
@@ -145,6 +146,7 @@ public:
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
     virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

@@ -1961,6 +1961,10 @@ void ViewAbstract::BindPopup(
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
         popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
+        auto accessibilityProperty = popupNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityHoverPriority(param->IsBlockEvent());
+        }
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));

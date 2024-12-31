@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-#include <string>
 #include "text_input_base.h"
+
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {

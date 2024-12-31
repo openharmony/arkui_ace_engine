@@ -476,9 +476,9 @@ void JSGesture::JsHandlerOnGestureEvent(Ace::GestureEventAction action, const JS
     RefPtr<JsGestureFunction> handlerFunc = AceType::MakeRefPtr<JsGestureFunction>(JSRef<JSFunc>::Cast(args[0]));
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)]() {
+        auto onActionCancelFunc = [execCtx = args.GetExecutionContext(), func = std::move(handlerFunc)](
+                                      GestureEvent& info) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            auto info = GestureEvent();
             ACE_SCORING_EVENT("Gesture.onCancel");
             func->Execute(info);
         };

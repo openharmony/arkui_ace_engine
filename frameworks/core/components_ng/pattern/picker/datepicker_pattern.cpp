@@ -86,26 +86,35 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     CHECK_NULL_RETURN(pickerTheme, false);
     auto children = host->GetChildren();
     auto height = pickerTheme->GetDividerSpacing();
+    auto buttonSpace = pickerTheme->GetSelectorItemSpace();
+    auto currentFocusStackChild = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_RETURN(currentFocusStackChild, false);
+    auto currentFocusButtonNode = DynamicCast<FrameNode>(currentFocusStackChild->GetFirstChild());
+    CHECK_NULL_RETURN(currentFocusButtonNode, false);
     for (const auto& child : children) {
         auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
         CHECK_NULL_RETURN(columnNode, false);
         auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
         auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
         CHECK_NULL_RETURN(datePickerColumnNode, false);
-        auto columnNodeHeight = datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height();
         auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
         CHECK_NULL_RETURN(buttonNode, false);
         auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
         buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
         buttonConfirmLayoutProperty->UpdateType(ButtonType::NORMAL);
-        buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(PRESS_RADIUS));
+        buttonConfirmLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(selectorItemRadius_));
         auto standardButtonHeight = static_cast<float>((height - PRESS_INTERVAL).ConvertToPx());
-        auto maxButtonHeight = static_cast<float>(columnNodeHeight);
+        auto maxButtonHeight = static_cast<float>(datePickerColumnNode->GetGeometryNode()->GetFrameSize().Height());
         auto buttonHeight = Dimension(std::min(standardButtonHeight, maxButtonHeight), DimensionUnit::PX);
         buttonConfirmLayoutProperty->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(width - PRESS_INTERVAL.ConvertToPx()), CalcLength(buttonHeight)));
+            CalcSize(CalcLength(width - buttonSpace.ConvertToPx()), CalcLength(buttonHeight)));
         auto buttonConfirmRenderContext = buttonNode->GetRenderContext();
-        buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        if (!useButtonFocusArea_) {
+            buttonConfirmRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        } else {
+            auto isFocusButton = haveFocus_ && (currentFocusButtonNode == buttonNode);
+            UpdateColumnButtonStyles(columnNode, isFocusButton, false);
+        }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode();
         if (GetIsShowInDialog() && GreatNotEqual(standardButtonHeight, maxButtonHeight) &&
@@ -116,6 +125,167 @@ bool DatePickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         }
     }
     return true;
+}
+
+void DatePickerPattern::InitSelectorProps()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+
+    selectorItemRadius_ = pickerTheme->GetSelectorItemRadius();
+    useButtonFocusArea_ = pickerTheme->NeedButtonFocusAreaType();
+}
+
+void DatePickerPattern::InitFocusEvent()
+{
+    CHECK_NULL_VOID(!focusEventInitialized_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+
+    focusEventInitialized_ = true;
+}
+
+void DatePickerPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pickerPattern = weak.Upgrade();
+            CHECK_NULL_VOID(pickerPattern);
+            pickerPattern->SetHaveFocus(isFocusAcitve);
+            pickerPattern->UpdateFocusButtonState();
+        };
+    }
+
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    context->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void DatePickerPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveIsFocusActiveUpdateEvent(host);
+}
+
+void DatePickerPattern::SetHaveFocus(bool haveFocus)
+{
+    haveFocus_ = haveFocus;
+}
+
+void DatePickerPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+
+    AddIsFocusActiveUpdateEvent();
+    if (context->GetIsFocusActive()) {
+        SetHaveFocus(true);
+        UpdateFocusButtonState();
+    }
+}
+
+void DatePickerPattern::HandleBlurEvent()
+{
+    SetHaveFocus(false);
+    RemoveIsFocusActiveUpdateEvent();
+    UpdateFocusButtonState();
+}
+
+void DatePickerPattern::UpdateFocusButtonState()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (useButtonFocusArea_) {
+        auto currentFocusStackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+        CHECK_NULL_VOID(currentFocusStackNode);
+        auto blendColumnNode = currentFocusStackNode->GetLastChild();
+        CHECK_NULL_VOID(blendColumnNode);
+        auto currentFocusColumnNode = DynamicCast<FrameNode>(blendColumnNode->GetLastChild());
+        CHECK_NULL_VOID(currentFocusColumnNode);
+
+        UpdateColumnButtonStyles(currentFocusColumnNode, haveFocus_, true);
+    }
+}
+
+void DatePickerPattern::UpdateColumnButtonStyles(
+    const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty)
+{
+    CHECK_NULL_VOID(columnNode);
+
+    auto datePickerColumnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(datePickerColumnPattern);
+    datePickerColumnPattern->UpdateColumnButtonFocusState(haveFocus, needMarkDirty);
+}
+
+void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto pickerTheme = context->GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(pickerTheme);
+    auto stackNode = DynamicCast<FrameNode>(host->GetChildAtIndex(focusKeyID_));
+    CHECK_NULL_VOID(stackNode);
+    auto buttonNode = DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
+    auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
+    auto stackRenderContext = stackNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
+    auto leftPadding = 0.0f;
+    if (geometryNode->GetPadding()) {
+        leftPadding = geometryNode->GetPadding()->left.value_or(0.0f);
+    }
+    focusButtonRect -=
+        OffsetF(focusSpace - leftPadding, focusSpace - stackRenderContext->GetPaintRectWithoutTransform().GetY());
+    focusButtonRect += SizeF(focusSpace + focusSpace, focusSpace + focusSpace);
+    focusButtonRect += OffsetF(focusButtonXOffset, 0);
+
+    paintRect.SetRect(focusButtonRect);
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS,
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS,
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS,
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
+    paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS,
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()),
+        static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
 }
 
 void DatePickerPattern::OnModifyDone()
@@ -155,6 +325,8 @@ void DatePickerPattern::OnModifyDone()
     if (focusHub) {
         InitOnKeyEvent(focusHub);
     }
+    InitFocusEvent();
+    InitSelectorProps();
 }
 
 void DatePickerPattern::InitDisabled()
@@ -401,7 +573,7 @@ void DatePickerPattern::PaintFocusState()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
-
+    UpdateFocusButtonState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -449,6 +621,9 @@ void DatePickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(pipeline);
     auto pickerTheme = pipeline->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        return GetInnerFocusButtonPaintRect(paintRect, leftTotalColumnWidth);
+    }
     auto dividerSpacing = pickerTheme->GetDividerSpacing().ConvertToPx();
     auto pickerThemeWidth = dividerSpacing * RATE;
 

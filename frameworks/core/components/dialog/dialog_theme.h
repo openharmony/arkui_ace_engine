@@ -42,6 +42,8 @@ constexpr double DEFAULT_DIALOG_MAXSIZE_SCALE_PORTRAIT = 0.8f;
 constexpr int DEFAULT_DIALOG_SCROLL_FLEX_ALIGN = 1;
 constexpr int DEFAULT_DIALOG_COLUMN_MEASURE_TYPE = 1;
 constexpr int DIALOG_TITLE_MAX_LINES_VALUE = 2;
+constexpr float DEFAULT_ALIGN_DIALOG = 3.0;
+constexpr float SHADOW_NONE = 6.0;
 
 } // namespace
 /**
@@ -268,6 +270,11 @@ public:
     const Color& GetButtonDefaultFontColor() const
     {
         return buttonDefaultFontColor_;
+    }
+
+    int GetDialogBackgroundBlurStyle() const
+    {
+        return dialogBackgroundBlurStyle_;
     }
 
     double GetFrameStart() const
@@ -519,9 +526,64 @@ public:
         return dialogLandscapeHeightBoundary_;
     }
 
-    const int& GetDialogBackgroundBlurStyle() const
+    const Color& GetBackgroudBorderColor() const
     {
-        return dialogBackgroundBlurStyle_;
+        return backgroundBorderColor_;
+    }
+
+    const Dimension& GetBackgroudBorderWidth()
+    {
+        return backgroundBorderWidth_;
+    }
+
+    double GetDialogRatioHeight() const
+    {
+        return dialogRatioHeight_;
+    }
+
+    int32_t GetTextAlignContent() const
+    {
+        return text_align_content_;
+    }
+
+    int32_t GetTextAlignTitle() const
+    {
+        return text_align_title_;
+    }
+
+    uint32_t GetShadowDialog() const
+    {
+        return shadowDialog_;
+    }
+
+    int32_t GetAlignDialog() const
+    {
+        return alignDialog_;
+    }
+
+    int32_t GetButtonType() const
+    {
+        return button_type_;
+    }
+
+    const Color& GetColorBgWithBlur() const
+    {
+        return colorBgWithBlur_;
+    }
+
+    const Dimension& GetPaddingTopTitle() const
+    {
+        return paddingTopTitle_;
+    }
+
+    const Dimension& GetPaddingSingleTitle() const
+    {
+        return paddingSingleTitle_;
+    }
+
+    const Dimension& GetNormalButtonFontSize() const
+    {
+        return normalButtonFontSize_;
     }
 
 protected:
@@ -619,6 +681,18 @@ private:
     Color dialogOuterBorderColor_;
     double dialogInnerBorderWidth_ = 0.0f;
     Color dialogInnerBorderColor_;
+    Dimension paddingSingleTitle_;
+    Dimension paddingTopTitle_;
+    Dimension backgroundBorderWidth_;
+    double dialogRatioHeight_ = 0.9;
+    int32_t text_align_content_ = 0;
+    int32_t text_align_title_ = 0;
+    int32_t button_type_ = 0;
+    uint32_t shadowDialog_ = 6;
+    int32_t alignDialog_ = 3;
+    Dimension normalButtonFontSize_;
+    Color colorBgWithBlur_;
+    Color backgroundBorderColor_;
     int dialogBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 

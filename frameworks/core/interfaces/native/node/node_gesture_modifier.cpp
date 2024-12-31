@@ -358,19 +358,6 @@ void GetUniqueGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, GestureTypeName 
     }
 }
 
-void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
-{
-    auto onActionCancel = [extraParam]() {
-        ArkUINodeEvent eventData;
-        eventData.kind = GESTURE_ASYNC_EVENT;
-        eventData.nodeId = 0;
-        eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
-        eventData.gestureAsyncEvent.subKind = ON_ACTION_CANCEL;
-        SendArkUISyncEvent(&eventData);
-    };
-    gestureRef->SetOnActionCancelId(onActionCancel);
-}
-
 void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent)
 {
     CHECK_NULL_VOID(info.GetPointerEvent());
@@ -465,7 +452,10 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
         gestureRef->SetOnActionEndId(onActionEnd);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
-        setCancelActionFunc(gestureRef, extraParam);
+        auto onActionCancel = [extraParam](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam);
+        };
+        gestureRef->SetOnActionCancelId(onActionCancel);
     }
 }
 

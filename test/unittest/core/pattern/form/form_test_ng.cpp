@@ -1392,11 +1392,11 @@ HWTEST_F(FormTestNg, AddFormChildNode, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
     EXPECT_EQ(disableStyleRootNode, columnNode);
     EXPECT_EQ(disableStyleTextNode, textNode);
 }
@@ -1418,13 +1418,13 @@ HWTEST_F(FormTestNg, RemoveFormChildNode, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
-    pattern->RemoveFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+    pattern->RemoveFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
     EXPECT_EQ(disableStyleRootNode, nullptr);
     EXPECT_EQ(disableStyleTextNode, nullptr);
 }
@@ -1475,11 +1475,11 @@ HWTEST_F(FormTestNg, OnLanguageConfigurationUpdate, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     ASSERT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     RefPtr<FrameNode> disableStyleRootNode =
         pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE);
     RefPtr<FrameNode> disableStyleTextNode =
-        pattern->GetFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE);
+        pattern->GetFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE);
     pattern->EnableDrag();
     LOGI("OnLanguageConfigurationUpdate");
     pattern->OnLanguageConfigurationUpdate();

@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
@@ -27,7 +28,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_accessibility_property.h"
 #include "core/components_ng/pattern/time_picker/timepicker_column_layout_algorithm.h"
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_interface.h"
 #include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/pattern/time_picker/toss_animation_controller.h"
 
@@ -423,7 +423,7 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
     bool isShow_ = true;
     bool isEnableHaptic_ = true;
-    std::shared_ptr<ITimepickerAudioHaptic> hapticController_ = nullptr;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerColumnPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -795,4 +795,77 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         curFocus = next.Upgrade();
     }
 }
+
+/**
+ * @tc.name: GetOverScrollOffset002
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(8);
+
+    CreateDone();
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { ITEM_MAIN_SIZE, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, -ITEM_MAIN_SIZE * 2 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 2;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { 0, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = ITEM_MAIN_SIZE;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { -ITEM_MAIN_SIZE, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, ITEM_MAIN_SIZE * 2 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+}
 } // namespace OHOS::Ace::NG
