@@ -156,7 +156,9 @@ void TabsModelNG::InitTabsNode(RefPtr<TabsNode> tabsNode, const RefPtr<SwiperCon
 
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
+    if (tabBarLayoutProperty->GetPixelRound() == static_cast<uint16_t>(PixelRoundPolicy::ALL_FORCE_ROUND)) {
+        tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
+    }
 
     auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
@@ -468,9 +470,6 @@ void TabsModelNG::SetBarBackgroundColor(const Color& backgroundColor)
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateBarBackgroundColor(backgroundColor);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
@@ -741,9 +740,6 @@ void TabsModelNG::SetBarBackgroundColor(FrameNode* frameNode, const Color& backg
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateBarBackgroundColor(backgroundColor);
     auto tabBarRenderContext = tabBarNode->GetRenderContext();
     CHECK_NULL_VOID(tabBarRenderContext);
     tabBarRenderContext->UpdateBackgroundColor(backgroundColor);
@@ -756,9 +752,6 @@ void TabsModelNG::SetBarBackgroundBlurStyle(FrameNode* frameNode, const BlurStyl
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarBlurStyleOption(styleOption);
     auto pipeline = tabBarNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
@@ -1020,9 +1013,6 @@ void TabsModelNG::SetBarBackgroundEffect(FrameNode* frameNode, const EffectOptio
     CHECK_NULL_VOID(tabsNode);
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(tabBarPaintProperty);
-    tabBarPaintProperty->UpdateTabBarEffectOption(effectOption);
     auto pipeline = tabBarNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (effectOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
