@@ -601,7 +601,7 @@ export class TipsDialog extends ViewPU {
                 } catch (exception) {
                     let code = exception.code;
                     let message = exception.message;
-                    hilog.error(0x3900, 'Ace', `Faild to send accessibility event, cause, code: ${code}, message: ${message}`);
+                    hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
                 }
             });
             Row.padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() });
@@ -1771,7 +1771,7 @@ export class ConfirmDialog extends ViewPU {
                 } catch (exception) {
                     let code = exception.code;
                     let message = exception.message;
-                    hilog.error(0x3900, 'Ace', `Faild to send accessibility event, cause, code: ${code}, message: ${message}`);
+                    hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
                 }
             });
             Row.width('100%');
