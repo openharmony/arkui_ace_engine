@@ -47,6 +47,10 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
 const int32_t WORD_BREAK_TYPES_DEFAULT = 2;
+const std::vector<float> DEFAULT_COLORFILTER_MATRIX = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+};
 } // namespace
 
 CalcDimension ParseLengthMetrics(const JSRef<JSObject>& obj, bool withoutPercent = true)
@@ -773,7 +777,64 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
     if (!syncLoadObj->IsNull() && syncLoadObj->IsBoolean()) {
         imageStyle.syncLoad = syncLoadObj->ToBoolean();
     }
+
+    ParseJsImageSpanColorFilterAttribute(obj, imageStyle);
     return imageStyle;
+}
+
+void JSImageAttachment::ParseJsImageSpanColorFilterAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
+{
+    auto colorFilterObj = obj->GetProperty("colorFilter");
+    if (colorFilterObj->IsNull()) {
+        return;
+    }
+    if (!colorFilterObj->IsArray() && !colorFilterObj->IsObject()) {
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    if (colorFilterObj->IsObject() && !colorFilterObj->IsArray()) {
+        auto drawingColorFilter = CreateDrawingColorFilter(colorFilterObj);
+        if (drawingColorFilter) {
+            imageStyle.colorFilterMatrix = std::nullopt;
+            imageStyle.drawingColorFilter = drawingColorFilter;
+            return;
+        }
+        JSColorFilter* colorFilter;
+        if (!colorFilterObj->IsUndefined() && !colorFilterObj->IsNull()) {
+            colorFilter = JSRef<JSObject>::Cast(colorFilterObj)->Unwrap<JSColorFilter>();
+        } else {
+            SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+        if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+            SetImageSpanColorFilterAttribute(imageStyle, colorFilter->GetColorFilterMatrix());
+            return;
+        }
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    JSRef<JSArray> array = JSRef<JSArray>::Cast(colorFilterObj);
+    if (array->Length() != COLOR_FILTER_MATRIX_SIZE) {
+        SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+        return;
+    }
+    std::vector<float> colorfilter;
+    for (size_t i = 0; i < array->Length(); i++) {
+        JSRef<JSVal> value = array->GetValueAt(i);
+        if (!value->IsNumber()) {
+            SetImageSpanColorFilterAttribute(imageStyle, DEFAULT_COLORFILTER_MATRIX);
+            return;
+        }
+        colorfilter.emplace_back(value->ToNumber<float>());
+    }
+    SetImageSpanColorFilterAttribute(imageStyle, colorfilter);
+}
+
+void JSImageAttachment::SetImageSpanColorFilterAttribute(ImageSpanAttribute& imageStyle,
+    const std::vector<float>& matrix)
+{
+    imageStyle.colorFilterMatrix = matrix;
+    imageStyle.drawingColorFilter = std::nullopt;
 }
 
 void JSImageAttachment::ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle)
