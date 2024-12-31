@@ -485,7 +485,7 @@ void UINode::DoAddChild(
         }
     }
 
-    child->SetParent(Claim(this));
+    child->SetParent(Claim(this), false);
     child->SetDepth(GetDepth() + 1);
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
@@ -1796,5 +1796,15 @@ void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, Notifica
     if (parent) {
         parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
+}
+
+void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
+{
+    auto current = parent.Upgrade();
+    CHECK_NULL_VOID(current);
+    if (needDetect && DetectLoop(Claim(this), current)) {
+        return;
+    }
+    parent_ = parent;
 }
 } // namespace OHOS::Ace::NG
