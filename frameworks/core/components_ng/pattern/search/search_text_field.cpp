@@ -47,10 +47,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     if (event.IsKeepEditable()) {
         return;
     }
-    CloseKeyboard(forceCloseKeyboard);
-    if (HasFocus()) {
-        FocusHub::LostFocusToViewRoot();
-    }
+    HandleCloseKeyboard(forceCloseKeyboard);
 }
 
 TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const

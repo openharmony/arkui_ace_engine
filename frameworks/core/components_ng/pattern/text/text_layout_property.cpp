@@ -20,6 +20,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float MINFONTSCALE = 0.85f;
 constexpr float MAXFONTSCALE = 3.20f;
+constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
 static const std::array<std::string, 6> TEXT_BASE_LINE_TO_STRING = {
     "textBaseline.ALPHABETIC",
     "textBaseline.IDEOGRAPHIC",
@@ -68,6 +69,38 @@ std::string TextLayoutProperty::GetCopyOptionString() const
             break;
     }
     return copyOptionString;
+}
+
+std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
+{
+    auto jsonValue = JsonUtil::Create(true);
+
+    jsonValue->Put("start", GetTextMarqueeStart().value_or(true));
+    jsonValue->Put("step",
+        StringUtils::DoubleToString(GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx())).c_str());
+    jsonValue->Put("loop", std::to_string(GetTextMarqueeLoop().value_or(-1)).c_str());
+    jsonValue->Put("direction", GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT) == MarqueeDirection::LEFT
+                                    ? "MarqueeDirection.LEFT"
+                                    : "MarqueeDirection.RIGHT");
+    jsonValue->Put("delay", std::to_string(GetTextMarqueeDelay().value_or(0)).c_str());
+    jsonValue->Put("fadeout", GetTextMarqueeFadeout().value_or(false));
+    jsonValue->Put(
+        "startPolicy", GetTextMarqueeStartPolicy().value_or(MarqueeStartPolicy::DEFAULT) == MarqueeStartPolicy::DEFAULT
+                           ? "MarqueeStartPolicy.DEFAULT"
+                           : "MarqueeStartPolicy.ON_FOCUS");
+
+    return jsonValue->ToString();
+}
+
+void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json)
+{
+    UpdateTextMarqueeStart(json->GetBool("start"));
+    UpdateTextMarqueeStep(json->GetDouble("step"));
+    UpdateTextMarqueeLoop(json->GetInt("loop"));
+    UpdateTextMarqueeDirection(V2::ConvertWrapStringToMarqueeDirection(json->GetString("direction")));
+    UpdateTextMarqueeDelay(json->GetInt("delay"));
+    UpdateTextMarqueeFadeout(json->GetBool("fadeout"));
+    UpdateTextMarqueeStartPolicy(V2::ConvertWrapStringToMarqueeStartPolicy(json->GetString("startPolicy")));
 }
 
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -136,6 +169,7 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
         V2::ConvertEllipsisModeToString(GetEllipsisMode().value_or(EllipsisMode::TAIL)).c_str(), filter);
     json->PutExtAttr("textSelectable", V2::ConvertWrapTextSelectableToString(
         GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
+    json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
@@ -164,6 +198,7 @@ void TextLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
     UpdateTextAlign(V2::ConvertWrapStringToTextAlign(json->GetString("textAlign")));
     UpdateTextOverflow(V2::ConvertWrapStringToTextOverflow(json->GetString("textOverflow")));
     UpdateMaxLines(StringUtils::StringToUint(json->GetString("maxLines")));
+    UpdateMarqueeOptionsFromJson(json->GetObject("marqueeOptions"));
     LayoutProperty::FromJson(json);
 }
 } // namespace OHOS::Ace::NG

@@ -32,6 +32,7 @@ public:
 
     virtual void Create(const RefPtr<VideoControllerV2>& videoController) = 0;
     virtual void SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName) = 0;
+    virtual void SetShowFirstFrame(bool showFirstFrame) {}
     virtual void SetProgressRate(double progressRate) = 0;
     virtual void SetPosterSourceInfo(const std::string& posterUrl, const std::string &bundleName,
         const std::string &moduleName) = 0;

@@ -207,6 +207,43 @@ public:
         }
     };
 
+    struct FloatingCaretState {
+        bool isFloatingCaretVisible = false;
+        bool isOriginCaretVisible = false;
+        std::optional<Offset> touchMoveOffset = std::nullopt;
+        Color originCaretColor = Color(0x4D000000);
+        const Dimension showFloatingCaretDistance = 10.0_vp;
+
+        void Reset()
+        {
+            isFloatingCaretVisible = false;
+            isOriginCaretVisible = false;
+            touchMoveOffset.reset();
+        }
+
+        void UpdateOriginCaretColor(ColorMode colorMode)
+        {
+            originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
+        }
+
+        void UpdateByTouchMove(const Offset& offset, double distance)
+        {
+            isFloatingCaretVisible = true;
+            touchMoveOffset = offset;
+            isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+        }
+    };
+
+    const FloatingCaretState& GetFloatingCaretState() const
+    {
+        return floatingCaretState_;
+    }
+
+    void ResetFloatingCaretState()
+    {
+        floatingCaretState_.Reset();
+    }
+
     class ContentModifyLock {
     public:
         ContentModifyLock();
@@ -324,6 +361,20 @@ public:
     long long GetTimestamp() const
     {
         return timestamp_;
+    }
+
+    void SetMaxLength(std::optional<int32_t> maxLength)
+    {
+        if (maxLength != INT_MAX) {
+            DeleteToMaxLength(maxLength);
+        }
+        maxLength_ = maxLength;
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "maxLength: [%{public}d]", maxLength_.value_or(INT_MAX));
+    }
+
+    int32_t GetMaxLength()
+    {
+        return maxLength_.value_or(INT_MAX);
     }
 
     void UpdateSpanPosition()
@@ -576,6 +627,8 @@ public:
     SelectionInfo FromStyledString(const RefPtr<SpanString>& spanString);
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
+    void DeleteToMaxLength(std::optional<int32_t> length);
+    std::u16string DeleteContentRichEditor(int32_t length);
 
     void ResetIsMousePressed()
     {
@@ -619,6 +672,7 @@ public:
     }
 
     RectF GetCaretRect() const override;
+    void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -696,6 +750,7 @@ public:
     std::vector<RectF> GetTextBoxes() override;
     bool OnBackPressed() override;
 
+    RectF GetCaretRelativeRect();
     // Add for Scroll
 
     void OnAttachToFrameNode() override;
@@ -766,6 +821,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
     void ResetDragOption() override;
@@ -1035,7 +1091,6 @@ private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     bool IsShowSingleHandleByClick(const OHOS::Ace::GestureEvent& info, int32_t lastCaretPosition,
         const RectF& lastCaretRect, bool isCaretTwinkling);
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretPosition, const RectF& lastCaretRect);
     bool RepeatClickCaret(const Offset& offset, const RectF& lastCaretRect);
     void CreateAndShowSingleHandle();
     void MoveCaretAndStartFocus(const Offset& offset);
@@ -1090,10 +1145,12 @@ private:
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void HandleTouchDown(const TouchLocationInfo& info);
     void HandleTouchUp();
+    void StartFloatingCaretLand();
     void ResetTouchAndMoveCaretState();
     void HandleTouchUpAfterLongPress();
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
+    void SetCaretTouchMoveOffset(const Offset& localOffset);
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -1297,6 +1354,8 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
+    void ProcessInsertValueMore(std::string text, OperationRecord record, OperationType operationType,
+        RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
     void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
@@ -1386,6 +1445,7 @@ private:
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1424,6 +1484,7 @@ private:
     bool isShowPlaceholder_ = false;
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatingCaretState_;
     // Recorded when touch down or mouse left button press.
     OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};
@@ -1458,8 +1519,10 @@ private:
     uint32_t twinklingInterval_ = 0;
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
+    std::optional<int32_t> maxLength_ = std::nullopt;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
-    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
 };
 } // namespace OHOS::Ace::NG
 

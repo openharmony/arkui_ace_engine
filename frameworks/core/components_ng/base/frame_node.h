@@ -61,6 +61,10 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
+namespace OHOS::Ace::Kit {
+class FrameNode;
+}
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class PipelineContext;
@@ -241,14 +245,7 @@ public:
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
-    void CleanVisibleAreaUserCallback(bool isApproximate = false)
-    {
-        if (isApproximate) {
-            eventHub_->CleanVisibleAreaCallback(true, isApproximate);
-        } else {
-            eventHub_->CleanVisibleAreaCallback(true, false);
-        }
-    }
+    void CleanVisibleAreaUserCallback(bool isApproximate = false);
 
     void SetVisibleAreaInnerCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback,
         bool isCalculateInnerClip = false)
@@ -402,6 +399,16 @@ public:
     void RebuildRenderContextTree() override;
 
     bool IsContextTransparent() override;
+
+    bool IsTrimMemRecycle() const
+    {
+        return isTrimMemRecycle_;
+    }
+
+    void SetTrimMemRecycle(bool isTrimMemRecycle)
+    {
+        isTrimMemRecycle_ = isTrimMemRecycle;
+    }
 
     bool IsVisible() const
     {
@@ -652,6 +659,16 @@ public:
         return customerSet_;
     }
 
+    float GetPreGrayedOpacity() const
+    {
+        return preOpacity_;
+    }
+
+    void SetPreGrayedOpacity(float preOpacity)
+    {
+        preOpacity_ = preOpacity;
+    }
+
     void SetAllowDrop(const std::set<std::string>& allowDrop)
     {
         allowDrop_ = allowDrop;
@@ -694,7 +711,7 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
-    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child.
     // new function will ignore child's position and translate properties.
     RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
@@ -1155,6 +1172,8 @@ public:
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
     void OnPropertyChangeMeasure() const;
 
+    void SetKitNode(const RefPtr<Kit::FrameNode>& node);
+
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
         if (visibleAreaChangeTriggerReason_ != triggerReason) {
@@ -1163,6 +1182,33 @@ public:
     }
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+
+    bool IsDebugInspectorId();
+
+    RectF GetLastFrameRect() const
+    {
+        RectF rect;
+        return lastFrameRect_ ? *lastFrameRect_ : rect;
+    }
+    void SetLastFrameRect(const RectF& lastFrameRect)
+    {
+        *lastFrameRect_ = lastFrameRect;
+    }
+    OffsetF GetLastParentOffsetToWindow() const
+    {
+        OffsetF offset;
+        return lastParentOffsetToWindow_ ? *lastParentOffsetToWindow_ : offset;
+    }
+    void SetLastParentOffsetToWindow(const OffsetF& lastParentOffsetToWindow)
+    {
+        *lastParentOffsetToWindow_ = lastParentOffsetToWindow;
+    }
+    std::shared_ptr<OffsetF>& GetLastHostParentOffsetToWindow()
+    {
+        return lastHostParentOffsetToWindow_;
+    }
 
 protected:
     void DumpInfo() override;
@@ -1271,8 +1317,6 @@ private:
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
-
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
     void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
@@ -1306,8 +1350,7 @@ private:
 
     void ResetPredictNodes();
 
-    bool IsDebugInspectorId();
-
+    bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -1329,6 +1372,7 @@ private:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
@@ -1409,7 +1453,7 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1434,12 +1478,15 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
+    float preOpacity_ = 1.0f;
 
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
+
+    RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG

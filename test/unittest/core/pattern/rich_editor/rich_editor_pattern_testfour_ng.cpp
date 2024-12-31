@@ -72,111 +72,6 @@ int32_t RichEditorPatternTestFourNg::GetEmojiStringLength(std::string emojiStrin
 }
 
 /**
- * @tc.name: HandleDoubleClickOrLongPress001
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    GestureEvent info;
-    RefPtr<FrameNode> imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 0, AceType::MakeRefPtr<ImagePattern>());
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->selectOverlay_->hasTransform_ = true;
-
-    richEditorPattern->isLongPress_ = true;
-    richEditorPattern->HandleDoubleClickOrLongPress(info, imageNode);
-    /**
-     * @tc.steps: step2. add span and select text
-     */
-    AddSpan("test");
-    RectF rect(0, 0, 5, 5);
-    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
-    richEditorPattern->textSelector_.Update(3, 4);
-    richEditorPattern->selectOverlay_->OnHandleMoveDone(rect, true);
-    richEditorPattern->HandleDoubleClickOrLongPress(info, imageNode);
-
-    EXPECT_TRUE(richEditorPattern->textSelector_.IsValid());
-}
-
-/**
- * @tc.name: HandleDoubleClickOrLongPress002
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    GestureEvent info;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->selectOverlay_->hasTransform_ = true;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 10;
-    ParagraphManager::ParagraphInfo paragraphInfo;
-    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
-        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
-            selectedRects.emplace_back(RectF(0, 0, 100, 20));
-        }));
-    PositionWithAffinity defaultPositionWithAffinity(2, TextAffinity::UPSTREAM);
-    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
-    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_FALSE(richEditorPattern->isMousePressed_);
-}
-
-/**
- * @tc.name: HandleDoubleClickOrLongPress003
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, HandleDoubleClickOrLongPress003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    richEditorNode_->eventHub_->GetOrCreateFocusHub();
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    GestureEvent info;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->selectOverlay_->hasTransform_ = true;
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 10;
-    ParagraphManager::ParagraphInfo paragraphInfo;
-    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
-        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
-            selectedRects.emplace_back(RectF(0, 0, 100, 20));
-        }));
-    PositionWithAffinity defaultPositionWithAffinity(2, TextAffinity::UPSTREAM);
-    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(defaultPositionWithAffinity));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
-    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
-    richEditorPattern->isMousePressed_ = true;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_FALSE(richEditorPattern->isLongPress_);
-}
-
-/**
  * @tc.name: HandleMenuCallbackOnSelectAll001
  * @tc.desc: test HandleMenuCallbackOnSelectAll
  * @tc.type: FUNC
@@ -222,24 +117,6 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleMenuCallbackOnSelectAll001, TestSize
     richEditorPattern->selectOverlay_->isUsingMouse_ = true;
     EXPECT_EQ(richEditorPattern->selectOverlay_->IsUsingMouse(), true);
     richEditorPattern->HandleMenuCallbackOnSelectAll();
-}
-
-/**
- * @tc.name: ToStyledString002
- * @tc.desc: test ToStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, ToStyledString002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    int32_t start = 3;
-    int32_t end = -2;
-    AddSpan("test");
-    RefPtr<SpanString> res = richEditorPattern->ToStyledString(start, end);
-    ASSERT_NE(res, nullptr);
 }
 
 /**
@@ -1340,33 +1217,6 @@ HWTEST_F(RichEditorPatternTestFourNg, HandleSingleClickEvent001, TestSize.Level1
     richEditorPattern->DeleteSelectOperation(&record);
 
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-}
-
-/**
- * @tc.name: SetPreviewText001
- * @tc.desc: test RichEditorPattern SetPreviewText
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestFourNg, SetPreviewText001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    std::string previewTextValue;
-    PreviewRange range;
-
-    range.start = -1;
-    range.end = 0;
-
-    richEditorPattern->previewTextRecord_.previewContent = "";
-    richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
-    richEditorPattern->previewTextRecord_.startOffset = 0;
-    richEditorPattern->previewTextRecord_.endOffset = 0;
-
-    richEditorPattern->SetPreviewText(previewTextValue, range);
-
-    ASSERT_EQ(richEditorPattern->InitPreviewText(previewTextValue, range), false);
 }
 
 /**

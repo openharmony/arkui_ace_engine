@@ -141,12 +141,12 @@ public:
         return hasCacheNavigationNodeEnable_;
     }
 
-    void UpdateRenderGroup(const RefPtr<FrameNode>& curNode, bool isSet);
+    void UpdateAnimationCachedRenderGroup(const RefPtr<FrameNode>& curNode, bool isSet);
     void UpdatePreNavNodeRenderGroupProperty();
     void ResetCurNavNodeRenderGroupProperty();
     void UpdateCurNavNodeRenderGroupProperty();
     void CacheNavigationNodeAnimation();
-    bool CheckChildrenAnimationAndTagState(const RefPtr<FrameNode>& node);
+    bool CheckNodeNeedCache(const RefPtr<FrameNode>& node);
     RefPtr<FrameNode> GetNavDestContentFrameNode(const RefPtr<FrameNode>& node);
     bool AddInteractiveAnimation(const std::function<void()>& addCallback);
 

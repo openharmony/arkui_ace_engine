@@ -23,6 +23,7 @@ constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
+static std::string nameValue;
 
 void SetSelect(ArkUINodeHandle node, ArkUI_Bool isSelected)
 {
@@ -287,6 +288,22 @@ void SetCheckboxGroup(ArkUINodeHandle node, ArkUI_CharPtr group)
     CheckBoxModelNG::SetCheckboxGroup(frameNode, std::string(group));
 }
 
+ArkUI_CharPtr GetCheckboxName(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    nameValue = CheckBoxModelNG::GetCheckboxName(frameNode);
+    return nameValue.c_str();
+}
+
+ArkUI_CharPtr GetCheckboxGroup(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    nameValue = CheckBoxModelNG::GetCheckboxGroup(frameNode);
+    return nameValue.c_str();
+}
+
 namespace NodeModifier {
 const ArkUICheckboxModifier *GetCheckboxModifier()
 {
@@ -319,6 +336,8 @@ const ArkUICheckboxModifier *GetCheckboxModifier()
         GetCheckboxShape,
         SetCheckboxName,
         SetCheckboxGroup,
+        GetCheckboxName,
+        GetCheckboxGroup,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -362,6 +381,8 @@ const CJUICheckboxModifier* GetCJUICheckboxModifier()
         GetCheckboxShape,
         SetCheckboxName,
         SetCheckboxGroup,
+        GetCheckboxName,
+        GetCheckboxGroup,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

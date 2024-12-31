@@ -60,6 +60,7 @@ public:
     void SetBarBackgroundColor(const Color& backgroundColor) override;
     void SetClipEdge(bool clipEdge) override;
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override;
+    void ResetScrollableBarModeOptions() override;
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
@@ -68,6 +69,7 @@ public:
     void SetEdgeEffect(EdgeEffect edgeEffect) override;
     void SetBarBackgroundEffect(const EffectOption& effectOption) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
+    void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -91,6 +93,8 @@ public:
     static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
     static void SetAnimateMode(FrameNode* frameNode, TabAnimateMode mode);
     static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect);
+    static void SetTabBarIndex(FrameNode* frameNode, int32_t index);
+    static void SetTabsController(FrameNode* frameNode, const RefPtr<SwiperController>& tabsController);
     static void SetBarBackgroundEffect(FrameNode* frameNode, const EffectOption& effectOption);
     static void SetPageFlipMode(FrameNode* frameNode, int32_t options);
 

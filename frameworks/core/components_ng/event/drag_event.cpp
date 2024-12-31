@@ -132,9 +132,10 @@ void DragEventActuator::StartLongPressActionForWeb()
 
 void DragEventActuator::CancelDragForWeb()
 {
+    auto gestureInfo = GestureEvent();
     if (actionCancel_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "DragDrop call action cancel success");
-        actionCancel_();
+        actionCancel_(gestureInfo);
     } else {
         TAG_LOGE(AceLogTag::ACE_WEB, "DragDrop action cancel null");
     }
@@ -416,7 +417,7 @@ void DragEventActuator::TryTriggerThumbnailCallback()
     CHECK_NULL_VOID(gestureHub);
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
-    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG) {
+    if (isThumbnailCallbackTriggered_ || frameNode->GetTag() == V2::WEB_ETS_TAG || gestureHub->GetTextDraggable()) {
         return;
     }
     GetThumbnailPixelMap(true);
@@ -619,7 +620,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         actuator->SetIsNotInPreviewState(false);
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
-    auto actionCancel = [weak = WeakClaim(this), touchSourceType = touchRestrict.sourceType]() {
+    auto actionCancel = [weak = WeakClaim(this), touchSourceType = touchRestrict.sourceType](const GestureEvent& info) {
         TAG_LOGD(AceLogTag::ACE_DRAG, "Drag event has been canceled.");
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
@@ -727,7 +728,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     actionCancel_ = actionCancel;
     panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
     panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
-    auto panOnActionCancel = [weak = WeakClaim(this)]() {
+    auto panOnActionCancel = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         actuator->HandleOnPanActionCancel();
@@ -883,7 +884,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             option.GetOnFinishEvent());
         actuator->SetEventColumn(actuator);
     };
-    auto longPressCancel = [weak = WeakClaim(this)] {
+    auto longPressCancel = [weak = WeakClaim(this)](const GestureEvent& info) {
         // remove drag overlay info by Cancel event.
         TAG_LOGD(AceLogTag::ACE_DRAG, "Long press event has been canceled.");
         auto actuator = weak.Upgrade();
@@ -953,7 +954,6 @@ void DragEventActuator::ResetDragStatus()
     overlayManager->RemoveGatherNode();
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
-    overlayManager->RemoveFilter();
 }
 
 void DragEventActuator::SetDragDampStartPointInfo(const Point& point, int32_t pointerId)
@@ -1247,6 +1247,11 @@ void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, con
     columnNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
     columnNode->MarkModifyDone();
     columnNode->SetActive(true);
+    auto renderContext = columnNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->MarkUiFirstNode(false);
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+    }
     MarkDirtyNode(columnNode);
     if (!isDragPixelMap) {
         FlushSyncGeometryNodeTasks();
@@ -1794,6 +1799,7 @@ void DragEventActuator::SetTextAnimation(const RefPtr<GestureEventHub>& gestureH
         textPixelMap_ = renderContext->GetThumbnailPixelMap();
     }
     modifier->StartFloatingAnimate();
+    pattern->OnDragNodeFloating();
     pattern->CloseHandleAndSelect();
     TAG_LOGD(AceLogTag::ACE_DRAG, "DragEvent set text animation success.");
 }
@@ -2126,9 +2132,9 @@ RefPtr<FrameNode> DragEventActuator::CreateImageNode(const RefPtr<FrameNode>& fr
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 
-    gatherNodeChildInfo = {
-        imageNode, offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()),
-        width, height, width / 2.0f, height / 2.0f };
+    gatherNodeChildInfo = { imageNode,
+        offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()), width, height,
+        width / 2.0f, height / 2.0f, WeakPtr<FrameNode>(frameNode) };
     return imageNode;
 }
 

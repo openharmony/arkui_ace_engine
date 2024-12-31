@@ -133,6 +133,8 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
     float GetWindowScale() const;
+    void UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const int32_t eventId = -1);
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
@@ -466,6 +468,16 @@ public:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
+    void SetGrayedState(bool state)
+    {
+        grayedState_ = state;
+    }
+
+    bool GetGrayedState() const
+    {
+        return grayedState_;
+    }
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -573,6 +585,7 @@ private:
     RefPtr<GridColumnInfo> columnInfo_;
     WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
+    bool grayedState_ = false;
 };
 } // namespace OHOS::Ace::NG
 

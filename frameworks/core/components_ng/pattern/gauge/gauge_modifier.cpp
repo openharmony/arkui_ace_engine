@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/gauge/gauge_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -28,7 +29,6 @@ constexpr float HALF_CIRCLE = 180.0f;
 constexpr float WHOLE_CIRCLE = 360.0f;
 constexpr float QUARTER_CIRCLE = 90.0f;
 constexpr float PERCENT_HALF = 0.5f;
-constexpr float SEGMENTS_SPACE_PERCENT = 0.008f;
 }
 void GaugeModifier::onDraw(DrawingContext& context)
 {
@@ -651,7 +651,11 @@ void GaugeModifier::PaintMultiSegmentGradientCircularShadow(RSCanvas& canvas, Re
         info.drawSweepDegree = (weights[index] / totalWeight) * data.sweepDegree;
         info.offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
         info.colorStopArray = colors.at(index);
-        DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            DrawSingleSegmentGradient(canvas, data, paintProperty, info, index);
+        } else {
+            DrawSingleSegmentGradientExtend(canvas, data, paintProperty, info, index);
+        }
     }
     canvas.Restore();
 }
@@ -783,7 +787,13 @@ void GaugeModifier::DrawSegmentGradient(RSCanvas& canvas, RSBrush& brush, Render
             GetDrawPath(path, data, startDegree, sweepDegree, true);
             GetDrawPath(clipPath, data, startDegree, drawSweepDegree, true);
             auto radius = data.radius - data.thickness * PERCENT_HALF;
-            auto space = data.radius * MIN_CIRCLE * SEGMENTS_SPACE_PERCENT;
+            auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+            CHECK_NULL_VOID(pattern);
+            auto context = pattern->GetContext();
+            CHECK_NULL_VOID(context);
+            auto theme = context->GetTheme<GaugeTheme>();
+            CHECK_NULL_VOID(theme);
+            float space = data.radius * MIN_CIRCLE * theme->GetIntervalRatio();
             auto degree = info.lastStartDegree + info.lastSweepDegree;
             clipPath2.AddCircle(data.center.GetX() + radius * std::cos((degree)*M_PI / HALF_CIRCLE),
                 data.center.GetY() + radius * std::sin((degree)*M_PI / HALF_CIRCLE),
@@ -837,7 +847,13 @@ void GaugeModifier::DrawHighLight(RSCanvas& canvas, RenderRingInfo& data, float 
 {
     float offsetDegree = GetOffsetDegree(data, data.thickness * PERCENT_HALF);
     auto radius = data.radius - data.thickness * PERCENT_HALF;
-    auto space = data.radius * MIN_CIRCLE * SEGMENTS_SPACE_PERCENT;
+    auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<GaugeTheme>();
+    CHECK_NULL_VOID(theme);
+    float space = data.radius * MIN_CIRCLE * theme->GetIntervalRatio();
     RSPath path1;
     path1.AddCircle(data.center.GetX() + radius * std::cos((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
                     data.center.GetY() + radius * std::sin((drawStartDegree - offsetDegree) * M_PI / HALF_CIRCLE),
@@ -918,7 +934,7 @@ void GaugeModifier::NewDrawIndicator(
     pen.SetBlendMode(RSBlendMode::SRC_OVER);
     pen.SetColor(theme->GetIndicatorBorderColor().GetValue());
     pen.SetAntiAlias(true);
-    pen.SetWidth(INDICATOR_BORDER_WIDTH_RATIO_DOUBLE * data.radius);
+    pen.SetWidth(theme->GetIndicatorBorderRatio() * data.radius);
     pen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
     canvas.AttachPen(pen);
     canvas.DrawPath(path);
@@ -979,11 +995,17 @@ void GaugeModifier::CreateDefaultColor(std::vector<RSColorQuad>& colors, std::ve
 void GaugeModifier::CreateDefaultTrianglePath(
     float pathStartVertexX, float pathStartVertexY, float radius, RSPath& path)
 {
-    auto width = radius * RADIUS_TO_DIAMETER * INDICATOR_WIDTH_RATIO;
-    auto height = radius * RADIUS_TO_DIAMETER * INDICATOR_HEIGHT_RATIO;
+    auto pattern = DynamicCast<GaugePattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<GaugeTheme>();
+    CHECK_NULL_VOID(theme);
+    float width = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorWidthRatio();
+    float height = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorHeightRatio();
     auto hypotenuse = std::sqrt(((width * PERCENT_HALF) * (width * PERCENT_HALF)) + (height * height));
     
-    auto cornerRadius = radius * RADIUS_TO_DIAMETER * INDICATOR_CORNER_RADIUS_RATIO;
+    float cornerRadius = radius * RADIUS_TO_DIAMETER * theme->GetIndicatorRadiusRatio();
     auto bottomAngle = std::atan(height / (width * PERCENT_HALF));
 
     if (!NearZero(hypotenuse) && hypotenuse != 0) {

@@ -24,11 +24,6 @@ constexpr float PROGRSS_MAX_VALUE = 100.f;
 void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     PaintProperty::ToJsonValue(json, filter);
-    /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
-        ToJsonValueForCapsule(json, filter);
-        return;
-    }
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto progressTheme = pipeline->GetTheme<ProgressTheme>();
@@ -56,7 +51,6 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
         (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str(), filter);
     json->PutExtAttr("capsuleBorderColor",
         (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str(), filter);
-    ToJsonValueForCapsule(json, filter);
     json->PutExtAttr("progressGradientColor", ToJsonGradientColor().c_str(), filter);
 }
 
@@ -68,45 +62,6 @@ std::string ProgressPaintProperty::ProgressOptions() const
     jsonValue->Put("type",
         ProgressTypeUtils::ConvertProgressTypeToString(GetProgressType().value_or(ProgressType::LINEAR)).c_str());
     return jsonValue->ToString();
-}
-
-void ProgressPaintProperty::ToJsonValueForCapsule(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
-{
-    /* no fixed attr below, just return */
-    if (filter.IsFastFilter()) {
-        return;
-    }
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto progressTheme = pipeline->GetTheme<ProgressTheme>();
-    CHECK_NULL_VOID(progressTheme);
-    auto capsuleStyle = JsonUtil::Create(true);
-    auto fontStyle = JsonUtil::Create(true);
-    auto font = JsonUtil::Create(true);
-    capsuleStyle->Put("borderWidth", (GetBorderWidth().value_or(progressTheme->GetBorderWidth())).ToString().c_str());
-    capsuleStyle->Put(
-        "borderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());
-    capsuleStyle->Put("fontColor", (GetTextColor().value_or(progressTheme->GetTextColor())).ColorToString().c_str());
-    capsuleStyle->Put("content", (GetText().value_or("")).c_str());
-    capsuleStyle->Put("enableScanEffect", (GetEnableScanEffect().value_or(false)) ? "true" : "false");
-    capsuleStyle->Put("showDefaultPercentage", (GetEnableShowText().value_or(false)) ? "true" : "false");
-    font->Put("size", (GetTextSize().value_or(progressTheme->GetTextSize())).ToString().c_str());
-    font->Put("style", GetItalicFontStyle().value_or(Ace::FontStyle::NORMAL) == Ace::FontStyle::NORMAL
-                           ? "FontStyle.Normal"
-                           : "FontStyle.Italic");
-    font->Put("weight", V2::ConvertWrapFontWeightToStirng(GetFontWeight().value_or(FontWeight::NORMAL)).c_str());
-    std::vector<std::string> defaultFamily = { "Sans" };
-    std::vector<std::string> fontFamilyVector = GetFontFamily().value_or(defaultFamily);
-    if (fontFamilyVector.empty()) {
-        fontFamilyVector = defaultFamily;
-    }
-    std::string fontFamily = fontFamilyVector.at(0);
-    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
-        fontFamily += ',' + fontFamilyVector.at(i);
-    }
-    font->Put("family", fontFamily.c_str());
-    capsuleStyle->Put("font", font);
-    json->PutExtAttr("capsuleStyle", capsuleStyle, filter);
 }
 
 std::string ProgressPaintProperty::ToJsonGradientColor() const

@@ -516,6 +516,12 @@ void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ark
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
  
     NG::PickerTextStyle textStyle;
     std::vector<std::string> res;
@@ -541,15 +547,21 @@ void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, Ark
         textStyle.textOverflow = TEXT_OVERFLOWS[0];
     }
 
-    TextPickerModelNG::SetDefaultTextStyle(frameNode, textStyle);
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, textStyle);
 }
 
 void ResetTextPickerDefaultTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
     NG::PickerTextStyle pickerTextStyle;
-    TextPickerModelNG::SetDefaultTextStyle(frameNode, pickerTextStyle);
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, pickerTextStyle);
 }
 
 ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)

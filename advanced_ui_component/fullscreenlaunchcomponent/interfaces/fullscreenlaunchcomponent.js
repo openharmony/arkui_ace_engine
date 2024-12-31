@@ -23,7 +23,7 @@ const commonEventManager = requireNapi('commonEventManager');
 export class FullScreenLaunchComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === 'function') {
+        if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
         this.content = this.doNothingBuilder;
@@ -88,7 +88,7 @@ export class FullScreenLaunchComponent extends ViewPU {
                 hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, err: %{public}s.', JSON.stringify(err));
                 return;
             }
-            if (data === null || data === undefined) {
+            if (data == null || data == undefined) {
                 hilog.error(0x3900, 'FullScreenLaunchComponent', 'Failed to create subscriber, data is null.');
                 return;
             }
@@ -185,7 +185,7 @@ export class FullScreenLaunchComponent extends ViewPU {
             UIExtensionComponent.height('100%');
             UIExtensionComponent.width('100%');
             UIExtensionComponent.onError(err => {
-                if (this.onError !== undefined) {
+                if (this.onError != undefined) {
                     this.onError(err);
                 }
                 this.isShow = false;
@@ -196,7 +196,7 @@ export class FullScreenLaunchComponent extends ViewPU {
             });
             UIExtensionComponent.onTerminated(info => {
                 this.isShow = false;
-                if (this.onTerminated !== undefined) {
+                if (this.onTerminated != undefined) {
                     this.onTerminated(info);
                 }
             });

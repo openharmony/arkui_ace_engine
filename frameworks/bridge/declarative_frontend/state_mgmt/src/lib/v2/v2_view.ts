@@ -51,7 +51,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     private onWillApplyThemeInternally(): void {
-        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this.id__());
+        const theme = PUV2ViewBase.arkThemeScopeManager?.getFinalTheme(this);
         if (theme) {
             this.onWillApplyTheme(theme);
         }
@@ -86,8 +86,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         return `@ComponentV2 '${this.constructor.name}'[${this.id__()}]`;
     }
 
-
-    private get isViewV2(): boolean {
+    protected get isViewV2(): boolean {
         return true;
     }
 
@@ -479,7 +478,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             return retVal;
         }
         Object.getOwnPropertyNames(meta)
-            .filter((varName) => !varName.startsWith('___pc_alias__@')) // remove provider & consumer prefix
+            .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
             .forEach((varName) => {
                 const prop: any = Reflect.get(meta, varName);
                 if ('deco' in prop) {

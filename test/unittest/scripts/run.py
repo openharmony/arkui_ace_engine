@@ -25,31 +25,50 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 
 
+def build_target_name(xml_file_path):
+    last_backslash_index = xml_file_path.rfind('/')
+    last_dot_index = xml_file_path.rfind('.')
+    if last_backslash_index != -1 and last_dot_index != -1 and last_backslash_index < last_dot_index:
+        result = xml_file_path[last_backslash_index + 1:last_dot_index]
+        return result
+    else:
+        return "Build Target Not Find"
+
 def parse_xml(xml_file_path):
     """
     Parse the XML file of the execution output of the use case
     """
+    test_module_name = build_target_name(xml_file_path)
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
     tests = root.attrib.get("tests")
     failures = root.attrib.get("failures")
     failed_info = {
-        "test_suite_name": [],
+        "test_module_name": test_module_name,
         "total_count": tests,
         "failed_count": failures,
         "failed_testcase_name": []
     }
+    passed_info = {
+        "test_module_name": test_module_name,
+        "total_count": tests,
+        "passed_count": 0,
+        "passed_testcase_name": []
+    }
+    passed_count = 0
     for testsuite in root.findall(".//testsuite"):
         testsuite_name = testsuite.attrib.get("name")
         testsuite_failures = testsuite.attrib.get("failures")
-        if int(testsuite_failures):
-            failed_info["test_suite_name"].append(testsuite_name)
         for testcase in testsuite.findall(".//testcase"):
             testcase_name = testcase.attrib.get("name")
             failure = testcase.find("failure")
             if failure is not None:
-                failed_info["failed_testcase_name"].append(testcase_name)
-    return failed_info
+                failed_info["failed_testcase_name"].append(testsuite_name+"#"+testcase_name)
+            else:
+                passed_info["passed_testcase_name"].append(testsuite_name+"#"+testcase_name)
+                passed_count = passed_count+1
+    passed_info["passed_count"] = str(passed_count)
+    return failed_info, passed_info
 
 
 def run_command(test_binary_path: str, alter_cmds: list = None):
@@ -101,24 +120,30 @@ def run_tests_parallel(test_directory, process_number: int):
         "execute_time": 0,
         "total_execute_tests": 0,
         "failed_tests_count": 0,
+        "passed_tests_count": 0,
         "unavailable": [],
-        "failed": []
+        "failed": [],
+        "passed": []
     }
     total_tests_count = 0
     failed_tests_count = 0
+    passed_tests_count = 0
     for test_binary in test_binaries:
         xml_file_path = "{}.xml".format(test_binary)
         if os.path.exists(xml_file_path):
-            failed_info = parse_xml(xml_file_path)
+            failed_info, passed_info= parse_xml(xml_file_path)
             total_tests_count = total_tests_count + int(failed_info.get('total_count', '0'))
             failed_tests_count = failed_tests_count + int(failed_info.get('failed_count', '0'))
+            passed_tests_count = passed_tests_count + int(passed_info.get('passed_count', '0'))
             if int(failed_info.get('failed_count', '0')):
                 test_result['failed'].append(failed_info)
+            test_result['passed'].append(passed_info)
         else:
             test_result["unavailable"].append(test_binary.split('/')[-1])
     test_result["execute_time"] = "{} seconds".format(round(end - start, 2))
     test_result['total_execute_tests'] = total_tests_count
     test_result['failed_tests_count'] = failed_tests_count
+    test_result['passed_tests_count'] = passed_tests_count
     json_file_path = os.path.join(test_directory, "test_result.json")
     flags = os.O_CREAT | os.O_WRONLY | os.O_TRUNC
     mode = stat.S_IRUSR | stat.S_IWUSR

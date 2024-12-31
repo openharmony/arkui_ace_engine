@@ -65,6 +65,7 @@ void PagePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -229,6 +230,7 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
@@ -352,7 +354,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -825,7 +827,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -862,7 +864,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -938,14 +940,19 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        const float defaultAmplitudePx = 0.005f;
-        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        CHECK_NULL_VOID(pipeline);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_VOID(appTheme);
+        float defaultAmplitudeRatio = appTheme->GetPageTransitionAmplitudeRatio();
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudeRatio);
     }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline) {
         const int32_t nanoToMilliSeconds = 1000000;
         const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;

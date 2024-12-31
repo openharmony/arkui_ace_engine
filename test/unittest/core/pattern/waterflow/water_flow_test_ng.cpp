@@ -14,7 +14,9 @@
  */
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
+#define protected public
 #include "test/mock/base/mock_system_properties.h"
+#undef protected
 #endif
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"

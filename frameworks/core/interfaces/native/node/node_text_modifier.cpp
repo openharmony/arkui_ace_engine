@@ -19,6 +19,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -121,6 +122,17 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
+}
+
+void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, Constants::GetVariableFontWeight(static_cast<FontWeight>(weight)));
+    TextModelNG::SetEnableVariableFontWeight(frameNode, true);
 }
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
@@ -1204,6 +1216,50 @@ void ResetTextEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(value->start);
+    marqueeOptions.UpdateTextMarqueeStep(value->step);
+    marqueeOptions.UpdateTextMarqueeLoop(value->loop);
+    marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT);
+    marqueeOptions.UpdateTextMarqueeDelay(value->delay);
+    marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void ResetMarqueeOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextMarqueeOptions marqueeOptions;
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+}
+
+void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onChange = reinterpret_cast<std::function<void(int32_t)>*>(callback);
+        TextModelNG::SetOnMarqueeStateChange(frameNode, std::move(*onChange));
+    } else {
+        TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+    }
+}
+
+void ResetOnMarqueeStateChange(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetOnMarqueeStateChange(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1336,6 +1392,11 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextResponseRegion = ResetResponseRegion,
         .setTextEnableHapticFeedback = SetTextEnableHapticFeedback,
         .resetTextEnableHapticFeedback = ResetTextEnableHapticFeedback,
+        .setTextMarqueeOptions = SetMarqueeOptions,
+        .resetTextMarqueeOptions = ResetMarqueeOptions,
+        .setOnMarqueeStateChange = SetOnMarqueeStateChange,
+        .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
+        .setImmutableFontWeight = SetImmutableFontWeight,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

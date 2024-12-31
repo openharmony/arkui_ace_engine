@@ -951,6 +951,12 @@ public:
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override
+    {
+        ViewAbstract::SetOnCrownEvent(std::move(onCrownCallback));
+    }
+#endif
     void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -1309,8 +1315,11 @@ public:
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityRole(const std::string& role, bool resetValue) override;
+    void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void ResetOnAccessibilityFocus() override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1341,6 +1350,13 @@ public:
     {
         ViewAbstract::DisableOnKeyEvent();
     }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override
+    {
+        ViewAbstract::DisableOnCrownEvent();
+    }
+#endif
 
     void DisableOnKeyPreIme() override
     {
@@ -1493,6 +1509,10 @@ public:
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
     static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
+    static void SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue);
+    static void SetOnAccessibilityFocus(
+        FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
+    static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)

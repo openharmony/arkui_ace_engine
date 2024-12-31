@@ -256,7 +256,7 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
     ProgressModelNG::SetFontFamily(node, families);
     ProgressModelNG::SetItalicFontStyle(node, static_cast<Ace::FontStyle>(fontStyle));
-    if ((value->borderRadiusValue < 0) ||
+    if (Negative(value->borderRadiusValue) ||
         (static_cast<DimensionUnit>(value->borderRadiusUnit) == DimensionUnit::PERCENT)) {
         ProgressModelNG::ResetBorderRadius(node);
     } else {

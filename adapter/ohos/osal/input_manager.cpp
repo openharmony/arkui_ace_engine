@@ -29,6 +29,15 @@ bool InputManager::GetDeviceIds(std::vector<int32_t>& resDeviceIds)
     return true;
 }
 
+std::shared_ptr<MMI::PointerEvent> InputManager::CreatePointerEvent(
+    const std::shared_ptr<const MMI::PointerEvent>& pointerEvent)
+{
+    if (!pointerEvent) {
+        return nullptr;
+    }
+    return std::make_shared<MMI::PointerEvent>(*pointerEvent);
+}
+
 KeyboardType ConvertKeyboardType(int32_t type)
 {
     switch (type) {

@@ -1060,24 +1060,15 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleMouseLeftButtonPress002, TestSize.Le
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    TestParagraphRect paragraphRect = { .start = 0, .end = 10, .rects = { { 0, 0, 100, 20 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 10,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
     MouseInfo info;
     richEditorPattern->copyOption_ = CopyOptions::InApp;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 10;
-    ParagraphManager::ParagraphInfo paragraphInfo;
-    ParagraphManager::ParagraphInfo paragraphInfo1;
-    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
-    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
-        .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
-            selectedRects.emplace_back(RectF(0, 0, 100, 20));
-        }));
-    paragraphInfo.paragraph = mockParagraph;
-    paragraphInfo1.paragraph = mockParagraph;
-    paragraphInfo.start = 0;
-    paragraphInfo.end = 10;
-    paragraphInfo1.end = 10;
-    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
-    richEditorPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo1);
     richEditorPattern->HandleMouseLeftButtonPress(info);
     EXPECT_TRUE(richEditorPattern->blockPress_);
 }
@@ -1092,6 +1083,11 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleMouseLeftButtonPress003, TestSize.Le
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 1,
+        .indexOffsetMap = { { 0, Offset(0, 0) }, { 6, Offset(50, 0) } },
+        .testParagraphRects = { paragraphRect } };
+    AddParagraph(paragraphItem);
     MouseInfo info;
     richEditorPattern->GetFocusHub()->focusType_ = FocusType::DISABLE;
     richEditorPattern->HandleMouseLeftButtonPress(info);
@@ -1118,6 +1114,9 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleMouseRightButton001, TestSize.Level1
         .WillRepeatedly(Invoke([&](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
             selectedRects.emplace_back(RectF(0, 0, 100, 20));
         }));
+    ASSERT_NE(mockParagraph, nullptr);
+    PositionWithAffinity positionWithAffinity(2, TextAffinity::UPSTREAM);
+    EXPECT_CALL(*mockParagraph, GetGlyphPositionAtCoordinate(_)).WillRepeatedly(Return(positionWithAffinity));
     paragraphInfo.paragraph = mockParagraph;
     paragraphInfo.start = 0;
     paragraphInfo.end = 10;
@@ -1646,9 +1645,9 @@ HWTEST_F(RichEditorPatternTestFiveNg, RepeatClickCaret001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretTwinkling_ = true;
-    Offset offset;
+    Offset offset = Offset(50.0, 50.0);
     RectF lastCaretRect;
-    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, 1, lastCaretRect));
+    EXPECT_FALSE(richEditorPattern->RepeatClickCaret(offset, lastCaretRect));
 }
 
 /**

@@ -66,6 +66,14 @@ public:
         return true;
     }
 
+    bool PostTask(Task&& task, Task type, const std::string& name,
+        PriorityType priorityType = PriorityType::LOW) const
+    {
+        CHECK_NULL_RETURN(task, false);
+        task();
+        return true;
+    }
+
 private:
     bool delayRun_ = false;
 };

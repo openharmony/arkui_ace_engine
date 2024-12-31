@@ -136,6 +136,15 @@ bool CheckContainer(const RefPtr<Container>& container)
     return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
 }
 
+bool CheckRunOnThreadByThreadId(int32_t currentId, bool defaultRes)
+{
+    auto container = Container::GetContainer(currentId);
+    CHECK_NULL_RETURN(container, defaultRes);
+    auto executor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(executor, defaultRes);
+    return executor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI);
+}
+
 bool GetAnyContextIsLayouting(const RefPtr<PipelineBase>& currentPipeline)
 {
     if (currentPipeline->IsLayouting()) {
@@ -651,7 +660,18 @@ void RecordAnimationFinished(int32_t count)
 
 void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
 {
-    ContainerScope scope(Container::CurrentIdSafelyWithCheck());
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    if (!CheckRunOnThreadByThreadId(currentId, true)) {
+        // fix DynamicComponent get wrong container when calling the animateTo function.
+        auto localContainerId = ContainerScope::CurrentLocalId();
+        TAG_LOGI(AceLogTag::ACE_ANIMATION,
+            "AnimateToInner not run on running thread, currentId: %{public}d, localId: %{public}d",
+            currentId, localContainerId);
+        if (localContainerId > 0 && CheckRunOnThreadByThreadId(localContainerId, false)) {
+            currentId = localContainerId;
+        }
+    }
+    ContainerScope scope(currentId);
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -1012,11 +1032,13 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
+#ifndef ARKUI_WEARABLE
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
     JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
     JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
+#endif
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }

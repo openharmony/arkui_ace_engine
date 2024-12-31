@@ -266,6 +266,9 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
+#endif
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
@@ -318,6 +321,9 @@ public:
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
     virtual void DisableOnFocusAxisEvent() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void DisableOnCrownEvent() = 0;
+#endif
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
@@ -392,6 +398,9 @@ public:
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
+    virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void ResetOnAccessibilityFocus() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

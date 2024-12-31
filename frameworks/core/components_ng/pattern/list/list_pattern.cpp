@@ -19,6 +19,7 @@
 #include "base/log/dump_log.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/list/list_theme.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/list/list_height_offset_calculator.h"
@@ -63,6 +64,9 @@ void ListPattern::OnModifyDone()
         auto scrollableEvent = GetScrollableEvent();
         CHECK_NULL_VOID(scrollableEvent);
         scrollable_ = scrollableEvent->GetScrollable();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -85,10 +89,31 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    auto fadingEdge = GetFadingEdge(paintProperty);
     auto overlayNode = host->GetOverlayNode();
-    if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
+    if (!overlayNode && fadingEdge) {
         CreateAnalyzerOverlay(host);
     }
+}
+
+bool ListPattern::GetFadingEdge(RefPtr<ScrollablePaintProperty>& paintProperty)
+{
+    auto defaultFadingEdge = false;
+    if (!paintProperty->HasDefaultFadingEdge()) {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto context = host->GetContextRefPtr();
+        CHECK_NULL_RETURN(context, false);
+        auto listTheme = context->GetTheme<ListTheme>();
+        CHECK_NULL_RETURN(listTheme, false);
+        defaultFadingEdge = GetAxis() == Axis::VERTICAL ? listTheme->GetFadingEdge()
+                                                        : false;
+        paintProperty->UpdateDefaultFadingEdge(defaultFadingEdge);
+    } else {
+        defaultFadingEdge = paintProperty->GetDefaultFadingEdge().value_or(false);
+    }
+    auto fadingEdge = paintProperty->GetFadingEdge().value_or(defaultFadingEdge);
+    return fadingEdge;
 }
 
 void ListPattern::ChangeAxis(RefPtr<UINode> node)
@@ -168,7 +193,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     bool isNeedUpdateIndex = targetIndex_ ? HandleTargetIndex(isJump) : true;
     if (predictSnapOffset.has_value()) {
         if (scrollable_ && !(NearZero(predictSnapOffset.value()) && NearZero(scrollSnapVelocity_)) &&
-            !AnimateRunning()) {
+            (!AnimateRunning() || lastSnapTargetIndex_.has_value())) {
             StartListSnapAnimation(predictSnapOffset.value(), scrollSnapVelocity_);
             if (snapTrigOnScrollStart_) {
                 FireOnScrollStart();
@@ -178,6 +203,7 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
         }
         scrollSnapVelocity_ = 0.0f;
         predictSnapOffset_.reset();
+        ResetLastSnapTargetIndex();
         snapTrigOnScrollStart_ = false;
         if (predictSnapEndPos.has_value()) {
             predictSnapEndPos_ = predictSnapEndPos;
@@ -321,7 +347,6 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
         paint->SetDirection(true);
     }
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     paint->SetTotalItemCount(maxListItemIndex_ + 1);
     auto scrollEffect = GetScrollEdgeEffect();
@@ -331,8 +356,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paint);
     const auto& geometryNode = host->GetGeometryNode();
+    auto renderContext = host->GetRenderContext();
     if (!listContentModifier_) {
-        auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, paint);
         auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
         auto& padding = geometryNode->GetPadding();
@@ -345,7 +370,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
     bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
-    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached);
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached, clip);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
@@ -619,8 +645,9 @@ RefPtr<LayoutAlgorithm> ListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-    if (chainAnimation_) {
+    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
+    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
+    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }
@@ -936,7 +963,6 @@ bool ListPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
     predictSnapOffset_ = snapAnimationOptions.snapDelta;
     scrollSnapVelocity_ = snapAnimationOptions.animationVelocity;
     snapTrigByScrollBar_ = snapAnimationOptions.fromScrollBar;
-    ResetLastSnapTargetIndex();
     MarkDirtyNodeSelf();
     return true;
 }
@@ -1157,6 +1183,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 moveStep = curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
+                VerifyFocusIndex(nextIndex, nextIndexInGroup, curListItemGroupPara);
             }
         } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT)) {
             if (curIndexInGroup == -1) {
@@ -1166,6 +1193,7 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
             } else {
                 moveStep = -curListItemGroupPara.lanes;
                 nextIndexInGroup = curIndexInGroup + moveStep;
+                VerifyFocusIndex(nextIndex, nextIndexInGroup, curListItemGroupPara);
             }
         } else if ((isVertical && (step == FocusStep::RIGHT)) || (!isVertical && step == FocusStep::DOWN)) {
             moveStep = 1;
@@ -1221,6 +1249,17 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         }
     }
     return nullptr;
+}
+
+void ListPattern::VerifyFocusIndex(int32_t& nextIndex, int32_t& nextIndexInGroup, const ListItemGroupPara& param)
+{
+    if (nextIndexInGroup < 0) {
+        nextIndex--;
+        nextIndexInGroup = -1;
+    } else if (nextIndexInGroup > param.itemEndIndex) {
+        nextIndex++;
+        nextIndexInGroup = -1;
+    }
 }
 
 WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, int32_t tarGroupIndex)
@@ -1680,6 +1719,12 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         extraOffset = GetExtraOffset().value();
         targetPos += extraOffset;
         ResetExtraOffset();
+    }
+    if (lastSnapTargetIndex_.has_value()) {
+        if ((Positive(targetPos) && IsAtBottom()) || (Negative(targetPos) && IsAtTop())) {
+            ResetLastSnapTargetIndex();
+            return true;
+        }
     }
     if (!NearZero(targetPos)) {
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true, false);
@@ -2148,7 +2193,7 @@ void ListPattern::SetChainAnimation()
     bool autoLanes = listLayoutProperty->HasLaneMinLength() || listLayoutProperty->HasLaneMaxLength();
     bool animation = listLayoutProperty->GetChainAnimation().value_or(false);
     bool enable = edgeEffect == EdgeEffect::SPRING && lanes == 1 && !autoLanes && animation;
-    if (!enable) {
+    if (!enable || GetEffectEdge() != EffectEdge::ALL) {
         chainAnimation_.Reset();
         return;
     }
@@ -2467,7 +2512,7 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
         }
     }
     int32_t lanesOffset = 0;
-    if (lanes_ > 1) {
+    if (lanes_ > 1 && !NearZero(crossSize + laneGutter_)) {
         lanesOffset = static_cast<int32_t>(crossOffset / ((crossSize + laneGutter_) / lanes_));
     }
     for (auto& pos : itemPosition_) {

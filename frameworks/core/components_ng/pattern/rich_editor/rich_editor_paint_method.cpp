@@ -39,32 +39,71 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (!richEditorPattern->HasFocus()) {
         overlayMod->UpdateScrollBar(paintWrapper);
         overlayMod->SetCaretVisible(false);
+        overlayMod->SetFloatingCaretVisible(false);
         const auto& selection = richEditorPattern->GetTextSelector();
         if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-            overlayMod->SetSelectedRects(pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd()));
+            auto contentRect = richEditorPattern->GetTextContentRect();
+            auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
+            std::vector<RectF> selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+            overlayMod->SetSelectedRects(selectedRects);
         }
         return;
     }
-    auto caretVisible = richEditorPattern->GetCaretVisible();
     overlayMod->SetShowSelect(richEditorPattern->GetShowSelect());
-    overlayMod->SetCaretVisible(caretVisible);
-    overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
     overlayMod->SetSelectedColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
-    constexpr float CARET_WIDTH = 2.0f;
-    overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
-    SetCaretOffsetAndHeight(paintWrapper);
+    SetCaretState(paintWrapper);
     std::vector<RectF> selectedRects;
     const auto& selection = richEditorPattern->GetTextSelector();
-    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
-        selectedRects = pManager_->GetRects(selection.GetTextStart(), selection.GetTextEnd());
-    }
     auto contentRect = richEditorPattern->GetTextContentRect();
+    if (richEditorPattern->GetTextContentLength() > 0 && selection.GetTextStart() != selection.GetTextEnd()) {
+        auto rects = pManager_->GetRichEditorBoxesForSelect(selection.GetTextStart(), selection.GetTextEnd());
+        selectedRects = CalculateSelectedRect(rects, contentRect.Width());
+    }
     overlayMod->SetContentRect(contentRect);
     overlayMod->SetSelectedRects(selectedRects);
     auto frameSize = paintWrapper->GetGeometryNode()->GetFrameSize();
     overlayMod->SetFrameSize(frameSize);
     overlayMod->UpdateScrollBar(paintWrapper);
     overlayMod->SetIsClip(false);
+}
+
+void RichEditorPaintMethod::SetCaretState(PaintWrapper* paintWrapper)
+{
+    auto richEditorPattern = DynamicCast<RichEditorPattern>(GetPattern().Upgrade());
+    CHECK_NULL_VOID(richEditorPattern);
+    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(GetOverlayModifier(paintWrapper));
+    CHECK_NULL_VOID(overlayMod);
+    auto caretVisible = richEditorPattern->GetCaretVisible();
+    const auto& floatingCaretState = richEditorPattern->GetFloatingCaretState();
+    overlayMod->SetCaretVisible(caretVisible);
+    overlayMod->SetOriginCaretVisible(floatingCaretState.isOriginCaretVisible);
+    overlayMod->SetFloatingCaretVisible(floatingCaretState.isFloatingCaretVisible);
+    overlayMod->SetOriginCaretColor(floatingCaretState.originCaretColor.GetValue());
+    overlayMod->SetCaretColor(richEditorPattern->GetCaretColor().GetValue());
+    constexpr float CARET_WIDTH = 2.0f;
+    overlayMod->SetCaretWidth(static_cast<float>(Dimension(CARET_WIDTH, DimensionUnit::VP).ConvertToPx()));
+    SetCaretOffsetAndHeight(paintWrapper);
+}
+
+std::vector<RectF> RichEditorPaintMethod::CalculateSelectedRect(
+    const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& selectedRects, float contentWidth)
+{
+    const float blankWidth = TextBase::GetSelectedBlankLineWidth();
+    std::vector<RectF> result;
+    float lastLineBottom = -1.0f;
+    for (const auto& info : selectedRects) {
+        auto rects = info.first;
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
+        for (auto& rect : rects) {
+            TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);
+        }
+        result.insert(result.end(), rects.begin(), rects.end());
+        if (!result.empty()) {
+            lastLineBottom = result.back().Bottom();
+        }
+    }
+    return result;
 }
 
 void RichEditorPaintMethod::SetPreviewTextDecoration(PaintWrapper* paintWrapper)
@@ -91,6 +130,10 @@ void RichEditorPaintMethod::SetCaretOffsetAndHeight(PaintWrapper* paintWrapper)
     auto lastCaretY = lastOffset.GetY() + overlayMod->GetCaretHeight() - richEditorPattern->GetLastTextRect().GetY();
     auto curCaretY = caretOffset.GetY() + caretHeight - richEditorPattern->GetTextRect().GetY();
     overlayMod->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+    const auto& floatingCaretState = richEditorPattern->GetFloatingCaretState();
+    if (floatingCaretState.touchMoveOffset && !overlayMod->GetFloatCaretLanding()) {
+        overlayMod->SetFloatingCaretOffset(OffsetF(floatingCaretState.touchMoveOffset->GetX(), caretOffset.GetY()));
+    }
     if (richEditorPattern->IsTriggerAvoidOnCaretAvoidMode() || !NearEqual(lastCaretY, curCaretY) ||
         !NearEqual(lastOffset.GetX(), caretOffset.GetX())) {
         richEditorPattern->NotifyCaretChange();

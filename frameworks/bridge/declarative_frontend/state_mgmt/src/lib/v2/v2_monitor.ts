@@ -103,6 +103,10 @@ class MonitorV2 {
     return this.target_;
   }
 
+  public getMonitorFuncName(): string {
+    return this.monitorFunction.name;
+  }
+
   /**
       Return array of those monitored paths
       that changed since previous invocation

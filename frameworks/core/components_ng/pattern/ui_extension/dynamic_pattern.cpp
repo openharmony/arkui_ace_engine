@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t WORKER_HAS_USED_ERROR = 10011;
+constexpr char DC_DEPTH_PREFIX[] = "dcDepth_";
 constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
 constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two workers are not allowed to run at the same time";
 }
@@ -69,6 +70,11 @@ void DynamicPattern::InitializeDynamicComponent(
     InitializeRender(runtime);
 }
 
+void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
+}
+
 void DynamicPattern::InitializeRender(void* runtime)
 {
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
@@ -85,9 +91,24 @@ void DynamicPattern::InitializeRender(void* runtime)
         }
         dynamicComponentRenderer_->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+        dynamicComponentRenderer_->SetBackgroundTransparent(backgroundTransparent_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
+
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        OnAreaChangedFunc onAreaChangedFunc = [renderer = dynamicComponentRenderer_](
+            const RectF& oldRect,
+            const OffsetF& oldOrigin,
+            const RectF& rect,
+            const OffsetF& origin) {
+                CHECK_NULL_VOID(renderer);
+                renderer->UpdateParentOffsetToWindow(origin + rect.GetOffset());
+        };
+        eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
     }
 #else
     PLATFORM_LOGE("DynamicComponent not support preview.");
@@ -183,7 +204,9 @@ bool DynamicPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto animationOption = pipeline->GetSyncAnimationOption();
-    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption);
+    auto parentGlobalOffset = dirty->GetParentGlobalOffsetWithSafeArea(true, true) +
+        dirty->GetFrameRectWithSafeArea(true).GetOffset();
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption, parentGlobalOffset);
     return false;
 }
 
@@ -245,6 +268,22 @@ void DynamicPattern::UnRegisterPipelineEvent(int32_t instanceId)
     auto context = PipelineContext::GetContextByContainerId(instanceId);
     CHECK_NULL_VOID(context);
     context->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void DynamicPattern::DumpDynamicRenderer(int32_t depth, bool hasJson)
+{
+    CHECK_NULL_VOID(dynamicComponentRenderer_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    std::vector<std::string> params = container->GetUieParams();
+    std::string deptParam;
+    deptParam.append(DC_DEPTH_PREFIX).append(std::to_string(depth));
+    params.push_back(deptParam);
+    if (hasJson) {
+        params.push_back("-json");
+    }
+    std::vector<std::string> dumpInfo;
+    dynamicComponentRenderer_->NotifyUieDump(params, dumpInfo);
 }
 
 void DynamicPattern::DumpInfo()

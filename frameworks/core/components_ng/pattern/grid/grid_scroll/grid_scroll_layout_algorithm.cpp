@@ -226,8 +226,8 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     const int32_t end = info_.endMainLineIndex_ + cacheCount;
     float mainPos = -info_.GetHeightInRange(start, info_.startMainLineIndex_, mainGap_);
     for (auto i = start; i <= end; ++i) {
-        const bool isCache =
-            !props->GetShowCachedItemsValue(false) && (i < info_.startMainLineIndex_ || i > info_.endMainLineIndex_);
+        const bool inRange = i >= info_.startMainLineIndex_ && i <= info_.endMainLineIndex_;
+        const bool isCache = !props->GetShowCachedItemsValue(false) && !inRange;
         const auto& line = info_.gridMatrix_.find(i);
         if (line == info_.gridMatrix_.end()) {
             continue;
@@ -267,7 +267,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             if (!wrapper) {
                 continue;
             }
-            if (!isCache) {
+            if (inRange) {
                 startIndex = startIndex == -1 ? itemIdex : std::min(startIndex, itemIdex);
                 endIndex = std::max(itemIdex, endIndex);
             }
@@ -307,6 +307,9 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     info_.totalHeightOfItemsInView_ = info_.GetTotalHeightOfItemsInView(mainGap_);
 
+    if (startIndex == -1 && endIndex == -1) {
+        startIndex = endIndex = info_.childrenCount_;
+    }
     if (!info_.hasMultiLineItem_) {
         layoutWrapper->SetActiveChildRange(startIndex, endIndex, cacheCount * crossCount_, cacheCount * crossCount_,
             props->GetShowCachedItemsValue(false));
@@ -405,12 +408,12 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
         auto offset = info_.currentOffset_;
-        if (!canOverScroll_) {
+        if ((Positive(offset) && !canOverScrollStart_) || (Negative(offset) && !canOverScrollEnd_)) {
             info_.currentOffset_ = 0.0;
             info_.prevOffset_ = 0.0;
         }
         if (!haveNewLineAtStart) {
-            if (canOverScroll_) {
+            if (canOverScrollStart_) {
                 info_.UpdateEndIndex(offset, mainSize, mainGap_);
             }
             layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
@@ -570,7 +573,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if (!canOverScroll_) {
+        if ((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
+            (Negative(info_.currentOffset_) && !canOverScrollEnd_)) {
             info_.reachEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
@@ -582,7 +586,9 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && info_.startIndex_ == 0) {
-        if (!canOverScroll_ || isChildrenUpdated_) {
+        if (((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
+                (Negative(info_.currentOffset_) && !canOverScrollEnd_)) ||
+            isChildrenUpdated_) {
             info_.currentOffset_ = 0;
             info_.prevOffset_ = 0;
         }
@@ -605,7 +611,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     }
 
     // Step3. modify [currentOffset_]
-    if (!canOverScroll_) {
+    if (!canOverScrollEnd_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + info_.prevOffset_;
         info_.currentOffset_ = info_.prevOffset_ - realOffsetToMoveUp;
         info_.prevOffset_ = info_.currentOffset_;
@@ -617,10 +623,38 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
     // fill current line first
+    FillCurrentLine(mainSize, crossSize, layoutWrapper);
+
+    if (GreatNotEqual(mainLength, mainSize)) {
+        if (IsScrollToEndLine()) {
+            TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
+            // scrollToIndex(AUTO) on first layout
+            moveToEndLineIndex_ = -1;
+        }
+        return;
+    }
+    // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
+    // part of the viewport
+    while (LessNotEqual(mainLength, mainSize)) {
+        float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+        if (GreatOrEqual(lineHeight, 0.0)) {
+            mainLength += (lineHeight + mainGap_);
+            continue;
+        }
+        info_.reachEnd_ = true;
+        return;
+    };
+    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
+    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
+}
+
+void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
+{
     auto mainIter = info_.gridMatrix_.find(currentMainLineIndex_);
     auto nextMain = info_.gridMatrix_.find(currentMainLineIndex_ + 1);
     if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_ &&
         nextMain == info_.gridMatrix_.end()) {
+        bool doneFillCurrentLine = false;
         auto currentIndex = info_.endIndex_ + 1;
         cellAveLength_ = -1.0f;
         bool hasNormalItem = false;
@@ -646,30 +680,12 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
             LargeItemLineHeight(itemWrapper, hasNormalItem);
             info_.endIndex_ = currentIndex;
             currentIndex++;
+            doneFillCurrentLine = true;
+        }
+        if (doneFillCurrentLine) {
+            info_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
         }
     }
-
-    if (GreatNotEqual(mainLength, mainSize)) {
-        if (IsScrollToEndLine()) {
-            TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
-            // scrollToIndex(AUTO) on first layout
-            moveToEndLineIndex_ = -1;
-        }
-        return;
-    }
-    // When [mainLength] is still less than [mainSize], do [FillNewLineBackward] repeatedly until filling up the lower
-    // part of the viewport
-    while (LessNotEqual(mainLength, mainSize)) {
-        float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-        if (GreatOrEqual(lineHeight, 0.0)) {
-            mainLength += (lineHeight + mainGap_);
-            continue;
-        }
-        info_.reachEnd_ = true;
-        return;
-    };
-    // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
-    info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
 }
 
 OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
@@ -862,7 +878,8 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         return;
     }
 
-    canOverScroll_ = false; // never over-scroll on jumps
+    canOverScrollStart_ = false;
+    canOverScrollEnd_ = false;
     switch (info_.scrollAlign_) {
         case ScrollAlign::START:
         case ScrollAlign::END:
@@ -1091,7 +1108,12 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     // reset reachEnd_ if any line at bottom is out of viewport
     // last line make LessNotEqual(mainLength, mainSize) and continue is reach end too
     info_.reachEnd_ = info_.endIndex_ == info_.childrenCount_ - 1;
-    if (!info_.reachEnd_) {
+    if (info_.reachEnd_) {
+        if (LessNotEqual(info_.GetTotalHeightOfItemsInView(mainGap_) + info_.currentOffset_, mainSize)) {
+            // skip clearing cache if overScrolling
+            return runOutOfRecord;
+        }
+    } else {
         info_.offsetEnd_ = false;
     }
     if (!cacheValid) {
@@ -1965,12 +1987,11 @@ float GridScrollLayoutAlgorithm::FillNewCacheLineBackward(
                 info_.endIndex_ = elem.second;
             }
         }
-        if (info_.lineHeightMap_.find(currentLine) != info_.lineHeightMap_.end()) {
-            return info_.lineHeightMap_.find(currentLine)->second;
-        } else {
+        if (NonNegative(cellAveLength_)) {
             info_.lineHeightMap_[currentLine] = cellAveLength_;
             return cellAveLength_;
         }
+        return GetOrDefault(info_.lineHeightMap_, currentLine, -1.f);
     }
 
     lastCross_ = 0;

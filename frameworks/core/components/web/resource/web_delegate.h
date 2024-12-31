@@ -596,16 +596,6 @@ private:
     bool eventResult_ = false;
 };
 
-class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -1033,6 +1023,7 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    void SetDragResizeStartFlag(bool isDragResizeStart);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1374,6 +1365,7 @@ private:
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
+    bool isDragResizeStart_ = false;
 #endif
 };
 

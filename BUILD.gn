@@ -66,6 +66,10 @@ config("ace_config") {
     }
   }
 
+  if (ace_engine_enable_circle_feature) {
+    cflags += [ "-DARKUI_CIRCLE_FEATURE" ]
+  }
+
   cflags_cc = [
     "-fvisibility-inlines-hidden",
     "-Wno-non-c-typedef-for-linkage",
@@ -80,6 +84,10 @@ config("ace_config") {
   if (use_linux) {
     cflags_cc += [ "-std=c++17" ]
     defines += [ "_USE_MATH_DEFINES" ]
+  }
+
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
   }
 
   ldflags = []

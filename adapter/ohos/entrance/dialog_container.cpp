@@ -117,6 +117,29 @@ void DialogContainer::InitializeKeyEventCallback()
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void DialogContainer::InitializeCrownEventCallback()
+{
+    ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                    const CrownEvent& event,
+                                    const std::function<void()>& markProcess) {
+        ContainerScope scope(id);
+        bool result = false;
+        context->GetTaskExecutor()->PostSyncTask(
+            [context, event, &result, markProcess, id]() {
+                ContainerScope scope(id);
+                result = context->OnNonPointerEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
+            },
+            TaskExecutor::TaskType::UI, "ArkUIDialogCrownEvent");
+        return result;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+}
+#endif
+
 void DialogContainer::InitializeRotationEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
@@ -214,6 +237,9 @@ void DialogContainer::InitializeCallback()
     InitializeSystemBarHeightChangeCallback();
     InitializeSurfaceDestroyCallback();
     InitializeDragEventCallback();
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitializeCrownEventCallback();
+#endif
 }
 
 RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)

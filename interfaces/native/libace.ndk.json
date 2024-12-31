@@ -1484,6 +1484,10 @@
         "name": "OH_ArkUI_NodeUtils_GetNodeType"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },
@@ -2566,5 +2570,9 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PostFrameCallback"
     }
 ]

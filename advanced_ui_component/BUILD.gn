@@ -69,33 +69,39 @@ foreach(module, advanced_ui_component_libs) {
 }
 
 group("advanced_ui_component") {
-  deps = advanced_ui_component_targets
+  deps = []
   deps += [
-    "chipgroup/interfaces:chipgroup",
-    "composelistitem/interfaces:composelistitem",
-    "composetitlebar/interfaces:composetitlebar",
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
     "downloadfilebutton/interfaces:downloadfilebutton",
-    "editabletitlebar/interfaces:editabletitlebar",
-    "exceptionprompt/interfaces:exceptionprompt",
-    "filter/interfaces:filter",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
     "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
-    "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
-    "popup/interfaces:popup",
-    "progressbutton/interfaces:progressbutton",
-    "segmentbutton/interfaces:segmentbutton",
-    "selectionmenu/interfaces:selectionmenu",
-    "selecttitlebar/interfaces:selecttitlebar",
-    "splitlayout/interfaces:splitlayout",
-    "subheader/interfaces:subheader",
-    "swiperefresher/interfaces:swiperefresher",
-    "tabtitlebar/interfaces:tabtitlebar",
-    "toolbar/interfaces:toolbar",
-    "treeview/interfaces:treeview",
   ]
+  if (!ace_engine_feature_wearable) {
+    deps += advanced_ui_component_targets
+    deps += [
+      "chipgroup/interfaces:chipgroup",
+      "composelistitem/interfaces:composelistitem",
+      "composetitlebar/interfaces:composetitlebar",
+      "editabletitlebar/interfaces:editabletitlebar",
+      "exceptionprompt/interfaces:exceptionprompt",
+      "filter/interfaces:filter",
+      "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+      "popup/interfaces:popup",
+      "progressbutton/interfaces:progressbutton",
+      "progressbuttonv2/interfaces:progressbuttonv2",
+      "segmentbutton/interfaces:segmentbutton",
+      "selectionmenu/interfaces:selectionmenu",
+      "selecttitlebar/interfaces:selecttitlebar",
+      "splitlayout/interfaces:splitlayout",
+      "subheader/interfaces:subheader",
+      "swiperefresher/interfaces:swiperefresher",
+      "tabtitlebar/interfaces:tabtitlebar",
+      "toolbar/interfaces:toolbar",
+      "treeview/interfaces:treeview",
+    ]
+  }
 }

@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
@@ -815,7 +816,7 @@ HWTEST_F(GridOptionLayoutTestNg, SyncLayoutBeforeSpring001, TestSize.Level1)
     pattern_->SyncLayoutBeforeSpring();
     EXPECT_EQ(GetChildY(frameNode_, 9), 100);
     EXPECT_TRUE(pattern_->info_.synced_);
-    EXPECT_FALSE(pattern_->forceOverScroll_);
+    EXPECT_FALSE(pattern_->preSpring_);
 }
 
 /**
@@ -1017,7 +1018,7 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo005, TestSize.Level1)
 HWTEST_F(GridOptionLayoutTestNg, ScrollTo006, TestSize.Level1)
 {
     GridLayoutOptions option;
-    option.irregularIndexes = { 5, 35};
+    option.irregularIndexes = { 5, 35 };
     GridModelNG model = CreateGrid();
     model.SetLayoutOptions(option);
     model.SetColumnsTemplate("1fr 1fr");
@@ -1239,6 +1240,89 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OverScroll002
+ * @tc.desc: Test Spring animation after changing item height
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(6); // less than viewport
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-250.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+
+    GetChildLayoutProperty<LayoutProperty>(frameNode_, 4)
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(110.0f)));
+    GetChildFrameNode(frameNode_, 4)->MarkDirtyNode();
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: OverScroll002
+ * @tc.desc: Test Spring animation with different line heights
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll003, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedHeightItems(1, 5.0f);
+    CreateFixedItems(6); // less than viewport
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-250.f);
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 3);
+
+    GetChildLayoutProperty<LayoutProperty>(frameNode_, 4)
+        ->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(110.0f)));
+    auto child = GetChildFrameNode(frameNode_, 4);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
  * @tc.name: ChangingHeight001
  * @tc.desc: Test Jumping while changing item heights
  * @tc.type: FUNC
@@ -1267,5 +1351,52 @@ HWTEST_F(GridOptionLayoutTestNg, ChangingHeight001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::AUTO);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 0);
+}
+
+/**
+ * @tc.name: NestedScrollTo001
+ * @tc.desc: Test nested grid calling scrollTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, NestedScrollTo001, TestSize.Level1)
+{
+    ListModelNG model;
+    model.Create();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    int32_t listStart = 0;
+    int32_t listStop = 0;
+    model.SetOnScrollStart([&listStart]() { ++listStart; });
+    model.SetOnScrollStop([&listStop]() { ++listStop; });
+    GridModelNG grid = CreateGrid();
+    grid.SetColumnsTemplate("1fr 1fr 1fr");
+    grid.SetLayoutOptions({});
+    grid.SetEdgeEffect(EdgeEffect::SPRING, true);
+    grid.SetNestedScroll(
+        NestedScrollOptions { .forward = NestedScrollMode::SELF_FIRST, .backward = NestedScrollMode::SELF_FIRST });
+    int32_t scrollStart = 0;
+    int32_t scrollStop = 0;
+    grid.SetOnScrollStart([&scrollStart]() { ++scrollStart; });
+    grid.SetOnScrollStop([&scrollStop]() { ++scrollStop; });
+    CreateFixedItems(20);
+    CreateDone();
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_EQ(scrollStart, 0);
+    EXPECT_EQ(scrollStop, 0);
+    pattern_->AnimateTo(600, 1000, Curves::EASE_OUT, false, true);
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->isAnimationStop_);
+    EXPECT_TRUE(pattern_->curveAnimation_);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetScrollable()->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetScrollable()->state_, Scrollable::AnimationState::IDLE);
+    EXPECT_EQ(scrollStart, 1);
+    EXPECT_EQ(scrollStop, 1);
+    EXPECT_EQ(listStart, 0);
+    EXPECT_EQ(listStop, 0);
 }
 } // namespace OHOS::Ace::NG

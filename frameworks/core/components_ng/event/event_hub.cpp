@@ -538,6 +538,78 @@ void EventHub::FireOnDetach()
     }
 }
 
+void EventHub::SetOnWillBind(std::function<void(int32_t)>&& onWillBind)
+{
+    onWillBind_ = std::move(onWillBind);
+}
+
+void EventHub::ClearOnWillBind()
+{
+    onWillBind_ = nullptr;
+}
+
+void EventHub::FireOnWillBind(int32_t containerId)
+{
+    if (onWillBind_) {
+        auto onWillBind = onWillBind_;
+        onWillBind(containerId);
+    }
+}
+
+void EventHub::SetOnWillUnbind(std::function<void(int32_t)>&& onWillUnbind)
+{
+    onWillUnbind_ = std::move(onWillUnbind);
+}
+
+void EventHub::ClearOnWillUnbind()
+{
+    onWillUnbind_ = nullptr;
+}
+
+void EventHub::FireOnWillUnbind(int32_t containerId)
+{
+    if (onWillUnbind_) {
+        auto onWillUnbind = onWillUnbind_;
+        onWillUnbind(containerId);
+    }
+}
+
+void EventHub::SetOnBind(std::function<void(int32_t)>&& onBind)
+{
+    onBind_ = std::move(onBind);
+}
+
+void EventHub::ClearOnBind()
+{
+    onBind_ = nullptr;
+}
+
+void EventHub::FireOnBind(int32_t containerId)
+{
+    if (onBind_) {
+        auto onBind = onBind_;
+        onBind(containerId);
+    }
+}
+
+void EventHub::SetOnUnbind(std::function<void(int32_t)>&& onUnbind)
+{
+    onUnbind_ = std::move(onUnbind);
+}
+
+void EventHub::ClearOnUnbind()
+{
+    onUnbind_ = nullptr;
+}
+
+void EventHub::FireOnUnbind(int32_t containerId)
+{
+    if (onUnbind_) {
+        auto onUnbind = onUnbind_;
+        onUnbind(containerId);
+    }
+}
+
 void EventHub::ClearStateStyle()
 {
     if (stateStyleMgr_) {

@@ -230,7 +230,7 @@ bool NetworkImageLoader::DownloadImage(
     DownloadCallback&& downloadCallback, const std::string& src, bool sync, int32_t nodeId)
 {
     // If the API version is greater or equal than 14, use the preload module to download the URL.
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         return sync ? DownloadManager::GetInstance()->DownloadSyncWithPreload(
                           std::move(downloadCallback), src, Container::CurrentId(), nodeId)
                     : DownloadManager::GetInstance()->DownloadAsyncWithPreload(

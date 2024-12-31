@@ -997,6 +997,18 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     return totalHeight;
 }
 
+bool GridLayoutInfo::HeightSumSmaller(float other, float mainGap) const
+{
+    other += mainGap;
+    for (const auto& it : lineHeightMap_) {
+        other -= it.second + mainGap;
+        if (NonPositive(other)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 std::pair<int32_t, float> GridLayoutInfo::FindItemCenter(int32_t startLine, int32_t lineCnt, float mainGap) const
 {
     float halfLen = (GetHeightInRange(startLine, startLine + lineCnt, mainGap) - mainGap) / 2.0f;
@@ -1049,5 +1061,34 @@ int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, 
         return gridMatrix_.at(mainIndex).at(crossIndex);
     }
     return -1;
+}
+
+void GridLayoutInfo::PrintMatrix()
+{
+    TAG_LOGD(ACE_GRID, "-----------start print gridMatrix------------");
+    std::string res = std::string("");
+    for (auto item : gridMatrix_) {
+        res.append(std::to_string(item.first));
+        res.append(": ");
+        for (auto index : item.second) {
+            res.append("[")
+                .append(std::to_string(index.first))
+                .append(",")
+                .append(std::to_string(index.second))
+                .append("] ");
+        }
+        TAG_LOGD(ACE_GRID, "%{public}s", res.c_str());
+        res.clear();
+    }
+    TAG_LOGD(ACE_GRID, "-----------end print gridMatrix------------");
+}
+
+void GridLayoutInfo::PrintLineHeight()
+{
+    TAG_LOGD(ACE_GRID, "-----------start print lineHeightMap------------");
+    for (auto item : lineHeightMap_) {
+        TAG_LOGD(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
+    }
+    TAG_LOGD(ACE_GRID, "-----------end print lineHeightMap------------");
 }
 } // namespace OHOS::Ace::NG

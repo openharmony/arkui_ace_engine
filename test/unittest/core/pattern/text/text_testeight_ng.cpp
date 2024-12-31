@@ -15,8 +15,7 @@
 
 #include "text_base.h"
 
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -272,7 +271,8 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd001, TestSize.Level1)
     pattern->SetupMagnifier();
     pattern->magnifierController_->magnifierNodeExist_ = true;
     auto secondHandle_ = pattern->textSelector_.secondHandle;
-    pattern->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_NE(secondHandle_, pattern->textSelector_.secondHandle);
     EXPECT_FALSE(pattern->magnifierController_->magnifierNodeExist_);
 }
@@ -290,7 +290,8 @@ HWTEST_F(TextTestEightNg, OnTextGenstureSelectionEnd002, TestSize.Level1)
     ASSERT_NE(pattern, nullptr);
     pattern->textForDisplay_ = u"";
     auto secondHandle_ = pattern->textSelector_.secondHandle;
-    pattern->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_EQ(secondHandle_, pattern->textSelector_.secondHandle);
 }
 
@@ -740,7 +741,7 @@ HWTEST_F(TextTestEightNg, DumpParagraphsInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: DumpParagraphsInfo001
+ * @tc.name: DumpParagraphsInfo002
  * @tc.desc: test DumpParagraphsInfo.
  * @tc.type: FUNC
  */
@@ -756,5 +757,231 @@ HWTEST_F(TextTestEightNg, DumpParagraphsInfo002, TestSize.Level1)
     pattern->DumpParagraphsInfo();
     auto it = std::find(dumpLog.description_.begin(), dumpLog.description_.end(), "paragraphs is empty!\n");
     EXPECT_NE(it, dumpLog.description_.end());
+}
+
+/**
+ * @tc.name: AddSubComponentInfosByDataDetectorForSpan001
+ * @tc.desc: test AddSubComponentInfosByDataDetectorForSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan001, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItemChild, nullptr);
+    spanItemChild->position = 100;
+    spanItemChild->content = u"content";
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AISpan span1 = {10, 20, "example content1", TextDataDetectType::EMAIL};
+    AISpan span2 = {101, 20, "example content2", TextDataDetectType::EMAIL};
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
+    pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
+    EXPECT_TRUE(pattern->subComponentInfos_.empty());
+    EXPECT_TRUE(subComponentInfos.empty());
+}
+
+/**
+ * @tc.name: AddSubComponentInfosByDataDetectorForSpan002
+ * @tc.desc: test AddSubComponentInfosByDataDetectorForSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan002, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItemChild, nullptr);
+    spanItemChild->position = 50;
+    spanItemChild->content = u"content";
+    spanItemChild->needRemoveNewLine = true;
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
+    AISpan span2 = {10, 20, "example content2", TextDataDetectType::EMAIL};
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(2, span2));
+    pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
+    EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
+}
+
+/**
+ * @tc.name: AddSubComponentInfosByDataDetectorForSpan003
+ * @tc.desc: test AddSubComponentInfosByDataDetectorForSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan003, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItemChild, nullptr);
+    spanItemChild->position = 55;
+    spanItemChild->content = u"content";
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AISpan span1 = {10, 50, "example content1", TextDataDetectType::EMAIL};
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
+    pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
+    EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
+}
+
+/**
+ * @tc.name: AddSubComponentInfosByDataDetectorForSpan004
+ * @tc.desc: test AddSubComponentInfosByDataDetectorForSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan004, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItemChild, nullptr);
+    spanItemChild->position = 55;
+    spanItemChild->content = u"content";
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AISpan span1 = {40, 60, "example content1", TextDataDetectType::EMAIL};
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
+    CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
+    pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
+    EXPECT_EQ(subComponentInfos.back().spanText, "example content1");
+}
+
+/**
+ * @tc.name: AddSubComponentInfosByDataDetectorForSpan005
+ * @tc.desc: test AddSubComponentInfosByDataDetectorForSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, AddSubComponentInfosByDataDetectorForSpan005, TestSize.Level1)
+{
+    std::vector<SubComponentInfo> subComponentInfos;
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    ASSERT_NE(spanItemChild, nullptr);
+    spanItemChild->position = 55;
+    spanItemChild->content = u"a";
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    AISpan span1 = {50, 54, "example content", TextDataDetectType::EMAIL};
+    pattern->dataDetectorAdapter_->aiSpanMap_.insert(std::make_pair(1, span1));
+    CHECK_NULL_VOID(pattern->dataDetectorAdapter_);
+    pattern->AddSubComponentInfosByDataDetectorForSpan(subComponentInfos, spanItemChild);
+    EXPECT_TRUE(pattern->subComponentInfos_.empty());
+    EXPECT_TRUE(subComponentInfos.empty());
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNode001
+ * @tc.desc: test OnDetachFromFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnDetachFromFrameNode001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->surfaceChangedCallbackMap_.emplace(-1, [](int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason) {});
+    pattern->surfaceChangedCallbackId_ = -1;
+    auto beforeSize = pipeline->surfaceChangedCallbackMap_.size();
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    auto atferSize = pipeline->surfaceChangedCallbackMap_.size();
+    EXPECT_NE(beforeSize, atferSize);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNode002
+ * @tc.desc: test OnDetachFromFrameNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, OnDetachFromFrameNode002, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->surfacePositionChangedCallbackMap_.emplace(-1, [](int32_t, int32_t) {});
+    pattern->surfacePositionChangedCallbackId_ = -1;
+    auto beforeSize = pipeline->surfacePositionChangedCallbackMap_.size();
+    pattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    auto afterSize = pipeline->surfacePositionChangedCallbackMap_.size();
+    EXPECT_NE(beforeSize, afterSize);
+}
+
+/**
+ * @tc.name: HandleLongPress001
+ * @tc.desc: test HandleLongPress.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, HandleLongPress001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    GestureEvent info;
+    pattern->isMousePressed_ = false;
+    pattern->selectOverlay_->isHandleDragging_ = true;
+    pattern->HandleLongPress(info);
+    auto host = pattern->GetHost();
+    ASSERT_NE(host, nullptr);
+    auto hub = host->GetEventHub<EventHub>();
+    auto gestureHub = hub->GetGestureEventHub();
+    EXPECT_EQ(gestureHub, nullptr);
+}
+
+/**
+ * @tc.name: ShowShadow001
+ * @tc.desc: test ShowShadow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, ShowShadow001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto spanItem1 = AceType::MakeRefPtr<SpanItem>();
+    spanItem1 = nullptr;
+    pattern->spans_.emplace_back(spanItem1);
+    RefPtr<TextOverlayModifier> modifier = AceType::MakeRefPtr<TextOverlayModifier>();
+    pattern->overlayMod_ = modifier;
+    pattern->hasUrlSpan_ = true;
+    pattern->pManager_ = AceType::MakeRefPtr<ParagraphManager>();
+    ASSERT_NE(pattern->pManager_, nullptr);
+    PointF point;
+    Color color;
+    auto res = pattern->ShowShadow(point, color);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: LocalOffsetInSelectedArea001
+ * @tc.desc: test LocalOffsetInSelectedArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestEightNg, LocalOffsetInSelectedArea001, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textLayoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    textLayoutProperty->UpdateTextSelectableMode(TextSelectableMode::UNSELECTABLE);
+    pattern->copyOption_ = CopyOptions::None;
+    auto res = pattern->LocalOffsetInSelectedArea(Offset(0, 0));
+    EXPECT_FALSE(res);
 }
 } // namespace OHOS::Ace::NG

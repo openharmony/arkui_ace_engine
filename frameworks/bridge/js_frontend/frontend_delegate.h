@@ -287,6 +287,14 @@ public:
     virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void ShowAllNodesOnOverlay() {}
     virtual void HideAllNodesOnOverlay() {}
+    virtual bool SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+    {
+        return false;
+    }
+    virtual std::optional<NG::OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return std::nullopt;
+    }
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

@@ -853,6 +853,36 @@ void ViewAbstract::DisableOnKeyEvent()
     focusHub->ClearOnKeyCallback();
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ViewAbstract::DisableOnCrownEvent()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnCrownCallback();
+}
+
+void ViewAbstract::DisableOnCrownEvent(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnCrownCallback();
+}
+
+void ViewAbstract::SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnCrownCallback(std::move(onCrownCallback));
+}
+
+void ViewAbstract::SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnCrownCallback(std::move(onCrownCallback));
+}
+#endif
+
 void ViewAbstract::DisableOnHover()
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
@@ -1931,6 +1961,10 @@ void ViewAbstract::BindPopup(
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
         popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
+        auto accessibilityProperty = popupNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityHoverPriority(param->IsBlockEvent());
+        }
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));

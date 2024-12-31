@@ -86,6 +86,10 @@ public:
             theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
             theme->urlHoverColor_ = pattern->GetAttr<Color>("interactive_hover", Color(0x33007dff));
             theme->urlPressColor_ = pattern->GetAttr<Color>("interactive_pressed", Color(0x19182431));
+            theme->isTextFadeout_ = pattern->GetAttr<std::string>("text_fadeout_enable", "") == "true";
+            theme->fadeoutWidth_ = pattern->GetAttr<Dimension>("text_fadeout_width", 16.0_vp);
+            theme->marqueeStartPolicy_ = static_cast<MarqueeStartPolicy>(static_cast<int32_t>(
+                pattern->GetAttr<double>("text_marquee_start_policy", 0.0)));
         }
     };
 
@@ -114,6 +118,16 @@ public:
     double GetLinearSplitChildMinSize() const
     {
         return linearSplitChildMinSize_;
+    }
+
+    bool GetIsTextFadeout() const
+    {
+        return isTextFadeout_;
+    }
+
+    const Dimension& GetFadeoutWidth() const
+    {
+        return fadeoutWidth_;
     }
 
     bool IsShowHandle() const
@@ -149,6 +163,11 @@ public:
     {
         return urlPressColor_;
     }
+	
+    MarqueeStartPolicy GetMarqueeStartPolicy() const
+    {
+        return marqueeStartPolicy_;
+    }
 
 protected:
     TextTheme() = default;
@@ -162,6 +181,9 @@ private:
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
     bool isShowSearch_ = false;
+    bool isTextFadeout_ = false;
+    Dimension fadeoutWidth_;
+    MarqueeStartPolicy marqueeStartPolicy_ = MarqueeStartPolicy::DEFAULT;
     Color urlDisabledColor_;
     Color urlDefaultColor_;
     Color urlHoverColor_;

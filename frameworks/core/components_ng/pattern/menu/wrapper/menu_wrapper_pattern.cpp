@@ -346,7 +346,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     }
     // SelectOverlay's custom menu does not need to be focused.
     auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
-    if (!isCustomMenu) {
+    auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
+    if (!isCustomMenu && !isRightClickMenu) {
         auto menuPattern = focusMenu->GetPattern<MenuPattern>();
         CHECK_NULL_RETURN(menuPattern, nullptr);
         menuPattern->FocusViewShow();
@@ -736,6 +737,13 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     return menuPattern->IsSelectOverlayCustomMenu();
 }
 
+bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayRightClickMenu();
+}
+
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
@@ -882,6 +890,24 @@ void MenuWrapperPattern::RequestPathRender()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+bool MenuWrapperPattern::IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const
+{
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    auto isPreviewTag = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_RETURN(isPreviewTag, false);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto preview = host->GetChildAtIndex(1);
+    CHECK_NULL_RETURN(preview, false);
+    return preview->GetId() == frameNode->GetId();
+}
+
 void MenuWrapperPattern::DumpInfo()
 {
     DumpLog::GetInstance().AddDesc("MenuPreviewMode: " + std::to_string(dumpInfo_.menuPreviewMode));
@@ -928,5 +954,28 @@ void MenuWrapperPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("DefaultPlacement", dumpInfo_.defaultPlacement.c_str());
     json->Put("FinalPosition", dumpInfo_.finalPosition.ToString().c_str());
     json->Put("FinalPlacement", dumpInfo_.finalPlacement.c_str());
+}
+
+void MenuWrapperPattern::SetDumpInfo(const MenuDumpInfo& dumpInfo)
+{
+    dumpInfo_.menuPreviewMode = dumpInfo.menuPreviewMode;
+    dumpInfo_.menuType = dumpInfo.menuType;
+    dumpInfo_.enableArrow = dumpInfo.enableArrow;
+    dumpInfo_.targetNode = dumpInfo.targetNode;
+    dumpInfo_.targetOffset = dumpInfo.targetOffset;
+    dumpInfo_.targetSize = dumpInfo.targetSize;
+    dumpInfo_.menuWindowRect = dumpInfo.menuWindowRect;
+    dumpInfo_.wrapperRect = dumpInfo.wrapperRect;
+    dumpInfo_.previewBeginScale = dumpInfo.previewBeginScale;
+    dumpInfo_.previewEndScale = dumpInfo.previewEndScale;
+    dumpInfo_.top = dumpInfo.top;
+    dumpInfo_.bottom = dumpInfo.bottom;
+    dumpInfo_.left = dumpInfo.left;
+    dumpInfo_.right = dumpInfo.right;
+    dumpInfo_.globalLocation = dumpInfo.globalLocation;
+    dumpInfo_.originPlacement = dumpInfo.originPlacement;
+    dumpInfo_.defaultPlacement = dumpInfo.defaultPlacement;
+    dumpInfo_.finalPosition = dumpInfo.finalPosition;
+    dumpInfo_.finalPlacement = dumpInfo.finalPlacement;
 }
 } // namespace OHOS::Ace::NG

@@ -15,6 +15,8 @@
 
 #include "core/event/axis_event.h"
 
+#include "base/input_manager/input_manager.h"
+
 namespace OHOS::Ace {
 AxisEvent AxisEvent::CreateScaleEvent(float scale) const
 {

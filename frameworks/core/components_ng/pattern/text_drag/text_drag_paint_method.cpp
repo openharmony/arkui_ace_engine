@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/text_drag/text_drag_paint_method.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components/text/text_theme.h"
 
 namespace OHOS::Ace::NG {
 constexpr float CONSTANT_DOUBLE = 2.0f;
@@ -39,7 +40,7 @@ void TextDragPaintMethod::UpdateHandleInfo(const TextDragInfo& info)
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         modifier->SetHandleColor(textOverlayTheme->GetHandleColor());
     } else {
-        modifier->SetHandleColor(info.handleColor.value());
+        modifier->SetHandleColor(info.handleColor.value_or(textOverlayTheme->GetHandleColor()));
     }
     modifier->SetInnerHandleRadius(textOverlayTheme->GetHandleDiameterInner().ConvertToPx() / CONSTANT_DOUBLE);
     modifier->SetInnerHandleColor(textOverlayTheme->GetHandleColorInner());
@@ -53,8 +54,10 @@ void TextDragPaintMethod::UpdateHandleInfo(const TextDragInfo& info)
         pattern->GetFrameWidth() + (screenWdith + handleDiameter) * CONSTANT_DOUBLE,
         pattern->GetFrameHeight() + (screenHeight + handleDiameter) * CONSTANT_DOUBLE);
     modifier->SetBoundsRect(boundsRect);
-    auto selectorColor = info.selectedBackgroundColor;
-    modifier->SetSelectedColor(selectorColor->GetValue());
-    modifier->SetIsInline(info.isInline);
+    modifier->SetIsHandleAnimation(info.isHandleAnimation);
+    auto textTheme = pipleline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    auto selectorColor = info.selectedBackgroundColor.value_or(textTheme->GetSelectedColor());
+    modifier->SetSelectedColor(selectorColor.GetValue());
 }
 } // namespace OHOS::Ace::NG

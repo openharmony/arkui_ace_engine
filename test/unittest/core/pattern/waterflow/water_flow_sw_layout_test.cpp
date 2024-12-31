@@ -1981,4 +1981,56 @@ HWTEST_F(WaterFlowSWTest, Illegal004, TestSize.Level1)
     EXPECT_EQ(info_->idxToLane_.size(), 3);
     EXPECT_FALSE(info_->idxToLane_.count(3));
 }
+
+/**
+ * @tc.name: Illegal005
+ * @tc.desc: test in the middle When the notification of Lazyforeach and section update doesn't come in one frame.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, Illegal005, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(37, [](int32_t) { return 100.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_14);
+    CreateDone();
+
+    EXPECT_EQ(info_->startIndex_, 0);
+    EXPECT_EQ(info_->endIndex_, 14);
+
+    // test in the middle position.
+    pattern_->ScrollToIndex(19, false, ScrollAlign::START);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 19);
+    EXPECT_EQ(info_->endIndex_, 26);
+    DeleteItemInLazyForEach(16);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    mockLazy->SetTotalCount(36);
+    FlushUITasks();
+    EXPECT_EQ(info_->startIndex_, 19);
+    EXPECT_EQ(info_->endIndex_, 26);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(info_->segmentTails_.size(), 3);
+    EXPECT_EQ(info_->segmentTails_.back(), 36);
+
+    std::vector<WaterFlowSections::Section> newSection = {
+        WaterFlowSections::Section{.itemsCount = 19, .crossCount = 1}};
+    secObj->ChangeData(1, 1, newSection);
+    EXPECT_EQ(frameNode_->GetChildrenUpdated(), 16);
+    FlushLayoutTask(frameNode_);
+
+    EXPECT_EQ(info_->startIndex_, 18);
+    EXPECT_EQ(info_->endIndex_, 25);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 36);
+    EXPECT_EQ(secObj->GetSectionInfo()[1].itemsCount, 19);
+    EXPECT_EQ(info_->segmentTails_.back(), 35);
+
+    EXPECT_EQ(
+        info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 0.000000 empty}");
+    EXPECT_EQ(
+        info_->lanes_[1][0].ToString(), "{StartPos: 0.000000 EndPos: 800.000000 Items [18 19 20 21 22 23 24 25 ] }");
+    EXPECT_EQ(info_->idxToLane_.size(), 8);
+}
 } // namespace OHOS::Ace::NG
