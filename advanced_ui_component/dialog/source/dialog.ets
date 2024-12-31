@@ -906,7 +906,7 @@ export struct AlertDialog {
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
-          .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
+          .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
           .textAlign(this.textAlign)
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
