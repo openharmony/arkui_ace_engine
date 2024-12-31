@@ -414,7 +414,7 @@ void ErrorDecorator::UpdateErrorStyle()
     textLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
     textLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
     textLayoutProperty->UpdateMaxFontScale(theme->GetErrorTextMaxFontScale());
-    textLayoutProperty->UpdateTextAlign(errorTextStyle.GetTextAlign());
+    textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateIsAnimationNeeded(false);
@@ -532,9 +532,13 @@ void ErrorDecorator::LayoutDecorator()
     auto offset = textFieldGeometryNode->GetContentOffset();
     auto isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto offSetX = offset.GetX();
+    auto textFrameWidth = textGeometryNode->GetFrameRect().Width();
     if (isRTL) {
         auto textFieldContentRect = textFieldGeometryNode->GetContentRect();
-        offSetX += textFieldContentRect.Width() - textGeometryNode->GetFrameRect().Width();
+        offSetX += textFieldContentRect.Width() - textFrameWidth;
+    }
+    if (theme->GetErrorTextCenter()) {
+        offSetX = (textFieldGeometryNode->GetFrameRect().Width() - textFrameWidth) / 2;
     }
     textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));
     textNode->Layout();

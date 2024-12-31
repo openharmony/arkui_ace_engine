@@ -314,6 +314,10 @@ public:
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
     bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    bool DumpCommon(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
+    bool DumpDynamicUiContent(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
 
     bool DumpInfo(const std::vector<std::string>& params);
 

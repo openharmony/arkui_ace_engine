@@ -2573,6 +2573,33 @@ void OverlayManager::ReloadBuilderNodeConfig()
     }
 }
 
+void OverlayManager::OpenCustomDialogInner(const DialogProperties& dialogProps,
+    std::function<void(int32_t)> &&callback, const RefPtr<FrameNode> dialog, bool showComponentContent)
+{
+    if (!dialog) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
+        callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : -1);
+        return;
+    }
+
+    RegisterDialogLifeCycleCallback(dialog, dialogProps);
+    BeforeShowDialog(dialog);
+    if (dialogProps.dialogCallback) {
+        dialogProps.dialogCallback(dialog);
+    }
+
+    callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
+
+    if (dialogProps.transitionEffect != nullptr) {
+        SetDialogTransitionEffect(dialog);
+    } else {
+        OpenDialogAnimation(dialog);
+    }
+
+    dialogCount_++;
+    CustomDialogRecordEvent(dialogProps);
+}
+
 void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback)
 {
     RefPtr<UINode> customNode;
@@ -2581,7 +2608,19 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         TAG_LOGE(AceLogTag::ACE_DIALOG, "Parameters of OpenCustomDialog are incomplete because of no callback.");
         return;
     }
-    if (dialogProps.customBuilder) {
+
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    if (dialogProps.customBuilderWithId) {
+        TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder with id.");
+        NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
+        dialogProps.customBuilderWithId(nodeId);
+        customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (!customNode) {
+            TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to build custom node.");
+            callback(-1);
+            return;
+        }
+    } else if (dialogProps.customBuilder) {
         TAG_LOGD(AceLogTag::ACE_DIALOG, "open custom dialog with custom builder.");
         NG::ScopedViewStackProcessor builderViewStackProcessor(Container::CurrentId());
         dialogProps.customBuilder();
@@ -2607,25 +2646,8 @@ void OverlayManager::OpenCustomDialog(const DialogProperties& dialogProps, std::
         customNode = RebuildCustomBuilder(contentNode);
         showComponentContent = true;
     }
-    auto dialog = DialogView::CreateDialogNode(dialogProps, customNode);
-    if (!dialog) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "Fail to create dialog node.");
-        callback(showComponentContent ? ERROR_CODE_DIALOG_CONTENT_ERROR : -1);
-        return;
-    }
-    RegisterDialogLifeCycleCallback(dialog, dialogProps);
-    BeforeShowDialog(dialog);
-
-    callback(showComponentContent ? ERROR_CODE_NO_ERROR : dialog->GetId());
-
-    if (dialogProps.transitionEffect != nullptr) {
-        SetDialogTransitionEffect(dialog);
-    } else {
-        OpenDialogAnimation(dialog);
-    }
-
-    dialogCount_++;
-    CustomDialogRecordEvent(dialogProps);
+    auto dialog = DialogView::CreateDialogNode(nodeId, dialogProps, customNode);
+    OpenCustomDialogInner(dialogProps, std::move(callback), dialog, showComponentContent);
     return;
 }
 
@@ -4825,18 +4847,6 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         PlayBubbleStyleSheetTransition(sheetNode, true);
     } else {
         PlaySheetTransition(sheetNode, true);
-    }
-
-    auto pageNode = AceType::DynamicCast<FrameNode>(maskNode->GetParent());
-    CHECK_NULL_VOID(pageNode);
-    //when sheet shows in page
-    if (pageNode->GetTag() == V2::PAGE_ETS_TAG) {
-        //set focus on sheet when page has more than one child
-        auto focusView = pageNode->GetPattern<FocusView>();
-        CHECK_NULL_VOID(focusView);
-        auto focusHub = sheetNode->GetFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusView->SetViewRootScope(focusHub);
     }
 }
 

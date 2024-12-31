@@ -205,7 +205,7 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth, bool hasJson = false);
+    virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 

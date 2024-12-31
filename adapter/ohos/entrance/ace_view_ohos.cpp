@@ -443,7 +443,7 @@ bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     event.isPreIme = isPreIme;
-    return nonPointerEventCallback_(event);
+    return nonPointerEventCallback_(event, nullptr);
 }
 
 bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -451,7 +451,12 @@ bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>
     CHECK_NULL_RETURN(nonPointerEventCallback_, false);
     NG::FocusAxisEvent event;
     ConvertFocusAxisEvent(pointerEvent, event);
-    return nonPointerEventCallback_(event);
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            enabled);
+    };
+    return nonPointerEventCallback_(event, std::move(markProcess));
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
