@@ -23,6 +23,7 @@
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -202,5 +203,45 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setFrictionTestDefaultValues, TestS
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FRICTION_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_FRICTION_DEFAULT_VALUE) << "Default value for attribute 'friction'";
+}
+
+/*
+ * @tc.name: setOnWillScrollTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest, TestSize.Level1)
+{
+    using namespace Converter;
+    static const int32_t expectedResId = 123;
+    static const Dimension expectedOffset = 555.0_vp;
+    static const ScrollState expectedState = ScrollState::SCROLL;
+    
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+                            const Ark_Number xOffset, const Ark_Number yOffset,
+                            Ark_ScrollState scrollState, Ark_ScrollSource scrollSource,
+                            const Callback_OffsetResult_Void continuation) {
+        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResId);
+        EXPECT_EQ(OptConvert<ScrollState>(scrollState).value_or(ScrollState()), expectedState);
+
+        Ark_OffsetResult arkResult {
+            .xOffset = xOffset,
+            .yOffset = yOffset
+        };
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto func = ArkValue<ScrollOnWillScrollCallback>(nullptr, callSyncFunc, expectedResId);
+    auto funcOpt = ArkValue<Opt_ScrollOnWillScrollCallback>(func);
+    modifier_->setOnWillScroll(node_, &funcOpt);
+
+    auto fireOnWillScroll = eventHub->GetOnWillScroll();
+    ASSERT_NE(fireOnWillScroll, nullptr);
+    auto result = fireOnWillScroll(expectedOffset, expectedState, ScrollSource::SCROLL_BAR);
+    EXPECT_EQ(result.offset, expectedOffset);
 }
 } // namespace OHOS::Ace::NG
