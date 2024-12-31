@@ -794,7 +794,7 @@ export struct ConfirmDialog {
       } catch (exception) {
         let code: number = (exception as BusinessError).code;
         let message: string = (exception as BusinessError).message;
-        hilog.error(0x3900, 'Ace', `Faild to send accessibility event, cause, code: ${code}, message: ${message}`);
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
       }
     })
     .width('100%')
