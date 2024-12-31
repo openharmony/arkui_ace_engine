@@ -94,7 +94,7 @@ typedef enum {
     /** Check box group.
      *  @since 16
      */
-    ARKUI_NODE_CHECKBOX_GROUP = 20,
+    ARKUI_NODE_CHECKBOX_GROUP = 21,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -4141,7 +4141,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SELECT_ALL = 20001,
+    NODE_CHECKBOX_GROUP_SELECT_ALL = 21001,
 
     /**
      * @brief Defines the color of the checkboxgroup when it is selected.
@@ -4157,7 +4157,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 20002,
+    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 21002,
     /**
      * @brief Defines the border color of the checkboxgroup when it is not selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -4170,7 +4170,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 20003,
+    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 21003,
 
     /**
      * @brief Defines the internal icon style of the checkboxgroup.
@@ -4188,7 +4188,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_MARK = 20004,
+    NODE_CHECKBOX_GROUP_MARK = 21004,
 
     /**
      * @brief Defines the shape of the checkboxgroup.
@@ -4202,7 +4202,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SHAPE = 20005,
+    NODE_CHECKBOX_GROUP_SHAPE = 21005,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
