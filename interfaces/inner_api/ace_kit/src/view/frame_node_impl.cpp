@@ -181,6 +181,15 @@ void FrameNodeImpl::MarkDirtyNode(NG::PropertyChangeFlag flag)
     frameNode_->MarkDirtyNode(flag);
 }
 
+void FrameNodeImpl::RemoveChild(const RefPtr<FrameNode> &child)
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto childNode = AceType::DynamicCast<FrameNodeImpl>(child);
+    auto* childNodePtr = childNode->GetAceNodePtr();
+    CHECK_NULL_VOID(childNodePtr);
+    frameNode_->RemoveChild(AceType::Claim(childNodePtr));
+}
+
 std::string FrameNodeImpl::GetTag() const
 {
     CHECK_NULL_RETURN(frameNode_, "");

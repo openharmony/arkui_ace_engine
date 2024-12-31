@@ -52,6 +52,7 @@ public:
     void AddChild(const RefPtr<FrameNode>& child) override;
     std::list<RefPtr<FrameNode>> GetChildren() override;
     void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
+    void RemoveChild(const RefPtr<FrameNode>& child) override;
 
     std::string GetTag() const override;
     int32_t GetId() const override;
