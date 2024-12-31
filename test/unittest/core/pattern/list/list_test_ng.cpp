@@ -146,11 +146,12 @@ ListItemModelNG ListTestNg::CreateListItem(V2::ListItemStyle listItemStyle)
     return itemModel;
 }
 
-void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle)
+void ListTestNg::CreateListItemGroups(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup(listItemGroupStyle);
-        CreateListItems(GROUP_ITEM_NUMBER, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }

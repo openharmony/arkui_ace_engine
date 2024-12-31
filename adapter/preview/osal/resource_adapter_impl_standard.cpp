@@ -405,7 +405,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "GetIntArray error, id=%{public}u", resId);
         }
     }
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;
@@ -423,7 +423,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& 
         }
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;

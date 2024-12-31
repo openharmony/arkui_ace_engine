@@ -109,7 +109,7 @@ public:
     virtual void PanOnActionStart(const GestureEvent& info) = 0;
     virtual void PanOnActionUpdate(const GestureEvent& info) = 0;
     virtual void PanOnActionEnd(const GestureEvent& info) = 0;
-    virtual void PanOnActionCancel() = 0;
+    virtual void PanOnActionCancel(const GestureEvent& info) = 0;
     virtual DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) = 0;
     RefPtr<DragDropEvent> FindDragDropNode(const RefPtr<PipelineContext>& context, const GestureEvent& info);
     virtual void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo,

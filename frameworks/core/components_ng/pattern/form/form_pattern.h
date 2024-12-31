@@ -66,7 +66,7 @@ enum class FormChildNodeType : int32_t {
     /**
      * forbidden form text node
     */
-    FORM_FORBIDDEN_TEXT_NODE,
+    FORM_SPECIAL_STYLE_NODE
 };
 
 class FormPattern : public Pattern {
@@ -178,7 +178,9 @@ private:
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
+    void UpdateSpecialStyleCfg();
     void UpdateTimeLimitFontCfg();
+    void UpdateAppLockCfg();
 
     void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
     void TakeSurfaceCaptureForUI();
@@ -208,6 +210,7 @@ private:
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateTimeLimitNode();
+    RefPtr<FrameNode> CreateAppLockNode();
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
@@ -237,6 +240,7 @@ private:
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    RefPtr<FrameNode> CreateActionNode();
     Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);

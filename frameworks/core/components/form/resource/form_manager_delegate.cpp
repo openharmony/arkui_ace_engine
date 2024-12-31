@@ -55,6 +55,7 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
+constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
@@ -692,7 +693,9 @@ void FormManagerDelegate::DispatchPointerEvent(const
     }
 
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
-    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    auto pointAction = pointerEvent->GetPointerAction();
+    if (pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
@@ -819,6 +822,9 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         code.c_str(), msg.c_str(), externalErrorCode, errorMsg.c_str());
     switch (externalErrorCode) {
         case RENDER_DEAD_CODE:
+            ReAddForm();
+            break;
+        case FORM_STATUS_TIME_OUT:
             ReAddForm();
             break;
         case FORM_NOT_TRUST_CODE:

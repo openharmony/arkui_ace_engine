@@ -567,8 +567,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
+#endif
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
@@ -622,7 +625,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
     { "QRCode", JSQRCode::JSBind },
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
@@ -703,7 +705,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
+#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -1031,6 +1035,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {

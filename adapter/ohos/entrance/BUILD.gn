@@ -71,13 +71,13 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/cj_utils/cj_utils.cpp",
 
       # AudioHaptic
-      "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_factory.cpp",
+      "$ace_root/adapter/ohos/entrance/picker/picker_haptic_factory.cpp",
     ]
 
     if (enable_audio_framework && enable_player_framework) {
       sources += [
-        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_controller.cpp",
-        "$ace_root/adapter/ohos/entrance/timepicker/timepicker_haptic_impl.cpp",
+        "$ace_root/adapter/ohos/entrance/picker/picker_haptic_controller.cpp",
+        "$ace_root/adapter/ohos/entrance/picker/picker_haptic_impl.cpp",
       ]
     }
 

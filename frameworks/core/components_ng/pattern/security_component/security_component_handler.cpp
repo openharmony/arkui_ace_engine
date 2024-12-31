@@ -989,6 +989,11 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     }
 #endif
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
+        layoutProperty->GetIsMaxLineLimitExceeded().value()) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
+        return -1;
+    }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
@@ -1018,6 +1023,11 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.dataSize = data.size();
     }
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
+        layoutProperty->GetIsMaxLineLimitExceeded().value()) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
+        return -1;
+    }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");

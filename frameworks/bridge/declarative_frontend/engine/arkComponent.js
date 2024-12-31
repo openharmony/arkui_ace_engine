@@ -5353,6 +5353,12 @@ globalThis.applyTextModifierToNode = function (modifier, nodePtr) {
   component.applyModifierPatch();
 };
 
+globalThis.applyCommonModifierToNode = function (modifier, nodePtr) {
+  let component = new ArkComponent(nodePtr);
+  applyUIAttributes(modifier, nodePtr, component);
+  component.applyModifierPatch();
+};
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -8852,6 +8858,42 @@ class RichEditorBarStateModifier extends ModifierWithKey {
 }
 RichEditorBarStateModifier.identity = Symbol('richEditorBarState');
 
+class RichEditorMaxLengthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLength(node);
+    }
+    else {
+      getUINativeModule().richEditor.setMaxLength(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorMaxLengthModifier.identity = Symbol('richEditorMaxLength');
+
+class RichEditorMaxLinesModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetMaxLines(node);
+    }
+    else {
+      getUINativeModule().richEditor.setMaxLines(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorMaxLinesModifier.identity = Symbol('richEditorMaxLines');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -8980,6 +9022,14 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   barState(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorBarStateModifier.identity, RichEditorBarStateModifier, value);
+    return this;
+  }
+  maxLength(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLengthModifier.identity, RichEditorMaxLengthModifier, value);
+    return this;
+  }
+  maxLines(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
     return this;
   }
 }
@@ -9634,6 +9684,23 @@ class SearchLineHeightModifier extends ModifierWithKey {
     }
 }
 SearchLineHeightModifier.identity = Symbol('searchLineHeight');
+class SearchHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().search.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().search.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchHalfLeadingModifier.identity = Symbol('searchHalfLeading');
 class SearchMinFontSizeModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -9669,6 +9736,40 @@ class SearchMaxFontSizeModifier extends ModifierWithKey {
     }
 }
 SearchMaxFontSizeModifier.identity = Symbol('searchMaxFontSize');
+class SearchMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().search.resetMinFontScale(node);
+      }
+      else {
+          getUINativeModule().search.setMinFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchMinFontScaleModifier.identity = Symbol('searchMinFontScale');
+class SearchMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().search.resetMaxFontScale(node);
+      }
+      else {
+          getUINativeModule().search.setMaxFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchMaxFontScaleModifier.identity = Symbol('searchMaxFontScale');
 class SearchSelectedBackgroundColorModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -9983,6 +10084,25 @@ class SearchEnableHapticFeedbackModifier extends ModifierWithKey {
   }
 }
 SearchEnableHapticFeedbackModifier.identity = Symbol('searchEnableHapticFeedback');
+
+class SearchStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().search.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchStopBackPressModifier.identity = Symbol('searchStopBackPress');
+
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -10141,12 +10261,24 @@ class ArkSearchComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SearchLineHeightModifier.identity, SearchLineHeightModifier, value);
     return this;
   }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchHalfLeadingModifier.identity, SearchHalfLeadingModifier, value);
+    return this;
+  }
   minFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, SearchMinFontSizeModifier.identity, SearchMinFontSizeModifier, value);
     return this;
   }
   maxFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, SearchMaxFontSizeModifier.identity, SearchMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchMinFontScaleModifier.identity, SearchMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchMaxFontScaleModifier.identity, SearchMaxFontScaleModifier, value);
     return this;
   }
   selectedBackgroundColor(value) {
@@ -10192,6 +10324,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   enableHapticFeedback(value) {
     modifierWithKey(this._modifiersWithKeys, SearchEnableHapticFeedbackModifier.identity, SearchEnableHapticFeedbackModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchStopBackPressModifier.identity, SearchStopBackPressModifier, value);
     return this;
   }
 }
@@ -12736,6 +12872,23 @@ class TextAreaLineHeightModifier extends ModifierWithKey {
     }
 }
 TextAreaLineHeightModifier.identity = Symbol('textAreaLineHeight');
+class TextAreaHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().textArea.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaHalfLeadingModifier.identity = Symbol('textAreaHalfLeading');
 class TextAreaWordBreakModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -12903,6 +13056,40 @@ class TextAreaMaxFontSizeModifier extends ModifierWithKey {
     }
 }
 TextAreaMaxFontSizeModifier.identity = Symbol('textAreaMaxFontSize');
+class TextAreaMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetMinFontScale(node);
+      }
+      else {
+          getUINativeModule().textArea.setMinFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaMinFontScaleModifier.identity = Symbol('textAreaMinFontScale');
+class TextAreaMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textArea.resetMaxFontScale(node);
+      }
+      else {
+          getUINativeModule().textArea.setMaxFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaMaxFontScaleModifier.identity = Symbol('textAreaMaxFontScale');
 class TextAreaHeightAdaptivePolicyModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -13786,6 +13973,24 @@ class TextAreaEllipsisModeModifier extends ModifierWithKey {
 }
 TextAreaEllipsisModeModifier.identity = Symbol('textEllipsisMode');
 
+class TextAreaStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textArea.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().textArea.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextAreaStopBackPressModifier.identity = Symbol('textAreaStopBackPress');
+
 class ArkTextAreaComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -13933,6 +14138,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaLineHeightModifier.identity, TextAreaLineHeightModifier, value);
     return this;
   }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaHalfLeadingModifier.identity, TextAreaHalfLeadingModifier, value);
+    return this;
+  }
   wordBreak(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaWordBreakModifier.identity, TextAreaWordBreakModifier, value);
     return this;
@@ -13948,6 +14157,14 @@ class ArkTextAreaComponent extends ArkComponent {
   }
   maxFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, TextAreaMaxFontSizeModifier.identity, TextAreaMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMinFontScaleModifier.identity, TextAreaMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaMaxFontScaleModifier.identity, TextAreaMaxFontScaleModifier, value);
     return this;
   }
   heightAdaptivePolicy(value) {
@@ -14114,6 +14331,10 @@ class ArkTextAreaComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextAreaEllipsisModeModifier.identity, TextAreaEllipsisModeModifier, value);
     return this;
   }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, TextAreaStopBackPressModifier.identity, TextAreaStopBackPressModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.TextArea !== undefined) {
@@ -14240,6 +14461,23 @@ class TextInputLineHeightModifier extends ModifierWithKey {
     }
 }
 TextInputLineHeightModifier.identity = Symbol('textInputLineHeight');
+class TextInputHalfLeadingModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetHalfLeading(node);
+      }
+      else {
+          getUINativeModule().textInput.setHalfLeading(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputHalfLeadingModifier.identity = Symbol('textInputHalfLeading');
 class TextInputUnderlineColorModifier extends ModifierWithKey {
   constructor(value) {
       super(value);
@@ -14344,6 +14582,42 @@ class TextInputMaxFontSizeModifier extends ModifierWithKey {
     }
 }
 TextInputMaxFontSizeModifier.identity = Symbol('textInputMaxFontSize');
+
+class TextInputMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetMinFontScale(node);
+      }
+      else {
+          getUINativeModule().textInput.setMinFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputMinFontScaleModifier.identity = Symbol('textInputMinFontScale');
+class TextInputMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+      super(value);
+  }
+  applyPeer(node, reset) {
+      if (reset) {
+          getUINativeModule().textInput.resetMaxFontScale(node);
+      }
+      else {
+          getUINativeModule().textInput.setMaxFontScale(node, this.value);
+      }
+  }
+  checkObjectDiff() {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputMaxFontScaleModifier.identity = Symbol('textInputMaxFontScale');
+
 class TextInputHeightAdaptivePolicyModifier extends ModifierWithKey {
     constructor(value) {
         super(value);
@@ -15498,6 +15772,24 @@ class TextInputEllipsisModeModifier extends ModifierWithKey {
 }
 TextInputEllipsisModeModifier.identity = Symbol('textInputEllipsisMode');
 
+class TextInputStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().textInput.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().textInput.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+TextInputStopBackPressModifier.identity = Symbol('textInputStopBackPress');
+
 class ArkTextInputComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -15719,6 +16011,10 @@ class ArkTextInputComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
     return this;
   }
+  halfLeading(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
+    return this;
+  }
   underlineColor(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
     return this;
@@ -15738,6 +16034,14 @@ class ArkTextInputComponent extends ArkComponent {
   }
   maxFontSize(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputMinFontScaleModifier.identity, TextInputMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputMaxFontScaleModifier.identity, TextInputMaxFontScaleModifier, value);
     return this;
   }
   heightAdaptivePolicy(value) {
@@ -15880,6 +16184,10 @@ class ArkTextInputComponent extends ArkComponent {
   }
   ellipsisMode(value) {
     modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, TextInputStopBackPressModifier.identity, TextInputStopBackPressModifier, value);
     return this;
   }
 }
@@ -30702,6 +31010,118 @@ class WaterFlowFlingSpeedLimitModifier extends ModifierWithKey {
 }
 WaterFlowFlingSpeedLimitModifier.identity = Symbol('waterFlowFlingSpeedLimit');
 
+class WaterFlowOnScrollFrameBeginModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollFrameBegin(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollFrameBegin(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollFrameBeginModifier.identity = Symbol('waterFlowOnScrollFrameBegin');
+
+class WaterFlowOnWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnWillScroll(node);
+    } else {
+      getUINativeModule().waterFlow.setOnWillScroll(node, this.value);
+    }
+  }
+}
+WaterFlowOnWillScrollModifier.identity = Symbol('waterFlowOnWillScroll');
+
+class WaterFlowOnDidScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnDidScroll(node);
+    } else {
+      getUINativeModule().waterFlow.setOnDidScroll(node, this.value);
+    }
+  }
+}
+WaterFlowOnDidScrollModifier.identity = Symbol('waterFlowOnDidScroll');
+
+class WaterFlowOnReachStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnReachStart(node);
+    } else {
+      getUINativeModule().waterFlow.setOnReachStart(node, this.value);
+    }
+  }
+}
+WaterFlowOnReachStartModifier.identity = Symbol('waterFlowOnReachStart');
+
+class WaterFlowOnReachEndModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnReachEnd(node);
+    } else {
+      getUINativeModule().waterFlow.setOnReachEnd(node, this.value);
+    }
+  }
+}
+WaterFlowOnReachEndModifier.identity = Symbol('waterFlowOnReachEnd');
+
+class WaterFlowOnScrollStartModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollStart(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollStart(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollStartModifier.identity = Symbol('waterFlowOnScrollStart');
+
+class WaterFlowOnScrollStopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollStop(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollStop(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollStopModifier.identity = Symbol('waterFlowOnScrollStop');
+
+class WaterFlowOnScrollIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().waterFlow.resetOnScrollIndex(node);
+    } else {
+      getUINativeModule().waterFlow.setOnScrollIndex(node, this.value);
+    }
+  }
+}
+WaterFlowOnScrollIndexModifier.identity = Symbol('waterFlowOnScrollIndex');
+
 class WaterFlowInitializeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30781,13 +31201,16 @@ class ArkWaterFlowComponent extends ArkScrollable {
     return this;
   }
   onReachStart(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnReachStartModifier.identity, WaterFlowOnReachStartModifier, event);
+    return this;
   }
   onReachEnd(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnReachEndModifier.identity, WaterFlowOnReachEndModifier, event);
+    return this;
   }
   onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollFrameBeginModifier.identity, WaterFlowOnScrollFrameBeginModifier, event);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
@@ -30807,6 +31230,26 @@ class ArkWaterFlowComponent extends ArkScrollable {
   }
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowFlingSpeedLimitModifier.identity, WaterFlowFlingSpeedLimitModifier, value);
+    return this;
+  }
+  onWillScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnWillScrollModifier.identity, WaterFlowOnWillScrollModifier, callback);
+    return this;
+  }
+  onDidScroll(callback) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnDidScrollModifier.identity, WaterFlowOnDidScrollModifier, callback);
+    return this;
+  }
+  onScrollStart(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollStartModifier.identity, WaterFlowOnScrollStartModifier, event);
+    return this;
+  }
+  onScrollStop(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollStopModifier.identity, WaterFlowOnScrollStopModifier, event);
+    return this;
+  }
+  onScrollIndex(event) {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowOnScrollIndexModifier.identity, WaterFlowOnScrollIndexModifier, event);
     return this;
   }
   initialize(value) {

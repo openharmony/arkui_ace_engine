@@ -2519,13 +2519,56 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
-            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "WindowName = " SEC_PLD(%{public}s) ", "
+            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
-            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            pointerEvent->GetId(), SEC_PARAM(container->GetWindowName().c_str()), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
+    return true;
+}
+
+bool UIContentImpl::ProcessPointerEvent(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+{
+    if (!ProcessPointerEvent(pointerEvent)) {
+        return false;
+    }
+    if (pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_RETURN(context, false);
+        auto task = [context, finallyCallback = callback]() {
+            CHECK_NULL_VOID(context);
+            CHECK_NULL_VOID(finallyCallback);
+            ContainerScope scope(context->GetInstanceId());
+            auto dragDropManager = context->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            auto isAnyDraggableHit = dragDropManager->IsAnyDraggableHit(context, MOUSE_PRESS_LEFT + MOUSE_BASE_ID);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "is any draggable node hit: %{public}d", isAnyDraggableHit);
+            dragDropManager->SetIsAnyDraggableHit(false);
+            finallyCallback(isAnyDraggableHit);
+        };
+
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            task();
+        } else {
+            taskExecutor->PostTask(
+                std::move(task), TaskExecutor::TaskType::UI, "ArkUIProcessPointerEvent", PriorityType::VIP);
+        }
+    } else {
+        CHECK_NULL_RETURN(callback, false);
+        callback(false);
+    }
     return true;
 }
 
@@ -2537,9 +2580,10 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
-            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "WindowName = " SEC_PLD(%{public}s) ", "
+            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
-            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            pointerEvent->GetId(), SEC_PARAM(container->GetWindowName().c_str()), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
@@ -2551,9 +2595,10 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{private}d, "
-        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+        "keyEvent info: keyCode is " SEC_PLD(%{private}d) ", "
+        "keyAction is " SEC_PLD(%{public}d) ", keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), SEC_PARAM(touchEvent->GetKeyCode()), SEC_PARAM(touchEvent->GetKeyAction()),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());

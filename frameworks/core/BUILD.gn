@@ -73,6 +73,18 @@ template("ace_core_source_set") {
           vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
     }
 
+    if (ace_engine_enable_circle_feature &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs
+    }
+
+    if (ace_engine_enable_circle_feature &&
+        defined(vendor_configs.ace_engine_advanced_router_circle_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_router_circle_mode_dirs
+    }
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
@@ -282,6 +294,14 @@ template("ace_core_source_set") {
       # text
       "text/text_emoji_processor.cpp",
     ]
+
+    if (ace_engine_feature_enable_event_extra_handling &&
+        defined(
+            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
+    } else {
+      sources += [ "event/event_info_convertor.cpp" ]
+    }
 
     if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
@@ -975,6 +995,9 @@ template("ace_core_ng_source_set") {
         config.enable_ability_component) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/ability_component:ace_core_components_ability_component_pattern_ng_$platform" ]
     }
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform" ]
+    }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
       if (!is_arkui_x) {
@@ -1004,6 +1027,9 @@ template("ace_core_ng_source_set") {
       } else {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
       }
+    }
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform" ]
     }
 
     if (defined(config.form_components_support) &&

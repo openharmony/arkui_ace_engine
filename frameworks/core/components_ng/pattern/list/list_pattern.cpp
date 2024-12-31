@@ -356,8 +356,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     auto host = GetHost();
     CHECK_NULL_RETURN(host, paint);
     const auto& geometryNode = host->GetGeometryNode();
+    auto renderContext = host->GetRenderContext();
     if (!listContentModifier_) {
-        auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, paint);
         auto size = renderContext->GetPaintRectWithoutTransform().GetSize();
         auto& padding = geometryNode->GetPadding();
@@ -370,7 +370,8 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     listContentModifier_->SetIsNeedDividerAnimation(isNeedDividerAnimation_);
     paint->SetLaneGutter(laneGutter_);
     bool showCached = listLayoutProperty->GetShowCachedItemsValue(false);
-    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached);
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    paint->SetItemsPosition(itemPosition_, cachedItemPosition_, pressedItem_, showCached, clip);
     paint->SetContentModifier(listContentModifier_);
     paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
     UpdateFadingEdge(paint);
@@ -2511,7 +2512,7 @@ int32_t ListPattern::GetItemIndexByPosition(float xOffset, float yOffset)
         }
     }
     int32_t lanesOffset = 0;
-    if (lanes_ > 1) {
+    if (lanes_ > 1 && !NearZero(crossSize + laneGutter_)) {
         lanesOffset = static_cast<int32_t>(crossOffset / ((crossSize + laneGutter_) / lanes_));
     }
     for (auto& pos : itemPosition_) {

@@ -94,7 +94,7 @@ typedef enum {
     /** Check box group.
      *  @since 16
      */
-    ARKUI_NODE_CHECKBOX_GROUP = 20,
+    ARKUI_NODE_CHECKBOX_GROUP = 21,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -2817,6 +2817,19 @@ typedef enum {
     NODE_TEXT_INPUT_ENABLE_PREVIEW_TEXT = 7033,
 
     /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_HALF_LEADING = 7034,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3130,6 +3143,19 @@ typedef enum {
      * @since 16
      */
     NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT = 8024,
+
+    /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_HALF_LEADING = 8025,
 
     /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
@@ -4115,7 +4141,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SELECT_ALL = 20001,
+    NODE_CHECKBOX_GROUP_SELECT_ALL = 21001,
 
     /**
      * @brief Defines the color of the checkboxgroup when it is selected.
@@ -4131,7 +4157,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 20002,
+    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 21002,
     /**
      * @brief Defines the border color of the checkboxgroup when it is not selected.
      * This attribute can be set, reset, and obtained as required through APIs.
@@ -4144,7 +4170,7 @@ typedef enum {
      * 
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 20003,
+    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 21003,
 
     /**
      * @brief Defines the internal icon style of the checkboxgroup.
@@ -4162,7 +4188,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_MARK = 20004,
+    NODE_CHECKBOX_GROUP_MARK = 21004,
 
     /**
      * @brief Defines the shape of the checkboxgroup.
@@ -4176,7 +4202,7 @@ typedef enum {
      *
      * @since 16
      */
-    NODE_CHECKBOX_GROUP_SHAPE = 20005,
+    NODE_CHECKBOX_GROUP_SHAPE = 21005,
 
     /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
@@ -7934,6 +7960,19 @@ bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node);
  * @since 14
  */
 int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
+ 
+/**
+ * @brief Get the node handle by id. This interface only works on the main thread.
+ *
+ * @param id The id of the target node handle.
+ * @param node The handle of target node handle.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node);
 
 /**
  * @brief The event called when the sliding operation offset changes.

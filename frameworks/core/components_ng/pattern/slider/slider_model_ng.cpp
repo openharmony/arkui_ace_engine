@@ -441,7 +441,7 @@ void SliderModelNG::SetMinResponsiveDistance(FrameNode* frameNode, float value)
     if (LessOrEqual(value, diff) && GreatOrEqual(value, minResponse)) {
         minResponse = value;
     }
-    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, MinResponsiveDistance, minResponse, frameNode);
 }
 
 #ifdef SUPPORT_DIGITAL_CROWN
