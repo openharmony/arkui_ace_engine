@@ -19,6 +19,7 @@
 #include "base/geometry/axis.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scroll/scroll_accessibility_property.h"
+#include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/scroll/scroll_event_hub.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"

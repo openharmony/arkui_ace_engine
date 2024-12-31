@@ -28,7 +28,7 @@ void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity
     if (!MockAnimationManager::Enabled()) {
         return;
     }
-    MockAnimationManager::GetInstance().SetParams(option, { finishCallback, nullptr });
+    MockAnimationManager::GetInstance().SetParams(option.GetDuration(), { finishCallback, nullptr });
     MockAnimationManager::GetInstance().OpenAnimation();
     Set(value);
     MockAnimationManager::GetInstance().CloseAnimation();

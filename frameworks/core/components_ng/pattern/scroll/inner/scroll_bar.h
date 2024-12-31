@@ -35,6 +35,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
 
+
 namespace OHOS::Ace::NG {
 
 constexpr double FACTOR_HALF = 0.5;
@@ -323,6 +324,8 @@ public:
         return isReverse_;
     }
 
+    Axis GetPanDirection() const;
+
     Rect GetTouchRegion() const
     {
         return touchRegion_;
@@ -369,7 +372,6 @@ public:
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
     void SetReverse(bool reverse);
-    Axis GetPanDirection() const;
     // infos for dump
     void AddScrollBarLayoutInfo();
     void GetShapeModeDumpInfo();
@@ -425,7 +427,7 @@ private:
     Dimension inactiveWidth_;
     Dimension activeWidth_;
     double barWidth_ = 0.0;         // actual width of the scrollbar
-    Dimension normalWidth_; // user-set width of the scrollbar
+    Dimension normalWidth_;         // user-set width of the scrollbar
     Dimension themeNormalWidth_;
     Dimension touchWidth_;
     Dimension hoverWidth_;
@@ -485,6 +487,7 @@ private:
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+
     RefPtr<ClickEvent> clickevent_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
     bool isMousePressed_ = false;

@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
@@ -46,7 +47,6 @@ constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 ms
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
-constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -125,11 +125,14 @@ void ScrollablePattern::UpdateFadingEdge(const RefPtr<ScrollablePaintMethod>& pa
     }
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (!paintProperty->GetFadingEdge().value_or(false)) {
+    bool hasFadingEdge = paintProperty->GetFadingEdge().value_or(false);
+    if (!hasFadingEdge) {
         paint->SetOverlayRenderContext(overlayRenderContext);
         paint->SetFadingInfo(false, false, prevHasFadingEdge_);
+        prevHasFadingEdge_ = hasFadingEdge;
         return;
     }
+    prevHasFadingEdge_ = hasFadingEdge;
     auto isFadingTop = !IsAtTop();
     auto isFadingBottom = IsFadingBottom();
     float paddingBeforeContent = 0.0f;
@@ -154,7 +157,7 @@ void ScrollablePattern::UpdateFadeInfo(
     float percentFading = 0.0f;
     auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value_or(LIST_FADINGEDGE);
+    auto fadingEdgeLength = paintProperty->GetFadingEdgeLength().value();
     if (fadingEdgeLength.Unit() == DimensionUnit::PERCENT) {
         percentFading = fadingEdgeLength.Value() / 100.0f; // One hundred percent
     } else {
@@ -631,6 +634,7 @@ void ScrollablePattern::AddScrollEvent()
         CHECK_NULL_RETURN(pattern, 0.0);
         return pattern->GetMainContentSize();
     });
+
     scrollable->AddPanActionEndEvent([weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -1709,7 +1713,6 @@ void ScrollablePattern::SelectWithScroll()
 void ScrollablePattern::ClearSelectedZone()
 {
     DrawSelectedZone(RectF());
-    selectScrollOffset_ = 0.0f;
 }
 
 RectF ScrollablePattern::ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset)
@@ -1752,7 +1755,6 @@ void ScrollablePattern::DrawSelectedZone(const RectF& selectedZone)
 void ScrollablePattern::MarkSelectedItems()
 {
     if (multiSelectable_ && mousePressed_) {
-        UpdateMouseStartOffset();
         auto selectedZone = ComputeSelectedZone(mouseStartOffset_, mouseEndOffset_);
         if (!selectedZone.IsEmpty()) {
             MultiSelectWithoutKeyboard(selectedZone);
@@ -1779,7 +1781,11 @@ bool ScrollablePattern::ShouldSelectScrollBeStopped()
 
 void ScrollablePattern::UpdateMouseStart(float offset)
 {
-    selectScrollOffset_ += offset;
+    if (axis_ == Axis::VERTICAL) {
+        mouseStartOffset_.AddY(offset);
+    } else {
+        mouseStartOffset_.AddX(offset);
+    }
 }
 
 float ScrollablePattern::GetOutOfScrollableOffset() const
@@ -1856,22 +1862,6 @@ void ScrollablePattern::LimitMouseEndOffset()
         mouseEndOffset_.SetX(LessNotEqual(limitedMainOffset, 0.0f) ? mouseEndOffset_.GetX() : limitedMainOffset);
         mouseEndOffset_.SetY(LessNotEqual(limitedCrossOffset, 0.0f) ? mouseEndOffset_.GetY() : limitedCrossOffset);
     }
-}
-
-void ScrollablePattern::UpdateMouseStartOffset()
-{
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    uint64_t currentVsync = context->GetVsyncTime();
-    if (currentVsync > lastVsyncTime_) {
-        if (axis_ == Axis::VERTICAL) {
-            mouseStartOffset_.AddY(selectScrollOffset_);
-        } else {
-            mouseStartOffset_.AddX(selectScrollOffset_);
-        }
-        selectScrollOffset_ = 0.0f;
-    }
-    lastVsyncTime_ = currentVsync;
 }
 
 bool ScrollablePattern::HandleScrollImpl(float offset, int32_t source)
@@ -3493,6 +3483,45 @@ PositionMode ScrollablePattern::GetPositionMode()
     return positionMode;
 }
 
+void ScrollablePattern::CheckScrollBarOff()
+{
+    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto displayMode = paintProperty->GetScrollBarMode().value_or(GetDefaultScrollBarDisplayMode());
+    if (displayMode == DisplayMode::OFF) {
+        SetScrollBar(DisplayMode::OFF);
+    }
+}
+
+void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState state)
+{
+    if (state == NestedState::GESTURE) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    uint64_t currentVsync = pipeline->GetVsyncTime();
+    uint64_t diff = currentVsync - nestedScrollTimestamp_;
+    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
+        diff = DEFAULT_VSYNC_DIFF_TIME;
+    }
+    nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
+    nestedScrollTimestamp_ = currentVsync;
+}
+
+float ScrollablePattern::GetNestedScrollVelocity()
+{
+    if (NearZero(nestedScrollVelocity_)) {
+        return 0.0f;
+    }
+    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
+    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
+    if (diff >= MAX_VSYNC_DIFF_TIME) {
+        nestedScrollVelocity_ = 0.0f;
+    }
+    return nestedScrollVelocity_;
+}
+
 void ScrollablePattern::AddNestScrollBarProxy(const WeakPtr<ScrollBarProxy>& scrollBarProxy)
 {
     if (std::find(nestScrollBarProxy_.begin(), nestScrollBarProxy_.end(), scrollBarProxy) !=
@@ -3605,45 +3634,6 @@ void ScrollablePattern::SearchAndUnsetParentNestedScroll(const RefPtr<FrameNode>
         auto ScrollPattern = AceType::DynamicCast<ScrollablePattern>(parentPattern);
         UnsetParentNestedScroll(ScrollPattern);
     }
-}
-
-void ScrollablePattern::CheckScrollBarOff()
-{
-    auto paintProperty = GetPaintProperty<ScrollablePaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto displayMode = paintProperty->GetScrollBarMode().value_or(GetDefaultScrollBarDisplayMode());
-    if (displayMode == DisplayMode::OFF) {
-        SetScrollBar(DisplayMode::OFF);
-    }
-}
-
-void ScrollablePattern::UpdateNestedScrollVelocity(float offset, NestedState state)
-{
-    if (state == NestedState::GESTURE) {
-        return;
-    }
-    auto pipeline = GetContext();
-    CHECK_NULL_VOID(pipeline);
-    uint64_t currentVsync = pipeline->GetVsyncTime();
-    uint64_t diff = currentVsync - nestedScrollTimestamp_;
-    if (diff >= MAX_VSYNC_DIFF_TIME || diff <= MIN_DIFF_VSYNC) {
-        diff = DEFAULT_VSYNC_DIFF_TIME;
-    }
-    nestedScrollVelocity_ = (offset / diff) * MILLOS_PER_NANO_SECONDS;
-    nestedScrollTimestamp_ = currentVsync;
-}
-
-float ScrollablePattern::GetNestedScrollVelocity()
-{
-    if (NearZero(nestedScrollVelocity_)) {
-        return 0.0f;
-    }
-    uint64_t currentVsync = static_cast<uint64_t>(GetSysTimestamp());
-    uint64_t diff = currentVsync > nestedScrollTimestamp_ ? currentVsync - nestedScrollTimestamp_ : 0;
-    if (diff >= MAX_VSYNC_DIFF_TIME) {
-        nestedScrollVelocity_ = 0.0f;
-    }
-    return nestedScrollVelocity_;
 }
 
 SizeF ScrollablePattern::GetViewSizeMinusPadding()

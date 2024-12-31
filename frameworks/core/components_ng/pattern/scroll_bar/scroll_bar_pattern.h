@@ -277,7 +277,6 @@ public:
         }
         return false;
     }
-
     void InitClickEvent();
     void HandleClickEvent();
     void InitLongPressEvent();
@@ -292,7 +291,6 @@ public:
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
-
     void AddScrollBarLayoutInfo();
 
     void GetAxisDumpInfo();
@@ -380,6 +378,7 @@ private:
 
     // dump info
     std::list<OuterScrollBarLayoutInfo> outerScrollBarLayoutInfos_;
+    bool enableNestedSorll_ = false;
     bool isMousePressed_ = false;
     RefPtr<ClickEvent> clickListener_;
     RefPtr<ClickRecognizer> clickRecognizer_;
@@ -389,7 +388,6 @@ private:
     //Determine whether the current scroll direction is scrolling upwards or downwards
     bool scrollingUp_ = false;
     bool scrollingDown_ = false;
-    bool enableNestedSorll_ = false;
 };
 
 } // namespace OHOS::Ace::NG

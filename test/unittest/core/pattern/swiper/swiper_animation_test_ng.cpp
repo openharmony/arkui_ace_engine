@@ -104,7 +104,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     // change attribute during animation
     layoutProperty_->UpdateLoop(true);
     pattern_->OnModifyDone();
-    MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
@@ -149,7 +148,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     EXPECT_EQ(GetChildX(frameNode_, 0), 100.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimation();
-    MockAnimationManager::GetInstance().Tick();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
 

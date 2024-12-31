@@ -61,6 +61,8 @@ struct ListMainSizeValues {
     std::optional<float> layoutStartMainPos;
     std::optional<float> layoutEndMainPos;
     float referencePos = 0.0f;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };
@@ -344,13 +346,13 @@ private:
     bool layouted_ = false;
     LayoutConstraintF layoutConstraint_;
 
+    bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;
     int32_t forwardCachedIndex_ = -1;
     ListItemGroupLayoutAlgorithm::PositionMap cachedItemPosition_;
     float adjustRefPos_ = 0.0f;
     float adjustTotalSize_ = 0.0f;
 
-    bool reCache_ = false;
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;

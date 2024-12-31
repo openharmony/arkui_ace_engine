@@ -44,12 +44,6 @@ public:
      */
     void Next();
 
-    /**
-     * @brief force update the property by @c delta to simulate velocity update
-     * @note currently only supports float type
-     */
-    void ForceUpdate(float delta);
-
     bool Finished() const
     {
         return remainingTicks_ <= 0;
@@ -71,7 +65,7 @@ public:
     void End();
 
     /**
-     * @brief jump to the end of the animation and update the value. Requires one more frame to finish.
+     * @brief jump to the end of the animation and update the value
      */
     void JumpToEnd();
 

@@ -330,7 +330,8 @@ void SwiperPattern::ResetOnForceMeasure()
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = currentIndex_;
-
+    TAG_LOGI(
+        AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by force measure", jumpIndex_.value_or(-1));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetNode = FindLazyForEachNode(host);
@@ -727,17 +728,20 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (HasRightButtonNode()) {
         ++skipCnt;
     }
-    swiperFocusHub->AllChildFocusHub<true>(
-        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
-            if (--skipCnt >= 0 || !child) {
-                return;
-            }
-            if (IsUseCustomAnimation() && hasTabsAncestor_) {
-                child->SetParentFocusable(child == showChildFocusHub);
-            } else {
-                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
-            }
-        });
+    std::list<RefPtr<FocusHub>> focusNodes;
+    swiperFocusHub->FlushChildrenFocusHub(focusNodes);
+    for (auto iter = focusNodes.rbegin(); iter != focusNodes.rend(); ++iter) {
+        const auto& node = *iter;
+        if (skipCnt > 0 || !node) {
+            --skipCnt;
+            continue;
+        }
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            node->SetParentFocusable(node == showChildFocusHub);
+        } else {
+            node->SetParentFocusable(IsFocusNodeInItemPosition(node));
+        }
+    }
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
@@ -2402,7 +2406,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    HandleSwiperCustomAnimation(offset);
+    HandleSwiperCustomAnimation(-currentDelta_);
     MarkDirtyNodeSelf();
 }
 

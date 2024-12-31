@@ -616,8 +616,8 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
     CHECK_NULL_VOID(listPattern);
     auto listLayoutProperty = listNode->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
-    auto cacheCountForward = listLayoutProperty->GetCachedCountValue(1) - forwardCached;
-    auto cacheCountBackward = listLayoutProperty->GetCachedCountValue(1) - backwardCached;
+    auto cacheCountForward = listLayoutProperty->GetCachedCountWithDefault() - forwardCached;
+    auto cacheCountBackward = listLayoutProperty->GetCachedCountWithDefault() - backwardCached;
     if (cacheCountForward < 1 && cacheCountBackward < 1) {
         return;
     }
@@ -637,6 +637,7 @@ void ListItemGroupPattern::LayoutCache(const LayoutConstraintF& constraint, int6
         .backwardCachedIndex = backwardCachedIndex_,
         .deadline = deadline,
     };
+    itemGroup->SetContentOffset(listSizeValues.contentStartOffset, listSizeValues.contentEndOffset);
     itemGroup->SetCacheParam(param);
     itemGroup->SetListLayoutProperty(listLayoutProperty);
     itemGroup->SetListMainSize(listSizeValues.startPos, listSizeValues.endPos, listSizeValues.referencePos,

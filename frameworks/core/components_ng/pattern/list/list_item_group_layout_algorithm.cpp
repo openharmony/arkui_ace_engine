@@ -122,6 +122,21 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->SetCacheCount(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
 }
 
+void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
+{
+    if (!itemPosition_.empty()) {
+        auto iter = cachedItemPosition_.begin();
+        while (iter != cachedItemPosition_.end()) {
+            if ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
+                iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount)) {
+                iter = cachedItemPosition_.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+}
+
 float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
     const OptionalSizeF& parentIdealSize, RefPtr<LayoutProperty> layoutProperty)
 {
@@ -138,21 +153,6 @@ float ListItemGroupLayoutAlgorithm::GetListItemGroupMaxWidth(
         maxWidth = parentWidth;
     }
     return maxWidth;
-}
-
-void ListItemGroupLayoutAlgorithm::UpdateCachedItemPosition(int32_t cacheCount)
-{
-    if (!itemPosition_.empty()) {
-        auto iter = cachedItemPosition_.begin();
-        while (iter != cachedItemPosition_.end()) {
-            if ((iter->first >= GetStartIndex() && iter->first <= GetEndIndex()) ||
-                iter->first < (GetStartIndex() - cacheCount) || iter->first > (GetEndIndex() + cacheCount)) {
-                iter = cachedItemPosition_.erase(iter);
-            } else {
-                iter++;
-            }
-        }
-    }
 }
 
 void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

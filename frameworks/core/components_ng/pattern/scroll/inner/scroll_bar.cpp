@@ -38,25 +38,6 @@ ScrollBar::ScrollBar()
     InitTheme();
 }
 
-BarDirection ScrollBar::CheckBarDirection(const Point& point)
-{
-    if (!InBarRectRegion(point)) {
-        return BarDirection::BAR_NONE;
-    }
-    auto touchRegion = GetTouchRegion();
-    auto pointOffset = OffsetF(point.GetX(), point.GetY());
-    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
-    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
-    auto axis = positionMode_ == PositionMode::BOTTOM ? Axis::HORIZONTAL : Axis::VERTICAL;
-    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
-        return BarDirection::PAGE_UP;
-    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
-        return BarDirection::PAGE_DOWN;
-    } else {
-        return BarDirection::BAR_NONE;
-    }
-}
-
 ScrollBar::ScrollBar(DisplayMode displayMode, ShapeMode shapeMode, PositionMode positionMode) : ScrollBar()
 {
     displayMode_ = displayMode;
@@ -105,6 +86,25 @@ bool ScrollBar::InBarRectRegion(const Point& point) const
         return barRect_.IsInRegion(point);
     }
     return false;
+}
+
+BarDirection ScrollBar::CheckBarDirection(const Point& point)
+{
+    if (!InBarRectRegion(point)) {
+        return BarDirection::BAR_NONE;
+    }
+    auto touchRegion = GetTouchRegion();
+    auto pointOffset = OffsetF(point.GetX(), point.GetY());
+    auto scrollBarTopOffset = OffsetF(touchRegion.Left(), touchRegion.Top());
+    auto scrollBarBottomOffset = OffsetF(touchRegion.Right(), touchRegion.Bottom());
+    auto axis = positionMode_ == PositionMode::BOTTOM ? Axis::HORIZONTAL : Axis::VERTICAL;
+    if (pointOffset.GetMainOffset(axis) < scrollBarTopOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_UP;
+    } else if (pointOffset.GetMainOffset(axis) > scrollBarBottomOffset.GetMainOffset(axis)) {
+        return BarDirection::PAGE_DOWN;
+    } else {
+        return BarDirection::BAR_NONE;
+    }
 }
 
 void ScrollBar::FlushBarWidth()

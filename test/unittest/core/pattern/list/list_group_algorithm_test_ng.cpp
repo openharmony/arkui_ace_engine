@@ -81,7 +81,7 @@ HWTEST_F(ListGroupAlgTestNg, ListItemGroupLayoutAlgorithm_NeedMeasureItem001, Te
      * @tc.expected: Group1 Offset is 25
      */
     pattern_->UpdateCurrentOffset(25, SCROLL_FROM_UPDATE);
-    CreateDone(frameNode_);
+    FlushLayoutTask(frameNode_);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 1), OffsetF(0, 25)));
     EXPECT_EQ(pattern_->currentOffset_, 305);
 
