@@ -925,7 +925,6 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
-    InitKeyEvent();
 }
 
 void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1029,6 +1028,7 @@ void VideoPattern::OnModifyDone()
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+    InitKeyEvent();
 }
 
 void VideoPattern::InitKeyEvent()
@@ -2053,6 +2053,8 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     progressRate_ = videoPattern->GetProgressRate();
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src, instanceId_);
     auto videoNode = GetHost();
@@ -2116,6 +2118,11 @@ void VideoPattern::EnableAnalyzer(bool enable)
 void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
 {
     isEnableShortcutKey_ = isEnableShortcutKey;
+}
+
+bool VideoPattern::GetShortcutKeyEnabled() const
+{
+    return isEnableShortcutKey_;
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)
