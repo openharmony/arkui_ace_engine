@@ -321,8 +321,9 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
     shareOverlayInfo_->handleLevelMode = mode;
     auto handleNode = handleNode_.Upgrade();
     CHECK_NULL_VOID(handleNode);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     if (mode == HandleLevelMode::OVERLAY) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -336,10 +337,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
             TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
-        return;
-    }
-    if (mode == HandleLevelMode::EMBED) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
+    } else if (mode == HandleLevelMode::EMBED) {
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -453,6 +451,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
     auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
     selectOverlayNode_ = overlayNode;
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), node = overlayNode] {
             auto manager = weak.Upgrade();
