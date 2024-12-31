@@ -279,6 +279,7 @@ public:
         const std::string& videoSrc, int32_t instanceId);
 
     void SetShortcutKeyEnabled(bool isEnableShortcutKey);
+    bool GetShortcutKeyEnabled() const;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
