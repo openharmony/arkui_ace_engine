@@ -142,5 +142,89 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
     EXPECT_EQ(reinterpret_cast<FrameNode*>(checkEvent->parentNode), frameNode);
     EXPECT_EQ(pattern->GetUnitNode(), node);
 }
+/**
+ * @tc.name: setOnWillInsertTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnWillInsert.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnWillInsertTest, TestSize.Level1)
+{
+    static const auto CHECK_TEXT("test_text");
+    static const Ark_Int32 AINT32_POS(1234);
+const Ark_Int32 AINT32_NEG(INT_MIN);
 
+
+    static const Ark_Int32 expectedResId = 123;
+    auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
+        const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<std::string>(data.insertValue), CHECK_TEXT);
+        auto result = Converter::Convert<int32_t>(data.insertOffset) > 0;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_InsertValue_Boolean>(nullptr, onWillInsertHandler, expectedResId);
+    modifier_->setOnWillInsert(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    {
+        InsertValueInfo checkValue = { .insertOffset = AINT32_POS, .insertValue = CHECK_TEXT };
+        auto returnVal = eventHub->FireOnWillInsertValueEvent(checkValue);
+        EXPECT_TRUE(returnVal);
+    }
+    {
+        InsertValueInfo checkValue = { .insertOffset = AINT32_NEG, .insertValue = CHECK_TEXT };
+        auto returnVal = eventHub->FireOnWillInsertValueEvent(checkValue);
+        EXPECT_FALSE(returnVal);
+    }
+}
+
+/**
+ * @tc.name: setOnWillDeleteTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextInputModifier.setOnWillDelete.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
+{
+    static const auto CHECK_TEXT("test_text");
+    static const Ark_Int32 AINT32_POS(1234);
+
+    static const Ark_Int32 expectedResId = 123;
+    static const Ark_Int32 expectedOffset = AINT32_POS;
+
+    ASSERT_NE(modifier_->setOnWillDelete, nullptr);
+    auto callbackSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_DeleteValue data, const Callback_Boolean_Void cbReturn) {
+        EXPECT_EQ(resourceId, expectedResId);
+        EXPECT_EQ(Converter::Convert<std::string>(data.deleteValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<int32_t>(data.deleteOffset), expectedOffset);
+        auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
+        auto result = willDeleteDirection == TextDeleteDirection::FORWARD;
+        CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
+    };
+    auto arkCallback = Converter::ArkValue<Callback_DeleteValue_Boolean>(nullptr, callbackSyncFunc, expectedResId);
+    modifier_->setOnWillDelete(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    DeleteValueInfo checkValueDefault;
+
+    {
+        DeleteValueInfo checkValue = {
+            .deleteOffset = expectedOffset, .deleteValue = CHECK_TEXT, .direction = TextDeleteDirection::FORWARD
+        };
+        auto checkVal = eventHub->FireOnWillDeleteEvent(checkValue);
+        EXPECT_TRUE(checkVal);
+    }
+    {
+        DeleteValueInfo checkValue = {
+            .deleteOffset = expectedOffset, .deleteValue = CHECK_TEXT, .direction = TextDeleteDirection::BACKWARD
+        };
+        auto checkVal = eventHub->FireOnWillDeleteEvent(checkValue);
+        EXPECT_FALSE(checkVal);
+    }
+}
 } // namespace OHOS::Ace::NG
