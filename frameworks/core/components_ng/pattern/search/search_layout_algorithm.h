@@ -57,6 +57,10 @@ private:
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    float CalculateMaxFontScale(LayoutWrapper* layoutWrapper);
+    float CalculateMinFontScale(LayoutWrapper* layoutWrapper);
+    CalcSize searchButtonCalcSize(const RefPtr<SearchTheme>& searchTheme, RefPtr<SearchLayoutProperty> layoutProperty,
+        LayoutWrapper* layoutWrapper, float maxFontScale, float minFontScale);
     void UpdateFontFeature(LayoutWrapper* layoutWrapper);
     void UpdateTextFieldSize(LayoutWrapper* layoutWrapper);
     void SetTextFieldLayoutConstraintHeight(LayoutConstraintF& contentConstraint, double textFieldHeight,

@@ -34,13 +34,13 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
 
     theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::WHITE);
 
-    if (SystemProperties::GetResourceDecoupling()) {
-        auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
-        theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
+    auto color = themeStyle->GetAttr<Color>("focus_color", Color());
+    if (color != Color(0xff000000)) {
+        theme->focusColor_ = color;
     } else {
-        auto color = themeStyle->GetAttr<Color>("focus_color", Color());
-        if (color != Color(0xff000000)) {
-            theme->focusColor_ = color;
+        if (SystemProperties::GetResourceDecoupling()) {
+            auto resAdapter = ResourceManager::GetInstance().GetResourceAdapter();
+            theme->focusColor_ = resAdapter->GetColor(FOCUS_COLOR);
         }
     }
 
@@ -56,6 +56,8 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     theme->focusWidthVp_ = pattern->GetAttr<Dimension>("app_theme_focus_width", 2.0_vp);
     theme->focusOutPaddingVp_ = pattern->GetAttr<Dimension>("app_theme_focus_padding", 2.0_vp);
     theme->focusBoxGlow_ = static_cast<bool>(pattern->GetAttr<double>("app_theme_focus_box_glow", 0.0));
+    theme->pageTransitionAmplitudeRatio_ =
+        themeStyle->GetAttr<double>("page_transition_amplitude_ratio", DEFAULT_AMPLITUDE_RATIO);
     return theme;
 }
 } // namespace OHOS::Ace

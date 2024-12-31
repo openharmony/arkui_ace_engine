@@ -977,20 +977,20 @@ class MultiFilterRow extends ViewPU {
         accessibility.sendAccessibilityEvent(x15);
     }
 
-    sendArrowAccessibility(r15) {
-        this.isSendArrowAccessibility = true;
-        setTimeout(() => {
-            let u15 = ({
+    sendArrowAccessibility(u15) {
+        if (this.isSendArrowAccessibility) {
+            let v15 = ({
                 type: 'requestFocusForAccessibility',
                 bundleName: this.bundleName,
                 triggerAction: 'common',
-                customId: r15,
+                customId: u15,
             });
-            accessibility.sendAccessibilityEvent(u15);
-        }, 100);
-        setTimeout(() => {
-            this.isSendArrowAccessibility = false;
-        }, 200);
+            accessibility.sendAccessibilityEvent(v15).then(() => {
+                setTimeout(() => {
+                    this.isSendArrowAccessibility = false;
+                }, 200);
+            });
+        }
     }
 
     DownAndUpArrow(v14 = null) {
@@ -1067,6 +1067,7 @@ class MultiFilterRow extends ViewPU {
                 }
             });
             Button.onClick(() => {
+                this.isSendArrowAccessibility = true;
                 this.replaceEffect += 1;
                 if (this.isArrowIconDown.value) {
                     this.isArrowIconDown.value = false;

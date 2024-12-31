@@ -14,13 +14,18 @@
  */
 
 #include "text_base.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+
 #include "test/mock/core/common/mock_font_manager.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
+#include "test/mock/core/render/mock_canvas_image.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/render/adapter/pixelmap_image.h"
+
 
 namespace OHOS::Ace::NG {
 

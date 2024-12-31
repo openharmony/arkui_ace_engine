@@ -82,6 +82,7 @@ struct UpdateSpanStyle {
         updateTextBackgroundStyle.reset();
 
         updateLineHeight.reset();
+        updateHalfLeading.reset();
         updateLetterSpacing.reset();
 
         updateImageWidth.reset();
@@ -112,6 +113,7 @@ struct UpdateSpanStyle {
     std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<bool> updateHalfLeading = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
@@ -145,6 +147,9 @@ struct UpdateSpanStyle {
         if (updateSymbolColor) {
             auto& colors = updateSymbolColor.value();
             std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+        }
+        if (updateTextBackgroundStyle) {
+            updateTextBackgroundStyle->UpdateColorByResourceId();
         }
     }
 
@@ -286,6 +291,7 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 
 public:
     virtual int32_t GetCaretOffset() = 0;
+    virtual NG::RectF GetCaretRect() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
@@ -369,6 +375,9 @@ public:
     virtual void SetBarState(DisplayMode mode) {}
     virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
         const NG::SelectMenuParam& menuParam) {}
+    virtual void SetMaxLength(std::optional<int32_t> value) {}
+    virtual void ResetMaxLength() {}
+    virtual void SetMaxLines(uint32_t value) {};
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

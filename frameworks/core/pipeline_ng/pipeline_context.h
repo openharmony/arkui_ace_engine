@@ -48,6 +48,7 @@
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -66,6 +67,11 @@ using VsyncCallbackFun = std::function<void()>;
 using FrameCallbackFunc = std::function<void(uint64_t nanoTimestamp)>;
 using FrameCallbackFuncFromCAPI = std::function<void(uint64_t nanoTimestamp, uint32_t frameCount)>;
 
+enum class MockFlushEventType : int32_t {
+    REJECT = -1,
+    NONE = 0,
+    EXECUTE = 1,
+};
 class ACE_FORCE_EXPORT PipelineContext : public PipelineBase {
     DECLARE_ACE_TYPE(NG::PipelineContext, PipelineBase);
 
@@ -198,9 +204,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
-    
+
     void FlushMouseEventVoluntarily();
-    
+
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
@@ -689,9 +695,9 @@ public:
         }
     }
 
-    void MarkNeedFlushMouseEvent()
+    void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
     {
-        isNeedFlushMouseEvent_ = true;
+        isNeedFlushMouseEvent_ = type;
     }
 
     void MarkNeedFlushAnimationStartTime()
@@ -844,6 +850,11 @@ public:
 
     bool HasOnceVsyncListener() {
         return onceVsyncListener_ != nullptr;
+    }
+
+    const RefPtr<MemoryManager>& GetMemoryManager() const
+    {
+        return memoryMgr_;
     }
 
     const RefPtr<NavigationManager>& GetNavigationManager() const
@@ -1032,10 +1043,6 @@ public:
     }
 
     void UpdateHalfFoldHoverProperty(int32_t windowWidth, int32_t windowHeight);
-    static bool IsPipelineDestroyed(int32_t instanceId)
-    {
-        return aliveInstanceSet_.find(instanceId) == aliveInstanceSet_.end();
-    }
 
     void AnimateOnSafeAreaUpdate();
     void RegisterAttachedNode(UINode* uiNode);
@@ -1051,6 +1058,13 @@ public:
     std::string GetModuleName();
 
     void SetEnableSwipeBack(bool isEnable) override;
+
+    Offset GetHostParentOffsetToWindow() const
+    {
+        return lastHostParentOffsetToWindow_;
+    }
+
+    void SetHostParentOffsetToWindow(const Offset& offset);
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -1193,7 +1207,7 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    
+
     std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
@@ -1250,7 +1264,7 @@ private:
     bool isFocusActive_ = false;
     bool isWindowHasFocused_ = false;
     bool onShow_ = false;
-    bool isNeedFlushMouseEvent_ = false;
+    MockFlushEventType isNeedFlushMouseEvent_ = MockFlushEventType::NONE;
     bool isNeedFlushAnimationStartTime_ = false;
     bool canUseLongPredictTask_ = false;
     bool isWindowSceneConsumed_ = false;
@@ -1301,6 +1315,7 @@ private:
 
     int32_t preNodeId_ = -1;
 
+    RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
@@ -1326,10 +1341,10 @@ private:
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
     bool autoFocusInactive_ = true;
-    static std::unordered_set<int32_t> aliveInstanceSet_;
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
+    Offset lastHostParentOffsetToWindow_ { 0, 0 };
 
     friend class ScopedLayout;
     friend class FormGestureManager;

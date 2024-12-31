@@ -233,6 +233,8 @@ public:
     void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) override;
     void ShowAllNodesOnOverlay() override;
     void HideAllNodesOnOverlay() override;
+    bool SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo) override;
+    std::optional<NG::OverlayManagerInfo> GetOverlayManagerOptions() override;
 
     void RequestAnimationFrame(const std::string& callbackId) override {}
 

@@ -108,6 +108,11 @@ public:
     {
         return false;
     }
+
+    virtual bool IsStopBackPress() const
+    {
+        return true;
+    }
 private:
     WeakPtr<AceType> bindManager_;
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayHolder);

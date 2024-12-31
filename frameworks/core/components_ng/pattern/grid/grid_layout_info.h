@@ -368,6 +368,10 @@ struct GridLayoutInfo {
 
     int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const;
 
+    // Only used for debugging.
+    void PrintMatrix();
+    void PrintLineHeight();
+
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]

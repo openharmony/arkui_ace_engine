@@ -55,7 +55,7 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
-
+    UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
     if (!pattern->GetTextUtf16Value().empty()) {
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
         textContent = pattern->GetTextUtf16Value();
@@ -67,8 +67,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         showPlaceHolder = true;
     }
 
-    if (pattern->GetMaxFontSizeScale().has_value()) {
-        textStyle.SetMaxFontScale(pattern->GetMaxFontSizeScale().value());
+    if (textFieldLayoutProperty->HasEllipsisMode()) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
     }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
@@ -211,9 +211,11 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
 
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float maxFontScale = pattern->GetMaxFontSizeScale().has_value() ?
-            pattern->GetMaxFontSizeScale().value() : pipeline->GetMaxAppFontScale();
+        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        float maxFontScale = textFieldLayoutProperty->HasMaxFontScale() ?
+            textFieldLayoutProperty->GetMaxFontScale().value() : pipeline->GetMaxAppFontScale();
         float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
+        indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -447,6 +449,17 @@ float TextFieldLayoutAlgorithm::GetVisualTextWidth() const
     return std::min(paragraph_->GetMaxWidth(), std::max(0.0f, paragraph_->GetLongestLine()));
 }
 
+void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
+    TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern)
+{
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        textStyle.SetMaxFontScale(textFieldLayoutProperty->GetMaxFontScale().value());
+    }
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        textStyle.SetMinFontScale(textFieldLayoutProperty->GetMinFontScale().value());
+    }
+}
+
 void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
     TextStyle& textStyle, bool isDisabled)
@@ -459,7 +472,8 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
 
     Dimension fontSize = theme->GetFontSize();
     if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = layoutProperty->GetFontSizeValue(Dimension());
+        fontSize = Dimension(layoutProperty->GetFontSizeValue(Dimension()).ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
     }
     textStyle.SetFontSize(fontSize);
     textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
@@ -494,9 +508,6 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     }
     if (layoutProperty->HasTextAlign()) {
         textStyle.SetTextAlign(layoutProperty->GetTextAlign().value());
-    }
-    if (layoutProperty->HasTextIndent()) {
-        textStyle.SetTextIndent(layoutProperty->GetTextIndent().value());
     }
     UpdateTextStyleMore(frameNode, layoutProperty, textStyle, isDisabled);
 }
@@ -647,6 +658,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize
@@ -687,6 +699,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize };
@@ -793,10 +806,10 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
 {
     CHECK_NULL_VOID(modifier);
     modifier->SetFontFamilies(textStyle.GetFontFamilies());
-    modifier->SetFontSize(textStyle.GetFontSize());
+    modifier->SetFontSize(textStyle.GetFontSize(), textStyle);
     if (textStyle.GetAdaptTextSize()) {
-        modifier->SetAdaptMinFontSize(textStyle.GetAdaptMinFontSize());
-        modifier->SetAdaptMaxFontSize(textStyle.GetAdaptMaxFontSize());
+        modifier->SetAdaptMinFontSize(textStyle.GetAdaptMinFontSize(), textStyle);
+        modifier->SetAdaptMaxFontSize(textStyle.GetAdaptMaxFontSize(), textStyle);
     }
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
@@ -1041,9 +1054,30 @@ bool TextFieldLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textSty
     return true;
 }
 
+void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle)
+{
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (layoutProperty->HasLineHeight()) {
+        auto heightValue = layoutProperty->GetLineHeightValue(Dimension());
+        if (heightValue.Unit() == DimensionUnit::PERCENT) {
+            textStyle.SetLineHeight(heightValue);
+        } else {
+            textStyle.SetLineHeight(
+                Dimension(heightValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale())));
+        }
+    }
+}
+
 void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled)
 {
+    if (layoutProperty->HasTextIndent()) {
+        textStyle.SetTextIndent(layoutProperty->GetTextIndent().value());
+    }
     if (layoutProperty->HasAdaptMinFontSize()) {
         textStyle.SetAdaptMinFontSize(layoutProperty->GetAdaptMinFontSize().value());
     }
@@ -1074,9 +1108,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
     if (layoutProperty->HasLetterSpacing()) {
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
-    if (layoutProperty->HasLineHeight()) {
-        textStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    UpdateTextStyleLineHeight(frameNode, layoutProperty, textStyle);
+    if (layoutProperty->HasHalfLeading()) {
+        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
     }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
@@ -1106,8 +1140,23 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
         return;
     }
     if (layoutProperty->HasLineHeight()) {
-        placeholderTextStyle.SetLineHeight(layoutProperty->GetLineHeight().value());
-        placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
+        auto heightValue = layoutProperty->GetLineHeightValue(Dimension());
+        if (heightValue.Unit() == DimensionUnit::PERCENT) {
+            placeholderTextStyle.SetLineHeight(heightValue);
+        } else {
+            placeholderTextStyle.SetLineHeight(
+                Dimension(heightValue.ConvertToPxDistribute(placeholderTextStyle.GetMinFontScale(),
+                    placeholderTextStyle.GetMaxFontScale())));
+        }
+    }
+    if (layoutProperty->HasHalfLeading()) {
+        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
+    }
+    if (layoutProperty->HasMaxFontScale()) {
+        placeholderTextStyle.SetMaxFontScale(layoutProperty->GetMaxFontScale().value());
+    }
+    if (layoutProperty->HasMinFontScale()) {
+        placeholderTextStyle.SetMinFontScale(layoutProperty->GetMinFontScale().value());
     }
     placeholderTextStyle.SetLineSpacing(theme->GetPlaceholderLineSpacing());
 }

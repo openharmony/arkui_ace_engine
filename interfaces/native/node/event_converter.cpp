@@ -37,6 +37,7 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK = 10;
 constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
+constexpr int32_t ORIGIN_MOUSE_ACTION_CANCEL = 13;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_LEFT = 1;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
@@ -340,6 +341,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT:
             return ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
+        case NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE:
+            return ON_CHECKBOX_GROUP_CHANGE;
         default:
             return -1;
     }
@@ -556,6 +559,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT:
             return NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT;
+        case ON_CHECKBOX_GROUP_CHANGE:
+            return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
         default:
             return -1;
     }
@@ -711,6 +716,8 @@ int32_t ConvertToCMouseActionType(int32_t originActionType)
             return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_RELEASE);
         case ORIGIN_MOUSE_ACTION_MOVE:
             return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_MOVE);
+        case ORIGIN_MOUSE_ACTION_CANCEL:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_CANCEL);
         default:
             break;
     }

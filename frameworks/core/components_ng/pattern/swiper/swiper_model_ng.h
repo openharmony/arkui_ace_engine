@@ -29,9 +29,9 @@
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
+class ACE_FORCE_EXPORT SwiperModelNG : public OHOS::Ace::SwiperModel {
 public:
-    RefPtr<SwiperController> Create() override;
+    RefPtr<SwiperController> Create(bool isCreateArc = false) override;
     void SetDirection(Axis axis) override;
     void SetIndex(uint32_t index) override;
     void SetIndicatorInteractive(bool interactive) override;
@@ -65,6 +65,7 @@ public:
     void SetMainSwiperSizeHeight() override;
     void SetIndicatorStyle(const SwiperParameters& swiperParameters) override;
     void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) override;
+    void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) override;
     void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) override;
     void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) override;
     void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
@@ -76,8 +77,10 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetSwipeByGroup(bool swipeByGroup) override;
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
+    void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
+    void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetIndicatorInteractive(FrameNode* frameNode, bool interactive);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin, bool ignoreBlankn = false);
@@ -107,6 +110,7 @@ public:
     static void SetIndicatorIsBoolean(FrameNode* frameNode, bool isBoolean);
     static void SetDigitIndicatorStyle(FrameNode* frameNode, const SwiperDigitalParameters& swiperDigitalParameters);
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
+    static void SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);

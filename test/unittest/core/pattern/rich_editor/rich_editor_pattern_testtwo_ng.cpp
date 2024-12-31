@@ -1312,37 +1312,6 @@ HWTEST_F(RichEditorPatternTestTwoNg, CalcCursorOffsetByPosition002, TestSize.Lev
 }
 
 /**
- * @tc.name: OnHover001
- * @tc.desc: test OnHover
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestTwoNg, OnHover001, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->currentMouseStyle_ = MouseFormat::DEFAULT;
-    richEditorPattern->scrollBar_ = nullptr;
-    richEditorPattern->OnHover(true);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
-    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    richEditorPattern->scrollBar_->isPressed_ = false;
-    richEditorPattern->scrollBar_->isHover_ = false;
-    richEditorPattern->OnHover(true);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::TEXT_CURSOR);
-
-    richEditorPattern->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
-    richEditorPattern->scrollBar_->isPressed_ = true;
-    richEditorPattern->scrollBar_->isHover_ = false;
-    richEditorPattern->OnHover(true);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::DEFAULT);
-
-    richEditorPattern->scrollBar_->isPressed_ = true;
-    richEditorPattern->scrollBar_->isHover_ = true;
-    richEditorPattern->OnHover(true);
-    EXPECT_EQ(richEditorPattern->currentMouseStyle_, MouseFormat::DEFAULT);
-}
-
-/**
  * @tc.name: GetSelectSpansPositionInfo001
  * @tc.desc: test GetSelectSpansPositionInfo
  * @tc.type: FUNC

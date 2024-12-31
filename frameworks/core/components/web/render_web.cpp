@@ -1212,7 +1212,7 @@ void RenderWeb::PanOnActionEnd(const GestureEvent& info)
     SetPreDragDropNode(nullptr);
 }
 
-void RenderWeb::PanOnActionCancel()
+void RenderWeb::PanOnActionCancel(const GestureEvent& info)
 {
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();

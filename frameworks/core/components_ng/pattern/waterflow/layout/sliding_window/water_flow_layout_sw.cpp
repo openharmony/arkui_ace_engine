@@ -554,7 +554,8 @@ void WaterFlowLayoutSW::MeasureOnJump(int32_t jumpIdx, ScrollAlign align)
         info_->delta_ = -Infinity<float>();
     }
     jumpIdx = std::min(itemCnt_ - 1, jumpIdx);
-    SetCanOverScroll(false);
+    canOverScrollStart_ = false;
+    canOverScrollEnd_ = false;
 
     bool inView = info_->ItemInView(jumpIdx);
     if (align == ScrollAlign::AUTO) {
@@ -650,16 +651,19 @@ void WaterFlowLayoutSW::AdjustOverScroll()
         maxEnd += info_->footerHeight_;
     }
 
-    if (CanOverScroll()) {
-        return;
-    }
     maxEnd += info_->BotMargin();
     minStart -= info_->TopMargin();
 
     int32_t startIdx = info_->StartIndex();
     if (startIdx == 0 && Positive(minStart)) {
+        if (canOverScrollStart_) {
+            return;
+        }
         ApplyDelta(-minStart);
     } else if (info_->EndIndex() == itemCnt_ - 1 && LessNotEqual(maxEnd, mainLen_)) {
+        if (canOverScrollEnd_) {
+            return;
+        }
         float delta = mainLen_ - maxEnd;
         if (startIdx == 0) {
             delta = std::min(-minStart, delta);

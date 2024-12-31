@@ -97,6 +97,14 @@ public:
                                            .append(std::to_string(layoutResult_.frontSpace).c_str())
                                            .append(std::string(" FlexBetweenSpace: "))
                                            .append(std::to_string(layoutResult_.betweenSpace).c_str()));
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto layoutProperty = DynamicCast<LinearLayoutProperty>(host->GetLayoutProperty());
+        CHECK_NULL_VOID(layoutProperty);
+        auto space = layoutProperty->GetSpace();
+        if (space.has_value()) {
+            DumpLog::GetInstance().AddDesc(std::string("space: ").append(space.value().ToString().c_str()));
+        }
     }
 
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override

@@ -16,6 +16,8 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 #include "base/ressched/ressched_report.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -503,6 +505,30 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);
+        RecordClickEventIfNeed(info);
+    }
+}
+
+void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
+{
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto host = GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(host);
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(host->GetInspectorId().value_or(""))
+            .SetType(host->GetTag())
+            .SetText(host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true))
+            .SetDescription(host->GetAutoEventParamValue(""))
+            .SetHost(host);
+        auto rectSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
+        if (rectSwitch) {
+            static const int32_t precision = 2;
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","
+               << info.GetGlobalPoint().GetY();
+            builder.SetExtra(Recorder::KEY_POINT, ss.str());
+        }
+        Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
 }
 

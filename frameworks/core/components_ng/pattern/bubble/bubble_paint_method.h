@@ -54,6 +54,7 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
+                bubble->PaintSingleBorder(canvas, paintWrapper);
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -129,6 +130,7 @@ public:
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);

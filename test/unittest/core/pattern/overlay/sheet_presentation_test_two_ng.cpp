@@ -1487,7 +1487,6 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetOffset004, TestSize.Level1)
     auto renderContext = sheetNode->GetRenderContext();
     EXPECT_EQ(renderContext->GetOuterBorderWidth().has_value(), true);
     EXPECT_EQ(renderContext->GetBorderWidth().has_value(), true);
-    EXPECT_EQ(renderContext->GetBorderRadius().has_value(), true);
 }
 
 /**

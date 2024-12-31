@@ -432,14 +432,16 @@ void JSScroll::SetScrollBarColor(const JSCallbackInfo& args)
 void JSScroll::SetEdgeEffect(const JSCallbackInfo& args)
 {
     auto edgeEffect = EdgeEffect::NONE;
+    auto effectEdge = EffectEdge::ALL;
     if (args.Length() > 0) {
         edgeEffect = JSScrollable::ParseEdgeEffect(args[0], EdgeEffect::NONE);
     }
     auto alwaysEnabled = true;
     if (args.Length() > 1) {
         alwaysEnabled = JSScrollable::ParseAlwaysEnable(args[1], true);
+        effectEdge = JSScrollable::ParseEffectEdge(args[1]);
     }
-    ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollModel::GetInstance()->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
 }
 
 void JSScroll::JsWidth(const JSCallbackInfo& info)

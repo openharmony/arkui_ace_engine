@@ -18,6 +18,7 @@
 
 #include "core/components_ng/base/common_configuration.h"
 #include "core/components_ng/pattern/button/button_model.h"
+#include "core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
 class ButtonConfiguration : public CommonConfiguration {
@@ -95,6 +96,8 @@ private:
     static void Create(const std::string& tagName);
     static void SetTypeAndStateEffect(const std::optional<ButtonType>& type, const std::optional<bool>& stateEffect);
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, const std::string& label);
+    static void SetButtonSize(FrameNode* frameNode, const std::optional<ControlSize>& controlSize,
+        RefPtr<ButtonTheme> buttonTheme);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BUTTON_BUTTON_MODEL_NG_H

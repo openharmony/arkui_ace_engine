@@ -56,6 +56,7 @@ private:
         const RefPtr<LayoutProperty>& props, const std::optional<LayoutConstraintF>& layoutConstraint);
     void LayoutMenuItem(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
     void LayoutOption(LayoutWrapper* layoutWrapper, const RefPtr<LayoutProperty>& props);
+    void ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& row, const SizeF& optSize, float intervall);
     float MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper);
     void InitPadding(const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
     float CalcItemHeight(float leftRowHeight, float rightRowHeight);

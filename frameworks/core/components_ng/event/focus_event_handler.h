@@ -18,6 +18,9 @@
 
 #include "focus_state.h"
 #include "core/event/focus_axis_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 namespace OHOS::Ace::NG {
@@ -81,6 +84,10 @@ public:
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
     OnFocusAxisEventFunc onFocusAxisEventCallback_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    OnCrownCallbackFunc onCrownEventCallback_;
+    OnCrownEventFunc onCrownEventsInternal_;
+#endif
 
     WeakPtr<FocusHub> defaultFocusNode_;
     bool isDefaultFocus_ = { false };
@@ -113,7 +120,14 @@ public:
     }
     bool OnClick(const KeyEvent& event);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool ProcessOnCrownEventInternal(const CrownEvent& event);
+#endif
+
 protected:
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool OnCrownEvent(const CrownEvent& CrownEvent);
+#endif
     bool OnFocusEvent(const FocusEvent& event);
     virtual bool HandleFocusTravel(const FocusEvent& event) = 0; // bad design which need to be deleted
 
@@ -126,7 +140,10 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    ACE_DEFINE_FOCUS_EVENT(OnCrownCallback, OnCrownCallbackFunc, onCrownEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnCrownEventInternal, OnCrownEventFunc, onCrownEventsInternal)
+#endif
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     bool isNodeNeedKey_ { false }; // extension use only
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
@@ -141,6 +158,9 @@ private:
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool ProcessOnKeyEventInternal(const KeyEvent& event);
     bool HandleFocusAxisEvent(const FocusAxisEvent& event);
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool HandleCrownEvent(const CrownEvent& CrownEvent);
+#endif
 
     void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 };

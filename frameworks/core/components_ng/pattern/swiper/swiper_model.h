@@ -28,6 +28,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -61,6 +64,14 @@ struct SwiperDigitalParameters {
     std::optional<Dimension> selectedFontSize;
     std::optional<FontWeight> fontWeight;
     std::optional<FontWeight> selectedFontWeight;
+};
+
+struct SwiperArcDotParameters {
+    std::optional<SwiperArcDirection> arcDirection;
+    std::optional<Color> itemColor;
+    std::optional<Color> selectedItemColor;
+    std::optional<Color> containerColor;
+    std::optional<NG::Gradient> maskColor;
 };
 
 struct SwiperArrowParameters {
@@ -97,7 +108,7 @@ public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}
@@ -133,6 +144,7 @@ public:
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
+    virtual void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
@@ -146,6 +158,8 @@ public:
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
+    virtual void SetDisableTransitionAnimation(bool isDisable) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

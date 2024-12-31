@@ -463,6 +463,63 @@ void GestureEventHub::HandleNotAllowDrag(const GestureEvent& info)
     }
 }
 
+void GestureEventHub::HandleDragThroughTouch(const RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    dragframeNodeInfo_.frameNode = frameNode;
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto grayedState = dragDropManager->GetGrayedState();
+    if (grayedState) {
+        return;
+    }
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
+    if (!gatherNodeChildrenInfo.empty()) {
+        for (const auto& itemFrameNode : gatherNodeChildrenInfo) {
+            auto node = itemFrameNode.preImageNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            dragframeNodeInfo_.gatherFrameNode.push_back(node);
+            DragAnimationHelper::DoDragStartGrayedAnimation(node);
+        }
+        dragframeNodeInfo_.gatherFrameNode.push_back(frameNode);
+    }
+    DragAnimationHelper::DoDragStartGrayedAnimation(frameNode);
+    dragDropManager->SetGrayedState(true);
+}
+
+void GestureEventHub::HandleDragThroughMouse(const RefPtr<FrameNode> frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    dragframeNodeInfo_.frameNode = frameNode;
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto grayedState = dragDropManager->GetGrayedState();
+    if (grayedState) {
+        return;
+    }
+    auto size = GetSelectItemSize();
+    if (size) {
+        auto fatherNode = dragEventActuator_->GetItemParentNode();
+        CHECK_NULL_VOID(fatherNode);
+        auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(scrollPattern);
+        auto children = scrollPattern->GetVisibleSelectedItems();
+        dragframeNodeInfo_.gatherFrameNode = children;
+        for (const auto& itemFrameNode : children) {
+            DragAnimationHelper::DoDragStartGrayedAnimation(itemFrameNode);
+        }
+    } else {
+        DragAnimationHelper::DoDragStartGrayedAnimation(frameNode);
+    }
+    dragDropManager->SetGrayedState(true);
+}
+
 void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 {
     TAG_LOGD(AceLogTag::ACE_DRAG, "Start handle onDragStart.");
@@ -615,6 +672,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         pixelMap = pixelMap_;
     }
+    (info.GetSourceDevice() == SourceType::MOUSE) ? HandleDragThroughMouse(frameNode)
+                                                  : HandleDragThroughTouch(frameNode);
     SetDragGatherPixelMaps(info);
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     auto dragNodePipeline = frameNode->GetContextRefPtr();
@@ -688,6 +747,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     arkExtraInfoJson->Put("scale", scale);
     arkExtraInfoJson->Put("dip_scale", dipScale);
     arkExtraInfoJson->Put("drag_node_gray_scale", dragNodeGrayscale);
+    arkExtraInfoJson->Put("event_id", info.GetPointerEventId());
     UpdateExtraInfo(frameNode, arkExtraInfoJson, scale);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -811,6 +871,29 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
     gestureInfoForWeb_ = std::make_shared<GestureEvent>(info);
 }
 
+void GestureEventHub::HandleDragEndAction(const DragframeNodeInfo& info)
+{
+    auto frameNode = info.frameNode;
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    auto state = dragDropManager->GetGrayedState();
+    if (!state) {
+        return;
+    }
+    if (!info.gatherFrameNode.empty()) {
+        auto gatherFrameNode = info.gatherFrameNode;
+        for (const auto& itemFrameNode : gatherFrameNode) {
+            DragAnimationHelper::SetPreOpacity(itemFrameNode);
+        }
+    } else {
+        DragAnimationHelper::SetPreOpacity(frameNode);
+    }
+    dragDropManager->SetGrayedState(false);
+}
+
 void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
 {
     auto pipeline = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -840,6 +923,7 @@ void GestureEventHub::HandleOnDragEnd(const GestureEvent& info)
             eventHub->HandleInternalOnDrop(event, "");
         }
     }
+    HandleDragEndAction(dragframeNodeInfo_);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
@@ -871,11 +955,13 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
     CHECK_NULL_RETURN(dragDropManager, ret);
     auto eventManager = pipeline->GetEventManager();
     RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager](
-                        const DragNotifyMsgCore& notifyMessage) {
+    auto callback = [id = Container::CurrentId(), eventHub, dragEvent, taskScheduler, dragDropManager, eventManager,
+                        dragframeNodeInfo = dragframeNodeInfo_,
+                        gestureEventHubPtr = AceType::Claim(this)](const DragNotifyMsgCore& notifyMessage) {
         ContainerScope scope(id);
         taskScheduler->PostTask(
-            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id]() {
+            [eventHub, dragEvent, dragDropManager, eventManager, notifyMessage, id, dragframeNodeInfo,
+                gestureEventHubPtr]() {
                 auto container = Container::GetContainer(id);
                 if (!container) {
                     TAG_LOGE(AceLogTag::ACE_DRAG, "handle drag end callback, can not get container.");
@@ -898,6 +984,7 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 if (eventHub->HasOnDragEnd()) {
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
+                gestureEventHubPtr->HandleDragEndAction(dragframeNodeInfo);
             },
             TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };
@@ -1010,7 +1097,11 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
         DragEventActuator::GetFrameNodePreviewPixelMap(itemFrameNode);
         auto gestureHub = itemFrameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        dragDropManager->PushGatherPixelMap(gestureHub->GetDragPreviewPixelMap());
+        auto itemPreviewPixelMap = gestureHub->GetDragPreviewPixelMap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;
@@ -1037,7 +1128,11 @@ void GestureEventHub::SetNotMouseDragGatherPixelMaps()
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-        dragDropManager->PushGatherPixelMap(imageSourceInfo.GetPixmap());
+        auto itemPreviewPixelMap = imageSourceInfo.GetPixmap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;

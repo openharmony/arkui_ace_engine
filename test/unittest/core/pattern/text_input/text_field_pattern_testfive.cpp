@@ -15,6 +15,10 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/text/text_emoji_processor.h"
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -412,4 +416,346 @@ HWTEST_F(TextFieldPatternTestFive, GetBorder001, TestSize.Level0)
     ASSERT_EQ(pattern_->GetBorderTop(border), 10.0);
     ASSERT_EQ(pattern_->GetBorderBottom(border), 10.0);
 }
+
+/**
+ * @tc.name: DeleteWord001
+ * @tc.desc: test testInput delete word function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, DeleteWord001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField("hello world", "", [](TextFieldModelNG model) {});
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step2. set caret pos
+     */
+    pattern_->SetCaretPosition(5);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+
+    /**
+     * @tc.steps: step3. delete left word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 5;
+            start = 0;
+            end = 5;
+            return true;
+    });
+    pattern_->HandleOnDeleteComb(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), " world");
+
+    /**
+     * @tc.steps: step4. delete right word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 1;
+            start = 1;
+            end = 6;
+            return true;
+    });
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnDeleteComb(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), " world");
+
+    /**
+     * @tc.steps: step5. undo to begining
+     */
+    pattern_->HandleOnUndoAction();
+    pattern_->HandleOnUndoAction();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world");
+
+    /**
+     * @tc.steps: step6. set RTL
+     */
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.steps: step7. delete left word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 0;
+            return true;
+    });
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnDeleteComb(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world");
+
+    /**
+     * @tc.steps: step8. delete right word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 5;
+            return true;
+    });
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnDeleteComb(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world");
+
+    /**
+     * @tc.steps: step9. test Chinese
+     */
+    CreateTextField("你好世界", "", [](TextFieldModelNG model) {});
+    paragraph = AceType::MakeRefPtr<MockParagraph>();
+    pattern_->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step10. set caret pos
+     */
+    pattern_->SetCaretPosition(2);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 2);
+
+    /**
+     * @tc.steps: step11. delete left word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 2;
+            start = 0;
+            end = 2;
+            return true;
+    });
+    pattern_->HandleOnDeleteComb(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "世界");
+
+    /**
+     * @tc.steps: step12. delete right word
+     */
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+            offset = 0;
+            start = 0;
+            end = 2;
+            return true;
+    });
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnDeleteComb(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "世界");
+}
+
+/**
+ * @tc.name: PageUpOrDown001
+ * @tc.desc: test testInput page up/down function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, PageUpOrDown001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField("hello world", "", [](TextFieldModelNG model) {});
+
+    /**
+     * @tc.steps: step2. set caret pos
+     */
+    pattern_->SetCaretPosition(5);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
+
+    /**
+     * @tc.steps: step3. page up
+     */
+    pattern_->HandleOnPageUp();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+
+    /**
+     * @tc.steps: step4. page down
+     */
+    pattern_->HandleOnPageDown();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+}
+
+/**
+ * @tc.name: IssueFixTest001
+ * @tc.desc: test be fixed issue
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, IssueFixTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Initialize text input
+     */
+    CreateTextField("hello world", "", [](TextFieldModelNG model) {});
+
+    /**
+     * Use the tab key to focus and do not display dual handles
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    event.code = KeyCode::KEY_TAB;
+    event.pressedCodes = { KeyCode::KEY_TAB };
+    pattern_->OnKeyEvent(event);
+    EXPECT_EQ(pattern_->SelectOverlayIsOn(), false);
+
+    /**
+     * The content is empty, use ctrl+a to select all, the cursor should not disappear
+     */
+    pattern_->contentController_->content_ = u"";
+    GetFocus();
+    pattern_->SetCaretPosition(0);
+    pattern_->HandleOnSelectAll();
+    EXPECT_EQ(pattern_->isCaretTwinkling_, true);
+    EXPECT_EQ(pattern_->cursorVisible_, true);
+
+    /**
+     * press tab, HandleOnEscape should return true
+     */
+    GetFocus();
+    EXPECT_EQ(pattern_->HandleOnEscape(), true);
+
+    /**
+     * password focus box rect is diffent between LRT and RTL
+     */
+    CreateTextField("hello world", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    pattern_->contentController_->content_ = u"hello world";
+    auto textInputLayoutAlgorithm =
+        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    TextStyle textStyle;
+    Dimension maxDimension(10);
+    textStyle.SetAdaptMaxFontSize(maxDimension);
+    Dimension minDimension(0);
+    textStyle.SetAdaptMinFontSize(minDimension);
+    textStyle.SetTextAlign(TextAlign::LEFT);
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.selfIdealSize.SetWidth(100);
+    layoutConstraint.selfIdealSize.SetHeight(100);
+    textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle,
+        pattern_->contentController_->content_, 1.0_px, layoutConstraint, &layoutWrapper);
+    FlushLayoutTask(frameNode_);
+    RoundRect ltrFocusRect;
+    pattern_->GetInnerFocusPaintRect(ltrFocusRect);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    RoundRect rtlFocusRect;
+    pattern_->GetInnerFocusPaintRect(rtlFocusRect);
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    EXPECT_NE(ltrFocusRect.GetRect().GetX(), rtlFocusRect.GetRect().GetX());
+
+    /**
+     * password mode can enter special characters
+     */
+    CreateTextField("hello world £¥$€", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+    });
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world £¥$€");
+    CreateTextField("hello world £¥$€", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::NEW_PASSWORD);
+    });
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world £¥$€");
+    // reset
+    CreateTextField("hello world", "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+    });
+    EXPECT_EQ(pattern_->GetTextValue(), "hello world");
+}
+
+/**
+ * @tc.name: TextEmojiInputTest001
+ * @tc.desc: test text emoji processor function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextEmojiInputTest001, TestSize.Level0)
+{
+    /**
+     * normal text
+     */
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    std::u16string test1 = u"ABCD";
+    EmojiRelation result =  TextEmojiProcessor::GetIndexRelationToEmoji(0, test1, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 0);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test1), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test1), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test1, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test1, startIndex, endIndex), false);
+
+    /**
+     * emoji text
+     */
+    std::u16string test2 = u"😅";
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(0, test2, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 0);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test2, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test2, startIndex, endIndex), false);
+
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(1, test2, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 1);
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(1, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(1, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(1, test2, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(1, test2, startIndex, endIndex), false);
+
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(2, test2, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 2);
+    EXPECT_EQ(endIndex, 2);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(2, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(2, test2), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(2, test2, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(2, test2, startIndex, endIndex), false);
+
+    EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 1, test2, false), u"\xD83D");
+    EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 1, test2, true), u"\xD83D");
+
+    /**
+     * long emoji text
+     */
+    std::u16string test3 = u"😅😅😅😅😅😅😅";
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(0, test3, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 0);
+    EXPECT_EQ(endIndex, 0);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(0, test3, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(0, test3, startIndex, endIndex), false);
+
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(3, test3, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 3);
+    EXPECT_EQ(endIndex, 3);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(3, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(3, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(3, test3, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(3, test3, startIndex, endIndex), false);
+
+    result =  TextEmojiProcessor::GetIndexRelationToEmoji(14, test3, startIndex, endIndex);
+    EXPECT_EQ(startIndex, 14);
+    EXPECT_EQ(endIndex, 14);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(14, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(14, test3), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexBeforeOrInEmoji(14, test3, startIndex, endIndex), false);
+    EXPECT_EQ(TextEmojiProcessor::IsIndexAfterOrInEmoji(14, test3, startIndex, endIndex), false);
+
+    EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 3, test3, false), u"😅\xD83D");
+    EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 3, test3, true), u"😅\xD83D");
+}
+
 } // namespace OHOS::Ace::NG
