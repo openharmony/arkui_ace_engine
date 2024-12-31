@@ -890,6 +890,9 @@ void PipelineContext::FlushRequestFocus()
                     unfocusableParentFocusNode->GetFocusable(), unfocusableParentFocusNode->IsShow(),
                     unfocusableParentFocusNode->IsEnabled());
                 unfocusableParentFocusNode = nullptr;
+            } else {
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                    requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
             }
         }
         dirtyFocusNode_.Reset();
