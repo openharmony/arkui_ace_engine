@@ -4691,10 +4691,10 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
-     * .value[0].i32: maximum starting fling speed, Unit: vp/s \n
+     * .value[0].f32: maximum starting fling speed, Unit: vp/s \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}: \n
-     * .value[0].i32: maximum starting fling speed, Unit: vp/s \n
+     * .value[0].f32: maximum starting fling speed, Unit: vp/s \n
      *
      * @since 16
      */

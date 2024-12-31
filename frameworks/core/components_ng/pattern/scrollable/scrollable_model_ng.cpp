@@ -267,7 +267,7 @@ float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, 0.0f);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, 0.0f);
-    return static_cast<float>(pattern->GetMaxFlingVelocity());
+    return static_cast<float>(pattern->GetMaxFlingVelocity() / PipelineBase::GetCurrentDensity());
 }
 
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)

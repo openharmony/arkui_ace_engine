@@ -5779,10 +5779,7 @@ int32_t SetFlingSpeedLimit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* ite
     if (item->size != 1) {
         return ERROR_CODE_PARAM_INVALID;
     }
-    if (LessNotEqual(item->value[0].i32, NUM_0)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setFlingSpeedLimit(node->uiNodeHandle, item->value[0].i32);
+    GetFullImpl()->getNodeModifiers()->getScrollableModifier()->setFlingSpeedLimit(node->uiNodeHandle, item->value[0].f32);
     return ERROR_CODE_NO_ERROR;
 }
 
