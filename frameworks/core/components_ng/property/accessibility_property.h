@@ -20,15 +20,15 @@
 #include <string>
 #include <unordered_set>
 
+#include "base/geometry/ng/point_t.h"
 #include "base/memory/ace_type.h"
 #include "interfaces/native/native_type.h"
 #include "core/accessibility/accessibility_utils.h"
 #include "core/components_ng/base/inspector_filter.h"
-#include "core/components_ng/base/ui_node.h"
 
 namespace OHOS::Accessibility {
 class ExtraElementInfo;
-}
+} // namespace OHOS::Accessibility
 
 namespace OHOS::Ace::NG {
 using ActionNoParam = std::function<void()>;
@@ -56,15 +56,16 @@ using OnAccessibilityFocusCallbackImpl = std::function<void((bool isFocus))>;
 using GetWindowScenePositionImpl = std::function<void((int32_t& left, int32_t& top))>;
 
 class FrameNode;
+class UINode;
 using AccessibilityHoverTestPath = std::vector<RefPtr<FrameNode>>;
 
 class ACE_FORCE_EXPORT AccessibilityProperty : public virtual AceType {
     DECLARE_ACE_TYPE(AccessibilityProperty, AceType);
 
 public:
-    AccessibilityProperty() = default;
+    AccessibilityProperty();
 
-    ~AccessibilityProperty() override = default;
+    ~AccessibilityProperty() override;
 
     virtual std::string GetText() const;
 

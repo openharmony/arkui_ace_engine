@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H
 
+#include <cstdint>
+
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/grid/grid_constants.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
@@ -72,8 +74,7 @@ public:
     {
         bool columnsTemplateValid = propColumnsTemplate_.has_value() && !propColumnsTemplate_.value().empty();
         bool rowsTemplateValid = propRowsTemplate_.has_value() && !propRowsTemplate_.value().empty();
-        return columnsTemplateValid ||
-               (!columnsTemplateValid && !rowsTemplateValid);
+        return columnsTemplateValid || (!columnsTemplateValid && !rowsTemplateValid);
     }
 
     bool IsConfiguredScrollable() const
@@ -153,7 +154,17 @@ public:
 
     std::pair<bool, bool> GetPercentSensitive() override
     {
-        return {true, true};
+        return { true, true };
+    }
+
+    void SetCrossCount(int32_t count)
+    {
+        crossCount_ = count;
+    }
+
+    int32_t GetCrossCount() const
+    {
+        return crossCount_;
     }
 
 private:
@@ -167,6 +178,8 @@ private:
     Dimension GetBarWidth() const;
 
     void UpdateIrregularFlag(const GridLayoutOptions& layoutOptions) const;
+
+    int32_t crossCount_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_LAYOUT_PROPERTY_H

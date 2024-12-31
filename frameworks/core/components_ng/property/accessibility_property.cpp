@@ -20,6 +20,10 @@
 
 namespace OHOS::Ace::NG {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
+
+AccessibilityProperty::AccessibilityProperty() = default;
+AccessibilityProperty::~AccessibilityProperty() = default;
+
 std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 {
     static const AceAction allActions[] = {

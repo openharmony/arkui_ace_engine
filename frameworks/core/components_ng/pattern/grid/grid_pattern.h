@@ -16,9 +16,12 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_GRID_GRID_PATTERN_H
 
+#include "base/memory/referenced.h"
+#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/grid/grid_accessibility_property.h"
 #include "core/components_ng/pattern/grid/grid_content_modifier.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
+#include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
@@ -287,11 +290,21 @@ public:
 
     RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override
     {
-        if (adapter_ && adapter_->getItemFunc) {
-            return adapter_->getItemFunc(index);
+        if (scrollWindowAdapter_) {
+            return scrollWindowAdapter_->GetChildByIndex(index);
         }
         return nullptr;
     }
+
+    ScrollWindowAdapter* GetScrollWindowAdapter() override
+    {
+        if (scrollWindowAdapter_) {
+            return scrollWindowAdapter_.GetRawPtr();
+        }
+        return nullptr;
+    }
+
+    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() override;
 
 private:
     /**
@@ -381,7 +394,9 @@ private:
     std::unique_ptr<GridLayoutInfo> infoCopy_; // legacy impl to save independent data for animation.
     GridLayoutInfo info_;
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
-    std::shared_ptr<GridItemAdapter> adapter_;
+    std::shared_ptr<GridItemAdapter> adapter_; // need to delete?
+    RefPtr<ScrollWindowAdapter> scrollWindowAdapter_;
+    RefPtr<GridFillAlgorithm> gridFillAlgorithm_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

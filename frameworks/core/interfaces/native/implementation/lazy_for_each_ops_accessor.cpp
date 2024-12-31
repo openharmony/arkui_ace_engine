@@ -13,9 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include <cstdint>
+#include <utility>
+
 #include "arkoala_api_generated.h"
+
+#include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/scroll_window_adapter.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
 
 struct LazyForEachOpsPeer {
     virtual ~LazyForEachOpsPeer() = default;
@@ -33,29 +41,37 @@ Ark_NativePointer CtorImpl()
 }
 Ark_NativePointer GetFinalizerImpl()
 {
-    return reinterpret_cast<void *>(&DestroyPeerImpl);
+    return reinterpret_cast<void*>(&DestroyPeerImpl);
 }
-Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node,
-                                       Ark_NativePointer mark,
-                                       Ark_Int32 direction)
+
+Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer mark, Ark_Int32 direction)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetNeedMoreElements(frameNode, convValue);
-    return nullptr;
+    CHECK_NULL_RETURN(node, nullptr);
+    constexpr int32_t requestMoreItemFlag = 0x01;
+    auto* parent = reinterpret_cast<FrameNode*>(node);
+    auto* scrollWindowAdapter = parent->GetScrollWindowAdapter();
+    CHECK_NULL_RETURN(scrollWindowAdapter, reinterpret_cast<Ark_NativePointer>(requestMoreItemFlag));
+    return scrollWindowAdapter->NeedMoreElements(
+        reinterpret_cast<FrameNode*>(mark), static_cast<FillDirection>(direction));
 }
-void OnRangeUpdateImpl(Ark_NativePointer node,
-                       const Callback_RangeUpdate* updater)
+
+void OnRangeUpdateImpl(Ark_NativePointer node, ArkUI_Int32 totalCount, const Callback_RangeUpdate* updater)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::SetOnRangeUpdate(frameNode, convValue);
+    CHECK_NULL_VOID(updater);
+
+    auto onEvent = [callback = CallbackHelper(*updater)](
+                       const Ark_Int32 index, const Ark_NativePointer mark) { callback.Invoke(index, mark); };
+    auto* scrollWindowAdapter = frameNode->GetOrCreateScrollWindowAdapter();
+    CHECK_NULL_VOID(scrollWindowAdapter);
+    scrollWindowAdapter->RegisterUpdater(std::move(onEvent));
+    scrollWindowAdapter->SetTotalCount(totalCount);
 }
-} // LazyForEachOpsAccessor
+
+void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
+
+} // namespace LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
@@ -64,8 +80,9 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::GetFinalizerImpl,
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
+        LazyForEachOpsAccessor::SetCurrentIndexImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }
 
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

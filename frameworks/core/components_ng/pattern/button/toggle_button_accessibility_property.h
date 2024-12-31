@@ -18,6 +18,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
 class ToggleButtonAccessibilityProperty : public AccessibilityProperty {

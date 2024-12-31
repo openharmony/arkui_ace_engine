@@ -666,6 +666,16 @@ public:
     virtual void AddInnerOnGestureRecognizerJudgeBegin(
         GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc) {};
 
+    virtual ScrollWindowAdapter* GetScrollWindowAdapter()
+    {
+        return nullptr;
+    }
+
+    virtual ScrollWindowAdapter* GetOrCreateScrollWindowAdapter()
+    {
+        return nullptr;
+    }
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}
