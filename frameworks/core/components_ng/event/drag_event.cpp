@@ -395,7 +395,7 @@ void DragEventActuator::GetThumbnailPixelMapForCustomNode()
                     CHECK_NULL_VOID(actuator);
                     actuator->PrepareFinalPixelMapForDragThroughTouch(customPixelMap, true);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap");
+                TaskExecutor::TaskType::UI, "ArkUIDragSetCustomPixelMap", PriorityType::VIP);
         } else {
             TAG_LOGI(AceLogTag::ACE_DRAG, "PixelMap is null.");
             DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::SNAPSHOT_FAIL);
@@ -1721,7 +1721,7 @@ void DragEventActuator::ExecutePreDragAction(const PreDragStatus preDragStatus, 
                 CHECK_NULL_VOID(callback);
                 callback(onPreDragStatus);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag");
+            TaskExecutor::TaskType::UI, "ArkUIDragExecutePreDrag", PriorityType::VIP);
     } else {
         onPreDragFunc(onPreDragStatus);
     }
@@ -2566,7 +2566,7 @@ void DragEventActuator::GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>&
                     gestureHub->SetPixelMap(pixelMap);
                     TAG_LOGI(AceLogTag::ACE_DRAG, "Set thumbnail pixelMap async success.");
                 },
-                TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap");
+                TaskExecutor::TaskType::UI, "ArkUIDragSetPixelMap", PriorityType::VIP);
         }
     };
     auto frameNode = gestureHub->GetFrameNode();
