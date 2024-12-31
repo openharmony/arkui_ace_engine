@@ -2300,7 +2300,7 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
         code = item->second;
     }
     std::shared_ptr<NWebKeyboardEventImpl> keyboardEvent =
-        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(keyEvent.code),
+        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(code),
                                                 static_cast<int32_t>(keyEvent.action),
                                                 keyEvent.unicode,
                                                 keyEvent.enableCapsLock,
