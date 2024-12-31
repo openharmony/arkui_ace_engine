@@ -108,6 +108,9 @@ public:
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
+    void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
+    void OnWindowSceneVisibleChange(bool visible);
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -331,6 +334,7 @@ private:
     bool isFoldStatusChanged_ = false;
     bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
+    WeakPtr<Pattern> weakSystemWindowScene_;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
