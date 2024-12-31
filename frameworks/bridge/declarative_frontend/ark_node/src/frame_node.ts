@@ -820,6 +820,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkFlowItemComponent(node, type);
       })
     }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
+      })
+    }],
     ['QRCode', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
         return new ArkQRCodeComponent(node, type);
@@ -848,16 +858,6 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     ['TextTimer', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
         return new ArkTextTimerComponent(node, type);
-      })
-    }],
-    ['Marquee', (context: UIContext): FrameNode=> {
-      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
-        return new ArkMarqueeComponent(node, type);
-      })
-    }],
-    ['TextArea', (context: UIContext): FrameNode=> {
-      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
-        return new ArkTextAreaComponent(node, type);
       })
     }],
   ]
