@@ -28420,7 +28420,7 @@ class ListChainAnimationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetChainAnimation(node);
     }
     else {
@@ -28434,7 +28434,7 @@ class ListCachedCountModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetCachedCount(node);
     }
     else {
@@ -28448,7 +28448,7 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetEnableScrollInteraction(node);
     }
     else {
@@ -28584,7 +28584,7 @@ class ListFlingSpeedLimitModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetFlingSpeedLimit(node);
     }
     else {
