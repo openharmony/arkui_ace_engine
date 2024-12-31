@@ -169,8 +169,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        CHECK_NULL_RETURN(eventHub, false);
-        if (!eventHub->GetOnStateChange()) {
+        if (eventHub && !eventHub->GetOnStateChange()) {
             auto onStateChangeMap = pattern->GetOnStateChangeMap();
             auto iter = onStateChangeMap.find(uiNode->GetId());
             if (iter != onStateChangeMap.end()) {
@@ -180,6 +179,8 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "mountToParent navdestinationId:%{public}d, slot:%{public}d",
+                navDestination->GetId(), slot);
             navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
