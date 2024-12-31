@@ -22,6 +22,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 namespace OHOS::Ace::NG {
 
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
@@ -71,6 +74,9 @@ public:
     static bool GetFadingEdge(FrameNode* frameNode);
     static float GetFadingEdgeLength(FrameNode* frameNode);
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
+#endif
     static void ResetScrollBarWidth(FrameNode* frameNode);
     static void ResetScrollBarColor(FrameNode* frameNode);
 };

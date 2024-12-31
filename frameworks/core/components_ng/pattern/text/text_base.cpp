@@ -255,10 +255,11 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
     if (!isStarted_ || info.GetChangedTouches().empty()) {
         return;
     }
-    auto touchType = info.GetChangedTouches().front().GetTouchType();
+    auto locationInfo = info.GetChangedTouches().front();
+    auto touchType = locationInfo.GetTouchType();
     switch (touchType) {
         case TouchType::UP:
-            EndGestureSelection();
+            EndGestureSelection(locationInfo);
             break;
         case TouchType::MOVE:
             DoTextSelectionTouchMove(info);

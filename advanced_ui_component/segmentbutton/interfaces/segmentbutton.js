@@ -1073,6 +1073,171 @@ class l1 extends ViewPU {
     }
 }
 
+class v3 extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__buttons = new SynchedPropertyNesedObjectPU(params.buttons, this, "buttons");
+        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
+        this.__pressArray = new SynchedPropertyObjectTwoWayPU(params.pressArray, this, "pressArray");
+        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(params.hoverArray, this, "hoverArray");
+        this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(params.hoverColorArray, this, "hoverColorArray");
+        this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+
+    setInitiallyProvidedValue(params) {
+        this.__buttons.set(params.buttons);
+        this.__options.set(params.options);
+    }
+
+    updateStateVars(params) {
+        this.__buttons.set(params.buttons);
+        this.__options.set(params.options);
+    }
+
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__buttons.purgeDependencyOnElmtId(rmElmtId);
+        this.__options.purgeDependencyOnElmtId(rmElmtId);
+        this.__pressArray.purgeDependencyOnElmtId(rmElmtId);
+        this.__hoverArray.purgeDependencyOnElmtId(rmElmtId);
+        this.__hoverColorArray.purgeDependencyOnElmtId(rmElmtId);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
+    }
+
+    aboutToBeDeleted() {
+        this.__buttons.aboutToBeDeleted();
+        this.__options.aboutToBeDeleted();
+        this.__pressArray.aboutToBeDeleted();
+        this.__hoverArray.aboutToBeDeleted();
+        this.__hoverColorArray.aboutToBeDeleted();
+        this.__zoomScaleArray.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+
+    get buttons() {
+        return this.__buttons.get();
+    }
+
+    get options() {
+        return this.__options.get();
+    }
+
+    get pressArray() {
+        return this.__pressArray.get();
+    }
+
+    set pressArray(newValue) {
+        this.__pressArray.set(newValue);
+    }
+
+    get hoverArray() {
+        return this.__hoverArray.get();
+    }
+
+    set hoverArray(newValue) {
+        this.__hoverArray.set(newValue);
+    }
+
+    get hoverColorArray() {
+        return this.__hoverColorArray.get();
+    }
+
+    set hoverColorArray(newValue) {
+        this.__hoverColorArray.set(newValue);
+    }
+
+    get zoomScaleArray() {
+        return this.__zoomScaleArray.get();
+    }
+
+    set zoomScaleArray(newValue) {
+        this.__zoomScaleArray.set(newValue);
+    }
+
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create({ space: 1 });
+            Row.direction(this.options.direction);
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            ForEach.create();
+            const forEachItemGenFunction = (_item, index) => {
+                const item = _item;
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    If.create();
+                    if (index < a1) {
+                        this.ifElseBranchUpdateFunction(0, () => {
+                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                Stack.create();
+                                Stack.direction(this.options.direction);
+                                Stack.scale({
+                                    x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 :
+                                    this.zoomScaleArray[index],
+                                    y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 :
+                                    this.zoomScaleArray[index]
+                                });
+                            }, Stack);
+                            {
+                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                    if (isInitialRender) {
+                                        let componentCall = new l1(this, {
+                                            pressIndex: index,
+                                            colorProperty: this.hoverColorArray[index],
+                                            press: this.pressArray[index],
+                                            hover: this.hoverArray[index],
+                                            options: this.options,
+                                        }, undefined, elmtId, () => {
+                                        }, {
+                                            page: "segmentbutton/src/main/ets/components/MainPage.ets",
+                                            line: 615,
+                                            q2: 13
+                                        });
+                                        ViewPU.create(componentCall);
+                                        let paramsLambda = () => {
+                                            return {
+                                                pressIndex: index,
+                                                colorProperty: this.hoverColorArray[index],
+                                                press: this.pressArray[index],
+                                                hover: this.hoverArray[index],
+                                                options: this.options
+                                            };
+                                        };
+                                        componentCall.paramsGenerator_ = paramsLambda;
+                                    } else {
+                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            colorProperty: this.hoverColorArray[index],
+                                            press: this.pressArray[index],
+                                            hover: this.hoverArray[index],
+                                            options: this.options
+                                        });
+                                    }
+                                }, { name: "PressAndHoverEffect" });
+                            }
+                            Stack.pop();
+                        });
+                    } else {
+                        this.ifElseBranchUpdateFunction(1, () => {
+                        });
+                    }
+                }, If);
+                If.pop();
+            };
+            this.forEachUpdateFunction(elmtId, this.buttons, forEachItemGenFunction, undefined, true, false);
+        }, ForEach);
+        ForEach.pop();
+        Row.pop();
+    }
+
+    rerender() {
+        this.updateDirtyElements();
+    }
+}
+
 class m1 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -1656,7 +1821,7 @@ class m1 extends ViewPU {
                                                     }, undefined, elmtId, () => {
                                                     }, {
                                                         page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 805,
+                                                        line: 838,
                                                         q2: 15
                                                     });
                                                     ViewPU.create(componentCall);
@@ -2352,7 +2517,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1111,
+                                                line: 1144,
                                                 q2: 11
                                             });
                                             ViewPU.create(componentCall);
@@ -2386,84 +2551,40 @@ export class SegmentButton extends ViewPU {
                                     If.create();
                                     if (this.options.buttons !== void 0 && this.options.buttons.length > 1) {
                                         this.ifElseBranchUpdateFunction(0, () => {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                Row.create({ space: 1 });
-                                                Row.direction(this.options.direction);
-                                            }, Row);
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                ForEach.create();
-                                                const forEachItemGenFunction = (_item, index) => {
-                                                    const item = _item;
-                                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                        If.create();
-                                                        if (index < a1) {
-                                                            this.ifElseBranchUpdateFunction(0, () => {
-                                                                this.observeComponentCreation2((elmtId,
-                                                                    isInitialRender) => {
-                                                                    Stack.create();
-                                                                    Stack.direction(this.options.direction);
-                                                                    Stack.scale({
-                                                                        x: this.options.type === 'capsule' &&
-                                                                            (this.options.multiply ?? false) ? 1 :
-                                                                        this.zoomScaleArray[index],
-                                                                        y: this.options.type === 'capsule' &&
-                                                                            (this.options.multiply ?? false) ? 1 :
-                                                                        this.zoomScaleArray[index]
-                                                                    });
-                                                                }, Stack);
-                                                                {
-                                                                    this.observeComponentCreation2((elmtId,
-                                                                        isInitialRender) => {
-                                                                        if (isInitialRender) {
-                                                                            let componentCall = new l1(this, {
-                                                                                pressIndex: index,
-                                                                                colorProperty: this.hoverColorArray[index],
-                                                                                press: this.pressArray[index],
-                                                                                hover: this.hoverArray[index],
-                                                                                options: this.options,
-                                                                            }, undefined, elmtId, () => {
-                                                                            }, {
-                                                                                page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                                                line: 1122,
-                                                                                q2: 23
-                                                                            });
-                                                                            ViewPU.create(componentCall);
-                                                                            let paramsLambda = () => {
-                                                                                return {
-                                                                                    pressIndex: index,
-                                                                                    colorProperty: this.hoverColorArray[index],
-                                                                                    press: this.pressArray[index],
-                                                                                    hover: this.hoverArray[index],
-                                                                                    options: this.options
-                                                                                };
-                                                                            };
-                                                                            componentCall.paramsGenerator_ =
-                                                                                paramsLambda;
-                                                                        } else {
-                                                                            this.updateStateVarsOfChildByElmtId(elmtId,
-                                                                                {
-                                                                                    colorProperty: this.hoverColorArray[index],
-                                                                                    press: this.pressArray[index],
-                                                                                    hover: this.hoverArray[index],
-                                                                                    options: this.options
-                                                                                });
-                                                                        }
-                                                                    }, { name: "PressAndHoverEffect" });
-                                                                }
-                                                                Stack.pop();
-                                                            });
-                                                        } else {
-                                                            this.ifElseBranchUpdateFunction(1, () => {
-                                                            });
-                                                        }
-                                                    }, If);
-                                                    If.pop();
-                                                };
-                                                this.forEachUpdateFunction(elmtId, this.options.buttons,
-                                                    forEachItemGenFunction, undefined, true, false);
-                                            }, ForEach);
-                                            ForEach.pop();
-                                            Row.pop();
+                                            {
+                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                                    if (isInitialRender) {
+                                                        let componentCall = new v3(this, {
+                                                            options: this.options,
+                                                            buttons: this.options.buttons,
+                                                            pressArray: this.__pressArray,
+                                                            hoverArray: this.__hoverArray,
+                                                            hoverColorArray: this.__hoverColorArray
+                                                        }, undefined, elmtId, () => {
+                                                        }, {
+                                                            page: "segmentbutton/src/main/ets/components/MainPage.ets",
+                                                            line: 1151,
+                                                            q2: 15
+                                                        });
+                                                        ViewPU.create(componentCall);
+                                                        let paramsLambda = () => {
+                                                            return {
+                                                                options: this.options,
+                                                                buttons: this.options.buttons,
+                                                                pressArray: this.pressArray,
+                                                                hoverArray: this.hoverArray,
+                                                                hoverColorArray: this.hoverColorArray
+                                                            };
+                                                        };
+                                                        componentCall.paramsGenerator_ = paramsLambda;
+                                                    } else {
+                                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                            options: this.options,
+                                                            buttons: this.options.buttons
+                                                        });
+                                                    }
+                                                }, { name: "PressAndHoverEffectArray" });
+                                            }
                                         });
                                     } else {
                                         this.ifElseBranchUpdateFunction(1, () => {
@@ -2501,7 +2622,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1148,
+                                                line: 1168,
                                                 q2: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2534,7 +2655,7 @@ export class SegmentButton extends ViewPU {
                                             }, undefined, elmtId, () => {
                                             }, {
                                                 page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1154,
+                                                line: 1174,
                                                 q2: 13
                                             });
                                             ViewPU.create(componentCall);
@@ -2572,7 +2693,7 @@ export class SegmentButton extends ViewPU {
                                     maxFontScale: this.getMaxFontSize(),
                                     onItemClicked: this.onItemClicked
                                 }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1169, q2: 9 });
+                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1189, q2: 9 });
                                 ViewPU.create(componentCall);
                                 let paramsLambda = () => {
                                     return {

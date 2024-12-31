@@ -340,8 +340,23 @@ class UIContext {
     }
 
     getOverlayManager() {
-        this.overlayManager_ = new OverlayManager(this.instanceId_);
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        this.overlayManager_.setOverlayManagerOptions();
         return this.overlayManager_;
+    }
+    setOverlayManagerOptions(options) {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.setOverlayManagerOptions(options);
+    }
+    getOverlayManagerOptions() {
+        if(!this.overlayManager_) {
+            this.overlayManager_ = new OverlayManager(this.instanceId_);
+        }
+        return this.overlayManager_.getOverlayManagerOptions();
     }
 
     animateTo(value, event) {
@@ -1151,6 +1166,55 @@ class PromptAction {
         }
     }
 
+    openCustomDialogWithController(content, controller, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        let isDialogController = controller instanceof this.ohos_prompt.DialogController;
+        if (!isDialogController) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        if (typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.openCustomDialogWithController(content.getFrameNode(), controller);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let result_ = this.ohos_prompt.openCustomDialogWithController(content.getFrameNode(), controller, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    presentCustomDialog(builder, controller, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof controller === 'undefined' && typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.presentCustomDialog(builder);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        let isDialogController = controller instanceof this.ohos_prompt.DialogController;
+        if (!isDialogController) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        if (typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.presentCustomDialog(builder, controller);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let result_ = this.ohos_prompt.presentCustomDialog(builder, controller, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     updateCustomDialog(content, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result_ = this.ohos_prompt.updateCustomDialog(content.getFrameNode(), options);
@@ -1238,6 +1302,20 @@ class OverlayManager {
     constructor(instanceId) {
         this.instanceId_ = instanceId;
         this.ohos_overlayManager = globalThis.requireNapi('overlay');
+    }
+
+    setOverlayManagerOptions(options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.setOverlayManagerOptions(options);
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
+    }
+
+    getOverlayManagerOptions() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let res = this.ohos_overlayManager.getOverlayManagerOptions();
+        __JSScopeUtil__.restoreInstanceId();
+        return res;
     }
 
     addComponentContent(content, index) {

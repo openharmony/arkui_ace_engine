@@ -46,6 +46,7 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
+            Parse(themeConstants, theme);
             return theme;
         }
     private:
@@ -64,6 +65,11 @@ public:
             theme->textMaxLines_ = textMaxLines < 0 ? theme->textMaxLines_ : static_cast<uint32_t>(textMaxLines);
             theme->backgroundColor_ = toastPattern->GetAttr<Color>(PATTERN_BG_COLOR, Color());
             theme->blurStyleTextColor_ = toastPattern->GetAttr<Color>(PATTERN_TEXT_COLOR_BLUR, Color());
+            theme->toastAlign_ = static_cast<int32_t>(toastPattern->GetAttr<double>("toast_align", -1.0));
+            theme->multiLineTextAlign_ = static_cast<TextAlign>(toastPattern->GetAttr<double>("toast_text_align", 0.0));
+            constexpr double toastLimitHeightRatio = 0.65;
+            theme->toastLimitHeightRatio_ =
+                toastPattern->GetAttr<double>("toast_limit_height_ratio", toastLimitHeightRatio);
 
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
@@ -105,6 +111,16 @@ public:
             theme->toastInnerBorderColor_ =
                 toastPattern->GetAttr<Color>("toast_inner_border_color", Color::TRANSPARENT);
             theme->toastInnerBorderWidth_ = toastPattern->GetAttr<double>("toast_inner_border_width", 0.0f);
+        }
+        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
+        {
+            RefPtr<ThemeStyle> toastPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOAST);
+            if (!toastPattern) {
+                return;
+            }
+
+            theme->bgThemeColorMode_ =
+                static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
             theme->toastShadowStyle_ = static_cast<ShadowStyle>(toastPattern->GetAttr<int>(
                 "toast_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>(
@@ -204,9 +220,29 @@ public:
         return toastShadowStyle_;
     }
     
-    const int& GetToastBackgroundBlurStyle() const
+    int GetToastBackgroundBlurStyle() const
     {
         return toastBackgroundBlurStyle_;
+    }
+
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
+    int32_t GetAlign() const
+    {
+        return toastAlign_;
+    }
+
+    TextAlign GetMultiLineTextAlign() const
+    {
+        return multiLineTextAlign_;
+    }
+
+    double GetToastLimitHeightRatio() const
+    {
+        return toastLimitHeightRatio_;
     }
 
 protected:
@@ -231,6 +267,10 @@ private:
     double toastInnerBorderWidth_ = 0.0f;
     Color toastInnerBorderColor_ = Color::TRANSPARENT;
     ShadowStyle toastShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    uint32_t bgThemeColorMode_ = 0;
+    TextAlign multiLineTextAlign_ = TextAlign::START;
+    int32_t toastAlign_ = 0;
+    double toastLimitHeightRatio_ = 0.65;
     int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
 };
 

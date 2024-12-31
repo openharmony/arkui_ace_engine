@@ -11,8 +11,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//build/config/components/ets_frontend/es2abc_config.gni")
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_promptaction_abc") {
+  src_js = rebase_path("promptaction.js")
+  dst_file = rebase_path(target_out_dir + "/promptaction.abc")
+  in_puts = [ "promptaction.js" ]
+  out_puts = [ target_out_dir + "/promptaction.abc" ]
+  extra_args = [ "--module" ]
+}
+
+base_output_path = get_label_info(":gen_promptaction_abc", "target_out_dir")
+promptaction_obj_path = base_output_path + "/promptaction.o"
+promptaction_abc_obj_path = base_output_path + "/promptaction_abc.o"
+
+gen_obj("promptaction_js") {
+  input = "promptaction.js"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    promptaction_obj_path = base_output_path + "/promptaction.c"
+  }
+  output = promptaction_obj_path
+  snapshot_dep = []
+}
+
+gen_obj("promptaction_abc") {
+  input = get_label_info(":gen_promptaction_abc", "target_out_dir") +
+          "/promptaction.abc"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    promptaction_abc_obj_path = base_output_path + "/promptaction_abc.c"
+  }
+  output = promptaction_abc_obj_path
+  snapshot_dep = [ ":gen_promptaction_abc" ]
+}
 
 template("napi_promptaction_static") {
   forward_variables_from(invoker, "*")
@@ -25,9 +59,14 @@ template("napi_promptaction_static") {
 
     sources = [
       "../promptaction/prompt_action.cpp",
+      "../promptaction/prompt_controller.cpp",
       "js_prompt_action.cpp",
+      "js_prompt_controller.cpp",
     ]
-    deps = []
+    deps = [
+      ":gen_obj_src_promptaction_abc",
+      ":gen_obj_src_promptaction_js",
+    ]
     external_deps = []
     if (platform != "" && is_arkui_x) {
       deps += [ "//plugins/libs/napi:napi_$platform" ]

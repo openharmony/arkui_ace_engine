@@ -211,9 +211,11 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
 
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float maxFontScale = pattern->GetMaxFontSizeScale().has_value() ?
-            pattern->GetMaxFontSizeScale().value() : pipeline->GetMaxAppFontScale();
+        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        float maxFontScale = textFieldLayoutProperty->HasMaxFontScale() ?
+            textFieldLayoutProperty->GetMaxFontScale().value() : pipeline->GetMaxAppFontScale();
         float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
+        indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;

@@ -29,7 +29,7 @@ struct TextDragInfo {
     RectF firstHandle;
     RectF secondHandle;
     float maxSelectedWidth = 0.0f;
-    bool isInline = true;
+    bool isHandleAnimation = true;
 };
 } // namespace OHOS::Ace::NG
 

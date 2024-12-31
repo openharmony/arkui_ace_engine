@@ -1641,4 +1641,15 @@ void ViewAbstractModelImpl::SetAccessibilityTextPreferred(bool accessibilityText
 
 void ViewAbstractModelImpl::SetAccessibilityNextFocusId(const std::string& nextFocusId)
 {}
+
+void ViewAbstractModelImpl::SetAccessibilityRole(const std::string& role, bool resetValue)
+{}
+
+void ViewAbstractModelImpl::SetOnAccessibilityFocus(
+    NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl)
+{}
+
+void ViewAbstractModelImpl::ResetOnAccessibilityFocus()
+{}
+
 } // namespace OHOS::Ace::Framework

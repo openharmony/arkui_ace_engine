@@ -1395,20 +1395,11 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     CHECK_NULL_VOID(eventHub);
     auto currentNavigationMode = GetNavigationMode();
 
+    auto lastStandardIndex = hostNode->GetLastStandardIndex();
     if (modeChange) {
-        if (currentNavigationMode == NavigationMode::SPLIT) {
-            if (layoutProperty->GetHideNavBarValue(false)) {
-                eventHub->FireNavBarStateChangeEvent(false);
-            } else {
-                eventHub->FireNavBarStateChangeEvent(true);
-            }
-        } else {
-            if (navigationStack_->Empty() && !layoutProperty->GetHideNavBarValue(false)) {
-                eventHub->FireNavBarStateChangeEvent(true);
-            } else {
-                eventHub->FireNavBarStateChangeEvent(false);
-            }
-        }
+        bool navbarIsHidden = (currentNavigationMode == NavigationMode::STACK && lastStandardIndex >= 0) ||
+                              layoutProperty->GetHideNavBar().value_or(false);
+        eventHub->FireNavBarStateChangeEvent(!navbarIsHidden);
         SetNavBarVisibilityChange(false);
         return;
     }
@@ -1424,7 +1415,8 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     }
 
     if (currentNavigationMode == NavigationMode::STACK) {
-        eventHub->FireNavBarStateChangeEvent(navigationStack_->Empty());
+        bool navbarIsHidden = (lastStandardIndex >= 0) || layoutProperty->GetHideNavBar().value_or(false);
+        eventHub->FireNavBarStateChangeEvent(!navbarIsHidden);
     }
 }
 

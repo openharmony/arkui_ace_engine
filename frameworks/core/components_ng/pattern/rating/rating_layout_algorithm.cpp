@@ -102,6 +102,7 @@ void RatingLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     foregroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
     secondaryLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
     backgroundLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
+    backgroundFocusLoadingCtx_->MakeCanvasImage(singleStarSize, true, ImageFit::FILL);
 }
 
 } // namespace OHOS::Ace::NG

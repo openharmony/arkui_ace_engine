@@ -211,7 +211,8 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto animationOption = pipeline->GetSyncAnimationOption();
-    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption);
+    NG::OffsetF offset;
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption, offset);
     return false;
 }
 

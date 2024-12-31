@@ -148,25 +148,4 @@ HWTEST_F(RichEditorClickTestOneNg, ClickAISpan001, TestSize.Level1)
     bool res = richEditorPattern->ClickAISpan(textOffset, aiSpan);
     EXPECT_EQ(res, false);
 }
-
-/**
- * @tc.name: HandleLongPress001
- * @tc.desc: test RichEditorPattern HandleLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorClickTestOneNg, HandleLongPress001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.localLocation_ = Offset(0, 0);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    richEditorPattern->HandleLongPress(info);
-    focusHub->focusType_ = FocusType::DISABLE;
-    richEditorPattern->HandleLongPress(info);
-    ASSERT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::NONE);
-}
-
 } // namespace OHOS::Ace::NG

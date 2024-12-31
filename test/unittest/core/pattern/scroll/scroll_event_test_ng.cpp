@@ -1500,6 +1500,59 @@ HWTEST_F(ScrollEventTestNg, EnablePaging004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 100);
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateContent();
+    CreateScrollDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    pattern_->UpdateCurrentOffset(100, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -VERTICAL_SCROLLABLE_DISTANCE - 100);
+}
+
+/**
  * @tc.name: EnablePaging005
  * @tc.desc: Test enablePaging
  * @tc.type: FUNC

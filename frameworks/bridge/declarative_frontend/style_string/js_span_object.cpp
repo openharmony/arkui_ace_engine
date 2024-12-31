@@ -705,8 +705,10 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
     std::string imageSrc;
     std::string bundleName;
     std::string moduleName;
-    auto imageValue = obj->GetProperty("value");
-    bool srcValid = JSContainerBase::ParseJsMedia(imageValue, imageSrc);
+    int32_t resId = 0;
+    auto srcValid = obj->HasProperty("resourceValue");
+    auto imageValue = srcValid ? obj->GetProperty("resourceValue") : obj->GetProperty("value");
+    JSViewAbstract::ParseJsMediaWithBundleName(imageValue, imageSrc, bundleName, moduleName, resId);
     if (isCard && imageValue->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(imageSrc);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -714,10 +716,10 @@ ImageSpanOptions JSImageAttachment::CreateImageOptions(const JSRef<JSObject>& ob
             imageSrc.clear();
         }
     }
-    JSImage::GetJsMediaBundleInfo(imageValue, bundleName, moduleName);
     options.image = imageSrc;
     options.bundleName = bundleName;
     options.moduleName = moduleName;
+    options.isUriPureNumber = (resId == -1);
     if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (!isCard) {
@@ -765,6 +767,11 @@ ImageSpanAttribute JSImageAttachment::ParseJsImageSpanAttribute(const JSRef<JSOb
             auto borderRadiusAttr = layoutStyleObject->GetProperty("borderRadius");
             imageStyle.borderRadius = JSRichEditor::ParseBorderRadiusAttr(borderRadiusAttr);
         }
+    }
+
+    auto syncLoadObj = obj->GetProperty("syncLoad");
+    if (!syncLoadObj->IsNull() && syncLoadObj->IsBoolean()) {
+        imageStyle.syncLoad = syncLoadObj->ToBoolean();
     }
     return imageStyle;
 }

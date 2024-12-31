@@ -60,6 +60,7 @@ const MARGIN_OFFSET: number = 8;
 const TAG: string = 'TreeView';
 const LOG_CODE: number = 0x3900;
 const ENTER_EXIT_DURATION: number = 2000;
+const ACCESSIBILITY_REFOCUS_DELAY_TIME: number = 300;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
 const ARROW_DOWN: Resource = $r('sys.symbol.chevron_down');
 const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
@@ -986,6 +987,7 @@ export struct TreeView {
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Provide clickButtonFlag: boolean = true;
   @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
+  @Provide isAccessibilityEnabled: boolean = false;
 
   @Builder
   NullBuilder() {
@@ -1036,6 +1038,10 @@ export struct TreeView {
     let uiContent: UIContext = this.getUIContext();
     this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
     this.maxAppFontScale = uiContent.getMaxFontScale();
+
+    accessibility.on('accessibilityStateChange', (state: boolean) => {
+      this.isAccessibilityEnabled = state;
+    })
   }
 
   decideFontScale() {
@@ -1179,6 +1185,88 @@ export struct TreeView {
     }
   }
 
+  private touchInner(itemInner: NodeInfo, event: TouchEvent) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (event.type === TouchType.Down) {
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+    }
+    if (event.type === TouchType.Up) {
+      this.listNodeDataSource.listNode[index].setIsSelected(true);
+      this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+      if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
+        this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
+          .getNodeItem().imageNode?.source;
+        this.listNodeDataSource.listNode[index].symbolSource = this.listNodeDataSource.listNode[index]
+          .getNodeItem().imageNode?.symbolSource;
+      }
+
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+      this.viewLastIndex = index;
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
+  private clickInner(itemInner: NodeInfo) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.listNodeDataSource.listNode[index].setIsSelected(true);
+    this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+    if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
+      this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
+        .getNodeItem().imageNode?.source;
+      this.listNodeDataSource.listNode[index].symbolSource = this.listNodeDataSource.listNode[index]
+        .getNodeItem().imageNode?.symbolSource;
+    }
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.viewLastIndex = index;
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
   build() {
     List({}) {
       LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo) => {
@@ -1189,49 +1277,11 @@ export struct TreeView {
               listNodeDataSource: this.listNodeDataSource,
               index: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId()),
               listTreeViewMenu: this.listTreeViewMenu,
+              callBackClick: (): void => this.clickInner(itemInner),
             })
           }
-          .onTouch((event: TouchEvent) => {
-            this.viewLastIndex = this.listNodeDataSource.getLastIndex();
-            let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
-
-            if (event.type === TouchType.Down) {
-              if (index !== this.viewLastIndex) {
-                this.clearLastIndexColor();
-                this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.setClickIndex(index);
-              }
-            }
-            if (event.type === TouchType.Up) {
-              this.listNodeDataSource.listNode[index].setIsSelected(true);
-              this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
-              if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
-                this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
-                  .getNodeItem().imageNode?.source;
-                this.listNodeDataSource.listNode[index].symbolSource = this.listNodeDataSource.listNode[index]
-                  .getNodeItem().imageNode?.symbolSource;
-              }
-
-              if (index !== this.viewLastIndex) {
-                this.clearLastIndexColor();
-                this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.setClickIndex(index);
-              }
-              this.viewLastIndex = index;
-            }
-
-            if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
-              this.listNodeDataSource.setPopUpInfo(
-                PopUpType.WARNINGS,
-                InputError.NONE,
-                false,
-                this.listNodeDataSource.getLastIndex()
-              );
-              this.listNodeDataSource.setItemVisibilityOnEdit(
-                this.listNodeDataSource.getLastIndex(),
-                MenuOperation.COMMIT_NODE
-              );
-            }
+          .onTouch(this.isAccessibilityEnabled ? undefined : (event: TouchEvent) => {
+            this.touchInner(itemInner, event);
           })
         }
         .width('100%')
@@ -1508,10 +1558,6 @@ export struct TreeView {
           .mainTitleNode?.setMainTitleSelected(false);
         this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
           .mainTitleNode?.setMainTitleHighLight(false);
-      }
-
-      if (this.listNodeDataSource.listNode[this.viewLastIndex] !== null) {
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
       }
 
       this.listNodeDataSource.lastIndex = this.viewLastIndex;
@@ -2954,28 +3000,47 @@ class ListNodeDataSource extends BasicDataSource {
     return accessibleTitleList.join(',');
   }
 
-  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string | undefined {
-    let accessibleTitleList: string[] = [];
-    while (insertNodeCurrentNodeId !== -1) {
-      if (insertNodeCurrentNodeId === undefined) {
-        return;
-      }
-      let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
-      let parentNodeIndex = this.findIndex(insertNodeParentNodeId);
-      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
+    if (insertNodeCurrentNodeId === undefined) {
+      return '';
+    }
+    let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+    if (insertNodeParentNodeId === -1) {
+      let accessibleTitleList: string[] = [];
+      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
       if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
-        return;
+        return '';
       }
-      let primaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle;
-      let secondaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle;
+      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
       let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
       let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
       accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
-      insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      return accessibleTitleList.join(',');
+    } else {
+      let accessibleTitleList: string[] = [];
+      while (insertNodeCurrentNodeId !== -1) {
+        if (insertNodeCurrentNodeId === undefined) {
+          return '';
+        }
+        let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+        if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+          return '';
+        }
+        let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+        let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
+        let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+        let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+        accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+        insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      }
+      return accessibleTitleList.join(',');
     }
-    return accessibleTitleList.join(',');
   }
 
   getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: number | undefined,
@@ -3111,6 +3176,8 @@ class ListNodeDataSource extends BasicDataSource {
   public delayHighLightAndExpandNode(currentIndex: number, currentNodeId: number, showIndex: number): void {
     let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
     let isOverBorder: boolean | undefined = this.getData(showIndex)?.getIsOverBorder();
+    let insertNodeId: number = this.listNode[currentIndex + 1].getNodeCurrentNodeId();
+    let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
     if (isOverBorder) {
       this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
     } else {
@@ -3130,6 +3197,13 @@ class ListNodeDataSource extends BasicDataSource {
         let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
         this.timeoutHighLightId = setTimeout(() => {
           this.delayHighLight(currentIndex);
+          if (insertNodeParentNodeId === -1) {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(currentNodeId), 1))
+          } else {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(insertNodeId), 1))
+          }
         }, delayHighLightTime);
       }
       if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
@@ -4141,7 +4215,11 @@ export struct TreeViewInner {
   @Consume treeViewTheme: TreeViewTheme;
   @Consume clickButtonFlag: boolean;
   @Consume accessibilityNodeType: AccessibilityNodeType;
+  @Consume isAccessibilityEnabled: boolean;
   @BuilderParam private listTreeViewMenu: () => void;
+  callBackClick: () => void = () => {
+
+  }
   private readonly MAX_CN_LENGTH: number = 254;
   private readonly MAX_EN_LENGTH: number = 255;
   private readonly INITIAL_INVALID_VALUE = -1;
@@ -4227,7 +4305,7 @@ export struct TreeViewInner {
     let insertNodePosition: number = childrenItemId.indexOf(currentNodeId) + 1;
     let accessibleTitle: string | undefined = this.listNodeDataSource.getAccessibleTitle(currentNodeId);
     if (accessibleTitle === undefined) {
-      return '';
+      return ' ';
     }
 
     if (this.accessibilityNodeType === AccessibilityNodeType.PLACE) {
@@ -4255,7 +4333,7 @@ export struct TreeViewInner {
     if (this.accessibilityNodeType === AccessibilityNodeType.TEXT) {
       return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
     } else {
-      return '';
+      return ' ';
     }
   }
 
@@ -4273,10 +4351,123 @@ export struct TreeViewInner {
 
   private getAccessibilityReadButtonDescription(): string {
     if (this.clickButtonFlag === false) {
-      return '';
+      return ' ';
     } else {
       return this.listNodeDataSource.getStringByName('treeview_accessibility_implement_node');
     }
+  }
+
+  private onTouchNode(event: TouchEvent) {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId();
+
+    if (event.type === TouchType.Down) {
+      this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
+    } else if (event.type === TouchType.Up) {
+      if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+        this.item.setNodeColor(COLOR_SELECT);
+      } else {
+        this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+      }
+      if (this.item.getNodeItem().imageNode !== null) {
+        this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+        this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+        this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+        this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+      }
+
+      this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+      let callParam: CallbackParam = { currentNodeId: currentId };
+      this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+      this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+        ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+        `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index;
+    this.count--;
+  }
+
+  private onClickNode() {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId();
+
+    if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+      this.item.setNodeColor(COLOR_SELECT);
+    } else {
+      this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+    }
+    if (this.item.getNodeItem().imageNode !== null) {
+      this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+      this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+      this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+      this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+    }
+
+    this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+    let callParam: CallbackParam = { currentNodeId: currentId };
+    this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+    this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+      ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+      `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index;
+    this.count--;
+  }
+
+  private accessibilityRefocus() {
+    this.clickButtonFlag = false;
+    let eventInfo: accessibility.EventInfo = ({
+      type: 'requestFocusForAccessibility',
+      bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+      triggerAction: 'common',
+      customId: `treeView_button${this.item.getNodeCurrentNodeId()}`
+    })
+    accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+      setTimeout(() => {
+        this.clickButtonFlag = true;
+      }, ENTER_EXIT_DURATION)
+    })
   }
 
   @Builder
@@ -4476,6 +4667,10 @@ export struct TreeViewInner {
               .id(`treeView_node${this.item.getNodeCurrentNodeId()}`)
               .accessibilityText(this.getAccessibilityReadText(this.item.getNodeCurrentNodeId()))
               .accessibilityDescription(this.getAccessibilityDescription())
+              .onClick(this.isAccessibilityEnabled ? () => {
+                this.onClickNode();
+                this.callBackClick();
+              } : undefined)
 
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
@@ -4485,40 +4680,25 @@ export struct TreeViewInner {
                     this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT])
                     .opacity(!this.item.getIsHighLight() ?
                       this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity)
-                    .onTouch((event: TouchEvent) => {
-                      if (event.type === TouchType.Down) {
-                        this.listNodeDataSource.expandAndCollapseNode(
-                          this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
-                        this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
-
-                        this.clickButtonFlag = false;
-                      }
-                      if (event.type === TouchType.Up) {
-                        let eventInfo: accessibility.EventInfo = ({
-                          type: 'requestFocusForAccessibility',
-                          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-                          triggerAction: 'common',
-                          customId: `treeView_button${this.item.getNodeCurrentNodeId()}`
-                        })
-                        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-                          setTimeout(() => {
-                            this.clickButtonFlag = true;
-                          }, ENTER_EXIT_DURATION)
-                        })
-                      }
-                      event.stopPropagation();
-                    })
                     .focusable(true)
                 }
                 .focusable(true)
                 .justifyContent(FlexAlign.Center)
                 .height(this.item.getNodeItem().imageCollapse?.itemHeight)
                 .width(this.item.getNodeItem().imageCollapse?.itemWidth)
+                .onClick(() => {
+                  this.listNodeDataSource.expandAndCollapseNode(
+                    this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
+                  this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
+
+                  setTimeout(() => {
+                    this.accessibilityRefocus();
+                  }, ACCESSIBILITY_REFOCUS_DELAY_TIME)
+                })
                 .id(`treeView_button${this.item.getNodeCurrentNodeId()}`)
                 .accessibilityText(this.getAccessibilityReadButtonText(this.item.getNodeItem()
                   .imageCollapse?.collapseSource === ARROW_RIGHT))
                 .accessibilityDescription(this.getAccessibilityReadButtonDescription())
-                .accessibilityLevel('yes')
               }
             }
             .focusable(true)
@@ -4537,55 +4717,8 @@ export struct TreeViewInner {
             this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
           }
         })
-        .onTouch((event) => {
-          this.count++;
-          if (this.count > 1) {
-            this.count--;
-            return;
-          }
-
-          this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
-          this.listNodeDataSource.setClickIndex(this.index);
-          let currentId: number = this.item.getNodeCurrentNodeId();
-
-          if (event.type === TouchType.Down) {
-            this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
-          } else if (event.type === TouchType.Up) {
-            if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
-              this.item.setNodeColor(COLOR_SELECT);
-            } else {
-              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
-            }
-            if (this.item.getNodeItem().imageNode !== null) {
-              this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
-              this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
-              this.item.imageSource = this.item.getNodeItem().imageNode?.source;
-              this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
-            }
-
-            this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-            let callParam: CallbackParam = { currentNodeId: currentId };
-            this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
-
-            this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
-              ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
-              `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
-          }
-
-          if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
-            this.listNodeDataSource.setPopUpInfo(
-              PopUpType.WARNINGS,
-              InputError.NONE,
-              false,
-              this.listNodeDataSource.getLastIndex()
-            );
-            this.listNodeDataSource.setItemVisibilityOnEdit(
-              this.listNodeDataSource.getLastIndex(),
-              MenuOperation.COMMIT_NODE
-            );
-          }
-          this.lastIndex = this.index;
-          this.count--;
+        .onTouch(this.isAccessibilityEnabled ? undefined : (event) => {
+          this.onTouchNode(event);
         })
         /* backgroundColor when editing and in other states. */
         .backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&

@@ -90,7 +90,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
     auto entryPoint = entryPointValue->ToString();
-    bool backgroundTransparent = false;
+    bool backgroundTransparent = true;
     if (backgroundTransparentValue->IsBoolean()) {
         backgroundTransparent = backgroundTransparentValue->ToBoolean();
     }
