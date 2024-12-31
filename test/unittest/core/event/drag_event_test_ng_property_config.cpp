@@ -635,7 +635,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorCreateBadgeTextNodeTest001, TestSize.
     /**
      * @tc.steps: step2. Invoke CreateBadgeTextNode.
      */
-    auto textNode = dragEventActuator->CreateBadgeTextNode(frameNode, 1, 1.05f, true);
+    auto textNode = dragEventActuator->CreateBadgeTextNode(1);
     EXPECT_EQ(textNode, nullptr);
 }
 
@@ -792,38 +792,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest002, TestSize.Leve
     dragEventActuator->isRedragStart_ = false;
     dragEventActuator->HandleDragDampingMove(point, info.GetTouches().front().GetFingerId(), true);
     EXPECT_EQ(dragEventActuator->isRedragStart_, true);
-}
-
-/**
- * @tc.name: DragEventActuatorMountGatherNodeTest003
- * @tc.desc: Test GetFloatImageOffset.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create DragEventActuator.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(framenode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    ASSERT_NE(gestureEventHub, nullptr);
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    RefPtr<PixelMap> pixelMap = gestureHub->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->windowModal_ = WindowModal::SEMI_MODAL;
-    dragEventActuator->GetFloatImageOffset(framenode, pixelMap);
-    EXPECT_EQ(dragEventActuator->GetFloatImageOffset(framenode, pixelMap).GetX(), 5.0);
 }
 
 /**
@@ -1096,14 +1064,15 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest011, TestSize.Leve
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
-        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     ASSERT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     dragEventActuator->isNotInPreviewState_ = true;
     auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
     gestureHub->textDraggable_ = false;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    GestureEvent info = GestureEvent();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 

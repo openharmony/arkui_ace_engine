@@ -1194,7 +1194,10 @@ bool FocusHub::CalculatePosition()
         return false;
     }
 
-    if (lastFocusNode->IsChild()) {
+    // relative position and width/height need to be calculated.
+    // 1. lastFocusNode is node
+    // 2. lastFocusNode do not have focusing child
+    if (lastFocusNode->IsChild() || !lastFocusNode->IsLastWeakNodeFocused()) {
         auto lastFocusGeometryNode = lastFocusNode->GetGeometryNode();
         CHECK_NULL_RETURN(lastFocusGeometryNode, false);
         RectF rect(childRect.GetOffset(), lastFocusGeometryNode->GetFrameSize());
@@ -1368,7 +1371,6 @@ bool FocusHub::IsLeafFocusScope()
         return true;
     }
     if (focusDepend_ == FocusDependence::SELF) {
-        lastWeakFocusNode_ = nullptr;
         focusManager->UpdateSwitchingEndReason(SwitchingEndReason::DEPENDENCE_SELF);
         return true;
     }
@@ -1553,16 +1555,23 @@ bool FocusHub::PaintFocusStateToRenderContext()
         if (!HasPaintRect()) {
             return false;
         }
-        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth);
+        renderContext->PaintFocusState(GetPaintRect(), paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
         return true;
     }
 
     Dimension focusPaddingVp;
     GetPaintPaddingVp(focusPaddingVp);
     if (HasPaintRect()) {
-        renderContext->PaintFocusState(GetPaintRect(), focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(GetPaintRect(),
+                                       focusPaddingVp,
+                                       paintColor,
+                                       paintWidth,
+                                       {false, appTheme->IsFocusBoxGlow()});
     } else {
-        renderContext->PaintFocusState(focusPaddingVp, paintColor, paintWidth);
+        renderContext->PaintFocusState(focusPaddingVp,
+                                       paintColor,
+                                       paintWidth,
+                                       appTheme->IsFocusBoxGlow());
     }
     return true;
 }
@@ -1648,7 +1657,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    renderContext->PaintFocusState(paintRect, paintColor, paintWidth);
+    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
     return true;
 }
 
@@ -2323,9 +2332,11 @@ bool FocusHub::UpdateFocusView()
     CHECK_NULL_RETURN(frameNode, false);
     auto focusView = frameNode->GetPattern<FocusView>();
     if (!focusView) {
-        auto focusManager = GetFocusManager();
-        CHECK_NULL_RETURN(focusManager, false);
-        focusManager->FlushFocusView();
+        if (frameNode->IsOnMainTree()) {
+            auto focusManager = GetFocusManager();
+            CHECK_NULL_RETURN(focusManager, false);
+            focusManager->FlushFocusView();
+        }
         return true;
     }
     auto focusedChild = lastWeakFocusNode_.Upgrade();
@@ -2806,5 +2817,12 @@ void FocusHub::DumpFocusUieInJson(std::unique_ptr<JsonValue>& json)
     if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern->DumpInfo(json);
     }
+}
+
+bool FocusHub::IsLastWeakNodeFocused() const
+{
+    auto lastFocusNode = lastWeakFocusNode_.Upgrade();
+    CHECK_NULL_RETURN(lastFocusNode, false);
+    return lastFocusNode->IsCurrentFocus();
 }
 } // namespace OHOS::Ace::NG

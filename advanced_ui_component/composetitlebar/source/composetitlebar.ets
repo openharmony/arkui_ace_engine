@@ -25,6 +25,9 @@ export interface ComposeTitleBarMenuItem {
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityLevel?: string;
+  accessibilityDescription?: ResourceStr;
 }
 
 const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
@@ -55,6 +58,35 @@ class Util {
   }
 }
 
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
+
 @Component
 struct ComposeTitleBar {
   item: ComposeTitleBarMenuItem | undefined = undefined;
@@ -70,6 +102,7 @@ struct ComposeTitleBar {
   private static readonly portraitImageLeftPadding = 4;
   private static readonly portraitImageRightPadding = 16;
   private static instanceCount = 0;
+  @Provide('uniqueId') uniqueId?: number = -1;
 
   build() {
     Flex({
@@ -82,7 +115,9 @@ struct ComposeTitleBar {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.getUIContext()?.getRouter()?.back()
-          }, index: -1
+          },
+          index: -1,
+          itemIndex: -1
         })
 
         Row() {
@@ -127,6 +162,7 @@ struct ComposeTitleBar {
           .alignItems(HorizontalAlign.Start)
           .constraintSize({ maxWidth: this.titleMaxWidth })
         }
+        .accessibilityGroup(true)
       }
       .margin({ left: $r('sys.float.ohos_id_default_padding_start') })
 
@@ -134,6 +170,9 @@ struct ComposeTitleBar {
         CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ })
       }
     }
+    .onAppear(() => {
+      this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+    })
     .width('100%')
     .height(ComposeTitleBar.totalHeight)
     .backgroundColor($r('sys.color.ohos_id_color_background'))
@@ -168,7 +207,6 @@ struct CollapsibleMenuSection {
     label: $r('sys.string.ohos_toolbar_more'),
   } as ComposeTitleBarMenuItem;
   index: number = 0;
-  longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -181,7 +219,7 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false;
   @State isMoreIconOnHover: boolean = false;
   @State isMoreIconOnClick: boolean = false;
-  @State fontSize: number = 1;
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
       cancel: () => {
@@ -196,6 +234,8 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   })
+
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick ?
@@ -232,6 +272,7 @@ struct CollapsibleMenuSection {
         }
       })
     }
+    this.fontSize = this.decideFontScale()
   }
 
   decideFontScale(): number {
@@ -250,18 +291,22 @@ struct CollapsibleMenuSection {
     }
   }
 
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
   build() {
     Column() {
       Row() {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
             ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
             })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
               (item: ComposeTitleBarMenuItem, index: number) => {
-                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
               })
 
             Button({ type: ButtonType.Normal, stateEffect: true }) {
@@ -271,6 +316,7 @@ struct CollapsibleMenuSection {
                 .draggable(false)
                 .focusable(true)
             }
+            .accessibilityText($r('sys.string.ohos_toolbar_more'))
             .width(ImageMenuItem.imageHotZoneWidth)
             .height(ImageMenuItem.imageHotZoneWidth)
             .borderRadius(ImageMenuItem.buttonBorderRadius)
@@ -319,16 +365,7 @@ struct CollapsibleMenuSection {
               }
             })
             .onClick(() => this.isPopupShown = true)
-            .gesture(
-              LongPressGesture({ repeat: false, duration: this.longPressTime })
-                .onAction((event: GestureEvent) => {
-                  this.fontSize = this.decideFontScale();
-                  if (event) {
-                    if (this.fontSize >= this.minFontSize) {
-                      this.dialogController?.open()
-                    }
-                  }
-                }))
+            .gestureModifier(this.buttonGestureModifier)
             .bindPopup(this.isPopupShown, {
               builder: this.popupBuilder,
               placement: Placement.Bottom,
@@ -378,7 +415,7 @@ struct CollapsibleMenuSection {
 struct ImageMenuItem {
   item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
   index: number = 0;
-  longPressTime: number = 500;
+  itemIndex?: number = 0;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -392,7 +429,8 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
-  @Prop fontSize: number = 1;
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
+  @Consume('uniqueId') parentParentUniqueId?: number;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
       cancel: () => {
@@ -408,6 +446,8 @@ struct ImageMenuItem {
     customStyle: true,
   })
 
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
+
   private textDialog(): ResourceStr {
     if (this.item.value === PUBLIC_MORE) {
       return $r('sys.string.ohos_toolbar_more');
@@ -417,6 +457,45 @@ struct ImageMenuItem {
       return this.item.label ? this.item.label : '';
     }
   }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === PUBLIC_BACK) {
+      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+    } else if (this.item.value === PUBLIC_MORE) {
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
 
   getFgColor() {
     return this.isOnClick
@@ -445,6 +524,11 @@ struct ImageMenuItem {
       hilog.error(0x3900, 'ComposeTitleBar',
         `Failed to init fontsizescale info, cause, code: ${code}, message: ${message}`);
     }
+    this.fontSize = this.decideFontScale();
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
   }
 
   decideFontScale(): number {
@@ -494,6 +578,10 @@ struct ImageMenuItem {
         }
       }
     }
+    .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
+    .accessibilityText(this.getAccessibilityReadText())
+    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
     .enabled(this.item.isEnabled ? this.item.isEnabled : false)
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
@@ -563,16 +651,7 @@ struct ImageMenuItem {
         return this.item.isEnabled && this.item.action?.();
       }
     })
-    .gesture(
-      LongPressGesture({ repeat: false, duration: this.longPressTime })
-        .onAction((event: GestureEvent) => {
-          this.fontSize = this.decideFontScale();
-          if (event) {
-            if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-              this.dialogController?.open()
-            }
-          }
-        }))
+    .gestureModifier(this.buttonGestureModifier)
   }
 }
 

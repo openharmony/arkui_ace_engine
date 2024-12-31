@@ -99,7 +99,7 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     leftCenter -= (centerDilateDistance - centerDistance) * HALF_FLOAT;
     rightCenter += (centerDilateDistance - centerDistance) * HALF_FLOAT;
     PaintSelectedIndicator(
-        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio, true);
 }
 
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
@@ -235,6 +235,29 @@ int32_t OverlengthDotIndicatorModifier::GetBlackPointsAnimationDuration() const
     return animationDuration_;
 }
 
+bool OverlengthDotIndicatorModifier::NeedUpdateWhenAnimationFinish() const
+{
+    if (NearZero(forceStopPageRate_) || NearEqual(forceStopPageRate_, -1.0f) ||
+        NearEqual(forceStopPageRate_, FLT_MAX)) {
+        return true;
+    }
+
+    if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
+        (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+        return true;
+    }
+
+    if (std::abs(forceStopPageRate_) < HALF_FLOAT && currentSelectedIndex_ < targetSelectedIndex_) {
+        return false;
+    }
+
+    if (std::abs(forceStopPageRate_) >= HALF_FLOAT && currentSelectedIndex_ > targetSelectedIndex_) {
+        return false;
+    }
+
+    return true;
+}
+
 void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes)
 {
     AnimationOption blackPointOption;
@@ -267,6 +290,11 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
+
+        if (!modifier->NeedUpdateWhenAnimationFinish()) {
+            return;
+        }
+
         if (!modifier->blackPointsAnimEnd_ && (modifier->needUpdate_ || !modifier->isAutoPlay_)) {
             modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
             modifier->currentOverlongType_ = modifier->targetOverlongType_;

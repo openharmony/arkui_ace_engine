@@ -341,7 +341,7 @@ public:
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
-        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight);
+        const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource);
     double GetNormalWidthToPx() const;
     float CalcPatternOffset(float scrollBarOffset) const;
     Color GetForegroundColor() const;
@@ -389,7 +389,8 @@ protected:
 
 private:
     void SetBarRegion(const Offset& offset, const Size& size);
-    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent,
+        int32_t scrollSource);
     void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);

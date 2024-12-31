@@ -344,69 +344,87 @@ void SetToggleState(ArkUINodeHandle node, ArkUI_Bool isOn)
 namespace NodeModifier {
 const ArkUIToggleModifier* GetToggleModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIToggleModifier modifier = {
-        SetToggleSelectedColor,
-        ResetToggleSelectedColor,
-        SetToggleSwitchPointColor,
-        ResetToggleSwitchPointColor,
-        SetToggleHeight,
-        ResetToggleHeight,
-        SetToggleResponseRegion,
-        ResetToggleResponseRegion,
-        SetTogglePadding,
-        ResetTogglePadding,
-        SetToggleBackgroundColor,
-        ResetToggleBackgroundColor,
-        SetToggleHoverEffect,
-        ResetToggleHoverEffect,
-        GetToggleSelectedColor,
-        GetToggleSwitchPointColor,
-        SetToggleIsOn,
-        ResetToggleIsOn,
-        GetToggleIsOn,
-        SetTogglePointRadius,
-        ResetTogglePointRadius,
-        SetToggleUnselectedColor,
-        ResetToggleUnselectedColor,
-        SetToggleTrackBorderRadius,
-        ResetToggleTrackBorderRadius,
-        GetToggleUnselectedColor,
-        SetToggleState,
+        .setToggleSelectedColor = SetToggleSelectedColor,
+        .resetToggleSelectedColor = ResetToggleSelectedColor,
+        .setToggleSwitchPointColor = SetToggleSwitchPointColor,
+        .resetToggleSwitchPointColor = ResetToggleSwitchPointColor,
+        .setToggleHeight = SetToggleHeight,
+        .resetToggleHeight = ResetToggleHeight,
+        .setToggleResponseRegion = SetToggleResponseRegion,
+        .resetToggleResponseRegion = ResetToggleResponseRegion,
+        .setTogglePadding = SetTogglePadding,
+        .resetTogglePadding = ResetTogglePadding,
+        .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .resetToggleBackgroundColor = ResetToggleBackgroundColor,
+        .setToggleHoverEffect = SetToggleHoverEffect,
+        .resetToggleHoverEffect = ResetToggleHoverEffect,
+        .getToggleSelectedColor = GetToggleSelectedColor,
+        .getToggleSwitchPointColor = GetToggleSwitchPointColor,
+        .setToggleIsOn = SetToggleIsOn,
+        .resetToggleIsOn = ResetToggleIsOn,
+        .getToggleIsOn = GetToggleIsOn,
+        .setTogglePointRadius = SetTogglePointRadius,
+        .resetTogglePointRadius = ResetTogglePointRadius,
+        .setToggleUnselectedColor = SetToggleUnselectedColor,
+        .resetToggleUnselectedColor = ResetToggleUnselectedColor,
+        .setToggleTrackBorderRadius = SetToggleTrackBorderRadius,
+        .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
+        .getToggleUnselectedColor = GetToggleUnselectedColor,
+        .setToggleState = SetToggleState,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIToggleModifier* GetCJUIToggleModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIToggleModifier modifier = {
-        SetToggleSelectedColor,
-        ResetToggleSelectedColor,
-        SetToggleSwitchPointColor,
-        ResetToggleSwitchPointColor,
-        SetToggleHeight,
-        ResetToggleHeight,
-        SetToggleResponseRegion,
-        ResetToggleResponseRegion,
-        SetTogglePadding,
-        ResetTogglePadding,
-        SetToggleBackgroundColor,
-        ResetToggleBackgroundColor,
-        SetToggleHoverEffect,
-        ResetToggleHoverEffect,
-        GetToggleSelectedColor,
-        GetToggleSwitchPointColor,
-        SetToggleIsOn,
-        ResetToggleIsOn,
-        GetToggleIsOn,
-        SetTogglePointRadius,
-        ResetTogglePointRadius,
-        SetToggleUnselectedColor,
-        ResetToggleUnselectedColor,
-        SetToggleTrackBorderRadius,
-        ResetToggleTrackBorderRadius,
-        GetToggleUnselectedColor,
+        .setToggleSelectedColor = SetToggleSelectedColor,
+        .resetToggleSelectedColor = ResetToggleSelectedColor,
+        .setToggleSwitchPointColor = SetToggleSwitchPointColor,
+        .resetToggleSwitchPointColor = ResetToggleSwitchPointColor,
+        .setToggleHeight = SetToggleHeight,
+        .resetToggleHeight = ResetToggleHeight,
+        .setToggleResponseRegion = SetToggleResponseRegion,
+        .resetToggleResponseRegion = ResetToggleResponseRegion,
+        .setTogglePadding = SetTogglePadding,
+        .resetTogglePadding = ResetTogglePadding,
+        .setToggleBackgroundColor = SetToggleBackgroundColor,
+        .resetToggleBackgroundColor = ResetToggleBackgroundColor,
+        .setToggleHoverEffect = SetToggleHoverEffect,
+        .resetToggleHoverEffect = ResetToggleHoverEffect,
+        .getToggleSelectedColor = GetToggleSelectedColor,
+        .getToggleSwitchPointColor = GetToggleSwitchPointColor,
+        .setToggleIsOn = SetToggleIsOn,
+        .resetToggleIsOn = ResetToggleIsOn,
+        .getToggleIsOn = GetToggleIsOn,
+        .setTogglePointRadius = SetTogglePointRadius,
+        .resetTogglePointRadius = ResetTogglePointRadius,
+        .setToggleUnselectedColor = SetToggleUnselectedColor,
+        .resetToggleUnselectedColor = ResetToggleUnselectedColor,
+        .setToggleTrackBorderRadius = SetToggleTrackBorderRadius,
+        .resetToggleTrackBorderRadius = ResetToggleTrackBorderRadius,
+        .getToggleUnselectedColor = GetToggleUnselectedColor,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

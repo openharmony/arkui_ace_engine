@@ -28,6 +28,9 @@
 #endif
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+#include "nweb_helper.h"
+#endif
 
 namespace OHOS::Ace::NG {
 void WebModelNG::Create(const std::string& src, const RefPtr<WebController>& webController, RenderMode renderMode,
@@ -1164,6 +1167,22 @@ void WebModelNG::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->JavaScriptOnDocumentStart(scriptItems);
+}
+
+void WebModelNG::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void WebModelNG::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)

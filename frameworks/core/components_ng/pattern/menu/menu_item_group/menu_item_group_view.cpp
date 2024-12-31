@@ -32,7 +32,8 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
 
     auto layoutProps = row->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt });
+    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt, std::nullopt,
+        std::nullopt });
 }
 } // namespace
 

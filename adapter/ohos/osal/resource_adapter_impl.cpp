@@ -95,7 +95,9 @@ const char* PATTERN_MAP[] = {
     THEME_BLUR_STYLE_COMMON,
     THEME_PATTERN_SHADOW,
     THEME_PATTERN_CONTAINER_MODAL,
-    THEME_PATTERN_SCROLLABLE
+    THEME_PATTERN_SCROLLABLE,
+    THEME_PATTERN_APP,
+    THEME_PATTERN_LINEAR_INDICATOR
 };
 
 bool IsDirExist(const std::string& path)
@@ -411,7 +413,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArray(uint32_t resId) const
         }
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;
@@ -428,7 +430,7 @@ std::vector<uint32_t> ResourceAdapterImpl::GetIntArrayByName(const std::string& 
         LOGE("GetIntArray error, resName=%{public}s", resName.c_str());
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;

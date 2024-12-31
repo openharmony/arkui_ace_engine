@@ -66,9 +66,10 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
     const bool disableSkip = IsOutOfBoundary(true) || ScrollablePattern::AnimateRunning();
-    const bool overScroll = CanOverScroll(GetScrollSource()) || forceOverScroll_;
+    const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
+    const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
     if (UseIrregularLayout()) {
-        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, overScroll);
+        auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(info_, canOverScrollStart, canOverScrollEnd);
         algo->SetEnableSkip(!disableSkip);
         return algo;
     }
@@ -78,7 +79,8 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     } else {
         result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(info_, crossCount, mainCount);
     }
-    result->SetCanOverScroll(overScroll);
+    result->SetCanOverScrollStart(canOverScrollStart);
+    result->SetCanOverScrollEnd(canOverScrollEnd);
     result->SetScrollSource(GetScrollSource());
     if (ScrollablePattern::AnimateRunning()) {
         result->SetLineSkipping(!disableSkip);
@@ -105,7 +107,6 @@ RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
 {
     auto paint = MakeRefPtr<GridPaintMethod>(GetAxis() == Axis::HORIZONTAL, IsReverse(), GetScrollBar());
     CHECK_NULL_RETURN(paint, nullptr);
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -141,6 +142,9 @@ void GridPattern::OnModifyDone()
     SetAxis(info_.axis_);
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
 
     SetEdgeEffect();
@@ -412,6 +416,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
+        if (GetEffectEdge() == EffectEdge::START && NonPositive(offset) && source == SCROLL_FROM_UPDATE) {
+            return true;
+        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (irregular) {
@@ -435,6 +442,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
+        if (GetEffectEdge() == EffectEdge::END && NonNegative(offset) && source == SCROLL_FROM_UPDATE) {
+            return true;
+        }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
@@ -492,14 +502,16 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     ProcessEvent(indexChanged, info_.currentHeight_ - info_.prevHeight_);
     info_.prevHeight_ = info_.currentHeight_;
     info_.extraOffset_.reset();
-    SetScrollSource(SCROLL_FROM_NONE);
     UpdateScrollBarOffset();
+    SetScrollSource(SCROLL_FROM_NONE);
     if (config.frameSizeChange) {
         if (GetScrollBar() != nullptr) {
             GetScrollBar()->ScheduleDisappearDelayTask();
         }
     }
-    CheckRestartSpring(false);
+    if (!preSpring_) {
+        CheckRestartSpring(false);
+    }
     CheckScrollable();
     MarkSelectedItems();
     isInitialized_ = true;
@@ -978,7 +990,7 @@ float GridPattern::GetEndOffset()
     const bool irregular = UseIrregularLayout();
     float heightInView = info.GetTotalHeightOfItemsInView(mainGap, irregular);
 
-    if (GetAlwaysEnabled() && LessNotEqual(GetTotalHeight(), contentHeight)) {
+    if (GetAlwaysEnabled() && info.HeightSumSmaller(contentHeight, mainGap)) {
         // overScroll with contentHeight < viewport
         if (irregular) {
             return info.GetHeightInRange(0, info.startMainLineIndex_, mainGap);
@@ -1037,27 +1049,31 @@ void GridPattern::SyncLayoutBeforeSpring()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    forceOverScroll_ = true;
+    preSpring_ = true;
     host->SetActive();
-    auto context = host->GetContext();
+    auto* context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
-    forceOverScroll_ = false;
+    preSpring_ = false;
 }
 
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
-    const auto& info = info_;
-    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
-    float disToBot =
-        info.GetDistanceToBottom(info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
-    if (!info.offsetEnd_) {
-        offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+    const float mainGap = GetMainGap();
+    const float viewport = info_.lastMainSize_ - info_.contentEndPadding_;
+    float heightInView = info_.totalHeightOfItemsInView_;
+    if (info_.HeightSumSmaller(viewport, mainGap)) {
+        // content < viewport, use viewport height to calculate overScroll
+        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) - mainGap;
+    }
+    float disToBot = info_.GetDistanceToBottom(viewport, heightInView, mainGap);
+    if (!info_.IsOutOfEnd(mainGap, true)) {
+        offset.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
         offset.end = delta;
     } else {
-        offset.end = std::min(static_cast<float>(delta), -disToBot);
+        offset.end = std::min(delta, -disToBot);
     }
 }
 

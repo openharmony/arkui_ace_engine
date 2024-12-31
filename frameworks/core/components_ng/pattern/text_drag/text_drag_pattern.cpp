@@ -354,4 +354,13 @@ Color TextDragPattern::GetDragBackgroundColor()
     CHECK_NULL_RETURN(textTheme, Color(TEXT_DRAG_COLOR_BG));
     return textTheme->GetDragBackgroundColor();
 }
+
+Dimension TextDragPattern::GetDragCornerRadius()
+{
+    auto deviceType = SystemProperties::GetDeviceType();
+    if (deviceType == DeviceType::TWO_IN_ONE) {
+        return TEXT_DRAG_RADIUS_2IN1;
+    }
+    return TEXT_DRAG_RADIUS;
+}
 } // namespace OHOS::Ace::NG

@@ -93,6 +93,25 @@ void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
     NG::ScrollableModelNG::SetFadingEdge(fadingEdge, fadingEdgeLength);
 }
 
+void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (info.Length() < 1 || info[0]->IsNull() || !info[0]->IsNumber()) {
+        NG::ScrollableModelNG::SetDigitalCrownSensitivity(
+            static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
+        return;
+    }
+    auto sensitivity = info[0]->ToNumber<int32_t>();
+    if (sensitivity < 0 || sensitivity > static_cast<int32_t>(CrownSensitivity::HIGH)) {
+        NG::ScrollableModelNG::SetDigitalCrownSensitivity(
+            static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
+        return;
+    } else {
+        NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+    }
+#endif
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -102,6 +121,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
+    JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

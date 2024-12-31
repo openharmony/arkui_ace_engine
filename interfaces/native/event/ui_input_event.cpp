@@ -286,9 +286,12 @@ int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent *event)
     return -1;
 }
 
-int32_t GetCKeyEventPressedKeys(
+int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
     const ArkUI_UIInputEvent* event, int32_t* pressedKeyCodes, int32_t* length)
 {
+    if (!event || !pressedKeyCodes || !length) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
     const auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
     if (!keyEvent) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
@@ -300,42 +303,6 @@ int32_t GetCKeyEventPressedKeys(
     *length = keyEvent->keyCodesLength;
     for (int i = 0; i < keyEvent->keyCodesLength; i++) {
         pressedKeyCodes[i] = keyEvent->pressedKeyCodes[i];
-    }
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-int32_t GetCFocusAxisEventPressedKeys(
-    const ArkUI_UIInputEvent* event, int32_t* pressedKeyCodes, int32_t* length)
-{
-    const auto* focusAxisEvent = reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent);
-    if (!focusAxisEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    auto inputLength = *length;
-    if (focusAxisEvent->keyCodesLength > inputLength) {
-        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
-    }
-    *length = focusAxisEvent->keyCodesLength;
-    for (int i = 0; i < focusAxisEvent->keyCodesLength; i++) {
-        pressedKeyCodes[i] = focusAxisEvent->pressedKeyCodes[i];
-    }
-    return ARKUI_ERROR_CODE_NO_ERROR;
-}
-
-int32_t OH_ArkUI_UIInputEvent_GetPressedKeys(
-    const ArkUI_UIInputEvent* event, int32_t* pressedKeyCodes, int32_t* length)
-{
-    if (!event || !pressedKeyCodes || !length) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
-    }
-    std::map<ArkUIEventTypeId, std::function<int64_t(ArkUI_UIInputEvent*, int32_t*, int32_t*)>> eventHandlers = {
-        {C_KEY_EVENT_ID, GetCKeyEventPressedKeys},
-        {C_FOCUS_AXIS_EVENT_ID, GetCFocusAxisEventPressedKeys},
-    };
-    auto iter = eventHandlers.find(event->eventTypeId);
-    if (iter != eventHandlers.end()) {
-        ArkUI_UIInputEvent* inputEvent = const_cast<ArkUI_UIInputEvent*>(event);
-        return iter->second(inputEvent, pressedKeyCodes, length);
     }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }

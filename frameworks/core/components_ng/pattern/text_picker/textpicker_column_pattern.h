@@ -372,10 +372,21 @@ public:
     void ResetOptionPropertyHeight();
     void ResetTotalDelta();
 
+    void SetDisableTextStyleAnimation(bool value)
+    {
+        isDisableTextStyleAnimation_ = value;
+    }
+    void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+    void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
+    void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
+    const Color& GetButtonHoverColor() const;
+    void UpdateTextAreaPadding(const RefPtr<PickerTheme>& pickerTheme,
+        const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
@@ -431,6 +442,8 @@ private:
     Dimension LinearFontSize(const Dimension& startFontSize, const Dimension& endFontSize, double percent);
     void ClearCurrentTextOptions(const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty,
         bool isUpateTextContentOnly, bool isDirectlyClear);
+    void UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty);
 
     RefPtr<TextPickerLayoutProperty> GetParentLayout() const;
     RefPtr<TouchEventImpl> CreateItemTouchEventListener();
@@ -451,10 +464,24 @@ private:
     void UpdateTextAccessibilityProperty(
         int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
 
-    bool isTossing_ = false;
+    void InitTextFadeOut();
+    void UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+
+    bool isFocusColumn_ = false;
+    bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
     Color hoverColor_;
+    Color buttonBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBgColor_ = Color::TRANSPARENT;
+    Color buttonFocusBgColor_ = Color::TRANSPARENT;
+    Color buttonDefaultBorderColor_ = Color::TRANSPARENT;
+    Color buttonFocusBorderColor_ = Color::TRANSPARENT;
+    Color selectorTextFocusColor_ = Color::WHITE;
+    Dimension buttonDefaultBorderWidth_ = 0.0_vp;
+    Dimension buttonFocusBorderWidth_ = 0.0_vp;
+    bool isFirstTimeUpdateButtonProps_ = true;
+    bool useButtonFocusArea_ = false;
     EventCallback EventCallback_;
     EventCallback scrollStopEventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
@@ -515,6 +542,8 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+
+    bool isDisableTextStyleAnimation_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

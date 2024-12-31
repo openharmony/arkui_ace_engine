@@ -243,13 +243,23 @@ bool TextFieldManagerNG::ScrollTextFieldToSafeArea()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto keyboardInset = pipeline->GetSafeAreaManager()->GetKeyboardInset();
-    bool isShowKeyboard = keyboardInset.IsValid();
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(manager, false);
+    auto systemSafeArea = manager->GetSystemSafeArea();
+    uint32_t bottom;
+    if (systemSafeArea.bottom_.IsValid()) {
+        bottom = systemSafeArea.bottom_.start;
+    } else {
+        bottom = pipeline->GetCurrentRootHeight();
+    }
+    auto keyboardHeight = manager->GetRawKeyboardHeight();
+    SafeAreaInsets::Inset keyboardInset = { .start = bottom - keyboardHeight, .end = bottom };
+    bool isShowKeyboard = manager->GetKeyboardInset().IsValid();
     if (isShowKeyboard) {
         auto bottomInset = pipeline->GetSafeArea().bottom_.Combine(keyboardInset);
         CHECK_NULL_RETURN(bottomInset.IsValid(), false);
         return ScrollToSafeAreaHelper(bottomInset, isShowKeyboard);
-    } else if (pipeline->GetSafeAreaManager()->KeyboardSafeAreaEnabled()) {
+    } else if (manager->KeyboardSafeAreaEnabled()) {
         // hide keyboard only scroll when keyboard avoid mode is resize
         return ScrollToSafeAreaHelper({0, 0}, isShowKeyboard);
     }

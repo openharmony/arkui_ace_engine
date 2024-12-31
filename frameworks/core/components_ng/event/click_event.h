@@ -183,8 +183,6 @@ public:
     }
     
 private:
-    void RecordClickEventIfNeed(const GestureEvent& info) const;
-
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;
     RefPtr<ClickEvent> clickAfterEvents_;

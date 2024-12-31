@@ -11,7 +11,7 @@ const MENU_ICON_SIZE: string = '24vp'
 const MENU_MARGIN_V: string = '8vp'
 const MENU_MARGIN_H: string = '12vp'
 const MENU_TITLE_MARGIN_V: string = '10vp'
-const MENU_TITLE_TEXT_FONT_SIZE: string = '16fp'
+const MENU_TITLE_TEXT_FONT_SIZE: string = '16vp'
 const HOVER_TIME: number = 1000; // Hover time: 1000ms
 const MENU_AUTO_DISAPPEAR_TIME: number = 2000; // Menu auto-disappear: 2000ms
 const MENU_MOUSEOUT_DISAPPEAR_TIME: number = 1000; // Menu mouseout disappear: 1000ms
@@ -133,7 +133,7 @@ class ColorGroup {
 }
 const colorMap:Map<Resource,ColorGroup> = new Map<Resource,ColorGroup>([
   [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
-  [buttonHoverBackgroundColor, new ColorGroup('#26000000', '#40FFFFFF')],
+  [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
   [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [closeNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
   [closeHoverBackgroundColor, new ColorGroup('#FA2A2D', '#E64548')],
@@ -586,7 +586,7 @@ struct custombutton {
         })
         .gesture(GestureGroup(GestureMode.Exclusive, LongPressGesture({ repeat: false }).onAction(() => {
           this.onMenuWidthChange()
-          this.isShowMenu = true
+          this.isShowMenu = !this.hideSplit
         }), TapGesture().onAction(() => {
           this.onMaximizeButtonClick()
         })))
@@ -662,6 +662,7 @@ struct custombutton {
         .borderRadius('4vp')
         //右间距在父组件中体现
         // .margin({ right: BUTTON_ELEMENT_MARGIN_HORIZONTAL })
+        .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -682,12 +683,14 @@ struct custombutton {
             }
           })
         })
+
       }.id('containerModalButtonRowId')
       .height('100%')
       .padding({ left: BUTTON_ELEMENT_MARGIN_HORIZONTAL, right: this.buttonRightOffset +'vp'})
       .onAreaChange((oldValue: Area, newValue: Area) => {
         this.onAreaChangeEvent(oldValue, newValue)
       })
+      .gesture(PanGesture())
     }
     .justifyContent(FlexAlign.End)
     .visibility(this.rowVisibility)

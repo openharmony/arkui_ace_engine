@@ -94,6 +94,9 @@ public:
      */
     virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
+    /**
+     * @note should take unconsumed delta into account.
+     */
     virtual bool OutOfBounds() const = 0;
 
     /**
@@ -133,6 +136,9 @@ public:
 
     virtual void Reset() = 0;
     virtual void ResetFooter() = 0;
+
+    virtual bool OverScrollTop() = 0;
+    virtual bool OverScrollBottom() = 0;
 
     // for compatibility
     virtual void UpdateStartIndex() {};

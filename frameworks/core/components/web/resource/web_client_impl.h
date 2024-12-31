@@ -292,6 +292,8 @@ public:
     void OnAccessibilityEvent(int64_t accessibilityId, int32_t eventType) override;
 
     bool IsCurrentFocus() override;
+
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

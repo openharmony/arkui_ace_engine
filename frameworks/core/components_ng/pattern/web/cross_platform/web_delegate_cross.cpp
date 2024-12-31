@@ -122,6 +122,7 @@ constexpr char NTC_PARAM_Y[] = "y";
 
 constexpr char WEB_ATTRIBUTE_ZOOM_ACCESS[] = "zoomAccess";
 constexpr char NTC_ZOOM_ACCESS[] = "zoomAccess";
+constexpr char NTC_INCOGNITO_MODE[] = "incognitoMode";
 constexpr char WEB_ATTRIBUTE_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char NTC_JAVASCRIPT_ACCESS[] = "javascriptAccess";
 constexpr char WEB_ATTRIBUTE_MIN_FONT_SIZE[] = "minFontSize";
@@ -134,6 +135,20 @@ constexpr char WEB_ATTRIBUTE_BACKGROUND_COLOR[] = "backgroundColor";
 constexpr char NTC_BACKGROUND_COLOR[] = "backgroundColor";
 constexpr char WEB_ATTRIBUTE_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
 constexpr char NTC_MEDIA_PLAY_GESTURE_ACCESS[] = "mediaPlayGestureAccess";
+constexpr char WEB_ATTRIBUTE_BLOCK_NETWORK[] = "blockNetwork";
+constexpr char NTC_BLOCK_NETWORK[] = "blockNetwork";
+constexpr char WEB_ATTRIBUTE_MIXED_MODE[] = "mixedMode";
+constexpr char NTC_MIXED_MODE[] = "mixedMode";
+constexpr char WEB_ATTRIBUTE_ONLINE_IMAGE_ACCESS[] = "onlineImageAccess";
+constexpr char NTC_ONLINE_IMAGE_ACCESS[] = "onlineImageAccess";
+constexpr char WEB_ATTRIBUTE_GEOLOCATION_ACCESS[] = "geolocationAccess";
+constexpr char NTC_GEOLOCATION_ACCESS[] = "geolocationAccess";
+constexpr char WEB_ATTRIBUTE_DOM_STORAGE_ACCESS[] = "domStorageAccess";
+constexpr char NTC_DOM_STORAGE_ACCESS[] = "domStorageAccess";
+constexpr char WEB_CACHE_MODE[] = "cacheMode";
+constexpr char NTC_CACHE_MODE[] = "cacheMode";
+constexpr char WEB_IMAGE_ACCESS[] = "imageAccess";
+constexpr char NTC_IMAGE_ACCESS[] = "imageAccess";
 
 const char WEB_PARAM_NONE[] = "";
 const char WEB_PARAM_AND[] = "#HWJS-&-#";
@@ -688,8 +703,9 @@ void WebDelegateCross::CreatePluginResource(
                     << WEB_PARAM_EQUALS << position.GetX() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_TOP
                     << WEB_PARAM_EQUALS << position.GetY() * context->GetViewScale() << WEB_PARAM_AND << NTC_PARAM_SRC
                     << WEB_PARAM_EQUALS << webPattern->GetWebSrc().value_or("") << WEB_PARAM_AND << NTC_PARAM_PAGE_URL
-                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT << WEB_PARAM_EQUALS
-                    << webPattern->GetRichTextInit();
+                    << WEB_PARAM_EQUALS << pageUrl << WEB_PARAM_AND << NTC_PARAM_RICH_TEXT_INIT
+                    << WEB_PARAM_EQUALS << webPattern->GetRichTextInit() << WEB_PARAM_AND << NTC_INCOGNITO_MODE
+                    << WEB_PARAM_EQUALS << webPattern->GetIncognitoMode();
 
         std::string param = paramStream.str();
         webDelegate->id_ = resRegister->CreateResource(WEB_CREATE, param);
@@ -1535,9 +1551,36 @@ void WebDelegateCross::UpdateJavaScriptEnabled(const bool& isJsEnabled)
 }
 
 void WebDelegateCross::UpdateAllowFileAccess(const bool& isFileAccessEnabled) {}
-void WebDelegateCross::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled) {}
-void WebDelegateCross::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled) {}
-void WebDelegateCross::UpdateMixedContentMode(const MixedModeContent& mixedMode) {}
+
+void WebDelegateCross::UpdateBlockNetworkImage(const bool& onLineImageAccessEnabled)
+{
+    hash_ = MakeResourceHash();
+    updateBlockNetworkImageMethod_ = MakeMethodHash(WEB_ATTRIBUTE_ONLINE_IMAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_ONLINE_IMAGE_ACCESS << WEB_PARAM_EQUALS << onLineImageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateBlockNetworkImageMethod_, param, nullptr);
+}
+
+void WebDelegateCross::UpdateLoadsImagesAutomatically(const bool& isImageAccessEnabled)
+{
+    hash_ = MakeResourceHash();
+    updateLoadsImagesAutomaticallyMethod_ = MakeMethodHash(WEB_IMAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_IMAGE_ACCESS << WEB_PARAM_EQUALS << isImageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateLoadsImagesAutomaticallyMethod_, param, nullptr);
+}
+
+void WebDelegateCross::UpdateMixedContentMode(const MixedModeContent& mixedMode)
+{
+    hash_ = MakeResourceHash();
+    onUpdateMixedContentModeMethod_ = MakeMethodHash(WEB_ATTRIBUTE_MIXED_MODE);
+    std::stringstream paramStream;
+    paramStream << NTC_MIXED_MODE << WEB_PARAM_EQUALS << mixedMode;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(onUpdateMixedContentModeMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateSupportZoom(const bool& isZoomAccessEnabled)
 {
@@ -1550,13 +1593,34 @@ void WebDelegateCross::UpdateSupportZoom(const bool& isZoomAccessEnabled)
 }
 
 void WebDelegateCross::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateDomStorageEnabledMethod_ = MakeMethodHash(WEB_ATTRIBUTE_DOM_STORAGE_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_DOM_STORAGE_ACCESS << WEB_PARAM_EQUALS << isDomStorageAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateDomStorageEnabledMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled)
-{}
+{
+    hash_ = MakeResourceHash();
+    UpdateGeolocationEnabledMethod_ = MakeMethodHash(WEB_ATTRIBUTE_GEOLOCATION_ACCESS);
+    std::stringstream paramStream;
+    paramStream << NTC_GEOLOCATION_ACCESS << WEB_PARAM_EQUALS << isGeolocationAccessEnabled;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(UpdateGeolocationEnabledMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateCacheMode(const WebCacheMode& mode)
-{}
+{
+    hash_ = MakeResourceHash();
+    updateCacheModeMethod_ = MakeMethodHash(WEB_CACHE_MODE);
+    std::stringstream paramStream;
+    paramStream << NTC_CACHE_MODE << WEB_PARAM_EQUALS << mode;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(updateCacheModeMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateDarkMode(const WebDarkMode& mode)
 {}
@@ -1642,7 +1706,14 @@ void WebDelegateCross::UpdateMinLogicalFontSize(int32_t minLogicalFontSize)
 {}
 
 void WebDelegateCross::UpdateBlockNetwork(bool isNetworkBlocked)
-{}
+{
+    hash_ = MakeResourceHash();
+    onBlockNetworkUpdateMethod_ = MakeMethodHash(WEB_ATTRIBUTE_BLOCK_NETWORK);
+    std::stringstream paramStream;
+    paramStream << NTC_BLOCK_NETWORK << WEB_PARAM_EQUALS << isNetworkBlocked;
+    std::string param = paramStream.str();
+    CallResRegisterMethod(onBlockNetworkUpdateMethod_, param, nullptr);
+}
 
 void WebDelegateCross::UpdateHorizontalScrollBarAccess(bool isHorizontalScrollBarAccessEnabled)
 {

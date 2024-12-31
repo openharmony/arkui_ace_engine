@@ -195,70 +195,36 @@ void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, cons
     }
 }
 
-void TestNG::DragStart(const RefPtr<FrameNode>& frameNode, Offset startOffset)
+AssertionResult TestNG::IsExist(const RefPtr<FrameNode>& frameNode, int32_t index)
 {
-    dragNode_ = FindScrollableNode(frameNode);
-    GestureEvent gesture;
-    dragInfo_ = gesture;
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    dragInfo_.SetSourceTool(SourceTool::FINGER);
-    dragInfo_.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    dragInfo_.SetGlobalPoint(Point() + startOffset);
-    dragInfo_.SetGlobalLocation(startOffset);
-    dragInfo_.SetLocalLocation(startOffset);
-    scrollable->HandleTouchDown();
-    scrollable->isDragging_ = true;
-    scrollable->HandleDragStart(dragInfo_);
-}
-
-void TestNG::DragUpdate(float delta)
-{
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    double velocity = delta > 0 ? 200 : -200;
-    dragInfo_.SetMainVelocity(velocity);
-    dragInfo_.SetMainDelta(delta);
-    dragInfo_.SetGlobalPoint(Point(0, delta));
-    dragInfo_.SetGlobalLocation(Offset(0, delta));
-    dragInfo_.SetLocalLocation(Offset(0, delta));
-    scrollable->HandleDragUpdate(dragInfo_);
-    FlushUITasks();
-}
-
-void TestNG::DragEnd(float velocityDelta)
-{
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
-    dragInfo_.SetMainDelta(0);
-    dragInfo_.SetMainVelocity(velocity);
-    dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
-    dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
-    dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
-    scrollable->HandleTouchUp();
-    scrollable->HandleDragEnd(dragInfo_);
-    scrollable->isDragging_ = false;
-    FlushUITasks();
-    dragNode_ = nullptr;
-}
-
-void TestNG::DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, float dragDelta, float velocityDelta)
-{
-    DragStart(frameNode, startOffset);
-    DragUpdate(dragDelta);
-    DragEnd(velocityDelta);
-}
-
-RefPtr<FrameNode> TestNG::FindScrollableNode(const RefPtr<FrameNode>& frameNode)
-{
-    auto scrollableNode = frameNode;
-    while (scrollableNode) {
-        if (AceType::InstanceOf<ScrollablePattern>(scrollableNode->GetPattern())) {
-            return scrollableNode;
-        }
-        scrollableNode = AceType::DynamicCast<FrameNode>(scrollableNode->GetParent());
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (childNode) {
+        return AssertionSuccess();
     }
-    return scrollableNode;
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionFailure();
+    }
+    return AssertionSuccess();
 }
 } // namespace OHOS::Ace::NG

@@ -15,7 +15,9 @@
 
 #include "core/components_ng/pattern/security_component/security_component_layout_algorithm.h"
 
+#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "unicode/uchar.h"
 
@@ -121,12 +123,6 @@ void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayou
         property->GetBackgroundBottomPadding().has_value(), size, borderWidth);
 
     size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
-    if (!property->GetTextIconSpace().has_value() ||
-        LessNotEqual(property->GetTextIconSpace().value().ConvertToPx(), 0.0)) {
-        size = theme->GetTextIconSpace().ConvertToPx();
-    } else {
-        size = property->GetTextIconSpace().value().ConvertToPx();
-    }
     middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
 }
 
@@ -315,18 +311,21 @@ void SecurityComponentLayoutAlgorithm::MeasureIntegralSize()
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
-    OffsetF& offsetText)
+    OffsetF& offsetText, SizeF& childSize)
 {
     offsetText = offsetIcon + OffsetF(0.0, icon_.height_ + middle_.height_);
     if (icon_.width_ > text_.width_) {
         offsetText += OffsetF((icon_.width_ - text_.width_) / HALF, 0.0);
+        childSize += SizeF(icon_.width_, 0.0);
     } else {
         offsetIcon += OffsetF((text_.width_ - icon_.width_) / HALF, 0.0);
+        childSize += SizeF(text_.width_, 0.0);
     }
+    childSize += SizeF(0.0, icon_.height_ + middle_.height_ + text_.height_);
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* layoutWrapper,
-    OffsetF& offsetIcon, OffsetF& offsetText)
+    OffsetF& offsetIcon, OffsetF& offsetText, SizeF& childSize)
 {
     if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
         offsetIcon = offsetText +
@@ -338,21 +337,72 @@ void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* lay
     if (icon_.height_ > text_.height_) {
         offsetText +=
             OffsetF(0.0, (icon_.height_ - text_.height_) / HALF);
+        childSize += SizeF(0.0, icon_.height_);
     } else {
         offsetIcon +=
             OffsetF(0.0, (text_.height_ - icon_.height_) / HALF);
+        childSize += SizeF(0.0, text_.height_);
     }
+    childSize += SizeF(icon_.width_ + middle_.width_ + text_.width_, 0.0);
+}
+
+Alignment SecurityComponentLayoutAlgorithm::ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align)
+{
+    if (GetTextDirection(layoutWrapper) != TextDirection::RTL) {
+        return align;
+    }
+    if (align == Alignment::TOP_LEFT) {
+        return Alignment::TOP_RIGHT;
+    }
+    if (align == Alignment::CENTER_LEFT) {
+        return Alignment::CENTER_RIGHT;
+    }
+    if (align == Alignment::BOTTOM_LEFT) {
+        return Alignment::BOTTOM_RIGHT;
+    }
+    if (align == Alignment::TOP_RIGHT) {
+        return Alignment::TOP_LEFT;
+    }
+    if (align == Alignment::CENTER_RIGHT) {
+        return Alignment::CENTER_LEFT;
+    }
+    if (align == Alignment::BOTTOM_RIGHT) {
+        return Alignment::BOTTOM_LEFT;
+    }
+    return align;
 }
 
 void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    OffsetF offsetIcon = OffsetF(left_.width_, top_.height_);
-    OffsetF offsetText = OffsetF(left_.width_, top_.height_);
+    OffsetF offsetIcon = OffsetF(0.0, 0.0);
+    OffsetF offsetText = OffsetF(0.0, 0.0);
+    SizeF childSize = SizeF(0.0, 0.0);
     if (isVertical_) {
-        UpdateVerticalOffset(offsetIcon, offsetText);
+        UpdateVerticalOffset(offsetIcon, offsetText, childSize);
     } else {
-        UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
+        UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText, childSize);
+    }
+    auto property = AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(property);
+    if (property->GetAlignment().has_value()) {
+        auto left = LessNotEqual(left_.width_, left_.defaultWidth_) ? left_.width_ : left_.defaultWidth_;
+        auto right = LessNotEqual(right_.width_, right_.defaultWidth_) ? right_.width_ : right_.defaultWidth_;
+        auto top = LessNotEqual(top_.height_, top_.defaultHeight_) ? top_.height_ : top_.defaultHeight_;
+        auto bottom = LessNotEqual(bottom_.height_, bottom_.defaultHeight_) ? bottom_.height_ : bottom_.defaultHeight_;
+        offsetIcon += OffsetF(left, top);
+        offsetText += OffsetF(left, top);
+        auto geometryNode = layoutWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frameSize = geometryNode->GetFrameSize();
+        frameSize -= SizeF(left + right, top + bottom);
+        auto alignment = ParseAlignmentRTL(layoutWrapper, property->GetAlignment().value());
+        auto translate = Alignment::GetAlignPosition(frameSize, childSize, alignment);
+        offsetIcon += translate;
+        offsetText += translate;
+    } else {
+        offsetIcon += OffsetF(left_.width_, top_.height_);
+        offsetText += OffsetF(left_.width_, top_.height_);
     }
 
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
@@ -703,8 +753,18 @@ bool SecurityComponentLayoutAlgorithm::IsTextOutOfOneColumn(RefPtr<FrameNode>& f
     return false;
 }
 
+bool SecurityComponentLayoutAlgorithm::GetMaxLineLimitExceededFlag(std::optional<SizeF>& currentTextSize)
+{
+    auto res = text_.DidExceedMaxLines(currentTextSize);
+    if (res) {
+        SC_LOG_INFO("MaxLine limit exceeded.");
+        return true;
+    }
+    return false;
+}
+
 bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
-    LayoutWrapper* layoutWrapper)
+    LayoutWrapper* layoutWrapper, std::optional<SizeF>& currentTextSize)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto frameNode = layoutWrapper->GetHostNode();
@@ -714,7 +774,6 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty_, false);
 
-    std::optional<SizeF> currentTextSize;
     auto res = text_.GetCurrentTextSize(currentTextSize, currentFontSize_);
     if (!res) {
         return false;
@@ -740,6 +799,18 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     return res;
 }
 
+void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto securityComponentLayoutProperty =
+        AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(securityComponentLayoutProperty);
+    std::optional<SizeF> currentTextSize;
+    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
+        layoutWrapper, currentTextSize));
+    securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
+}
+
 void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -755,6 +826,13 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
+
+    // has value and less equal 0.0
+    if (LessOrEqual(constraint_->selfIdealSize.Width().value_or(1.0), 0.0) &&
+        LessOrEqual(constraint_->selfIdealSize.Height().value_or(1.0), 0.0)) {
+        return;
+    }
+
     isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
         SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
     isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(
@@ -790,8 +868,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
-    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
-        layoutWrapper));
+    UpdateTextFlags(layoutWrapper);
 }
 
 TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* layoutWrapper)

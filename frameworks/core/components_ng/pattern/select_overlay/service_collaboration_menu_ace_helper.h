@@ -41,7 +41,6 @@ public:
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
-    std::string GetIconPath(const std::string& abilityType);
     uint32_t GetSymbolId(const std::string& abilityType);
     RefPtr<FrameNode> CreateMainMenuItem(
         const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon);
@@ -54,6 +53,11 @@ public:
     RefPtr<FrameNode> CreateSubDeviceMenuOnCol(const RefPtr<FrameNode>& column, const RefPtr<FrameNode>& menuWrapper);
     void SubMeunMountToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
         std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    void AddHoverEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+        std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    void AddClickEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+        std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
+    
 
     bool subMenuIsHover_ = false;
     bool subMenuIsShow_ = false;

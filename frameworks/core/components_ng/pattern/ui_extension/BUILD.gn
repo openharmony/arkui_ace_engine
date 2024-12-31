@@ -18,6 +18,8 @@ build_component_ng("ui_extension_pattern_ng") {
   sources = [
     "accessibility_session_adapter_isolated_component.cpp",
     "accessibility_session_adapter_ui_extension.cpp",
+    "dynamic_component/dynamic_component_manager.cpp",
+    "dynamic_node.cpp",
     "dynamic_pattern.cpp",
     "isolated_pattern.cpp",
     "modal_ui_extension_proxy_impl.cpp",

@@ -132,6 +132,54 @@ void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemColorModeChangeEvent(node->uiNodeHandle);
 }
 
+int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onDrawCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onLayoutCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
     ArkUI_NodeHandle node, void* userData, void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData))
 {
@@ -366,6 +414,17 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
         abort();
     }
     return handle->nodeCount;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node)
+{
+    CHECK_NULL_RETURN(id, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeByKey(id);
+    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *node = GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

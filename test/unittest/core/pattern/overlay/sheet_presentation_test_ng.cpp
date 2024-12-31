@@ -1127,22 +1127,139 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint001, TestSize.Level1
 {
     SheetPresentationTestNg::SetUpTestCase();
     auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 301, AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
     EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
 
     algorithm->sheetStyle_.isTitleBuilder = true;
     EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_CENTER);
     EXPECT_NE(algorithm->sheetType_, SheetType::SHEET_POPUP);
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
 
     algorithm->sheetType_ = SheetType::SHEET_CENTER;
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
     algorithm->sheetType_ = SheetType::SHEET_POPUP;
-    algorithm->CreateSheetChildConstraint(sheetPattern->GetLayoutProperty<SheetPresentationProperty>());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateSheetChildConstraint002
+ * @tc.desc: Branch: if ((sheetStyle_.isTitleBuilder.has_value()) && ((sheetType_ == SheetType::SHEET_CENTER) ||
+ *                      (sheetType_ == SheetType::SHEET_POPUP)))
+ *           Condition: sheetStyle_.isTitleBuilder.has_value() = true && sheetType_ == SheetType::SHEET_CENTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_CENTER;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheet algorithm.
+     * @tc.expected: sheet title has value.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+
+    /**
+     * @tc.steps: step3. set sheetType is SHEET_CENTER and sheetStyle_.isTitleBuilder is true and sheetHeight_ is 1000.
+     */
+    algorithm->sheetStyle_.isTitleBuilder = true;
+    algorithm->sheetType_ = SheetType::SHEET_CENTER;
+    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetHeight_ = 1000.0f;
+
+    /**
+     * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
+     * @tc.expected: childConstraint.maxSize.Height() is 900.
+     */
+    auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
+    ASSERT_NE(operationNode, nullptr);
+    auto titleGeometryNode = operationNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto childConstraint = algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    EXPECT_EQ(childConstraint.maxSize.Height(), 900);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CreateSheetChildConstraint003
+ * @tc.desc: Branch: if (sheetType_ == SheetType::SHEET_POPUP)
+ *           Condition: sheetStyle_.isTitleBuilder.has_value() = true && sheetType_ == SheetType::SHEET_POPUP
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet node.
+     */
+    SheetPresentationTestNg::SetUpTestCase();
+    auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto callback = [](const std::string&) {};
+    SheetStyle style;
+    style.isTitleBuilder = true;
+    style.sheetType = SheetType::SHEET_POPUP;
+    style.sheetTitle = MESSAGE;
+    style.showCloseIcon = false;
+    auto sheetNode = SheetView::CreateSheetPage(0, "", builder, builder, std::move(callback), style);
+    ASSERT_NE(sheetNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create sheet algorithm.
+     * @tc.expected: sheet title has value.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
+    EXPECT_FALSE(algorithm->sheetStyle_.isTitleBuilder.has_value());
+    algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+
+    /**
+     * @tc.steps: step3. set sheetType is SHEET_CENTER and sheetStyle_.isTitleBuilder is true and sheetHeight_ is 1000.
+     */
+    algorithm->sheetStyle_.isTitleBuilder = true;
+    algorithm->sheetType_ = SheetType::SHEET_POPUP;
+    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetHeight_ = 1000.0f;
+
+    /**
+     * @tc.steps: step4. set title height is 100 and excute CreateSheetChildConstraint function.
+     * @tc.expected: childConstraint.maxSize.Height() is (900 - SHEET_ARROW_HEIGHT.ConvertToPx()).
+     */
+    auto operationNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(0));
+    ASSERT_NE(operationNode, nullptr);
+    auto titleGeometryNode = operationNode->GetGeometryNode();
+    ASSERT_NE(titleGeometryNode, nullptr);
+    titleGeometryNode->SetFrameSize(SizeF(100.0f, 100.0f));
+    auto childConstraint = algorithm->CreateSheetChildConstraint(
+        sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
+    EXPECT_EQ(childConstraint.maxSize.Height(), 900 - SHEET_ARROW_HEIGHT.ConvertToPx());
     SheetPresentationTestNg::TearDownTestCase();
 }
 
@@ -2404,5 +2521,174 @@ HWTEST_F(SheetPresentationTestNg, UpdateMaskBackgroundColor002, TestSize.Level1)
 
     SheetPresentationTestNg::TearDownTestCase();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(originApiVersion);
+}
+
+/**
+ * @tc.name: CalculateSheetRadius001
+ * @tc.desc: Test bindSheet supports configuring corner radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetRadius_ = 32.0_vp;
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+    BorderRadiusProperty radius(Dimension(100.0));
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.radius = radius;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->ClipSheetNode();
+    auto renderContext = sheetNode->GetRenderContext();
+    radius.radiusBottomLeft = 1.0_px;
+    radius.radiusBottomRight = 1.0_px;
+    EXPECT_EQ(renderContext->GetBorderRadius(), radius);
+
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetRadius002
+ * @tc.desc: Test bindSheet supports configuring corner radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius002, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetRadius_ = 32.0_vp;
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    BorderRadiusProperty sheetRadius(sheetTheme->GetSheetRadius());
+    SheetStyle sheetStyle;
+    sheetStyle.radius->SetRadius(Dimension(100.0));
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+
+    geometryNode->SetFrameSize(SizeF(0, 0));
+    sheetPattern->CalculateSheetRadius(sheetRadius);
+    BorderRadiusProperty radius(sheetTheme->GetSheetRadius());
+    EXPECT_EQ(sheetRadius, radius);
+
+    sheetRadius.SetRadius(sheetTheme->GetSheetRadius());
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+    sheetPattern->CalculateSheetRadius(sheetRadius);
+    radius.SetRadius(Dimension(100.0));
+    EXPECT_EQ(sheetRadius, radius);
+
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetRadius003
+ * @tc.desc: Test bindSheet supports configuring corner radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius003, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetRadius_ = 32.0_vp;
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    std::optional<Dimension> sheetStyleRadius;
+
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+    std::optional<Dimension> sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    std::optional<Dimension> radius = sheetTheme->GetSheetRadius();
+    EXPECT_EQ(sheetRadius, radius);
+
+    geometryNode->SetFrameSize(SizeF(20, 30));
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = Dimension(10.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    sheetStyleRadius = Dimension(-100.0);
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = sheetTheme->GetSheetRadius();
+    EXPECT_EQ(sheetRadius, radius);
+
+    geometryNode->SetFrameSize(SizeF(20, 30));
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = Dimension(10.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetRadius004
+ * @tc.desc: Test bindSheet supports configuring corner radius.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, CalculateSheetRadius004, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    sheetTheme->sheetRadius_ = 32.0_vp;
+    SheetPresentationTestNg::SetSheetTheme(sheetTheme);
+    std::optional<Dimension> sheetStyleRadius;
+
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+    std::optional<Dimension> sheetRadius = sheetTheme->GetSheetRadius();
+    sheetStyleRadius = Dimension(100.0);
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    std::optional<Dimension> radius = Dimension(100.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    sheetStyleRadius = Dimension(0.2, DimensionUnit::PERCENT);
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = Dimension(200.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    geometryNode->SetFrameSize(SizeF(100, 150));
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetStyleRadius = Dimension(100.0);
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = Dimension(50.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    sheetStyleRadius = Dimension(1, DimensionUnit::PERCENT);
+    sheetRadius = sheetTheme->GetSheetRadius();
+    sheetPattern->CalculateAloneSheetRadius(sheetRadius, sheetStyleRadius);
+    radius = Dimension(50.0);
+    EXPECT_EQ(sheetRadius, radius);
+
+    SheetPresentationTestNg::TearDownTestCase();
 }
 } // namespace OHOS::Ace::NG

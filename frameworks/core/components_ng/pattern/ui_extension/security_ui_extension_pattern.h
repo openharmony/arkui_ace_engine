@@ -70,6 +70,8 @@ public:
     int32_t GetNodeId();
     int32_t GetInstanceId();
     void SetEventProxyFlag(int32_t flag);
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnExtensionDetachToDisplay();
 
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -89,6 +91,8 @@ public:
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void FireOnErrorCallback(
         int32_t code, const std::string& name, const std::string& message) override;
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();

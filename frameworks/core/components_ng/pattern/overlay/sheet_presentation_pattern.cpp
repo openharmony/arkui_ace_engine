@@ -48,6 +48,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #endif
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -511,6 +512,30 @@ void SheetPresentationPattern::InitOnkeyEvent(const RefPtr<FocusHub>& focusHub)
     });
 }
 
+void SheetPresentationPattern::SetShadowStyle(bool isFocused)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetStyle.shadow.has_value()) {
+        return;
+    }
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
+    auto style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfig());
+    if (!isFocused) {
+        style = static_cast<ShadowStyle>(sheetTheme->GetSheetShadowConfigS());
+    }
+    auto shadow = GetShadowFromTheme(style);
+    renderContext->UpdateBackShadow(shadow);
+}
+
 void SheetPresentationPattern::HandleFocusEvent()
 {
     auto host = GetHost();
@@ -518,12 +543,14 @@ void SheetPresentationPattern::HandleFocusEvent()
     auto sheetId = host->GetId();
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet get focus, and id is : %{public}d", sheetId);
     SheetManager::GetInstance().SetFocusSheetId(sheetId);
+    SetShadowStyle(true);
 }
 
 void SheetPresentationPattern::HandleBlurEvent()
 {
     TAG_LOGI(AceLogTag::ACE_SHEET, "Sheet lost focus");
     SheetManager::GetInstance().SetFocusSheetId(std::nullopt);
+    SetShadowStyle(false);
 }
 
 void SheetPresentationPattern::HandleDragStart()
@@ -1127,23 +1154,6 @@ void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float drag
     CHECK_NULL_VOID(overlayManager);
     overlayManager->ModalPageLostFocus(GetHost());
     if (!isTransitionIn) {
-        const auto& layoutProp = GetLayoutProperty<SheetPresentationProperty>();
-        CHECK_NULL_VOID(layoutProp);
-        auto showInPage = layoutProp->GetSheetStyleValue(SheetStyle()).showInPage.value_or(false);
-        if (showInPage) {
-            //set focus null back to page when sheet is going to disappear
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            auto sheetWrapper = host->GetParent();
-            CHECK_NULL_VOID(sheetWrapper);
-            auto node = AceType::DynamicCast<FrameNode>(sheetWrapper->GetParent());
-            CHECK_NULL_VOID(node);
-            if (node->GetTag() == V2::PAGE_ETS_TAG) {
-                auto focusView = node->GetPattern<FocusView>();
-                CHECK_NULL_VOID(focusView);
-                focusView->SetViewRootScope(nullptr);
-            }
-        }
         OnWillDisappear();
     }
     auto sheetType = GetSheetType();
@@ -1528,8 +1538,9 @@ void SheetPresentationPattern::CheckSheetHeightChange()
                 CHECK_NULL_VOID(renderContext);
                 renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
+            } else {
+                overlayManager->PlaySheetTransition(host, true, false);
             }
-            overlayManager->PlaySheetTransition(host, true, false);
             auto maskNode = overlayManager->GetSheetMask(host);
             if (maskNode) {
                 UpdateMaskBackgroundColorRender();
@@ -1591,7 +1602,9 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
                 break;
             }
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM:
+            [[fallthrough]];
         case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() <= 0) {
                 height = InitialSingleGearHeight(sheetStyle);
@@ -1981,32 +1994,32 @@ void SheetPresentationPattern::ClipSheetNode()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto sheetRadius = sheetTheme->GetSheetRadius();
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
     ResetClipShape();
     auto sheetType = GetSheetType();
-    float half = 0.5f;
-    if (sheetSize.Width() * half < sheetRadius.ConvertToPx()) {
-        sheetRadius = Dimension(sheetSize.Width() * half);
+    BorderRadiusProperty borderRadius(sheetTheme->GetSheetRadius());
+    CalculateSheetRadius(borderRadius);
+    if (IsSheetBottom()) {
+        // set 1px for avoiding doudble radius black lines.
+        borderRadius.radiusBottomLeft = 1.0_px;
+        borderRadius.radiusBottomRight = 1.0_px;
+    }
+    renderContext->UpdateBorderRadius(borderRadius);
+    if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
+        renderContext->UpdateOuterBorderRadius(borderRadius);
     }
     if (sheetType == SheetType::SHEET_POPUP) {
+        std::string clipPath;
+        clipPath = GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         auto path = AceType::MakeRefPtr<Path>();
-        auto clipPath = GetPopupStyleSheetClipPath(sheetSize, sheetRadius);
         path->SetValue(clipPath);
         path->SetBasicShapeType(BasicShapeType::PATH);
         renderContext->UpdateClipShape(path);
-        return;
     }
-    BorderRadiusProperty borderRadius;
-    if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
-        borderRadius.SetRadius(sheetRadius);
-    }
-    if (IsSheetBottomStyle()) {
-        // set 1px for avoiding doudble radius black lines.
-        borderRadius = BorderRadiusProperty(sheetRadius, sheetRadius, 1.0_px, 1.0_px);
-    }
-    renderContext->UpdateBorderRadius(borderRadius);
 }
 
 bool SheetPresentationPattern::IsWindowSizeChangedWithUndefinedReason(
@@ -2182,29 +2195,72 @@ void SheetPresentationPattern::SetColumnMinSize(bool reset)
     props->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(builderHeight_)));
 }
 
-std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius)
+void SheetPresentationPattern::CalculateSheetRadius(BorderRadiusProperty& sheetRadius)
 {
-    std::string path = MoveTo(0.0f, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius.ConvertToPx());
-    path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0, sheetRadius.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx());
-    path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetSize = geometryNode->GetFrameSize();
+    auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    if (sheetSize.IsPositive()) {
+        CalculateAloneSheetRadius(sheetRadius.radiusTopLeft, sheetStyle.radius->radiusTopLeft);
+        CalculateAloneSheetRadius(sheetRadius.radiusTopRight, sheetStyle.radius->radiusTopRight);
+        CalculateAloneSheetRadius(sheetRadius.radiusBottomLeft, sheetStyle.radius->radiusBottomLeft);
+        CalculateAloneSheetRadius(sheetRadius.radiusBottomRight, sheetStyle.radius->radiusBottomRight);
+    }
+}
+
+void SheetPresentationPattern::CalculateAloneSheetRadius(
+    std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto sheetSize = geometryNode->GetFrameSize();
+    float half = 0.5f;
+    if (sheetStyleRadius.has_value() && GreatOrEqual(sheetStyleRadius->Value(), 0.0f)) {
+        if (sheetStyleRadius->Unit() == DimensionUnit::PERCENT) {
+            sheetRadius = Dimension(sheetStyleRadius->Value() * sheetSize.Width());
+        } else {
+            sheetRadius = sheetStyleRadius;
+        }
+    }
+    // The maximum value of radius is half the width of the page.
+    if (sheetSize.Width() * half < sheetRadius->ConvertToPx()) {
+        sheetRadius = Dimension(sheetSize.Width() * half);
+    }
+}
+
+std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(
+    const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
+{
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    std::string path = MoveTo(0.0f, SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopLeft);
+    path += ArcTo(radiusTopLeft, radiusTopLeft, 0.0f, 0, radiusTopLeft, SHEET_ARROW_HEIGHT.ConvertToPx());
+    path +=
+        LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
     path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx()); // P2
     path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
         arrowOffset_.GetX() + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
         SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx()); // P4
-    path += LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
-        SHEET_ARROW_HEIGHT.ConvertToPx()); // P5
-    path += LineTo(sheetSize.Width() - sheetRadius.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx());
-    path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0, sheetSize.Width(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius.ConvertToPx());
-    path += LineTo(sheetSize.Width(), sheetSize.Height() - sheetRadius.ConvertToPx());
-    path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0,
-        sheetSize.Width() - sheetRadius.ConvertToPx(), sheetSize.Height());
-    path += LineTo(sheetRadius.ConvertToPx(), sheetSize.Height());
-    path += ArcTo(sheetRadius.ConvertToPx(), sheetRadius.ConvertToPx(), 0.0f, 0, 0.0f,
-        sheetSize.Height() - sheetRadius.ConvertToPx());
+    path +=
+        LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx()); // P5
+    path += LineTo(sheetSize.Width() - radiusTopRight, SHEET_ARROW_HEIGHT.ConvertToPx());
+    path += ArcTo(
+        radiusTopRight, radiusTopRight, 0.0f, 0, sheetSize.Width(), SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopRight);
+    path += LineTo(sheetSize.Width(), sheetSize.Height() - radiusBottomRight);
+    path +=
+        ArcTo(radiusBottomRight, radiusBottomRight, 0.0f, 0, sheetSize.Width() - radiusBottomRight, sheetSize.Height());
+    path += LineTo(radiusBottomLeft, sheetSize.Height());
+    path += ArcTo(radiusBottomLeft, radiusBottomLeft, 0.0f, 0, 0.0f, sheetSize.Height() - radiusBottomLeft);
     return path + "Z";
 }
 
@@ -2707,7 +2763,6 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
         BorderWidthProperty outBorderWidth;
         BorderColorProperty borderColor;
         BorderColorProperty outBorderColor;
-        BorderRadiusProperty borderraduis;
         borderWidth.SetBorderWidth(0.0_vp);
         outBorderWidth.SetBorderWidth(0.0_vp);
         if (sheetType != SheetType::SHEET_POPUP) {
@@ -2716,12 +2771,9 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
             renderContext->UpdateOuterBorderColor(outBorderColor);
             renderContext->UpdateBorderColor(borderColor);
             if (sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
-                borderraduis.SetRadius(sheetTheme->GetSheetRadius());
                 borderWidth.SetBorderWidth(sheetTheme->GetSheetInnerBorderWidth());
                 outBorderWidth.SetBorderWidth(sheetTheme->GetSheetOuterBorderWidth());
             } else {
-                borderraduis.radiusTopLeft = sheetTheme->GetSheetRadius();
-                borderraduis.radiusTopRight = sheetTheme->GetSheetRadius();
                 borderWidth.leftDimen = sheetTheme->GetSheetInnerBorderWidth();
                 borderWidth.topDimen = sheetTheme->GetSheetInnerBorderWidth();
                 borderWidth.rightDimen = sheetTheme->GetSheetInnerBorderWidth();
@@ -2734,8 +2786,6 @@ void SheetPresentationPattern::SetSheetOuterBorderWidth(
         renderContext->UpdateBorderWidth(borderWidth);
         layoutProperty->UpdateOuterBorderWidth(outBorderWidth);
         renderContext->UpdateOuterBorderWidth(outBorderWidth);
-        renderContext->UpdateOuterBorderRadius(borderraduis);
-        renderContext->UpdateBorderRadius(borderraduis);
     }
 }
 
@@ -2977,6 +3027,22 @@ Rect SheetPresentationPattern::GetFoldScreenRect() const
         return Rect();
     }
     return currentFoldCreaseRegion_.front();
+}
+
+Shadow SheetPresentationPattern::GetShadowFromTheme(ShadowStyle shadowStyle)
+{
+    auto colorMode = SystemProperties::GetColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return Shadow();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, Shadow());
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, Shadow());
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, Shadow());
+    auto shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return shadow;
 }
 
 void SheetPresentationPattern::FireHoverModeChangeCallback()

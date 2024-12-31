@@ -56,7 +56,7 @@ bool NeedAvoidMenuBar(PipelineContext* pipeline)
 bool NeedAvoidContainerModal(
     PipelineContext* pipeline, const RefPtr<TitleBarNode>& titleBarNode)
 {
-    return pipeline && !pipeline->GetContainerCustomTitleVisible() &&
+    return NavigationTitleUtil::NeedAvoidContainerModal(pipeline) &&
         titleBarNode && titleBarNode->NeedAvoidContainerModal();
 }
 } // namespace
@@ -598,6 +598,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titleBarGeometryNode = titleBarNode->GetGeometryNode();
     CHECK_NULL_VOID(titleBarGeometryNode);
     auto titleBarHeight = titleBarGeometryNode->GetFrameSize().Height();
+    CHECK_NULL_VOID(geometryNode);
 
     auto titleHeight = geometryNode->GetFrameSize().Height();
     float offsetY = 0.0f;
@@ -752,6 +753,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto titlePattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
     if (isCustom) {
+        isInitialTitle_ = false;
         // customBuilder and NavigationCustomTitle offset is (0.0f, menuHeight_)
         auto customOffsetY = NearZero(menuWidth_) ? 0.0f : menuHeight_;
         auto customOffsetX = 0.0f;
@@ -815,6 +817,7 @@ void TitleBarLayoutAlgorithm::LayoutSubtitle(LayoutWrapper* layoutWrapper, const
     auto titleBarGeometryNode = titleBarNode->GetGeometryNode();
     CHECK_NULL_VOID(titleBarGeometryNode);
     auto titleBarHeight = titleBarGeometryNode->GetFrameSize().Height();
+    CHECK_NULL_VOID(geometryNode);
 
     auto subtitleHeight = geometryNode->GetFrameSize().Height();
     float offsetY = 0.0f;
@@ -938,6 +941,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     auto menuWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(menuWrapper);
     auto geometryNode = menuWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto menuWidth = geometryNode->GetMarginFrameSize().Width();
     auto maxWidth = geometryNode->GetParentLayoutConstraint()->maxSize.Width();
     maxWidth = WidthAfterAvoidMenuBarAndContainerModal(titleBarNode, maxWidth);
@@ -974,7 +978,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
         }
         offsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, offsetX);
         // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
-        if (isRightToLeft) {
+        if (isRightToLeft && geometryNode->GetMargin()) {
             offsetX = offsetX - geometryNode->GetMargin()->left.value_or(.0f) -
                       geometryNode->GetMargin()->right.value_or(.0f);
         }
@@ -1012,7 +1016,7 @@ void TitleBarLayoutAlgorithm::LayoutMenu(LayoutWrapper* layoutWrapper, const Ref
     }
     menuOffsetX = ChangeOffsetByDirection(layoutWrapper, geometryNode, menuOffsetX);
     // Fixed the issue of repeatedly adding margin in SetMarginFrameOffset for RTL
-    if (isRightToLeft) {
+    if (isRightToLeft && geometryNode->GetMargin()) {
         menuOffsetX = menuOffsetX - geometryNode->GetMargin()->left.value_or(.0f) -
                       geometryNode->GetMargin()->right.value_or(.0f);
     }

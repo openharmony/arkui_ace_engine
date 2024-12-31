@@ -375,6 +375,14 @@
       OHOS::Ace::ShadowTheme::*;
       OHOS::Ace::TouchLocationInfo::*;
       OHOS::Ace::ACE_FORCE_EXPORT::*;
+      OHOS::Ace::LifeCycleCheckable::~LifeCycleCheckable*;
+      OHOS::Ace::Kit::ViewStackProcessor::*;
+      OHOS::Ace::Kit::AbstractViewFactory::*;
+      OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
+      OHOS::Ace::Kit::ResourceParser::*;
+
+      vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
+      VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";
@@ -410,6 +418,7 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
+      vtable?for?OHOS::Ace::NG::SwiperModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -418,6 +427,13 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+
+      OHOS::Ace::LinearColor::TRANSPARENT;
+
+      "OHOS::Ace::CardScope::CurrentId()";
+      "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
+      "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
+      "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
     };
   local:
     *;

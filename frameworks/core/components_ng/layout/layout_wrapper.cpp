@@ -25,13 +25,6 @@ bool InRange(float number, float boundaryStart, float boundaryEnd)
     return GreatOrEqual(number, boundaryStart) && LessOrEqual(number, boundaryEnd);
 }
 
-bool IsSyntaxNode(const std::string& tag)
-{
-    return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
-           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG || tag == V2::JS_SYNTAX_ITEM_ETS_TAG ||
-           tag == V2::JS_NODE_SLOT_ETS_TAG || tag == V2::JS_REPEAT_ETS_TAG || tag == V2::JS_VIEW_COMPONENT_TAG;
-}
-
 bool CheckPaddingBorderGap(ExpandEdges& incomingExpand, const PaddingPropertyF& innerSpace)
 {
     if (incomingExpand.left.has_value() && !NearZero(innerSpace.left.value_or(0.0f))) {
@@ -235,6 +228,12 @@ void LayoutWrapper::AdjustNotExpandNode()
     }
     geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
     renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+    if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
+        ACE_SAFE_AREA_SCOPED_TRACE("AdjustNotExpandNode[%s][self:%d][parent:%d][key:%s][paintRectRect:%s]",
+            host->GetTag().c_str(), host->GetId(),
+            host->GetAncestorNodeOfFrame() ? host->GetAncestorNodeOfFrame()->GetId() : 0,
+            host->GetInspectorIdValue("").c_str(), renderContext->GetPaintRectWithoutTransform().ToString().c_str());
+    }
 }
 
 void LayoutWrapper::ExpandSafeArea()
@@ -294,6 +293,14 @@ void LayoutWrapper::ExpandSafeArea()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+    if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
+        ACE_SAFE_AREA_SCOPED_TRACE(
+            "ExpandSafeAreaFinish[%s][self:%d][parent:%d][key:%s][opt:%s][paintRectRect:%s][selfAdjust:%s]",
+            host->GetTag().c_str(), host->GetId(),
+            host->GetAncestorNodeOfFrame() ? host->GetAncestorNodeOfFrame()->GetId() : 0,
+            host->GetInspectorIdValue("").c_str(), opts->ToString().c_str(),
+            renderContext->GetPaintRectWithoutTransform().ToString().c_str(), selfAdjust.ToString().c_str());
+    }
 }
 
 void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)
@@ -516,7 +523,7 @@ void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset, b
 {
     auto child = DynamicCast<FrameNode>(childUI);
     if (!child) {
-        if (!IsSyntaxNode(childUI->GetTag())) {
+        if (!childUI->IsSyntaxNode()) {
             return;
         }
         for (const auto& syntaxChild : childUI->GetChildren()) {

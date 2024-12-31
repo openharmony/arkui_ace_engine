@@ -60,6 +60,11 @@ public:
     static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
         float width, float height);
     static void ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event);
+    static RefPtr<FrameNode> GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key);
+    static OffsetF GetFrameNodeOffsetToWindow(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
+    static OffsetF GetPointRelativeToMainWindow(const Point& point);
+    static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

@@ -20,8 +20,10 @@
 
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/paint_wrapper.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t ITEM_SIZE = 4;
@@ -55,6 +57,7 @@ public:
           itemHalfSizes_(AceType::MakeRefPtr<AnimatablePropertyVectorFloat>(LinearVector<float>(ITEM_SIZE))),
           backgroundWidthDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
           backgroundHeightDilateRatio_(AceType::MakeRefPtr<AnimatablePropertyFloat>(1)),
+          isFocused_(AceType::MakeRefPtr<PropertyBool>(false)),
           unselectedColor_(AceType::MakeRefPtr<PropertyColor>(Color::TRANSPARENT)),
           selectedColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT)),
           touchBottomPointColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT))
@@ -69,6 +72,7 @@ public:
         AttachProperty(indicatorPadding_);
         AttachProperty(indicatorMargin_);
         AttachProperty(itemHalfSizes_);
+        AttachProperty(isFocused_);
         AttachProperty(unselectedColor_);
         AttachProperty(selectedColor_);
         AttachProperty(backgroundWidthDilateRatio_);
@@ -114,11 +118,12 @@ public:
     void PaintUnselectedIndicator(RSCanvas& canvas, const OffsetF& center,
         const LinearVector<float>& itemHalfSizes,
         bool currentIndexFlag, const LinearColor& indicatorColor);
-    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter,
-        const OffsetF& rightCenter, const LinearVector<float>& itemHalfSizes);
+    void PaintSelectedIndicator(RSCanvas& canvas, const OffsetF& leftCenter, const OffsetF& rightCenter,
+        const LinearVector<float>& itemHalfSizes, bool isOverlong = false);
     void PaintMask(DrawingContext& context);
     void PaintBackground(DrawingContext& context, const ContentProperty& contentProperty);
     virtual LinearVector<float> GetItemHalfSizes(size_t index, ContentProperty& contentProperty);
+    void SetFocusedAndSelectedColor(ContentProperty& contentProperty);
     // Update property
     void UpdateShrinkPaintProperty(const OffsetF& margin, const LinearVector<float>& normalItemHalfSizes,
         const LinearVector<float>& vectorBlackPointCenterX, const std::pair<float, float>& longPointCenterX);
@@ -164,6 +169,7 @@ public:
     {
         if (unselectedColor_) {
             unselectedColor_->Set(unselectedColor);
+            originalUnselectColor_ = unselectedColor_->Get();
         }
     }
 
@@ -171,6 +177,7 @@ public:
     {
         if (selectedColor_ && isSelectedColorAnimEnd_) {
             selectedColor_->Set(LinearColor(selectedColor));
+            originalSelectColor_ = selectedColor_->Get().ToColor();
         }
         if (touchBottomPointColor_ && isSelectedColorAnimEnd_) {
             touchBottomPointColor_->Set(LinearColor(selectedColor));
@@ -190,6 +197,13 @@ public:
     void SetNormalToHoverIndex(const std::optional<int32_t>& normalToHoverIndex)
     {
         normalToHoverIndex_ = normalToHoverIndex;
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
     }
 
     void SetHoverToNormalIndex(const std::optional<int32_t>& hoverToNormalIndex)
@@ -338,6 +352,7 @@ protected:
     RefPtr<AnimatablePropertyVectorFloat> itemHalfSizes_;
     RefPtr<AnimatablePropertyFloat> backgroundWidthDilateRatio_;
     RefPtr<AnimatablePropertyFloat> backgroundHeightDilateRatio_;
+    RefPtr<PropertyBool> isFocused_;
 
     RefPtr<Curve> headCurve_;
     float motionVelocity_ = 0;
@@ -369,6 +384,10 @@ protected:
     float itemHeight_ = 0.0f;
     float selectedItemWidth_ = 0.0f;
     float selectedItemHeight_ = 0.0f;
+    Color originalUnselectColor_;
+    Color originalSelectColor_;
+    Dimension paddingSide_;
+    float scaleIndicator_ = 1.33f;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(DotIndicatorModifier);
 };

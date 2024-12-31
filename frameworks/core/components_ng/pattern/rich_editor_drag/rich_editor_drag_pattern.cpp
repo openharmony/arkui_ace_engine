@@ -25,14 +25,14 @@
 
 namespace OHOS::Ace::NG {
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode,
-    const RichEditorDragInfo& info)
+    const TextDragInfo& info)
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     CHECK_NULL_RETURN(hostPattern, nullptr);
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dragNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_DRAG_ETS_TAG, nodeId, [hostPattern, info]() {
-        auto dragInfo = std::make_shared<RichEditorDragInfo>(info);
+        auto dragInfo = std::make_shared<TextDragInfo>(info);
         return MakeRefPtr<RichEditorDragPattern>(DynamicCast<TextPattern>(hostPattern), dragInfo);
     });
     auto dragContext = dragNode->GetRenderContext();
@@ -60,18 +60,23 @@ RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(const RefPtr<FrameNode>&
 
 void RichEditorDragPattern::AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes)
 {
-    width = NearZero(info_->maxSelectedWidth) ? contentRect.Width() : info_->maxSelectedWidth;
+    auto richEditor = DynamicCast<RichEditorPattern>(hostPattern_.Upgrade());
+    if (richEditor) {
+        width = NearZero(info_->maxSelectedWidth) ? contentRect.Width() : info_->maxSelectedWidth;
+    } else {
+        TextDragPattern::AdjustMaxWidth(width, contentRect, boxes);
+    }
 }
 
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
     const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren)
 {
-    RichEditorDragInfo info;
+    TextDragInfo info;
     return RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
 }
 
 RefPtr<FrameNode> RichEditorDragPattern::CreateDragNode(
-    const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const RichEditorDragInfo& info)
+    const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const TextDragInfo& info)
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();

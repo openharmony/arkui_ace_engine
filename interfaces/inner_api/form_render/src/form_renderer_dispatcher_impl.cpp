@@ -116,9 +116,13 @@ void FormRendererDispatcherImpl::DispatchSurfaceChangeEvent(float width, float h
         return;
     }
 
+#ifdef FORM_SIZE_CHANGE_ANIMATION
     // form existed in Sceneboard window always get undefined sizeChangeReason, use Visible to control anim instead
     reason = isVisible_ ? static_cast<uint32_t>(Rosen::WindowSizeChangeReason::ROTATION) :
         static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#else
+    reason = static_cast<uint32_t>(Rosen::WindowSizeChangeReason::UNDEFINED);
+#endif
     handler->PostTask([content = uiContent_, width, height, reason, rsTransaction, borderWidth, this]() {
         auto uiContent = content.lock();
         if (!uiContent) {
@@ -275,6 +279,25 @@ void FormRendererDispatcherImpl::OnAccessibilityTransferHoverEvent(float pointX,
         }
         HILOG_INFO("OnAccessibilityTransferHoverEvent");
         uiContent->HandleAccessibilityHoverEvent(pointX, pointY, sourceType, eventType, timeMs);
+    });
+}
+
+void FormRendererDispatcherImpl::OnNotifyDumpInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    auto handler = eventHandler_.lock();
+    if (!handler) {
+        HILOG_ERROR("eventHandler is nullptr");
+        return;
+    }
+    handler->PostSyncTask([content = uiContent_, params, &info]() {
+        auto uiContent = content.lock();
+        if (!uiContent) {
+            HILOG_ERROR("uiContent is nullptr");
+            return;
+        }
+        HILOG_INFO("OnNotifyDumpInfo");
+        uiContent->DumpInfo(params, info);
     });
 }
 } // namespace Ace

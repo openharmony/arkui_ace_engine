@@ -243,18 +243,15 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            const bool isCache =
-                !showCache && (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_);
+            const bool inRange = item.first >= layoutInfo_->startIndex_ && item.first <= layoutInfo_->endIndex_;
+            const bool isCache = !showCache && !inRange;
             auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 
-            if (isCache) {
-                continue;
-            }
-            if (wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
                 wrapper->Layout();
             } else {
                 wrapper->GetHostNode()->ForceSyncGeometryNode();
@@ -264,7 +261,7 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 layoutInfo_->storedOffset_ = mainOffset;
             }
 
-            if (NonNegative(mainOffset + item.second.second)) {
+            if (inRange && NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
@@ -322,7 +319,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
     if (layoutInfo_->currentOffset_ >= 0) {
-        if (!CanOverScroll()) {
+        if (!canOverScrollStart_) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = true;
@@ -407,7 +404,8 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     layoutInfo_->maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
-        if (!CanOverScroll()) {
+        if ((NonNegative(layoutInfo_->currentOffset_) && !canOverScrollStart_) ||
+            (NonPositive(layoutInfo_->currentOffset_) && !canOverScrollEnd_)) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, 0.0f);
@@ -417,7 +415,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
     if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
-        if (!CanOverScroll()) {
+        if (!canOverScrollEnd_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
         }
 

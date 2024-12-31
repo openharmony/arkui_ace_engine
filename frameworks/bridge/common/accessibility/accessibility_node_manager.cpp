@@ -190,10 +190,10 @@ int32_t ConvertToNodeId(int32_t cardAccessibilityId)
 const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_UPPER = 5;
 const size_t AccessibilityNodeManager::EVENT_DUMP_PARAM_LENGTH_LOWER = 3;
 const size_t AccessibilityNodeManager::PROPERTY_DUMP_PARAM_LENGTH = 2;
-const int32_t AccessibilityNodeManager::EVENT_DUMP_ORDER_INDEX = 0;
-const int32_t AccessibilityNodeManager::EVENT_DUMP_ID_INDEX = 1;
-const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_INDEX = 2;
-const int32_t AccessibilityNodeManager::EVENT_DUMP_ACTION_PARAM_INDEX = 3;
+const size_t AccessibilityNodeManager::EVENT_DUMP_ORDER_INDEX = 0;
+const size_t AccessibilityNodeManager::EVENT_DUMP_ID_INDEX = 1;
+const size_t AccessibilityNodeManager::EVENT_DUMP_ACTION_INDEX = 2;
+const size_t AccessibilityNodeManager::EVENT_DUMP_ACTION_PARAM_INDEX = 3;
 
 AccessibilityNodeManager::~AccessibilityNodeManager()
 {

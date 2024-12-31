@@ -75,7 +75,9 @@
 #include "core/components_ng/pattern/text_field/text_select_controller.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
 #include "core/components_ng/property/property.h"
+#include "core/components/theme/app_theme.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -161,7 +163,9 @@ enum class RequestFocusReason {
     AUTO_FILL,
     CLEAN_NODE,
     MOUSE,
-    SYSTEM
+    SYSTEM,
+    DRAG_ENTER,
+    DRAG_SELECT
 };
 
 
@@ -191,6 +195,12 @@ struct TouchAndMoveCaretState {
     Offset touchDownOffset;
     Dimension minDinstance = 5.0_vp;
     int32_t touchFingerId = -1;
+};
+
+struct FloatingCaretState {
+    bool FloatingCursorVisible = false;
+    bool ShowOriginCursor = false;
+    Color OriginCursorColor = Color(0x4D000000);
 };
 
 struct ContentScroller {
@@ -314,6 +324,11 @@ public:
     void DeleteForward(int32_t length) override;
     void DeleteForwardOperation(int32_t length);
     void HandleOnDelete(bool backward) override;
+    bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
+    void HandleOnPageUp() override;
+    void HandleOnPageDown() override;
     void CreateHandles() override;
     void GetEmojiSubStringRange(int32_t& start, int32_t& end);
 
@@ -322,6 +337,7 @@ public:
     void FinishTextPreview() override;
     void SetPreviewTextOperation(PreviewTextInfo info);
     void FinishTextPreviewOperation();
+    TextDragInfo CreateTextDragInfo() const;
 
     RefPtr<TextComponentDecorator> GetCounterDecorator() const
     {
@@ -416,12 +432,7 @@ public:
     bool CloseKeyboard(bool forceClose) override;
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
-    FocusPattern GetFocusPattern() const override
-    {
-        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
-        focusPattern.SetIsFocusActiveWhenFocused(true);
-        return focusPattern;
-    }
+    FocusPattern GetFocusPattern() const override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::u16string& errorText) override;
@@ -459,6 +470,41 @@ public:
     {
         return cursorVisible_;
     }
+
+    bool GetFloatingCursorVisible() const
+    {
+        return floatCaretState_.FloatingCursorVisible;
+    }
+
+    void SetFloatingCursorVisible(bool floatingCursorVisible)
+    {
+        floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
+    }
+
+    bool GetShowOriginCursor() const
+    {
+        return floatCaretState_.ShowOriginCursor;
+    }
+
+    void SetShowOriginCursor(bool showOriginCursor)
+    {
+        floatCaretState_.ShowOriginCursor = showOriginCursor;
+    }
+
+    Color GetOriginCursorColor() const
+    {
+        return floatCaretState_.OriginCursorColor;
+    }
+
+    void SetOriginCursorColor(Color originCursorColor)
+    {
+        floatCaretState_.OriginCursorColor = originCursorColor;
+    }
+
+    virtual void AdjustFloatingCaretInfo(const Offset& localOffset,
+        const HandleInfoNG& caretInfo, HandleInfoNG& floatingCaretInfo);
+
+    void FloatingCaretLand();
 
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool GetImeAttached() const
@@ -524,6 +570,11 @@ public:
     void SetTextRect(const RectF& textRect)
     {
         textRect_ = textRect;
+    }
+
+    float GetTextParagraphIndent() const
+    {
+        return textParagraphIndent_;
     }
 
     const RectF& GetFrameRect() const
@@ -630,6 +681,7 @@ public:
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
         CHECK_NULL_VOID(HasFocus());
         CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
+        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard());
         auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipelineContext);
         auto windowManager = pipelineContext->GetWindowManager();
@@ -637,8 +689,8 @@ public:
 
         auto windowMode = windowManager->GetWindowMode();
         TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed windowMode = %{public}d", windowMode);
-        if (windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+        if ((windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) && IsStopEditWhenCloseKeyboard()) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -699,6 +751,11 @@ public:
         return selectController_->GetCaretRect();
     }
 
+    RectF GetFloatingCaretRect() const
+    {
+        return selectController_->GetFloatingCaretRect();
+    }
+
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY);
 
@@ -740,7 +797,7 @@ public:
         return mouseStatus_;
     }
 
-    void UpdateEditingValueToRecord();
+    void UpdateEditingValueToRecord(int32_t beforeCaretPosition = -1);
 
     void UpdateScrollBarOffset() override;
 
@@ -907,8 +964,11 @@ public:
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
+    bool IsStopBackPress() const;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckMousePressedOverScrollBar(GestureEvent& info);
@@ -937,6 +997,7 @@ public:
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     bool CanUndo();
+    bool HasOperationRecords();
     bool CanRedo();
     void HandleOnSelectAll(bool isKeyEvent, bool inlineStyle = false, bool showMenu = false);
     void HandleOnSelectAll() override
@@ -946,6 +1007,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);
@@ -1061,6 +1123,7 @@ public:
     void SetTextInputFlag(bool isTextInput)
     {
         isTextInput_ = isTextInput;
+        SetTextFadeoutCapacity(isTextInput_);
     }
 
     void SetSingleLineHeight(float height)
@@ -1543,6 +1606,20 @@ public:
         return maxFontSizeScale_;
     }
 
+    void SetTextFadeoutCapacity(bool enabled)
+    {
+        haveTextFadeoutCapacity_ = enabled;
+    }
+    bool GetTextFadeoutCapacity()
+    {
+        return haveTextFadeoutCapacity_;
+    }
+
+    void SetHoverPressBgColorEnabled(bool enabled)
+    {
+        hoverAndPressBgColorEnabled_ = enabled;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1566,7 +1643,7 @@ protected:
 
     int32_t GetTouchIndex(const OffsetF& offset) override;
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
-    void OnTextGenstureSelectionEnd() override;
+    void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void DoTextSelectionTouchCancel() override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
     void UpdateSelection(int32_t both);
@@ -1577,6 +1654,11 @@ protected:
     RefPtr<TextSelectController> selectController_;
     bool needToRefreshSelectOverlay_ = false;
     bool isTextChangedAtCreation_ = false;
+
+    void HandleCloseKeyboard(bool forceClose);
+
+    // 是否独立控制键盘
+    bool independentControlKeyboard_ = false;
 
 private:
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
@@ -1614,6 +1696,10 @@ private:
     void InitMouseEvent();
     void HandleHoverEffect(MouseInfo& info, bool isHover);
     void OnHover(bool isHover);
+    void UpdateHoverStyle(bool isHover);
+    void UpdatePressStyle(bool isPressed);
+    void PlayAnimationHoverAndPress(const Color& color);
+    void UpdateTextFieldBgColor(const Color& color);
     void ChangeMouseState(
         const Offset location, int32_t frameId, bool isByPass = false);
     void FreeMouseStyleHoldNode(const Offset location);
@@ -1715,6 +1801,7 @@ private:
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void GetTextInputFocusPaintRect(RoundRect& paintRect);
     void PaintResponseAreaRect();
     void PaintCancelRect();
     void PaintUnitRect();
@@ -1791,6 +1878,9 @@ private:
     void TwinklingByFocus();
 
     bool FinishTextPreviewByPreview(const std::u16string& insertValue);
+    bool GetIndependentControlKeyboard();
+    bool IsMoveFocusOutFromLeft(const KeyEvent& event);
+    bool IsMoveFocusOutFromRight(const KeyEvent& event);
 
     bool GetTouchInnerPreviewText(const Offset& offset) const;
     bool IsShowMenu(const std::optional<SelectionOptions>& options, bool defaultValue);
@@ -1814,10 +1904,21 @@ private:
     float CalcScrollSpeed(float hotAreaStart, float hotAreaEnd, float point);
     std::optional<TouchLocationInfo> GetAcceptedTouchLocationInfo(const TouchEventInfo& info);
     void ResetTouchAndMoveCaretState();
+    void UpdateSelectionAndHandleVisibility();
     void ResetFirstClickAfterGetFocus();
+    void ProcessAutoFillOnFocus();
+    bool IsStopEditWhenCloseKeyboard()
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, true);
+        auto context = host->GetContext();
+        CHECK_NULL_RETURN(context, true);
+        return !(context->GetIsFocusActive() && independentControlKeyboard_);
+    }
 
     RectF frameRect_;
     RectF textRect_;
+    float textParagraphIndent_ = 0.0;
     RefPtr<Paragraph> paragraph_;
     InlineMeasureItem inlineMeasureItem_;
     TextStyle nextLineUtilTextStyle_;
@@ -1959,10 +2060,10 @@ private:
     std::function<void()> processOverlayDelayTask_;
     FocuseIndex focusIndex_ = FocuseIndex::TEXT;
     TouchAndMoveCaretState moveCaretState_;
+    FloatingCaretState floatCaretState_;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
-    bool colorModeChange_ = false;
     bool isKeyboardClosedByUser_ = false;
     bool isFillRequestFinish_ = true;
     bool keyboardAvoidance_ = false;
@@ -1979,6 +2080,14 @@ private:
     bool textInputBlurOnSubmit_ = true;
     bool textAreaBlurOnSubmit_ = false;
     bool isDetachFromMainTree_ = false;
+
+    // 节点是否需要渐隐能力
+    bool haveTextFadeoutCapacity_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool isFocusBGColorSet_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    bool hoverAndPressBgColorEnabled_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     Dimension previewUnderlineWidth_ = 2.0_vp;
     bool hasSupportedPreviewText_ = true;
@@ -2007,6 +2116,8 @@ private:
     std::optional<float> maxFontSizeScale_;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
+    RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
+    bool directionKeysMoveFocusOut_ = false;
 };
 } // namespace OHOS::Ace::NG
 
