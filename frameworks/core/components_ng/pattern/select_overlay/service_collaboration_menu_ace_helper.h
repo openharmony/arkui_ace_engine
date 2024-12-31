@@ -40,7 +40,6 @@ public:
         bool needMargin, bool hasEndIncon);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& row,
         const RefPtr<FrameNode>& menuItemGroupNode);
-    void UpdateHeaderRowPadding(const RefPtr<FrameNode>& row);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     uint32_t GetSymbolId(const std::string& abilityType);
