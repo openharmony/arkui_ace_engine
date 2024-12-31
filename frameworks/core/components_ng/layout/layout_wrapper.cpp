@@ -228,6 +228,12 @@ void LayoutWrapper::AdjustNotExpandNode()
     }
     geometryNode->SetSelfAdjust(adjustedRect - geometryNode->GetFrameRect());
     renderContext->UpdatePaintRect(adjustedRect + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+    if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
+        ACE_SAFE_AREA_SCOPED_TRACE("AdjustNotExpandNode[%s][self:%d][parent:%d][key:%s][paintRectRect:%s]",
+            host->GetTag().c_str(), host->GetId(),
+            host->GetAncestorNodeOfFrame() ? host->GetAncestorNodeOfFrame()->GetId() : 0,
+            host->GetInspectorIdValue("").c_str(), renderContext->GetPaintRectWithoutTransform().ToString().c_str());
+    }
 }
 
 void LayoutWrapper::ExpandSafeArea()
@@ -287,6 +293,14 @@ void LayoutWrapper::ExpandSafeArea()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdatePaintRect(frame + geometryNode->GetPixelGridRoundRect() - geometryNode->GetFrameRect());
+    if (SystemProperties::GetSafeAreaDebugTraceEnabled()) {
+        ACE_SAFE_AREA_SCOPED_TRACE(
+            "ExpandSafeAreaFinish[%s][self:%d][parent:%d][key:%s][opt:%s][paintRectRect:%s][selfAdjust:%s]",
+            host->GetTag().c_str(), host->GetId(),
+            host->GetAncestorNodeOfFrame() ? host->GetAncestorNodeOfFrame()->GetId() : 0,
+            host->GetInspectorIdValue("").c_str(), opts->ToString().c_str(),
+            renderContext->GetPaintRectWithoutTransform().ToString().c_str(), selfAdjust.ToString().c_str());
+    }
 }
 
 void LayoutWrapper::ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame)

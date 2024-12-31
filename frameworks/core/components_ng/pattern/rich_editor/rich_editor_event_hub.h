@@ -111,6 +111,8 @@ public:
     const SymbolSpanStyle GetSymbolSpanStyle() const;
     void SetLineHeight(double lineHeight);
     double GetLineHeight() const;
+    void SetHalfLeading(bool halfLeading);
+    bool GetHalfLeading() const;
     void SetLetterspacing(double letterSpacing);
     double GetLetterspacing() const;
     void SetTextStyle(TextStyleResult textStyle);
@@ -167,6 +169,7 @@ public:
 private:
     TextStyleResult textStyle_;
     double lineHeight_ = 0.0;
+    bool halfLeading_ = false;
     double letterSpacing_ = 0.0;
     int32_t spanIndex_ = 0;
     int32_t spanRangeStart_ = 0;

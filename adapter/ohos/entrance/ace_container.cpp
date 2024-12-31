@@ -112,6 +112,7 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
+const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
@@ -967,13 +968,16 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](
+                                        const NonPointerEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, &event, &result, id]() {
+            [context, &event, &result, id, markProcess]() {
                 ContainerScope scope(id);
                 result = context->OnNonPointerEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;
@@ -1863,6 +1867,17 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    bool isDynamicUiContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if (isDynamicUiContent) {
+        return DumpDynamicUiContent(params, info);
+    }
+
+    return DumpCommon(params, info);
+}
+
+bool AceContainer::DumpCommon(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
     if (isDumping_.test_and_set()) {
         LOGW("another dump is still running");
         return false;
@@ -1889,6 +1904,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     isDumping_.clear();
     return true;
+}
+
+bool AceContainer::DumpDynamicUiContent(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    LOGI("DumpDynamicUiContent");
+    ContainerScope scope(instanceId_);
+    return DumpInfo(params);
 }
 
 bool AceContainer::DumpInfo(const std::vector<std::string>& params)
@@ -3518,6 +3541,8 @@ void AceContainer::AddWatchSystemParameter()
         SystemProperties::AddWatchSystemParameter(
             ENABLE_PERFORMANCE_MONITOR_KEY, container,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+        SystemProperties::AddWatchSystemParameter(
+            IS_FOCUS_ACTIVE_KEY, container, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -3536,6 +3561,7 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, SystemProperties::OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)

@@ -167,33 +167,6 @@ void RichEditorBaseTestOneNg::TearDownTestSuite()
 }
 
 /**
- * @tc.name: SetEnterKeyType
- * @tc.desc: test SetEnterKeyType
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestOneNg, SetEnterKeyType, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. get richEditor controller
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    richEditorModel.SetEnterKeyType(TextInputAction::NEW_LINE);
-    richEditorNode_->MarkModifyDone();
-    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
-        TextInputAction::NEW_LINE);
-    richEditorModel.SetEnterKeyType(TextInputAction::UNSPECIFIED);
-    richEditorNode_->MarkModifyDone();
-    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
-        TextInputAction::NEW_LINE);
-    ClearSpan();
-}
-
-/**
  * @tc.name: SupportAvoidanceTest
  * @tc.desc: test whether the custom keyboard supports the collision avoidance function
  * @tc.type: FUNC
@@ -568,11 +541,11 @@ HWTEST_F(RichEditorBaseTestOneNg, Controller002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ToStyledString001
- * @tc.desc: Test spans to styledString.
+ * @tc.name: TextbackgroundStyle001
+ * @tc.desc: Test add span and get span with textBackgroundStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorBaseTestOneNg, ToStyledString001, TestSize.Level1)
+HWTEST_F(RichEditorBaseTestOneNg, TextbackgroundStyle001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -581,136 +554,194 @@ HWTEST_F(RichEditorBaseTestOneNg, ToStyledString001, TestSize.Level1)
     ASSERT_NE(richEditorController, nullptr);
 
     /**
-     * @tc.steps: step1. init spans
+     * @tc.steps: step1. add span
      */
+    TextStyle style;
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    textBackgroundStyle.needCompareGroupId = false;
+    style.SetTextBackgroundStyle(textBackgroundStyle);
     TextSpanOptions options;
     options.value = INIT_VALUE_1;
+    options.style = style;
     richEditorController->AddTextSpan(options);
-    options.value = INIT_VALUE_2;
-    richEditorController->AddTextSpan(options);
+    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan, nullptr);
+    EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
+    EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
+    
+    /**
+     * @tc.steps: step2. get span
+     */
+    auto info = richEditorController->GetSpansInfo(0, 1);
+    auto spanTextBackground = info.selection_.resultObjects.front().textStyle.textBackgroundStyle;
+    EXPECT_TRUE(spanTextBackground.has_value());
+    EXPECT_EQ(spanTextBackground.value(), textBackgroundStyle);
+}
+
+/**
+ * @tc.name: TextbackgroundStyle002
+ * @tc.desc: Test set typing style with textBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, TextbackgroundStyle002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
 
     /**
-     * @tc.steps: step2. test ToStyledString
+     * @tc.steps: step1. set typing style
      */
-    auto spanString = richEditorPattern->ToStyledString(0, 8);
+    TextStyle style;
+    style.SetTextColor(TEXT_COLOR_VALUE);
+    style.SetTextDecorationColor(TEXT_DECORATION_COLOR_VALUE);
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    textBackgroundStyle.needCompareGroupId = false;
+    style.SetTextBackgroundStyle(textBackgroundStyle);
+    UpdateSpanStyle typingStyle;
+    typingStyle.updateTextColor = TEXT_COLOR_VALUE;
+    typingStyle.updateTextDecorationColor = TEXT_DECORATION_COLOR_VALUE;
+    typingStyle.updateTextBackgroundStyle = textBackgroundStyle;
+    richEditorController->SetTypingStyle(typingStyle, style);
+    
+    /**
+     * @tc.steps: step2. get typing style
+     */
+    auto typingStyleResult = richEditorController->GetTypingStyle();
+    EXPECT_TRUE(typingStyleResult.has_value());
+    auto backgroundResult = typingStyleResult->updateTextBackgroundStyle;
+    EXPECT_TRUE(backgroundResult.has_value());
+    EXPECT_EQ(backgroundResult.value(), textBackgroundStyle);
+
+    /**
+     * @tc.steps: step3. insert value
+     */
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan, nullptr);
+    EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
+    EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
+    richEditorPattern->caretPosition_ = 6;
+    richEditorPattern->InsertValue(INIT_VALUE_2);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: TextbackgroundStyle003
+ * @tc.desc: Test update span style with textBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, TextbackgroundStyle003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add span
+     */
+    TextStyle style;
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. update span style
+     */
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    textBackgroundStyle.needCompareGroupId = false;
+    style.SetTextBackgroundStyle(textBackgroundStyle);
+    struct UpdateSpanStyle updateSpanStyle;
+    updateSpanStyle.updateTextBackgroundStyle = textBackgroundStyle;
+    richEditorController->SetUpdateSpanStyle(updateSpanStyle);
+    ImageSpanAttribute imageStyle;
+    richEditorController->UpdateSpanStyle(0, 2, style, imageStyle);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 2);
+    auto newSpan = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan, nullptr);
+    EXPECT_TRUE(newSpan->GetTextBackgroundStyle().has_value());
+    EXPECT_EQ(newSpan->GetTextBackgroundStyle().value(), textBackgroundStyle);
+}
+
+/**
+ * @tc.name: TextbackgroundStyle004
+ * @tc.desc: Test toStyledString and fromStyledString with textBackgroundStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestOneNg, TextbackgroundStyle004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. add span
+     */
+    TextStyle style;
+    TextBackgroundStyle textBackgroundStyle;
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(5, OHOS::Ace::DimensionUnit::VP);
+    textBackgroundStyle.backgroundColor = Color::RED;
+    textBackgroundStyle.backgroundRadius = borderRadius;
+    textBackgroundStyle.needCompareGroupId = false;
+    style.SetTextBackgroundStyle(textBackgroundStyle);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    options.style = style;
+    richEditorController->AddTextSpan(options);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step2. toStyledString
+     */
+    auto spanString = richEditorPattern->ToStyledString(0, 6);
     ASSERT_NE(spanString, nullptr);
-    EXPECT_EQ(spanString->GetSpanItems().size(), 2);
-}
+    auto spans = spanString->GetSpans(0, 6, SpanType::BackgroundColor);
+    EXPECT_EQ(spans.size(), 1);
+    auto backgroundSpan = AceType::DynamicCast<BackgroundColorSpan>(spans[0]);
+    EXPECT_NE(backgroundSpan, nullptr);
+    EXPECT_EQ(backgroundSpan->GetBackgroundColor(), textBackgroundStyle);
 
-/**
- * @tc.name: RichEditorLayoutAlgorithm001
- * @tc.desc: test MeasureContent
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
-
-    LayoutConstraintF parentLayoutConstraint;
-    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
-
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-
-    parentLayoutConstraint.selfIdealSize.SetHeight(std::nullopt);
-    parentLayoutConstraint.selfIdealSize.SetWidth(1.0f);
-
-    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
-    ASSERT_NE(paragraph, nullptr);
-
-    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
-    layoutAlgorithm->paragraphManager_ = paragraphManager;
-
-    AddSpan(INIT_U16VALUE_1);
-    layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
-    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-
-    layoutAlgorithm->spans_.clear();
-    auto size1 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size1.value().Width(), 1.0f);
-
-    richEditorPattern->presetParagraph_ = paragraph;
-    auto size2 = layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(size2.value().Width(), 1.0f);
-}
-
-/**
- * @tc.name: RichEditorLayoutAlgorithm002
- * @tc.desc: test GetParagraphStyleSpanItem
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-
-    std::list<RefPtr<SpanItem>> spanGroup;
-    spanGroup.clear();
-    spanGroup.emplace_back(AceType::MakeRefPtr<PlaceholderSpanItem>());
-    auto span = layoutAlgorithm->GetParagraphStyleSpanItem(spanGroup);
-    EXPECT_EQ(*spanGroup.begin(), span);
-}
-
-/**
- * @tc.name: RichEditorLayoutAlgorithm003
- * @tc.desc: test Measure
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm003, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(10.0f, 1000.0f);
-    layoutConstraint.minSize = CONTAINER_SIZE;
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
-    layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 720.0f);
-}
-
-/**
- * @tc.name: RichEditorLayoutAlgorithm004
- * @tc.desc: test RichEditorLayoutAlgorithm
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestOneNg, RichEditorLayoutAlgorithm004, TestSize.Level1)
-{
-    std::list<RefPtr<SpanItem>> spans;
-    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
-    auto placeholderSpanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
-    auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    ASSERT_NE(spanItem, nullptr);
-
-    std::u16string str = u"\n";
-    spanItem->content = str;
-    spans.emplace_back(spanItem);
-    auto layoutAlgorithm = AceType::MakeRefPtr<RichEditorLayoutAlgorithm>(spans, AceType::RawPtr(paragraphManager),
-        std::nullopt);
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    EXPECT_NE(*(layoutAlgorithm->allSpans_.begin()), nullptr);
+    /**
+     * @tc.steps: step3. fromStyledString
+     */
+    auto info = richEditorPattern->FromStyledString(spanString);
+    EXPECT_EQ(info.selection_.resultObjects.size(), 1);
+    auto spanTextBackground = info.selection_.resultObjects.front().textStyle.textBackgroundStyle;
+    EXPECT_TRUE(spanTextBackground.has_value());
+    EXPECT_EQ(spanTextBackground.value(), textBackgroundStyle);
 }
 } // namespace OHOS::Ace::NG

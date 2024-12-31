@@ -45,6 +45,7 @@ public:
     void SetAdaptiveHeight(bool state);
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
+    void DumpDynamicRenderer(int32_t depth, bool hasJson);
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;

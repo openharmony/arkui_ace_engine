@@ -43,6 +43,9 @@ class FormManagerDelegate : public FormManagerResource {
     DECLARE_ACE_TYPE(FormManagerDelegate, FormManagerResource);
 
 public:
+#ifdef OHOS_STANDARD_SYSTEM
+    void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
+#endif
     using onFormAcquiredCallbackForJava =
         std::function<void(int64_t, const std::string&, const std::string&, const std::string&)>;
     using OnFormUpdateCallbackForJava = std::function<void(int64_t, const std::string&)>;
@@ -63,6 +66,7 @@ public:
     using UnTrustFormCallback = std::function<void()>;
     using SnapshotCallback = std::function<void(const uint32_t&)>;
     using EnableFormCallback = std::function<void(const bool enable)>;
+    using LockFormCallback = std::function<void(const bool lock)>;
 
     enum class State : char {
         WAITINGFORSIZE,
@@ -112,6 +116,7 @@ public:
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
     void AddSnapshotCallback(SnapshotCallback&& callback);
     void AddEnableFormCallback(EnableFormCallback&& callback);
+    void AddLockFormCallback(LockFormCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
@@ -131,6 +136,7 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info);
     bool CheckFormBundleForbidden(const std::string& bundleName);
     void NotifyFormDump(const std::vector<std::string>& params, std::vector<std::string>& info);
+    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
 #ifdef OHOS_STANDARD_SYSTEM
     void ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJsInfo);
     void ProcessFormUninstall(const int64_t formId);
@@ -147,6 +153,7 @@ public:
         const std::string& cardName, AppExecFwk::FormInfo& formInfo);
     void ProcessRecycleForm();
     void ProcessEnableForm(bool enable);
+    void ProcessLockForm(bool lock);
 #endif
     void HandleCachedClickEvents();
 
@@ -165,6 +172,7 @@ private:
     void HandleSnapshotCallback(const uint32_t& delayTime);
     bool ParseAction(const std::string& action, const std::string& type, AAFwk::Want& want);
     void HandleEnableFormCallback(const bool enable);
+    void HandleLockFormCallback(bool lock);
     void SetGestureInnerFlag();
     void CheckWhetherSurfaceChangeFailed();
 
@@ -183,6 +191,7 @@ private:
     UnTrustFormCallback unTrustFormCallback_;
     SnapshotCallback snapshotCallback_;
     EnableFormCallback enableFormCallback_;
+    LockFormCallback lockFormCallback_;
 
     State state_ { State::WAITINGFORSIZE };
     bool isDynamic_ = true;
@@ -193,7 +202,6 @@ private:
     std::vector<std::shared_ptr<MMI::PointerEvent>> pointerEventCache_;
     NotifySurfaceChangeFailedRecord notifySurfaceChangeFailedRecord_;
 #ifdef OHOS_STANDARD_SYSTEM
-    void SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo);
     void OnRouterActionEvent(const std::string& action);
     void OnCallActionEvent(const std::string& action);
     int64_t runningCardId_ = -1;

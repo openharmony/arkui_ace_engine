@@ -38,6 +38,14 @@ void SequencedRecognizer::OnAccepted()
     }
 }
 
+void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback && *callback) {
+        GestureEvent info;
+        (*callback)(info);
+    }
+}
+
 void SequencedRecognizer::OnRejected()
 {
     refereeState_ = RefereeState::FAIL;
@@ -58,7 +66,7 @@ void SequencedRecognizer::OnRejected()
     }
 
     if (currentIndex_ != -1) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 

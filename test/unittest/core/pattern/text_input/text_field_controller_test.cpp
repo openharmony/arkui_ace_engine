@@ -13,14 +13,24 @@
  * limitations under the License.
  */
 
+#include <unicode/putil.h>
+#include <unicode/uclean.h>
+
 #include "text_input_base.h"
-#include "base/utils/string_utils.h"
+
+#include "test/mock/core/common/mock_data_detector_mgr.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/render/mock_render_context.h"
+
+#include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
 
 namespace {
 const std::string NEWLINE = "\n";
 const std::u16string WIDE_NEWLINE = UtfUtils::Str8ToStr16(NEWLINE);
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_1 = ParseFontFeatureSettings("\"ss01\" 1");
 } // namespace
 
 class MockDataDetectorInterface : public DataDetectorInterface {

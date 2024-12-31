@@ -35,6 +35,9 @@ build_component_ng("base_ng") {
   if (ace_engine_feature_enable_split_mode &&
       defined(vendor_configs.ace_engine_advanced_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_split_mode
+  } else if (ace_engine_enable_circle_feature &&
+             defined(vendor_configs.ace_engine_advanced_router_circle_mode)) {
+    sources += vendor_configs.ace_engine_advanced_router_circle_mode
   } else if (ace_engine_feature_wearable &&
              defined(vendor_configs.ace_engine_advanced_wearable_pattern)) {
     sources += vendor_configs.ace_engine_advanced_wearable_pattern
@@ -47,6 +50,10 @@ build_component_ng("base_ng") {
   if (ace_engine_feature_enable_nav_split_mode &&
       defined(vendor_configs.ace_engine_advanced_navigation_split_mode)) {
     sources += vendor_configs.ace_engine_advanced_navigation_split_mode
+  } else if (ace_engine_enable_circle_feature &&
+             defined(
+                 vendor_configs.ace_engine_advanced_navigation_circle_mode)) {
+    sources += vendor_configs.ace_engine_advanced_navigation_circle_mode
   } else {
     sources += [ "navigation_register.cpp" ]
   }

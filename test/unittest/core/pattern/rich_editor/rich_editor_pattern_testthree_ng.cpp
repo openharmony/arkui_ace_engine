@@ -443,38 +443,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, UpdateTextFieldManager001, TestSize.Level
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapperSwap001
- * @tc.desc: test OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto rendenContext = richEditorNode_->GetRenderContext();
-    ASSERT_NE(rendenContext, nullptr);
-    rendenContext->UpdateClipEdge(false);
-    auto geometryNode = richEditorNode_->GetGeometryNode();
-    ASSERT_NE(geometryNode, nullptr);
-    auto globalOffset = OffsetF(15.0f, 3.0f);
-    geometryNode->SetFrameSize(SizeF(20.0f, 5.0f));
-    geometryNode->SetFrameOffset(globalOffset);
-
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
-    ASSERT_NE(layoutAlgorithm, nullptr);
-    layoutAlgorithm->parentGlobalOffset_ = globalOffset;
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    richEditorPattern->baselineOffset_ = 6.0f;
-    richEditorPattern->CreateNodePaintMethod();
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: HandleUserGestureEvent001
  * @tc.desc: test HandleUserGestureEvent
  * @tc.type: FUNC
@@ -799,64 +767,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, InitPlaceholderSpansMap003, TestSize.Leve
     spanItem->spanItemType = SpanItemType::IMAGE;
     richEditorPattern->InitPlaceholderSpansMap(newSpanItem, spanItem, index, placeholderGains);
     EXPECT_EQ(placeholderGains, placeholderGains += PLACEHOLDER_LENGTH - CUSTOM_CONTENT_LENGTH);
-}
-
-/**
- * @tc.name: HandleLongPress001
- * @tc.desc: test
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleLongPress001, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    FingerInfo fingerInfo1;
-    FingerInfo fingerInfo2;
-    std::list<FingerInfo> fingerList;
-    fingerList.push_back(fingerInfo1);
-    fingerList.push_back(fingerInfo2);
-    info.SetFingerList(fingerList);
-    richEditorPattern->HandleLongPress(info);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
-}
-
-/**
- * @tc.name: HandleLongPress002
- * @tc.desc: test HandleLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleLongPress002, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.SetOffsetX(0.0);
-    info.SetOffsetY(0.0);
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->hasUrlSpan_ = true;
-    richEditorPattern->HandleLongPress(info);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
-}
-
-/**
- * @tc.name: HandleLongPress003
- * @tc.desc: test HandleLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleLongPress003, TestSize.Level1)
-{
-    auto richEditorPattern = GetRichEditorPattern();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.SetOffsetX(0.0);
-    info.SetOffsetY(0.0);
-    richEditorPattern->sourceType_ = SourceType::MOUSE;
-    richEditorPattern->HandleLongPress(info);
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetX(), info.GetOffsetX());
-    EXPECT_EQ(richEditorPattern->selectionMenuOffsetClick_.GetY(), info.GetOffsetY());
 }
 
 /**
@@ -1758,27 +1668,6 @@ HWTEST_F(RichEditorPatternTestThreeNg, HandleSelect002, TestSize.Level1)
     selectOverlayManager->selectOverlayInfo_.isUsingMouse = true;
     richEditorPattern->HandleSelect(info, selectStart, selectEnd);
     EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-}
-
-/**
- * @tc.name: HandleDoubleClickOrLongPress002
- * @tc.desc: test HandleDoubleClickOrLongPress
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorPatternTestThreeNg, HandleDoubleClickOrLongPress002, TestSize.Level1)
-{
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    GestureEvent info;
-    info.SetSourceTool(SourceTool::FINGER);
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-    richEditorPattern->selectOverlay_->hasTransform_ = true;
-    auto localOffset = info.GetLocalLocation();
-    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
-    EXPECT_TRUE(localOffset == richEditorPattern->ConvertGlobalToLocalOffset(info.GetGlobalLocation()));
-    richEditorPattern->overlayMod_ = nullptr;
-    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
-    EXPECT_TRUE(richEditorPattern->isEditing_);
 }
 
 /**

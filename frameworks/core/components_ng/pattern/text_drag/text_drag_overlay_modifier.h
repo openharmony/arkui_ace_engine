@@ -109,9 +109,9 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
-    void SetIsInline(bool isInline)
+    void SetIsHandleAnimation(bool isHandleAnimation)
     {
-        isInline_ = isInline;
+        isHandleAnimation_ = isHandleAnimation;
     }
 
     void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
@@ -130,7 +130,7 @@ protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     bool isHandlesShow_ = false;
-    bool isInline_ = true;
+    bool isHandleAnimation_ = true;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;

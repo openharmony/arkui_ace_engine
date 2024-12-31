@@ -65,6 +65,7 @@ void UseSelfStyle(const std::unique_ptr<FontStyle>& fontStyle,
     }
     if (textLineStyle) {
         UPDATE_TEXT_STYLE(textLineStyle, LineHeight, SetLineHeight);
+        UPDATE_TEXT_STYLE(textLineStyle, HalfLeading, SetHalfLeading);
         UPDATE_TEXT_STYLE(textLineStyle, TextBaseline, SetTextBaseline);
         UPDATE_TEXT_STYLE(textLineStyle, BaselineOffset, SetBaselineOffset);
         UPDATE_TEXT_STYLE(textLineStyle, TextOverflow, SetTextOverflow);

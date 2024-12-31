@@ -365,6 +365,7 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
+    virtual void SetStopBackPress(bool isStopBackPress) {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

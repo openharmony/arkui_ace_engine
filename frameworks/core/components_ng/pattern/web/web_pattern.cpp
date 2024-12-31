@@ -326,6 +326,7 @@ constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
 constexpr int32_t PINCH_END_TYPE = 2;
+constexpr int32_t PINCH_CANCEL_TYPE = 4;
 
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
@@ -1008,7 +1009,13 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->HandleScaleGestureEnd(event);
         }
     };
-    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
+    auto actionCancelTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleScaleGestureCancel(event);
+        }
+    };
 
     pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
     pinchGesture_->SetPriority(GesturePriority::Parallel);
@@ -1257,6 +1264,22 @@ void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 
     delegate_->ScaleGestureChangeV2(
         PINCH_END_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+}
+
+void WebPattern::HandleScaleGestureCancel(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_CANCEL_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -5849,15 +5872,20 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
     switch (type) {
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END: {
+            if (!isSmoothDragResizeEnabled) {
+                return;
+            }
             g_dragWindowFlag = true;
+            delegate_->SetDragResizeStartFlag(true);
             WindowDrag(width, height);
             break;
-        }
+        case WindowSizeChangeReason::DRAG_END:
         default:
+            delegate_->SetDragResizeStartFlag(false);
             g_dragWindowFlag = false;
             last_height_ = 0;
             last_width_ = 0;
@@ -5868,10 +5896,6 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
     if (delegate_) {
-        bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
-        if (!isSmoothDragResizeEnabled) {
-            return;
-        }
         if (last_height_ == 0 && last_width_ == 0) {
             last_height_ = height;
             last_width_ = width;

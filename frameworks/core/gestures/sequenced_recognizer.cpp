@@ -36,6 +36,14 @@ void SequencedRecognizer::OnAccepted()
     recognizers_[activeIndex]->SetRefereeState(RefereeState::SUCCEED);
 }
 
+void SequencedRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
+{
+    if (callback && *callback) {
+        GestureEvent info;
+        (*callback)(info);
+    }
+}
+
 void SequencedRecognizer::OnRejected()
 {
     if (activeIndex >= recognizers_.size()) {
@@ -52,7 +60,7 @@ void SequencedRecognizer::OnRejected()
     recognizers_[activeIndex]->SetRefereeState(RefereeState::FAIL);
 
     if (activeIndex != 0) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 
     Reset();

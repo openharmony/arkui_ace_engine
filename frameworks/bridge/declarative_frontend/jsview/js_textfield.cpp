@@ -1990,4 +1990,13 @@ void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
     }
 }
+
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
 } // namespace OHOS::Ace::Framework

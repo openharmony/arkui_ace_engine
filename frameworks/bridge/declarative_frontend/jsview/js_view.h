@@ -419,6 +419,8 @@ public:
 
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
+    void JSGetDialogController(const JSCallbackInfo& info);
+
 private:
     void MarkNeedUpdate() override;
 
