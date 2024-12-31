@@ -669,6 +669,16 @@ public:
         return static_cast<int32_t>(pageFlipMode_);
     }
 
+    bool IsStopWhenTouched() const
+    {
+        return stopWhenTouched_;
+    }
+
+    void SetStopWhenTouched(bool stopWhenTouched)
+    {
+        stopWhenTouched_ = stopWhenTouched;
+    }
+
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
 
@@ -1247,6 +1257,7 @@ private:
 
     PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
     bool isFirstAxisAction_ = true;
+    bool stopWhenTouched_ = true;
 };
 } // namespace OHOS::Ace::NG
 

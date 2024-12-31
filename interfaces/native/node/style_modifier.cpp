@@ -7006,6 +7006,12 @@ int32_t SetSwiperAutoPlay(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
     }
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperAutoPlay(node->uiNodeHandle, item->value[0].i32);
+
+    bool stopWhenTouched = true;
+    if (item->size > NUM_1 && InRegion(NUM_0, NUM_1, item->value[1].i32)) {
+        stopWhenTouched = static_cast<bool>(item->value[1].i32);
+    }
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperStopWhenTouched(node->uiNodeHandle, stopWhenTouched);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -7013,12 +7019,15 @@ void ResetSwiperAutoPlay(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperAutoPlay(node->uiNodeHandle);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->resetSwiperStopWhenTouched(node->uiNodeHandle);
 }
 
 const ArkUI_AttributeItem* GetSwiperAutoPlay(ArkUI_NodeHandle node)
 {
     auto modifier = GetFullImpl()->getNodeModifiers()->getSwiperModifier();
     g_numberValues[0].i32 = modifier->getSwiperAutoPlay(node->uiNodeHandle);
+    g_numberValues[1].i32 = modifier->getSwiperStopWhenTouched(node->uiNodeHandle);
+    g_attributeItem.size = 2;
     return &g_attributeItem;
 }
 
