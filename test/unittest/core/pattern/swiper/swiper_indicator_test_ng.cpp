@@ -436,6 +436,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.L
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
@@ -628,5 +629,88 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
 
     auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
     EXPECT_EQ(groupTurnPageRate, -0.25f);
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternCheckIsTouchBottom001
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    GestureEvent info;
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoSwiper;
+    infoSwiper.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoSwiper;
+    indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
+
+    /**
+     * @tc.steps: step2. call CheckIsTouchBottom.
+     */
+    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternCheckIsTouchBottom002
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    TouchLocationInfo touchLocationInfo("down", 2);
+    indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
+
+    /**
+     * @tc.steps: step2. call CheckIsTouchBottom.
+     */
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternConvertAngleWithArcDirection001
+ * @tc.desc: ConvertAngleWithArcDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call ConvertAngleWithArcDirection.
+     */
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 91.0f),
+        179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 89.0f),
+        -179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, -91.0f),
+        179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, 1.0f),
+        -89.0f);
 }
 } // namespace OHOS::Ace::NG

@@ -38,7 +38,7 @@ public:
     {}
     ~LinearColor() = default;
 
-    static const LinearColor TRANSPARENT;
+    ACE_FORCE_EXPORT static const LinearColor TRANSPARENT;
     static const LinearColor WHITE;
     static const LinearColor BLACK;
     static const LinearColor RED;
