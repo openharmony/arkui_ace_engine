@@ -712,7 +712,7 @@ public:
     void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState(bool isNeedStateStyles = true);
+    void ClearFocusState(bool isNeedStateStyles = true, bool isNeedClearCallBack = true);
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
