@@ -80,6 +80,8 @@ struct SessionViewportConfig {
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
 };
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
@@ -215,7 +217,15 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
-    int32_t GetInstanceIdFromHost();
+    int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    void OnUIExtBusinessReceiveReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
+    void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+    void RegisterUIExtBusinessConsumeReplyCallback(
+        UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
 
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -299,6 +309,7 @@ private:
     {
         forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
     }
+    void RegisterEventProxyFlagCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -360,6 +371,8 @@ private:
     uint32_t realHostWindowId_ = 0;
     std::string want_;
     bool forceProcessOnKeyEventInternal_ = false;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
