@@ -141,7 +141,7 @@ class ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
-    if (component._needDiff) {
+    if (component && component._needDiff) {
       const stageTypeInfo = typeof this.stageValue;
       const valueTypeInfo = typeof this.value;
       let different = false;
@@ -10693,7 +10693,7 @@ class ArkSpanComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -26863,7 +26863,7 @@ class ArkXComponentComponent extends ArkComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
