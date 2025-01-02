@@ -172,6 +172,13 @@ void ResetImageAnimatorIteration(ArkUINodeHandle node)
     ImageAnimatorModelNG::SetIteration(frameNode, DEFAULT_ITERATION);
 }
 
+void SetAutoMonitorInvisibleArea(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(frameNode, value);
+}
+
 void SetImageAnimatorSrc(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -277,6 +284,7 @@ const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
         .resetImages = ImageAnimatorModifier::ResetImages,
         .setImageAnimatorIteration = ImageAnimatorModifier::SetImageAnimatorIteration,
         .resetImageAnimatorIteration = ImageAnimatorModifier::ResetImageAnimatorIteration,
+        .setAutoMonitorInvisibleArea = ImageAnimatorModifier::SetAutoMonitorInvisibleArea,
         .setImageAnimatorSrc = ImageAnimatorModifier::SetImageAnimatorSrc,
         .resetDuration = ImageAnimatorModifier::ResetDuration,
         .getIsReverse = ImageAnimatorModifier::GetIsReverse,

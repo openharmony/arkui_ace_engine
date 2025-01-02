@@ -30,6 +30,7 @@ public:
     void SetPreDecode(int32_t preDecode) override;
     void SetIsReverse(bool isReverse) override;
     void SetFixedSize(bool fixedSize) override;
+    void SetAutoMonitorInvisibleArea(bool autoMonitorInvisibleArea = false) override {};
     void SetOnStart(std::function<void()>&& OnStart) override;
     void SetOnPause(std::function<void()>&& OnPause) override;
     void SetOnRepeat(std::function<void()>&& OnRepeat) override;

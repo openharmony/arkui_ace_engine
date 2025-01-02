@@ -2338,6 +2338,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetIteration));
     imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetIterations"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::ResetIteration));
+    imageAnimator->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoMonitorInvisibleArea"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageAnimatorBridge::SetAutoMonitorInvisibleArea));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "imageAnimator"), imageAnimator);
 
     auto textInput = panda::ObjectRef::New(vm);
