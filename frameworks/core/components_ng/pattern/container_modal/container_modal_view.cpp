@@ -24,6 +24,7 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
+#include "core/components_ng/pattern/container_modal/container_modal_cj_utils.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -99,9 +100,17 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    auto isSucc = ExecuteCustomTitleAbc();
-    if (!isSucc) {
-        return nullptr;
+    auto currentContaioner = Container::GetContainer(Container::CurrentId());
+    CHECK_NULL_RETURN(currentContaioner, nullptr);
+    auto isCjApp = currentContaioner->IsCJApp();
+    if (isCjApp) {
+        auto node = BuildTitleNodeForCj();
+        NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(node);
+    } else {
+        auto isSucc = ExecuteCustomTitleAbc();
+        if (!isSucc) {
+            return nullptr;
+        }
     }
 
     // get custom node

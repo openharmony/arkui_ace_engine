@@ -91,6 +91,8 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
       OHOS::Ace::WindowUtils::*;
+      OHOS::Ace::NG::ParallelPagePattern::*;
+      OHOS::Ace::NG::ViewAdvancedRegister::*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
@@ -361,6 +363,8 @@
       VTT?for?OHOS::Ace::NG::CanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasRenderingContext2DModelNG;
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
+      VTT?for?OHOS::Ace::NG::ParallelPagePattern;
+      VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -452,6 +456,8 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
+      vtable?for?OHOS::Ace::NG::ParallelPagePattern;
+      vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;

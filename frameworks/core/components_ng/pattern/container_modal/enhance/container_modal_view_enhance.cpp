@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
+#include "core/components_ng/pattern/container_modal/container_modal_cj_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -78,7 +79,18 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     CHECK_NULL_RETURN(containerPattern, nullptr);
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
-    containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
+
+    // Confirm that if it is a pure Cangjie application, the node construction is completed on the C side
+    auto currentContaioner = Container::GetContainer(Container::CurrentId());
+    CHECK_NULL_RETURN(currentContaioner, nullptr);
+    auto isCjApp = currentContaioner->IsCJApp();
+    if (isCjApp) {
+        WeakPtr<ContainerModalPatternEnhance> weakPattern = controlButtonsRow->GetPattern<ContainerModalPatternEnhance>();
+        containerModalNode->AddChild(AddControlButtonsForCj(weakPattern, controlButtonsRow));
+    } else {
+        containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
+    }
+    
     containerPattern->Init();
     return containerModalNode;
 }
