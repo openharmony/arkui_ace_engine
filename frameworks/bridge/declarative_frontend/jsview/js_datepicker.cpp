@@ -865,7 +865,7 @@ std::function<void(const std::string&)> JSDatePickerDialog::GetDateAcceptEvent(c
 
 JsiRef<JsiValue> JSDatePickerDialog::GetDateObj(const std::unique_ptr<JsonValue>& selectedJson, bool isDatePicker)
 {
-    std::tm dateTime = { 0 };
+    std::tm dateTime {};
     auto year = selectedJson->GetValue("year");
     if (year && year->IsNumber()) {
         dateTime.tm_year = year->GetInt() - 1900; // local date start from 1900
@@ -1113,7 +1113,9 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject() && !info[0]->IsEmpty()) {
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+        && !info[0]->IsEmpty())) {
         return;
     }
 
@@ -1371,6 +1373,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
+    JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1410,6 +1413,15 @@ void JSTimePicker::EnableHapticFeedback(const JSCallbackInfo& info)
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::EnableCascade(const JSCallbackInfo& info)
+{
+    bool isEnableCascade = false;
+    if (info[0]->IsBoolean()) {
+        isEnableCascade = info[0]->ToBoolean();
+    }
+    TimePickerModel::GetInstance()->SetEnableCascade(isEnableCascade);
 }
 
 void JSTimePicker::DateTimeOptions(const JSCallbackInfo& info)
@@ -1668,7 +1680,9 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     CHECK_NULL_VOID(scopedDelegate);
-    if (!info[0]->IsObject() && !info[0]->IsEmpty()) {
+    if ((Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()) ||
+        (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && !info[0]->IsObject()
+        && !info[0]->IsEmpty())) {
         return;
     }
     auto paramObject = info[0]->IsEmpty() ? (JSRef<JSObject>::New()) : JSRef<JSObject>::Cast(info[0]);
@@ -1713,10 +1727,13 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
     auto selectedTime = paramObject->GetProperty("selected");
     auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObject->GetProperty("enableCascade");
     NG::TimePickerSettingData settingData;
     PickerDialogInfo pickerDialog;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    settingData.isEnableCascade = enableCascade->ToBoolean();
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    pickerDialog.isEnableCascade = enableCascade->ToBoolean();
     if (selectedTime->IsObject()) {
         PickerDate dialogTitleDate = ParseDate(selectedTime);
         if (dialogTitleDate.GetYear() != 0) {
@@ -1826,8 +1843,10 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObj->GetProperty("enableCascade");
     NG::TimePickerSettingData settingData;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    settingData.isEnableCascade = enableCascade->ToBoolean();
 
     DialogProperties properties;
     properties.alignment = theme->GetAlignment();
@@ -1865,13 +1884,16 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObj->GetProperty("enableCascade");
     bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    bool isEnableCascade = enableCascade->ToBoolean();
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
     timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
+    timePicker->SetEnableCascade(isEnableCascade);
     component = timePicker;
 }
 

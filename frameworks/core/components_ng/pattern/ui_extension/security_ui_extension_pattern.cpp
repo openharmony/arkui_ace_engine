@@ -29,6 +29,7 @@
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/error/error_code.h"
 #include "base/geometry/offset.h"
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/event_hub.h"
@@ -82,12 +83,22 @@ SecurityUIExtensionPattern::~SecurityUIExtensionPattern()
 void SecurityUIExtensionPattern::UnregisterResources()
 {
     PLATFORM_LOGI("UnregisterResources.");
+    ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     uiExtensionManager->RecycleExtensionId(uiExtensionId_);
     uiExtensionManager->RemoveDestroyedUIExtension(GetNodeId());
+
+    CHECK_NULL_VOID(accessibilityChildTreeCallback_);
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilityChildTreeCallback(
+        accessibilityChildTreeCallback_->GetAccessibilityId());
+    accessibilityChildTreeCallback_ = nullptr;
 }
 
 void SecurityUIExtensionPattern::Initialize(const NG::UIExtensionConfig& config)
@@ -284,6 +295,36 @@ void SecurityUIExtensionPattern::OnConnect()
     if (isFocused) {
         uiExtensionManager->RegisterSecurityUIExtensionInFocus(
             WeakClaim(this), sessionWrapper_);
+    }
+    InitializeAccessibility();
+}
+
+void SecurityUIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
+{
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(instanceId_);
+    switch (eventId) {
+        case UIExtCallbackEventId::ON_AREA_CHANGED:
+            break;
+        case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
+            OnUeaAccessibilityEventAsync();
+            break;
+        default:
+            break;
+    }
+}
+
+void SecurityUIExtensionPattern::OnUeaAccessibilityEventAsync()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
+        UIEXT_LOGI("security uec need notify register accessibility again %{public}d, %{public}d.",
+            accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
+        ResetAccessibilityChildTreeCallback();
+        InitializeAccessibility();
     }
 }
 
@@ -721,6 +762,29 @@ int64_t SecurityUIExtensionPattern::WrapExtensionAbilityId(
     int64_t extensionOffset, int64_t abilityId)
 {
     return uiExtensionId_ * extensionOffset + abilityId;
+}
+
+void SecurityUIExtensionPattern::DumpInfo()
+{
+    UIEXT_LOGI("Dump SecurityUEC Info In String Format");
+    DumpLog::GetInstance().AddDesc(std::string("UecType: ").append("SecurityUIExtensionComponent"));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
+}
+
+void SecurityUIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+    CHECK_NULL_VOID(json);
+    UIEXT_LOGI("Dump SecurityUEC Info In Json Format");
+    json->Put("UecType: ", "SecurityUIExtensionComponent");
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
 }
 
 const char* SecurityUIExtensionPattern::ToString(AbilityState state)

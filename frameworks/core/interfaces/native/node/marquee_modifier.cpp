@@ -257,25 +257,79 @@ void ResetMarqueeDirection(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIMarqueeModifier* GetMarqueeModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIMarqueeModifier modifier = {
-        SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
-        ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
-        ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
-        ResetMarqueeUpdateStrategy, SetMarqueeOnStart, ResetMarqueeOnStart,
-        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish, SetMarqueeSrcValue,
-        ResetMarqueeSrcValue, SetMarqueePlayerStatus, ResetMarqueePlayerStatus, SetMarqueeScrollAmount,
-        ResetMarqueeScrollAmount, SetMarqueeLoop, ResetMarqueeLoop, SetMarqueeDirection, ResetMarqueeDirection };
+        .setMarqueeFontSize = SetMarqueeFontSize,
+        .resetMarqueeFontSize = ResetMarqueeFontSize,
+        .setMarqueeFontColor = SetMarqueeFontColor,
+        .resetMarqueeFontColor = ResetMarqueeFontColor,
+        .setMarqueeAllowScale = SetMarqueeAllowScale,
+        .resetMarqueeAllowScale = ResetMarqueeAllowScale,
+        .setMarqueeFontWeight = SetMarqueeFontWeight,
+        .resetMarqueeFontWeight = ResetMarqueeFontWeight,
+        .setMarqueeFontFamily = SetMarqueeFontFamily,
+        .resetMarqueeFontFamily = ResetMarqueeFontFamily,
+        .setMarqueeUpdateStrategy = SetMarqueeUpdateStrategy,
+        .resetMarqueeUpdateStrategy = ResetMarqueeUpdateStrategy,
+        .setMarqueeOnStart = SetMarqueeOnStart,
+        .resetMarqueeOnStart = ResetMarqueeOnStart,
+        .setMarqueeOnBounce = SetMarqueeOnBounce,
+        .resetMarqueeOnBounce = ResetMarqueeOnBounce,
+        .setMarqueeOnFinish = SetMarqueeOnFinish,
+        .resetMarqueeOnFinish = ResetMarqueeOnFinish,
+        .setMarqueeSrcValue = SetMarqueeSrcValue,
+        .resetMarqueeSrcValue = ResetMarqueeSrcValue,
+        .setMarqueePlayerStatus = SetMarqueePlayerStatus,
+        .resetMarqueePlayerStatus = ResetMarqueePlayerStatus,
+        .setMarqueeScrollAmount = SetMarqueeScrollAmount,
+        .resetMarqueeScrollAmount = ResetMarqueeScrollAmount,
+        .setMarqueeLoop = SetMarqueeLoop,
+        .resetMarqueeLoop = ResetMarqueeLoop,
+        .setMarqueeDirection = SetMarqueeDirection,
+        .resetMarqueeDirection = ResetMarqueeDirection,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIMarqueeModifier* GetCJUIMarqueeModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIMarqueeModifier modifier = {
-        SetMarqueeFontSize, ResetMarqueeFontSize, SetMarqueeFontColor,
-        ResetMarqueeFontColor, SetMarqueeAllowScale, ResetMarqueeAllowScale, SetMarqueeFontWeight,
-        ResetMarqueeFontWeight, SetMarqueeFontFamily, ResetMarqueeFontFamily, SetMarqueeUpdateStrategy,
-        ResetMarqueeUpdateStrategy, SetMarqueeOnStart, ResetMarqueeOnStart,
-        SetMarqueeOnBounce, ResetMarqueeOnBounce, SetMarqueeOnFinish, ResetMarqueeOnFinish };
+        .setMarqueeFontSize = SetMarqueeFontSize,
+        .resetMarqueeFontSize = ResetMarqueeFontSize,
+        .setMarqueeFontColor = SetMarqueeFontColor,
+        .resetMarqueeFontColor = ResetMarqueeFontColor,
+        .setMarqueeAllowScale = SetMarqueeAllowScale,
+        .resetMarqueeAllowScale = ResetMarqueeAllowScale,
+        .setMarqueeFontWeight = SetMarqueeFontWeight,
+        .resetMarqueeFontWeight = ResetMarqueeFontWeight,
+        .setMarqueeFontFamily = SetMarqueeFontFamily,
+        .resetMarqueeFontFamily = ResetMarqueeFontFamily,
+        .setMarqueeUpdateStrategy = SetMarqueeUpdateStrategy,
+        .resetMarqueeUpdateStrategy = ResetMarqueeUpdateStrategy,
+        .setMarqueeOnStart = SetMarqueeOnStart,
+        .resetMarqueeOnStart = ResetMarqueeOnStart,
+        .setMarqueeOnBounce = SetMarqueeOnBounce,
+        .resetMarqueeOnBounce = ResetMarqueeOnBounce,
+        .setMarqueeOnFinish = SetMarqueeOnFinish,
+        .resetMarqueeOnFinish = ResetMarqueeOnFinish,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

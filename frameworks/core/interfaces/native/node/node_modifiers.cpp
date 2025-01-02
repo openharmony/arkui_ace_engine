@@ -35,6 +35,7 @@
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
+#include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -80,7 +81,9 @@
 #include "core/interfaces/native/node/polygon_modifier.h"
 #include "core/interfaces/native/node/polyline_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#endif
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/interfaces/native/node/rect_modifier.h"
@@ -100,6 +103,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 
@@ -119,279 +123,384 @@
 #include "core/interfaces/native/node/form_component_modifier.h"
 #endif
 
-namespace OHOS::Ace::NG {
-namespace {
-const ArkUINodeModifiers impl = {
-    ARKUI_NODE_MODIFIERS_API_VERSION,
-    NodeModifier::GetCommonModifier,
-    NodeModifier::GetCheckboxGroupModifier,
-    NodeModifier::GetCounterModifier,
-    NodeModifier::GetRowModifier,
-    NodeModifier::GetRowSplitModifier,
-    NodeModifier::GetTextModifier,
-    NodeModifier::GetButtonModifier,
-    NodeModifier::GetToggleModifier,
-    NodeModifier::GetImageSpanModifier,
-    NodeModifier::GetBlankModifier,
-    NodeModifier::GetSearchModifier,
-    NodeModifier::GetSelectModifier,
-    NodeModifier::GetRadioModifier,
-    NodeModifier::GetCheckboxModifier,
-    NodeModifier::GetTimepickerModifier,
-    NodeModifier::GetTextPickerModifier,
-    NodeModifier::GetRatingModifier,
-    NodeModifier::GetSliderModifier,
-    NodeModifier::GetDividerModifier,
-    NodeModifier::GetStackModifier,
-    NodeModifier::GetFolderStackModifier,
-    NodeModifier::GetNavDestinationModifier,
-    NodeModifier::GetGridModifier,
-    NodeModifier::GetGridColModifier,
-    NodeModifier::GetGridRowModifier,
-    NodeModifier::GetPanelModifier,
-    NodeModifier::GetTextAreaModifier,
-    NodeModifier::GetNavigationModifier,
-    NodeModifier::GetColumnModifier,
-    NodeModifier::GetRichEditorModifier,
-    NodeModifier::GetImageModifier,
-    NodeModifier::GetVideoModifier,
-    nullptr,
-    NodeModifier::GetNavigatorModifier,
-    NodeModifier::GetNavRouterModifier,
-    NodeModifier::GetNodeContainerModifier,
-    NodeModifier::GetPatternLockModifier,
-    NodeModifier::GetColumnSplitModifier,
-    NodeModifier::GetLineModifier,
-    NodeModifier::GetPathModifier,
-    NodeModifier::GetPolygonModifier,
-    NodeModifier::GetPolylineModifier,
-    NodeModifier::GetSpanModifier,
-    NodeModifier::GetImageAnimatorModifier,
-    NodeModifier::GetSideBarContainerModifier,
-    NodeModifier::GetCalendarPickerModifier,
-    NodeModifier::GetTextInputModifier,
-    NodeModifier::GetTabsModifier,
-    NodeModifier::GetStepperItemModifier,
-    NodeModifier::GetHyperlinkModifier,
-    NodeModifier::GetMarqueeModifier,
-    NodeModifier::GetMenuItemModifier,
-    NodeModifier::GetMenuModifier,
-    NodeModifier::GetDatePickerModifier,
-    NodeModifier::GetWaterFlowModifier,
-    NodeModifier::GetAlphabetIndexerModifier,
-    NodeModifier::GetDataPanelModifier,
-    NodeModifier::GetGaugeModifier,
-    NodeModifier::GetScrollModifier,
-    NodeModifier::GetScrollableModifier,
-    NodeModifier::GetGridItemModifier,
-    NodeModifier::GetProgressModifier,
-    NodeModifier::GetCommonShapeModifier,
-    NodeModifier::GetShapeModifier,
-    NodeModifier::GetRectModifier,
-    NodeModifier::GetSwiperModifier,
-    NodeModifier::GetListItemModifier,
-    NodeModifier::GetListModifier,
-    NodeModifier::GetListItemGroupModifier,
-    NodeModifier::GetQRCodeModifier,
-    NodeModifier::GetLoadingProgressModifier,
-    NodeModifier::GetTextClockModifier,
-    NodeModifier::GetTextTimerModifier,
-    NodeModifier::GetRenderNodeModifier,
-    NodeModifier::GetFrameNodeModifier,
-
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-    NodeModifier::GetPluginModifier,
-#else
-    nullptr,
-#endif
-
-#ifdef XCOMPONENT_SUPPORTED
-    NodeModifier::GetXComponentModifier,
-#else
-    nullptr,
-#endif
-
-    NodeModifier::GetUIStateModifier,
-
-#ifdef FORM_SUPPORTED
-    NodeModifier::GetFormComponentModifier,
-#else
-    nullptr,
-#endif
-    NodeModifier::GetFlexModifier, // FlexModifier
-    NodeModifier::GetScrollBarModifier, // ScrollBarModifier
-    NodeModifier::GetScrollerModifier,
-    NodeModifier::GetTabContentModifier,
-    nullptr, // TabsControllerModifier
-    NodeModifier::GetSwiperControllerModifier,
-    NodeModifier::GetGestureModifier, // GestureModifier
-    NodeModifier::GetBadgeModifier, // BadgeModifier
-    nullptr, // WebModifier
-    NodeModifier::GetRefreshModifier, // RefreshModifier
-    nullptr, // MenuItemGroupModifier
-    nullptr, // SearchControllerModifier
-    nullptr, // SideBarModifier
-    nullptr, // PatternLockControllerModifier
-    nullptr, // TextTimerControllerModifier
-    nullptr, // TextClockControllerModifier
-    nullptr, // RichEditorControllerModifier
-    nullptr, // TextAreaControllerModifier
-    NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
-    NodeModifier::GetParticleModifier,
-    NodeModifier::GetNodeContentModifier,
-    NodeModifier::GetSymbolGlyphModifier,
-    NodeModifier::GetSymbolSpanModifier,
-
-#ifdef MODEL_COMPONENT_SUPPORTED
-    NodeModifier::GetComponent3DModifier,
-#else
-    nullptr,
-#endif
-
-    NodeModifier::GetContainerSpanModifier,
-    NodeModifier::GetCustomNodeExtModifier,
-};
-} // namespace
-
-} // namespace OHOS::Ace::NG
+using namespace OHOS::Ace::NG;
 
 extern "C" {
-
 const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
-    return &OHOS::Ace::NG::impl;
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static ArkUINodeModifiers impl = {
+        .version = ARKUI_NODE_MODIFIERS_API_VERSION,
+        .getCommonModifier = NodeModifier::GetCommonModifier,
+        .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
+        .getCounterModifier = NodeModifier::GetCounterModifier,
+        .getRowModifier = NodeModifier::GetRowModifier,
+    #ifndef ARKUI_WEARABLE
+        .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
+        .getTextModifier = NodeModifier::GetTextModifier,
+        .getButtonModifier = NodeModifier::GetButtonModifier,
+        .getToggleModifier = NodeModifier::GetToggleModifier,
+        .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
+        .getBlankModifier = NodeModifier::GetBlankModifier,
+        .getSearchModifier = NodeModifier::GetSearchModifier,
+    #ifndef ARKUI_WEARABLE
+        .getSelectModifier = NodeModifier::GetSelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
+        .getRadioModifier = NodeModifier::GetRadioModifier,
+        .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
+        .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
+        .getTextPickerModifier = NodeModifier::GetTextPickerModifier,
+        .getRatingModifier = NodeModifier::GetRatingModifier,
+        .getSliderModifier = NodeModifier::GetSliderModifier,
+        .getDividerModifier = NodeModifier::GetDividerModifier,
+        .getStackModifier = NodeModifier::GetStackModifier,
+    #ifndef ARKUI_WEARABLE
+        .getFolderStackModifier = NodeModifier::GetFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
+        .getNavDestinationModifier = NodeModifier::GetNavDestinationModifier,
+        .getGridModifier = NodeModifier::GetGridModifier,
+        .getGridColModifier = NodeModifier::GetGridColModifier,
+        .getGridRowModifier = NodeModifier::GetGridRowModifier,
+        .getPanelModifier = NodeModifier::GetPanelModifier,
+        .getTextAreaModifier = NodeModifier::GetTextAreaModifier,
+        .getNavigationModifier = NodeModifier::GetNavigationModifier,
+        .getColumnModifier = NodeModifier::GetColumnModifier,
+        .getRichEditorModifier = NodeModifier::GetRichEditorModifier,
+        .getImageModifier = NodeModifier::GetImageModifier,
+        .getVideoModifier = NodeModifier::GetVideoModifier,
+        .getVideoControllerModifier = nullptr,
+        .getNavigatorModifier = NodeModifier::GetNavigatorModifier,
+        .getNavRouterModifier = NodeModifier::GetNavRouterModifier,
+        .getNodeContainerModifier = NodeModifier::GetNodeContainerModifier,
+        .getPatternLockModifier = NodeModifier::GetPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
+        .getColumnSplitModifier = NodeModifier::GetColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
+        .getLineModifier = NodeModifier::GetLineModifier,
+        .getPathModifier = NodeModifier::GetPathModifier,
+        .getPolygonModifier = NodeModifier::GetPolygonModifier,
+        .getPolylineModifier = NodeModifier::GetPolylineModifier,
+        .getSpanModifier = NodeModifier::GetSpanModifier,
+        .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
+        .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
+        .getTextInputModifier = NodeModifier::GetTextInputModifier,
+    #ifndef ARKUI_WEARABLE
+        .getTabsModifier = NodeModifier::GetTabsModifier,
+    #else
+        .getTabsModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
+        .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
+        .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
+        .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
+        .getMenuModifier = NodeModifier::GetMenuModifier,
+        .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
+    #ifndef ARKUI_WEARABLE
+        .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
+    #else
+        .getWaterFlowModifier = nullptr,
+    #endif
+        .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
+        .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
+        .getGaugeModifier = NodeModifier::GetGaugeModifier,
+        .getScrollModifier = NodeModifier::GetScrollModifier,
+        .getScrollableModifier = NodeModifier::GetScrollableModifier,
+        .getGridItemModifier = NodeModifier::GetGridItemModifier,
+        .getProgressModifier = NodeModifier::GetProgressModifier,
+        .getCommonShapeModifier = NodeModifier::GetCommonShapeModifier,
+        .getShapeModifier = NodeModifier::GetShapeModifier,
+        .getRectModifier = NodeModifier::GetRectModifier,
+        .getSwiperModifier = NodeModifier::GetSwiperModifier,
+        .getListItemModifier = NodeModifier::GetListItemModifier,
+        .getListModifier = NodeModifier::GetListModifier,
+        .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
+        .getQRCodeModifier = NodeModifier::GetQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
+        .getLoadingProgressModifier = NodeModifier::GetLoadingProgressModifier,
+        .getTextClockModifier = NodeModifier::GetTextClockModifier,
+        .getTextTimerModifier = NodeModifier::GetTextTimerModifier,
+        .getRenderNodeModifier = NodeModifier::GetRenderNodeModifier,
+        .getFrameNodeModifier = NodeModifier::GetFrameNodeModifier,
+    #ifdef PLUGIN_COMPONENT_SUPPORTED
+        .getPluginModifier = NodeModifier::GetPluginModifier,
+    #else
+        .getPluginModifier = nullptr,
+    #endif
+    #ifdef XCOMPONENT_SUPPORTED
+        .getXComponentModifier = NodeModifier::GetXComponentModifier,
+    #else
+        .getXComponentModifier = nullptr,
+    #endif
+        .getUIStateModifier = NodeModifier::GetUIStateModifier,
+    #ifdef FORM_SUPPORTED
+        .getFormComponentModifier = NodeModifier::GetFormComponentModifier,
+    #else
+        .getFormComponentModifier = nullptr,
+    #endif
+        .getFlexModifier = NodeModifier::GetFlexModifier, // FlexModifier
+        .getScrollBarModifier = NodeModifier::GetScrollBarModifier, // ScrollBarModifier
+        .getScrollerModifier = NodeModifier::GetScrollerModifier,
+    #ifndef ARKUI_WEARABLE
+        .getTabContentModifier = NodeModifier::GetTabContentModifier,
+    #else
+        .getTabContentModifier = nullptr,
+    #endif
+        .getTabsControllerModifier = nullptr, // TabsControllerModifier
+        .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
+        .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
+        .getBadgeModifier = NodeModifier::GetBadgeModifier, // BadgeModifier
+        .getWebModifier = nullptr, // WebModifier
+        .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
+        .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
+        .getSearchControllerModifier = nullptr, // SearchControllerModifier
+        .getSideBarModifier = nullptr, // SideBarModifier
+        .getPatternLockControllerModifier = nullptr, // PatternLockControllerModifier
+        .getTextTimerControllerModifier = nullptr, // TextTimerControllerModifier
+        .getTextClockControllerModifier = nullptr, // TextClockControllerModifier
+        .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
+        .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
+        .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
+        .getParticleModifier = NodeModifier::GetParticleModifier,
+    #ifndef ARKUI_WEARABLE
+        .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
+        .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
+        .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
+    #ifdef MODEL_COMPONENT_SUPPORTED
+        .getComponent3DModifier = NodeModifier::GetComponent3DModifier,
+    #else
+        .getComponent3DModifier = nullptr,
+    #endif
+        .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
+        .getCustomNodeExtModifier = nullptr,
+        .getThemeModifier = NodeModifier::GetThemeModifier,
+        .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
+    return &impl;
 }
 
 const CJUINodeModifiers* GetCJUINodeModifiers()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static CJUINodeModifiers modifiers {
-    ARKUI_NODE_MODIFIERS_API_VERSION,
-    OHOS::Ace::NG::NodeModifier::GetCJUICommonModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUICheckboxGroupModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUICounterModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRowModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRowSplitModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIButtonModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIToggleModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIImageSpanModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIBlankModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISearchModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISelectModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRadioModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUICheckboxModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITimepickerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextPickerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRatingModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISliderModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIDividerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIStackModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIFolderStackModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUINavDestinationModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGridModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGridColModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGridRowModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIPanelModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextAreaModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUINavigationModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIColumnModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRichEditorModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIImageModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIVideoModifier,
-    nullptr,
-    nullptr,
-    OHOS::Ace::NG::NodeModifier::GetCJUINavRouterModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUINodeContainerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIPatternLockModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIColumnSplitModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUILineModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIPathModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIPolygonModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIPolylineModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISpanModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIImageAnimatorModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISideBarContainerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUICalendarPickerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextInputModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITabsModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIStepperItemModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIHyperlinkModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIMarqueeModifier,
-    nullptr,
-    OHOS::Ace::NG::NodeModifier::GetCJUIMenuModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIDatePickerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIWaterFlowModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIAlphabetIndexerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIDataPanelModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGaugeModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIScrollModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGridItemModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIProgressModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUICommonShapeModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIShapeModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRectModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISwiperModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIListItemModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIListModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIListItemGroupModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIQRCodeModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUILoadingProgressModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextClockModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITextTimerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIRenderNodeModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIFrameNodeModifier,
+        .version = ARKUI_NODE_MODIFIERS_API_VERSION,
+        .getCommonModifier = NodeModifier::GetCJUICommonModifier,
+        .getCheckboxGroupModifier = NodeModifier::GetCJUICheckboxGroupModifier,
+        .getCounterModifier = NodeModifier::GetCJUICounterModifier,
+        .getRowModifier = NodeModifier::GetCJUIRowModifier,
+    #ifndef ARKUI_WEARABLE
+        .getRowSplitModifier = NodeModifier::GetCJUIRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
+        .getTextModifier = NodeModifier::GetCJUITextModifier,
+        .getButtonModifier = NodeModifier::GetCJUIButtonModifier,
+        .getToggleModifier = NodeModifier::GetCJUIToggleModifier,
+        .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
+        .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
+        .getSearchModifier = NodeModifier::GetCJUISearchModifier,
+    #ifndef ARKUI_WEARABLE
+        .getSelectModifier = NodeModifier::GetCJUISelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
+        .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
+        .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
+        .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
+        .getTextPickerModifier = NodeModifier::GetCJUITextPickerModifier,
+        .getRatingModifier = NodeModifier::GetCJUIRatingModifier,
+        .getSliderModifier = NodeModifier::GetCJUISliderModifier,
+        .getDividerModifier = NodeModifier::GetCJUIDividerModifier,
+        .getStackModifier = NodeModifier::GetCJUIStackModifier,
+    #ifndef ARKUI_WEARABLE
+        .getFolderStackModifier = NodeModifier::GetCJUIFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
+        .getNavDestinationModifier = NodeModifier::GetCJUINavDestinationModifier,
+        .getGridModifier = NodeModifier::GetCJUIGridModifier,
+        .getGridColModifier = NodeModifier::GetCJUIGridColModifier,
+        .getGridRowModifier = NodeModifier::GetCJUIGridRowModifier,
+        .getPanelModifier = NodeModifier::GetCJUIPanelModifier,
+        .getTextAreaModifier = NodeModifier::GetCJUITextAreaModifier,
+        .getNavigationModifier = NodeModifier::GetCJUINavigationModifier,
+        .getColumnModifier = NodeModifier::GetCJUIColumnModifier,
+        .getRichEditorModifier = NodeModifier::GetCJUIRichEditorModifier,
+        .getImageModifier = NodeModifier::GetCJUIImageModifier,
+        .getVideoModifier = NodeModifier::GetCJUIVideoModifier,
+        .getVideoControllerModifier = nullptr,
+        .getNavigatorModifier = nullptr,
+        .getNavRouterModifier = NodeModifier::GetCJUINavRouterModifier,
+        .getNodeContainerModifier = NodeModifier::GetCJUINodeContainerModifier,
+        .getPatternLockModifier = NodeModifier::GetCJUIPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
+        .getColumnSplitModifier = NodeModifier::GetCJUIColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
+        .getLineModifier = NodeModifier::GetCJUILineModifier,
+        .getPathModifier = NodeModifier::GetCJUIPathModifier,
+        .getPolygonModifier = NodeModifier::GetCJUIPolygonModifier,
+        .getPolylineModifier = NodeModifier::GetCJUIPolylineModifier,
+        .getSpanModifier = NodeModifier::GetCJUISpanModifier,
+        .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
+        .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
+        .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
+    #ifndef ARKUI_WEARABLE
+        .getTabsModifier = NodeModifier::GetCJUITabsModifier,
+    #else
+        .getTabsModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
+        .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
+        .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
+        .getMenuItemModifier = nullptr,
+        .getMenuModifier = NodeModifier::GetCJUIMenuModifier,
+        .getDatePickerModifier = NodeModifier::GetCJUIDatePickerModifier,
+    #ifndef ARKUI_WEARABLE
+        .getWaterFlowModifier = NodeModifier::GetCJUIWaterFlowModifier,
+    #else
+        .getWaterFlowModifier = nullptr,
+    #endif
+        .getAlphabetIndexerModifier = NodeModifier::GetCJUIAlphabetIndexerModifier,
+        .getDataPanelModifier = NodeModifier::GetCJUIDataPanelModifier,
+        .getGaugeModifier = NodeModifier::GetCJUIGaugeModifier,
+        .getScrollModifier = NodeModifier::GetCJUIScrollModifier,
+        .getGridItemModifier = NodeModifier::GetCJUIGridItemModifier,
+        .getProgressModifier = NodeModifier::GetCJUIProgressModifier,
+        .getCommonShapeModifier = NodeModifier::GetCJUICommonShapeModifier,
+        .getShapeModifier = NodeModifier::GetCJUIShapeModifier,
+        .getRectModifier = NodeModifier::GetCJUIRectModifier,
+        .getSwiperModifier = NodeModifier::GetCJUISwiperModifier,
+        .getListItemModifier = NodeModifier::GetCJUIListItemModifier,
+        .getListModifier = NodeModifier::GetCJUIListModifier,
+        .getListItemGroupModifier = NodeModifier::GetCJUIListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
+        .getQRCodeModifier = NodeModifier::GetCJUIQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
+        .getLoadingProgressModifier = NodeModifier::GetCJUILoadingProgressModifier,
+        .getTextClockModifier = NodeModifier::GetCJUITextClockModifier,
+        .getTextTimerModifier = NodeModifier::GetCJUITextTimerModifier,
+        .getRenderNodeModifier = NodeModifier::GetCJUIRenderNodeModifier,
+        .getFrameNodeModifier = NodeModifier::GetCJUIFrameNodeModifier,
 
-#ifdef PLUGIN_COMPONENT_SUPPORTED
-    OHOS::Ace::NG::NodeModifier::GetCJUIPluginModifier,
-#else
-    nullptr,
-#endif
+    #ifdef PLUGIN_COMPONENT_SUPPORTED
+        .getPluginModifier = NodeModifier::GetCJUIPluginModifier,
+    #else
+        .getPluginModifier = nullptr,
+    #endif
 
-#ifdef XCOMPONENT_SUPPORTED
-    OHOS::Ace::NG::NodeModifier::GetCJUIXComponentModifier,
-#else
-    nullptr,
-#endif
+    #ifdef XCOMPONENT_SUPPORTED
+        .getXComponentModifier = NodeModifier::GetCJUIXComponentModifier,
+    #else
+        .getXComponentModifier = nullptr,
+    #endif
 
-    OHOS::Ace::NG::NodeModifier::GetCJUIStateModifier,
+        .getUIStateModifier = NodeModifier::GetCJUIStateModifier,
 
-#ifdef FORM_SUPPORTED
-    OHOS::Ace::NG::NodeModifier::GetCJUIFormComponentModifier,
-#else
-    nullptr,
-#endif
-    OHOS::Ace::NG::NodeModifier::GetCJUIFlexModifier, // FlexModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUIScrollerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUITabContentModifier,
-    nullptr, // TabsControllerModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUISwiperControllerModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIGestureModifier, // GestureModifier
-    nullptr, // BadgeModifier
-    nullptr, // WebModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
-    nullptr, // MenuItemGroupModifier
-    nullptr, // SearchControllerModifier
-    nullptr, // SideBarModifier
-    nullptr, // PatternLockControllerModifier
-    nullptr, // TextTimerControllerModifier
-    nullptr, // TextClockControllerModifier
-    nullptr, // RichEditorControllerModifier
-    nullptr, // TextAreaControllerModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
-    OHOS::Ace::NG::NodeModifier::GetCJUINodeContentModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUIParticleModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISymbolGlyphModifier,
-    OHOS::Ace::NG::NodeModifier::GetCJUISymbolSpanModifier,
+    #ifdef FORM_SUPPORTED
+        .getFormComponentModifier = NodeModifier::GetCJUIFormComponentModifier,
+    #else
+        .getFormComponentModifier = nullptr,
+    #endif
+        .getFlexModifier = NodeModifier::GetCJUIFlexModifier, // FlexModifier
+        .getScrollBarModifier = NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
+        .getScrollerModifier = NodeModifier::GetCJUIScrollerModifier,
+    #ifndef ARKUI_WEARABLE
+        .getTabContentModifier = NodeModifier::GetCJUITabContentModifier,
+    #else
+        .getTabContentModifier = nullptr,
+    #endif
+        .getTabsControllerModifier = nullptr, // TabsControllerModifier
+        .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
+        .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
+        .getBadgeModifier = nullptr, // BadgeModifier
+        .getWebModifier = nullptr, // WebModifier
+        .getRefreshModifier = NodeModifier::GetCJUIRefreshModifier, // RefreshModifier
+        .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
+        .getSearchControllerModifier = nullptr, // SearchControllerModifier
+        .getSideBarModifier = nullptr, // SideBarModifier
+        .getPatternLockControllerModifier = nullptr, // PatternLockControllerModifier
+        .getTextTimerControllerModifier = nullptr, // TextTimerControllerModifier
+        .getTextClockControllerModifier = nullptr, // TextClockControllerModifier
+        .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
+        .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
+        .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
+    #ifndef ARKUI_WEARABLE
+        .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
+        .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
+        .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
+        .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
 
-#ifdef MODEL_COMPONENT_SUPPORTED
-    OHOS::Ace::NG::NodeModifier::GetCJUIComponent3DModifier,
-#else
-    nullptr,
-#endif
+    #ifdef MODEL_COMPONENT_SUPPORTED
+        .getComponent3DModifier = NodeModifier::GetCJUIComponent3DModifier,
+    #else
+        .getComponent3DModifier = nullptr,
+    #endif
 
-    OHOS::Ace::NG::NodeModifier::GetCJUIContainerSpanModifier,
+        .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 6; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifiers;
 }
 }

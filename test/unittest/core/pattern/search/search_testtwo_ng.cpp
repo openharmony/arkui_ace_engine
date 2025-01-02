@@ -1601,6 +1601,38 @@ HWTEST_F(SearchTestTwoNg, PatternHandleFocusEvent001, TestSize.Level1)
     EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 
+
+/**
+ * @tc.name: HalfLeading001
+ * @tc.desc: test search halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, HalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set halfLeading true.
+     */
+    searchModelInstance.SetHalfLeading(true);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test halfLeading
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetHalfLeading(), true);
+}
+
 /**
  * @tc.name: SetTextFont(FrameNode* frameNode, const Font& font)
  * @tc.desc: test search
@@ -1661,5 +1693,40 @@ HWTEST_F(SearchTestTwoNg, CreateSearchNode, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     searchModelInstance.SetSearchDefaultIcon();
     searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
+}
+
+/**
+ * @tc.name: SymbolColorToString001
+ * @tc.desc: SymbolColorToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SymbolColorToString001, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<SearchPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::vector<Color> colors;
+    colors.push_back(Color::BLUE);
+    auto result = searchPattern->SymbolColorToString(colors);
+    EXPECT_NE(result, "");
+}
+
+/**
+ * @tc.name: SymbolColorToString002
+ * @tc.desc: SymbolColorToString
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, SymbolColorToString002, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(V2::SEARCH_ETS_TAG, nodeId, AceType::MakeRefPtr<SearchPattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto searchPattern = AceType::DynamicCast<SearchPattern>(frameNode->GetPattern());
+    ASSERT_NE(searchPattern, nullptr);
+    std::vector<Color> colors;
+    auto result = searchPattern->SymbolColorToString(colors);
+    EXPECT_EQ(result, "");
 }
 } // namespace OHOS::Ace::NG

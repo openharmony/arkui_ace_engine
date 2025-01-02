@@ -230,7 +230,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->overScroll_ = false;
+    algorithm->canOverScrollStart_ = false;
+    algorithm->canOverScrollEnd_ = false;
     auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
@@ -426,7 +427,8 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
-    algo->overScroll_ = true;
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -760,8 +762,7 @@ HWTEST_F(GridIrregularLayoutTest, JumpCenter001, TestSize.Level1)
     CreateFixedHeightItems(1, 925.0f);
     CreateFixedHeightItems(4, 150.0f);
     CreateDone();
-    pattern_->ScrollToIndex(2, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::CENTER);
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.endMainLineIndex_, 5);
@@ -786,28 +787,23 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos001, TestSize.Level1)
     CreateFixedHeightItems(4, 150.0f);
     CreateDone();
 
-    pattern_->ScrollToIndex(2, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(2, true, ScrollAlign::CENTER);
     EXPECT_EQ(pattern_->finalPosition_, 417.5f);
 
     UpdateCurrentOffset(-200.0f);
 
-    pattern_->ScrollToIndex(1, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(1, true, ScrollAlign::CENTER);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 
-    pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::CENTER);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 
     UpdateCurrentOffset(-100.0f);
 
-    pattern_->ScrollToIndex(6, true, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(6, true, ScrollAlign::END);
     EXPECT_EQ(pattern_->finalPosition_, 215.0f);
 
-    pattern_->ScrollToIndex(2, true, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(2, true, ScrollAlign::END);
     EXPECT_EQ(pattern_->finalPosition_, 680.0f);
 }
 
@@ -829,12 +825,10 @@ HWTEST_F(GridIrregularLayoutTest, TargetPos002, TestSize.Level1)
     CreateFixedHeightItems(1, 150.0f);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(pattern_->info_.startMainLineIndex_, 1);
 
-    pattern_->ScrollToIndex(0, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(0, true, ScrollAlign::CENTER);
     EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 
     EXPECT_EQ(
@@ -877,24 +871,20 @@ HWTEST_F(GridIrregularLayoutTest, JumpAuto001, TestSize.Level1)
     CreateFixedHeightItems(4, 150.0f);
     CreateDone();
 
-    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::AUTO);
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.endMainLineIndex_, 6);
     EXPECT_EQ(GetChildY(frameNode_, 2), -525.0f);
 
     // shouldn't move
-    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::AUTO);
     EXPECT_EQ(GetChildY(frameNode_, 2), -525.0f);
 
-    pattern_->ScrollToIndex(2, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::START);
     EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
 
-    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
-    FlushUITasks();
+    ScrollToIndex(2, false, ScrollAlign::AUTO);
     EXPECT_EQ(GetChildY(frameNode_, 2), 0.0f);
 }
 
@@ -914,8 +904,7 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
     CreateFixedHeightItems(1, 900.0f);
     CreateFixedHeightItems(4, 150.0f);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 1);
     EXPECT_EQ(info.currentOffset_, -500.0f);
@@ -1444,8 +1433,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange001, TestSize.Level1)
     const auto& info = pattern_->info_;
     // only know 3 items
     EXPECT_EQ(info.GetIrregularHeight(10.0f), 8 * 250.0f + 7 * 10.0f);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(info.offsetEnd_);
     EXPECT_EQ(info.GetIrregularOffset(10.0f), 110.0f + 6 * 260.0f);
     EXPECT_EQ(info.GetIrregularHeight(10.0f), 8 * 250.0f + 7 * 10.0f);
@@ -1488,8 +1476,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     const auto& info = pattern_->info_;
     // only know 1 item
     EXPECT_EQ(info.GetIrregularHeight(5.0f), 27 * 300.0f + 26 * 5.0f);
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(info.offsetEnd_);
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 8);
@@ -1523,15 +1510,13 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange003, TestSize.Level1)
     CreateFixedHeightItems(1, 900.0f);
     CreateFixedHeightItems(5, 150.0f);
     CreateDone();
-    pattern_->ScrollToIndex(3, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(3, false, ScrollAlign::CENTER);
     EXPECT_EQ(GetChildY(frameNode_, 3), -250.0f);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
-    pattern_->ScrollToIndex(3, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(3, true, ScrollAlign::CENTER);
     pattern_->finalPosition_ = Infinity<float>();
     // finalPosition shouldn't be set because targetPos = current pos
     EXPECT_EQ(pattern_->finalPosition_, Infinity<float>());
@@ -1557,8 +1542,7 @@ HWTEST_F(GridIrregularLayoutTest, DeleteItem001, TestSize.Level1)
     ViewAbstract::SetHeight(CalcLength(200.0f));
     CreateDone();
     const auto& info = pattern_->info_;
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(info.offsetEnd_);
     for (int i = 0; i < 6; ++i) {
         frameNode_->RemoveChildAtIndex(3);
@@ -1622,8 +1606,7 @@ HWTEST_F(GridIrregularLayoutTest, Horizontal001, TestSize.Level1)
     CreateFixedWidthItems(20, 605.0f);
     CreateFixedWidthItems(8, 300.0f);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     layoutProperty_->UpdateRowsTemplate("1fr 1fr 1fr 1fr");
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1793,15 +1776,14 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone();
 
     int32_t targetIndex = 19;
     auto& info = pattern_->info_;
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
-    pattern_->ScrollToIndex(targetIndex, false, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, ScrollAlign::END);
     for (int i = 0; i < 10; ++i) {
         UpdateCurrentOffset(-10000.0f);
     }
@@ -1826,8 +1808,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
 
     int32_t targetIndex = 19;
     ScrollAlign align = ScrollAlign::AUTO;
-    pattern_->ScrollToIndex(targetIndex, false, align);
-    FlushUITasks();
+    ScrollToIndex(targetIndex, false, align);
     auto& info = pattern_->info_;
     EXPECT_EQ(info.startMainLineIndex_, 6);
     EXPECT_EQ(info.endMainLineIndex_, 9);
@@ -1864,8 +1845,7 @@ HWTEST_F(GridIrregularLayoutTest, Delete001, TestSize.Level1)
     CreateGridItems(9, -2, 50.0f);
     CreateDone();
 
-    pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(9, false, ScrollAlign::CENTER);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_15);
 
@@ -1878,8 +1858,7 @@ HWTEST_F(GridIrregularLayoutTest, Delete001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 14);
 
-    pattern_->ScrollToIndex(0, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(0, false, ScrollAlign::CENTER);
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 13);
     EXPECT_EQ(info.gridMatrix_, MATRIX_DEMO_16);
@@ -1912,8 +1891,7 @@ HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
     CreateGridItems(9, -2, 50.0f);
     CreateDone();
 
-    pattern_->ScrollToIndex(9, false, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(9, false, ScrollAlign::CENTER);
     const auto& info = pattern_->info_;
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 16);
@@ -1925,8 +1903,7 @@ HWTEST_F(GridIrregularLayoutTest, Add001, TestSize.Level1)
     EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 16);
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 21);
 }

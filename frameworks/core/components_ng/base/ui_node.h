@@ -118,6 +118,13 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    // Determine if the node is a SyntaxNode, default returns false.
+    // SyntaxNode classes need to override the method and return true.
+    virtual bool IsSyntaxNode() const
+    {
+        return false;
+    }
+
     void UpdateModalUiextensionCount(bool addNode)
     {
         if (addNode) {
@@ -176,7 +183,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    virtual void SetParent(const WeakPtr<UINode>& parent)
+    void SetParent(const WeakPtr<UINode>& parent)
     {
         parent_ = parent;
     }
@@ -198,7 +205,7 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth, bool hasJson = false);
+    virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -778,6 +785,15 @@ public:
      */
     virtual void NotifyChange(int32_t changeIdx, int32_t count, int64_t id, NotificationType notificationType);
 
+    int32_t GetThemeScopeId() const;
+    void SetThemeScopeId(int32_t themeScopeId);
+    virtual void UpdateThemeScopeId(int32_t themeScopeId);
+    virtual void UpdateThemeScopeUpdate(int32_t themeScopeId);
+    virtual void OnThemeScopeUpdate(int32_t themeScopeId) {}
+    void AllowUseParentTheme(bool isAllow);
+    bool IsAllowUseParentTheme() const;
+    ColorMode GetLocalColorMode() const;
+
     // Used to mark freeze and block dirty mark.
     virtual void SetFreeze(bool isFreeze, bool isForceUpdateFreezeVaule = false);
     bool IsFreeze() const
@@ -901,6 +917,7 @@ private:
     int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     int32_t rootNodeId_ = 0; // host is Page or NavDestination
+    int32_t themeScopeId_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
     bool removeSilently_ = true;
@@ -910,6 +927,7 @@ private:
     bool isRootBuilderNode_ = false;
     bool isArkTsFrameNode_ = false;
     bool isTraversing_ = false;
+    bool isAllowUseParentTheme_ = true;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
     RootNodeType rootNodeType_ = RootNodeType::PAGE_ETS_TAG;
     RefPtr<ExportTextureInfo> exportTextureInfo_;

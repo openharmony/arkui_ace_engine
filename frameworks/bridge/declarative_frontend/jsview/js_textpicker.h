@@ -75,6 +75,7 @@ public:
         const std::vector<NG::TextCascadePickerOptions>& options, const std::string& value,
         std::vector<std::string>& values);
     static void IsUserDefinedFontFamily(const std::string& pos);
+    static void ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
 };
 
 class JSTextPicker : public JSViewAbstract {
@@ -97,6 +98,9 @@ public:
     static void SetDivider(const JSCallbackInfo& info);
     static void SetGradientHeight(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
+
+    static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
+    static void SetDefaultTextStyle(const JSCallbackInfo& info);
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,
@@ -139,10 +143,10 @@ private:
         NG::TextCascadePickerOptionsAttr& attr, NG::TextPickerSettingData& settingData);
     static bool ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
         NG::TextPickerSettingData& settingData);
-    static bool ParseCanLoop(const JSRef<JSObject>& paramObject,
-        bool& canLoop);
+    static bool ParseCanLoop(const JSRef<JSObject>& paramObject, bool& canLoop);
     static bool ParseShowDataOptions(
         const JSRef<JSObject>& paramObject, ParseTextArrayParam& param, NG::TextCascadePickerOptionsAttr& attr);
+    static void ParseDisableTextStyleAnimation(const JSRef<JSObject>& paramObject, bool& isDisableTextStyleAnimation);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTPICKER_H

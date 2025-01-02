@@ -2055,6 +2055,678 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TimePickerRowPattern015
+ * @tc.desc: Test Column Pattern Init Haptic Controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern015, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call SetIsEnableHaptic.
+     * @tc.expected: isHapticChanged is false.
+     */
+    bool value = true;
+    timePickerRowPattern->SetIsEnableHaptic(value);
+    EXPECT_FALSE(timePickerRowPattern->isHapticChanged_);
+    /**
+     * @tc.steps: step3. call SetIsEnableHaptic.
+     * @tc.expected: isHapticChanged is true.
+     */
+    value = false;
+    timePickerRowPattern->SetIsEnableHaptic(value);
+    bool isEnableHaptic = timePickerRowPattern->GetIsEnableHaptic();
+    EXPECT_FALSE(isEnableHaptic);
+    EXPECT_TRUE(timePickerRowPattern->isHapticChanged_);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern016
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern016, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnModifyDone.
+     * @tc.expected: set isHapticChanged is true and isForceUpdate_ is false and isFiredTimeChange_ is false.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->isForceUpdate_ = false;
+    timePickerRowPattern->isFiredTimeChange_ = false;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_FALSE(timePickerRowPattern->isFiredTimeChange_);
+    /**
+     * @tc.steps: step3. call SetIsEnableHaptic.
+     * @tc.expected: set isHapticChanged is true and isForceUpdate_ is true and isFiredTimeChange_ is false.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->isForceUpdate_ = true;
+    timePickerRowPattern->isFiredTimeChange_ = false;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_FALSE(timePickerRowPattern->isFiredTimeChange_);
+    /**
+     * @tc.steps: step4. call SetIsEnableHaptic.
+     * @tc.expected: set isHapticChanged is true and isForceUpdate_ is false and isFiredTimeChange_ is true.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->isForceUpdate_ = false;
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_FALSE(timePickerRowPattern->isFiredTimeChange_);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern017
+ * @tc.desc: Test OnModifyDone2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern017, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnModifyDone.
+     * @tc.expected: set isHapticChanged is false and isForceUpdate_ is true and isFiredTimeChange_ is true.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = false;
+    timePickerRowPattern->isForceUpdate_ = true;
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_TRUE(timePickerRowPattern->isFiredTimeChange_);
+    /**
+     * @tc.steps: step2. call OnModifyDone.
+     * @tc.expected: set isHapticChanged is false and isForceUpdate_ is false and isFiredTimeChange_ is false.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = false;
+    timePickerRowPattern->isForceUpdate_ = false;
+    timePickerRowPattern->isFiredTimeChange_ = false;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_FALSE(timePickerRowPattern->isFiredTimeChange_);
+    /**
+     * @tc.steps: step2. call OnModifyDone.
+     * @tc.expected: set isHapticChanged is true and isForceUpdate_ is true and isFiredTimeChange_ is true.
+     */
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->isForceUpdate_ = true;
+    timePickerRowPattern->isFiredTimeChange_ = true;
+    timePickerRowPattern->OnModifyDone();
+    EXPECT_TRUE(timePickerRowPattern->isFiredTimeChange_);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern018
+ * @tc.desc: Test Init Disabled
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern018, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call InitDisabled.
+     * @tc.expected: set eventHub is disenabled.
+     */
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->enabled_ = false;
+    timePickerRowPattern->InitDisabled();
+    bool res = eventHub->IsEnabled();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern019
+ * @tc.desc: Test mount second Node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern019, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call MountSecondNode.
+     * @tc.expected: set HasAmPmNode is true and language_ is not "ug".
+     */
+    std::optional<int32_t> temp;
+    temp.emplace(100);
+    timePickerRowPattern->secondId_ = temp;
+    bool hasValue = timePickerRowPattern->secondId_.has_value();
+    std::string tag = "testNode";
+    int32_t nodeId = 212;
+    RefPtr<FrameNode> stackSecondNode = FrameNode::CreateFrameNode(tag, nodeId, timePickerRowPattern);
+    timePickerRowPattern->amPmTimeOrder_ = "01";
+    timePickerRowPattern->MountSecondNode(stackSecondNode);
+    bool res = timePickerRowPattern->HasAmPmNode();
+    EXPECT_TRUE(hasValue);
+    EXPECT_TRUE(res);
+    /**
+     * @tc.steps: step2. call RemoveSecondNode.
+     * @tc.expected: set HasAmPmNode is true and language_ is "ug".
+     */
+    timePickerRowPattern->amPmTimeOrder_ = "02";
+    timePickerRowPattern->language_ = "ug";
+    timePickerRowPattern->MountSecondNode(stackSecondNode);
+    res = timePickerRowPattern->HasAmPmNode();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern020
+ * @tc.desc: Test mount second Node2
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern020, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call MountSecondNode.
+     * @tc.expected: set HasAmPmNode is false and language_ is "ug".
+     */
+    timePickerRowPattern->amPmId_ = std::nullopt;
+    bool hasValue = timePickerRowPattern->amPmId_.has_value();
+    bool res = timePickerRowPattern->HasAmPmNode();
+
+    std::string tag = "testNode";
+    int32_t nodeId = 212;
+    RefPtr<FrameNode> stackSecondNode = FrameNode::CreateFrameNode(tag, nodeId, timePickerRowPattern);
+    timePickerRowPattern->amPmTimeOrder_ = "02";
+    timePickerRowPattern->language_ = "ug";
+    timePickerRowPattern->MountSecondNode(stackSecondNode);
+    EXPECT_FALSE(hasValue);
+    /**
+     * @tc.steps: step2. call MountSecondNode.
+     * @tc.expected: set HasAmPmNode is false and language_ is "ug".
+     */
+    timePickerRowPattern->language_ = "test";
+    timePickerRowPattern->MountSecondNode(stackSecondNode);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern021
+ * @tc.desc: Test remove second Node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern021, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call RemoveSecondNode.
+     * @tc.expected: set HasAmPmNode is false and language_ is "ug".
+     */
+    timePickerRowPattern->amPmId_ = std::nullopt;
+    bool hasValue = timePickerRowPattern->amPmId_.has_value();
+    bool res = timePickerRowPattern->HasAmPmNode();
+    timePickerRowPattern->amPmTimeOrder_ = "02";
+    timePickerRowPattern->language_ = "ug";
+    EXPECT_FALSE(hasValue);
+    /**
+     * @tc.steps: step2. call RemoveSecondNode.
+     * @tc.expected: set language_ is not "ug".
+     */
+    timePickerRowPattern->RemoveSecondNode();
+    timePickerRowPattern->language_ = "test";
+    timePickerRowPattern->RemoveSecondNode();
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern022
+ * @tc.desc: Test remove second Node
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern022, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call RemoveSecondNode.
+     * @tc.expected: set HasAmPmNode is true and language_ is not "ug".
+     */
+    std::optional<int32_t> temp;
+    temp.emplace(100);
+    timePickerRowPattern->secondId_ = temp;
+    bool hasValue = timePickerRowPattern->amPmId_.has_value();
+    bool res = timePickerRowPattern->HasAmPmNode();
+    timePickerRowPattern->amPmTimeOrder_ = "01";
+    timePickerRowPattern->RemoveSecondNode();
+    EXPECT_TRUE(hasValue);
+    /**
+     * @tc.steps: step2. call RemoveSecondNode.
+     * @tc.expected: set language_ is "ug".
+     */
+    timePickerRowPattern->amPmTimeOrder_ = "02";
+    timePickerRowPattern->language_ = "ug";
+    timePickerRowPattern->RemoveSecondNode();
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern023
+ * @tc.desc: On font Configuration Update
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern023, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnFontConfigurationUpdate.
+     * @tc.expected: set close dialog event.
+     */
+    TimePickerSettingData settingData;
+    settingData.properties.disappearTextStyle_.textColor = Color::RED;
+    settingData.properties.disappearTextStyle_.fontSize = Dimension(0);
+    settingData.properties.disappearTextStyle_.fontWeight = Ace::FontWeight::BOLD;
+    settingData.isUseMilitaryTime = false;
+
+    std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["selected"] = PickerTime(1, 1, 1);
+    DialogProperties dialogProperties;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    auto eventFunc = [](const std::string& info) { (void)info; };
+    dialogEvent["changeId"] = eventFunc;
+    dialogEvent["acceptId"] = eventFunc;
+    auto cancelFunc = [](const GestureEvent& info) { (void)info; };
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    dialogCancelEvent["cancelId"] = cancelFunc;
+
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = TimePickerDialogView::Show(
+        dialogProperties, settingData, buttonInfos, timePickerProperty, dialogEvent, dialogCancelEvent);
+    EXPECT_NE(dialogNode, nullptr);
+    std::function<void()> closeDialogEvent = [weak = WeakPtr<FrameNode>(dialogNode), timePickerRowPattern]() {
+        auto dialogNode = weak.Upgrade();
+        auto pipeline = dialogNode->GetContext();
+        auto overlayManager = pipeline->GetOverlayManager();
+        overlayManager->CloseDialog(dialogNode);
+        timePickerRowPattern->SetIsShowInDialog(false);
+    };
+    timePickerRowPattern->updateFontConfigurationEvent(closeDialogEvent);
+    timePickerRowPattern->OnFontConfigurationUpdate();
+    EXPECT_NE(closeDialogEvent, nullptr);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern024
+ * @tc.desc: Test UpdateConfirmButtonMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern024, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateConfirmButtonMargin.
+     * @tc.expected: set api version is 10.
+     */
+    int32_t setApiVersion = 10;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(buttonCancelNode, nullptr);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    timePickerRowPattern->UpdateConfirmButtonMargin(buttonCancelNode, dialogTheme);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+    /**
+     * @tc.steps: step3. call UpdateConfirmButtonMargin.
+     * @tc.expected: set api version is 16.
+     */
+    setApiVersion = 16;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    timePickerRowPattern->UpdateConfirmButtonMargin(buttonCancelNode, dialogTheme);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern025
+ * @tc.desc: Test OnLanguageConfigurationUpdate.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern025, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step1. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set timeOrder is "01" and isAmPmTimeOrderUpdate_ is true.
+     */
+    bool value = false;
+    timePickerRowPattern->SetHour24(value);
+    std::string timeOrder = "01";
+    timePickerRowPattern->amPmTimeOrder_ = timeOrder;
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = true;
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    bool isHour24 = timePickerRowPattern->GetHour24();
+    EXPECT_FALSE(isHour24);
+    /**
+     * @tc.steps: step2. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set timeOrder is "01" and isAmPmTimeOrderUpdate_ is false.
+     */
+    timePickerRowPattern->amPmTimeOrder_ = timeOrder;
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = value;
+    EXPECT_FALSE(timePickerRowPattern->isAmPmTimeOrderUpdate_);
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    EXPECT_TRUE(timePickerRowPattern->isAmPmTimeOrderUpdate_);
+    /**
+     * @tc.steps: step3. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set timeOrder is "10" and isAmPmTimeOrderUpdate_ is true.
+     */
+    timeOrder = "10";
+    timePickerRowPattern->amPmTimeOrder_ = timeOrder;
+    EXPECT_EQ(timePickerRowPattern->amPmTimeOrder_, timeOrder);
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = true;
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    EXPECT_NE(timePickerRowPattern->amPmTimeOrder_, timeOrder);
+    /**
+     * @tc.steps: step4. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set timeOrder is "10" and isAmPmTimeOrderUpdate_ is false.
+     */
+    timePickerRowPattern->amPmTimeOrder_ = timeOrder;
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = value;
+    EXPECT_FALSE(timePickerRowPattern->isAmPmTimeOrderUpdate_);
+    timePickerRowPattern->OnLanguageConfigurationUpdate();
+    EXPECT_TRUE(timePickerRowPattern->isAmPmTimeOrderUpdate_);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern026
+ * @tc.desc: Test UpdateNodePositionForUg.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern026, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set language is "ug" and hasSecond is true.
+     */
+    std::string language = "ug";
+    bool value = true;
+    timePickerRowPattern->isPreLanguageUg_ = value;
+    timePickerRowPattern->language_ = language;
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = value;
+    timePickerRowPattern->SetHasSecond(value);
+    bool hasSecond = timePickerRowPattern->GetHasSecond();
+    timePickerRowPattern->UpdateNodePositionForUg();
+    EXPECT_TRUE(hasSecond);
+    /**
+     * @tc.steps: step3. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set language is "ug" and hasSecond is false.
+     */
+    timePickerRowPattern->SetHasSecond(false);
+    hasSecond = timePickerRowPattern->GetHasSecond();
+    timePickerRowPattern->UpdateNodePositionForUg();
+    EXPECT_FALSE(hasSecond);
+    /**
+     * @tc.steps: step3. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set isAmPmTimeOrderUpdate_ is false and hasSecond is false.
+     */
+    timePickerRowPattern->isAmPmTimeOrderUpdate_ = false;
+    timePickerRowPattern->SetHasSecond(false);
+    timePickerRowPattern->UpdateNodePositionForUg();
+    EXPECT_FALSE(timePickerRowPattern->isAmPmTimeOrderUpdate_);
+    /**
+     * @tc.steps: step3. call OnLanguageConfigurationUpdate.
+     * @tc.expected: set isAmPmTimeOrderUpdate_ is false and hasSecond is true.
+     */
+    timePickerRowPattern->SetHasSecond(value);
+    hasSecond = timePickerRowPattern->GetHasSecond();
+    timePickerRowPattern->UpdateNodePositionForUg();
+    EXPECT_TRUE(hasSecond);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern027
+ * @tc.desc: Test UpdateCancelButtonMargin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern027, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call UpdateCancelButtonMargin.
+     * @tc.expected: set api version is 11.
+     */
+    int32_t setApiVersion = 11;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    auto buttonCancelNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    EXPECT_NE(buttonCancelNode, nullptr);
+    auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
+    timePickerRowPattern->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+    /**
+     * @tc.steps: step3. call UpdateCancelButtonMargin.
+     * @tc.expected: set api version is 16.
+     */
+    setApiVersion = 16;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    timePickerRowPattern->UpdateCancelButtonMargin(buttonCancelNode, dialogTheme);
+    EXPECT_EQ(currApiVersion, setApiVersion);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern028
+ * @tc.desc: Test CalcLeftTotalColumnWidth.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern028, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call CalcLeftTotalColumnWidth.
+     * @tc.expected: set the page layout mode is from right to left.
+     */
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    EXPECT_NE(pipeline, nullptr);
+    bool isRtl = true;
+    pipeline->SetIsRightToLeft(isRtl);
+    float leftTotalColumnWidth = 50.0f;
+    float childSize = 10.0f;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    bool res = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto allChildNode = timePickerRowPattern->GetAllChildNode();
+    columnNode_ = allChildNode["minute"].Upgrade();
+    EXPECT_NE(columnNode_, nullptr);
+    timePickerRowPattern->CalcLeftTotalColumnWidth(columnNode_, leftTotalColumnWidth, childSize);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern029
+ * @tc.desc: Test GetSecondFormatString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern029, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call GetSecondFormatString.
+     * @tc.expected: set Api Version is 15.
+     */
+    int32_t setApiVersion = 15;
+    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
+    int32_t currApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    uint32_t second = 12;
+    timePickerRowPattern->GetSecondFormatString(second);
+    EXPECT_GT(currApiVersion, second);
+}
+
+/**
+ * @tc.name: TimePickerRowPattern030
+ * @tc.desc: Test CheckFocusID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern030, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call CheckFocusID.
+     * @tc.expected: set focusKeyID is greater than childSize.
+     */
+    int32_t value = 5;
+    timePickerRowPattern->SetCurrentFocusKeyID(value);
+    int32_t focusKeyID = timePickerRowPattern->GetCurrentFocusKeyID();
+    EXPECT_EQ(focusKeyID, value);
+    int32_t childSize = 3;
+    EXPECT_GT(focusKeyID, childSize - 1);
+    timePickerRowPattern->CheckFocusID(childSize);
+    focusKeyID = timePickerRowPattern->GetCurrentFocusKeyID();
+    EXPECT_EQ(focusKeyID, childSize - 1);
+    /**
+     * @tc.steps: step3. call CheckFocusID.
+     * @tc.expected: set focusKeyID is less than childSize.
+     */
+    value = -1;
+    childSize = 8;
+    timePickerRowPattern->SetCurrentFocusKeyID(value);
+    bool res = timePickerRowPattern->CheckFocusID(childSize);
+    focusKeyID = timePickerRowPattern->GetCurrentFocusKeyID();
+    EXPECT_FALSE(res);
+    EXPECT_EQ(focusKeyID, 0);
+}
+
+/**
  * @tc.name: TimePickerFireChangeEventTest001
  * @tc.desc: Test SetSelectedDate.
  * @tc.type: FUNC
@@ -4992,4 +5664,55 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerModelNGBackgroundColor001, TestSize.
     EXPECT_EQ(TimePickerModelNG::getTimepickerBackgroundColor(frameNode), Color::RED.GetValue());
 }
 
+/**
+ * @tc.name: TimePickerRowPatternCheckFocusID001
+ * @tc.desc: Test CheckFocusID2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerRowPatternCheckFocusID001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create row pattern.
+     */
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+    frameNode->MarkModifyDone();
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    EXPECT_NE(timePickerRowPattern, nullptr);
+    /**
+     * @tc.steps: step2. call CheckFocusID.
+     * @tc.expected: set focusKeyID is less than childSize.
+     */
+    int32_t value = -1;
+    int32_t childSize = 8;
+    timePickerRowPattern->SetCurrentFocusKeyID(value);
+    bool res = timePickerRowPattern->CheckFocusID(childSize);
+    int32_t focusKeyID = timePickerRowPattern->GetCurrentFocusKeyID();
+    EXPECT_FALSE(res);
+    EXPECT_EQ(focusKeyID, 0);
+    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    EXPECT_NE(pipeline, nullptr);
+    float fontSize = 100.0f;
+    pipeline->fontScale_ = fontSize;
+    pipeline->rootHeight_ = fontSize;
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    EXPECT_NE(pickerTheme, nullptr);
+    double pickerSize = 50.75;
+    pickerTheme->pickerDialogMaxOneFontScale_ = pickerSize;
+    pickerTheme->deviceHeightLimit_ = pickerSize;
+    EXPECT_GT(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale());
+    timePickerRowPattern->SetCurrentPage(1);
+    res = timePickerRowPattern->CheckFocusID(childSize);
+    EXPECT_TRUE(res);
+    /**
+     * @tc.steps: step3. call CheckFocusID.
+     * @tc.expected: set focusKeyID is less than childSize.
+     */
+    timePickerRowPattern->SetCurrentPage(0);
+    res = timePickerRowPattern->CheckFocusID(childSize);
+    EXPECT_NE(timePickerRowPattern->GetCurrentPage(), 1);
+    EXPECT_TRUE(res);
+}
 } // namespace OHOS::Ace::NG

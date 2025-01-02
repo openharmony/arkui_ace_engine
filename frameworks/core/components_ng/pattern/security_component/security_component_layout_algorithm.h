@@ -40,8 +40,9 @@ private:
         OffsetF& offset);
     void MeasureButton(LayoutWrapper* layoutWrapper,
         RefPtr<SecurityComponentLayoutProperty>& securityComponentProperty);
-    void UpdateHorizontalOffset(LayoutWrapper* layoutWrapper, OffsetF& offsetIcon, OffsetF& offsetText);
-    void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText);
+    void UpdateHorizontalOffset(LayoutWrapper* layoutWrapper, OffsetF& offsetIcon, OffsetF& offsetText,
+        SizeF& childSize);
+    void UpdateVerticalOffset(OffsetF& offsetIcon, OffsetF& offsetText, SizeF& childSize);
     void InitPadding(RefPtr<SecurityComponentLayoutProperty>& property);
     double ShrinkWidth(double diff);
     double EnlargeWidth(double diff);
@@ -61,13 +62,17 @@ private:
     bool IsOutOfRangeInHoriCapsule(SizeF& leftCirclePoint, SizeF& rightCirclePoint, float maxDistance);
     bool IsOutOfRangeInVertiCapsule(SizeF& topCirclePoint, SizeF& bottomCirclePoint, float maxDistance);
     bool IsTextOutOfRangeInNormal();
-    bool GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
+    void UpdateTextFlags(LayoutWrapper* layoutWrapper);
+    bool GetMaxLineLimitExceededFlag(std::optional<SizeF>& currentTextSize);
+    bool GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper,
+        std::optional<SizeF>& currentTextSize);
     bool CompareDistance(SizeF& point, SizeF& circlePoint, float maxDistance);
     bool TopLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool TopRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool BottomLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool BottomRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold);
+    Alignment ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align);
 
     void UpdateTextSize();
 

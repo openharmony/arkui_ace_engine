@@ -189,6 +189,8 @@ void TimePickerRowPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
+    } else {
+        renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
@@ -435,6 +437,9 @@ uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) con
 void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     std::vector<RefPtr<FrameNode>> tags;
+    if (isEnableCascade_) {
+        OnDataLinking(tag, isAdd, index, tags);
+    }
     for (const auto& tag : tags) {
         auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(), [&tag](const auto& c) {
                 auto column = c.Upgrade();

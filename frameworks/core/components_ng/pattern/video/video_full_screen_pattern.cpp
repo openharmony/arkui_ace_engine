@@ -117,6 +117,7 @@ void VideoFullScreenPattern::UpdateState()
     UpdateAutoPlay(videoPattern->GetAutoPlay());
     UpdateProgressRate(videoPattern->GetProgressRate());
     UpdateAnalyzerState(videoPattern->GetAnalyzerState());
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
 
     // update full screen layout
     auto fullScreenNode = GetHost();

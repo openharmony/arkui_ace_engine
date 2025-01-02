@@ -1802,6 +1802,7 @@ bool SubwindowOhos::IsFocused()
 
 void SubwindowOhos::HideFilter(bool isInSubWindow)
 {
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "HideFilter enter, subWindow: %{public}d", isInSubWindow);
     RefPtr<Container> aceContainer = nullptr;
     if (isInSubWindow) {
         aceContainer = Platform::AceContainer::GetContainer(childContainerId_);

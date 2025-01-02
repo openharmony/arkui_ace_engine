@@ -241,6 +241,20 @@ struct GridLayoutInfo {
     void ClearMapsToEndContainsMultiLineItem(int32_t idx);
 
     /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
+    /**
+     * @brief clears lineHeightMap_ and gridMatrix_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStartContainsMultiLineItem(int32_t idx);
+
+    /**
      * @brief clears lineHeightMap_ starting from line [idx]
      *
      * @param idx starting line index
@@ -353,6 +367,10 @@ struct GridLayoutInfo {
     void UpdateDefaultCachedCount();
 
     int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const;
+
+    // Only used for debugging.
+    void PrintMatrix();
+    void PrintLineHeight();
 
     Axis axis_ = Axis::VERTICAL;
 

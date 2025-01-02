@@ -57,6 +57,9 @@ void TextFieldModelNG::CreateNode(
         auto changed = pattern->InitValueText(value.value());
         pattern->SetTextChangedAtCreation(changed);
     }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
+    }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
         textFieldLayoutProperty->UpdateMaxLines(1);
@@ -72,17 +75,18 @@ void TextFieldModelNG::CreateNode(
     pattern->RegisterWindowSizeCallback();
     pattern->InitSurfacePositionChangedCallback();
     pattern->InitTheme();
+    auto colorMode = SystemProperties::GetColorMode();
+    pattern->SetOriginCursorColor(colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000));
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetHasPreviewTextOption()) {
         pattern->SetSupportPreviewText(pipeline->GetSupportPreviewText());
     }
-    auto themeManager = pipeline->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
     auto textFieldTheme = pattern->GetTheme();
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
+    pattern->SetHoverPressBgColorEnabled(textFieldTheme->GetHoverAndPressBgColorEnabled());
     SetCaretColor(textFieldTheme->GetCursorColor());
     CaretStyle caretStyle;
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
@@ -109,6 +113,9 @@ RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::o
     auto textValue = pattern->GetTextUtf16Value();
     if (value.has_value() && value.value() != textValue) {
         pattern->InitEditingValueText(value.value());
+    }
+    if (!pattern->HasOperationRecords()) {
+        pattern->UpdateEditingValueToRecord(); // record initial status
     }
     textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(u""));
     if (!isTextArea) {
@@ -439,6 +446,26 @@ void TextFieldModelNG::SetFontFamily(const std::vector<std::string>& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, FontFamily, value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PreferredTextLineHeightNeedToUpdate, true);
+}
+
+void TextFieldModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value);
+}
+
+void TextFieldModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
+}
+
+void TextFieldModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextFieldModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value, frameNode);
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value,
@@ -885,9 +912,22 @@ void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LetterSpacing, value);
 }
 
+Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
+{
+    Dimension value;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(
+        TextFieldLayoutProperty, LetterSpacing, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+}
+
+void TextFieldModelNG::SetHalfLeading(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
@@ -1678,6 +1718,11 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& valu
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
+}
+
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
@@ -1907,11 +1952,24 @@ void TextFieldModelNG::SetEnablePreviewText(bool enablePreviewText)
     pattern->SetSupportPreviewText(enablePreviewText);
 }
 
+bool TextFieldModelNG::GetEnablePreviewText(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetSupportPreviewText();
+}
+
 void TextFieldModelNG::SetEnableHapticFeedback(bool state)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void TextFieldModelNG::SetEllipsisMode(EllipsisMode value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value);
 }
 
 Dimension TextFieldModelNG::GetAdaptMaxFontSize(FrameNode* frameNode)
@@ -2159,5 +2217,21 @@ void TextFieldModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool state)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetEnableHapticFeedback(state);
+}
+
+void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
+}
+
+void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
+}
+
+void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
 }
 } // namespace OHOS::Ace::NG

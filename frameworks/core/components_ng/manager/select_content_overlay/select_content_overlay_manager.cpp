@@ -143,6 +143,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onPaste = MakeMenuCallback(OptionMenuActionId::PASTE, overlayInfo);
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
+    overlayInfo.menuCallback.onSearch = MakeMenuCallback(OptionMenuActionId::SEARCH, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
     overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
@@ -320,8 +321,9 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
     shareOverlayInfo_->handleLevelMode = mode;
     auto handleNode = handleNode_.Upgrade();
     CHECK_NULL_VOID(handleNode);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     if (mode == HandleLevelMode::OVERLAY) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -335,10 +337,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
             TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
-        return;
-    }
-    if (mode == HandleLevelMode::EMBED) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
+    } else if (mode == HandleLevelMode::EMBED) {
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -452,6 +451,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
     auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
     selectOverlayNode_ = overlayNode;
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), node = overlayNode] {
             auto manager = weak.Upgrade();
@@ -1155,5 +1155,11 @@ RefPtr<FrameNode> SelectContentOverlayManager::GetContainerModalRoot()
         }
     }
     return nullptr;
+}
+
+bool SelectContentOverlayManager::IsStopBackPress() const
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, true);
+    return selectOverlayHolder_->IsStopBackPress();
 }
 } // namespace OHOS::Ace::NG

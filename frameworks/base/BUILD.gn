@@ -35,7 +35,7 @@ template("ace_base_source_set") {
     ]
     external_deps = []
     external_deps += [ "zlib:shared_libz" ]
-    include_dirs = []
+    include_dirs = [ "$ace_root" ]
     if (ohos_indep_compiler_enable) {
       include_dirs += indep_compile_includes
     }
@@ -73,6 +73,7 @@ template("ace_base_source_set") {
       "thread/background_task_executor.cpp",
       "utils/base_id.cpp",
       "utils/date_util.cpp",
+      "utils/lifecycle_checkable.cpp",
       "utils/measure_util.cpp",
       "utils/resource_configuration.cpp",
       "utils/string_expression.cpp",

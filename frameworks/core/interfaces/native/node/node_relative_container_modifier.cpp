@@ -129,15 +129,45 @@ namespace NodeModifier {
 
 const ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
 {
-    static const ArkUIRelativeContainerModifier modifier = { SetGuideLine, SetBarrier, GetGuideLine, GetBarrier,
-        ResetGuideline, ResetBarrier };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRelativeContainerModifier modifier = {
+        .setGuideLine = SetGuideLine,
+        .setBarrier = SetBarrier,
+        .getGuideLine = GetGuideLine,
+        .getBarrier = GetBarrier,
+        .resetGuideline = ResetGuideline,
+        .resetBarrier = ResetBarrier,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIRelativeContainerModifier* GetCJUIRelativeContainerModifier()
 {
-    static const CJUIRelativeContainerModifier modifier = { SetGuideLine, SetBarrier, GetGuideLine, GetBarrier,
-        ResetGuideline, ResetBarrier };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRelativeContainerModifier modifier = {
+        .setGuideLine = SetGuideLine,
+        .setBarrier = SetBarrier,
+        .getGuideLine = GetGuideLine,
+        .getBarrier = GetBarrier,
+        .resetGuideline = ResetGuideline,
+        .resetBarrier = ResetBarrier,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 } // namespace NodeModifier

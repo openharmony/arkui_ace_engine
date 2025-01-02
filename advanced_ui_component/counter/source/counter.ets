@@ -103,7 +103,6 @@ class CounterResource {
   // counter size
   public static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
   public static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
-  public static readonly COUNTER_BORDER_WIDTH = '1vp';
   public static readonly COUNTER_BORDER_WIDTH_NUMBER = 1;
   public static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
   public static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
@@ -111,6 +110,12 @@ class CounterResource {
   public static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
   public static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
   public static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
+  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = $r('sys.float.button_icon_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = $r('sys.float.container_height');
+  public static readonly COUNTER_BORDER_WIDTH = $r('sys.float.border_width');
+  public static readonly COUNTER_COMPACT_BUTTON_SIZE = $r('sys.float.button_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = $r('sys.float.container_radius');
+  public static readonly COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN = $r('sys.float.button_container_margin');
   public static readonly COUNTER_LIST_PADDING = 12;
   public static readonly COUNTER_LIST_HEIGHT = '48vp';
   public static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
@@ -122,13 +127,9 @@ class CounterResource {
   public static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
   public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
   public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
-  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
-  public static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp';
   public static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
   public static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
   public static readonly COUNTER_COMPACT_BUTTON_TEXT_MARGIN = 10;
-  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
-  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
   public static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
   public static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
   public static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
@@ -417,7 +418,7 @@ export struct CounterComponent {
       if (this.dateStyleOptions.step < 1) {
         this.step = 1
       } else {
-        this.step = this.dateStyleOptions.step;
+        this.step = Math.floor(this.dateStyleOptions.step);
       }
     }
     if (this.dateStyleOptions.onHoverIncrease !== undefined) {
@@ -1235,7 +1236,9 @@ export struct CounterComponent {
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
           .borderWidth(this.subBtnFocusWidh)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-          .margin({ start: LengthMetrics.vp(1) })
+          .margin({ 
+            start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN)) 
+          });
           .clip(true)
 
           if (this.hasTextWidth) {
@@ -1343,7 +1346,9 @@ export struct CounterComponent {
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
           .borderWidth(this.addBtnFocusWidh)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-          .margin({ end: LengthMetrics.vp(1) })
+          .margin({ 
+            end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN)) 
+          });
           .clip(true)
         }
         .direction(this.counterDirection)

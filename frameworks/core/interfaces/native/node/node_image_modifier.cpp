@@ -297,6 +297,36 @@ void ResetSyncLoad(ArkUINodeHandle node)
     ImageModelNG::SetSyncMode(frameNode, DEFAULT_SYNC_LOAD_VALUE);
 }
 
+void SetImageMatrix(ArkUINodeHandle node, const ArkUI_Float32* matrix)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Matrix4 matrix4Value = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModelNG::SetImageMatrix(frameNode, matrix4Value);
+}
+
+void ResetImageMatrix(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 defaultValue = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    ImageModelNG::SetImageMatrix(frameNode, defaultValue);
+}
+
 void SetObjectFit(ArkUINodeHandle node, ArkUI_Int32 objectFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -562,7 +592,9 @@ int32_t GetImageDraggable(ArkUINodeHandle node)
  */
 void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, const int* units, ArkUI_Int32 length)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->setBorderRadius(node, values, units, length);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->setBorderRadius(node, values, units, length);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -584,7 +616,9 @@ void SetImageBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values, con
 
 void ResetImageBorderRadius(ArkUINodeHandle node)
 {
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorderRadius(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorderRadius(node);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
@@ -632,7 +666,9 @@ void ResetImageBorder(ArkUINodeHandle node)
         ImageModelNG::SetBackBorder(frameNode);
         return;
     }
-    GetArkUINodeModifiers()->getCommonModifier()->resetBorder(node);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    nodeModifiers->getCommonModifier()->resetBorder(node);
     CalcDimension borderRadius;
     ImageModelNG::SetBorderRadius(frameNode, borderRadius);
 }
@@ -940,43 +976,199 @@ void ResetImageRotateOrientation(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageModifier* GetImageModifier()
 {
-    static const ArkUIImageModifier modifier = { SetImageSrc, SetImageShowSrc, SetImageResource, SetCopyOption,
-        ResetCopyOption, SetAutoResize, ResetAutoResize, SetObjectRepeat, ResetObjectRepeat, SetRenderMode,
-        ResetRenderMode, SetSyncLoad, ResetSyncLoad, SetObjectFit, ResetObjectFit, SetFitOriginalSize,
-        ResetFitOriginalSize, SetSourceSize, ResetSourceSize, SetMatchTextDirection, ResetMatchTextDirection,
-        SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation, ResetImageInterpolation, SetColorFilter,
-        ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit,
-        SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable, ResetImageDraggable,
-        SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, SetImageBorderWithValues, ResetImageBorder,
-        SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable, ResetResizable,
-        SetDynamicRangeMode, ResetDynamicRangeMode, SetImageRotateOrientation, ResetImageRotateOrientation,
-        SetEnhancedImageQuality, ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
-        GetDrawingColorFilter, ResetImageContent, ResetImageSrc, SetInitialPixelMap, SetAltSourceInfo, SetOnComplete,
-        SetOnError, ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIImageModifier modifier = {
+        .setSrc = SetImageSrc,
+        .setImageShowSrc = SetImageShowSrc,
+        .setImageResource = SetImageResource,
+        .setCopyOption = SetCopyOption,
+        .resetCopyOption = ResetCopyOption,
+        .setAutoResize = SetAutoResize,
+        .resetAutoResize = ResetAutoResize,
+        .setObjectRepeat = SetObjectRepeat,
+        .resetObjectRepeat = ResetObjectRepeat,
+        .setRenderMode = SetRenderMode,
+        .resetRenderMode = ResetRenderMode,
+        .setSyncLoad = SetSyncLoad,
+        .resetSyncLoad = ResetSyncLoad,
+        .setImageMatrix = SetImageMatrix,
+        .resetImageMatrix = ResetImageMatrix,
+        .setObjectFit = SetObjectFit,
+        .resetObjectFit = ResetObjectFit,
+        .setFitOriginalSize = SetFitOriginalSize,
+        .resetFitOriginalSize = ResetFitOriginalSize,
+        .setSourceSize = SetSourceSize,
+        .resetSourceSize = ResetSourceSize,
+        .setMatchTextDirection = SetMatchTextDirection,
+        .resetMatchTextDirection = ResetMatchTextDirection,
+        .setFillColor = SetFillColor,
+        .resetFillColor = ResetFillColor,
+        .setAlt = SetAlt,
+        .resetAlt = ResetAlt,
+        .setImageInterpolation = SetImageInterpolation,
+        .resetImageInterpolation = ResetImageInterpolation,
+        .setColorFilter = SetColorFilter,
+        .resetColorFilter = ResetColorFilter,
+        .setImageSyncLoad = SetImageSyncLoad,
+        .resetImageSyncLoad = ResetImageSyncLoad,
+        .setImageObjectFit = SetImageObjectFit,
+        .resetImageObjectFit = ResetImageObjectFit,
+        .setImageFitOriginalSize = SetImageFitOriginalSize,
+        .resetImageFitOriginalSize = ResetImageFitOriginalSize,
+        .setImageDraggable = SetImageDraggable,
+        .resetImageDraggable = ResetImageDraggable,
+        .setImageBorderRadius = SetImageBorderRadius,
+        .resetImageBorderRadius = ResetImageBorderRadius,
+        .setImageBorder = SetImageBorder,
+        .setImageBorderWithValues = SetImageBorderWithValues,
+        .resetImageBorder = ResetImageBorder,
+        .setImageOpacity = SetImageOpacity,
+        .resetImageOpacity = ResetImageOpacity,
+        .setEdgeAntialiasing = SetEdgeAntialiasing,
+        .resetEdgeAntialiasing = ResetEdgeAntialiasing,
+        .setResizable = SetResizable,
+        .resetResizable = ResetResizable,
+        .setDynamicRangeMode = SetDynamicRangeMode,
+        .resetDynamicRangeMode = ResetDynamicRangeMode,
+        .setImageRotateOrientation = SetImageRotateOrientation,
+        .resetImageRotateOrientation = ResetImageRotateOrientation,
+        .setEnhancedImageQuality = SetEnhancedImageQuality,
+        .resetEnhancedImageQuality = ResetEnhancedImageQuality,
+        .getImageSrc = GetImageSrc,
+        .getAutoResize = GetAutoResize,
+        .getObjectRepeat = GetObjectRepeat,
+        .getObjectFit = GetObjectFit,
+        .getImageInterpolation = GetImageInterpolation,
+        .getColorFilter = GetColorFilter,
+        .getAlt = GetAlt,
+        .getImageDraggable = GetImageDraggable,
+        .getRenderMode = GetRenderMode,
+        .setImageResizable = SetImageResizable,
+        .getImageResizable = GetImageResizable,
+        .getFitOriginalSize = GetFitOriginalSize,
+        .getFillColor = GetFillColor,
+        .setPixelMap = SetPixelMap,
+        .setPixelMapArray = SetPixelMapArray,
+        .setResourceSrc = SetResourceSrc,
+        .enableAnalyzer = EnableAnalyzer,
+        .setImagePrivacySensitive = SetImagePrivacySensitve,
+        .resetImagePrivacySensitive = ResetImagePrivacySensitve,
+        .analyzerConfig = AnalyzerConfig,
+        .setDrawingColorFilter = SetDrawingColorFilter,
+        .getDrawingColorFilter = GetDrawingColorFilter,
+        .resetImageContent = ResetImageContent,
+        .resetImageSrc = ResetImageSrc,
+        .setInitialPixelMap = SetInitialPixelMap,
+        .setAltSourceInfo = SetAltSourceInfo,
+        .setOnComplete = SetOnComplete,
+        .setOnError = SetOnError,
+        .resetOnError = ResetOnError,
+        .setImageOnFinish = SetImageOnFinish,
+        .resetImageOnFinish = ResetImageOnFinish,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIImageModifier* GetCJUIImageModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIImageModifier modifier = {
-        SetImageSrc, SetImageShowSrc, SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
-        SetObjectRepeat, ResetObjectRepeat, SetRenderMode, ResetRenderMode, SetSyncLoad, ResetSyncLoad,
-        SetObjectFit, ResetObjectFit, SetFitOriginalSize, ResetFitOriginalSize, SetSourceSize, ResetSourceSize,
-        SetMatchTextDirection, ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt,
-        SetImageInterpolation, ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad,
-        ResetImageSyncLoad, SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize,
-        SetImageDraggable, ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder,
-        ResetImageBorder, SetImageOpacity, ResetImageOpacity, SetEdgeAntialiasing, ResetEdgeAntialiasing, SetResizable,
-        ResetResizable, SetDynamicRangeMode, ResetDynamicRangeMode, SetEnhancedImageQuality,
-        ResetEnhancedImageQuality, GetImageSrc, GetAutoResize, GetObjectRepeat, GetObjectFit,
-        GetImageInterpolation, GetColorFilter, GetAlt, GetImageDraggable, GetRenderMode, SetImageResizable,
-        GetImageResizable, GetFitOriginalSize, GetFillColor, SetPixelMap, SetPixelMapArray, SetResourceSrc,
-        EnableAnalyzer, SetImagePrivacySensitve, ResetImagePrivacySensitve, AnalyzerConfig, SetDrawingColorFilter,
-        GetDrawingColorFilter, ResetImageSrc, SetInitialPixelMap, SetOnComplete, SetOnError,
-        ResetOnError, SetImageOnFinish, ResetImageOnFinish };
+        .setSrc = SetImageSrc,
+        .setImageShowSrc = SetImageShowSrc,
+        .setCopyOption = SetCopyOption,
+        .resetCopyOption = ResetCopyOption,
+        .setAutoResize = SetAutoResize,
+        .resetAutoResize = ResetAutoResize,
+        .setObjectRepeat = SetObjectRepeat,
+        .resetObjectRepeat = ResetObjectRepeat,
+        .setRenderMode = SetRenderMode,
+        .resetRenderMode = ResetRenderMode,
+        .setSyncLoad = SetSyncLoad,
+        .resetSyncLoad = ResetSyncLoad,
+        .setObjectFit = SetObjectFit,
+        .resetObjectFit = ResetObjectFit,
+        .setFitOriginalSize = SetFitOriginalSize,
+        .resetFitOriginalSize = ResetFitOriginalSize,
+        .setSourceSize = SetSourceSize,
+        .resetSourceSize = ResetSourceSize,
+        .setMatchTextDirection = SetMatchTextDirection,
+        .resetMatchTextDirection = ResetMatchTextDirection,
+        .setFillColor = SetFillColor,
+        .resetFillColor = ResetFillColor,
+        .setAlt = SetAlt,
+        .resetAlt = ResetAlt,
+        .setImageInterpolation = SetImageInterpolation,
+        .resetImageInterpolation = ResetImageInterpolation,
+        .setColorFilter = SetColorFilter,
+        .resetColorFilter = ResetColorFilter,
+        .setImageSyncLoad = SetImageSyncLoad,
+        .resetImageSyncLoad = ResetImageSyncLoad,
+        .setImageObjectFit = SetImageObjectFit,
+        .resetImageObjectFit = ResetImageObjectFit,
+        .setImageFitOriginalSize = SetImageFitOriginalSize,
+        .resetImageFitOriginalSize = ResetImageFitOriginalSize,
+        .setImageDraggable = SetImageDraggable,
+        .resetImageDraggable = ResetImageDraggable,
+        .setImageBorderRadius = SetImageBorderRadius,
+        .resetImageBorderRadius = ResetImageBorderRadius,
+        .setImageBorder = SetImageBorder,
+        .resetImageBorder = ResetImageBorder,
+        .setImageOpacity = SetImageOpacity,
+        .resetImageOpacity = ResetImageOpacity,
+        .setEdgeAntialiasing = SetEdgeAntialiasing,
+        .resetEdgeAntialiasing = ResetEdgeAntialiasing,
+        .setResizable = SetResizable,
+        .resetResizable = ResetResizable,
+        .setDynamicRangeMode = SetDynamicRangeMode,
+        .resetDynamicRangeMode = ResetDynamicRangeMode,
+        .setEnhancedImageQuality = SetEnhancedImageQuality,
+        .resetEnhancedImageQuality = ResetEnhancedImageQuality,
+        .getImageSrc = GetImageSrc,
+        .getAutoResize = GetAutoResize,
+        .getObjectRepeat = GetObjectRepeat,
+        .getObjectFit = GetObjectFit,
+        .getImageInterpolation = GetImageInterpolation,
+        .getColorFilter = GetColorFilter,
+        .getAlt = GetAlt,
+        .getImageDraggable = GetImageDraggable,
+        .getRenderMode = GetRenderMode,
+        .setImageResizable = SetImageResizable,
+        .getImageResizable = GetImageResizable,
+        .getFitOriginalSize = GetFitOriginalSize,
+        .getFillColor = GetFillColor,
+        .setPixelMap = SetPixelMap,
+        .setPixelMapArray = SetPixelMapArray,
+        .setResourceSrc = SetResourceSrc,
+        .enableAnalyzer = EnableAnalyzer,
+        .setImagePrivacySensitive = SetImagePrivacySensitve,
+        .resetImagePrivacySensitive = ResetImagePrivacySensitve,
+        .analyzerConfig = AnalyzerConfig,
+        .setDrawingColorFilter = SetDrawingColorFilter,
+        .getDrawingColorFilter = GetDrawingColorFilter,
+        .resetImageSrc = ResetImageSrc,
+        .setInitialPixelMap = SetInitialPixelMap,
+        .setOnComplete = SetOnComplete,
+        .setOnError = SetOnError,
+        .resetOnError = ResetOnError,
+        .setImageOnFinish = SetImageOnFinish,
+        .resetImageOnFinish = ResetImageOnFinish,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 

@@ -724,8 +724,7 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex001, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToIndex(20, true, ScrollAlign::END);
-    FlushUITasks();
+    ScrollToIndex(20, true, ScrollAlign::END);
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -745,10 +744,8 @@ HWTEST_F(GridScrollLayoutTestNg, SupplyAllData2ZeroIndex002, TestSize.Level1)
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToIndex(20, true, ScrollAlign::START);
-    FlushUITasks();
-    pattern_->ScrollToIndex(10, true, ScrollAlign::CENTER);
-    FlushUITasks();
+    ScrollToIndex(20, true, ScrollAlign::START);
+    ScrollToIndex(10, true, ScrollAlign::CENTER);
 
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
@@ -1335,6 +1332,52 @@ HWTEST_F(GridScrollLayoutTestNg, MarginPadding001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateFixedItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(-100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(200);
+    ASSERT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    auto model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateFixedItems(3);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(-200);
+    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+}
+
+/**
  * @tc.name: SpringAnimationTest001
  * @tc.desc: Test Grid change height during spring animation. GridItem is not fully filled Grid.
  * @tc.type: FUNC
@@ -1558,8 +1601,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest005, TestSize.Level1)
     CreateFixedItems(21);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     /**
      * @tc.steps: step1. Simulate a scrolling gesture.
@@ -1612,8 +1654,7 @@ HWTEST_F(GridScrollLayoutTestNg, SpringAnimationTest006, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20);
     CreateDone();
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(pattern_->IsAtBottom());
 
     /**
@@ -1802,8 +1843,7 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridWithScrollToIndex001, TestSize
     CreateBigItem(9, 9, 0, 3, ITEM_MAIN_SIZE, ITEM_MAIN_SIZE);
     CreateDone();
 
-    pattern_->ScrollToIndex(10, false, ScrollAlign::START);
-    FlushUITasks();
+    ScrollToIndex(10, false, ScrollAlign::START);
 
     pattern_->UpdateCurrentOffset(ITEM_MAIN_SIZE / 2, SCROLL_FROM_UPDATE);
     FlushUITasks();
@@ -1827,8 +1867,7 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Le
     CreateFixedItems(30);
     CreateDone();
 
-    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, 0);
-    FlushUITasks();
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
     for (int i = 0; i < 15; i++) {
@@ -1836,5 +1875,30 @@ HWTEST_F(GridScrollLayoutTestNg, TestIrregularGridMeasureForward001, TestSize.Le
         FlushUITasks();
     }
     EXPECT_NE(pattern_->info_.gridMatrix_[0][0], pattern_->info_.gridMatrix_[1][0]);
+}
+
+/**
+ * @tc.name: TestLayoutColumn001
+ * @tc.desc: Test whether the Grid can be normally laid out when its child node is Column.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollLayoutTestNg, TestLayoutColumn001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    GridLayoutOptions option;
+    model.SetLayoutOptions(option);
+    CreateColumns(30);
+    CreateDone();
+
+    int32_t colsNumber = 4;
+    float itemWidth = 60;
+    for (int32_t index = 0; index < 8; index++) {
+        RectF childRect = GetChildRect(frameNode_, index);
+        float offsetX = index % colsNumber * itemWidth;
+        float offsetY = floor(index / colsNumber) * ITEM_MAIN_SIZE;
+        RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
+        EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
+    }
 }
 } // namespace OHOS::Ace::NG

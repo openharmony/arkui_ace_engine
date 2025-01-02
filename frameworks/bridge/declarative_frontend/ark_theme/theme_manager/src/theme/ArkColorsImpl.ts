@@ -74,74 +74,32 @@ class ArkColorsImpl implements Colors {
     interactiveClick: ResourceColor;
 
     constructor(
-        colors: CustomColors = {},
+        colors: CustomColors,
         baselineColors: Colors
     ) {
-        const customAttribute = this as Object;
-        for (let attribute in colors) {
-            customAttribute[attribute] = colors[attribute];
-        }
-        this.brand = colors?.brand ?? baselineColors.brand;
-        const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors?.brand);
-
-        this.warning = colors?.warning ?? baselineColors.warning;
-        this.alert = colors?.alert ?? baselineColors.alert;
-        this.confirm = colors?.confirm ?? baselineColors.confirm;
-
-        this.fontPrimary = colors?.fontPrimary ?? baselineColors.fontPrimary;
-        this.fontSecondary = colors?.fontSecondary ?? baselineColors.fontSecondary;
-        this.fontTertiary = colors?.fontTertiary ?? baselineColors.fontTertiary;
-        this.fontFourth = colors?.fontFourth ?? baselineColors.fontFourth;
-        this.fontEmphasize = colors?.fontEmphasize ?? brandColors.primary ?? baselineColors.fontEmphasize;
-
-        this.fontOnPrimary = colors?.fontOnPrimary ?? baselineColors.fontOnPrimary;
-        this.fontOnSecondary = colors?.fontOnSecondary ?? baselineColors.fontOnSecondary;
-        this.fontOnTertiary = colors?.fontOnTertiary ?? baselineColors.fontOnTertiary;
-        this.fontOnFourth = colors?.fontOnFourth ?? baselineColors.fontOnFourth;
-
-        this.iconPrimary = colors?.iconPrimary ?? baselineColors.iconPrimary;
-        this.iconSecondary = colors?.iconSecondary ?? baselineColors.iconSecondary;
-        this.iconTertiary = colors?.iconTertiary ?? baselineColors.iconTertiary;
-        this.iconFourth = colors?.iconFourth ?? baselineColors.iconFourth;
-        this.iconEmphasize = colors?.iconEmphasize ?? brandColors.primary ?? baselineColors.iconEmphasize;
-        this.iconSubEmphasize = colors?.iconSubEmphasize ?? brandColors.tertiary ?? baselineColors.iconSubEmphasize;
-
-        this.iconOnPrimary = colors?.iconOnPrimary ?? baselineColors.iconOnPrimary;
-        this.iconOnSecondary = colors?.iconOnSecondary ?? baselineColors.iconOnSecondary;
-        this.iconOnTertiary = colors?.iconOnTertiary ?? baselineColors.iconOnTertiary;
-        this.iconOnFourth = colors?.iconOnFourth ?? baselineColors.iconOnFourth;
-
-        this.backgroundPrimary = colors?.backgroundPrimary ?? baselineColors.backgroundPrimary;
-        this.backgroundSecondary = colors?.backgroundSecondary ?? baselineColors.backgroundSecondary;
-        this.backgroundTertiary = colors?.backgroundTertiary ?? baselineColors.backgroundTertiary;
-        this.backgroundFourth = colors?.backgroundFourth ?? baselineColors.backgroundFourth;
-        this.backgroundEmphasize = colors?.backgroundEmphasize ?? brandColors.primary ?? baselineColors.backgroundEmphasize;
-
-        this.compForegroundPrimary = colors?.compForegroundPrimary ?? baselineColors.compForegroundPrimary;
-        this.compBackgroundPrimary = colors?.compBackgroundPrimary ?? baselineColors.compBackgroundPrimary;
-        this.compBackgroundPrimaryTran = colors?.compBackgroundPrimaryTran ?? baselineColors.compBackgroundPrimaryTran;
-        this.compBackgroundPrimaryContrary = colors?.compBackgroundPrimaryContrary ?? baselineColors.compBackgroundPrimaryContrary;
-        this.compBackgroundGray = colors?.compBackgroundGray ?? baselineColors.compBackgroundGray;
-        this.compBackgroundSecondary = colors?.compBackgroundSecondary ?? baselineColors.compBackgroundSecondary;
-        this.compBackgroundTertiary = colors?.compBackgroundTertiary ?? baselineColors.compBackgroundTertiary;
-        this.compBackgroundEmphasize = colors?.compBackgroundEmphasize ?? brandColors.primary ?? baselineColors.compBackgroundEmphasize;
-        this.compBackgroundNeutral = colors?.compBackgroundNeutral ?? baselineColors.compBackgroundNeutral;
-        this.compEmphasizeSecondary = colors?.compEmphasizeSecondary ?? brandColors.fourth ?? baselineColors.compEmphasizeSecondary;
-        this.compEmphasizeTertiary = colors?.compEmphasizeTertiary ?? brandColors.fifth ?? baselineColors.compEmphasizeTertiary;
-        this.compDivider = colors?.compDivider ?? baselineColors.compDivider;
-        this.compCommonContrary = colors?.compCommonContrary ?? baselineColors.compCommonContrary;
-        this.compBackgroundFocus = colors?.compBackgroundFocus ?? baselineColors.compBackgroundFocus;
-        this.compFocusedPrimary = colors?.compFocusedPrimary ?? baselineColors.compFocusedPrimary;
-        this.compFocusedSecondary = colors?.compFocusedSecondary ?? baselineColors.compFocusedSecondary;
-        this.compFocusedTertiary = colors?.compFocusedTertiary ?? baselineColors.compFocusedTertiary;
-
-        this.interactiveHover = colors?.interactiveHover ?? baselineColors.interactiveHover;
-        this.interactivePressed = colors?.interactivePressed ?? baselineColors.interactivePressed;
-        this.interactiveFocus = colors?.interactiveFocus ?? brandColors.primary ?? baselineColors.interactiveFocus;
-        this.interactiveActive = colors?.interactiveActive ?? brandColors.primary ?? baselineColors.interactiveActive;
-        this.interactiveSelect = colors?.interactiveSelect ?? baselineColors.interactiveSelect;
-        this.interactiveClick = colors?.interactiveClick ?? baselineColors.interactiveClick;
+        Object.assign(this, baselineColors, colors);
     }
+
+    static expandByBrandColor(colors: CustomColors) {
+        if (colors.brand) {
+            const brandColors: BrandColors = ArkColorsImpl.makeBrandColors(colors.brand);
+            colors.fontEmphasize = colors.fontEmphasize ?? brandColors.primary;
+
+            colors.iconEmphasize = colors.iconEmphasize ?? brandColors.primary;
+            colors.iconSubEmphasize = colors.iconSubEmphasize ?? brandColors.tertiary;
+
+            colors.backgroundEmphasize = colors.backgroundEmphasize ?? brandColors.primary;
+
+            colors.compBackgroundEmphasize = colors.compBackgroundEmphasize ?? brandColors.primary;
+
+            colors.compEmphasizeSecondary = colors.compEmphasizeSecondary ?? brandColors.fourth;
+            colors.compEmphasizeTertiary = colors.compEmphasizeTertiary ?? brandColors.fifth;
+
+            colors.interactiveFocus = colors.interactiveFocus ?? brandColors.primary;
+            colors.interactiveActive = colors.interactiveActive ?? brandColors.primary;
+        }
+    }
+
     static makeBrandColors(brandColor: ResourceColor | undefined) : BrandColors {
         const result: BrandColors = {
             primary: undefined,

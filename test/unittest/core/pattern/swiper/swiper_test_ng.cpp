@@ -24,6 +24,7 @@
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 void SwiperTestNg::SetUpTestSuite()
@@ -116,6 +117,17 @@ SwiperModelNG SwiperTestNg::CreateSwiper()
     return model;
 }
 
+SwiperModelNG SwiperTestNg::CreateArcSwiper()
+{
+    SwiperModelNG model;
+    model.Create(true);
+    model.SetIndicatorType(SwiperIndicatorType::ARC_DOT);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    GetSwiper();
+    return model;
+}
+
 void SwiperTestNg::CreateSwiperItems(int32_t itemNumber)
 {
     for (int32_t index = 0; index < itemNumber; index++) {
@@ -170,492 +182,31 @@ void SwiperTestNg::ChangeIndex(int32_t index)
     FlushUITasks();
 }
 
-/**
- * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap001
- * @tc.desc: OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap001, TestSize.Level1)
+void SwiperTestNg::RemoveSwiperItem(int32_t index)
 {
-    CreateWithArrow();
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    firstGeometryNode->Reset();
-    firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
-    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    struct DirtySwapConfig config;
-    pattern_->isInit_ = true;
-    config.skipMeasure = true;
-    config.skipLayout = true;
+    frameNode_->RemoveChildAtIndex(index);
+    FlushUITasks();
+}
 
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-            pattern_->isInit_ = false;
-            if (i == 1) {
-                config.skipLayout = false;
-                continue;
-            }
-            config.skipLayout = true;
-        }
-        config.skipMeasure = false;
+void SwiperTestNg::AddSwiperItem(int32_t slot)
+{
+    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    frameNode_->AddChild(testNode, slot);
+    FlushUITasks();
+}
+
+AssertionResult SwiperTestNg::DigitText(std::u16string expectDigit)
+{
+    auto currentIndexNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetFirstChild());
+    auto totalCountNode = AceType::DynamicCast<FrameNode>(indicatorNode_->GetLastChild());
+    auto currentIndexText = currentIndexNode->GetLayoutProperty<TextLayoutProperty>();
+    auto totalCountText = totalCountNode->GetLayoutProperty<TextLayoutProperty>();
+    std::u16string actualDigit = currentIndexText->GetContentValue() + totalCountText->GetContentValue();
+    if (actualDigit == expectDigit) {
+        return AssertionSuccess();
     }
-    struct SwiperItemInfo swiperItemInfo1;
-    struct SwiperItemInfo swiperItemInfo2;
-    struct SwiperItemInfo swiperItemInfo3;
-    struct SwiperItemInfo swiperItemInfo4;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    swiperItemInfo2.startPos = 1.0f;
-    swiperItemInfo2.endPos = -1.0f;
-    swiperItemInfo3.startPos = -1.0f;
-    swiperItemInfo3.endPos = 0.0f;
-    swiperItemInfo4.startPos = 1.0f;
-    swiperItemInfo4.endPos = 1.0f;
-
-    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
-    dirty->layoutAlgorithm_->layoutAlgorithm_ = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
-    ASSERT_NE(dirty->GetLayoutAlgorithm(), nullptr);
-    ASSERT_NE(AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm()), nullptr);
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(3, swiperItemInfo3));
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(4, swiperItemInfo4));
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    pattern_->indicatorDoingAnimation_ = false;
-    pattern_->jumpIndex_ = 1;
-
-    for (int i = 0; i <= 1; i++) {
-        pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-        pattern_->indicatorDoingAnimation_ = true;
-        pattern_->targetIndex_ = 1;
-        AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-            ->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    }
-
-    AceType::DynamicCast<SwiperPaintProperty>(frameNode_->paintProperty_)->UpdateEdgeEffect(EdgeEffect::SPRING);
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-            if (i == 1) {
-                AceType::DynamicCast<SwiperPaintProperty>(frameNode_->paintProperty_)
-                    ->UpdateEdgeEffect(EdgeEffect::FADE);
-                continue;
-            }
-            AceType::DynamicCast<SwiperPaintProperty>(frameNode_->paintProperty_)->UpdateEdgeEffect(EdgeEffect::SPRING);
-        }
-        AceType::DynamicCast<SwiperLayoutProperty>(frameNode_->layoutProperty_)->padding_ =
-            std::make_unique<PaddingProperty>();
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetRemainingOffset001
- * @tc.desc: GetRemainingOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetRemainingOffset001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    layoutProperty_->UpdateLoop(true);
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-
-    /**
-     * @tc.steps: step2. call GetRemainingOffset.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->GetDistanceToEdge();
-            if (i == 1) {
-                pattern_->itemPosition_.emplace(std::make_pair(0, swiperItemInfo1));
-                continue;
-            }
-            pattern_->itemPosition_.clear();
-        }
-        layoutProperty_->UpdateLoop(false);
-    }
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->GetDistanceToEdge();
-}
-
-/**
- * @tc.name: SwiperPatternCalculateDisplayCount001
- * @tc.desc: CalculateDisplayCount
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternCalculateDisplayCount001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto dimension = Dimension(1);
-    layoutProperty_->UpdateMinSize(dimension);
-
-    /**
-     * @tc.steps: step2. call CalculateDisplayCount.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->CalculateDisplayCount();
-}
-
-/**
- * @tc.name: SwiperPatternOnTouchTestHit001
- * @tc.desc: OnTouchTestHit
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-
-    /**
-     * @tc.steps: step2. call OnTouchTestHit.
-     * @tc.expected: Related function runs ok.
-     */
-    CommonFunc callback = [] {};
-    pattern_->isTouchDown_ = false;
-    pattern_->swiperController_->SetRemoveTabBarEventCallback(callback);
-    pattern_->OnTouchTestHit(SourceType::TOUCH);
-    EXPECT_NE(pattern_->swiperController_->GetRemoveTabBarEventCallback(), nullptr);
-}
-
-/**
- * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap002
- * @tc.desc: OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap002, TestSize.Level1)
-{
-    CreateWithArrow();
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    firstGeometryNode->Reset();
-    firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
-    auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    dirty->AppendChild(firstLayoutWrapper);
-    struct DirtySwapConfig config;
-    pattern_->isInit_ = true;
-    config.skipMeasure = false;
-    config.skipLayout = false;
-
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap.
-     * @tc.expected: Related function runs ok.
-     */
-    TurnPageRateFunc callback = [](const int32_t i, float f) {};
-    pattern_->swiperController_->SetTurnPageRateCallback(callback);
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-
-    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
-    dirty->layoutAlgorithm_->layoutAlgorithm_ = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
-    ASSERT_NE(dirty->GetLayoutAlgorithm(), nullptr);
-    ASSERT_NE(AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm()), nullptr);
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->isDragging_ = true;
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    EXPECT_NE(pattern_->swiperController_->GetTurnPageRateCallback(), nullptr);
-}
-
-/**
- * @tc.name: SwiperPatternGetDisplayCount002
- * @tc.desc: GetDisplayCount
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetDisplayCount002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->leftButtonId_.reset();
-
-    LayoutConstraintF layoutConstraint;
-    layoutConstraint.maxSize = SizeF(720.f, 1136.f);
-    layoutConstraint.percentReference = SizeF(720.f, 1136.f);
-    layoutConstraint.parentIdealSize.SetSize(SizeF(720.f, 1136.f));
-    layoutConstraint.selfIdealSize = OptionalSize(SizeF(720.f, 1200.f));
-    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
-    layoutProperty_->UpdateContentConstraint();
-
-    /**
-     * @tc.steps: step2. Set the FrameSize of the model.
-     */
-    frameNode_->GetGeometryNode()->SetFrameSize(SizeF(720.f, 1136.f));
-    Dimension SWIPER_MINSIZE = 50.0_vp;
-
-    for (int i = 0; i < 4; i++) {
-        /**
-         * @tc.steps: step3. Update the MinSize of one swiper item.
-         * @tc.expected: Related function runs ok.
-         */
-        layoutProperty_->UpdateMinSize(SWIPER_MINSIZE);
-        EXPECT_EQ(layoutProperty_->GetMinSize().value_or(Dimension(0.0, DimensionUnit::VP)), SWIPER_MINSIZE);
-
-        /**
-         * @tc.steps: step4. Call GetDisplayCount.
-         * @tc.expected: The return value is correct.
-         */
-        float displayCount = static_cast<int32_t>(
-            floor((SizeF(720.f, 1136.f).Width() - 2 * 16.f + 16.f) / (SWIPER_MINSIZE.ConvertToPx() + 16.f)));
-        displayCount = displayCount > 0 ? displayCount : 1;
-        displayCount = displayCount > pattern_->TotalCount() ? pattern_->TotalCount() : displayCount;
-        EXPECT_EQ(pattern_->GetDisplayCount(), displayCount);
-
-        constexpr Dimension delta = 200.0_vp;
-        SWIPER_MINSIZE += delta;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetFirstItemInfoInVisibleArea001
- * @tc.desc: GetFirstItemInfoInVisibleArea
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetFirstItemInfoInVisibleArea001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    struct SwiperItemInfo swiperItemInfo1 {
-        0.1f, 0.2f
-    }, swiperItemInfo2 { -0.1f, -0.2f }, swiperItemInfo3 { -0.1f, 0.2f }, swiperItemInfo4 { 0.1f, -0.2f };
-    pattern_->itemPosition_.clear();
-    auto dimension = Dimension(1);
-
-    /**
-     * @tc.steps: step2. call GetFirstItemInfoInVisibleArea.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->GetFirstItemInfoInVisibleArea();
-            if (i == 1) {
-                break;
-            }
-            pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-            pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-            pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo3));
-            pattern_->itemPosition_.emplace(std::make_pair(4, swiperItemInfo4));
-            layoutProperty_->UpdatePrevMargin(dimension);
-            layoutProperty_->layoutConstraint_->scaleProperty = ScaleProperty { 1.0f, 1.0f, 1.0f };
-        }
-        layoutProperty_->ResetPrevMargin();
-        layoutProperty_->layoutConstraint_->scaleProperty = ScaleProperty { 0.0f, 0.0f, 0.0f };
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetSecondItemInfoInVisibleArea001
- * @tc.desc: GetSecondItemInfoInVisibleArea
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetSecondItemInfoInVisibleArea001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    struct SwiperItemInfo swiperItemInfo1 {
-        0.1f, 0.2f
-    }, swiperItemInfo2 { -0.1f, -0.2f }, swiperItemInfo3 { -0.1f, 0.2f }, swiperItemInfo4 { 0.1f, -0.2f };
-    pattern_->itemPosition_.clear();
-    auto dimension = Dimension(1);
-
-    /**
-     * @tc.steps: step2. call GetSecondItemInfoInVisibleArea.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->GetSecondItemInfoInVisibleArea();
-            if (i == 1) {
-                break;
-            }
-            pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-            pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-            pattern_->itemPosition_.emplace(std::make_pair(3, swiperItemInfo3));
-            pattern_->itemPosition_.emplace(std::make_pair(4, swiperItemInfo4));
-            layoutProperty_->UpdatePrevMargin(dimension);
-            layoutProperty_->layoutConstraint_->scaleProperty = ScaleProperty { 1.0f, 1.0f, 1.0f };
-        }
-        layoutProperty_->ResetPrevMargin();
-        layoutProperty_->layoutConstraint_->scaleProperty = ScaleProperty { 0.0f, 0.0f, 0.0f };
-    }
-    pattern_->itemPosition_.erase(2);
-    pattern_->GetSecondItemInfoInVisibleArea();
-}
-
-/**
- * @tc.name: PostTranslateTask001
- * @tc.desc: PostTranslateTask
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, PostTranslateTask001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Call PostTranslateTask
-     * @tc.expected: Swipe to next
-     */
-    CreateDefaultSwiper();
-    pattern_->PostTranslateTask(DEFAULT_INTERVAL);
-    EXPECT_EQ(pattern_->targetIndex_, 1);
-}
-
-/**
- * @tc.name: PostTranslateTask002
- * @tc.desc: PostTranslateTask
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, PostTranslateTask002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. loop is false, index is last item index
-     * @tc.expected: Can not swipe to next
-     */
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    model.SetIndex(2);
-    CreateSwiperItems();
-    CreateSwiperDone();
-
-    /**
-     * @tc.steps: step2. Call PostTranslateTask
-     * @tc.expected: Can swipe to next
-     */
-    pattern_->PostTranslateTask(DEFAULT_INTERVAL);
-    EXPECT_EQ(pattern_->targetIndex_, 3);
-
-    /**
-     * @tc.steps: step3. Swipe to last item and call PostTranslateTask
-     * @tc.expected: Can not swipe to next
-     */
-    ChangeIndex(3);
-    pattern_->PostTranslateTask(DEFAULT_INTERVAL);
-    EXPECT_FALSE(pattern_->targetIndex_.has_value());
-}
-
-/**
- * @tc.name: PostTranslateTask003
- * @tc.desc: PostTranslateTask
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, PostTranslateTask003, TestSize.Level1)
-{
-    CreateSwiper();
-    CreateSwiperDone();
-    pattern_->itemPosition_.clear();
-    pattern_->PostTranslateTask(DEFAULT_INTERVAL);
-    EXPECT_FALSE(pattern_->targetIndex_.has_value());
-
-    layoutProperty_->UpdateDisplayCount(0);
-    pattern_->PostTranslateTask(DEFAULT_INTERVAL);
-    EXPECT_FALSE(pattern_->targetIndex_.has_value());
-}
-
-/**
- * @tc.name: SwiperPatternRegisterVisibleAreaChange001
- * @tc.desc: RegisterVisibleAreaChange
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternRegisterVisibleAreaChange001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-
-    /**
-     * @tc.steps: step2. call RegisterVisibleAreaChange.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->RegisterVisibleAreaChange();
-            if (i == 1) {
-                pattern_->hasVisibleChangeRegistered_ = false;
-            }
-            pattern_->hasVisibleChangeRegistered_ = true;
-        }
-        frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-    }
-
-    pattern_->isWindowShow_ = false;
-    for (int i = 0; i <= 1; i++) {
-        pattern_->RegisterVisibleAreaChange();
-        pattern_->isWindowShow_ = true;
-        pattern_->isVisibleArea_ = true;
-        pattern_->isVisible_ = true;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnTranslateFinish001
- * @tc.desc: OnTranslateFinish
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish001, TestSize.Level1)
-{
-    CreateWithArrow();
-    int32_t nextIndex = 1;
-    bool restartAutoPlay = true;
-    bool forceStop = true;
-
-    /**
-     * @tc.steps: step2. call OnTranslateFinish.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
-            if (i == 1) {
-                pattern_->isFinishAnimation_ = false;
-                continue;
-            }
-            pattern_->isFinishAnimation_ = true;
-            frameNode_->AddChild(indicatorNode_);
-            pattern_->isVisible_ = false;
-        }
-        frameNode_->AddChild(leftArrowNode_);
-        frameNode_->AddChild(indicatorNode_);
-        forceStop = false;
-        pattern_->isVisible_ = true;
-        frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-        layoutProperty_->UpdateLoop(true);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetCustomPropertyOffset001
- * @tc.desc: GetCustomPropertyOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetCustomPropertyOffset001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
-    layoutProperty_->ResetPrevMargin();
-
-    /**
-     * @tc.steps: step2. call GetCustomPropertyOffset.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->GetCustomPropertyOffset();
-            if (i == 1) {
-                break;
-            }
-            layoutProperty_->UpdateDirection(Axis::VERTICAL);
-            layoutProperty_->UpdatePrevMargin(Dimension(0));
-        }
-        layoutProperty_->UpdatePrevMargin(Dimension(1));
-    }
+    return AssertionFailure() << "Actual: " << UtfUtils::Str16ToStr8(actualDigit)
+                              << " Expected: " << UtfUtils::Str16ToStr8(expectDigit);
 }
 
 /**
@@ -690,464 +241,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternComputeNextIndexByVelocity001, TestSize.Leve
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, true), 1);
     velocity = -780.0f;
     EXPECT_EQ(pattern_->ComputeNextIndexByVelocity(velocity, false), 1);
-}
-
-/**
- * @tc.name: UpdateCurrentOffset001
- * @tc.desc: UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, UpdateCurrentOffset001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->UpdateCurrentOffset(10.f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), 10.f);
-}
-
-/**
- * @tc.name: UpdateCurrentOffset002
- * @tc.desc: UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, UpdateCurrentOffset002, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::SPRING);
-    pattern_->isTouchPad_ = true;
-    pattern_->childScrolling_ = true;
-    pattern_->UpdateCurrentOffset(10.f);
-    FlushUITasks();
-    EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
-    EXPECT_LT(GetChildX(frameNode_, 0), 10.f);
-
-    float preOffset = GetChildX(frameNode_, 0);
-    pattern_->UpdateCurrentOffset(-20.f);
-    FlushUITasks();
-    EXPECT_LT(GetChildX(frameNode_, 0), preOffset);
-    EXPECT_GT(GetChildX(frameNode_, 0), -20.f);
-}
-
-/**
- * @tc.name: UpdateCurrentOffset003
- * @tc.desc: UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, UpdateCurrentOffset003, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    model.SetEdgeEffect(EdgeEffect::FADE);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::FADE);
-    pattern_->childScrolling_ = true;
-    pattern_->UpdateCurrentOffset(10.f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
-
-    pattern_->UpdateCurrentOffset(-20.f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
-}
-
-/**
- * @tc.name: UpdateCurrentOffset004
- * @tc.desc: UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, UpdateCurrentOffset004, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetLoop(false);
-    model.SetEdgeEffect(EdgeEffect::NONE);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    EXPECT_EQ(pattern_->GetEdgeEffect(), EdgeEffect::NONE);
-    pattern_->childScrolling_ = true;
-    pattern_->UpdateCurrentOffset(10.f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
-
-    pattern_->UpdateCurrentOffset(-20.f);
-    FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), -20.f);
-}
-
-/**
- * @tc.name: UpdateCurrentOffset005
- * @tc.desc: UpdateCurrentOffset
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, UpdateCurrentOffset005, TestSize.Level1)
-{
-    CreateSwiper();
-    CreateSwiperDone();
-    pattern_->UpdateCurrentOffset(10.f);
-    FlushUITasks();
-    EXPECT_EQ(pattern_->currentOffset_, 0.f);
-}
-
-/**
- * @tc.name: SwiperPatternBeforeCreateLayoutWrapper001
- * @tc.desc: BeforeCreateLayoutWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper001, TestSize.Level1)
-{
-    CreateWithArrow();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_ = 1;
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
-
-    /**
-     * @tc.steps: step2. call BeforeCreateLayoutWrapper.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->BeforeCreateLayoutWrapper();
-            if (i == 1) {
-                frameNode_->AddChild(leftArrowNode_);
-                continue;
-            }
-            pattern_->rightButtonId_.reset();
-            pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-        }
-        pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(0);
-    }
-
-    frameNode_->AddChild(rightArrowNode_);
-    pattern_->currentIndex_ = 0;
-    pattern_->oldIndex_ = 0;
-    for (int i = 0; i <= 1; i++) {
-        pattern_->BeforeCreateLayoutWrapper();
-        pattern_->currentIndex_ = 1;
-    }
-    pattern_->jumpIndex_.reset();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_ = 1;
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(true);
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                pattern_->BeforeCreateLayoutWrapper();
-                if (i == 1 && j == 0) {
-                    pattern_->jumpIndex_ = 0;
-                    continue;
-                }
-                if (i == 1 && j == 1) {
-                    pattern_->jumpIndex_ = 10;
-                    continue;
-                }
-                pattern_->jumpIndex_ = -1;
-                pattern_->propertyAnimationIsRunning_ = true;
-            }
-            pattern_->jumpIndex_ = 10;
-            pattern_->rightButtonId_.reset();
-            pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-            frameNode_->AddChild(leftArrowNode_);
-            frameNode_->AddChild(rightArrowNode_);
-        }
-        pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateLoop(false);
-        pattern_->jumpIndex_ = -1;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternIsVisibleChildrenSizeLessThanSwiper001
- * @tc.desc: IsVisibleChildrenSizeLessThanSwiper
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper001, TestSize.Level1)
-{
-    CreateWithArrow();
-    layoutProperty_->UpdateDisplayCount(5);
-    pattern_->IsVisibleChildrenSizeLessThanSwiper();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    pattern_->itemPosition_.clear();
-    auto dimension = Dimension(1);
-    layoutProperty_->UpdateMinSize(dimension);
-    EXPECT_EQ(static_cast<int32_t>(pattern_->itemPosition_.size()), 0);
-
-    /**
-     * @tc.steps: step2. call IsVisibleChildrenSizeLessThanSwiper.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->IsVisibleChildrenSizeLessThanSwiper();
-            if (i == 1) {
-                pattern_->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
-                continue;
-            }
-            pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 2 }));
-            pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-        }
-        pattern_->itemPosition_.clear();
-        pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-        pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 1 }));
-    }
-
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->IsVisibleChildrenSizeLessThanSwiper();
-            pattern_->itemPosition_.clear();
-            pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-            pattern_->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1, 2 }));
-        }
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetLastItemInfoInVisibleArea001
- * @tc.desc: GetLastItemInfoInVisibleArea
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternGetLastItemInfoInVisibleArea001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call GetLastItemInfoInVisibleArea.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->GetLastItemInfoInVisibleArea();
-}
-
-/**
- * @tc.name: SwiperPatternBeforeCreateLayoutWrapper002
- * @tc.desc: BeforeCreateLayoutWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-
-    /**
-     * @tc.steps: step2. call BeforeCreateLayoutWrapper.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->BeforeCreateLayoutWrapper();
-            if (i == 1) {
-                pattern_->mainSizeIsMeasured_ = false;
-                continue;
-            }
-            pattern_->mainSizeIsMeasured_ = true;
-        }
-    }
-}
-
-/**
- * @tc.name: SwiperPatternBeforeCreateLayoutWrapper003
- * @tc.desc: BeforeCreateLayoutWrapper
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternBeforeCreateLayoutWrapper003, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->itemPosition_.clear();
-    pattern_->isVoluntarilyClear_ = false;
-
-    /**
-     * @tc.steps: step2. call BeforeCreateLayoutWrapper.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->BeforeCreateLayoutWrapper();
-        pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternIsVisibleChildrenSizeLessThanSwiper002
- * @tc.desc: IsVisibleChildrenSizeLessThanSwiper
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternIsVisibleChildrenSizeLessThanSwiper002, TestSize.Level1)
-{
-    CreateWithArrow();
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    pattern_->itemPosition_.clear();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    auto dimension = Dimension(1);
-    layoutProperty_->UpdateMinSize(dimension);
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1, 2 }));
-    pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 3 }));
-
-    /**
-     * @tc.steps: step2. call IsVisibleChildrenSizeLessThanSwiper.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->IsVisibleChildrenSizeLessThanSwiper();
-}
-
-/**
- * @tc.name: SwiperPatternOnTouchTestHit002
- * @tc.desc: OnTouchTestHit
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnTouchTestHit002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto hitTestType = SourceType::MOUSE;
-
-    /**
-     * @tc.steps: step2. call OnTouchTestHit.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->OnTouchTestHit(hitTestType);
-        pattern_->isTouchDown_ = true;
-    }
-}
-
-/**
- * @tc.name: SwiperModelNGSetDisplayCount001
- * @tc.desc: Test SetDisplayCount
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperModelNGSetDisplayCount001, TestSize.Level1)
-{
-    SwiperModelNG mode;
-    auto controller = mode.Create();
-    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
-    ASSERT_NE(controller, nullptr);
-    int32_t displayCount = 0;
-
-    /**
-     * @tc.steps: step3. call SetDisplayCount.
-     * @tc.expected: the related function runs ok.
-     */
-    mode.SetDisplayCount(displayCount);
-}
-
-/**
- * @tc.name: SwiperCheckLoopChange001
- * @tc.desc: Swiper CheckLoopChange.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperOnLoopChange001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->preLoop_ = true;
-    layoutProperty_->UpdateLoop(false);
-    layoutProperty_->ResetPrevMargin();
-    layoutProperty_->ResetNextMargin();
-
-    /**
-     * @tc.steps: step2. call OnLoopChange.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->CheckLoopChange();
-            if (i == 1) {
-                layoutProperty_->ResetPrevMargin();
-                continue;
-            }
-            layoutProperty_->UpdatePrevMargin(Dimension(1));
-        }
-        layoutProperty_->UpdateNextMargin(Dimension(1));
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnTranslateFinish002
- * @tc.desc: OnTranslateFinish
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnTranslateFinish002, TestSize.Level1)
-{
-    CreateWithArrow();
-    int32_t nextIndex = 1;
-    bool restartAutoPlay = true;
-    bool forceStop = true;
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    pattern_->currentIndex_ = 1;
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(false);
-    pattern_->isVisible_ = true;
-    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-    pattern_->isIndicatorLongPress_ = false;
-    EXPECT_EQ(frameNode_->GetChildren().size(), 7);
-
-    /**
-     * @tc.steps: step2. call OnTranslateFinish.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->OnTranslateFinish(nextIndex, restartAutoPlay, pattern_->isFinishAnimation_, forceStop);
-            if (i == 1) {
-                pattern_->isUserFinish_ = true;
-                continue;
-            }
-            pattern_->isUserFinish_ = false;
-        }
-        pattern_->isVisible_ = false;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnModifyDone002
- * @tc.desc: Test OnModifyDone
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnModifyDone002, TestSize.Level1)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetDirection(Axis::VERTICAL);
-    CreateSwiperItems();
-    CreateSwiperDone();
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    indicatorPattern->OnModifyDone();
-    indicatorPattern->swiperController_->removeSwiperEventCallback_();
-    indicatorPattern->swiperController_->addSwiperEventCallback_();
-    pattern_->OnAfterModifyDone();
-    EXPECT_NE(indicatorPattern, nullptr);
-}
-
-/**
- * @tc.name: SwiperPatternRegisterVisibleAreaChange002
- * @tc.desc: RegisterVisibleAreaChange
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternRegisterVisibleAreaChange002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto pipeline = frameNode_->GetContextRefPtr();
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-
-    /**
-     * @tc.steps: step2. call RegisterVisibleAreaChange.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->hasVisibleChangeRegistered_ = false;
-    paintProperty_->UpdateAutoPlay(true);
-    pattern_->RegisterVisibleAreaChange();
-    EXPECT_TRUE(pattern_->hasVisibleChangeRegistered_);
-    pattern_->isWindowShow_ = false;
-    pattern_->hasVisibleChangeRegistered_ = false;
-    paintProperty_->UpdateAutoPlay(true);
-    pattern_->RegisterVisibleAreaChange();
-    EXPECT_TRUE(pattern_->hasVisibleChangeRegistered_);
 }
 
 /**
@@ -1219,95 +312,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternInitSurfaceChangedCallback001, TestSize.Leve
     testFunction3(1, 1, 1, 1, WindowSizeChangeReason::CUSTOM_ANIMATION);
     auto callbacknumber3 = pattern_->surfaceChangedCallbackId_;
     EXPECT_EQ(callbacknumber3, 1);
-}
-
-/**
- * @tc.name: SwiperPatternMarkDirtyNodeSelf001
- * @tc.desc: MarkDirtyNodeSelf
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternMarkDirtyNodeSelf001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_ = 1;
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
-
-    /**
-     * @tc.steps: step2. call MarkDirtyNodeSelf.
-     * @tc.expected: Related function is called.
-     */
-    pattern_->crossMatchChild_ = true;
-    pattern_->MarkDirtyNodeSelf();
-    EXPECT_TRUE(pattern_->crossMatchChild_);
-    pattern_->crossMatchChild_ = false;
-    pattern_->MarkDirtyNodeSelf();
-    EXPECT_FALSE(pattern_->crossMatchChild_);
-}
-
-/**
- * @tc.name: SwiperPatternOnWindowHide001
- * @tc.desc: MarkDirtyNodeSelf
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnWindowHide001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_ = 1;
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateShowIndicator(true);
-    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateIndex(-1);
-
-    /**
-     * @tc.steps: step2. call MarkDirtyNodeSelf.
-     * @tc.expected: Related function is called.
-     */
-    pattern_->isDragging_ = true;
-    pattern_->OnWindowHide();
-    EXPECT_FALSE(pattern_->isDragging_);
-    pattern_->isDragging_ = false;
-    pattern_->OnWindowHide();
-    EXPECT_FALSE(pattern_->isDragging_);
-}
-
-/**
- * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap003
- * @tc.desc: OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap003, TestSize.Level1)
-{
-    CreateWithArrow();
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    firstGeometryNode->Reset();
-    firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
-    auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    dirty->AppendChild(firstLayoutWrapper);
-    struct DirtySwapConfig config;
-    pattern_->isInit_ = true;
-    config.skipMeasure = true;
-    config.skipLayout = false;
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-
-    /**
-     * @tc.steps: step2. call OnDirtyLayoutWrapperSwap.
-     * @tc.expected: Related function runs ok.
-     */
-    paintProperty_->GetAutoPlay().emplace(false);
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    config.skipMeasure = false;
-    paintProperty_->GetAutoPlay().emplace(false);
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    paintProperty_->GetAutoPlay().emplace(true);
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    paintProperty_->GetAutoPlay().emplace(true);
-    config.skipMeasure = false;
-    config.skipLayout = false;
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
 }
 
 /**
@@ -1914,127 +918,6 @@ HWTEST_F(SwiperTestNg, CalcCurrentPageStatus002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ResetDisplayCount001
- * @tc.desc: Swiper Model NG.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, ResetDisplayCount001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    SwiperModelNG model = CreateSwiper();
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto pattern = frameNode->GetPattern<SwiperPattern>();
-    auto layoutProperty = frameNode->GetLayoutProperty<SwiperLayoutProperty>();
-    auto paintProperty = frameNode->GetPaintProperty<SwiperPaintProperty>();
-
-    /**
-     * @tc.steps: step3.1. Test SetIndex function.
-     * @tc.expected: layoutProperty->GetIndex() is equal to 1.
-     */
-    model.SetIndex(1);
-    EXPECT_EQ(layoutProperty->GetIndex(), 1);
-
-    /**
-     * @tc.steps: step3.1. Test SetIndex function.
-     * @tc.expected: layoutProperty->GetIndex() is equal to 1.
-     */
-    model.SetDisplayCount(10);
-    model.ResetDisplayCount();
-    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto uiNode = AceType::DynamicCast<FrameNode>(element);
-    pattern = uiNode->GetPattern<SwiperPattern>();
-    EXPECT_NE(pattern->GetDisplayCount(), 10);
-}
-
-/**
- * @tc.name: SwiperPatternOnDirtyLayoutWrapperSwap002
- * @tc.desc: OnDirtyLayoutWrapperSwap
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperPatternOnDirtyLayoutWrapperSwap005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateWithArrow();
-    auto firstChild = AccessibilityManager::DynamicCast<FrameNode>(indicatorNode_);
-    RefPtr<GeometryNode> firstGeometryNode = AceType::MakeRefPtr<GeometryNode>();
-    firstGeometryNode->Reset();
-    firstGeometryNode->SetFrameSize(SizeF(20.0, 20.0));
-    auto firstLayoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    auto dirty = AceType::MakeRefPtr<LayoutWrapperNode>(firstChild, firstGeometryNode, firstChild->GetLayoutProperty());
-    dirty->AppendChild(firstLayoutWrapper);
-    struct DirtySwapConfig config;
-    pattern_->isInit_ = true;
-    config.skipMeasure = false;
-    config.skipLayout = false;
-
-    TurnPageRateFunc callback = [](const int32_t i, float f) {};
-    pattern_->swiperController_->SetTurnPageRateCallback(callback);
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-
-    auto swiperLayoutAlgorithm = AceType::DynamicCast<SwiperLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    dirty->layoutAlgorithm_ = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(swiperLayoutAlgorithm);
-    dirty->layoutAlgorithm_->layoutAlgorithm_ = AceType::MakeRefPtr<SwiperLayoutAlgorithm>();
-    ASSERT_NE(dirty->GetLayoutAlgorithm(), nullptr);
-    ASSERT_NE(AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm()), nullptr);
-    AceType::DynamicCast<SwiperLayoutAlgorithm>(dirty->GetLayoutAlgorithm()->GetLayoutAlgorithm())
-        ->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->isDragging_ = true;
-    pattern_->windowSizeChangeReason_ = WindowSizeChangeReason::ROTATION;
-    /**
-     * @tc.steps: step2. Calling the OnDirtyLayoutWrapperSwap interface
-     * @tc.expected: Pattern_ -> WindowSizeChangeReason_ Not equal to WindowSizeChangeReason::ROTATION
-     */
-    pattern_->OnDirtyLayoutWrapperSwap(dirty, config);
-    EXPECT_NE(pattern_->windowSizeChangeReason_, WindowSizeChangeReason::ROTATION);
-}
-
-/**
- * @tc.name: SwiperProcessDelta001
- * @tc.desc: Test for SwiperPattern::ProcessDelta.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperTestNg, SwiperProcessDelta001, TestSize.Level1)
-{
-    float mainSize = 50.0f;
-    float delta = 5.0f;
-    float deltaSum = 46.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, 4.0f);
-
-    delta = -10.0f;
-    deltaSum = 50.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, -10.0f);
-
-    delta = -10.0f;
-    deltaSum = -40.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, -10.0f);
-
-    delta = -10.0f;
-    deltaSum = -50.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, 0.0f);
-
-    delta = -50.0f;
-    deltaSum = -50.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, 0.0f);
-
-    delta = 1.0f;
-    deltaSum = -50.0f;
-    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
-    EXPECT_EQ(delta, 1.0f);
-}
-
-/**
  * @tc.name: AdjustCurrentIndexOnSwipePage001
  * @tc.desc: Test SwiperPattern AdjustCurrentIndexOnSwipePage
  * @tc.type: FUNC
@@ -2082,60 +965,150 @@ HWTEST_F(SwiperTestNg, SwiperPatternAdjustCurrentIndexOnSwipePage001, TestSize.L
 }
 
 /**
- * @tc.name: AdjustCurrentIndexWithTotalCountChange001
- * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange001
+ * @tc.name: ChangeItemsCount001
+ * @tc.desc: Test Add/Remove swiper item, the currentIndex is correct
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange001, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ChangeItemsCount001, TestSize.Level1)
 {
     CreateDefaultSwiper();
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
+
     /**
-     * @tc.steps: step1. turn page to last, let index change to -1.
+     * @tc.steps: step1. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->currentIndex_, -1);
-    /**
-     * @tc.steps: step2. add child, let totalCount increase.
-     */
-    RefPtr<FrameNode> testNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    frameNode_->AddChild(testNode, pattern_->TotalCount() - 1);
-    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
     EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER + 1);
-    pattern_->BeforeCreateLayoutWrapper();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+
     /**
-     * @tc.steps: step3. index will need not to be changed.
+     * @tc.steps: step2. Change index and remove child
+     * @tc.expected: The currentIndex would changed to be 0
      */
-    EXPECT_EQ(pattern_->currentIndex_, pattern_->oldChildrenSize_.value() - 1);
+    ShowNext();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 4);
+    ShowNext();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 5);
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 
 /**
- * @tc.name: AdjustCurrentIndexWithTotalCountChange002
- * @tc.desc: Test SwiperPattern AdjustCurrentIndexWithTotalCountChange002
+ * @tc.name: ChangeItemsCount002
+ * @tc.desc: Test Add/Remove swiper item when DIGIT
+ * @tc.desc: The indicator text and currentIndex are correct
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperTestNg, AdjustCurrentIndexWithTotalCountChange002, TestSize.Level1)
+HWTEST_F(SwiperTestNg, ChangeItemsCount002, TestSize.Level1)
 {
-    CreateDefaultSwiper();
-    auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, ITEM_NUMBER);
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetDisplayCount(2);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_TRUE(DigitText(u"1/6"));
+
     /**
-     * @tc.steps: step1. turn page to last, let index change to -1.
+     * @tc.steps: step1. Change index and remove child
      */
     ShowPrevious();
-    EXPECT_EQ(pattern_->currentIndex_, -1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(DigitText(u"6/6"));
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/5"));
+
     /**
-     * @tc.steps: step2. add child, let totalCount decrease.
+     * @tc.steps: step2. Remove child again
+     * @tc.expected: The currentIndex changed to be 0 because page not existed
      */
-    frameNode_->RemoveChildAtIndex(0);
-    EXPECT_EQ(pattern_->oldChildrenSize_.value(), ITEM_NUMBER);
-    EXPECT_EQ(pattern_->TotalCount(), ITEM_NUMBER - 1);
-    pattern_->BeforeCreateLayoutWrapper();
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/4"));
+
     /**
-     * @tc.steps: step3. index will need to be changed to 0.
+     * @tc.steps: step3. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
      */
-    EXPECT_EQ(pattern_->currentIndex_, 0);
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -1);
+    EXPECT_TRUE(DigitText(u"4/4"));
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(DigitText(u"4/5"));
+
+    /**
+     * @tc.steps: step4. Add child again
+     * @tc.expected: The currentIndex would not changed
+     */
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 3);
+    EXPECT_TRUE(DigitText(u"4/6"));
+}
+
+/**
+ * @tc.name: ChangeItemsCount003
+ * @tc.desc: Test Add/Remove swiper item when DIGIT/SwipeByGroup
+ * @tc.desc: The indicator text and currentIndex are correct
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, ChangeItemsCount003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+    EXPECT_TRUE(DigitText(u"1/6"));
+
+    /**
+     * @tc.steps: step1. Change index and remove child
+     * @tc.expected: The currentIndex would not changed because page existed
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"5/6"));
+
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"5/5"));
+
+    /**
+     * @tc.steps: step2. Remove child again
+     * @tc.expected: The currentIndex changed to be 0 because page not existed
+     */
+    RemoveSwiperItem(0);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+    EXPECT_TRUE(DigitText(u"1/4"));
+
+    /**
+     * @tc.steps: step3. Change index and add child
+     * @tc.expected: The currentIndex would changed to be >= 0
+     */
+    ShowPrevious();
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), -2);
+    EXPECT_TRUE(DigitText(u"3/4"));
+
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(DigitText(u"3/5"));
+
+    /**
+     * @tc.steps: step4. Add child again
+     * @tc.expected: The currentIndex would not changed
+     */
+    AddSwiperItem(pattern_->TotalCount() - 1);
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(DigitText(u"3/6"));
 }
 
 /**
@@ -2600,5 +1573,69 @@ HWTEST_F(SwiperTestNg, SwiperSetFrameRateTest001, TestSize.Level1)
     auto iter = frameRateManager->nodeRateMap_.find(nodeId);
     EXPECT_EQ(iter->second, expectedRate);
     EXPECT_TRUE(frameRateManager->isRateChanged_);
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, ToJsonValue001, TestSize.Level1)
+{
+    CreateDefaultSwiper();
+
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("nestedScroll"), "SwiperNestedScrollMode.SELF_ONLY");
+    EXPECT_EQ(json->GetInt("currentIndex"), 0);
+    EXPECT_EQ(json->GetDouble("currentOffset"), 0);
+    EXPECT_EQ(json->GetInt("uiCastJumpIndex"), -1);
+    EXPECT_EQ(json->GetString("indicator"), "");
+
+    pattern_->indicatorIsBoolean_ = false;
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("indicator"), "");
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::DIGIT);
+    pattern_->ToJsonValue(json, filter);
+    EXPECT_NE(json->GetString("indicator"), "");
+
+    json->Replace("uiCastJumpIndex", -1);
+    pattern_->FromJson(json);
+    EXPECT_FALSE(pattern_->jumpIndex_.has_value());
+    json->Replace("uiCastJumpIndex", 2);
+    pattern_->FromJson(json);
+    EXPECT_EQ(pattern_->jumpIndex_, 2);
+    json->Replace("currentOffset", -100.0f);
+    pattern_->FromJson(json);
+    EXPECT_EQ(pattern_->currentDelta_, 100.0f);
+}
+
+/**
++ * @tc.name: WearableSwiperOnModifyDone001
+ * @tc.desc: Test OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, WearableSwiperOnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
+    EXPECT_NE(indicatorPattern, nullptr);
+    indicatorPattern->GetArcDotIndicatorStyle();
+
+    /**
+     * @tc.steps: step2. call UpdateContentModifier.
+     */
+    indicatorPattern->OnModifyDone();
+    indicatorPattern->swiperController_->removeSwiperEventCallback_();
+    indicatorPattern->swiperController_->addSwiperEventCallback_();
+    indicatorPattern->OnAfterModifyDone();
+    EXPECT_EQ(indicatorPattern->lastSwiperIndicatorType_, SwiperIndicatorType::ARC_DOT);
 }
 } // namespace OHOS::Ace::NG

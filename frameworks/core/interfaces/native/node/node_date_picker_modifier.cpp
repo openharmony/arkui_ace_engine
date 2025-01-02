@@ -387,24 +387,82 @@ void ResetSelectedDate(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDatePickerModifier* GetDatePickerModifier()
 {
-    static const ArkUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
-        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
-        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
-        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
-        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIDatePickerModifier modifier = {
+        GetSelectedTextStyle,
+        SetSelectedTextStyle,
+        ResetSelectedTextStyle,
+        GetDatePickerTextStyle,
+        SetDatePickerTextStyle,
+        ResetDatePickerTextStyle,
+        GetDisappearTextStyle,
+        SetDisappearTextStyle,
+        ResetDisappearTextStyle,
+        GetLunar,
+        SetLunar,
+        ResetLunar,
+        GetStartDate,
+        SetStartDate,
+        ResetStartDate,
+        GetEndDate,
+        SetEndDate,
+        ResetEndDate,
+        GetSelectedDate,
+        SetSelectedDate,
+        ResetSelectedDate,
+        GetDatePickerBackgroundColor,
+        SetDatePickerBackgroundColor,
+        ResetDatePickerBackgroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
 {
-    static const CJUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
-        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
-        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
-        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
-        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIDatePickerModifier modifier = {
+        GetSelectedTextStyle,
+        SetSelectedTextStyle,
+        ResetSelectedTextStyle,
+        GetDatePickerTextStyle,
+        SetDatePickerTextStyle,
+        ResetDatePickerTextStyle,
+        GetDisappearTextStyle,
+        SetDisappearTextStyle,
+        ResetDisappearTextStyle,
+        GetLunar,
+        SetLunar,
+        ResetLunar,
+        GetStartDate,
+        SetStartDate,
+        ResetStartDate,
+        GetEndDate,
+        SetEndDate,
+        ResetEndDate,
+        GetSelectedDate,
+        SetSelectedDate,
+        ResetSelectedDate,
+        GetDatePickerBackgroundColor,
+        SetDatePickerBackgroundColor,
+        ResetDatePickerBackgroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

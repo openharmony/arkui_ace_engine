@@ -251,7 +251,7 @@ void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExte
     scrollBar_->SetOutBoundary(std::abs(scrollBarOutBoundaryExtent));
 }
 
-void ScrollBarPattern::UpdateScrollBarOffset()
+void ScrollBarPattern::UpdateScrollBarOffset(int32_t scrollSource)
 {
     CHECK_NULL_VOID(scrollBar_);
     auto host = GetHost();
@@ -264,10 +264,11 @@ void ScrollBarPattern::UpdateScrollBarOffset()
     auto estimatedHeight = GetControlDistance() + (GetAxis() == Axis::VERTICAL ? viewSize.Height() : viewSize.Width());
 
     UpdateScrollBarRegion(scrollableNodeOffset_, estimatedHeight,
-        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f));
+        Size(viewSize.Width(), viewSize.Height()), Offset(0.0f, 0.0f), scrollSource);
 }
 
-void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset)
+void ScrollBarPattern::UpdateScrollBarRegion(
+    float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource)
 {
     // outer scrollbar, viewOffset is padding offset
     if (scrollBar_) {
@@ -284,7 +285,7 @@ void ScrollBarPattern::UpdateScrollBarRegion(float offset, float estimatedHeight
         }
         Offset scrollOffset = { offset, offset };
         scrollBar_->SetReverse(IsReverse());
-        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight);
+        scrollBar_->UpdateScrollBarRegion(viewOffset, viewPort, scrollOffset, estimatedHeight, scrollSource);
         scrollBar_->MarkNeedRender();
     }
 }
@@ -304,7 +305,9 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source);
-        pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        if (source == SCROLL_FROM_START) {
+            pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        }
         return true;
     };
     scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
@@ -312,12 +315,17 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     auto scrollEnd = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        auto scrollEndCallback = pattern->scrollEndCallback_;
+        if (scrollEndCallback) {
+            scrollEndCallback();
+        }
         pattern->scrollBarProxy_->NotifyScrollStop();
     };
     scrollBar_->SetScrollEndCallback(std::move(scrollEnd));
     auto startSnapAnimationCallback = [weak = WeakClaim(this)](SnapAnimationOptions snapAnimationOptions) -> bool {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
+        pattern->isScrolling_ = false;
         auto scrollBarProxy = pattern->scrollBarProxy_;
         CHECK_NULL_RETURN(scrollBarProxy, false);
         return scrollBarProxy->NotifySnapScrollWithoutChild(snapAnimationOptions);
@@ -706,7 +714,7 @@ void ScrollBarPattern::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
-    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             GestureEvent info;

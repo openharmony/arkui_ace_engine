@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_paint_method.h"
 #include "core/components_ng/pattern/qrcode/qrcode_paint_property.h"
 #include "core/components_ng/pattern/qrcode/qrcode_pattern.h"
+#include "core/components/theme/app_theme.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -65,6 +66,7 @@ const uint32_t QR_CODE_VALUE_MAX_LENGTH = 256;
 const uint32_t QR_CODE_VALUE_MAX_LENGTH_NEW = 512;
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
+const Dimension DEFAULT_SIZE(240.0, DimensionUnit::VP);
 } // namespace
 
 class QRCodeTestNg : public TestNG {
@@ -81,6 +83,7 @@ void QRCodeTestNg::SetUpTestSuite()
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_QRCODE);
     auto qrcodeTheme = QrcodeTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(qrcodeTheme));
+    EXPECT_CALL(*themeManager, GetTheme(AppTheme::TypeId())).WillRepeatedly(Return(AceType::MakeRefPtr<AppTheme>()));
 }
 
 void QRCodeTestNg::TearDownTestSuite()
@@ -807,6 +810,46 @@ HWTEST_F(QRCodeTestNg, QRCodeModifierTest001, TestSize.Level1)
     EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
     qrcodeModifier->SetQRCodeBackgroundColor(QR_CODE_BACKGROUND_COLOR_VALUE);
     EXPECT_EQ(qrcodeModifier->backgroundColor_, nullptr);
+}
+
+/*
+ * @tc.name: QRCodeLayoutAlgorithmMeasureContent003
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(QRCodeTestNg, QRCodeLayoutAlgorithmMeasureContent003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create qrCodeModel
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->SetMinPlatformVersion(PLATFORM_VERSION_11);
+    RefPtr<QrcodeTheme> qrCodeTheme = pipeline->GetTheme<QrcodeTheme>();
+    ASSERT_NE(qrCodeTheme, nullptr);
+    QRCodeModelNG qrCodeModelNG;
+    qrCodeModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    LayoutWrapperNode layoutWrapper(frameNode, nullptr, layoutProperty);
+    auto qrCodePattern = frameNode->GetPattern<QRCodePattern>();
+    ASSERT_NE(qrCodePattern, nullptr);
+    auto qrCodeLayoutAlgorithm = AceType::DynamicCast<QRCodeLayoutAlgorithm>(qrCodePattern->CreateLayoutAlgorithm());
+    ASSERT_NE(qrCodeLayoutAlgorithm, nullptr);
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(qrCodeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: steps2. construct arguments and call MeasureContent().
+     * @tc.expected: cover branch not padding and Negative is false. Check the result of MeasureContent.
+     */
+    LayoutConstraintF contentConstraint;
+    qrCodeTheme->qrcodeDefaultSize_ = DEFAULT_SIZE;
+    auto size1 = qrCodeLayoutAlgorithm->MeasureContent(contentConstraint, &layoutWrapper);
+    ASSERT_NE(size1, std::nullopt);
+    EXPECT_EQ(size1->Width(), 240.0f);
 }
 
 /**

@@ -327,6 +327,7 @@ RefPtr<UINode> LazyForEachNode::GetFrameChildByIndex(uint32_t index, bool needBu
     if (!child.second) {
         return nullptr;
     }
+    child.second->UpdateThemeScopeId(GetThemeScopeId());
     if (isCache) {
         child.second->SetParent(WeakClaim(this));
         child.second->SetJSViewActive(false, true);

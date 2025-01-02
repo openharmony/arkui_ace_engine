@@ -678,7 +678,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureTest001, TestSize.Level1)
      */
     std::unique_ptr<GestureEventFunc> onActionId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     longPressGesture.onActionId_ = std::move(onActionId);
     longPressGesture.onActionEndId_ = std::move(onActionEndId);
     longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
@@ -764,7 +764,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest002, Tes
     longPressGesture.duration_ = 0;
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionEnd = [](GestureEvent& info) { return true; };
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
     longPressGesture.SetOnActionId(onActionStart);
     longPressGesture.SetOnActionEndId(onActionEnd);
     longPressGesture.SetOnActionCancelId(onActionCancel);

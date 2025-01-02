@@ -953,4 +953,57 @@ HWTEST_F(CalendarPaintMethTest, IsOffDayTest001, TestSize.Level1)
     calendarDay.index = -10;
     EXPECT_TRUE(paintMethod->IsOffDay(calendarDay));
 }
+
+/**
+ * @tc.name: IsTextHeightSmaller001
+ * @tc.desc: Test CalendarPaintMethod IsTextHeightSmaller
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, IsTextHeightSmaller001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    calendarDay.index = -10;
+    EXPECT_FALSE(paintMethod->IsTextHeightSmaller());
+}
+
+/**
+ * @tc.name: CalTextHeight001
+ * @tc.desc: Test CalendarPaintMethod CalTextHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPaintMethTest, CalTextHeight001, TestSize.Level1)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarPattern>(); });
+    auto calendarPaintProperty = frameNode->GetPaintProperty<PaintProperty>();
+    ASSERT_NE(calendarPaintProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto* paintWrapper = new PaintWrapper(renderContext, geometryNode, calendarPaintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    ObtainedMonth obtainedMonth;
+    CalendarDay calendarDay;
+    auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
+    calendarDay.index = -10;
+    double y = 0.0;
+    double x = 0.0;
+    auto dayOffset = Offset(x, y);
+    EXPECT_FALSE(paintMethod->CalTextHeight(dayOffset, calendarDay));
+}
 } // namespace OHOS::Ace::NG

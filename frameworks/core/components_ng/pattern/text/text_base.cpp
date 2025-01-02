@@ -88,20 +88,34 @@ float TextBase::GetSelectedBlankLineWidth()
     return static_cast<float>(blankWidth);
 }
 
-void TextBase::CalculateSelectedRectEx(std::vector<RectF>& selectedRects, float lastLineBottom)
+void TextBase::CalculateSelectedRectEx(std::vector<RectF>& selectedRects, float lastLineBottom,
+    const std::optional<TextDirection>& direction)
 {
     if (selectedRects.empty()) {
         return;
     }
-    std::map<float, RectF> lineGroup;
+    const bool isRtl = direction.has_value() && (direction.value() == TextDirection::RTL);
+    std::map<float, std::pair<RectF, std::vector<RectF>>> lineGroup;
     SelectedRectsToLineGroup(selectedRects, lineGroup);
     selectedRects.clear();
-    lastLineBottom = LessNotEqual(lastLineBottom, 0.0f) ? lineGroup.begin()->second.Top() : lastLineBottom;
+    if (lineGroup.empty()) {
+        return;
+    }
+    lastLineBottom = LessNotEqual(lastLineBottom, 0.0f) ? lineGroup.begin()->second.first.Top() : lastLineBottom;
     for (const auto& line : lineGroup) {
-        auto& lineRect = line.second;
-        RectF rect = RectF(lineRect.Left(), lastLineBottom, lineRect.Width(), lineRect.Bottom() - lastLineBottom);
-        selectedRects.emplace_back(rect);
-        lastLineBottom = line.second.Bottom();
+        const auto& lineRect = line.second.first;
+        if (!isRtl) {
+            RectF rect = RectF(lineRect.Left(), lastLineBottom, lineRect.Width(), lineRect.Bottom() - lastLineBottom);
+            selectedRects.emplace_back(rect);
+            lastLineBottom = line.second.first.Bottom();
+            continue;
+        }
+        const auto& lineRects = line.second.second;
+        for (const auto& lineItem : lineRects) {
+            RectF rect = RectF(lineItem.Left(), lastLineBottom, lineItem.Width(), lineRect.Bottom() - lastLineBottom);
+            selectedRects.emplace_back(rect);
+        }
+        lastLineBottom = line.second.first.Bottom();
     }
 }
 
@@ -133,7 +147,8 @@ bool TextBase::UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAl
     return true;
 }
 
-void TextBase::SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, std::map<float, RectF>& lineGroup)
+void TextBase::SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect,
+    std::map<float, std::pair<RectF, std::vector<RectF>>>& lineGroup)
 {
     for (const auto& localRect : selectedRect) {
         if (NearZero(localRect.Width()) && NearZero(localRect.Height())) {
@@ -141,10 +156,21 @@ void TextBase::SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, 
         }
         auto it = lineGroup.find(localRect.GetY());
         if (it == lineGroup.end()) {
-            lineGroup.emplace(localRect.GetY(), localRect);
+            std::vector<RectF> rects = { localRect };
+            lineGroup.emplace(localRect.GetY(), std::make_pair(localRect, rects));
+            continue;
+        }
+        auto lineRect = it->second.first;
+        it->second.first = lineRect.CombineRectT(localRect);
+        if (it->second.second.empty()) {
+            it->second.second.emplace_back(localRect);
+            continue;
+        }
+        auto backRect = it->second.second.back();
+        if (NearEqual(backRect.Left(), localRect.Right()) || NearEqual(backRect.Right(), localRect.Left())) {
+            it->second.second.back() = backRect.CombineRectT(localRect);
         } else {
-            auto lineRect = it->second;
-            it->second = lineRect.CombineRectT(localRect);
+            it->second.second.emplace_back(localRect);
         }
     }
 }
@@ -229,10 +255,11 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
     if (!isStarted_ || info.GetChangedTouches().empty()) {
         return;
     }
-    auto touchType = info.GetChangedTouches().front().GetTouchType();
+    auto locationInfo = info.GetChangedTouches().front();
+    auto touchType = locationInfo.GetTouchType();
     switch (touchType) {
         case TouchType::UP:
-            EndGestureSelection();
+            EndGestureSelection(locationInfo);
             break;
         case TouchType::MOVE:
             DoTextSelectionTouchMove(info);

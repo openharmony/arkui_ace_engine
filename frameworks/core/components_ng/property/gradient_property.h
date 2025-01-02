@@ -265,7 +265,7 @@ struct ACE_EXPORT SweepGradient {
 
 class ACE_FORCE_EXPORT Gradient final {
 public:
-    void AddColor(const GradientColor& color);
+    ACE_FORCE_EXPORT void AddColor(const GradientColor& color);
 
     void ClearColors();
 

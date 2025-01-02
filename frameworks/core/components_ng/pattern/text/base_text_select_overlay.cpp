@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
-constexpr SelectOverlayDirtyFlag UPDATE_HANDLE_COLOR_FLAG = 101;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
@@ -717,6 +716,7 @@ VectorF BaseTextSelectOverlay::GetHostScale()
 void BaseTextSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
     isHandleDragging_ = false;
+    dragHandleIndex_ = DragHandleIndex::NONE;
     if (reason == CloseReason::CLOSE_REASON_BY_RECREATE) {
         return;
     }
@@ -1045,6 +1045,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
     if (SelectOverlayIsOn()) {
         HideMenu(true);
         auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [weak = WeakClaim(this), scrollingNode] {
                 auto overlay = weak.Upgrade();
@@ -1067,7 +1068,7 @@ bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto framePaintRect = RectF(host->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
-    auto changed = globalPaintRect_ != framePaintRect;
+    auto changed = globalPaintRect_.GetOffset() != framePaintRect.GetOffset();
     globalPaintRect_ = framePaintRect;
     return changed;
 }
@@ -1249,9 +1250,17 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    if ((flag & UPDATE_HANDLE_COLOR_FLAG) == UPDATE_HANDLE_COLOR_FLAG) {
+    if ((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG) {
         info->handlerColor = GetHandleColor();
         manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+    if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
+        (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
+        if (isSupportMenuSearch_ && AllowSearch() &&
+            info->menuInfo.showSearch != IsNeedMenuSearch()) {
+            info->menuInfo.showSearch = !info->menuInfo.showSearch;
+            manager->NotifyUpdateToolBar(true);
+        }
     }
 }
 
@@ -1259,7 +1268,24 @@ void BaseTextSelectOverlay::UpdateHandleColor()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->MarkInfoChange(UPDATE_HANDLE_COLOR_FLAG);
+    manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
+}
+
+bool BaseTextSelectOverlay::IsNeedMenuSearch()
+{
+    auto searchContent = GetSelectedText();
+    return !std::regex_match(searchContent, std::regex("^\\s*$"));
+}
+
+void BaseTextSelectOverlay::HandleOnSearch()
+{
+    auto value = GetSelectedText();
+    auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!queryWord.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->StartAbilityOnQuery(queryWord);
+    }
 }
 
 std::pair<ContentClipMode, std::optional<ContentClip>> BaseTextSelectOverlay::GetScrollableClipInfo(

@@ -55,7 +55,10 @@ ohos_shared_library("navpushpathhelper") {
   }
 
   include_dirs = additional_include_dirs
-  include_dirs += [ "${ace_root}/frameworks" ]
+  include_dirs += [
+    "${ace_root}/frameworks",
+    "${ace_root}/interfaces/inner_api/ace_kit/include",
+  ]
   deps += [ "$ace_root/build:libace_compatible" ]
 
   external_deps = [

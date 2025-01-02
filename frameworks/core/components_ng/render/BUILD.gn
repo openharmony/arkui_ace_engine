@@ -43,6 +43,7 @@ build_component_ng("render_ng") {
     "image_painter.cpp",
     "line_painter.cpp",
     "media_player_creator.cpp",
+    "paint_property.cpp",
     "paint_wrapper.cpp",
     "polygon_painter.cpp",
     "rect_painter.cpp",
@@ -54,6 +55,8 @@ build_component_ng("render_ng") {
 
   rosen_sources = [
     "adapter/component_snapshot.cpp",
+    "adapter/focus_animation_modifier.cpp",
+    "adapter/focus_state_modifier.cpp",
     "adapter/gradient_style_modifier.cpp",
     "adapter/moon_progress_modifier.cpp",
     "adapter/rosen_animation_utils.cpp",

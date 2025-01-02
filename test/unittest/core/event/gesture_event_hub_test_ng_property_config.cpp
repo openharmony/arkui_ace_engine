@@ -1889,7 +1889,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragGatherPixelMaps001, TestSize.Level1)
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     gestureEventHub->SetDragGatherPixelMaps(info);
-    EXPECT_FALSE(dragDropManager->gatherPixelMaps_.empty());
+    EXPECT_TRUE(dragDropManager->gatherPixelMaps_.empty());
 }
 
 /**
@@ -1934,7 +1934,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragGatherPixelMaps002, TestSize.Level1)
     GestureEvent info;
     info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     gestureEventHub->SetDragGatherPixelMaps(info);
-    EXPECT_FALSE(dragDropManager->gatherPixelMaps_.empty());
+    EXPECT_TRUE(dragDropManager->gatherPixelMaps_.empty());
 }
 
 /**

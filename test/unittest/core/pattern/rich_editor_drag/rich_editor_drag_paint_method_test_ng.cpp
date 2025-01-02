@@ -71,7 +71,7 @@ void RichEditorDragPaintMethodTestNG::InitDate()
         AceType::MakeRefPtr<TextDragOverlayModifier>(pattern_);
     RefPtr<RichEditorDragContentModifier> richContentModifier =
         AceType::MakeRefPtr<RichEditorDragContentModifier>();
-    RichEditorDragInfo info;
+    TextDragInfo info;
     richGragPaintMethod_ =
         AceType::MakeRefPtr<RichEditorDragPaintMethod>(pattern_, textGragOverlayModifier, richContentModifier, info);
 }

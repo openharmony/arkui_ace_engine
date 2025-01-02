@@ -108,6 +108,9 @@ public:
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
+    void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
+    void OnWindowSceneVisibleChange(bool visible);
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -243,6 +246,11 @@ private:
     void OnModifyDone() override;
     bool CheckConstraint();
 
+    void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -283,6 +291,14 @@ private:
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
     void ResetAccessibilityChildTreeCallback();
+    bool GetForceProcessOnKeyEventInternal() const
+    {
+        return forceProcessOnKeyEventInternal_;
+    }
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -318,6 +334,7 @@ private:
     bool isFoldStatusChanged_ = false;
     bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
+    WeakPtr<Pattern> weakSystemWindowScene_;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
@@ -342,6 +359,7 @@ private:
     uint32_t focusWindowId_ = 0;
     uint32_t realHostWindowId_ = 0;
     std::string want_;
+    bool forceProcessOnKeyEventInternal_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

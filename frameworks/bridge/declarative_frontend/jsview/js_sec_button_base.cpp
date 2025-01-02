@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -26,6 +27,11 @@ using OHOS::Ace::NG::SecurityComponentModelNG;
 using OHOS::Ace::NG::SecurityComponentTheme;
 
 namespace OHOS::Ace::Framework {
+namespace {
+const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
+    TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
+}
+
 void JSSecButtonBase::SetIconSize(const JSCallbackInfo& info)
 {
     auto theme = GetTheme<SecurityComponentTheme>();
@@ -182,6 +188,35 @@ void JSSecButtonBase::SetBackgroundBorderColor(const JSCallbackInfo& info)
 
 void JSSecButtonBase::SetBackgroundBorderRadius(const JSCallbackInfo& info)
 {
+    if (info[0]->IsObject()) {
+        std::optional<CalcDimension> topLeft;
+        std::optional<CalcDimension> topRight;
+        std::optional<CalcDimension> bottomLeft;
+        std::optional<CalcDimension> bottomRight;
+        JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
+
+        CalcDimension topLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topLeft"), topLeftDimen)) {
+            topLeft = topLeftDimen;
+        }
+        CalcDimension topRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("topRight"), topRightDimen)) {
+            topRight = topRightDimen;
+        }
+        CalcDimension bottomLeftDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomLeft"), bottomLeftDimen)) {
+            bottomLeft = bottomLeftDimen;
+        }
+        CalcDimension bottomRightDimen;
+        if (ParseJsDimensionVp(paddingObj->GetProperty("bottomRight"), bottomRightDimen)) {
+            bottomRight = bottomRightDimen;
+        }
+        
+        if (topLeft.has_value() || topRight.has_value() || bottomLeft.has_value() || bottomRight.has_value()) {
+            SecurityComponentModelNG::SetBackgroundBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+            return;
+        }
+    }
     auto theme = GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
 
@@ -238,10 +273,102 @@ void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!ParseJsDimensionVp(info[0], length) || LessNotEqual(length.ConvertToPx(), 0.0)) {
         SecurityComponentModelNG::SetTextIconSpace(theme->GetTextIconSpace());
     } else {
         SecurityComponentModelNG::SetTextIconSpace(length);
     }
+}
+
+void JSSecButtonBase::SetAlign(const JSCallbackInfo& info)
+{
+    Alignment alignment;
+    if (!info[0]->IsNumber()) {
+        alignment = Alignment::CENTER;
+    } else {
+        auto value = info[0]->ToNumber<int32_t>();
+        alignment = ParseAlignment(value);
+    }
+    SecurityComponentModelNG::SetAlign(alignment);
+}
+
+void JSSecButtonBase::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SecurityComponentModelNG::SetMaxFontScale(1.0f);
+        return;
+    }
+    SecurityComponentModelNG::SetMaxFontScale(static_cast<float>(maxFontScale));
+}
+
+void JSSecButtonBase::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SecurityComponentModelNG::SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SecurityComponentModelNG::SetMinFontScale(1.0f);
+        return;
+    }
+    SecurityComponentModelNG::SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSSecButtonBase::SetMaxLines(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    auto value = Infinity<int32_t>();
+    if (args->ToString() != "Infinity") {
+        ParseJsInt32(args, value);
+    }
+    SecurityComponentModelNG::SetMaxLines(value);
+}
+
+void JSSecButtonBase::SetMaxFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension maxFontSize;
+    JSRef<JSVal> args = info[0];
+    if (!ParseJsDimensionFpNG(args, maxFontSize, false)) {
+        return;
+    }
+    if (maxFontSize.IsNegative()) {
+        return;
+    }
+    SecurityComponentModelNG::SetAdaptMaxFontSize(maxFontSize);
+}
+
+void JSSecButtonBase::SetMinFontSize(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    CalcDimension minFontSize;
+    JSRef<JSVal> args = info[0];
+    if (!ParseJsDimensionFpNG(args, minFontSize, false)) {
+        return;
+    }
+    if (minFontSize.IsNegative()) {
+        return;
+    }
+    SecurityComponentModelNG::SetAdaptMinFontSize(minFontSize);
+}
+
+void JSSecButtonBase::SetHeightAdaptivePolicy(int32_t value)
+{
+    if (value < 0 || value >= static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size())) {
+        value = 0;
+    }
+    SecurityComponentModelNG::SetHeightAdaptivePolicy(HEIGHT_ADAPTIVE_POLICY[value]);
 }
 }

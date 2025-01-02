@@ -1,0 +1,119 @@
+{
+  "files": [
+    // common:
+    // declarations of C++ exposed classes
+    "src/lib/common/ace_console.native.d.ts",
+    "src/lib/common/state_mgmt_configure.ts",
+    "src/lib/common/ace_trace.native.d.ts",
+    "src/lib/common/state_mgmt_profiler.ts",
+    "src/lib/common/state_mgmt_profiler.native.d.ts",
+    "src/lib/common/ark_tools.d.ts",
+    "src/lib/common/environment_setting.d.ts",
+    "src/lib/common/storage.d.ts",
+    "src/lib/common/local_storage_native.d.ts",
+    "src/lib/common/lazy_foreach.d.ts",
+    "src/lib/common/ifelse_native.d.ts",
+    "src/lib/common/ark_component.d.ts",
+
+    // interfaces
+    "src/lib/common/i_environment_backend.ts",
+    "src/lib/common/i_storage.ts",
+
+    // sdk
+    "src/lib/sdk/i_animatable_arithmetic.ts",
+    "src/lib/sdk/i_data_source.d.ts",
+    "src/lib/sdk/i_property_subscriber.ts",
+    "src/lib/sdk/local_storage.ts",
+    "src/lib/sdk/app_storage.ts",
+    "src/lib/sdk/subscriber_lookup.ts",
+    "src/lib/sdk/subscribed_abstract_property.ts",
+    "src/lib/sdk/subscribable_abstract.ts",
+    "src/lib/sdk/persistent_storage.ts",
+    "src/lib/sdk/environment.ts",
+    "src/lib/sdk/i_repeat.ts",
+
+    // common
+    "src/lib/common/state_mgmt_console_trace.ts",
+    "src/lib/common/observed_object.ts",
+    "src/lib/common/observed_property_abstract.ts",
+    "src/lib/common/custom_span_native.d.ts",
+    "src/lib/common/custom_dialog_controller_native.d.ts",
+    "src/lib/common/custom_dialog_controller.ts",
+    "src/lib/common/utils.ts",
+    "src/lib/common/state_mgmt_dfx.ts",
+
+    // full_update specific
+    "src/lib/full_update/fu_view_native.d.ts",
+    "src/lib/full_update/fu_observed_property_object_abstract.ts",
+    "src/lib/full_update/fu_observed_property_simple_abstract.ts",
+    "src/lib/full_update/fu_observed_property_object.ts",
+    "src/lib/full_update/fu_observed_property_simple.ts",
+    "src/lib/full_update/fu_synced_property_object_two_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_one_way.ts",
+    "src/lib/full_update/fu_synced_property_simple_two_way.ts",
+    "src/lib/full_update/fu_synced_property_object_nested.ts",
+    "src/lib/full_update/fu_view.ts",
+
+    // partial update and v2 common
+    "src/lib/puv2_common/puv2_viewstack_processor.d.ts",
+    "src/lib/puv2_common/iview.ts",
+    "src/lib/puv2_common/puv2_updatefunc.ts",
+    "src/lib/puv2_common/puv2_view_native_base.d.ts",
+    "src/lib/puv2_common/puv2_view_base.ts",
+
+    // partial_update specific
+    "src/lib/partial_update/pu_types_events.ts",
+    "src/lib/partial_update/pu_tracked_object.ts",
+    "src/lib/partial_update/pu_foreach.d.ts",
+    "src/lib/partial_update/pu_observed_property_abstract.ts",
+    "src/lib/partial_update/pu_observed_property.ts",
+    "src/lib/partial_update/pu_synced_property_one_way.ts",
+    "src/lib/partial_update/pu_synced_property_two_way.ts",
+    "src/lib/partial_update/pu_synced_property_object_nested.ts",
+    "src/lib/partial_update/pu_uinode_registry_proxy.ts",
+    "src/lib/partial_update/pu_view.ts",
+    "src/lib/partial_update/pu_recycle_manager.ts",
+    "src/lib/partial_update/pu_builder_proxy.ts",
+
+    // 'new' stateMgmt vers 2
+    "src/lib/v2/v2_observed_proxy.ts",
+    "src/lib/v2/v2_change_observation.ts",
+    "src/lib/v2/v2_decorated_variables.ts",
+    "src/lib/v2/v2_monitor.ts",
+    "src/lib/v2/v2_computed.ts",
+    "src/lib/v2/v2_view.ts",
+    "src/lib/v2/v2_decorators.ts",
+    "src/lib/v2/v2_json_coder.ts",
+    "src/lib/v2/v2_make_observed.ts",
+    "src/lib/common/sendable_type.ts",
+
+    // partial_update specific
+    "src/lib/partial_update/pu_repeat.ts",
+    "src/lib/partial_update/pu_repeat_impl.ts",
+    "src/lib/partial_update/pu_repeat_virtual_scroll_impl.ts",
+
+    // sdk
+    "src/lib/sdk/v2_persistence.ts",
+    "src/lib/sdk/ui_utils.ts",
+
+    // common
+    "src/lib/common/gesture_span.ts",
+    "src/lib/common/gesture_span_native.d.ts",
+
+    // init
+    "src/index.ts",
+  ],
+  "compilerOptions": {
+    "module": "none",
+    "target": "ES2016",
+    "outDir": "./distRelease/",
+    "outFile": "./distRelease/stateMgmt.js",
+    "rootDir": "./src/",
+    "declaration": true,
+    "noEmitOnError": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "ES2016"
+    ]
+  }
+}

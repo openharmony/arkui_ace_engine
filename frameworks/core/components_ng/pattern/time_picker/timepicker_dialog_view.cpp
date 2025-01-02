@@ -151,6 +151,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }
     SetHour24(timePickerRowPattern, settingData.isUseMilitaryTime);
+    SetEnableCascade(timePickerRowPattern, settingData.isEnableCascade);
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
@@ -288,7 +289,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -678,7 +679,7 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -772,7 +773,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1161,6 +1162,12 @@ void TimePickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+}
+
+void TimePickerDialogView::SetEnableCascade(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade)
+{
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
 }
 
 } // namespace OHOS::Ace::NG

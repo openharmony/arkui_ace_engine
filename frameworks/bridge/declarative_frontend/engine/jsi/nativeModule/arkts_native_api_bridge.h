@@ -63,7 +63,9 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -73,13 +75,18 @@ private:
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -99,7 +106,9 @@ private:
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

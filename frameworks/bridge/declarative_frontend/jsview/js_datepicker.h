@@ -108,6 +108,7 @@ public:
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void EnableCascade(const JSCallbackInfo& info);
 
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

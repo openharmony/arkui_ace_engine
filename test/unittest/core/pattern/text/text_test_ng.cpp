@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include <limits>
-#include "gtest/gtest.h"
 #include "text_base.h"
-#include "base/utils/string_utils.h"
+
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
-#include "core/components_ng/property/property.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 
@@ -2406,11 +2408,15 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph });
     // call onDraw function(textRacing_ = true)
-    textContentModifier.StartTextRace();
+    // call onDraw function(MarqueeState::RUNNING == marqueeState_)
+    MarqueeOption option;
+    textContentModifier.StartTextRace(option);
+    EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::RUNNING);
     context.width = CONTEXT_LARGE_WIDTH_VALUE;
     textContentModifier.onDraw(context);
-    // call onDraw function(textRacing_ = false)
+    // call onDraw function(MarqueeState::STOPPED == marqueeState_)
     textContentModifier.StopTextRace();
+    EXPECT_EQ(textContentModifier.marqueeState_, MarqueeState::STOPPED);
     textContentModifier.onDraw(context);
     EXPECT_EQ(textContentModifier.fontSizeFloat_->Get(), ADAPT_FONT_SIZE_VALUE.Value());
     EXPECT_EQ(textContentModifier.baselineOffsetFloat_->Get(), BASELINE_OFFSET_VALUE.Value());
@@ -2544,6 +2550,9 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textFrameNode->geometryNode_, nullptr);
+    textFrameNode->geometryNode_->SetContentOffset(OffsetF(TEXT_CONTENT_OFFSET, TEXT_CONTENT_OFFSET));
+    textFrameNode->geometryNode_->SetContentSize(SizeF(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE));
     ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);

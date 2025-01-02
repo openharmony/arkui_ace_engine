@@ -53,6 +53,7 @@ void JSVideo::Create(const JSCallbackInfo& info)
     }
     JSRef<JSObject> videoObj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> srcValue = videoObj->GetProperty("src");
+    JSRef<JSVal> posterOptionsValue = videoObj->GetProperty("posterOptions");
     JSRef<JSVal> previewUriValue = videoObj->GetProperty("previewUri");
     JSRef<JSVal> currentProgressRateValue = videoObj->GetProperty("currentProgressRate");
 
@@ -74,6 +75,10 @@ void JSVideo::Create(const JSCallbackInfo& info)
     int32_t resId = 0;
     ParseJsMediaWithBundleName(srcValue, src, bundleNameSrc, moduleNameSrc, resId);
     VideoModel::GetInstance()->SetSrc(src, bundleNameSrc, moduleNameSrc);
+
+    bool showFirstFrame = false;
+    ParseJsPosterOptions(posterOptionsValue, showFirstFrame);
+    VideoModel::GetInstance()->SetShowFirstFrame(showFirstFrame);
 
     // Parse the rate, if it is invalid, set it as 1.0.
     double currentProgressRate = 1.0;
@@ -113,6 +118,16 @@ void JSVideo::Create(const JSCallbackInfo& info)
         VideoModel::GetInstance()->SetPosterSourceByPixelMap(pixMap);
 #endif
     }
+}
+
+bool JSVideo::ParseJsPosterOptions(const JSRef<JSVal>& jsValue, bool& result)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> showFirstFrame = jsObj->GetProperty("showFirstFrame");
+    return ParseJsBool(showFirstFrame, result);
 }
 
 void JSVideo::JsMuted(const JSCallbackInfo& info)
@@ -175,11 +190,16 @@ void JSVideo::JsObjectFit(const JSCallbackInfo& info)
 void JSVideo::JsSurfaceBackgroundColor(const JSCallbackInfo& info)
 {
     Color backgroundColor = Color::BLACK;
-    if (ParseJsColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
+    if (ParseColorMetricsToColor(info[0], backgroundColor) && backgroundColor != Color::TRANSPARENT) {
         backgroundColor = Color::BLACK;
     }
 
     VideoModel::GetInstance()->SetSurfaceBackgroundColor(backgroundColor);
+}
+
+void JSVideo::JsSetShortcutKeyEnabled(const JSCallbackInfo& info)
+{
+    VideoModel::GetInstance()->SetShortcutKeyEnabled(info[0]->IsBoolean() ? info[0]->ToBoolean() : false);
 }
 
 void JSVideo::JsOnStart(const JSCallbackInfo& info)
@@ -411,6 +431,7 @@ void JSVideo::JSBind(BindingTarget globalObj)
     JSClass<JSVideo>::StaticMethod("loop", &JSVideo::JsLoop, opt);
     JSClass<JSVideo>::StaticMethod("objectFit", &JSVideo::JsObjectFit, opt);
     JSClass<JSVideo>::StaticMethod("surfaceBackgroundColor", &JSVideo::JsSurfaceBackgroundColor, opt);
+    JSClass<JSVideo>::StaticMethod("enableShortcutKey", &JSVideo::JsSetShortcutKeyEnabled, opt);
 
     JSClass<JSVideo>::StaticMethod("onStart", &JSVideo::JsOnStart);
     JSClass<JSVideo>::StaticMethod("onPause", &JSVideo::JsOnPause);

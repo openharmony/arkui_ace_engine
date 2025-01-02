@@ -219,6 +219,18 @@ bool GestureScope::HasFailRecognizer()
     return false;
 }
 
+bool GestureScope::IsAnySucceedRecognizerExist()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && (recognizer->GetRefereeState() == RefereeState::SUCCEED ||
+                              recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void GestureScope::ForceCleanGestureScope()
 {
     for (const auto& weak : recognizers_) {
@@ -367,6 +379,19 @@ bool GestureReferee::HasFailRecognizer(int32_t touchId)
     CHECK_NULL_RETURN(scope, false);
 
     return scope->HasFailRecognizer();
+}
+
+bool GestureReferee::IsAnySucceedRecognizerExist(int32_t touchId)
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+
+    return scope->IsAnySucceedRecognizerExist();
 }
 
 void GestureReferee::ForceCleanGestureReferee()

@@ -245,6 +245,12 @@ _arkui_shared_libs = [
     part_name = "ace_engine"
     lib_names = [ "focuscontroller" ]
   },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_list:arclist"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arclist" ]
+  },
 ]
 
 if (defined(current_platform.config)) {
@@ -275,6 +281,13 @@ napi_modules = [
         subsystem_name = "multimedia"
         part_name = "av_session"
         lib_names = [ "avcastpicker" ]
+      },
+      {
+        label =
+            "//foundation/arkui/ace_engine/component_ext/arc_swiper:arcswiper"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcswiper" ]
       },
     ]
   },
@@ -350,7 +363,7 @@ napi_modules = [
     prefix = "arkui/advanced"
     shard_libs = [
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/chip/interfaces:chip"
+        label = "//foundation/arkui/ace_engine/advanced_ui_component:chip"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "chip" ]

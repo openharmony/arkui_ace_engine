@@ -74,6 +74,8 @@ export struct ImageboxGroupBootcamp {
   @State privacySensitive: boolean = false;
   @State enableDynamicRangeMode: boolean = false;
   @State dynamicRangeMode: DynamicRangeMode = DynamicRangeMode.STANDARD
+  @State enableDragGray: boolean = false;
+  @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
 
 
 
@@ -131,6 +133,8 @@ export struct ImageboxGroupBootcamp {
             })
             .privacySensitive(useEnabled(this.enablePrivacySensitive,this.privacySensitive))
             .dynamicRangeMode(useEnabled(this.enableDynamicRangeMode,this.dynamicRangeMode))
+            .onDragStart(() => {})
+            .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
         }
         if(this.enableColorFilter){
           Column(){
@@ -409,6 +413,15 @@ export struct ImageboxGroupBootcamp {
           ]
         })
 
+        RadioBlock({
+          title: '拖拽背板图样式',
+          isEnabled: $enableDragGray,
+          value: $dragGray,
+          dataSource: [
+            { label: '默认', value: DragPreviewMode.AUTO },
+            { label: '灰显', value: DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT }
+          ]
+        })
       }
     }
   }

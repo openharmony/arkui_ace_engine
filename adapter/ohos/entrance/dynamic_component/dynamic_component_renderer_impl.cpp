@@ -32,6 +32,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
 #include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -85,6 +86,16 @@ void DynamicComponentRendererImpl::SetAdaptiveSize(bool adaptiveWidth, bool adap
 {
     adaptiveWidth_ = adaptiveWidth;
     adaptiveHeight_ = adaptiveHeight;
+}
+
+void DynamicComponentRendererImpl::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
+}
+
+bool DynamicComponentRendererImpl::GetBackgroundTransparent() const
+{
+    return backgroundTransparent_;
 }
 
 void DynamicComponentRendererImpl::SetUIContentType(UIContentType uIContentType)
@@ -232,6 +243,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     if (contentReadyCallback) {
         contentReadyCallback();
     }
+    InitializeDynamicAccessibility();
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
 }
 
@@ -339,9 +351,10 @@ void DynamicComponentRendererImpl::RegisterConfigChangedCallback()
     auto hostExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(hostExecutor);
     hostExecutor->PostTask(
-        [hostInstanceId = hostInstanceId_, subInstanceId = uiContent_->GetInstanceId()]() {
-            auto configChangedCallback = [subInstanceId](
+        [hostInstanceId = hostInstanceId_, subInstanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_]() {
+            auto configChangedCallback = [subInstanceId, aceLogTag](
                                              const Platform::ParsedConfig& config, const std::string& configuration) {
+                TAG_LOGI(aceLogTag, "UpdateConfiguration to subContainer");
                 auto subContainer = Platform::AceContainer::GetContainer(subInstanceId);
                 CHECK_NULL_VOID(subContainer);
                 subContainer->GetTaskExecutor()->PostTask(
@@ -373,7 +386,8 @@ void DynamicComponentRendererImpl::AttachRenderContext()
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
-        instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_]() {
+        instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_,
+        backgroundTransparent = GetBackgroundTransparent()]() {
             ContainerScope scope(hostInstanceId);
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
@@ -391,7 +405,9 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             auto renderContext = rootElement->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
 
-            pipeline->SetAppBgColor(Color::TRANSPARENT);
+            if (backgroundTransparent) {
+                pipeline->SetAppBgColor(Color::TRANSPARENT);
+            }
             renderContext->SetClipToFrame(true);
             renderContext->SetClipToBounds(true);
 
@@ -504,7 +520,7 @@ SizeF DynamicComponentRendererImpl::ComputeAdaptiveSize(const SizeF& size) const
 }
 
 void DynamicComponentRendererImpl::UpdateViewportConfig(
-    const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt)
+    const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt, const OffsetF& offset)
 {
     CHECK_NULL_VOID(uiContent_);
     auto adaptiveSize = ComputeAdaptiveSize(size);
@@ -514,7 +530,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
     TAG_LOGI(aceLogTag_, "[%{public}d] adaptive size: %{public}s -> [%{public}d x %{public}d]",
         uiContent_->GetInstanceId(), size.ToString().c_str(), vpConfig.Width(), vpConfig.Height());
 
-    auto task = [weak = WeakClaim(this), vpConfig, animationOpt, aceLogTag = aceLogTag_]() {
+    auto task = [weak = WeakClaim(this), vpConfig, animationOpt, aceLogTag = aceLogTag_, offset]() {
         auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
         auto uiContent = std::static_pointer_cast<UIContentImpl>(renderer->uiContent_);
@@ -523,12 +539,18 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
         ViewportConfig config(vpConfig.Width(), vpConfig.Height(), vpConfig.Density());
         config.SetPosition(vpConfig.Left(), vpConfig.Top());
         config.SetOrientation(vpConfig.Orientation());
-        if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()) {
+        if (renderer->uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+            renderer->UpdateParentOffsetToWindow(offset);
+            config.SetPosition(offset.GetX(), offset.GetY());
+        }
+        if (renderer->viewport_.Width() == config.Width() && renderer->viewport_.Height() == config.Height()
+            && renderer->density_ == config.Density()) {
             TAG_LOGW(aceLogTag, "card viewport not changed");
             return;
         }
         renderer->viewport_.SetWidth(config.Width());
         renderer->viewport_.SetHeight(config.Height());
+        renderer->density_ = config.Density();
         TAG_LOGI(aceLogTag, "update card viewport: [%{public}d x %{public}d]",
             config.Width(), config.Height());
         uiContent->UpdateViewportConfigWithAnimation(config, Rosen::WindowSizeChangeReason::UNDEFINED, animationOpt);
@@ -546,6 +568,29 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI, "ArkUIDynamicComponentUpdateViewport");
     }
+}
+
+void DynamicComponentRendererImpl::UpdateParentOffsetToWindow(const OffsetF& offset)
+{
+    TAG_LOGI(aceLogTag_, "UpdateParentOffsetToWindow");
+    auto task = [weak = WeakClaim(this), offset]() {
+        auto renderer = weak.Upgrade();
+        CHECK_NULL_VOID(renderer);
+        auto uiContent = renderer->uiContent_;
+        CHECK_NULL_VOID(uiContent);
+        ContainerScope scope(uiContent->GetInstanceId());
+        auto container = Container::GetContainer(uiContent->GetInstanceId());
+        CHECK_NULL_VOID(container);
+        auto pipeline = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipeline);
+        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->SetHostParentOffsetToWindow(Offset(offset.GetX(), offset.GetY()));
+    };
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI,
+        "ArkUIDynamicComponentUpdateParentOffsetToWindow");
 }
 
 void DynamicComponentRendererImpl::DestroyContent()
@@ -661,5 +706,44 @@ RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetHostTaskExecutor()
 void DynamicComponentRendererImpl::Dump(RendererDumpInfo &rendererDumpInfo)
 {
     rendererDumpInfo = rendererDumpInfo_;
+}
+
+void DynamicComponentRendererImpl::NotifyUieDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->DumpInfo(params, info);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeRegister(
+    uint32_t windowId, int32_t treeId, int64_t accessibilityId)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->RegisterAccessibilityChildTree(windowId, treeId, accessibilityId);
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityChildTreeDeregister()
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->DeregisterAccessibilityChildTree();
+}
+
+void DynamicComponentRendererImpl::TransferAccessibilityDumpChildInfo(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(uiContent_);
+    uiContent_->AccessibilityDumpChildInfo(params, info);
+}
+
+void DynamicComponentRendererImpl::InitializeDynamicAccessibility()
+{
+    if (uIContentType_ != UIContentType::DYNAMIC_COMPONENT) {
+        return;
+    }
+    auto dynamicHost = host_.Upgrade();
+    CHECK_NULL_VOID(dynamicHost);
+    auto pattern = AceType::DynamicCast<DynamicPattern>(dynamicHost->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeAccessibility();
 }
 } // namespace OHOS::Ace::NG

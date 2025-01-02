@@ -42,6 +42,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_BUTTON,
     THEME_PATTERN_CAMERA,
     THEME_PATTERN_LIST_ITEM,
+    THEME_PATTERN_ARC_LIST,
+    THEME_PATTERN_ARC_LIST_ITEM,
     THEME_PATTERN_PICKER,
     THEME_PATTERN_PROGRESS,
     THEME_PATTERN_SELECT,
@@ -210,11 +212,18 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         auto manager = GetResourceManager();
         if (manager) {
             auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
+            if (ret != Global::Resource::SUCCESS) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get theme by id error, id=%{public}d", themeId);
+            }
             for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
                 ResourceThemeStyle::RawAttrMap attrMap;
                 std::string patternTag = PATTERN_MAP[i];
                 std::string patternName = std::string(flag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
+                if (ret != Global::Resource::SUCCESS) {
+                    TAG_LOGW(
+                        AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+                }
                 if (attrMap.empty()) {
                     continue;
                 }
@@ -244,8 +253,7 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(taskExecutor);
 
     // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
-        weak = WeakClaim(this)]() -> void {
+    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme), weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
         auto adapter = weak.Upgrade();
@@ -288,6 +296,12 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
         auto state = manager->GetPatternByName(patternTag.c_str(), attrMap);
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternTag.c_str());
+            state = manager->GetPatternByName(patternName.c_str(), attrMap);
+            if (state != Global::Resource::SUCCESS) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+            } else if (attrMap.empty()) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+            }
         } else if (attrMap.empty()) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternTag.c_str());
         }
@@ -524,7 +538,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
         }
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;
@@ -542,7 +556,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string
             resName.c_str(), state);
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;

@@ -15,8 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 

@@ -112,6 +112,7 @@ void IsolatedPattern::InitializeRender(void* runtime)
 
         dynamicComponentRenderer_->SetUIContentType(UIContentType::ISOLATED_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
+        dynamicComponentRenderer_->SetBackgroundTransparent(true);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
@@ -210,7 +211,8 @@ bool IsolatedPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto animationOption = pipeline->GetSyncAnimationOption();
-    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption);
+    NG::OffsetF offset;
+    dynamicComponentRenderer_->UpdateViewportConfig(size, density, orientation, animationOption, offset);
     return false;
 }
 

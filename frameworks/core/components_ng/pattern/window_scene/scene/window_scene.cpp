@@ -247,7 +247,8 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
         transactionController->GetRSTransaction() : nullptr;
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
     if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, ret: %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
     }
 }
 

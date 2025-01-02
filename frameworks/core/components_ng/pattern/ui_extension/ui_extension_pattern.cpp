@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
@@ -434,6 +435,42 @@ void UIExtensionPattern::OnAreaUpdated()
     PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
 }
 
+void UIExtensionPattern::RegisterWindowSceneVisibleChangeCallback(
+    const RefPtr<Pattern>& windowScenePattern)
+{
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(windowScenePattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnWindowSceneVisibleChange(visible);
+        }
+    };
+    systemWindowScene->RegisterVisibleChangeCallback(host->GetId(), callback);
+    weakSystemWindowScene_ = systemWindowScene;
+    UIEXT_LOGI("RegisterWindowSceneVisibleChangeCallback %{public}d.", host->GetId());
+}
+
+void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId)
+{
+    auto pattern = weakSystemWindowScene_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(pattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    systemWindowScene->UnRegisterVisibleChangeCallback(nodeId);
+    UIEXT_LOGI("UnRegisterWindowSceneVisibleChangeCallback %{public}d.", nodeId);
+}
+
+void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
+{
+    UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    if (!visible) {
+        OnWindowHide();
+    }
+}
+
 void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
 {
     ContainerScope scope(instanceId_);
@@ -655,6 +692,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
+    UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -684,44 +722,95 @@ void UIExtensionPattern::OnModifyDone()
     InitKeyEvent(focusHub);
 }
 
-void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
+void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
 {
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
             pattern->HandleFocusEvent();
         }
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Blur Internal.");
             pattern->HandleBlurEvent();
         }
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
             pattern->DispatchFocusActiveEvent(false);
         }
     });
+}
+
+void UIExtensionPattern::InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            bool forceProcessKeyEvent = pattern->GetForceProcessOnKeyEventInternal();
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "Paint FocusState Internal will %{public}s Active UIExtension.", forceProcessKeyEvent ? "not" : "");
+            if (forceProcessKeyEvent) {
+                return true;
+            }
             pattern->DispatchFocusActiveEvent(true);
             return true;
         }
         return false;
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnKeyEventInternal([wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         if (pattern) {
-            return pattern->HandleKeyEvent(event);
+            if (event.IsPreIme()) {
+                TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "KeyEvent Internal preIme %{public}s.", event.ToString().c_str());
+                return pattern->HandleKeyEvent(event);
+            }
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, false);
+            auto pipeline = host->GetContextRefPtr();
+            CHECK_NULL_RETURN(pipeline, false);
+            bool isBypassInner =
+                event.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
+            bool forceProcessKeyEvent = pattern->GetForceProcessOnKeyEventInternal();
+            bool sendKey = !isBypassInner || forceProcessKeyEvent;
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "KeyEvent Internal will %{public}s send %{public}s, bypass[%{public}d], isForce[%{public}d].",
+                sendKey ? "" : "not", event.ToString().c_str(), isBypassInner, forceProcessKeyEvent);
+            if (sendKey) {
+                pattern->SetForceProcessOnKeyEventInternal(false);
+                return pattern->HandleKeyEvent(event);
+            }
         }
         return false;
     });
+}
+
+void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetIsNodeNeedKey(true);
+    InitKeyEventOnFocus(focusHub);
+    InitKeyEventOnBlur(focusHub);
+    InitKeyEventOnClearFocusState(focusHub);
+    InitKeyEventOnPaintFocusState(focusHub);
+    InitKeyEventOnKeyEvent(focusHub);
 }
 
 void UIExtensionPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -854,7 +943,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleFocusEvent();
             needReSendFocusToUIExtension_ = false;
         }
-        focusHub->SetForceProcessOnKeyEventInternal(true);
+        SetForceProcessOnKeyEventInternal(true);
     }
 }
 
@@ -876,7 +965,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
         hub->RequestFocusImmediately();
-        hub->SetForceProcessOnKeyEventInternal(true);
+        SetForceProcessOnKeyEventInternal(true);
     }
     DispatchPointerEvent(pointerEvent);
 }
@@ -905,7 +994,10 @@ bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
         sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
         return true;
     }
-
+    bool isTab = event.IsKey({ KeyCode::KEY_TAB });
+    if (!isTab) {
+        SetForceProcessOnKeyEventInternal(true);
+    }
     return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
@@ -1061,7 +1153,8 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
-    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
+    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE', errorCode = %{public}d.",
+        ToString(state_), code);
     state_ = AbilityState::NONE;
     SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     // Release the session.
@@ -1458,6 +1551,11 @@ void UIExtensionPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
     DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
     DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -1489,6 +1587,11 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
     json->Put("focusStatus: ", std::to_string(focusState_).c_str());
     json->Put("abilityState: ", ToString(state_));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
