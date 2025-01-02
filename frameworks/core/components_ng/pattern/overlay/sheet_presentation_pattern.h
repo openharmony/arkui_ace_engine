@@ -603,7 +603,7 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
-    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
+    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle) const;
 
     RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
@@ -614,7 +614,6 @@ public:
     {
         return detentsFinalIndex_;
     }
-
     bool IsScrollOutOfBoundary();
     RefPtr<FrameNode> GetScrollNode();
 

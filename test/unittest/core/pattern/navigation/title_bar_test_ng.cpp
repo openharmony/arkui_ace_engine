@@ -26,7 +26,6 @@
 
 #include "core/common/agingadapation/aging_adapation_dialog_theme.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
