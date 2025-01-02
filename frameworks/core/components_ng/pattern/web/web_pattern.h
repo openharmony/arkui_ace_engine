@@ -625,12 +625,7 @@ public:
     void UpdateFocusedAccessibilityId(int64_t accessibilityId = -1);
     void ClearFocusedAccessibilityId();
     void OnTooltip(const std::string& tooltip);
-<<<<<<< HEAD
-=======
-    void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
-    void OnPopupShow(bool show);
->>>>>>> e2789e8d21 (fix long content drag freeze)
     bool IsDefaultFocusNodeExist();
     bool IsRootNeedExportTexture();
     std::vector<int8_t> GetWordSelection(const std::string& text, int8_t offset);
