@@ -1804,6 +1804,120 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0108, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FocusHubTestNg0121
+ * @tc.desc: Test the function OnKeyEventDispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0121, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    child1->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    frameNode->AddChild(child2);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    focusHub->currentFocus_ = true;
+    pipeline->isFocusActive_ = true;
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::UP;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+
+    auto onKeyEventDispatchCallback1 = [](KeyEventInfo& info) -> bool {
+        return true; 
+    };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback1));
+    EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
+
+    auto onKeyEventDispatchCallback2 = [](KeyEventInfo& info) -> bool {
+        return false; 
+    };
+    focusHub->ClearOnKeyEventDispatchCallback();
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback2));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
+
+
+/**
+ * @tc.name: FocusHubTestNg0122
+ * @tc.desc: Test the function dispatchKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    child1->GetOrCreateFocusHub();
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    frameNode->AddChild(child2);
+
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->SetFocusType(FocusType::SCOPE);
+
+    auto childEventHub1 = AceType::MakeRefPtr<EventHub>();
+    childEventHub1->AttachHost(child1);
+    auto childFocusHub1 = AceType::MakeRefPtr<FocusHub>(childEventHub1);
+    childFocusHub1->SetFocusType(FocusType::NODE);
+
+    auto childEventHub2 = AceType::MakeRefPtr<EventHub>();
+    childEventHub2->AttachHost(child2);
+    auto childFocusHub2 = AceType::MakeRefPtr<FocusHub>(childEventHub2);
+    childFocusHub2->SetFocusType(FocusType::NODE);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    focusHub->currentFocus_ = true;
+    pipeline->isFocusActive_ = true;
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    auto onKeyEventDispatchCallback = [&childFocusHub2, &keyEvent](KeyEventInfo& eventInfo) -> bool {
+        childFocusHub2->currentFocus_ = true;
+       return childFocusHub2->HandleEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
+
+    auto onKeyEventCallback1 = [](KeyEventInfo& eventInfo) -> bool { return true; };
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback1));   
+    EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
+
+    auto onKeyEventCallback2 = [](KeyEventInfo& eventInfo) -> bool { return false; };
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback2));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+
+    auto onKeyEventCallback3 = [](KeyEventInfo& eventInfo) -> bool {
+        eventInfo.SetStopPropagation(true);
+        return false;
+    };
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback3));
+    EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
  * @tc.name: GetRootFocusHub001
  * @tc.desc: Test the function GetRootFocusHub.
  * @tc.type: FUNC
