@@ -2793,6 +2793,9 @@ struct ArkUITimepickerModifier {
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
     void (*setTimepickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetTimepickerEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTimepickerEnableCascade)(ArkUINodeHandle node);
+    void (*setTimepickerEnableCascade)(ArkUINodeHandle node, ArkUI_Bool isEnableCascade);
+    void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {

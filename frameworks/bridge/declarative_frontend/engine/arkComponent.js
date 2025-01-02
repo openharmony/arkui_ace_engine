@@ -20151,6 +20151,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerSelectedTextStyleModifier.identity, TimepickerSelectedTextStyleModifier, value);
     return this;
   }
+  enableCascade(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity, TimepickerEnableCascadeModifier, value);
+    return this;
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -20318,6 +20322,21 @@ class TimepickerLoopModifier extends ModifierWithKey {
   }
 }
 TimepickerLoopModifier.identity = Symbol('timepickerLoop');
+
+class TimepickerEnableCascadeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
+    }
+  }
+}
+TimepickerEnableCascadeModifier.identity = Symbol('timepickerEnableCascade');
 
 class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
   constructor(value) {

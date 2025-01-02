@@ -3819,6 +3819,19 @@ typedef enum {
      *
      */
     NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief Defines whether the AM/PM option is cascaded with the time in 12-hour mode.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable cascade. The default value is <b>false</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable cascade.\n
+     *
+     * @since 16
+     */
+    NODE_TIME_PICKER_ENABLE_CASCADE = 14007,
 
     /**
      * @brief Defines the data selection range of the text picker.

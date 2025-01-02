@@ -1078,6 +1078,9 @@ struct CJUITimepickerModifier {
     void (*setTimepickerDateTimeOptions)(
         ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType);
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTimepickerEnableCascade)(ArkUINodeHandle node);
+    void (*setTimepickerEnableCascade)(ArkUINodeHandle node, ArkUI_Bool isEnableCascade);
+    void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
 };
 
 struct CJUIVideoModifier {
