@@ -546,7 +546,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 auto subWindowMgr = SubwindowManager::GetInstance();
                 subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
             },
-            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas");
+            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas", PriorityType::VIP);
     }
 }
 

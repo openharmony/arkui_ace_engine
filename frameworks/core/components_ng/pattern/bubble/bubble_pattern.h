@@ -282,7 +282,6 @@ private:
     OffsetT<Dimension> GetInvisibleOffset();
     RefPtr<RenderContext> GetRenderContext();
     void ResetToInvisible();
-    bool PostTask(const TaskExecutor::Task& task, const std::string& name);
     void StartOffsetEnteringAnimation();
     void StartAlphaEnteringAnimation(std::function<void()> finish);
     void StartOffsetExitingAnimation();
