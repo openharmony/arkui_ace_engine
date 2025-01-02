@@ -1073,16 +1073,6 @@ void WebClientImpl::OnTooltip(const std::string& tooltip)
     delegate->OnTooltip(tooltip);
 }
 
-<<<<<<< HEAD
-=======
-void WebClientImpl::OnPopupSize(int x, int y, int width, int height)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnPopupSize(x, y, width, height);
-}
-
 void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
 {
     auto delegate = webDelegate_.Upgrade();
@@ -1091,14 +1081,6 @@ void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visib
     delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 }
 
-void WebClientImpl::OnPopupShow(bool show)
-{
-    auto delegate = webDelegate_.Upgrade();
-    CHECK_NULL_VOID(delegate);
-    ContainerScope scope(delegate->GetInstanceId());
-    delegate->OnPopupShow(show);
-}
->>>>>>> e2789e8d21 (fix long content drag freeze)
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     auto delegate = webDelegate_.Upgrade();
