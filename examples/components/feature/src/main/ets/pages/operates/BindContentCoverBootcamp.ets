@@ -1,5 +1,6 @@
-import { ColorBlock, Drawer, RadioBlock, SliderBlock, useEnabled } from "common"
-import { LengthMetrics } from "@kit.ArkUI";
+import { ColorBlock, Drawer, RadioBlock, SliderBlock, useEnabled } from 'common'
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 
 
 @Component
@@ -65,7 +66,33 @@ export struct BindContentCoverBootcamp {
   @State transitionAnimationExpectedFrameRateRangeMax: number = 60;
   @State enableTransitionAnimationExpectedFrameRateRangeExpected: boolean = false;
   @State transitionAnimationExpectedFrameRateRangeExpected: number = 60;
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
+  //compEvent
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time,value)
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200)
+  }
   build() {
     NavDestination() {
       Drawer({
@@ -95,21 +122,21 @@ export struct BindContentCoverBootcamp {
           backgroundColor: useEnabled(this.enableBackgroundColorColor, this.backgroundColorColor),
           onWillDismiss: (dismissContentCoverAction: DismissContentCoverAction) => {
             if (dismissContentCoverAction.reason == DismissReason.PRESS_BACK) {
-              console.log("BindContentCover: onWillDismiss()")
+              this.compEventTriggeredLog('BindContentCover: onWillDismiss()')
             }
             dismissContentCoverAction.dismiss()
           },
           onWillAppear: () => {
-            console.info('BindContentCover:onWillAppear()')
+            this.compEventTriggeredLog('BindContentCover:onWillAppear()')
           },
           onAppear: () => {
-            console.info('BindContentCover:onAppear()')
+            this.compEventTriggeredLog('BindContentCover:onAppear()')
           },
           onWillDisappear: () => {
-            console.info('BindContentCover:onWillDisappear()')
+            this.compEventTriggeredLog('BindContentCover:onWillDisappear()')
           },
           onDisappear: () => {
-            console.info('BindContentCover:onDisappear()')
+            this.compEventTriggeredLog('BindContentCover:onDisappear()')
           },
           transition: TransitionEffect.opacity(useEnabled(this.enableTransitionOpacity,
             this.transitionOpacity))
