@@ -1838,13 +1838,13 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0121, TestSize.Level1)
     EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     auto onKeyEventDispatchCallback1 = [](KeyEventInfo& info) -> bool {
-        return true; 
+        return true;
     };
     focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback1));
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 
     auto onKeyEventDispatchCallback2 = [](KeyEventInfo& info) -> bool {
-        return false; 
+        return false;
     };
     focusHub->ClearOnKeyEventDispatchCallback();
     focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback2));
@@ -1901,7 +1901,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
     focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
 
     auto onKeyEventCallback1 = [](KeyEventInfo& eventInfo) -> bool { return true; };
-    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback1));   
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback1));
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 
     auto onKeyEventCallback2 = [](KeyEventInfo& eventInfo) -> bool { return false; };
