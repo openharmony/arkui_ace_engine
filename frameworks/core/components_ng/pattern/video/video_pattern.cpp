@@ -325,7 +325,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
-        videoSrc, id = instanceId_, uiTaskExecutor] {
+        videoSrc, id = instanceId_, showFirstFrame = showFirstFrame_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->ResetMediaPlayer();
@@ -346,7 +346,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             CHECK_NULL_VOID(videoPattern);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-
+        mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
