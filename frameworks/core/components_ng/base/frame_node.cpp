@@ -5086,7 +5086,7 @@ void FrameNode::GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRe
             }
         }
 
-        if (visibleRect.IsEmpty() && (!isCalculateInnerVisibleRectClip_ || withClip || visibleInnerRect.IsEmpty())) {
+        if (visibleRect.IsEmpty() && (!(isCalculateInnerVisibleRectClip_ || withClip) || visibleInnerRect.IsEmpty())) {
             visibleInnerRect = visibleRect;
             return;
         }

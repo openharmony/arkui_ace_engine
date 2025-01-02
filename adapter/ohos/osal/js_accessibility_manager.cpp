@@ -36,7 +36,7 @@
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
