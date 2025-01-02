@@ -29936,8 +29936,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched); 
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 SwiperAutoPlayModifier.identity = Symbol('swiperAutoPlay');
