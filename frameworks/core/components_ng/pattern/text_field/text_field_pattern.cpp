@@ -5006,7 +5006,7 @@ void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional
     UpdateCaretInfoToController();
 }
 
-int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
+int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove, bool skipNewLineChar)
 {
     if (contentController_->IsEmpty()) {
         return 0;
@@ -5028,7 +5028,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     while (directionMove == 0 ? strIndex >= 0 : strIndex <= textLength) {
         auto chr = wideTextValue[strIndex];
         // skip the special character
-        if (chr == L' ' || chr == L'\n') {
+        if (chr == L' ' || (chr == L'\n' && skipNewLineChar)) {
             if (directionMove == 0) {
                 strIndex--;
             } else {
@@ -5045,10 +5045,9 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
                 offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
             }
             return std::clamp(offset, 0, textLength);
-        } else {
-            // GetWordBoundary fail
-            return 0;
         }
+        // GetWordBoundary fail
+        return 0;
     }
     return std::clamp(offset, 0, textLength);
 }
@@ -5860,7 +5859,7 @@ void TextFieldPattern::DeleteBackwardWord()
 {
     int32_t originCaretPosition = selectController_->GetCaretIndex();
     int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    int32_t leftWordLength = GetWordLength(originCaretPosition, 0);
+    int32_t leftWordLength = GetWordLength(originCaretPosition, 0, false);
     if (leftWordLength < 0) {
         // delete 1 char
         leftWordLength = 1;
@@ -5876,7 +5875,7 @@ void TextFieldPattern::DeleteForwardWord()
 {
     int32_t originCaretPosition = selectController_->GetCaretIndex();
     int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    int32_t rightWordLength = GetWordLength(originCaretPosition, 1);
+    int32_t rightWordLength = GetWordLength(originCaretPosition, 1, false);
     if (rightWordLength < 0) {
         // delete 1 char
         rightWordLength = 1;
