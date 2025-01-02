@@ -73,6 +73,14 @@ void ScrollPattern::OnModifyDone()
     }
 }
 
+RefPtr<PaintProperty> ScrollPattern::CreatePaintProperty()
+{
+    auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
+    auto property = MakeRefPtr<ScrollPaintProperty>();
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
+}
+
 bool ScrollPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {

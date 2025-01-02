@@ -53,6 +53,8 @@ public:
 
     void BeforeCreateLayoutWrapper() override;
 
+    RefPtr<PaintProperty> CreatePaintProperty() override;
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
