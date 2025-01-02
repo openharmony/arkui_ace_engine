@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 136
+#define ARKUI_FULL_API_VERSION 137
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 136
+#define ARKUI_NODE_API_VERSION 137
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -2571,8 +2571,6 @@ struct ArkUIListModifier {
     void (*setListChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
     void (*setListCloseAllSwipeActions)(ArkUINodeHandle node, void* userData, void(onFinish)(void* userData));
-    void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
-    void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
@@ -2877,8 +2875,6 @@ struct ArkUIGridModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
-    void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit);
-    void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setGridAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetGridAlignItems)(ArkUINodeHandle node);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
@@ -2943,6 +2939,9 @@ struct ArkUIScrollableModifier {
     void (*resetOnScrollStartCallBack)(ArkUINodeHandle node);
     void (*setOnScrollStopCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnScrollStopCallBack)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getFlingSpeedLimit)(ArkUINodeHandle node);
+    void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
@@ -2990,8 +2989,6 @@ struct ArkUIScrollModifier {
     void (*setScrollInitialOffset)(ArkUINodeHandle node, ArkUI_Float32 xOffsetValue, ArkUI_Int32 xOffsetUnit,
         ArkUI_Float32 yOffsetValue, ArkUI_Int32 yOffsetUnit);
     void (*resetScrollInitialOffset)(ArkUINodeHandle node);
-    void (*setScrollFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*resetScrollFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation);
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y);
     ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
@@ -3940,8 +3937,6 @@ struct ArkUIWaterFlowModifier {
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
-    void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
-    void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
     ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     ArkUI_Int32 (*getWaterFlowLayoutMode)(ArkUINodeHandle node);

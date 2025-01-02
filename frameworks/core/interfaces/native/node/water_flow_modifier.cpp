@@ -726,8 +726,6 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .setScrollToIndex = SetScrollToIndex,
         .setWaterflowFooter = SetWaterflowFooter,
         .resetWaterflowFooter = ResetWaterflowFooter,
-        .setWaterFlowFlingSpeedLimit = SetWaterFlowFlingSpeedLimit,
-        .resetWaterFlowFlingSpeedLimit = ResetWaterFlowFlingSpeedLimit,
         .getScrollController = GetScrollController,
         .setWaterFlowScroller = SetWaterFlowScroller,
         .getWaterFlowLayoutMode = GetWaterFlowLayoutMode,
