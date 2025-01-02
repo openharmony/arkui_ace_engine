@@ -696,11 +696,22 @@ void StageManager::ExpandSafeArea(const RefPtr<UINode>& pageNode)
 {
     auto node = AceType::DynamicCast<FrameNode>(pageNode);
     CHECK_NULL_VOID(node);
+    // check need avoid keyboard
+    auto pipelineContext = pageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    auto isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(node);
+    if (!pipelineContext->CheckOverlayFocus() && isNeedAvoidKeyboard) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "don't set safeArea when keyboard is need avoid");
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
         .edges = SAFE_AREA_EDGE_ALL };
     layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void StageManager::StopPageTransition(bool needTransition)
