@@ -63,7 +63,7 @@ void TextModelNG::Create(const std::u16string& content)
 
 void TextModelNG::Create(const std::string& content)
 {
-    Create(UtfUtils::Str8ToStr16(content));
+    Create(UtfUtils::Str8DebugToStr16(content));
 }
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)

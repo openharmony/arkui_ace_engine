@@ -41,7 +41,7 @@ void TextModelImpl::Create(const std::string& content)
 
 void TextModelImpl::Create(const std::u16string& content)
 {
-    Create(UtfUtils::Str16ToStr8(content));
+    Create(UtfUtils::Str16DebugToStr8(content));
 }
 
 void TextModelImpl::SetFont(const Font& value) {}

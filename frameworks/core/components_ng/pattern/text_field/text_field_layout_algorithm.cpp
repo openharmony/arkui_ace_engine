@@ -711,6 +711,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(theme);
     auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
         needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
     paragraph_->AddText(displayText);
     paragraph_->Build();
 }
@@ -752,6 +753,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
             paragraph_->AddText(
                 TextFieldPattern::CreateObscuredText(static_cast<int32_t>(splitStr.length())));
         } else {
+            UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(splitStr.data()), splitStr.length(), 0);
             paragraph_->AddText(splitStr);
         }
         paragraph_->PopStyle();
@@ -777,6 +779,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(theme);
     auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
         needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
     inlineParagraph_->AddText(displayText);
     inlineParagraph_->Build();
 }

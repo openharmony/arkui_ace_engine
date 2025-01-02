@@ -81,7 +81,7 @@ protected:
             ss << "[";
             for_each(list.begin(), list.end(), [&ss](RefPtr<SpanItem>& item) {
                 ss << "[" << item->interval.first << "," << item->interval.second << ":"
-                   << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << "], ";
+                   << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << "], ";
             });
             ss << "], ";
         }

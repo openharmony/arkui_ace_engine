@@ -40,7 +40,7 @@ const std::function<void(std::u16string)> FormatCharFunction(void (*callback)(co
 {
     const std::function<void(std::u16string)> result = [lambda = CJLambda::Create(callback)]
         (const std::u16string& value) -> void {
-        const std::string valueStr = UtfUtils::Str16ToStr8(value);
+        const std::string valueStr = UtfUtils::Str16DebugToStr8(value);
         lambda(valueStr.c_str());
     };
     return result;

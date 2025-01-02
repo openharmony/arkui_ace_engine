@@ -40,14 +40,14 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(SpanModelNG::GetContent(uiNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -56,7 +56,7 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(src);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)

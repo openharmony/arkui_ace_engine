@@ -402,7 +402,7 @@ public:
     {
         static TextEditingValue value;
         value.text = contentController_->GetTextValue();
-        value.hint = UtfUtils::Str16ToStr8(GetPlaceHolder());
+        value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
         value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
@@ -419,7 +419,7 @@ public:
 
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
-        contentController_->SetTextValue(UtfUtils::Str8ToStr16(value));
+        contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value));
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
