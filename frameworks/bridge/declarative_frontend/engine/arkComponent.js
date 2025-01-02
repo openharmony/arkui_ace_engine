@@ -17337,6 +17337,15 @@ class ArkDisplayArrow {
     return this.value === another.value && this.isHoverShow === another.isHoverShow;
   }
 }
+class ArkAutoPlay {
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+  isEqual(another) {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
+  }
+}
 class ArkDisplayCount {
   constructor() {
     this.value = undefined;
@@ -27280,6 +27289,10 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
     return this;
   }
+  enableTransparentLayer(value) {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableTransparentLayerModifier.identity, XComponentEnableTransparentLayerModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 if (globalThis.XComponent !== undefined) {
@@ -27704,10 +27717,27 @@ class XComponentHdrBrightnessModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !this.value.isEqual(this.stageValue);
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 XComponentHdrBrightnessModifier.identity = Symbol('xComponentHdrBrightness');
+class XComponentEnableTransparentLayerModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableTransparentLayer(node);
+    }
+    else {
+      getUINativeModule().xComponent.setEnableTransparentLayer(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+XComponentEnableTransparentLayerModifier.identity = Symbol('xComponentEnableTransparentLayer');
 class XComponentRenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -28390,7 +28420,7 @@ class ListChainAnimationModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetChainAnimation(node);
     }
     else {
@@ -28404,7 +28434,7 @@ class ListCachedCountModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetCachedCount(node);
     }
     else {
@@ -28418,7 +28448,7 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetEnableScrollInteraction(node);
     }
     else {
@@ -28554,7 +28584,7 @@ class ListFlingSpeedLimitModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
+    if (reset || isUndefined(this.value)) {
       getUINativeModule().list.resetFlingSpeedLimit(node);
     }
     else {
@@ -29361,8 +29391,13 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
   }
-  autoPlay(value) {
-    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, value);
+  autoPlay(autoPlay, options) {
+    let arkAutoPlay = new ArkAutoPlay();
+    arkAutoPlay.autoPlay = autoPlay;
+    if (!isNull(options) && !isUndefined(options) && typeof options === 'object') {
+      arkAutoPlay.needStopWhenTouched = options.stopWhenTouched;
+    }
+    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, arkAutoPlay);
     return this;
   }
   interval(value) {
@@ -29896,13 +29931,13 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().swiper.resetSwiperAutoPlay(node);
-    }
-    else {
-      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
+    } else { 
+      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value.autoPlay, this.value.needStopWhenTouched);
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
+      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched); 
   }
 }
 SwiperAutoPlayModifier.identity = Symbol('swiperAutoPlay');

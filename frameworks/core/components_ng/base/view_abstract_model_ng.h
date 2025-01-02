@@ -964,6 +964,11 @@ public:
         focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
+    void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
+    {
+        ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
+    }
+
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1363,6 +1368,11 @@ public:
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();
+    }
+
+    void DisableOnKeyEventDispatch() override
+    {
+        ViewAbstract::DisableOnKeyEventDispatch();
     }
 
     static void DisableOnKeyPreIme(FrameNode* frameNode)

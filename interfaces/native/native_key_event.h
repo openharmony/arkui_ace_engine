@@ -491,6 +491,15 @@ uint32_t OH_ArkUI_KeyEvent_GetUnicode(const ArkUI_UIInputEvent* event);
  * @since 14
  */
 void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent* event, bool isConsumed);
+
+/**
+ * @brief Dispatch key event to a specific component node.
+ *
+ * @param node Indicates the pointer to a component node.
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @since 16
+ */
+void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
 #ifdef __cplusplus
 };
 #endif

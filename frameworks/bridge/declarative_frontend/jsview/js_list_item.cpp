@@ -257,6 +257,9 @@ void JSListItem::JsParseDeleteArea(const JsiExecutionContext& context, const JSR
 void JSListItem::SetSwiperAction(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
+        ListItemModel::GetInstance()->SetDeleteArea(
+            nullptr, nullptr, nullptr, nullptr, nullptr, Dimension(0, DimensionUnit::VP), true);
+        ListItemModel::GetInstance()->SetSwiperAction(nullptr, nullptr, nullptr, V2::SwipeEdgeEffect::Spring);
         return;
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);

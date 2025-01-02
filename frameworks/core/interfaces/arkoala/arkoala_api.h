@@ -859,6 +859,7 @@ enum ArkUIEventSubKind {
     ON_PRE_DRAG,
     ON_KEY_PREIME,
     ON_FOCUS_AXIS,
+    ON_KEY_DISPATCH,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -2097,6 +2098,7 @@ struct ArkUICommonModifier {
     ArkUI_Bool (*getTabStop)(ArkUINodeHandle node);
     void (*setOnClick)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
+    void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
 };
@@ -2673,6 +2675,8 @@ struct ArkUISwiperModifier {
     void (*resetSwiperInterval)(ArkUINodeHandle node);
     void (*setSwiperAutoPlay)(ArkUINodeHandle node, ArkUI_Bool autoPlay);
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
+    void (*setSwiperStopWhenTouched)(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched);
+    void (*resetSwiperStopWhenTouched)(ArkUINodeHandle node);
     void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
@@ -2683,6 +2687,7 @@ struct ArkUISwiperModifier {
     void (*resetSwiperEnabled)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperLoop)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperAutoPlay)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperStopWhenTouched)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperIndex)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperVertical)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSwiperDuration)(ArkUINodeHandle node);
@@ -5018,6 +5023,8 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentEnableSecure)(ArkUINodeHandle node);
     void (*setXComponentHdrBrightness)(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness);
     void (*resetXComponentHdrBrightness)(ArkUINodeHandle node);
+    void (*setXComponentEnableTransparentLayer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*resetXComponentEnableTransparentLayer)(ArkUINodeHandle node);
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
 };

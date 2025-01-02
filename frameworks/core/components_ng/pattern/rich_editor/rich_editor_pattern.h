@@ -141,8 +141,8 @@ public:
 
     struct OperationRecord {
         OperationRecord() : beforeCaretPosition(-1), afterCaretPosition(-1), deleteCaretPostion(-1) {}
-        std::optional<std::string> addText;
-        std::optional<std::string> deleteText;
+        std::optional<std::u16string> addText;
+        std::optional<std::u16string> deleteText;
         int32_t beforeCaretPosition;
         int32_t afterCaretPosition;
         int32_t deleteCaretPostion;
@@ -152,8 +152,8 @@ public:
         int32_t startOffset = INVALID_VALUE;
         int32_t endOffset = INVALID_VALUE;
         bool previewTextHasStarted = false;
-        std::string previewContent;
-        std::string newPreviewContent;
+        std::u16string previewContent;
+        std::u16string newPreviewContent;
         bool needReplacePreviewText = false;
         bool needReplaceText = false;
         PreviewRange replacedRange;
@@ -268,7 +268,7 @@ public:
         WeakPtr<RichEditorPattern> pattern_;
     };
 
-    int32_t SetPreviewText(const std::string& previewTextValue, const PreviewRange range) override;
+    int32_t SetPreviewText(const std::u16string& previewTextValue, const PreviewRange range) override;
 
     const PreviewTextInfo GetPreviewTextInfo() const;
 
@@ -408,7 +408,7 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
-    void InsertValueInStyledString(const std::string& insertValue, bool calledByImf = false);
+    void InsertValueInStyledString(const std::u16string& insertValue, bool calledByImf = false);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
     RefPtr<FontSpan> CreateFontSpanByTextStyle(
@@ -437,22 +437,22 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     bool IsIMEOperation(OperationType operationType);
-    void InsertValue(const std::string& insertValue, bool isIME = false) override;
-    void InsertValueByOperationType(const std::string& insertValue,
+    void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
+    void InsertValueByOperationType(const std::u16string& insertValue,
         OperationType operationType = OperationType::DEFAULT);
-    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr,
+    void InsertValueOperation(const std::u16string& insertValue, OperationRecord* const record = nullptr,
         OperationType operationType = OperationType::IME);
     void DeleteSelectOperation(OperationRecord* const record);
     void DeleteByRange(OperationRecord* const record, int32_t start, int32_t end);
-    void InsertDiffStyleValueInSpan(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
-    void InsertValueByPaste(const std::string& insertValue);
+    void InsertDiffStyleValueInSpan(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
+        const std::u16string& insertValue, bool isIME = true);
+    void InsertValueByPaste(const std::u16string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
-        RefPtr<SpanNode>& spanNode, const std::string& insertValue, const TextInsertValueInfo& info);
+        RefPtr<SpanNode>& spanNode, const std::u16string& insertValue, const TextInsertValueInfo& info);
     void SpanNodeFission(RefPtr<SpanNode>& spanNode);
-    void CreateTextSpanNode(
-        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue, bool isIME = true);
+    void CreateTextSpanNode(RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info,
+        const std::u16string& insertValue, bool isIME = true);
     void SetDefaultColor(RefPtr<SpanNode>& spanNode);
     void HandleOnDelete(bool backward) override;
     std::pair<bool, bool> IsEmojiOnCaretPosition(int32_t& emojiLength, bool isBackward, int32_t length);
@@ -692,13 +692,13 @@ public:
     void HandleSurfacePositionChanged(int32_t posX, int32_t posY) override;
     bool RequestCustomKeyboard();
     bool CloseCustomKeyboard();
-    const std::string& GetPasteStr() const
+    const std::u16string& GetPasteStr() const
     {
         return pasteStr_;
     }
     void AddPasteStr(const std::string& addedStr)
     {
-        pasteStr_.append(addedStr);
+        pasteStr_.append(UtfUtils::Str8ToStr16(addedStr));
     }
     void ClearPasteStr()
     {
@@ -1235,17 +1235,17 @@ private:
     int32_t ProcessDeleteNodes(std::list<RichEditorAbstractSpanResult>& deleteSpans);
     bool OnKeyEvent(const KeyEvent& keyEvent);
     void MoveCaretAfterTextChange();
-    bool BeforeIMEInsertValue(const std::string& insertValue);
+    bool BeforeIMEInsertValue(const std::u16string& insertValue);
     void AfterInsertValue(
         const RefPtr<SpanNode>& spanNode, int32_t insertValueLength, bool isCreate, bool isIme = true);
     bool AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, int32_t moveLength, bool isCreate);
-    RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::string& insertValue);
+    RefPtr<SpanNode> InsertValueToBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, const std::u16string& insertValue);
     void SetCaretSpanIndex(int32_t index);
     bool HasSameTypingStyle(const RefPtr<SpanNode>& spanNode);
 
     void GetChangeSpanStyle(RichEditorChangeValue& changeValue, std::optional<TextStyle>& spanTextStyle,
         std::optional<struct UpdateParagraphStyle>& spanParaStyle, const RefPtr<SpanNode>& spanNode, int32_t spanIndex);
-    void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::string& insertValue,
+    void GetReplacedSpan(RichEditorChangeValue& changeValue, int32_t& innerPosition, const std::u16string& insertValue,
         int32_t textIndex, std::optional<TextStyle> textStyle, std::optional<struct UpdateParagraphStyle> paraStyle,
         bool isCreate = false, bool fixDel = true);
     void GetReplacedSpanFission(RichEditorChangeValue& changeValue, int32_t& innerPosition, std::u16string& content,
@@ -1323,11 +1323,11 @@ private:
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void DeleteForward(int32_t currentPosition, int32_t length);
     int32_t HandleOnDragDeleteForward();
-    void HandleOnDragDropTextOperation(const std::string& insertValue, bool isDeleteSelect, bool isCopy = false);
+    void HandleOnDragDropTextOperation(const std::u16string& insertValue, bool isDeleteSelect, bool isCopy = false);
     void UndoDrag(const OperationRecord& record);
     void RedoDrag(const OperationRecord& record);
-    void HandleOnDragInsertValueOperation(const std::string& insertValue);
-    void HandleOnDragInsertValue(const std::string& str);
+    void HandleOnDragInsertValueOperation(const std::u16string& insertValue);
+    void HandleOnDragInsertValue(const std::u16string& str);
     void HandleOnEditChanged(bool isEditing);
     void OnTextInputActionUpdate(TextInputAction value);
     void CloseSystemMenu();
@@ -1354,9 +1354,9 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
-    void ProcessInsertValueMore(std::string text, OperationRecord record, OperationType operationType,
+    void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
-    void ProcessInsertValue(const std::string& insertValue, OperationType operationType = OperationType::DEFAULT,
+    void ProcessInsertValue(const std::u16string& insertValue, OperationType operationType = OperationType::DEFAULT,
         bool calledbyImf = false);
     void FinishTextPreviewInner(bool deletePreviewText = true);
     void TripleClickSection(GestureEvent& info, int32_t start, int32_t end, int32_t pos);
@@ -1391,9 +1391,9 @@ private:
     void ClearOnFocusTextField(FrameNode* node);
     void ProcessResultObject(RefPtr<PasteDataMix> pasteData, const ResultObject& result);
     void EncodeTlvDataByResultObject(const ResultObject& result, std::vector<uint8_t>& tlvData);
-    bool InitPreviewText(const std::string& previewTextValue, const PreviewRange& range);
-    bool ReplaceText(const std::string& previewTextValue, const PreviewRange& range);
-    bool UpdatePreviewText(const std::string& previewTextValue, const PreviewRange& range);
+    bool InitPreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
+    bool ReplaceText(const std::u16string& previewTextValue, const PreviewRange& range);
+    bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
     void UpdateSelectionAndHandleVisibility();
@@ -1438,7 +1438,7 @@ private:
     OffsetF selectionMenuOffsetByMouse_;
     OffsetF selectionMenuOffsetClick_;
     OffsetF lastClickOffset_;
-    std::string pasteStr_;
+    std::u16string pasteStr_;
 
     // still in progress
     ParagraphManager paragraphs_;

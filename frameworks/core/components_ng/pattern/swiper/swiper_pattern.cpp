@@ -2892,6 +2892,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
+    CHECK_NULL_VOID(stopWhenTouched_);
     auto isOverlongIndicator = GetMaxDisplayCount() > 0;
     if (!isOverlongIndicator) {
         StopIndicatorAnimation(true);

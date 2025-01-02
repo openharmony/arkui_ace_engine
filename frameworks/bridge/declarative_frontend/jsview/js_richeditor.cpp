@@ -378,7 +378,7 @@ void JSRichEditor::SetJSSpanResultObject(JSRef<JSObject>& resultObj, const Resul
 {
     if (resultObject.type == SelectSpanType::TYPESPAN) {
         resultObj->SetProperty<std::u16string>("value", resultObject.valueString);
-        resultObj->SetProperty<std::string>("previewText", resultObject.previewText);
+        resultObj->SetProperty<std::u16string>("previewText", resultObject.previewText);
         resultObj->SetPropertyObject("textStyle", CreateJSTextStyleResult(resultObject.textStyle));
         resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(resultObject.textStyle));
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
@@ -668,8 +668,8 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToIMEInputObj(const NG::RichEditorInsert
 {
     JSRef<JSObject> aboutToIMEInputObj = JSRef<JSObject>::New();
     aboutToIMEInputObj->SetProperty<int32_t>("insertOffset", insertValue.GetInsertOffset());
-    aboutToIMEInputObj->SetProperty<std::string>("insertValue", insertValue.GetInsertValue());
-    aboutToIMEInputObj->SetProperty<std::string>("previewText", insertValue.GetPreviewText());
+    aboutToIMEInputObj->SetProperty<std::u16string>("insertValue", insertValue.GetInsertValue());
+    aboutToIMEInputObj->SetProperty<std::u16string>("previewText", insertValue.GetPreviewText());
     return JSRef<JSVal>::Cast(aboutToIMEInputObj);
 }
 
@@ -704,8 +704,8 @@ JSRef<JSVal> JSRichEditor::CreateJsOnIMEInputComplete(const NG::RichEditorAbstra
     textStyleObj->SetPropertyObject("textShadow", CreateJsTextShadowObjectArray(textSpanResult.GetTextStyle()));
     SetJsTextBackgroundStyle(textStyleObj, textSpanResult.GetTextStyle());
     onIMEInputCompleteObj->SetPropertyObject("spanPosition", spanPositionObj);
-    onIMEInputCompleteObj->SetProperty<std::string>("value", textSpanResult.GetValue());
-    onIMEInputCompleteObj->SetProperty<std::string>("previewText", textSpanResult.GetPreviewText());
+    onIMEInputCompleteObj->SetProperty<std::u16string>("value", textSpanResult.GetValue());
+    onIMEInputCompleteObj->SetProperty<std::u16string>("previewText", textSpanResult.GetPreviewText());
     onIMEInputCompleteObj->SetPropertyObject("textStyle", textStyleObj);
     onIMEInputCompleteObj->SetPropertyObject("offsetInSpan", offsetInSpan);
     onIMEInputCompleteObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(textSpanResult.GetTextStyle()));
@@ -761,8 +761,8 @@ void JSRichEditor::SetJSDeleteSpan(JSRef<JSObject>& spanResultObj, const NG::Ric
         case NG::SpanResultType::TEXT: {
             JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
             CreateTextStyleObj(textStyleObj, it);
-            spanResultObj->SetProperty<std::string>("value", it.GetValue());
-            spanResultObj->SetProperty<std::string>("previewText", it.GetPreviewText());
+            spanResultObj->SetProperty<std::u16string>("value", it.GetValue());
+            spanResultObj->SetProperty<std::u16string>("previewText", it.GetPreviewText());
             spanResultObj->SetPropertyObject("textStyle", textStyleObj);
             spanResultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(it.GetTextStyle()));
             break;
@@ -828,8 +828,8 @@ void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
 {
     JSRef<JSObject> textStyleObj = JSRef<JSObject>::New();
     CreateTextStyleObj(textStyleObj, spanResult);
-    resultObj->SetProperty<std::string>("value", spanResult.GetValue());
-    resultObj->SetProperty<std::string>("previewText", spanResult.GetPreviewText());
+    resultObj->SetProperty<std::u16string>("value", spanResult.GetValue());
+    resultObj->SetProperty<std::u16string>("previewText", spanResult.GetPreviewText());
     resultObj->SetPropertyObject("textStyle", textStyleObj);
     resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
 }
@@ -837,7 +837,7 @@ void JSRichEditor::SetTextChangeSpanResult(JSRef<JSObject>& resultObj,
 void JSRichEditor::SetSymbolChangeSpanResult(JSRef<JSObject>& resultObj,
     const NG::RichEditorAbstractSpanResult& spanResult)
 {
-    resultObj->SetProperty<std::string>("value", spanResult.GetValue());
+    resultObj->SetProperty<std::string>("value", spanResult.GetValueString());
     resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(spanResult.GetSymbolSpanStyle()));
     resultObj->SetPropertyObject("valueResource", CreateJSValueResource(spanResult.GetValueResource()));
     resultObj->SetPropertyObject("paragraphStyle", CreateJSParagraphStyle(spanResult.GetTextStyle()));
@@ -1104,7 +1104,7 @@ void JSRichEditor::SetPlaceholder(const JSCallbackInfo& info)
         TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "pipelineContext is null");
         return;
     }
-    std::string placeholderValue;
+    std::u16string placeholderValue;
     PlaceholderOptions options;
     JSContainerBase::ParseJsString(info[0], placeholderValue);
     options.value = placeholderValue;
@@ -1750,7 +1750,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
         return;
     }
     TextSpanOptions options;
-    std::string spanValue;
+    std::u16string spanValue;
     if (!args[0]->IsEmpty() && args[0]->IsString() && args[0]->ToString() != ""
         && JSContainerBase::ParseJsString(args[0], spanValue)) {
         options.value = spanValue;
@@ -1902,7 +1902,7 @@ void JSRichEditorBaseController::GetPreviewTextInfo(const JSCallbackInfo& args)
 JSRef<JSObject> JSRichEditorBaseController::CreateJSPreviewTextInfo(const PreviewTextInfo& info)
 {
     auto resultObj = JSRef<JSObject>::New();
-    resultObj->SetProperty<std::string>("value", info.value.value_or(""));
+    resultObj->SetProperty<std::u16string>("value", info.value.value_or(u""));
     resultObj->SetProperty<int32_t>("offset", info.offset.value_or(0));
     return resultObj;
 }

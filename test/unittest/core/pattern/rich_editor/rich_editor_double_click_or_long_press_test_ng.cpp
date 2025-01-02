@@ -77,7 +77,7 @@ void RichEditorDoubleClickOrLongPressTestNg::TearDownTestSuite()
 HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    AddSpan(TEST_INSERT_U16VALUE);
+    AddSpan(TEST_INSERT_VALUE);
 
     TestParagraphRect paragraphRect = { .start = 0, .end = 1, .rects = { { -400.0, -400.0, 200.0, 200.0 } } };
     TestParagraphItem paragraphItem = { .start = 0, .end = 1,
@@ -228,13 +228,13 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress005
     info.SetSourceTool(SourceTool::FINGER);
     richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
 
-    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
     richEditorPattern->HandleDoubleClickOrLongPress(info);
 
-    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = false;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;

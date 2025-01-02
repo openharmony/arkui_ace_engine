@@ -39,7 +39,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1603,11 +1603,11 @@ void SliderPattern::StartVibrateFeedback()
 {
     crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
     if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
             CROWN_VIBRATOR_STRONG, state);
     } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
             CROWN_VIBRATOR_WEAK, state);
     }
