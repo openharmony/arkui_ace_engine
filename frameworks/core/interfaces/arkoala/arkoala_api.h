@@ -5143,6 +5143,9 @@ struct ArkUIFrameNodeModifier {
     void (*addExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, void* extraData);
     void* (*getExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*removeExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*getCustomPropertyByKey)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
+    void (*addNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key, void (*onDestroy)(ArkUINodeHandle node));
+    void (*removeNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key);
     ArkUI_Int32 (*setDrawCompleteEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
