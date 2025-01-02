@@ -42,7 +42,8 @@ public:
     void DestroyContent() override;
 
     void UpdateViewportConfig(
-        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) override;
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool TransferKeyEvent(const KeyEvent& event) override;
@@ -74,6 +75,8 @@ public:
     void TransferAccessibilityDumpChildInfo(
         const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
+    void UpdateParentOffsetToWindow(const OffsetF& offset) override;
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
@@ -110,6 +113,7 @@ private:
     bool adaptiveWidth_ = true;
     bool adaptiveHeight_ = true;
     bool backgroundTransparent_ = true;
+    float density_ = 0;
     static std::set<void *> usingWorkers_;
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;

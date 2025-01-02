@@ -66,6 +66,13 @@ public:
     void SetUseContentModifier(bool useContentModifier);
     void SetIsRightToLeft(bool value);
     void SetCapsuleBorderRadius(float borderRadius);
+    void SetIsHovered(bool value);
+    void SetIsPressed(bool value);
+    void SetIsFocused(bool value);
+    bool IsFocused() const;
+    void SetRingProgressLeftPadding(const Dimension& ringProgressLeftPadding);
+
+    Color CalculateHoverPressColor(const Color& color);
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -160,12 +167,18 @@ private:
     RefPtr<PropertyBool> isRightToLeft_;
     RefPtr<PropertyFloat> capsuleBorderRadius_;
 
+    Color hoverBlendColor_;
+    Color pressBlendColor_;
+    bool isHover_ = false;
+    bool isPress_ = false;
+    bool isFocus_ = false;
     bool isVisible_ = true;
     float valueBackup_ = 0.0f;
     bool isLoading_ = false;
     bool isSweeping_ = false;
     float sweepingDateBackup_ = 0.0f;
     bool dateUpdated_ = false;
+    Dimension ringProgressLeftPadding_ = 0.0_vp;
 
     ACE_DISALLOW_COPY_AND_MOVE(ProgressModifier);
 };

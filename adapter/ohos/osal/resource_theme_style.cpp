@@ -93,6 +93,8 @@ static const std::unordered_set<std::string> stringAttrs = {
     "textfield_accessibility_hide_password",
     "rich_editor_show_handle",
     "text_show_handle",
+    "list_fadeout_enable",
+    "text_fadeout_enable",
     "textfield_show_password_button",
     "textfield_hide_password_button",
     "textfield_has_showed_password",

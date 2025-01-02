@@ -74,7 +74,11 @@ void UITaskScheduler::SetLayoutNodeRect()
         layoutNode->GetOneDepthVisibleFrameWithOffset(children, offset);
         for (auto& child : children) {
             auto paintRect = child->GetRenderContext()->GetPaintRectWithoutTransform();
-            paintRect.SetOffset(paintRect.GetOffset() + offset);
+            auto childGeometryNode = child->GetGeometryNode();
+            if (!childGeometryNode) {
+                continue;
+            }
+            paintRect.SetOffset(childGeometryNode->GetFrameOffset() + offset);
             child->GetRenderContext()->UpdatePaintRect(paintRect);
         }
     }

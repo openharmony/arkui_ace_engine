@@ -20,7 +20,7 @@
 #include <iterator>
 #include <list>
 
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -156,7 +156,7 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
             });
         }
     } else {
@@ -459,11 +459,11 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     CHECK_NULL_VOID(dataPickerLayoutProperty);
     dataPickerLayoutProperty->UpdatePadding(PaddingProperty {
             .left = CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX),
-            .bottom = CalcLength(),
+            .right = CalcLength(),
             .top = CalcLength(),
+            .bottom = CalcLength(),
             .start = CalcLength(),
-            .end = CalcLength(),
-            .right = CalcLength()});
+            .end = CalcLength()});
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);

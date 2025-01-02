@@ -299,6 +299,35 @@ void SecurityUIExtensionPattern::OnConnect()
     InitializeAccessibility();
 }
 
+void SecurityUIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
+{
+    CHECK_RUN_ON(UI);
+    ContainerScope scope(instanceId_);
+    switch (eventId) {
+        case UIExtCallbackEventId::ON_AREA_CHANGED:
+            break;
+        case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
+            OnUeaAccessibilityEventAsync();
+            break;
+        default:
+            break;
+    }
+}
+
+void SecurityUIExtensionPattern::OnUeaAccessibilityEventAsync()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
+        UIEXT_LOGI("security uec need notify register accessibility again %{public}d, %{public}d.",
+            accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
+        ResetAccessibilityChildTreeCallback();
+        InitializeAccessibility();
+    }
+}
+
 void SecurityUIExtensionPattern::OnDisconnect(bool isAbnormal)
 {
     CHECK_RUN_ON(UI);

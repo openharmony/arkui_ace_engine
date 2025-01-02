@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,8 +33,9 @@ public:
     static ListItemModel* GetInstance();
     virtual ~ListItemModel() = default;
 
-    virtual void Create() = 0;
-    virtual void Create(std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle) = 0;
+    virtual void Create(bool isCreateArc = false) = 0;
+    virtual void Create(
+        std::function<void(int32_t)>&& deepRenderFunc, V2::ListItemStyle listItemStyle, bool isCreateArc = false) = 0;
     virtual void OnDidPop();
     virtual void SetBorderRadius(const Dimension& borderRadius) = 0;
     virtual void SetType(const std::string& type) = 0;
@@ -58,6 +59,7 @@ public:
         OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
         OnStateChangedEvent&& onStateChange, const Dimension& length, bool isStartArea,
         NG::FrameNode* node) = 0;
+    virtual void SetAutoScale(bool autoScale) {}
 
 private:
     static std::unique_ptr<ListItemModel> instance_;

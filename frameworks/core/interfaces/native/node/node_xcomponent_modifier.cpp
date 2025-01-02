@@ -191,6 +191,20 @@ void ResetXComponentHdrBrightness(ArkUINodeHandle node)
     XComponentModelNG::HdrBrightness(frameNode, 1.0f);
 }
 
+void SetXComponentEnableTransparentLayer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, enable);
+}
+
+void ResetXComponentEnableTransparentLayer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, false);
+}
+
 void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -247,6 +261,8 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .resetXComponentEnableSecure = ResetXComponentEnableSecure,
         .setXComponentHdrBrightness = SetXComponentHdrBrightness,
         .resetXComponentHdrBrightness = ResetXComponentHdrBrightness,
+        .setXComponentEnableTransparentLayer = SetXComponentEnableTransparentLayer,
+        .resetXComponentEnableTransparentLayer = ResetXComponentEnableTransparentLayer,
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
     };

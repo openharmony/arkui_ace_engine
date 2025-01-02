@@ -1840,4 +1840,522 @@ HWTEST_F(SwiperIndicatorModifierTestNg, DotIndicatorModifier012, TestSize.Level1
     auto result = dotIndicatorModifier.GetLoopOpacityDuration();
     EXPECT_EQ(result, defaultOpacityAnimationDuration);
 }
+
+/**
+ * @tc.name: CircleDotIndicatorModifier001
+ * @tc.desc: Test DotIndicatorModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set parameters.
+     */
+    CircleDotIndicatorModifier circleDotIndicatorModifier;
+    Testing::MockCanvas canvas;
+    DrawingContext context { canvas, 100.f, 100.f };
+    EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AnyNumber());
+    EXPECT_CALL(canvas, DrawRect(_)).Times(AnyNumber());
+    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AnyNumber());
+    EXPECT_CALL(canvas, Restore()).Times(AnyNumber());
+    circleDotIndicatorModifier.SetAxis(Axis::HORIZONTAL);
+    circleDotIndicatorModifier.SetArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION);
+    circleDotIndicatorModifier.UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step2. call onDraw.
+     */
+    circleDotIndicatorModifier.onDraw(context);
+    EXPECT_EQ(circleDotIndicatorModifier.axis_, Axis::HORIZONTAL);
+    EXPECT_EQ(circleDotIndicatorModifier.arcDirection_, SwiperArcDirection::THREE_CLOCK_DIRECTION);
+
+    /**
+     * @tc.steps: step3. set parameters.
+     */
+    circleDotIndicatorModifier.SetAxis(Axis::VERTICAL);
+    circleDotIndicatorModifier.SetArcDirection(SwiperArcDirection::SIX_CLOCK_DIRECTION);
+    circleDotIndicatorModifier.UpdateBackgroundColor(Color::RED);
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.emplace_back(20.f);
+    LinearVector<float> vectorBlackPointRadius;
+    vectorBlackPointRadius.emplace_back(2.5f);
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.emplace_back(20.f);
+    itemHalfSizes.emplace_back(10.f);
+    itemHalfSizes.emplace_back(30.f);
+    itemHalfSizes.emplace_back(35.f);
+    circleDotIndicatorModifier.UpdatePressPaintProperty(itemHalfSizes, vectorBlackPointCenterX, vectorBlackPointRadius,
+                                                        {0.f, 0.f});
+
+    /**
+     * @tc.steps: step4. call onDraw.
+     */
+    circleDotIndicatorModifier.onDraw(context);
+    EXPECT_EQ(circleDotIndicatorModifier.axis_, Axis::VERTICAL);
+    EXPECT_EQ(circleDotIndicatorModifier.arcDirection_, SwiperArcDirection::SIX_CLOCK_DIRECTION);
+
+    /**
+     * @tc.steps: step5. set parameters.
+     */
+    circleDotIndicatorModifier.SetArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION);
+    circleDotIndicatorModifier.UpdateNormalToPressPaintProperty(itemHalfSizes, vectorBlackPointCenterX,
+                                                                vectorBlackPointRadius, {0.f, 0.f});
+
+    /**
+     * @tc.steps: step6. call onDraw.
+     */
+    circleDotIndicatorModifier.onDraw(context);
+    EXPECT_EQ(circleDotIndicatorModifier.arcDirection_, SwiperArcDirection::NINE_CLOCK_DIRECTION);
+}
+
+/**
+ * @tc.name: CircleDotPlayIndicatorAnimation001
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotPlayIndicatorAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.push_back(20.0f);
+    vectorBlackPointAngle.push_back(20.0f);
+    LinearVector<float> vectorBlackPointRadius;
+    vectorBlackPointRadius.emplace_back(2.5f);
+    vectorBlackPointRadius.emplace_back(2.5f);
+    std::pair<float, float> longPointCenterX = { 0.0f, 0.0f };
+    auto gestureState = GestureState::GESTURE_STATE_RELEASE_LEFT;
+
+    /**
+     * @tc.steps: step2. call PlayIndicatorAnimation.
+     */
+    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, vectorBlackPointRadius, longPointCenterX, gestureState);
+    longPointCenterX = { 1.0f, 1.0f };
+    modifier->PlayIndicatorAnimation(vectorBlackPointAngle, vectorBlackPointRadius, longPointCenterX, gestureState);
+    EXPECT_EQ(modifier->longPointLeftAnimEnd_, true);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorUpdateContentModifier001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorUpdateContentModifier001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<CircleDotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    EXPECT_FALSE(paintMethod->GetContentModifier(nullptr) == nullptr);
+    paintMethod->circleDotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->isLongPressed_ = true;
+
+    /**
+     * @tc.steps: step2. call UpdateContentModifier.
+     */
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    paintMethod->circleDotIndicatorModifier_->SetIsPressed(false);
+    paintMethod->isLongPressed_ = true;
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    paintMethod->isLongPressed_ = false;
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->isLongPressed_ = false;
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    paintMethod->circleDotIndicatorModifier_->SetIsPressed(true);
+    paintMethod->isLongPressed_ = false;
+    paintMethod->UpdateContentModifier(&paintWrapper);
+    EXPECT_EQ(paintMethod->circleDotIndicatorModifier_->axis_, Axis::HORIZONTAL);
+    EXPECT_EQ(paintMethod->circleDotIndicatorModifier_->arcDirection_, SwiperArcDirection::SIX_CLOCK_DIRECTION);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorPaintNormalIndicator001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod PaintNormalIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintNormalIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(500.f, 500.f));
+    auto paintProperty = AceType::MakeRefPtr<CircleDotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateContainerColor(Color::BLUE);
+    paintProperty->UpdateArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION);
+    paintProperty->UpdateColor(Color::RED);
+    paintProperty->UpdateSelectedColor(Color::GREEN);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->CalculateLongPointCenterAngle(&paintWrapper, false);
+    paintMethod->circleDotIndicatorModifier_->SetIsPressed(true);
+
+    /**
+     * @tc.steps: step2. call PaintNormalIndicator.
+     */
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_EQ(paintMethod->circleDotIndicatorModifier_->isPressed_, true);
+
+    paintMethod->circleDotIndicatorModifier_->SetIsPressed(false);
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->PaintNormalIndicator(&paintWrapper);
+    EXPECT_EQ(paintMethod->circleDotIndicatorModifier_->isPressed_, false);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorPaintUnselectedIndicator001
+ * @tc.desc: Test CircleDotIndicatorPaintUnselectedIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorPaintUnselectedIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.push_back(20.0f);
+    itemHalfSizes.push_back(20.0f);
+
+    RSCanvas canvas;
+    float itemAngle = -1.2f;
+    float itemRadius = 2.5f;
+    CircleDotIndicatorModifier::ContentProperty contentProperty;
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.push_back(20.0f);
+    vectorBlackPointAngle.push_back(20.0f);
+    contentProperty.vectorBlackPointAngle = vectorBlackPointAngle;
+    /**
+     * @tc.steps: step2. Call PaintUnselectedIndicator.
+     */
+    modifier->arcDirection_ = SwiperArcDirection::SIX_CLOCK_DIRECTION;
+    modifier->PaintUnselectedIndicator(
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
+    EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::SIX_CLOCK_DIRECTION);
+
+    modifier->arcDirection_ = SwiperArcDirection::THREE_CLOCK_DIRECTION;
+    modifier->PaintUnselectedIndicator(
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
+    EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::THREE_CLOCK_DIRECTION);
+
+    modifier->arcDirection_ = SwiperArcDirection::NINE_CLOCK_DIRECTION;
+    modifier->PaintUnselectedIndicator(
+        canvas, itemAngle, itemRadius, contentProperty, LinearColor(Color::TRANSPARENT));
+    EXPECT_EQ(modifier->arcDirection_, SwiperArcDirection::NINE_CLOCK_DIRECTION);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorCalculatePointAngle001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod CalculatePointAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorCalculatePointAngle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    paintMethod->itemCount_ = 1;
+    LinearVector<float> vectorBlackPointAngle;
+    vectorBlackPointAngle.push_back(20.0f);
+    vectorBlackPointAngle.push_back(20.0f);
+    paintMethod->vectorBlackPointAngle_ = vectorBlackPointAngle;
+    LinearVector<float> itemSizes;
+    itemSizes.emplace_back(20.f);
+    itemSizes.emplace_back(20.f);
+
+    /**
+     * @tc.steps: step2. Call CalculatePointAngle.
+     */
+    paintMethod->CalculatePointAngle(itemSizes, 0);
+    EXPECT_EQ(paintMethod->vectorBlackPointAngle_.size(), 1);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorGetHalfIndex001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod GetHalfIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetHalfIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<CircleDotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->itemCount_ = 2;
+
+    /**
+     * @tc.steps: step2. Call GetHalfIndex.
+     */
+    EXPECT_EQ(paintMethod->GetHalfIndex(), 0);
+    paintMethod->itemCount_ = 3;
+    EXPECT_EQ(paintMethod->GetHalfIndex(), 1);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorGetLongPointAngle001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod GetLongPointAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetLongPointAngle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    paintMethod->arcDirection_ = SwiperArcDirection::THREE_CLOCK_DIRECTION;
+    LinearVector<float> itemSizes;
+    itemSizes.emplace_back(20.f);
+    itemSizes.emplace_back(20.f);
+    int32_t indicatorStartIndex = 0;
+
+    /**
+     * @tc.steps: step2. Call GetLongPointAngle.
+     */
+    paintMethod->GetLongPointAngle(itemSizes, 0, indicatorStartIndex);
+    EXPECT_EQ(paintMethod->arcDirection_, SwiperArcDirection::THREE_CLOCK_DIRECTION);
+    paintMethod->arcDirection_ = SwiperArcDirection::NINE_CLOCK_DIRECTION;
+    paintMethod->GetLongPointAngle(itemSizes, 0, indicatorStartIndex);
+    EXPECT_EQ(paintMethod->arcDirection_, SwiperArcDirection::NINE_CLOCK_DIRECTION);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorGetBlackPointAngle001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod GetBlackPointAngle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetBlackPointAngle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    paintMethod->itemCount_ = 16;
+    LinearVector<float> itemSizes;
+    itemSizes.emplace_back(2.5f); // ITEM_SHRINK_RADIUS
+    itemSizes.emplace_back(2.5f); // SLECTED_ITEM_SHRINK_RADIUS
+    itemSizes.emplace_back(8.0f); // ONTAINER_SHRINK_RADIUS
+    itemSizes.emplace_back(5.0f); // ITEM_SHRINK_PADDING
+    itemSizes.emplace_back(7.0f); // SELECTED_ITEM_SHRINK_PADDING
+    itemSizes.emplace_back(4.0f); // ACTIVE_ITEM_SHRINK_ANGLE
+    itemSizes.emplace_back(4.5f); // ITEM_SHRINK_MINOR_PADDING
+    itemSizes.emplace_back(4.0f); // ITEM_SHRINK_MINI_PADDING
+
+    /**
+     * @tc.steps: step2. Call GetBlackPointAngle.
+     */
+    int32_t indicatorStartIndex = 0;
+    LinearVector<float> vectorBlackPointAngle = {};
+    vectorBlackPointAngle.resize(paintMethod->itemCount_);
+    for (int32_t i = 0; i < paintMethod->itemCount_; ++i) {
+        float offset = paintMethod->CalculateBlackPointRotateAngle(indicatorStartIndex, i);
+        vectorBlackPointAngle[i] = paintMethod->GetBlackPointAngle(itemSizes, i, 0, offset);
+    }
+    EXPECT_EQ(vectorBlackPointAngle[0], 35);
+    EXPECT_EQ(vectorBlackPointAngle[1], 28);
+    EXPECT_EQ(vectorBlackPointAngle[2], 23);
+    EXPECT_EQ(vectorBlackPointAngle[3], 18);
+    EXPECT_EQ(vectorBlackPointAngle[4], 13);
+    EXPECT_EQ(vectorBlackPointAngle[5], 8);
+    EXPECT_EQ(vectorBlackPointAngle[6], 3);
+    EXPECT_EQ(vectorBlackPointAngle[7], -2);
+    EXPECT_EQ(vectorBlackPointAngle[8], -7);
+    EXPECT_EQ(vectorBlackPointAngle[9], -12);
+    EXPECT_EQ(vectorBlackPointAngle[10], -17);
+    EXPECT_EQ(vectorBlackPointAngle[11], -22);
+    EXPECT_EQ(vectorBlackPointAngle[12], -27);
+    EXPECT_EQ(vectorBlackPointAngle[13], -32);
+    EXPECT_EQ(vectorBlackPointAngle[14], -37);
+    EXPECT_EQ(vectorBlackPointAngle[15], -40.5);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorGetIndex001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod GetIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    paintMethod->nextValidIndex_ = 1;
+    paintMethod->turnPageRate_ = 0.5f;
+
+    /**
+     * @tc.steps: step2. Call GetIndex.
+     */
+    EXPECT_EQ(paintMethod->GetIndex(2).first, paintMethod->currentIndexActual_);
+    paintMethod->nextValidIndex_ = -1;
+    EXPECT_EQ(paintMethod->GetIndex(0).first, 0);
+    paintMethod->turnPageRate_ = 0.0f;
+    EXPECT_EQ(paintMethod->GetIndex(-1).first, -1);
+    paintMethod->itemCount_ = 1;
+    EXPECT_EQ(paintMethod->GetIndex(0).first, 0);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorGetStartAndEndIndex001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod GetStartAndEndIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorGetStartAndEndIndex001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
+    RefPtr<CircleDotIndicatorModifier> modifier = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+    RefPtr<CircleDotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<CircleDotIndicatorPaintMethod>(modifier);
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+
+    /**
+     * @tc.steps: step2. Call GetStartAndEndIndex.
+     */
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(0).first, 0);
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_EXPAND_TO_LONG_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(0).first, 0);
+    paintMethod->nextValidIndex_ = 1;
+    paintMethod->turnPageRate_ = 0.5f;
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(-1).first, -1);
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    paintMethod->GetStartAndEndIndex(0);
+    paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    EXPECT_EQ(paintMethod->GetStartAndEndIndex(0).first, -1);
+}
+
+/**
+ * @tc.name: CircleDotIndicatorSetFunctions001
+ * @tc.desc: Test CircleDotIndicatorPaintMethod Set Functions
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorModifierTestNg, CircleDotIndicatorSetFunctions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    layoutProperty_->UpdateIndicatorType(SwiperIndicatorType::ARC_DOT);
+    auto indicatorpaintMethod = indicatorPattern->CreateCircleDotIndicatorPaintMethod(pattern_);
+    auto paintMethod = AceType::DynamicCast<CircleDotIndicatorPaintMethod>(indicatorPattern->CreateNodePaintMethod());
+
+    /**
+     * @tc.steps: step2. Call Set Functions.
+     */
+    indicatorpaintMethod->SetCurrentIndex(1);
+    EXPECT_EQ(indicatorpaintMethod->currentIndex_, 1);
+    indicatorpaintMethod->SetItemCount(1);
+    EXPECT_EQ(indicatorpaintMethod->itemCount_, 1);
+    paintMethod->SetAxis(Axis::HORIZONTAL);
+    EXPECT_EQ(paintMethod->GetAxis(), Axis::HORIZONTAL);
+    paintMethod->SetIsLongPressed(true);
+    EXPECT_EQ(paintMethod->isLongPressed_, true);
+    paintMethod->SetTurnPageRate(1.0f);
+    EXPECT_EQ(paintMethod->turnPageRate_, 1.0f);
+    paintMethod->SetGestureState(GestureState::GESTURE_STATE_RELEASE_LEFT);
+    EXPECT_EQ(paintMethod->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
+    paintMethod->SetTouchBottomTypeLoop(TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    EXPECT_EQ(paintMethod->touchBottomTypeLoop_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    paintMethod->SetMouseClickIndex(1);
+    EXPECT_EQ(paintMethod->mouseClickIndex_, 1);
+    paintMethod->SetPointAnimationStage(PointAnimationStage::STATE_EXPAND_TO_LONG_POINT);
+    EXPECT_EQ(paintMethod->pointAnimationStage_, PointAnimationStage::STATE_EXPAND_TO_LONG_POINT);
+    paintMethod->SetCurrentIndexActual(1);
+    EXPECT_EQ(paintMethod->currentIndexActual_, 1);
+    paintMethod->SetNextValidIndex(1);
+    EXPECT_EQ(paintMethod->nextValidIndex_, 1);
+}
 } // namespace OHOS::Ace::NG

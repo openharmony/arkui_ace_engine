@@ -749,6 +749,35 @@ ArkUINativeModuleValue XComponentBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue XComponentBridge::SetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enableTransparentLayer = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableTransparentLayer(
+            nativeNode, enableTransparentLayer);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue XComponentBridge::SetRenderFit(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();

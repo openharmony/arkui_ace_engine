@@ -17,7 +17,7 @@ const LayeredDrawableDescriptor = requireNapi('arkui.drawableDescriptor').Layere
 const TITLE_ICON_SIZE = '20vp';
 const TITLE_PADDING_START = '20vp';
 const TITLE_ELEMENT_MARGIN_HORIZONTAL = '12vp';
-const TITLE_TEXT_FONT_SIZE = '16fp';
+const TITLE_TEXT_FONT_SIZE = '16vp';
 const TITLE_TEXT_FONT_WEIGHT = '500px';
 const TITLE_ROW_HEIGHT = '37vp'
 export class Index extends ViewPU {
@@ -186,7 +186,7 @@ const c1 = '24vp';
 const d1 = '8vp';
 const e1 = '12vp';
 const f1 = '10vp';
-const g1 = '16fp';
+const g1 = '16vp';
 const h1 = 1000;
 const i1 = 2000;
 const j1 = 1000;
@@ -290,15 +290,15 @@ class a3 {
         this.d3 = l3;
     }
 }
-const colorMap = new Map([
-    [buttonNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
-    [buttonHoverBackgroundColor, new ColorGroup('#0C000000', '#26FFFFFF')],
-    [buttonHoverIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
-    [closeNormalIconFillColor, new ColorGroup('#182431', '#e5ffffff')],
-    [closeHoverBackgroundColor, new ColorGroup('#FA2A2D', '#E64548')],
-    [closeHoverIconFillColor, new ColorGroup('#ffffff', '#ffffff')],
-    [menuHoverColor, new ColorGroup('#19182431', '#19ffffff')],
-    [splitItemFillColor, new ColorGroup('#182431', '#e5ffffff')],
+const b3 = new Map([
+    [n2, new a3('#182431', '#e5ffffff')],
+    [o2, new a3('#0C000000', '#26FFFFFF')],
+    [q2, new a3('#182431', '#e5ffffff')],
+    [t2, new a3('#182431', '#e5ffffff')],
+    [u2, new a3('#FA2A2D', '#E64548')],
+    [v2, new a3('#ffffff', '#ffffff')],
+    [w2, new a3('#19182431', '#19ffffff')],
+    [z2, new a3('#182431', '#e5ffffff')],
 ]);
 class c3 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -306,73 +306,72 @@ class c3 extends ViewPU {
         if (typeof paramsLambda === "function") {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.f3 = new ObservedPropertySimplePU(0, this, "maxBtnTouchState");
-        this.g3 = new ObservedPropertyObjectPU(j2, this, "maximizeResource");
-        this.h3 = new ObservedPropertyObjectPU({
+        this.f3 = new ObservedPropertyObjectPU(j2, this, "maximizeResource");
+        this.g3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125829924,
             type: 20000
         }, this, "minimizeResource");
-        this.i3 = new ObservedPropertyObjectPU({
+        this.h3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125829917,
             type: 20000
         }, this, "closeResource");
-        this.j3 = new ObservedPropertyObjectPU({
+        this.i3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125830147,
             type: 20000
         }, this, "menuLeftResource");
-        this.l3 = new ObservedPropertyObjectPU({
+        this.j3 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125830148,
             type: 20000
         }, this, "menuRightResource");
-        this.m3 = new ObservedPropertyObjectPU(m2, this, "maximizeBackgroundColor");
-        this.n3 = new ObservedPropertyObjectPU(m2, this, "minimizeBackgroundColor");
-        this.q3 = new ObservedPropertyObjectPU(m2, this, "closeBackgroundColor");
-        this.r3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "maximizeFillColor");
-        this.s3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "minimizeFillColor");
-        this.t3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "closeFillColor");
-        this.u3 = new ObservedPropertySimplePU(1.0, this, "maximizeScale");
-        this.v3 = new ObservedPropertySimplePU(1.0, this, "minimizeScale");
-        this.w3 = new ObservedPropertySimplePU(1.0, this, "closeScale");
-        this.x3 = new ObservedPropertySimplePU(Visibility.Visible, this, "rowVisibility");
-        this.y3 = new ObservedPropertySimplePU(Visibility.Visible, this, "maximizeVisibility");
-        this.z3 = new ObservedPropertySimplePU(Visibility.Visible, this, "minimizeVisibility");
-        this.a4 = new ObservedPropertySimplePU(Visibility.Visible, this, "closeVisibility");
-        this.b4 = new ObservedPropertySimplePU(true, this, "closeStatus");
-        this.c4 = new ObservedPropertySimplePU(false, this, "isShowMenu");
-        this.d4 = new ObservedPropertyObjectPU({
+        this.l3 = new ObservedPropertyObjectPU(m2, this, "maximizeBackgroundColor");
+        this.m3 = new ObservedPropertyObjectPU(m2, this, "minimizeBackgroundColor");
+        this.n3 = new ObservedPropertyObjectPU(m2, this, "closeBackgroundColor");
+        this.q3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "maximizeFillColor");
+        this.r3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "minimizeFillColor");
+        this.s3 = new ObservedPropertyObjectPU(this.getResourceColor(n2), this, "closeFillColor");
+        this.t3 = new ObservedPropertySimplePU(1.0, this, "maximizeScale");
+        this.u3 = new ObservedPropertySimplePU(1.0, this, "minimizeScale");
+        this.v3 = new ObservedPropertySimplePU(1.0, this, "closeScale");
+        this.w3 = new ObservedPropertySimplePU(Visibility.Visible, this, "rowVisibility");
+        this.x3 = new ObservedPropertySimplePU(Visibility.Visible, this, "maximizeVisibility");
+        this.y3 = new ObservedPropertySimplePU(Visibility.Visible, this, "minimizeVisibility");
+        this.z3 = new ObservedPropertySimplePU(Visibility.Visible, this, "closeVisibility");
+        this.a4 = new ObservedPropertySimplePU(true, this, "closeStatus");
+        this.b4 = new ObservedPropertySimplePU(false, this, "isShowMenu");
+        this.c4 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125833961,
             type: 10003
         }, this, "leftSplitTitle");
-        this.e4 = new ObservedPropertyObjectPU({
+        this.d4 = new ObservedPropertyObjectPU({
             bundleName: '',
             moduleName: '',
             params: [],
             id: 125833962,
             type: 10003
         }, this, "rightSplitTitle");
-        this.f4 = new ObservedPropertyObjectPU(this.getResourceColor(z2), this, "splitFillColor");
-        this.g4 = new ObservedPropertyObjectPU(Color.Transparent, this, "leftSplitBackgroundColor");
-        this.h4 = new ObservedPropertyObjectPU(Color.Transparent, this, "rightSplitBackgroundColor");
-        this.i4 = new ObservedPropertySimplePU(1.0, this, "rowOpacity");
-        this.j4 = new ObservedPropertySimplePU('224vp', this, "menuWidth");
-        this.l4 = new ObservedPropertySimplePU(12, this, "buttonSpacing");
-        this.m4 = new ObservedPropertySimplePU(28, this, "buttonSize");
-        this.n4 = new ObservedPropertySimplePU(20, this, "buttonRightOffset");
+        this.e4 = new ObservedPropertyObjectPU(this.getResourceColor(z2), this, "splitFillColor");
+        this.f4 = new ObservedPropertyObjectPU(Color.Transparent, this, "leftSplitBackgroundColor");
+        this.g4 = new ObservedPropertyObjectPU(Color.Transparent, this, "rightSplitBackgroundColor");
+        this.h4 = new ObservedPropertySimplePU(1.0, this, "rowOpacity");
+        this.i4 = new ObservedPropertySimplePU('224vp', this, "menuWidth");
+        this.j4 = new ObservedPropertySimplePU(12, this, "buttonSpacing");
+        this.l4 = new ObservedPropertySimplePU(28, this, "buttonSize");
+        this.m4 = new ObservedPropertySimplePU(20, this, "buttonRightOffset");
         this.colorConfigurationLocked = false;
         this.isFocused = true;
         this.isDark = false;
@@ -384,9 +383,6 @@ class c3 extends ViewPU {
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
-        if (params.maxBtnTouchState !== undefined) {
-            this.maxBtnTouchState = params.maxBtnTouchState;
-        }
         if (params.maximizeResource !== undefined) {
             this.maximizeResource = params.maximizeResource;
         }
@@ -532,7 +528,6 @@ class c3 extends ViewPU {
         this.j4.purgeDependencyOnElmtId(rmElmtId);
         this.l4.purgeDependencyOnElmtId(rmElmtId);
         this.m4.purgeDependencyOnElmtId(rmElmtId);
-        this.n4.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.f3.aboutToBeDeleted();
@@ -565,195 +560,188 @@ class c3 extends ViewPU {
         this.j4.aboutToBeDeleted();
         this.l4.aboutToBeDeleted();
         this.m4.aboutToBeDeleted();
-        this.n4.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
-    get maxBtnTouchState() {
+    get maximizeResource() {
         return this.f3.get();
     }
-    set maxBtnTouchState(newValue) {
+    set maximizeResource(newValue) {
         this.f3.set(newValue);
     }
-    get maximizeResource() {
+    get minimizeResource() {
         return this.g3.get();
     }
-    set maximizeResource(newValue) {
+    set minimizeResource(newValue) {
         this.g3.set(newValue);
     }
-    get minimizeResource() {
+    get closeResource() {
         return this.h3.get();
     }
-    set minimizeResource(newValue) {
+    set closeResource(newValue) {
         this.h3.set(newValue);
     }
-    get closeResource() {
+    get menuLeftResource() {
         return this.i3.get();
     }
-    set closeResource(newValue) {
+    set menuLeftResource(newValue) {
         this.i3.set(newValue);
     }
-    get menuLeftResource() {
+    get menuRightResource() {
         return this.j3.get();
     }
-    set menuLeftResource(newValue) {
+    set menuRightResource(newValue) {
         this.j3.set(newValue);
     }
-    get menuRightResource() {
+    get maximizeBackgroundColor() {
         return this.l3.get();
     }
-    set menuRightResource(newValue) {
+    set maximizeBackgroundColor(newValue) {
         this.l3.set(newValue);
     }
-    get maximizeBackgroundColor() {
+    get minimizeBackgroundColor() {
         return this.m3.get();
     }
-    set maximizeBackgroundColor(newValue) {
+    set minimizeBackgroundColor(newValue) {
         this.m3.set(newValue);
     }
-    get minimizeBackgroundColor() {
+    get closeBackgroundColor() {
         return this.n3.get();
     }
-    set minimizeBackgroundColor(newValue) {
+    set closeBackgroundColor(newValue) {
         this.n3.set(newValue);
     }
-    get closeBackgroundColor() {
+    get maximizeFillColor() {
         return this.q3.get();
     }
-    set closeBackgroundColor(newValue) {
+    set maximizeFillColor(newValue) {
         this.q3.set(newValue);
     }
-    get maximizeFillColor() {
+    get minimizeFillColor() {
         return this.r3.get();
     }
-    set maximizeFillColor(newValue) {
+    set minimizeFillColor(newValue) {
         this.r3.set(newValue);
     }
-    get minimizeFillColor() {
+    get closeFillColor() {
         return this.s3.get();
     }
-    set minimizeFillColor(newValue) {
+    set closeFillColor(newValue) {
         this.s3.set(newValue);
     }
-    get closeFillColor() {
+    get maximizeScale() {
         return this.t3.get();
     }
-    set closeFillColor(newValue) {
+    set maximizeScale(newValue) {
         this.t3.set(newValue);
     }
-    get maximizeScale() {
+    get minimizeScale() {
         return this.u3.get();
     }
-    set maximizeScale(newValue) {
+    set minimizeScale(newValue) {
         this.u3.set(newValue);
     }
-    get minimizeScale() {
+    get closeScale() {
         return this.v3.get();
     }
-    set minimizeScale(newValue) {
+    set closeScale(newValue) {
         this.v3.set(newValue);
     }
-    get closeScale() {
+    get rowVisibility() {
         return this.w3.get();
     }
-    set closeScale(newValue) {
+    set rowVisibility(newValue) {
         this.w3.set(newValue);
     }
-    get rowVisibility() {
+    get maximizeVisibility() {
         return this.x3.get();
     }
-    set rowVisibility(newValue) {
+    set maximizeVisibility(newValue) {
         this.x3.set(newValue);
     }
-    get maximizeVisibility() {
+    get minimizeVisibility() {
         return this.y3.get();
     }
-    set maximizeVisibility(newValue) {
+    set minimizeVisibility(newValue) {
         this.y3.set(newValue);
     }
-    get minimizeVisibility() {
+    get closeVisibility() {
         return this.z3.get();
     }
-    set minimizeVisibility(newValue) {
+    set closeVisibility(newValue) {
         this.z3.set(newValue);
     }
-    get closeVisibility() {
+    get closeStatus() {
         return this.a4.get();
     }
-    set closeVisibility(newValue) {
+    set closeStatus(newValue) {
         this.a4.set(newValue);
     }
-    get closeStatus() {
+    get isShowMenu() {
         return this.b4.get();
     }
-    set closeStatus(newValue) {
+    set isShowMenu(newValue) {
         this.b4.set(newValue);
     }
-    get isShowMenu() {
+    get leftSplitTitle() {
         return this.c4.get();
     }
-    set isShowMenu(newValue) {
+    set leftSplitTitle(newValue) {
         this.c4.set(newValue);
     }
-    get leftSplitTitle() {
+    get rightSplitTitle() {
         return this.d4.get();
     }
-    set leftSplitTitle(newValue) {
+    set rightSplitTitle(newValue) {
         this.d4.set(newValue);
     }
-    get rightSplitTitle() {
+    get splitFillColor() {
         return this.e4.get();
     }
-    set rightSplitTitle(newValue) {
+    set splitFillColor(newValue) {
         this.e4.set(newValue);
     }
-    get splitFillColor() {
+    get leftSplitBackgroundColor() {
         return this.f4.get();
     }
-    set splitFillColor(newValue) {
+    set leftSplitBackgroundColor(newValue) {
         this.f4.set(newValue);
     }
-    get leftSplitBackgroundColor() {
+    get rightSplitBackgroundColor() {
         return this.g4.get();
     }
-    set leftSplitBackgroundColor(newValue) {
+    set rightSplitBackgroundColor(newValue) {
         this.g4.set(newValue);
     }
-    get rightSplitBackgroundColor() {
+    get rowOpacity() {
         return this.h4.get();
     }
-    set rightSplitBackgroundColor(newValue) {
+    set rowOpacity(newValue) {
         this.h4.set(newValue);
     }
-    get rowOpacity() {
+    get menuWidth() {
         return this.i4.get();
     }
-    set rowOpacity(newValue) {
+    set menuWidth(newValue) {
         this.i4.set(newValue);
     }
-    get menuWidth() {
+    get buttonSpacing() {
         return this.j4.get();
     }
-    set menuWidth(newValue) {
+    set buttonSpacing(newValue) {
         this.j4.set(newValue);
     }
-    get buttonSpacing() {
+    get buttonSize() {
         return this.l4.get();
     }
-    set buttonSpacing(newValue) {
+    set buttonSize(newValue) {
         this.l4.set(newValue);
     }
-    get buttonSize() {
+    get buttonRightOffset() {
         return this.m4.get();
     }
-    set buttonSize(newValue) {
-        this.m4.set(newValue);
-    }
-    get buttonRightOffset() {
-        return this.n4.get();
-    }
     set buttonRightOffset(newValue) {
-        this.n4.set(newValue);
+        this.m4.set(newValue);
     }
     onWindowFocused() {
         this.rowOpacity = 1.0;
@@ -1139,10 +1127,6 @@ class c3 extends ViewPU {
             GestureGroup.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
-                if (isHover && this.maxBtnTouchState == 2) {
-                    isHover = false;
-                    this.maxBtnTouchState = 0;
-                }
                 this.onHoverMaximizeButton(isHover);
                 if (isHover) {
                     this.onMenuWidthChange();
@@ -1159,26 +1143,6 @@ class c3 extends ViewPU {
                         this.maximizeScale = 1.0;
                     }
                 });
-            });
-            Button.onTouch((event) => {
-                if (event) {
-                    if (event.type === TouchType.Move) {
-                        this.maxBtnTouchState = 0;
-                    }
-                    if (event.type === TouchType.Down) {
-                        this.maxBtnTouchState = 1;
-                    }
-                    if (event.type === TouchType.Up) {
-                        this.maxBtnTouchState = 2;
-                    }
-                }
-            });
-            Button.onMouse((event) => {
-                if (event) {
-                    if (this.maxBtnTouchState == 0) {
-                        this.onHoverMaximizeButton(true);
-                    }
-                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1216,10 +1180,6 @@ class c3 extends ViewPU {
             TapGesture.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
-                if (isHover && this.maxBtnTouchState == 2) {
-                    isHover = false;
-                    this.maxBtnTouchState = 0;
-                }
                 this.onHoverMinimizeButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1229,13 +1189,6 @@ class c3 extends ViewPU {
                         this.minimizeScale = 1.0;
                     }
                 });
-            });
-            Button.onMouse((event) => {
-                if (event) {
-                    if (this.maxBtnTouchState == 0) {
-                        this.onHoverMinimizeButton(true);
-                    }
-                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1272,10 +1225,6 @@ class c3 extends ViewPU {
             TapGesture.pop();
             Gesture.pop();
             Button.onHover((isHover, event) => {
-                if (isHover && this.maxBtnTouchState == 2) {
-                    isHover = false;
-                    this.maxBtnTouchState = 0;
-                }
                 this.onHoverCloseButton(isHover);
                 this.getUIContext()?.animateTo({ duration: 0 }, () => {
                     if (isHover) {
@@ -1285,13 +1234,6 @@ class c3 extends ViewPU {
                         this.closeScale = 1.0;
                     }
                 });
-            });
-            Button.onMouse((event) => {
-                if (event) {
-                    if (this.maxBtnTouchState == 0) {
-                        this.onHoverCloseButton(true);
-                    }
-                }
             });
         }, Button);
         this.observeComponentCreation2((elmtId, isInitialRender) => {

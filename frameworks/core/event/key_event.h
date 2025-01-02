@@ -678,6 +678,7 @@ using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnKeyEventDispatchFunc = std::function<bool(KeyEventInfo&)>;
 using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

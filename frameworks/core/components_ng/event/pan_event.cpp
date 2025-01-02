@@ -111,7 +111,7 @@ void PanEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, con
     };
     panRecognizer_->SetOnActionEnd(actionEnd);
 
-    auto actionCancel = [weak = WeakClaim(this)]() {
+    auto actionCancel = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto actuator = weak.Upgrade();
         CHECK_NULL_VOID(actuator);
         // In the actionCancel callback, actuator->panEvents_ may be modified

@@ -152,6 +152,8 @@ public:
 
     double ShrinkHeight(double reduceSize) override;
 
+    bool DidExceedMaxLines(std::optional<SizeF>& currentTextSize);
+
     bool GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize);
 
     void DoMeasure(bool isVertical, float minWidth, float leftSpace);
@@ -171,6 +173,8 @@ private:
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
         const Dimension& fontSize, FontWeight fontWeight, float constraintWidth);
     void MeasureForWidth(float width);
+    float GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height);
+    void UpdateFontSize();
 
     bool isExist_ = false;
     Dimension minFontSize_;

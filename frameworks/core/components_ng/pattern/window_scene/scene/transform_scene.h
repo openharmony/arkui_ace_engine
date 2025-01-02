@@ -28,7 +28,9 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
+        return RenderContext::ContextParam {
+            .type = RenderContext::ContextType::EXTERNAL,
+            .surfaceName = std::nullopt};
     }
 
     uint32_t GetWindowPatternType() const override;

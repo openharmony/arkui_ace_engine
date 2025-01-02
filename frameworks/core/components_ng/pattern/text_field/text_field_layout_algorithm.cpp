@@ -66,6 +66,10 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
         showPlaceHolder = true;
     }
+
+    if (textFieldLayoutProperty->HasEllipsisMode()) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
+    }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -207,9 +211,11 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
 
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float maxFontScale = pattern->GetMaxFontSizeScale().has_value() ?
-            pattern->GetMaxFontSizeScale().value() : pipeline->GetMaxAppFontScale();
+        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        float maxFontScale = textFieldLayoutProperty->HasMaxFontScale() ?
+            textFieldLayoutProperty->GetMaxFontScale().value() : pipeline->GetMaxAppFontScale();
         float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
+        indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -652,6 +658,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize
@@ -692,6 +699,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize };
@@ -1061,7 +1069,6 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>
             textStyle.SetLineHeight(
                 Dimension(heightValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale())));
         }
-        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
     }
 }
 
@@ -1102,6 +1109,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
     UpdateTextStyleLineHeight(frameNode, layoutProperty, textStyle);
+    if (layoutProperty->HasHalfLeading()) {
+        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
+    }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
     }
@@ -1138,7 +1148,9 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
                 Dimension(heightValue.ConvertToPxDistribute(placeholderTextStyle.GetMinFontScale(),
                     placeholderTextStyle.GetMaxFontScale())));
         }
-        placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
+    }
+    if (layoutProperty->HasHalfLeading()) {
+        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
     }
     if (layoutProperty->HasMaxFontScale()) {
         placeholderTextStyle.SetMaxFontScale(layoutProperty->GetMaxFontScale().value());
