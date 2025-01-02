@@ -29,6 +29,7 @@ public:
     using NormalCallback = std::function<void(std::shared_ptr<Media::PixelMap>)>;
 
     static void Get(const std::string& componentId, JsCallback&& callback, const SnapshotOptions& options);
+    static void GetByUniqueId(int32_t uniqueId, JsCallback&& callback, const SnapshotOptions& options);
     // add delay to ensure Rosen has finished rendering
     static void Create(
         const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const SnapshotParam& param,
@@ -36,6 +37,8 @@ public:
     static void GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback);
 
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(const std::string& componentId,
+        const SnapshotOptions& options);
+    static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncByUniqueId(int32_t uniqueId,
         const SnapshotOptions& options);
 
     // create pixelMap in sync, this method only for drag.
