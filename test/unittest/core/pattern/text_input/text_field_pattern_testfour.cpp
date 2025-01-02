@@ -15,9 +15,6 @@
 
 #include "text_input_base.h"
 
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace

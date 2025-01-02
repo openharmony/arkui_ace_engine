@@ -42,6 +42,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_BUTTON,
     THEME_PATTERN_CAMERA,
     THEME_PATTERN_LIST_ITEM,
+    THEME_PATTERN_ARC_LIST,
+    THEME_PATTERN_ARC_LIST_ITEM,
     THEME_PATTERN_PICKER,
     THEME_PATTERN_PROGRESS,
     THEME_PATTERN_SELECT,
@@ -294,6 +296,12 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
         auto state = manager->GetPatternByName(patternTag.c_str(), attrMap);
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternTag.c_str());
+            state = manager->GetPatternByName(patternName.c_str(), attrMap);
+            if (state != Global::Resource::SUCCESS) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+            } else if (attrMap.empty()) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
+            }
         } else if (attrMap.empty()) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternTag.c_str());
         }
@@ -530,7 +538,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
         }
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;
@@ -548,7 +556,7 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string
             resName.c_str(), state);
     }
 
-    std::vector<uint32_t> result;
+    std::vector<uint32_t> result(intVectorResult.size());
     std::transform(
         intVectorResult.begin(), intVectorResult.end(), result.begin(), [](int x) { return static_cast<uint32_t>(x); });
     return result;

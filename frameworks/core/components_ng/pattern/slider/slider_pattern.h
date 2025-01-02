@@ -184,6 +184,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
 
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
@@ -217,8 +219,55 @@ private:
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
 #ifdef SUPPORT_DIGITAL_CROWN
-    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleCrownEvent(const CrownEvent& event);
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
+
+        auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->HandleCrownEvent(event);
+            return true;
+        };
+        focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+    }
+    void HandleCrownEvent(const CrownEvent& event)
+    {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+            "slider HandleCrownEvent event.action %{public}d event.degree %{public}f",
+            event.action, event.degree);
+        double mainDelta = GetCrownRotatePx(event);
+        switch (event.action) {
+            case CrownAction::BEGIN:
+                crownMovingLength_ = valueRatio_ * sliderLength_;
+                crownEventNum_ = 0;
+                reachBoundary_ = false;
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Begin);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::UPDATE:
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Moving);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::END:
+            default:
+                bubbleFlag_ = false;
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::End);
+                CloseTranslateAnimation();
+                break;
+        }
+    }
     double GetCrownRotatePx(const CrownEvent& event) const;
     void HandleCrownAction(double mainDelta);
     void StartVibrateFeedback();

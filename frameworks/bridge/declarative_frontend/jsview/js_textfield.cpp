@@ -1804,6 +1804,16 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    TextFieldModel::GetInstance()->SetHalfLeading(halfLeading);
+}
+
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -1979,5 +1989,14 @@ void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
     if (index < ELLIPSIS_MODALS.size()) {
         TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
     }
+}
+
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
 }
 } // namespace OHOS::Ace::Framework

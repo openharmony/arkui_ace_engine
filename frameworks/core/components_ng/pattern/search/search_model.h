@@ -80,6 +80,7 @@ public:
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
     virtual void SetLineHeight(const Dimension& value) {};
+    virtual void SetHalfLeading(bool value) {};
     virtual void SetAdaptMinFontSize(const Dimension& value) {};
     virtual void SetAdaptMaxFontSize(const Dimension& value) {};
     virtual void SetTextDecoration(Ace::TextDecoration value) {};
@@ -103,6 +104,7 @@ public:
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

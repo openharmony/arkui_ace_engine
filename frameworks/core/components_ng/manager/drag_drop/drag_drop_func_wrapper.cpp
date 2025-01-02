@@ -94,7 +94,7 @@ void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAct
             InteractionInterface::GetInstance()->StopDrag(dropResult);
             InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragStop");
+        TaskExecutor::TaskType::UI, "ArkUIDragStop", PriorityType::VIP);
 }
 
 bool ConfirmCurPointerEventInfo(
@@ -667,7 +667,7 @@ OffsetF DragDropFuncWrapper::GetFrameNodeOffsetToWindow(const RefPtr<FrameNode>&
 
 void DragDropFuncWrapper::ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event)
 {
-    event.rawPointerEvent = touchPoint.pointerEvent;
+    event.rawPointerEvent = touchPoint.GetTouchEventPointerEvent();
     event.pointerEventId = touchPoint.touchEventId;
     event.pointerId = touchPoint.id;
     event.windowX = touchPoint.x;

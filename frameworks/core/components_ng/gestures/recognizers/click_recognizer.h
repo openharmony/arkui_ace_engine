@@ -130,6 +130,7 @@ private:
     bool IsFormRenderClickRejected(const TouchEvent& event);
     void TriggerClickAccepted(const TouchEvent& event);
     OnAccessibilityEventFunc GetOnAccessibilityEventFunc();
+    void RecordClickEventIfNeed(const GestureEvent& info) const;
 
     int32_t count_ = 1;
     double distanceThreshold_ = std::numeric_limits<double>::infinity();

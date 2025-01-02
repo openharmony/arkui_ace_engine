@@ -455,7 +455,11 @@ void CalendarPattern::UpdateTitleNode()
     CHECK_NULL_VOID(theme);
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();
+#ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+#endif
         textLayoutProperty->UpdateFontSize(fontSize);
     } else {
         textLayoutProperty->UpdateMaxLines(2);

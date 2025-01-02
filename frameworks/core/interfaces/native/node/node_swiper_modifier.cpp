@@ -79,6 +79,7 @@ constexpr float ANIMATION_INFO_DEFAULT = 0.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 const int32_t ERROR_INT_CODE = -1;
 constexpr float ZERO_F = 0.0f;
+constexpr bool DEFAULT_STOP_WHEN_TOUCHED = true;
 
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
@@ -735,6 +736,25 @@ void ResetSwiperAutoPlay(ArkUINodeHandle node)
     SwiperModelNG::SetAutoPlay(frameNode, DEFAULT_AUTO_PLAY);
 }
 
+void SetSwiperStopWhenTouched(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    swiperAutoPlayOptions.stopWhenTouched = stopWhenTouched;
+    SwiperModelNG::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
+}
+
+void ResetSwiperStopWhenTouched(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    swiperAutoPlayOptions.stopWhenTouched = DEFAULT_STOP_WHEN_TOUCHED;
+    SwiperModelNG::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
+}
+
 void SetSwiperIndex(ArkUINodeHandle node, ArkUI_Int32 index)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -834,6 +854,13 @@ ArkUI_Int32 GetSwiperAutoPlay(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetAutoPlay(frameNode));
+}
+
+ArkUI_Int32 GetSwiperStopWhenTouched(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetAutoPlayOptions(frameNode).stopWhenTouched);
 }
 
 ArkUI_Int32 GetSwiperIndex(ArkUINodeHandle node)
@@ -1215,6 +1242,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .resetSwiperInterval = ResetSwiperInterval,
         .setSwiperAutoPlay = SetSwiperAutoPlay,
         .resetSwiperAutoPlay = ResetSwiperAutoPlay,
+        .setSwiperStopWhenTouched = SetSwiperStopWhenTouched,
+        .resetSwiperStopWhenTouched = ResetSwiperStopWhenTouched,
         .setSwiperIndex = SetSwiperIndex,
         .resetSwiperIndex = ResetSwiperIndex,
         .setSwiperIndicator = SetSwiperIndicator,
@@ -1225,6 +1254,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .resetSwiperEnabled = ResetSwiperEnabled,
         .getSwiperLoop = GetSwiperLoop,
         .getSwiperAutoPlay = GetSwiperAutoPlay,
+        .getSwiperStopWhenTouched = GetSwiperStopWhenTouched,
         .getSwiperIndex = GetSwiperIndex,
         .getSwiperVertical = GetSwiperVertical,
         .getSwiperDuration = GetSwiperDuration,
@@ -1312,6 +1342,8 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .resetSwiperInterval = ResetSwiperInterval,
         .setSwiperAutoPlay = SetSwiperAutoPlay,
         .resetSwiperAutoPlay = ResetSwiperAutoPlay,
+        .setSwiperStopWhenTouched = SetSwiperStopWhenTouched,
+        .resetSwiperStopWhenTouched = ResetSwiperStopWhenTouched,
         .setSwiperIndex = SetSwiperIndex,
         .resetSwiperIndex = ResetSwiperIndex,
         .setSwiperIndicator = SetSwiperIndicator,
@@ -1322,6 +1354,7 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .resetSwiperEnabled = ResetSwiperEnabled,
         .getSwiperLoop = GetSwiperLoop,
         .getSwiperAutoPlay = GetSwiperAutoPlay,
+        .getSwiperStopWhenTouched = GetSwiperStopWhenTouched,
         .getSwiperIndex = GetSwiperIndex,
         .getSwiperVertical = GetSwiperVertical,
         .getSwiperDuration = GetSwiperDuration,

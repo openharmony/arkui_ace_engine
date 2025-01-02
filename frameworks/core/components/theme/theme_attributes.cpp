@@ -49,6 +49,8 @@ const char THEME_PATTERN_ICON[] = "icon_pattern";
 const char THEME_PATTERN_IMAGE[] = "image_pattern";
 const char THEME_PATTERN_LIST[] = "list_pattern";
 const char THEME_PATTERN_LIST_ITEM[] = "list_item_pattern";
+const char THEME_PATTERN_ARC_LIST[] = "arc_list_pattern";
+const char THEME_PATTERN_ARC_LIST_ITEM[] = "arc_list_item_pattern";
 const char THEME_PATTERN_MARQUEE[] = "marquee_pattern";
 const char THEME_PATTERN_NAVIGATION_BAR[] = "navigation_bar_pattern";
 const char THEME_PATTERN_PICKER[] = "picker_pattern";
@@ -79,6 +81,7 @@ const char THEME_PATTERN_PATTERN_LOCK[] = "pattern_lock_pattern";
 const char THEME_PATTERN_GAUGE[] = "gauge_pattern";
 const char THEME_PATTERN_SHEET[] = "sheet_pattern";
 const char THEME_PATTERN_AGING_ADAPATION_DIALOG[] = "aging_adapation_dialog_pattern";
+const char THEME_PATTERN_LINEAR_INDICATOR[] = "linear_indicator_pattern";
 
 const char THEME_BLUR_STYLE_COMMON[] = "blur_style_common";
 const char THEME_PATTERN_SHADOW[] = "shadow_pattern";

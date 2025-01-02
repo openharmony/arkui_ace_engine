@@ -495,6 +495,32 @@ HWTEST_F(OverlayManagerToastTestNg, ToastTest010, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToastTest011
+ * @tc.desc: Test ShowToast UpdateToastAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerToastTestNg, ToastTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. ready toastInfo and update hoverModeArea enableHoverMode.
+     */
+    auto toastInfo =
+        NG::ToastInfo { .message = MESSAGE, .duration = DURATION, .bottom = BOTTOMSTRING, .isRightToLeft = true };
+    toastInfo.showMode = ToastShowMode::TOP_MOST;
+    /**
+     * @tc.steps: step2. create ToastNode toastPattern.
+     */
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto toastPattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(toastPattern, nullptr);
+    auto layoutAlgorithm = toastPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    toastPattern->OnColorConfigurationUpdate();
+    EXPECT_FALSE(toastPattern->IsDefaultToast());
+}
+
+/**
  * @tc.name: ToastDumpInfoTest001
  * @tc.desc: Test Toast DumpInfo.
  * @tc.type: FUNC

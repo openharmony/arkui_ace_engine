@@ -39,10 +39,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
-                                static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+constexpr uint16_t PIXEL_ROUND = static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END) |
+                                static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
 constexpr uint32_t DEFAULT_RENDERING_STRATEGY = 2;
 const auto MASK_COUNT = 2;
 }
@@ -183,7 +183,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto padding = tabContentPattern->GetPadding();
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabLayoutProperty);
-    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto tabBarLayoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(tabBarFrameNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto tabsDirection = tabLayoutProperty->GetNonAutoLayoutDirection();
+    auto tabBarDirection = tabBarLayoutProperty->GetLayoutDirection();
+    auto isRTL = tabBarDirection == TextDirection::RTL ||
+             (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
     if (isRTL && tabContentPattern->GetUseLocalizedPadding()) {
         PaddingProperty paddingRtl;
         paddingRtl.left = padding.right;
@@ -312,13 +317,15 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->UpdateInspectorId(id);
     } else {
         auto tabBarItemPadding = tabTheme->GetSubTabItemPadding();
-        layoutProperty->UpdatePadding({ CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding),
-            CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
+        auto subTabItemHorizontalPadding_ = tabTheme->GetSubTabItemHorizontalPadding();
+        layoutProperty->UpdatePadding({ CalcLength(subTabItemHorizontalPadding_),
+            CalcLength(subTabItemHorizontalPadding_), CalcLength(tabBarItemPadding),
+            CalcLength(tabBarItemPadding), {}, {} });
     }
 
     bool isFrameNode = tabBarStyle == TabBarStyle::SUBTABBATSTYLE && tabContentPattern->HasSubTabBarStyleNode();
     if (isFrameNode) {
-        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
+        tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::SUB_COMPONENT_CONTENT);
     } else {
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::NORMAL);
     }
@@ -382,8 +389,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {
@@ -655,6 +660,9 @@ void TabContentModelNG::UpdateLabelStyle(const LabelStyle& labelStyle, RefPtr<Te
     }
     if (labelStyle.textOverflow.has_value()) {
         textLayoutProperty->UpdateTextOverflow(labelStyle.textOverflow.value());
+        if (labelStyle.textOverflow.value() == TextOverflow::MARQUEE) {
+            textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
+        }
     }
     if (labelStyle.maxLines.has_value()) {
         textLayoutProperty->UpdateMaxLines(labelStyle.maxLines.value());

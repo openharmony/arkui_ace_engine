@@ -86,6 +86,7 @@ void TextFieldModelNG::CreateNode(
     CHECK_NULL_VOID(textFieldTheme);
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
+    pattern->SetHoverPressBgColorEnabled(textFieldTheme->GetHoverAndPressBgColorEnabled());
     SetCaretColor(textFieldTheme->GetCursorColor());
     CaretStyle caretStyle;
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
@@ -455,6 +456,16 @@ void TextFieldModelNG::SetMinFontScale(const float value)
 void TextFieldModelNG::SetMaxFontScale(const float value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value);
+}
+
+void TextFieldModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void TextFieldModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, value, frameNode);
 }
 
 void TextFieldModelNG::SetInputFilter(const std::string& value,
@@ -912,6 +923,11 @@ Dimension TextFieldModelNG::GetLetterSpacing(FrameNode* frameNode)
 void TextFieldModelNG::SetLineHeight(const Dimension& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value);
+}
+
+void TextFieldModelNG::SetHalfLeading(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value);
 }
 
 void TextFieldModelNG::SetLineSpacing(const Dimension& value)
@@ -1702,6 +1718,11 @@ void TextFieldModelNG::SetLineHeight(FrameNode* frameNode, const Dimension& valu
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineHeight, value, frameNode);
 }
 
+void TextFieldModelNG::SetHalfLeading(FrameNode* frameNode, const bool& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, HalfLeading, value, frameNode);
+}
+
 void TextFieldModelNG::SetLineSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, LineSpacing, value, frameNode);
@@ -2202,5 +2223,15 @@ void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
+}
+
+void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
+}
+
+void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
 }
 } // namespace OHOS::Ace::NG

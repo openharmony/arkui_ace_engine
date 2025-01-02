@@ -207,8 +207,8 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     };
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
-        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     dragEventActuator->ReplaceDragEvent(dragEvent);
     dragEventActuator->SetCustomDragEvent(dragEvent);
     EXPECT_NE(dragEventActuator->userCallback_, nullptr);
@@ -258,7 +258,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 
     /**
@@ -274,9 +274,9 @@ HWTEST_F(DragEventTestNg, DragEventActuatorOnCollectTouchTargetTest003, TestSize
     (*(dragEventActuator->panRecognizer_->onActionStart_))(info);
     (*(dragEventActuator->panRecognizer_->onActionUpdate_))(info);
     (*(dragEventActuator->panRecognizer_->onActionEnd_))(info);
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
-        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE; });
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE; });
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 
@@ -301,7 +301,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg001, TestSize.Level1)
     dragEventActuator->StartDragTaskForWeb(GestureEvent());
 
     dragEventActuator->CancelDragForWeb();
-    auto actionCancel = []() {};
+    auto actionCancel = [](GestureEvent&) {};
     dragEventActuator->actionCancel_ = actionCancel;
     dragEventActuator->CancelDragForWeb();
 
@@ -739,8 +739,8 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     frameNode->GetOrCreateFocusHub();
     dragEventActuator->OnCollectTouchTarget(
         COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventNoParameter>(
-        [&unknownPropertyValue]() { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
+    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
+        [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = GESTURE_EVENT_PROPERTY_VALUE; });
     EXPECT_NE(dragEventActuator->panRecognizer_->onActionCancel_, nullptr);
     /**
      * @tc.steps: step4. Invoke onActionCancel callback, when gestureHub->GetTextDraggable() is true.
@@ -751,7 +751,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
     gestureEventHub->SetTextDraggable(true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     /**
      * @tc.steps: step5. Invoke onActionCancel callback, when gestureHub->GetTextDraggable() is true.
@@ -760,7 +760,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     SystemProperties::debugEnabled_ = false;
     gestureEventHub->SetIsTextDraggable(true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     /**
      * @tc.steps: step6. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
@@ -769,7 +769,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
     eventHub->AttachHost(nullptr);
     EXPECT_EQ(dragEventActuator->GetIsBindOverlayValue(dragEventActuator), true);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     /**
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
@@ -777,12 +777,12 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
      */
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 
     gestureEventHub->SetTextDraggable(false);
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))();
+    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 }
 

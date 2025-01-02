@@ -139,6 +139,11 @@ public:
         isScrollable_ = isScrollable;
     }
 
+    void SetNavDestinationShow(bool isNavDestinationShow)
+    {
+        isNavDestinationShow_ = isNavDestinationShow;
+    }
+
 private:
     Offset GetHoverOffset(const Size& size) const;
     void CheckMainModeNearEqual();
@@ -164,6 +169,7 @@ private:
     PositionMode positionMode_ = PositionMode::RIGHT;
 
     bool isScrollable_ = true;
+    bool isNavDestinationShow_;
 };
 } // namespace OHOS::Ace::NG
 

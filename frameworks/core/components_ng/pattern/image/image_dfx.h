@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
         int64_t accessibilityId_ = -1;
         std::string imageSrc_;
         std::string borderRadiusValue_;
+        bool isTrimMemRecycle_ = false;
 
         // Used in tracing functions, does not include image source information (sensitive data)
         std::string ToStringWithoutSrc() const

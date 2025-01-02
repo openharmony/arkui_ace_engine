@@ -91,6 +91,10 @@ typedef enum {
     ARKUI_NODE_RADIO = 18,
     /** Frame-by-frame animation component. */
     ARKUI_NODE_IMAGE_ANIMATOR = 19,
+    /** Check box group.
+     *  @since 16
+     */
+    ARKUI_NODE_CHECKBOX_GROUP = 21,
     /** Stack container. */
     ARKUI_NODE_STACK = MAX_NODE_SCOPE_NUM,
     /** Swiper. */
@@ -2058,7 +2062,7 @@ typedef enum {
 
     /**
      * @brief Defines the font weight attribute, which can be set, reset, and obtained as required through APIs.
-     * The font weight set through this interface does not support adaptive adjustment.
+     * The font weight specified by this API is not affected by any changes in the system font weight settings.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: font weight {@link ArkUI_FontWeight}. The default value is <b>ARKUI_FONT_WEIGHT_NORMAL</b>.\n
@@ -2813,6 +2817,19 @@ typedef enum {
     NODE_TEXT_INPUT_ENABLE_PREVIEW_TEXT = 7033,
 
     /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_INPUT_HALF_LEADING = 7034,
+
+    /**
      * @brief Defines the default placeholder text for the multi-line text box.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3128,6 +3145,19 @@ typedef enum {
     NODE_TEXT_AREA_ENABLE_PREVIEW_TEXT = 8024,
 
     /**
+     * @brief 设置文本将行间距平分至行的顶部与底部。
+     *
+     * 属性设置方法参数{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。默认值false。\n
+     * \n
+     * 属性获取方法返回值{@link ArkUI_AttributeItem}格式：\n
+     * .value[0].i32: 设置文本是否将行间距平分至行的顶部与底部。\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_AREA_HALF_LEADING = 8025,
+
+    /**
      * @brief Defines the button text content. This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -3286,6 +3316,34 @@ typedef enum {
      *
      */
     NODE_CHECKBOX_SHAPE,
+
+    /**
+     * @brief Defines the name of the checkbox.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     * 
+     *@since 16
+     */
+    NODE_CHECKBOX_NAME = 11005,
+
+    /**
+     * @brief Defines the name of the checkbox.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP = 11006,
 
     /**
      * @brief Defines the ID of the <b><XComponent></b> component.
@@ -4057,6 +4115,96 @@ typedef enum {
     NODE_RADIO_GROUP,
 
     /**
+     * @brief Defines the name of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: component name. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: component name. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_NAME  = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
+
+    /**
+     * @brief Defines whether the checkboxgroup is selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether the check box is selected.
+     * The value <b>1</b> means that the checkboxgroup is selected, and <b>0</b> means the opposite. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: The value <b>1</b> means that the checkboxgroup is selected, and <b>0</b> means the opposite. \n
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SELECT_ALL = 21001,
+
+    /**
+     * @brief Defines the color of the checkboxgroup when it is selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: color of the checkboxgroup when it is selected, in 0xARGB format,
+     * for example, <b>0xFF1122FF</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: color of the checkboxgroup when it is selected, in 0xARGB format,
+     * for example, <b>0xFF1122FF</b>.
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SELECTED_COLOR = 21002,
+    /**
+     * @brief Defines the border color of the checkboxgroup when it is not selected.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_UNSELECTED_COLOR = 21003,
+
+    /**
+     * @brief Defines the internal icon style of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
+     * .value[1]?.f32: size of the internal mark, in vp. Optional.\n
+     * .value[2]?.f32: stroke width of the internal mark, in vp. Optional. The default value is <b>2</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].u32: border color, in 0xARGB format, for example, <b>0xFF1122FF</b>.\n
+     * .value[1].f32: size of the internal mark, in vp. \n
+     * .value[2].f32: stroke width of the internal mark, in vp. The default value is <b>2</b>. \n
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_MARK = 21004,
+
+    /**
+     * @brief Defines the shape of the checkboxgroup.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: component shape. The parameter type is {@link ArkUI_CheckboxShape}. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: component shape. The parameter type is {@link ArkUI_CheckboxShape}.
+     *
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_SHAPE = 21005,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -4528,9 +4676,15 @@ typedef enum {
      * .value[0].i32: whether to enable automatic playback for child component switching. The value <b>1</b>
      * means to enable automatic playback, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
      * \n
+     * .value[1]?.i32: whether to stop automatic playback when the user touches the screen. The value <b>1</b> means
+     * to stop automatic playback, and <b>0</b> means the opposite. The default value is <b>1</b>. This parameter is
+     * supported since API version 16. \n
+     * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: whether to enable automatic playback for child component switching. The value <b>1</b> means
      * to enable automatic playback, and <b>0</b> means the opposite. The default value is <b>0</b>. \n
+     * .value[1].i32: whether to stop automatic playback when the user touches the screen. The value <b>1</b> means to
+     * stop automatic playback, and <b>0</b> means the opposite. This parameter is supported since API version 16. \n
      *
      */
     NODE_SWIPER_AUTO_PLAY,
@@ -5674,6 +5828,7 @@ typedef enum {
      * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
+
     /**
      * @brief Defines the event triggered when the bound component receives a focus axis event after gaining focus.
      *
@@ -5684,6 +5839,19 @@ typedef enum {
      * @since 15
      */
     NODE_ON_FOCUS_AXIS = 23,
+
+     /**
+     * @brief Dispatch key event on the component node.
+     *
+     * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
+     * children. \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * 
+     * @since 16
+     */
+    NODE_DISPATCH_KEY_EVENT = 24,
+
     /**
      * @brief 文本设置TextDataDetectorConfig且识别成功时，触发onDetectResultUpdate回调。
      *
@@ -6142,6 +6310,18 @@ typedef enum {
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: status of the radio button. \n
      */
     NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
+
+    /**
+     * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX_GROOUP</b>
+     * component changes.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b><b>1</b>: selected; <b>0</b>: not selected.\n
+     * 
+     * @since 16
+     */
+    NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
@@ -7800,6 +7980,19 @@ bool OH_ArkUI_NodeUtils_IsCreatedByNDK(ArkUI_NodeHandle node);
  * @since 14
  */
 int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node);
+ 
+/**
+ * @brief Get the node handle by id. This interface only works on the main thread.
+ *
+ * @param id The id of the target node handle.
+ * @param node The handle of target node handle.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node);
 
 /**
  * @brief The event called when the sliding operation offset changes.

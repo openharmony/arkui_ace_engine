@@ -80,6 +80,7 @@ public:
     static void SetMaxFontSize(const JSCallbackInfo& info);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetHalfLeading(const JSCallbackInfo& info);
     static void SetId(const JSCallbackInfo& info);
     static void SetKey(const std::string& key);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
@@ -98,6 +99,7 @@ public:
     static void SetCancelImageIcon(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void CreateJsSearchCommonEvent(const JSCallbackInfo& info);
+    static void SetStopBackPress(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

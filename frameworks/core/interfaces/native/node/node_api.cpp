@@ -61,6 +61,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/text/html_utils.h"
 #include "interfaces/native/native_type.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -394,6 +395,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnPreDrag,
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
+    NodeModifier::SetOnKeyEventDispatch,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -490,6 +492,10 @@ const ComponentAsyncEventHandler CHECKBOX_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetCheckboxChange,
 };
 
+const ComponentAsyncEventHandler CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetCheckboxGroupChange,
+};
+
 const ComponentAsyncEventHandler SLIDER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSliderChange,
 };
@@ -562,9 +568,11 @@ const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnRadioChange,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
 };
+#endif
 
 const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnStart,
@@ -688,6 +696,10 @@ const ResetComponentAsyncEventHandler CALENDAR_PICKER_NODE_RESET_ASYNC_EVENT_HAN
 
 const ResetComponentAsyncEventHandler CHECKBOX_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     nullptr,
+};
+
+const ResetComponentAsyncEventHandler CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::ResetCheckboxGroupChange,
 };
 
 const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
@@ -888,11 +900,13 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
         }
         case ARKUI_CALENDAR_PICKER: {
             // calendar picker event type.
+#ifndef ARKUI_WEARABLE
             if (subKind >= sizeof(CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
             }
             eventHandle = CALENDAR_PICKER_NODE_ASYNC_EVENT_HANDLERS[subKind];
+#endif
             break;
         }
         case ARKUI_CHECKBOX: {
@@ -995,6 +1009,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_SELECT: {
             // select event type.
             if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1004,6 +1019,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_IMAGE_ANIMATOR: {
             // imageAnimator event type.
             if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1011,6 +1027,14 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
                 return;
             }
             eventHandle = IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >= sizeof(CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {
@@ -1288,6 +1312,16 @@ void NotifyResetComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind
                 return;
             }
             eventHandle = IMAGE_ANIMATOR_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
+        case ARKUI_CHECK_BOX_GROUP: {
+            if (subKind >=
+                sizeof(CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS) / sizeof(ResetComponentAsyncEventHandler)) {
+                TAG_LOGE(
+                    AceLogTag::ACE_NATIVE_NODE, "NotifyResetComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = CHECKBOX_GROUP_NODE_RESET_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

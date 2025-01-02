@@ -475,6 +475,12 @@ public:
     }
 
     virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
+
+    virtual bool ProcessPointerEvent(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace
