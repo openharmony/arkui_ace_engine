@@ -415,6 +415,7 @@ void UIExtensionPattern::OnConnect()
     }
     InitializeAccessibility();
     ReDispatchDisplayArea();
+    RegisterEventProxyFlagCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1494,7 +1495,7 @@ int32_t UIExtensionPattern::GetInstanceId() const
     return instanceId_;
 }
 
-int32_t UIExtensionPattern::GetInstanceIdFromHost()
+int32_t UIExtensionPattern::GetInstanceIdFromHost() const
 {
     auto instanceId = GetHostInstanceId();
     if (instanceId != instanceId_) {
@@ -1644,5 +1645,82 @@ void UIExtensionPattern::DumpOthers()
             }
         }
     }
+}
+
+void UIExtensionPattern::RegisterEventProxyFlagCallback()
+{
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
+        [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            std::string type = "";
+            int32_t eventFlags = 0;
+            if (data.HasParameter("type")) {
+                type = data.GetStringParam("type");
+            }
+            if (type == "OccupyEvents") {
+                if (data.HasParameter("eventFlags")) {
+                    eventFlags = data.GetIntParam("eventFlags", 0);
+                }
+                pattern->SetEventProxyFlag(eventFlags);
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+}
+
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
 }
 } // namespace OHOS::Ace::NG
