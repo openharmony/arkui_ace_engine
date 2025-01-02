@@ -1082,7 +1082,6 @@ ArkThemeWhiteList.whiteList = [
     'Counter',
     'DataPanel',
     'DatePicker',
-    'Divider',
     'LoadingProgress',
     'Menu',
     'MenuItem',
