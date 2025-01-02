@@ -19,45 +19,47 @@ import { BlockTag } from 'common/src/main/ets/model/BlockTag';
 import { ColorMetrics, LengthMetrics, matrix4, promptAction } from '@kit.ArkUI';
 import { pointer } from '@kit.InputKit';
 import { common2D, uiEffect } from '@kit.ArkGraphics2D';
-import { CompSizeBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompSizeBlocks'
-import { CompLocationBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompLocationBlocks'
-import { CompLayoutConstraintsBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompLayoutConstraintsBlocks'
-import { CompBorderBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompBorderBlocks'
-import { CompBorderImageBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompBorderImageBlocks'
-import { CompBackgroundBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompBackgroundBlocks'
-import { CompOpacityBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompOpacityBlocks'
-import { CompVisibilityBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompVisibilityBlocks'
-import { CompEnabledBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompEnabledBlocks'
-import { CompOverlayBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompOverlayBlocks'
-import { CompZOrderControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompZOrderControlBlocks'
-import { CompTransformationBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompTransformationBlocks'
-import { CompShapeClippingBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompShapeClippingBlocks'
-import { CompImageEffectsBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompImageEffectsBlocks'
-import { CompGestureModifierBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompGestureModifierBlocks'
-import { CompOutlineBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompOutlineBlocks'
-import { CompVisualEffectBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompVisualEffectBlocks'
-import { CompTouchTargetBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompTouchTargetBlocks'
-import { CompHitTestControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompHitTestControlBlocks'
-import { CompModalTransitionBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompModalTransitionBlocks'
-import { CompSheetTransitionBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompSheetTransitionBlocks'
-import { CompObscuringBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompObscuringBlocks'
-import { CompRenderFitBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompRenderFitBlocks'
-import { CompEventMonopolizationBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompEventMonopolizationBlocks'
-import { CompCursorControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompCursorControlBlocks'
-import { CompGradientColorBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompGradientColorBlocks';
-import { CompPopupControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompBindPopupBlocks';
-import { CompMenuControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompMenuControlBlocks';
-import { CompFocusControlBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompFocusControlBlocks';
-import { CompHoverEffectBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompHoverEffectBlocks';
-import { CompComponentIDBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompComponentIDBlocks';
-import { CompReuseIDBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompReuseIDBlocks';
-import { CompRestoreIdBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompRestoreIdBlocks';
-import { CompForegroundEffectBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompForegroundEffectBlocks';
-import { CompForegroundBlurBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompForegroundBlurBlocks';
-import { CompMotionBlurBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompMotionBlurBlocks';
-import { CompClickEffectBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompClickEffectBlocks';
-import { CompAccessibilityBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompAccessibilityBlocks';
-import { CompAttributeModifierBlocks } from '../../../../../../../../../../../work/arkui_ace_engine/examples/components/feature/src/main/ets/components/CompAttributeModifierBlocks';
+import { CompSizeBlocks } from './../../components/CompSizeBlocks'
+import { CompLocationBlocks } from './../../components/CompLocationBlocks'
+import { CompLayoutConstraintsBlocks } from './../../components/CompLayoutConstraintsBlocks'
+import { CompBorderBlocks } from './../../components/CompBorderBlocks'
+import { CompBorderImageBlocks } from './../../components/CompBorderImageBlocks'
+import { CompBackgroundBlocks } from './../../components/CompBackgroundBlocks'
+import { CompOpacityBlocks } from './../../components/CompOpacityBlocks'
+import { CompVisibilityBlocks } from './../../components/CompVisibilityBlocks'
+import { CompEnabledBlocks } from './../../components/CompEnabledBlocks'
+import { CompOverlayBlocks } from './../../components/CompOverlayBlocks'
+import { CompZOrderControlBlocks } from './../../components/CompZOrderControlBlocks'
+import { CompTransformationBlocks } from './../../components/CompTransformationBlocks'
+import { CompShapeClippingBlocks } from './../../components/CompShapeClippingBlocks'
+import { CompImageEffectsBlocks } from './../../components/CompImageEffectsBlocks'
+import { CompGestureModifierBlocks } from '../../components/CompGestureModifierBlocks'
+import { CompOutlineBlocks } from '../../components/CompOutlineBlocks'
+import { CompVisualEffectBlocks } from '../../components/CompVisualEffectBlocks'
+import { CompTouchTargetBlocks } from '../../components/CompTouchTargetBlocks'
+import { CompHitTestControlBlocks } from '../../components/CompHitTestControlBlocks'
+import { CompModalTransitionBlocks } from '../../components/CompModalTransitionBlocks'
+import { CompSheetTransitionBlocks } from '../../components/CompSheetTransitionBlocks'
+import { CompObscuringBlocks } from '../../components/CompObscuringBlocks'
+import { CompRenderFitBlocks } from '../../components/CompRenderFitBlocks'
+import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopolizationBlocks'
+import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
+import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
+import { CompPopupControlBlocks } from '../../components/CompBindPopupBlocks';
+import { CompMenuControlBlocks } from '../../components/CompMenuControlBlocks';
+import { CompFocusControlBlocks } from '../../components/CompFocusControlBlocks';
+import { CompHoverEffectBlocks } from '../../components/CompHoverEffectBlocks';
+import { CompComponentIDBlocks } from '../../components/CompComponentIDBlocks';
+import { CompReuseIDBlocks } from '../../components/CompReuseIDBlocks';
+import { CompRestoreIdBlocks } from '../../components/CompRestoreIdBlocks';
+import { CompForegroundEffectBlocks } from '../../components/CompForegroundEffectBlocks';
+import { CompForegroundBlurBlocks } from '../../components/CompForegroundBlurBlocks';
+import { CompMotionBlurBlocks } from '../../components/CompMotionBlurBlocks';
+import { CompClickEffectBlocks } from '../../components/CompClickEffectBlocks';
+import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlocks';
+import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
+
+
 
 
 //part2
