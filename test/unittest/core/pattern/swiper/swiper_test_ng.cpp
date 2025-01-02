@@ -63,8 +63,6 @@ void SwiperTestNg::SetUp() {}
 
 void SwiperTestNg::TearDown()
 {
-    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
-    stageNode->RemoveChildAtIndex(0);
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -81,8 +79,6 @@ void SwiperTestNg::TearDown()
 void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
-    stageNode->AddChild(frameNode_);
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
     eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
