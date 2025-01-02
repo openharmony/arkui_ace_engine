@@ -40,7 +40,7 @@ export struct ProgressButtonV2 {
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
   @Param onClicked: ClickCallback = () => {
   };
-  @Param enable: boolean = true;
+  @Param isEnabled: boolean = true;
   @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
   @Local textProgress: string = EMPTY_STRING;
   @Local isLoading: boolean = false;
