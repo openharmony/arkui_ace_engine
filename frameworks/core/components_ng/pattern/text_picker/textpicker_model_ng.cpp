@@ -442,6 +442,15 @@ void TextPickerModelNG::SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop)
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
+void TextPickerModelNG::SetOnEnterSelectedArea(TextCascadeChangeEvent&& onEnterSelectedArea)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+}
+
 void TextPickerModelNG::SetValue(const std::string& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextPickerLayoutProperty, Value, value);
@@ -752,7 +761,8 @@ RefPtr<AceType> TextPickerDialogModelNG::CreateObject()
 void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerText,
     NG::TextPickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    std::function<void(const std::string&)>&& onScrollStop, TextPickerDialog& textPickerDialog,
+    std::function<void(const std::string&)>&& onScrollStop,
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TextPickerDialog& textPickerDialog,
     TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
@@ -778,6 +788,7 @@ void TextPickerDialogModelNG::SetTextPickerDialogShow(RefPtr<AceType>& PickerTex
     dialogEvent["acceptId"] = onAccept;
     dialogEvent["changeId"] = onChange;
     dialogEvent["scrollStopId"] = onScrollStop;
+    dialogEvent["enterSelectedAreaId"] = onEnterSelectedArea;
     auto func = [onCancel](const GestureEvent& /* info */) {
         if (onCancel) {
             onCancel();
