@@ -408,7 +408,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowDivider(layoutProperty, host);
     UpdateControlButtonIcon();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         OnUpdateSideBarAndContent(host);
@@ -447,7 +447,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
         auto renderContext = sideBarFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (!renderContext->HasBackgroundColor()) {
-            auto context = PipelineBase::GetCurrentContext();
+            auto context = host->GetContextRefPtr();
             CHECK_NULL_VOID(context);
             auto sideBarTheme = context->GetTheme<SideBarTheme>();
             CHECK_NULL_VOID(sideBarTheme);
@@ -470,12 +470,12 @@ void SideBarContainerPattern::CreateAndMountNodes()
 
 void SideBarContainerPattern::UpdateDividerShadow() const
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sidebarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sidebarTheme);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!sidebarTheme->GetDividerShadowEnable()) {
@@ -551,7 +551,9 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     CHECK_NULL_VOID(dividerLayoutProperty);
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -567,7 +569,9 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
 
 void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -793,7 +797,8 @@ void SideBarContainerPattern::DoAnimation()
     FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
 
     auto weak = AceType::WeakClaim(this);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     inAnimation_ = true;
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
@@ -889,7 +894,9 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     CHECK_NULL_VOID(imageLayoutProperty);
     std::optional<ImageSourceInfo> imgSourceInfo = std::nullopt;
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -1032,7 +1039,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
         auto geometryNode = host->GetGeometryNode();
@@ -1262,7 +1269,9 @@ void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& button
 
 void SideBarContainerPattern::HandleLongPressEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     float scale = pipeline->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -1276,7 +1285,9 @@ void SideBarContainerPattern::HandleLongPressActionEnd()
     if (!isDialogShow_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
