@@ -1314,11 +1314,11 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
 }
 
 /**
- * @tc.name: ButtonPatternTest021
+ * @tc.name: ButtonFunctionTest021
  * @tc.desc: test textOverflow enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest021, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1383,11 +1383,11 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest021, TestSize.Level1)
 }
 
 /**
- * @tc.name: ButtonPatternTest022
+ * @tc.name: ButtonFunctionTest022
  * @tc.desc: test textOverflow enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonTestNg, ButtonPatternTest022, TestSize.Level1)
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest022, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1452,11 +1452,11 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest022, TestSize.Level1)
 }
 
 /**
- * @tc.name: ButtonPatternTest023
+ * @tc.name: ButtonFunctionTest023
  * @tc.desc: test textOverflow enum value.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest023, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1521,11 +1521,11 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest023, TestSize.Level1)
 }
 
 /**
- * @tc.name: ButtonPatternTest024
+ * @tc.name: ButtonFunctionTest024
  * @tc.desc: test AddIsFocusActiveUpdateEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonTestNg, ButtonPatternTest024, TestSize.Level1)
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create button and get frameNode.
@@ -1565,12 +1565,10 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest024, TestSize.Level1)
      */
     buttonPattern->OnModifyDone();
     buttonPattern->isTextFadeOut_ = true;
-    auto context = frameNode->GetContextRefPtr();
-    CHECK_NULL_VOID(context);
-    buttonPattern->HandleFocusStatusStyle(context);
+    buttonPattern->HandleFocusStatusStyle();
     buttonPattern->SetIsFocus(true);
-    buttonPattern->HandleFocusStyleTask(context);
-    buttonPattern->AddIsFocusActiveUpdateEvent(context);
+    buttonPattern->HandleFocusStyleTask();
+    buttonPattern->AddIsFocusActiveUpdateEvent();
     buttonPattern->UpdateButtonStyle();
     EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::MARQUEE);
     EXPECT_EQ(textLayoutProp->GetTextMarqueeFadeout(), true);
@@ -1582,8 +1580,8 @@ HWTEST_F(ButtonTestNg, ButtonPatternTest024, TestSize.Level1)
      * @tc.expected: step5. check whether the properties is correct.
      */
     buttonPattern->SetIsFocus(false);
-    buttonPattern->HandleBlurStyleTask(context);
-    buttonPattern->RemoveIsFocusActiveUpdateEvent(context);
+    buttonPattern->HandleBlurStyleTask();
+    buttonPattern->RemoveIsFocusActiveUpdateEvent();
     buttonPattern->UpdateButtonStyle();
     EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::MARQUEE);
     EXPECT_EQ(textLayoutProp->GetTextMarqueeFadeout(), true);
