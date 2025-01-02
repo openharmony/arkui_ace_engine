@@ -52,7 +52,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(layoutProperty, false);
     bool isHideRightClickMenu = layoutProperty->GetSelectionMenuHiddenValue(false) && IsUsingMouse();
     bool isFontSizeZero = layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value());
-    if (isHideRightClickMenu || isFontSizeZero) {
+    if (isHideRightClickMenu || (isFontSizeZero && !SelectOverlayIsOn())) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
             "The selection menu is not displayed cause Font size is zero or selectionMenuHidden is true");
         return false;
@@ -478,7 +478,7 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
         int32_t preIndex = selectController->GetCaretIndex();
-        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false);
+        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false, true);
         pattern->ShowCaretAndStopTwinkling();
         pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
@@ -673,5 +673,19 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
         return;
     }
     BaseTextSelectOverlay::UpdateSecondHandleOffset();
+}
+
+bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
+
+bool TextFieldSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
 }
 } // namespace OHOS::Ace::NG

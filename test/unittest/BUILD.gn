@@ -52,7 +52,7 @@ config("ace_coverage_config") {
 # ace unittest config
 config("ace_unittest_config") {
   visibility = [ "./../../*" ]
-  if (ace_engine_feature_enable_split_mode &&
+  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
       defined(vendor_configs.ace_engine_advanced_split_mode_test_visibility)) {
     visibility += vendor_configs.ace_engine_advanced_split_mode_test_visibility
   }
@@ -69,7 +69,7 @@ config("ace_unittest_config") {
     "//commonlibrary/c_utils/base/include/",
     "//third_party/node/src",
   ]
-  if (ace_engine_feature_enable_split_mode &&
+  if ((ace_engine_feature_enable_split_mode || ace_engine_feature_wearable) &&
       defined(vendor_configs.ace_engine_advanced_split_mode_dirs)) {
     include_dirs += vendor_configs.ace_engine_advanced_split_mode_dirs
   }
@@ -207,6 +207,7 @@ ohos_source_set("ace_components_base") {
     "$ace_root/frameworks/core/components_ng/base/view_full_update_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_partial_update_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/base/view_stack_processor.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&
       defined(
@@ -340,6 +341,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/form_visible/form_visible_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/full_screen/full_screen_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/memory/memory_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/navigation/navigation_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
@@ -578,6 +580,7 @@ ohos_source_set("ace_components_mock") {
   sources = [
     "$ace_root/test/mock/adapter/mock_file_uri_helper_ohos.cpp",
     "$ace_root/test/mock/adapter/mock_image_packer_ohos.cpp",
+    "$ace_root/test/mock/adapter/mock_input_manager.cpp",
     "$ace_root/test/mock/adapter/mock_modal_ui_extension.cpp",
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
@@ -678,6 +681,10 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/animation/animation_util.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/action_sheet/action_sheet_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/animator/animator_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_item_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/arc_list/arc_list_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/badge/badge_layout_property.cpp",
@@ -831,6 +838,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_layout_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/indexer_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/linear_indicator/linear_indicator_accessibility_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/linear_indicator/linear_indicator_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/linear_indicator/linear_indicator_layout_property.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/linear_indicator/linear_indicator_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/linear_indicator/linear_indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/column_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/linear_layout_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_layout/row_model_ng.cpp",
@@ -1099,6 +1111,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/stepper/stepper_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stepper/stepper_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/stepper/stepper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/arc_swiper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_helper.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_layout_algorithm.cpp",
@@ -1106,16 +1119,21 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_effect_options.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_source_info.cpp",
@@ -1251,7 +1269,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.cpp",
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
-    "$ace_root/test/mock/core/pattern/mock_time_picker_haptic_controller.cpp",
+    "$ace_root/test/mock/core/pattern/mock_picker_haptic_controller.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
   ]
   if (ace_engine_feature_enable_split_mode &&

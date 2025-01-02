@@ -15,6 +15,8 @@
 
 #include "core/event/touch_event.h"
 
+#include "base/input_manager/input_manager.h"
+
 namespace OHOS::Ace {
 TouchEvent& TouchEvent::SetId(int32_t id)
 {
@@ -135,10 +137,15 @@ TouchEvent& TouchEvent::SetPointers(std::vector<TouchPoint> pointers)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+TouchEvent& TouchEvent::SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent)
 {
     this->pointerEvent = std::move(pointerEvent);
     return *this;
+}
+
+std::shared_ptr<MMI::PointerEvent> TouchEvent::GetTouchEventPointerEvent() const
+{
+    return InputManager::CreatePointerEvent(pointerEvent);
 }
 
 TouchEvent& TouchEvent::SetOriginalId(int32_t originalId)

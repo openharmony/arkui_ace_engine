@@ -71,6 +71,8 @@ public:
     void AddFixedHeightItems(int32_t cnt, float height);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
     void CreateAdaptChildSizeGridItems(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    ColumnModelNG CreateColumn(float width = NULL_VALUE, float height = NULL_VALUE);
+    void CreateColumns(int32_t itemNumber = 10, float width = NULL_VALUE, float height = NULL_VALUE);
 
     void CheckPreloadListEqual(const std::list<int32_t>& expectedList) const;
     RefPtr<FrameNode> GetItem(int32_t idx, bool asCache);

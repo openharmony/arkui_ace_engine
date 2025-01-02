@@ -68,9 +68,9 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     std::string key = args[0]->ToString();
     auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
-    int areaMode = -1;
+    int32_t areaMode = -1;
     if (args.Length() > DATA_REQUIRED_ARGS && args[ARGS_AREAMODE]->IsNumber()) {
-        areaMode = std::stoi(args[ARGS_AREAMODE]->ToString());
+        areaMode = args[ARGS_AREAMODE]->ToNumber<int32_t>();
     }
     std::string value = serializedValue->ToString(args.GetVm())->ToString(args.GetVm());
     if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
@@ -90,9 +90,9 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsString()) {
         return;
     }
-    int areaMode = -1;
+    int32_t areaMode = -1;
     if (args.Length() > 1 && args[1]->IsNumber()) {
-        areaMode = std::stoi(args[1]->ToString());
+        areaMode = args[1]->ToNumber<int32_t>();
     }
     auto storage = StorageProxy::GetInstance()->GetStorage(areaMode);
     if (!storage) {
@@ -121,9 +121,9 @@ void JSPersistent::Has(const JSCallbackInfo& args)
         LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
-    int areaMode = -1;
+    int32_t areaMode = -1;
     if (args.Length() > 1 && args[1]->IsNumber()) {
-        areaMode = std::stoi(args[1]->ToString());
+        areaMode = args[1]->ToNumber<int32_t>();
     }
     std::string key = args[0]->ToString();
     if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {
@@ -145,9 +145,9 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
         return;
     }
     std::string key = args[0]->ToString();
-    int areaMode = -1;
+    int32_t areaMode = -1;
     if (args.Length() > 1 && args[1]->IsNumber()) {
-        areaMode = std::stoi(args[1]->ToString());
+        areaMode = args[1]->ToNumber<int32_t>();
     }
 
     if (!StorageProxy::GetInstance()->GetStorage(areaMode)) {

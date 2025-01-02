@@ -21,6 +21,8 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICheckboxGroupModifier* GetCheckboxGroupModifier();
 const CJUICheckboxGroupModifier* GetCJUICheckboxGroupModifier();
+void SetCheckboxGroupChange(ArkUINodeHandle node, void* extraParam);
+void ResetCheckboxGroupChange(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CHECKBOXGROUP_MODIFIER_H

@@ -328,7 +328,7 @@ HWTEST_F(EventManagerTestNg, MouseEventTest004, TestSize.Level1)
     event.action = MouseAction::CANCEL;
     event.button = MouseButton::EXTRA_BUTTON;
     retFlag = eventManager->DispatchMouseEventNG(event);
-    EXPECT_FALSE(retFlag);
+    EXPECT_TRUE(retFlag);
     AceApplicationInfo::GetInstance().SetApiTargetVersion(backupApiVersion);
 }
 
@@ -870,7 +870,7 @@ HWTEST_F(EventManagerTestNg, MouseLocationTest002, TestSize.Level1)
      * @tc.expected: eventManager is not null.
      */
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
     auto eventManager = AceType::MakeRefPtr<EventManager>();
     ASSERT_NE(eventManager, nullptr);
 
@@ -1568,7 +1568,7 @@ HWTEST_F(EventManagerDispatchMouseEventNGTest, EventManagerDispatchMouseEventNGT
         { MouseAction::PULL_DOWN, MouseButton::LEFT_BUTTON, false },
         { MouseAction::PULL_MOVE, MouseButton::RIGHT_BUTTON, false },
         { MouseAction::PULL_UP, MouseButton::MIDDLE_BUTTON, false },
-        { MouseAction::CANCEL, MouseButton::BACK_BUTTON, false },
+        { MouseAction::CANCEL, MouseButton::BACK_BUTTON, true },
     };
 
     /**

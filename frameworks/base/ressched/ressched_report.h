@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 
+#include <chrono>
 #include <string>
 #include <unordered_map>
 
@@ -56,6 +57,10 @@ private:
     ~ResSchedReport() {}
     void HandleTouchDown(const TouchEvent& touchEvent);
     void HandleTouchUp(const TouchEvent& touchEvent);
+    bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
+        int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);
+    bool IsPerSecRateLimit();
+    bool IsPerMinRateLimit();
     void HandleKeyDown(const KeyEvent& event);
     void HandleKeyUp(const KeyEvent& event);
     void HandleTouchMove(const TouchEvent& touchEvent);
@@ -85,6 +90,10 @@ private:
     bool isInSlide_ = false;
     bool isInTouch_ = false;
     double dpi_ = PipelineBase::GetCurrentDensity();
+    std::chrono::steady_clock::time_point startTimeMS = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point startTimeS = std::chrono::steady_clock::now();
+    int64_t keyEventCountMS = -1;
+    int64_t keyEventCountS = -1;
 };
 
 class ACE_EXPORT ResSchedReportScope final {

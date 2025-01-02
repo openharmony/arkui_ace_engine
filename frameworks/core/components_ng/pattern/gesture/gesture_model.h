@@ -33,7 +33,7 @@ public:
     virtual void Create(int32_t priorityNum, int32_t gestureMaskNum) = 0;
     virtual void Finish() = 0;
     virtual void Pop() = 0;
-    virtual void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) = 0;
+    virtual void SetOnGestureEvent(const GestureEventFunc& gestureEventFunc) = 0;
     virtual void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) = 0;
     virtual void SetTag(const std::string& tag) = 0;
     virtual void SetAllowedTypes(const std::set<SourceTool>& allowedTypes) = 0;

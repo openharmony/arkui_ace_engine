@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/text_overlay/text_overlay_theme.h"
 #include "text_base.h"
+
+#include "core/components_ng/pattern/text/span_model_ng.h"
 
 namespace OHOS::Ace::NG {
 namespace {

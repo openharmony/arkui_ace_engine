@@ -61,7 +61,7 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using NonPointerEventCallback = std::function<bool(const NonPointerEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&, const std::function<void()>&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
@@ -71,6 +71,9 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
+#ifdef SUPPORT_DIGITAL_CROWN
+using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
+#endif
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -499,9 +502,7 @@ public:
         return false;
     }
 
-    virtual bool GetCurPointerEventInfo(
-        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+    virtual bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
     {
         return false;
     }

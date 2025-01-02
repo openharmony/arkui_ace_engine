@@ -301,6 +301,23 @@ void SecuritySessionWrapperImpl::InitAllCallback()
             avoidArea = container->GetAvoidAreaByType(type);
             return avoidArea;
         };
+    sessionCallbacks->notifyExtensionEventFunc_ =
+        [weak = hostPattern_, taskExecutor = taskExecutor_, callSessionId](uint32_t eventId) {
+        taskExecutor->PostTask(
+            [weak, callSessionId, eventId]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                if (callSessionId != pattern->GetSessionId()) {
+                    TAG_LOGW(AceLogTag::ACE_SECURITYUIEXTENSION,
+                        "notifyBindModalFunc_: The callSessionId(%{public}d)"
+                            " is inconsistent with the curSession(%{public}d)",
+                        callSessionId, pattern->GetSessionId());
+                        return;
+                }
+                pattern->OnExtensionEvent(static_cast<UIExtCallbackEventId>(eventId));
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIExtensionEventCallback");
+    };
 }
 /*********************** End: Initialization *************************************/
 

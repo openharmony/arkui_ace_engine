@@ -418,4 +418,88 @@ HWTEST_F(UtfHelperTestOneNg, ConvertRegionUtf16ToUtf8_001, TestSize.Level1)
     size_t res = ConvertRegionUtf16ToUtf8(utf16String, utf8Buffer, utf16Len, utf8Len, 0);
     EXPECT_EQ(res, 0);
 }
+
+/**
+ * @tc.name: Utf16ToUtf8Size001
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_001, TestSize.Level1)
+{
+    uint16_t utf16[1] = { 0xd800 + 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 4);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_002
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_002, TestSize.Level1)
+{
+    uint16_t utf16[1] = { 0 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 1);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_003
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_003, TestSize.Level1)
+{
+    uint16_t utf16[1] = { 0x7ff - 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 3);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_004
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_004, TestSize.Level1)
+{
+    uint16_t utf16[1] = { 0xd800 + 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 4);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_005
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_005, TestSize.Level1)
+{
+    uint16_t utf16[2] = { 0xd800 + 1, 0xdc00 + 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 5);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_006
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_006, TestSize.Level1)
+{
+    uint16_t utf16[2] = { 0xd800 + 1, 0xdc00 - 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 7);
+}
+
+/**
+ * @tc.name: Utf16ToUtf8Size_007
+ * @tc.desc: Test utf_helper Utf16ToUtf8Size
+ * @tc.type: FUNC
+ */
+HWTEST_F(UtfHelperTestOneNg, Utf16ToUtf8Size_007, TestSize.Level1)
+{
+    uint16_t utf16[2] = { 0xd800 + 1, 0xdfff + 1 };
+    size_t len = sizeof(utf16) / sizeof(utf16[0]);
+    EXPECT_EQ(Utf16ToUtf8Size(utf16, len), 7);
+}
 } // namespace OHOS::Ace::UtfUtils

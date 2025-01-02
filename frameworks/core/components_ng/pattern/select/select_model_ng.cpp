@@ -31,14 +31,13 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
     } else {
-        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+        auto pattern = select->GetPattern<SelectPattern>();
         CHECK_NULL_VOID(pattern);
         layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth(pattern->GetControlSize())),
             CalcLength(theme->GetSelectDefaultHeight(pattern->GetControlSize()))));
     }
 }
 
-static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -480,9 +479,9 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         NG::PaddingProperty paddings;
         paddings.top = std::nullopt;
         paddings.bottom = std::nullopt;
-        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
-        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
-        ViewAbstract::SetPadding(paddings);
+        paddings.left = NG::CalcLength(pattern->GetSelectLeftRightMargin());
+        paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
+        ViewAbstract::SetPadding(frameNode, paddings);
     }
     
     pattern->BuildChild();

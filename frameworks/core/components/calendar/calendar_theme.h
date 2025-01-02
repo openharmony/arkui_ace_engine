@@ -803,7 +803,7 @@ public:
         return calendarPickerLargerScale_;
     }
 
-    const int& GetCalendarPickerDialogBlurStyle() const
+    int GetCalendarPickerDialogBlurStyle() const
     {
         return calendarPickerDialogBlurStyle_;
     }

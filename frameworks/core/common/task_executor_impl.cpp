@@ -60,14 +60,25 @@ TaskExecutor::Task TaskExecutorImpl::WrapTaskWithContainer(
 }
 
 TaskExecutor::Task TaskExecutorImpl::WrapTaskWithCustomWrapper(
-    TaskExecutor::Task&& task, int32_t id, std::function<void()>&& traceIdFunc) const
+    TaskExecutor::Task&& task, int32_t id, uint32_t delayTime,
+    std::function<void()>&& traceIdFunc) const
 {
     auto wrappedTask = [taskWrapper = taskWrapper_, originTask = std::move(task), id,
-                           traceIdPtr = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc)]() {
+        traceIdPtr = TraceId::CreateTraceId(), traceIdFunc = std::move(traceIdFunc), delayTime]() {
         ContainerScope scope(id);
+        bool isSync = false;
+        auto container = Container::Current();
+        if (container) {
+            isSync = (container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT)
+                && (delayTime <= 0);
+        }
         if (originTask && traceIdPtr) {
             traceIdPtr->SetTraceId();
-            taskWrapper->Call(originTask);
+            if (isSync) {
+                originTask();
+            } else {
+                taskWrapper->Call(originTask);
+            }
             traceIdPtr->ClearTraceId();
         } else {
             LOGW("WrapTaskWithContainer: originTask or traceIdPtr is null.");
@@ -180,8 +191,10 @@ bool TaskExecutorImpl::OnPostTask(
         }
     };
 
-    if (taskWrapper_ != nullptr && (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
-        TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(std::move(task), currentId, std::move(traceIdFunc));
+    if (taskWrapper_ != nullptr &&
+        (type == TaskType::PLATFORM || type == TaskType::UI || type == TaskType::JS)) {
+        TaskExecutor::Task wrappedTask = WrapTaskWithCustomWrapper(
+            std::move(task), currentId, delayTime, std::move(traceIdFunc));
         taskWrapper_->Call(std::move(wrappedTask));
         return true;
     }

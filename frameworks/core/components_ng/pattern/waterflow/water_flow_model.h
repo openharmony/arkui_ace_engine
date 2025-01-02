@@ -66,7 +66,7 @@ public:
     virtual void SetFriction(double friction) = 0;
     virtual void SetCachedCount(int32_t value, bool show = false) = 0;
 
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     EdgeEffect GetEdgeEffect() const
     {
         return EdgeEffect::NONE;

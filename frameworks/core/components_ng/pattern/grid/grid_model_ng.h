@@ -51,7 +51,7 @@ public:
     void SetMultiSelectable(bool value) override;
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -95,7 +95,7 @@ public:
     static void SetMultiSelectable(FrameNode* frameNode, bool multiSelectable);
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
 
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, double friction);
@@ -109,9 +109,16 @@ public:
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
+    static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
+    static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
+    static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
+    static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
+    static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
+    static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
 
 private:
     void AddDragFrameNodeToManager() const;
+    static void AddDragFrameNodeToManager(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

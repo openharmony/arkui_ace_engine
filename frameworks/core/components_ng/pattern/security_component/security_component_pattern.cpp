@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
 #ifdef SECURITY_COMPONENT_ENABLE
 #include "core/components_ng/pattern/security_component/security_component_handler.h"
 #endif
@@ -445,6 +444,42 @@ void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, Ref
     if (scPaintProp->GetFontColor().has_value()) {
         textLayoutProp->UpdateTextColor(scPaintProp->GetFontColor().value());
     }
+    if (scLayoutProp->GetMaxFontScale().has_value()) {
+        textLayoutProp->UpdateMaxFontScale(scLayoutProp->GetMaxFontScale().value());
+    }
+    if (scLayoutProp->GetMinFontScale().has_value()) {
+        textLayoutProp->UpdateMinFontScale(scLayoutProp->GetMinFontScale().value());
+    }
+    if (scLayoutProp->GetMaxLines().has_value()) {
+        textLayoutProp->UpdateMaxLines(scLayoutProp->GetMaxLines().value());
+    }
+    if (scLayoutProp->GetAdaptMaxFontSize().has_value()) {
+        textLayoutProp->UpdateAdaptMaxFontSize(scLayoutProp->GetAdaptMaxFontSize().value());
+    }
+    if (scLayoutProp->GetAdaptMinFontSize().has_value()) {
+        textLayoutProp->UpdateAdaptMinFontSize(scLayoutProp->GetAdaptMinFontSize().value());
+    }
+    if (scLayoutProp->GetHeightAdaptivePolicy().has_value()) {
+        textLayoutProp->UpdateHeightAdaptivePolicy(scLayoutProp->GetHeightAdaptivePolicy().value());
+    }
+}
+
+void SecurityComponentPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto* pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetBgDisabledAlpha();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode)
@@ -488,6 +523,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         CHECK_NULL_VOID(inputHub);
         inputHub->SetHoverEffect(scLayoutProp->GetHoverEffect().value());
     }
+    HandleEnabled();
 }
 
 void SecurityComponentPattern::OnModifyDone()
