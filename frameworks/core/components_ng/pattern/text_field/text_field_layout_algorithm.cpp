@@ -67,9 +67,6 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         showPlaceHolder = true;
     }
 
-    if (textFieldLayoutProperty->HasEllipsisMode()) {
-        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
-    }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -106,6 +103,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
+    }
+    if (textFieldLayoutProperty->HasEllipsisMode() && textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
     }
 }
 
