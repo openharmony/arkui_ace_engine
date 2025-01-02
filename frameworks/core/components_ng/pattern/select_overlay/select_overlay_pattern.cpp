@@ -388,7 +388,8 @@ void SelectOverlayPattern::HandlePanEnd(GestureEvent& info)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    if (!info_->menuInfo.menuIsShow) {
+    if (!info_->menuInfo.menuIsShow &&
+        (!info_->menuCallback.showMenuOnMoveDone || info_->menuCallback.showMenuOnMoveDone())) {
         info_->menuInfo.menuIsShow = orignMenuIsShow_;
         host->UpdateToolBar(false);
     }

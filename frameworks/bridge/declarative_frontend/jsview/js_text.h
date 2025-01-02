@@ -77,6 +77,8 @@ public:
     static void SetOnTextSelectionChange(const JSCallbackInfo& info);
     static void ParseMenuParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam);
+    static std::function<void(int32_t, int32_t)> ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
+        const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name);
     static void JsClip(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
