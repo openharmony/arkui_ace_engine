@@ -658,6 +658,7 @@ public:
     {
         PlaceholderSpanItem::DumpInfo();
     }
+    bool isFrameNode = false;
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -669,6 +670,7 @@ public:
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 
@@ -679,6 +681,7 @@ public:
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 

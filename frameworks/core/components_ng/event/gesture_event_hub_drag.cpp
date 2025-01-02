@@ -138,7 +138,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -861,7 +861,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -1097,7 +1097,11 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
         DragEventActuator::GetFrameNodePreviewPixelMap(itemFrameNode);
         auto gestureHub = itemFrameNode->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
-        dragDropManager->PushGatherPixelMap(gestureHub->GetDragPreviewPixelMap());
+        auto itemPreviewPixelMap = gestureHub->GetDragPreviewPixelMap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;
@@ -1124,7 +1128,11 @@ void GestureEventHub::SetNotMouseDragGatherPixelMaps()
         auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         auto imageSourceInfo = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo());
-        dragDropManager->PushGatherPixelMap(imageSourceInfo.GetPixmap());
+        auto itemPreviewPixelMap = imageSourceInfo.GetPixmap();
+        if (!itemPreviewPixelMap) {
+            continue;
+        }
+        dragDropManager->PushGatherPixelMap(itemPreviewPixelMap);
         cnt++;
         if (cnt > 1) {
             break;
@@ -1274,7 +1282,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;

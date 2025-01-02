@@ -170,9 +170,9 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -476,9 +476,9 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     pattern->SetSupportAnimation(supportAnimation);
 }
 
-void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void GridModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -600,46 +600,6 @@ void GridModelNG::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& opti
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, LayoutOptions, options, frameNode);
-}
-
-void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin)
-{
-    CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
-}
-
-void GridModelNG::SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachStart(std::move(onReachStart));
-}
-
-void GridModelNG::SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnReachEnd(std::move(onReachEnd));
-}
-
-void GridModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart)
-{
-    CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollStart(std::move(onScrollStart));
-}
-
-void GridModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop)
-{
-    CHECK_NULL_VOID(frameNode);
-    const auto& eventHub = frameNode->GetEventHub<GridEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
 void GridModelNG::SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value)

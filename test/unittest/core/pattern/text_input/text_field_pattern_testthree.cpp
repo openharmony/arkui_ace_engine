@@ -15,12 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
-#include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -466,11 +461,11 @@ HWTEST_F(TextFieldPatternTestThree, OnTextGenstureSelectionEnd001, TestSize.Leve
 {
     CreateTextField(DEFAULT_TEXT);
     GetFocus();
-
-    pattern_->OnTextGenstureSelectionEnd();
+    TouchLocationInfo locationInfo(0);
+    pattern_->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_FALSE(pattern_->IsContentRectNonPositive());
     pattern_->contentRect_.SetRect(10, 10, 0, 0);
-    pattern_->OnTextGenstureSelectionEnd();
+    pattern_->OnTextGenstureSelectionEnd(locationInfo);
     EXPECT_TRUE(pattern_->IsContentRectNonPositive());
 }
 

@@ -118,6 +118,25 @@ void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
 }
 
+void JSInteractableView::JsOnKeyEventDispatch(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined() || !args[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->DisableOnKeyEventDispatch();
+        return;
+    }
+    RefPtr<JsKeyFunction> JsOnKeyEventDispatch = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onKeyEventDispatch = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEventDispatch),
+                             node = frameNode](KeyEventInfo& keyEvent) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onKeyEventDispatch");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(keyEvent);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyEventDispatch(std::move(onKeyEventDispatch));
+}
+
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {

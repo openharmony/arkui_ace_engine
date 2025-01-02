@@ -293,7 +293,7 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*path, RSClipOp::INTERSECT, true);
     PaintSelBackground(canvas, pattern);
     canvas.Restore();
-    if (isInline_) {
+    if (isHandleAnimation_) {
         if (firstHandle_) {
             auto selectPosition = pattern->GetSelectPosition();
             auto rect = firstHandle_->Get();

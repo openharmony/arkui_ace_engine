@@ -270,6 +270,7 @@ public:
     virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
 #endif
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
@@ -310,6 +311,7 @@ public:
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
+    virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
@@ -398,6 +400,9 @@ public:
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
     virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
+    virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void ResetOnAccessibilityFocus() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

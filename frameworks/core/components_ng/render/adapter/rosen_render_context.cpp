@@ -2583,7 +2583,6 @@ void RosenRenderContext::PaintAccessibilityFocus()
     if (localRect != RectT<int32_t>()) {
         RectT<int32_t> containerRect;
         containerRect.SetRect(0, 0, bounds.z_, bounds.w_);
-        localRect = localRect.Constrain(containerRect);
         RectF globalRect = frameRect.GetRect();
         auto localRectWidth = localRect.Width() - 2 * lineWidth;
         auto localRectHeight = localRect.Height() - 2 * lineWidth;
@@ -4929,6 +4928,14 @@ void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetHDRBrightness(hdrBrightness);
+}
+
+void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
 }
 
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)

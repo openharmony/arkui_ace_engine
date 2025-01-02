@@ -45,6 +45,7 @@ constexpr char PROPERTY_FOLD_TYPE[] = "const.window.foldscreen.type";
 constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
+constexpr char ENABLE_RECYCLE_IMAGE_KEY[] = "persist.ace.recycle.image.enabled";
 constexpr char ENABLE_DEBUG_OFFSET_LOG_KEY[] = "persist.ace.scrollable.log.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
 constexpr char CUSTOM_TITLE_KEY[] = "persist.sys.arkui.customtitle";
@@ -97,6 +98,11 @@ bool IsDownloadByNetworkDisabled()
     return system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
 }
 
+bool IsRecycleImageEnabled()
+{
+    return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
+}
+
 bool IsSvgTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
@@ -142,6 +148,16 @@ bool IsSyncDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
 }
 
+bool IsMeasureDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
+}
+
+bool IsSafeAreaDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -154,7 +170,7 @@ bool IsWindowRectResizeEnabled()
 
 bool IsFocusCanBeActive()
 {
-    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") == "1";
+    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
 }
 
 bool IsCacheNavigationNodeEnable()
@@ -394,6 +410,8 @@ std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
@@ -428,6 +446,7 @@ ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
 bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
+bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -449,6 +468,7 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
+std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -458,7 +478,6 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
-bool SystemProperties::focusCanBeActive_ = IsFocusCanBeActive();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -590,6 +609,8 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+    safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
@@ -597,6 +618,7 @@ void SystemProperties::InitDeviceInfo(
     debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
     debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
+    recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
@@ -604,9 +626,9 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
-    focusCanBeActive_ = IsFocusCanBeActive();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -851,6 +873,19 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
     }
 }
 
+void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, void* context)
+{
+    bool focusCanBeActive = true;
+    if (value && strcmp(value, "0") == 0) {
+        focusCanBeActive = false;
+    }
+    if (focusCanBeActive != focusCanBeActive_) {
+        SetFocusCanBeActive(focusCanBeActive);
+        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
+    }
+    return;
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     // always return density of main screen, don't use this interface unless you need density when no window exists
@@ -885,6 +920,11 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
 {
     acePerformanceMonitorEnable_.store(performanceMonitorEnable);
+}
+
+void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
+{
+    focusCanBeActive_.store(focusCanBeActive);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
@@ -958,10 +998,5 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
-{
-    return focusCanBeActive_;
 }
 } // namespace OHOS::Ace

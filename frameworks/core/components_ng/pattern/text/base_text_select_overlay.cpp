@@ -1045,6 +1045,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
     if (SelectOverlayIsOn()) {
         HideMenu(true);
         auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [weak = WeakClaim(this), scrollingNode] {
                 auto overlay = weak.Upgrade();
@@ -1255,7 +1256,8 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
         (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showSearch != (isSupportMenuSearch_ && IsNeedMenuSearch())) {
+        if (isSupportMenuSearch_ && AllowSearch() &&
+            info->menuInfo.showSearch != IsNeedMenuSearch()) {
             info->menuInfo.showSearch = !info->menuInfo.showSearch;
             manager->NotifyUpdateToolBar(true);
         }

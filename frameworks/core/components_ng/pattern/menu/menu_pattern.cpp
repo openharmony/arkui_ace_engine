@@ -65,6 +65,7 @@ constexpr double MOUNT_MENU_FINAL_SCALE = 0.95f;
 constexpr double SEMI_CIRCLE_ANGEL = 90.0f;
 constexpr Dimension PADDING = 4.0_vp;
 constexpr double HALF = 2.0;
+constexpr Dimension OPTION_MARGIN = 8.0_vp;
 
 void UpdateFontStyle(RefPtr<MenuLayoutProperty>& menuProperty, RefPtr<MenuItemLayoutProperty>& itemProperty,
     RefPtr<MenuItemPattern>& itemPattern, bool& contentChanged, bool& labelChanged)
@@ -289,7 +290,7 @@ void MenuPattern::OnModifyDone()
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
         UpdateBorderRadius(host, borderRadius);
     }
-
+    UpdateMenuBorderAndBackgroundBlur();
     SetAccessibilityAction();
 
     if (previewMode_ != MenuPreviewMode::NONE) {
@@ -406,6 +407,7 @@ void InnerMenuPattern::OnModifyDone()
     auto uiNode = AceType::DynamicCast<UINode>(host);
     UpdateMenuItemChildren(uiNode);
     SetAccessibilityAction();
+    InitDefaultBorder(host);
 }
 
 // close menu on touch up
@@ -982,7 +984,8 @@ void MenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
     expandDisplay_ = expandDisplay;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || theme->GetMenuBlendBgColor()) {
         auto bgColor = theme->GetBackgroundColor();
         renderContext->UpdateBackgroundColor(bgColor);
     }
@@ -1757,7 +1760,8 @@ void MenuPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(menuPattern);
 
     auto renderContext = host->GetRenderContext();
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !renderContext->IsUniRenderEnabled()
+        || menuTheme->GetMenuBlendBgColor()) {
         renderContext->UpdateBackgroundColor(menuTheme->GetBackgroundColor());
     } else {
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
@@ -1848,13 +1852,14 @@ void MenuPattern::DumpInfo()
 
 float MenuPattern::GetSelectMenuWidth()
 {
+    auto minSelectWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
     RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    CHECK_NULL_RETURN(columnInfo, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(columnInfo, minSelectWidth);
     auto parent = columnInfo->GetParent();
-    CHECK_NULL_RETURN(parent, MIN_SELECT_MENU_WIDTH.ConvertToPx());
+    CHECK_NULL_RETURN(parent, minSelectWidth);
     parent->BuildColumnWidth();
     auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
-    float finalWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    float finalWidth = minSelectWidth;
 
     if (IsWidthModifiedBySelect()) {
         auto menuLayoutProperty = GetLayoutProperty<MenuLayoutProperty>();
@@ -1864,7 +1869,7 @@ float MenuPattern::GetSelectMenuWidth()
         finalWidth = defaultWidth;
     }
 
-    if (finalWidth < MIN_SELECT_MENU_WIDTH.ConvertToPx()) {
+    if (finalWidth < minSelectWidth) {
         finalWidth = defaultWidth;
     }
 
@@ -2178,5 +2183,27 @@ void MenuPattern::OnDetachFromMainTree()
     auto pattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RequestPathRender();
+}
+
+float MenuPattern::GetSelectMenuWidthFromTheme() const
+{
+    auto minSelectWidth = MIN_SELECT_MENU_WIDTH.ConvertToPx();
+    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+    CHECK_NULL_RETURN(columnInfo, minSelectWidth);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, minSelectWidth);
+    parent->BuildColumnWidth();
+    auto defaultWidth = static_cast<float>(columnInfo->GetWidth(COLUMN_NUM));
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, minSelectWidth);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, minSelectWidth);
+    auto theme = context->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(theme, minSelectWidth);
+    float finalWidth = (theme->GetMenuNormalWidth() + OPTION_MARGIN).ConvertToPx();
+    if (finalWidth < minSelectWidth) {
+        finalWidth = defaultWidth;
+    }
+    return finalWidth;
 }
 } // namespace OHOS::Ace::NG

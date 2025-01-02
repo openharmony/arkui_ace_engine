@@ -72,8 +72,9 @@ public:
         int32_t itemNumber = TOTAL_ITEM_NUMBER, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     void AddItems(int32_t itemNumber, V2::ListItemStyle listItemStyle = V2::ListItemStyle::NONE);
     ListItemGroupModelNG CreateListItemGroup(V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
-    void CreateListItemGroups(
-        int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE);
+    void CreateListItemGroups(int32_t groupNumber,
+        V2::ListItemGroupStyle listItemGroupStyle = V2::ListItemGroupStyle::NONE,
+        int32_t itemNumber = GROUP_ITEM_NUMBER);
     void CreateItemWithSize(int32_t itemNumber, SizeT<Dimension> itemSize);
     void CreateGroupChildrenMainSize(int32_t groupNumber);
     void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);

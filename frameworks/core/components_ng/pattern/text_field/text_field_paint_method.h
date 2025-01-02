@@ -63,6 +63,8 @@ public:
 private:
     void UpdateTextStyleToModifier(
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, bool isDisabled);
+    void DoTextFadeoutIfNeed(PaintWrapper* paintWrapper);
+
 private:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextFieldOverlayModifier> textFieldOverlayModifier_;

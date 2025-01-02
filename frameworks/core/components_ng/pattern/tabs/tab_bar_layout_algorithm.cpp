@@ -45,6 +45,7 @@ constexpr int8_t SM_COLUMN_NUM = 4;
 constexpr int8_t MD_COLUMN_NUM = 8;
 constexpr int8_t LG_COLUMN_NUM = 12;
 constexpr int8_t TWO = 2;
+constexpr int8_t FOCUS_BOARD = 2;
 } // namespace
 
 void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -60,14 +61,15 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(geometryNode);
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
-    auto tabBarPattern = host->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabsLayoutProperty);
-    isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto tabsDirection = tabsLayoutProperty->GetNonAutoLayoutDirection();
+    auto tabBarDirection = layoutProperty->GetLayoutDirection();
+    isRTL_ = tabBarDirection == TextDirection::RTL ||
+             (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto idealSize =
         CreateIdealSize(constraint.value(), axis_, layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT));
@@ -114,13 +116,13 @@ void TabBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         layoutWrapper->SetActive(false);
         geometryNode->SetFrameSize(SizeF());
         if (tabBarFocusNode) {
-            tabBarFocusNode->SetFocusable(false);
+            tabBarFocusNode->SetFocusable(false, false);
         }
         return;
     } else {
         layoutWrapper->SetActive(true);
         if (tabBarFocusNode) {
-            tabBarFocusNode->SetFocusable(true);
+            tabBarFocusNode->SetFocusable(true, false);
         }
     }
     if (!constraint->selfIdealSize.Height().has_value() && axis_ == Axis::HORIZONTAL) {
@@ -240,7 +242,15 @@ void TabBarLayoutAlgorithm::MeasureScrollableMode(LayoutWrapper* layoutWrapper, 
     if (axis_ == Axis::HORIZONTAL) {
         auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
-        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(ScrollableBarModeOptions());
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto tabTheme = pipelineContext->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        ScrollableBarModeOptions defaultOptions;
+        defaultOptions.margin = tabTheme->GetTabBarDefaultMargin();
+        auto layoutStyle = layoutProperty->GetScrollableBarModeOptions().value_or(defaultOptions);
         scrollMargin_ = layoutStyle.margin.ConvertToPx();
         MeasureVisibleItems(layoutWrapper, childLayoutConstraint);
 
@@ -322,6 +332,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
     CHECK_NULL_RETURN(pipelineContext, {});
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_RETURN(tabTheme, {});
+    auto focusBoardPadding = tabTheme->GetBoardFocusPadding().ConvertToPx();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     if (axis_ == Axis::HORIZONTAL) {
         isBarAdaptiveHeight_ = GetBarAdaptiveHeight(layoutWrapper);
@@ -334,6 +345,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         } else if (!isBarAdaptiveHeight_) {
             frameSize.SetHeight(defaultHeight_.value());
+            frameSize.MinusHeight(focusBoardPadding * FOCUS_BOARD);
             childLayoutConstraint.parentIdealSize = OptionalSizeF(frameSize);
             childLayoutConstraint.selfIdealSize.SetHeight(frameSize.Height());
         }
@@ -345,6 +357,7 @@ LayoutConstraintF TabBarLayoutAlgorithm::GetChildConstraint(LayoutWrapper* layou
                                     : frameSize.Height() / childCount_);
             childLayoutConstraint.selfIdealSize = OptionalSizeF(frameSize);
         } else {
+            frameSize.MinusWidth(focusBoardPadding * FOCUS_BOARD);
             childLayoutConstraint.maxSize.SetHeight(Infinity<float>());
             childLayoutConstraint.selfIdealSize.SetWidth(frameSize.Width());
         }
@@ -977,14 +990,6 @@ void TabBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (visibleItemPosition_.empty()) {
         return;
     }
-
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
-    CHECK_NULL_VOID(tabsLayoutProperty);
-    isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     auto frameSize = geometryNode->GetPaddingSize();
     auto childOffset = OffsetF();

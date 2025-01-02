@@ -87,6 +87,14 @@ bool WaterFlowPattern::IsAtBottom() const
 {
     return layoutInfo_->offsetEnd_;
 };
+bool WaterFlowPattern::IsAtTopWithDelta() const
+{
+    return layoutInfo_->OverScrollTop();
+};
+bool WaterFlowPattern::IsAtBottomWithDelta() const
+{
+    return layoutInfo_->OverScrollBottom();
+};
 bool WaterFlowPattern::IsReverse() const
 {
     auto host = GetHost();
@@ -167,7 +175,8 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else {
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
-    algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+    algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
     return algorithm;
 }
 
@@ -180,7 +189,6 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     paint->SetContentModifier(contentModifier_);
 
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
 
     auto scrollEffect = GetScrollEdgeEffect();
@@ -200,6 +208,9 @@ void WaterFlowPattern::OnModifyDone()
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
 

@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 
+#include "mock_event_report.h"
+
 #include "base/log/event_report.h"
 
 namespace OHOS::Ace {
+DragInfo MockEventReport::dragInfo_;
+
 void EventReport::SendEvent(const EventInfo& eventInfo) {}
 
 void EventReport::SendJsCardRenderTimeEvent(
@@ -76,5 +80,9 @@ void EventReport::ReportNonManualPostCardActionInfo(const std::string& formName,
     const std::string& abilityName, const std::string& moduleName, int32_t dimension)
 {}
 
-void EventReport::ReportDragInfo(const DragInfo& dragInfo) {}
+void EventReport::ReportDragInfo(const DragInfo& dragInfo)
+{
+    MockEventReport::dragInfo_ = dragInfo;
+    return;
+}
 } // namespace OHOS::Ace

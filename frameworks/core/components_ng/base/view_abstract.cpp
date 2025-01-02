@@ -853,6 +853,13 @@ void ViewAbstract::DisableOnKeyEvent()
     focusHub->ClearOnKeyCallback();
 }
 
+void ViewAbstract::DisableOnKeyEventDispatch()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnKeyEventDispatchCallback();
+}
+
 #ifdef SUPPORT_DIGITAL_CROWN
 void ViewAbstract::DisableOnCrownEvent()
 {
@@ -1036,6 +1043,13 @@ void ViewAbstract::DisableOnKeyEvent(FrameNode* frameNode)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->ClearOnKeyCallback();
+}
+
+void ViewAbstract::DisableOnKeyEventDispatch(FrameNode* frameNode)
+{
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ClearOnKeyEventDispatchCallback();
 }
 
 void ViewAbstract::DisableOnHover(FrameNode* frameNode)
@@ -1961,6 +1975,10 @@ void ViewAbstract::BindPopup(
         popupNode->MarkModifyDone();
         popupPattern = popupNode->GetPattern<BubblePattern>();
         popupPattern->RegisterDoubleBindCallback(param->GetDoubleBindCallback());
+        auto accessibilityProperty = popupNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->SetAccessibilityHoverPriority(param->IsBlockEvent());
+        }
     }
     popupInfo.focusable = param->GetFocusable();
     popupInfo.target = AceType::WeakClaim(AceType::RawPtr(targetNode));
@@ -4016,6 +4034,29 @@ void ViewAbstract::SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyC
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnKeyCallback(std::move(onKeyCallback));
+}
+
+void ViewAbstract::SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyDispatchCallback));
+}
+
+void ViewAbstract::SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyDispatchCallback));
+}
+
+void ViewAbstract::DispatchKeyEvent(FrameNode* frameNode, KeyEvent& keyEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->HandleEvent(keyEvent);
 }
 
 bool ViewAbstract::GetFocusable(FrameNode* frameNode)

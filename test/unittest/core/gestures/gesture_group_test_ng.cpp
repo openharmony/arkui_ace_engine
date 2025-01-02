@@ -776,7 +776,7 @@ HWTEST_F(GestureGroupTestNg, GestureGroupTest001, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Sequence;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     gestureGroup.onActionCancelId_ = std::move(onActionCancelId);
     groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
@@ -862,7 +862,7 @@ HWTEST_F(GestureGroupTestNg, GestureGroupGestureGroupTest003, TestSize.Level1)
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Sequence;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     gestureGroup.onActionCancelId_ = std::move(onActionCancelId);
     groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);
@@ -904,7 +904,7 @@ HWTEST_F(GestureGroupTestNg, GestureGroupCreateRecognizerTest001, TestSize.Level
     gestureGroup.priority_ = GesturePriority::Low;
     gestureGroup.gestureMask_ = GestureMask::Normal;
     gestureGroup.mode_ = GestureMode::Sequence;
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](const GestureEvent& info) { return true; };
     gestureGroup.SetOnActionCancelId(onActionCancel);
     groupRecognizer = gestureGroup.CreateRecognizer();
     EXPECT_NE(groupRecognizer, nullptr);

@@ -137,7 +137,7 @@ void RenderPickerColumn::OnTouchTestHit(
                 refPtr->HandleDragEnd();
             }
         });
-        panRecognizer_->SetOnActionCancel([weak = AceType::WeakClaim(this)]() {
+        panRecognizer_->SetOnActionCancel([weak = AceType::WeakClaim(this)](const GestureEvent& event) {
             auto refPtr = weak.Upgrade();
             if (refPtr) {
                 refPtr->HandleDragEnd();

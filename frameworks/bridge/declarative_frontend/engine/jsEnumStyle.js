@@ -487,6 +487,13 @@ var EdgeEffect;
   EdgeEffect[EdgeEffect.None = 2] = 'None';
 })(EdgeEffect || (EdgeEffect = {}));
 
+let EffectEdge;
+(function (EffectEdge) {
+  EffectEdge[EffectEdge.START = 1] = 'START';
+  EffectEdge[EffectEdge.END = 2] = 'END';
+  EffectEdge[EffectEdge.ALL = 3] = 'ALL';
+})(EffectEdge || (EffectEdge = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';
@@ -537,6 +544,7 @@ let MouseAction;
   MouseAction[MouseAction.Release = 2] = 'Release';
   MouseAction[MouseAction.Move = 3] = 'Move';
   MouseAction[MouseAction.Hover = 4] = 'Hover';
+  MouseAction[MouseAction.CANCEL = 13] = 'CANCEL';
 })(MouseAction || (MouseAction = {}));
 
 let KeyType;

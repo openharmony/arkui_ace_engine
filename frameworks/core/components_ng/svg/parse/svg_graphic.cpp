@@ -176,7 +176,7 @@ bool SvgGraphic::UpdateFillStyle(const std::optional<Color>& color, bool antiAli
     if (!color && fillState_.GetColor() == Color::TRANSPARENT && !fillState_.GetGradient()) {
         return false;
     }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         if (!fillState_.GetHref().empty() && CheckHrefPattern()) {
             fillState_.SetColor(Color::TRANSPARENT);
         }
@@ -208,7 +208,7 @@ void SvgGraphic::SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& 
     auto info = gradient->GetRadialGradientInfo();
     auto center = RSPoint(static_cast<RSScalar>(info.cx), static_cast<RSScalar>(info.cy));
     auto focal = RSPoint(static_cast<RSScalar>(info.fx), static_cast<RSScalar>(info.fy));
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         auto bounds = path_.GetBounds();
         auto maxBounds = std::max(bounds.GetWidth(), bounds.GetHeight());
         if (maxBounds != 0) {
@@ -356,7 +356,7 @@ void SvgGraphic::UpdateLineDash()
     const auto& strokeState = attributes_.strokeState;
     if (!strokeState.GetLineDash().lineDash.empty()) {
         auto lineDashState = strokeState.GetLineDash().lineDash;
-        if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
             RSScalar intervals[lineDashState.size()];
             for (size_t i = 0; i < lineDashState.size(); ++i) {
                 intervals[i] = static_cast<RSScalar>(lineDashState[i]);
