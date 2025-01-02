@@ -2218,6 +2218,7 @@ void UIContentImpl::Foreground()
         instanceId_);
     if (window_ != nullptr && window_->GetType() == Rosen::WindowType::WINDOW_TYPE_APP_MAIN_WINDOW) {
         PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
+        PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsBegin();
     }
     ContainerScope::UpdateRecentForeground(instanceId_);
     Platform::AceContainer::OnShow(instanceId_);
@@ -2237,6 +2238,7 @@ void UIContentImpl::Background()
 {
     LOGI("[%{public}s][%{public}s][%{public}d]: window background", bundleName_.c_str(), moduleName_.c_str(),
         instanceId_);
+    PerfMonitor::GetPerfMonitor()->NotifyAppJankStatsEnd();
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
