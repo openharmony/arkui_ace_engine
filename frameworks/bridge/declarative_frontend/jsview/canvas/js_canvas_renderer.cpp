@@ -124,7 +124,7 @@ static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
     StringUtils::StringSplitter(valueStr.c_str(), ',', valueProps);
     auto size = valueProps.size();
     auto count = std::count(valueStr.begin(), valueStr.end(), ',');
-    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || size != (count + 1)) {
+    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || static_cast<int32_t>(size) != (count + 1)) {
         return false;
     }
     std::vector<uint8_t> colorInt;
