@@ -1851,7 +1851,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0121, TestSize.Level1)
     EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
-
 /**
  * @tc.name: FocusHubTestNg0122
  * @tc.desc: Test the function dispatchKeyEvent.
@@ -1897,7 +1896,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
 
     auto onKeyEventDispatchCallback = [&childFocusHub2, &keyEvent](KeyEventInfo& eventInfo) -> bool {
         childFocusHub2->currentFocus_ = true;
-       return childFocusHub2->HandleEvent(keyEvent);
+        return childFocusHub2->HandleEvent(keyEvent);
     };
     focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
 
