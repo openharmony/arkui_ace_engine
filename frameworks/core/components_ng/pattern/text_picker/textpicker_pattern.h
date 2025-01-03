@@ -144,13 +144,6 @@ public:
         return columnWidths_;
     }
 
-    void SetDividerLength(int32_t index, float childCount, const SizeF& pickerContentSize);
-
-    std::optional<float> GetDividerLength() const
-    {
-        return dividerLength_;
-    }
-
     std::vector<NG::TextCascadePickerOptions> GetMultiOptions() const
     {
         return cascadeOriginptions_;
@@ -640,7 +633,6 @@ private:
     bool isNeedUpdateSelectedIndex_ = true;
     PickerTextProperties textProperties_;
     std::vector<Dimension> columnWidths_;
-    std::optional<float> dividerLength_;
 
     bool isDisableTextStyleAnimation_ = false;
     bool isEnableHaptic_ = true;

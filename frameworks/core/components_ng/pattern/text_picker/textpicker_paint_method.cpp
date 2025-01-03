@@ -93,11 +93,10 @@ void TextPickerPaintMethod::PaintDefaultDividerLines(RSCanvas& canvas, const Rec
     auto theme = pipeline->GetTheme<PickerTheme>();
     auto dividerColor = theme->GetDividerColor();
     auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
-
+    auto dividerLength = contentRect.Width();
+    auto dividerMargin = contentRect.GetX();
     auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPickerPattern);
-    auto dividerLength = textPickerPattern->GetDividerLength().value_or(contentRect.Width());
-    auto dividerMargin = contentRect.GetX();
     if (textPickerPattern->GetIsShowInDialog()) {
         dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
         dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();

@@ -1493,16 +1493,11 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
         size.SetWidth(pickerContentSize.Width());
     } else {
         auto index = CalculateIndex(frameNode);
-        if (index == -1) {
+        if (index < 0 || index >= static_cast<int32_t>(childCount)) {
             return;
         }
-        float percent = CalculateColumnSize(index, childCount, pickerContentSize);
-        SetDividerLength(index, childCount, pickerContentSize);
-        if (columnWidths_.empty()) {
-            size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
-        } else {
-            size.SetWidth(pickerContentSize.Width() * percent);
-        }
+        float width = CalculateColumnSize(index, childCount, pickerContentSize);
+        size.SetWidth(width);
     }
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
@@ -1520,49 +1515,31 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
     return index;
 }
 
-void TextPickerPattern::SetDividerLength(int32_t index, float childCount, const SizeF& pickerContentSize)
-{
-    if (index == childCount - 1) {
-        dividerLength_ = 0.0f;
-        for (int32_t i = 0; i < childCount; i++) {
-            dividerLength_ = dividerLength_.value()+ columnWidths_[i].Value() * pickerContentSize.Width() / 100.0f;
-        }
-    }
-}
-
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
-    for (auto& width : columnWidths_) {
-        if (width.Unit() != DimensionUnit::PERCENT) {
-            width = Dimension(width.ConvertToPx() / pickerContentSize.Width() * MAX_PERCENT, DimensionUnit::PERCENT);
+    float widthSum = 0.0f;
+    for (uint32_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
+        columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
+            Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :
+            Dimension(pickerContentSize.Width() * columnWidths_[i].Value() / MAX_PERCENT, DimensionUnit::PX);
+
+        if (LessNotEqual(columnWidths_[i].Value(), 0.0f) && !NearZero(childCount)) {
+            columnWidths_[i].SetValue(pickerContentSize.Width() / childCount);
         }
-        if (width.Value() < 0.0f) {
-            width.SetValue(0.0f);
-        }
+
+        widthSum += columnWidths_[i].Value();
     }
 
-    float widthSum = 0.0f;
-    for (uint32_t i = 0; i < columnWidths_.size(); i++) {
-        if (i < childCount) {
-            widthSum += columnWidths_[i].Value();
-        } else {
-            columnWidths_[i].SetValue(0.0f);
-        }
-    }
-    if (widthSum > MAX_PERCENT || widthSum < 0.0f) {
-        columnWidths_.clear();
+    if (GreatNotEqual(widthSum, pickerContentSize.Width())) {
+        return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
 
     if (index >= columnWidths_.size()) {
-        float unAssignedColumnWidth = MAX_PERCENT;
-        for (const auto& width : columnWidths_) {
-            unAssignedColumnWidth -= width.Value();
-        }
-        columnWidths_.emplace_back(Dimension(unAssignedColumnWidth / (childCount - columnWidths_.size()),
-            DimensionUnit::PERCENT));
+        columnWidths_.emplace_back(Dimension((pickerContentSize.Width() - widthSum) /
+            (childCount - columnWidths_.size()), DimensionUnit::PX));
     }
-
-    return columnWidths_[index].Value() / MAX_PERCENT;
+    return columnWidths_.size() == 0 ?
+        pickerContentSize.Width() / std::max(childCount, 1.0f) : columnWidths_[index].Value();
 }
 
 void TextPickerPattern::SetCanLoop(bool isLoop)

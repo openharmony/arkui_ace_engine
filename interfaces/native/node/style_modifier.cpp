@@ -8742,13 +8742,10 @@ void ResetTextPickerValue(ArkUI_NodeHandle node)
 
 int32_t SetTextPickerColumnWidths(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (!item) {
+    if (!item || item->size == 0 || !item->value) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
-    if (!item->value) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
     uint32_t size = item->size;
     ArkUI_Float32 values[size];
     for (uint32_t i = 0; i < size; ++i) {

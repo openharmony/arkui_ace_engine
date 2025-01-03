@@ -606,12 +606,10 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
 bool JSTextPickerParser::ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue,
     ParseTextArrayParam& param)
 {
-    if (jsColumnWidthsValue->IsArray()) {
-        ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths);
+    if (jsColumnWidthsValue->IsArray() && ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths)) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void JSTextPickerParser::ParseMultiTextArrayValueInternal(
