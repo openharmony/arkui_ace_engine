@@ -1238,6 +1238,15 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
+void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+    NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ViewStackModel::GetInstance()->NewScope();
+    NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
+#endif
+}
+
 std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)
 {
     auto jsonContentInfo = JsonUtil::Create(true);

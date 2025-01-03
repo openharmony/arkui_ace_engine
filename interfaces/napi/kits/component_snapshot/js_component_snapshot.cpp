@@ -497,6 +497,60 @@ static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info
     return result;
 }
 
+static napi_value JSSnapshotFromComponent(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+    if (!helper.CheckArgs(napi_valuetype::napi_object)) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of object type.");
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    napi_value result = nullptr;
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Can't get delegate of ace_engine. ");
+        NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+
+    napi_value frameNodePtr = nullptr;
+    auto componentResult = napi_get_named_property(env, helper.GetArgv(0), "nodePtr_", &frameNodePtr);
+    if (componentResult != napi_ok) {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    void* nativePtr = nullptr;
+    componentResult = napi_get_value_external(env, frameNodePtr, &nativePtr);
+    if (componentResult != napi_ok) {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    if (!nativePtr) {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return nullptr;
+    }
+    WeakPtr<NG::UINode> nodeWk;
+    auto* uiNodePtr = reinterpret_cast<OHOS::Ace::NG::UINode*>(nativePtr);
+    nodeWk = AceType::WeakClaim(uiNodePtr);
+    
+    NG::SnapshotParam param;
+    helper.ParseParamForBuilder(param);
+
+    delegate->CreateSnapshotFromComponent(nodeWk.Upgrade(), helper.CreateCallback(&result), false, param);
+
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
 static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor snapshotDesc[] = {
@@ -505,6 +559,7 @@ static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getSync", JSSnapshotGetSync),
         DECLARE_NAPI_FUNCTION("getWithUniqueId", JSSnapshotGetWithUniqueId),
         DECLARE_NAPI_FUNCTION("getSyncWithUniqueId", JSSnapshotGetSyncWithUniqueId),
+        DECLARE_NAPI_FUNCTION("createFromComponent", JSSnapshotFromComponent),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(snapshotDesc) / sizeof(snapshotDesc[0]), snapshotDesc));
 
