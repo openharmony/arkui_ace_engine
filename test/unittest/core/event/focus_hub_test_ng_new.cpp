@@ -1817,61 +1817,117 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0121, TestSize.Level1)
         AceType::MakeRefPtr<Pattern>());
     auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
         AceType::MakeRefPtr<ButtonPattern>());
-    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+
+    /**
+     * @tc.steps: step2. Create FocusHub and set keyEvent.
+     */
+    child1->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->currentFocus_ = true;
+
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    /**
+     * @tc.expected: The return value of  is false.
+     * @tc.steps3: Default returns false if onKeyEventDispatch is not bound.
+     */
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0122
+ * @tc.desc: Test the function onKeyEventDispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode and add button as its children which focus type is enable.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
         AceType::MakeRefPtr<ButtonPattern>());
 
     /**
      * @tc.steps: step2. Create FocusHub and set keyEvent.
      */
     child1->GetOrCreateFocusHub();
-    child2->GetOrCreateFocusHub();
     frameNode->AddChild(child1);
-    frameNode->AddChild(child2);
-
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
+    focusHub->SetFocusType(FocusType::SCOPE);
     focusHub->currentFocus_ = true;
-    pipeline->isFocusActive_ = true;
+
     KeyEvent keyEvent;
-    keyEvent.action = KeyAction::UP;
+    keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_SPACE;
 
     /**
-     * @tc.expected: The return value of  is false.
-     * @tc.steps3: Default returns false if onKeyEventDispatch is not bound
-     */
-    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
-
-    /**
      * @tc.expected: The return value of onKeyEventDispatch is true.
-     * @tc.steps4: call the function onKeyEventDispatch with FocusType::SCOPE.
+     * @tc.steps3: call the function onKeyEventDispatch with FocusType::SCOPE.
      */
-    auto onKeyEventDispatchCallback1 = [](KeyEventInfo& info) -> bool {
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool {
         return true;
     };
-    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback1));
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0123
+ * @tc.desc: Test the function onKeyEventDispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0123, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode and add button as its children which focus type is enable.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+
+    /**
+     * @tc.steps: step2. Create FocusHub and set keyEvent.
+     */
+    child1->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->currentFocus_ = true;
+
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
 
     /**
      * @tc.expected: The return value of onKeyEventDispatch is false.
-     * @tc.steps5: call the function onKeyEventDispatch with FocusType::SCOPE.
+     * @tc.steps3: call the function onKeyEventDispatch with FocusType::SCOPE.
      */
-    auto onKeyEventDispatchCallback2 = [](KeyEventInfo& info) -> bool {
+    auto onKeyEventDispatchCallback = [](KeyEventInfo& info) -> bool {
         return false;
     };
-    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback2));
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
     EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
- * @tc.name: FocusHubTestNg0122
+ * @tc.name: FocusHubTestNg0124
  * @tc.desc: Test the function dispatchKeyEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0124, TestSize.Level1)
 {
     /**
      * @tc.steps1: Create frameNode and add button as its children which focus type is enable.
@@ -1886,35 +1942,25 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
     /**
      * @tc.steps: step2. Create FocusHub and set keyEvent.
      */
-    child1->GetOrCreateFocusHub();
     child2->GetOrCreateFocusHub();
     frameNode->AddChild(child1);
     frameNode->AddChild(child2);
-
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
     focusHub->SetFocusType(FocusType::SCOPE);
-
-    auto childEventHub1 = AceType::MakeRefPtr<EventHub>();
-    childEventHub1->AttachHost(child1);
-    auto childFocusHub1 = AceType::MakeRefPtr<FocusHub>(childEventHub1);
-    childFocusHub1->SetFocusType(FocusType::NODE);
-
     auto childEventHub2 = AceType::MakeRefPtr<EventHub>();
     childEventHub2->AttachHost(child2);
     auto childFocusHub2 = AceType::MakeRefPtr<FocusHub>(childEventHub2);
     childFocusHub2->SetFocusType(FocusType::NODE);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
     focusHub->currentFocus_ = true;
-    pipeline->isFocusActive_ = true;
+
     KeyEvent keyEvent;
     keyEvent.action = KeyAction::DOWN;
     keyEvent.code = KeyCode::KEY_SPACE;
 
     /**
-     * @tc.steps: step3. Binds onKeyEventDispatch callback, executes dipatchKeyEvent to dispatch keyevent to child2
+     * @tc.steps: step3. Binds onKeyEventDispatch callback, executes dipatchKeyEvent to dispatch keyevent to child2.
      */
     auto onKeyEventDispatchCallback = [&childFocusHub2, &keyEvent](KeyEventInfo& eventInfo) -> bool {
         childFocusHub2->currentFocus_ = true;
@@ -1924,33 +1970,122 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0122, TestSize.Level1)
 
     /**
      * @tc.expected: The return value of child2 onKeyEvent is true.
-     * @tc.steps: step4. call the function onKeyEventDispatch and dipatchKeyEvent
+     * @tc.steps: step4. call the function onKeyEventDispatch and dipatchKeyEvent.
      */
-    auto onKeyEventCallback1 = [](KeyEventInfo& eventInfo) -> bool {
-        return true;
-    };
-    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback1));
+    auto onKeyEventCallback = [](KeyEventInfo& eventInfo) -> bool { return true; };
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback));
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0125
+ * @tc.desc: Test the function dispatchKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0125, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode and add button as its children which focus type is enable.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+
+    /**
+     * @tc.steps: step2. Create FocusHub and set keyEvent.
+     */
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    auto childEventHub2 = AceType::MakeRefPtr<EventHub>();
+    childEventHub2->AttachHost(child2);
+    auto childFocusHub2 = AceType::MakeRefPtr<FocusHub>(childEventHub2);
+    childFocusHub2->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
+
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
+    /**
+     * @tc.steps: step3. Binds onKeyEventDispatch callback, executes dipatchKeyEvent to dispatch keyevent to child2.
+     */
+    auto onKeyEventDispatchCallback = [&childFocusHub2, &keyEvent](KeyEventInfo& eventInfo) -> bool {
+        childFocusHub2->currentFocus_ = true;
+        return childFocusHub2->HandleEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
 
     /**
      * @tc.expected: The return value of child2 onKeyEvent is false.
-     * @tc.steps: step5. call the function onKeyEventDispatch and dipatchKeyEvent
+     * @tc.steps: step4. call the function onKeyEventDispatch and dipatchKeyEvent.
      */
-    auto onKeyEventCallback2 = [](KeyEventInfo& eventInfo) -> bool {
-        return false;
-    };
-    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback2));
+    auto onKeyEventCallback = [](KeyEventInfo& eventInfo) -> bool { return false; };
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback));
     EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg0126
+ * @tc.desc: Test the function dispatchKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0126, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create frameNode and add button as its children which focus type is enable.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto child1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+    auto child2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1,
+        AceType::MakeRefPtr<ButtonPattern>());
+
+    /**
+     * @tc.steps: step2. Create FocusHub and set keyEvent.
+     */
+    child2->GetOrCreateFocusHub();
+    frameNode->AddChild(child1);
+    frameNode->AddChild(child2);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    focusHub->SetFocusType(FocusType::SCOPE);
+    auto childEventHub2 = AceType::MakeRefPtr<EventHub>();
+    childEventHub2->AttachHost(child2);
+    auto childFocusHub2 = AceType::MakeRefPtr<FocusHub>(childEventHub2);
+    childFocusHub2->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
+
+    KeyEvent keyEvent;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_SPACE;
+
+    /**
+     * @tc.steps: step3. Binds onKeyEventDispatch callback, executes dipatchKeyEvent to dispatch keyevent to child2.
+     */
+    auto onKeyEventDispatchCallback = [&childFocusHub2, &keyEvent](KeyEventInfo& eventInfo) -> bool {
+        childFocusHub2->currentFocus_ = true;
+        return childFocusHub2->HandleEvent(keyEvent);
+    };
+    focusHub->SetOnKeyEventDispatchCallback(std::move(onKeyEventDispatchCallback));
 
     /**
      * @tc.expected: The return value of child2 onKeyEvent SetStopPropagation true.
-     * @tc.steps: step6. call the function onKeyEventDispatch and dipatchKeyEvent
+     * @tc.steps: step6. call the function onKeyEventDispatch and dipatchKeyEvent.
      */
-    auto onKeyEventCallback3 = [](KeyEventInfo& eventInfo) -> bool {
+    auto onKeyEventCallback = [](KeyEventInfo& eventInfo) -> bool {
         eventInfo.SetStopPropagation(true);
         return false;
     };
-    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback3));
+    childFocusHub2->SetOnKeyCallback(std::move(onKeyEventCallback));
     EXPECT_TRUE(focusHub->HandleEvent(keyEvent));
 }
 
