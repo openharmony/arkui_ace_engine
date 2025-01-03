@@ -39,6 +39,10 @@ public:
             dirty_ |= LIST_UPDATE_SPACE;
             space_ = space;
         }
+        if (lanes != lanes_) {
+            dirty_ |= LIST_UPDATE_SPACE;
+            lanes_ = lanes;
+        }
         switch (CheckPosMapUpdateRule()) {
             case ListPosMapUpdate::NO_CHANGE:
                 break;
