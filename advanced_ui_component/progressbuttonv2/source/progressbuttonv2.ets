@@ -105,7 +105,7 @@ export struct ProgressButtonV2 {
           .width('100%')
           .hoverEffect(HoverEffect.None)
           .clip(false)
-          .enabled(this.enable)
+          .enabled(this.isEnabled)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor)
         Row() {
@@ -122,7 +122,7 @@ export struct ProgressButtonV2 {
               right: 8,
               bottom: 4
             })
-            .opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY)
+            .opacity(this.isEnabled ? TEXT_ENABLE : TEXT_OPACITY)
             .onSizeChange((_, newValue) => {
               if (!newValue.height || newValue.height === this.textHeight) {
                 return;
@@ -158,9 +158,9 @@ export struct ProgressButtonV2 {
     .padding({ top: 0, bottom: 0 })
     .width(this.toLengthString(this.progressButtonWidth))
     .constraintSize({ minWidth: BUTTON_NORMARL_WIDTH })
-    .stateEffect(this.enable)
+    .stateEffect(this.isEnabled)
     .onClick(() => {
-      if (!this.enable) {
+      if (!this.isEnabled) {
         return;
       }
       if (this.progress < MAX_PROGRESS) {
