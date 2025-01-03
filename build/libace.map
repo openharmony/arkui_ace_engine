@@ -385,6 +385,7 @@
       OHOS::Ace::Theme::*;
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
+      OHOS::Ace::NG::ScrollBarModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -427,6 +428,7 @@
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

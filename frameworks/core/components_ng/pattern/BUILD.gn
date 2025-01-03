@@ -603,6 +603,9 @@ build_component_ng("pattern_ng") {
     sources += [
       "arc_scroll/inner/arc_scroll_bar.cpp",
       "arc_scroll/inner/arc_scroll_bar_overlay_modifier.cpp",
+      "arc_scroll_bar/arc_scroll_bar_layout_algorithm.cpp",
+      "arc_scroll_bar/arc_scroll_bar_paint_method.cpp",
+      "arc_scroll_bar/arc_scroll_bar_pattern.cpp",
     ]
   }
 

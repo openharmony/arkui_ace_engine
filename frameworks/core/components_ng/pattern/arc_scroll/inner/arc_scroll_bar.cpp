@@ -127,11 +127,12 @@ void ArcScrollBar::SetRoundTrickRegion(
     } else {
         activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary();
     }
+    auto minHeight = GetMinAngle() * barRegionSize / GetNormaMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
-        activeSize = std::max(std::max(activeSize, NormalizeToPx(GetMinHeight()) - GetOutBoundary()),
+        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary()),
             NormalizeToPx(GetMinDynamicHeight()));
     } else {
-        activeSize = std::max(activeSize, NormalizeToPx(GetMinHeight()));
+        activeSize = std::max(activeSize, minHeight);
     }
 
     if (LessOrEqual(activeSize, normalWidth)) {
