@@ -42,7 +42,12 @@ void SetScrollableBarModeOptions(ArkUINodeHandle node, const ArkUI_Float32 value
     ScrollableBarModeOptions option;
     CalcDimension margin = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     option.margin = margin;
-    option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
+    if (layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
+    } else {
+        option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
+    }
     TabsModelNG::SetScrollableBarModeOptions(frameNode, option);
 }
 void SetBarGridAlign(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
@@ -217,7 +222,7 @@ void ResetScrollableBarModeOptions(ArkUINodeHandle node)
     ScrollableBarModeOptions defaultOption;
     CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
     defaultOption.margin = margin;
-    defaultOption.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    defaultOption.nonScrollableLayoutStyle = std::nullopt;
     TabsModelNG::SetScrollableBarModeOptions(frameNode, defaultOption);
 }
 void ResetBarGridAlign(ArkUINodeHandle node)
