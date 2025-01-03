@@ -759,17 +759,15 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolFrameNode);
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
-    auto textFieldLayoutProperty = symbolFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto lastFontSize = symbolProperty->GetFontSize().value_or(GetSymbolDefaultSize());
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
-    auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value_or(MAX_FONT_SCALE);
+    auto maxFontScale = layoutProperty->GetMaxFontScale().value_or(MAX_FONT_SCALE);
     symbolProperty->UpdateMaxFontScale(std::min(MAX_FONT_SCALE, maxFontScale));
-    symbolProperty->UpdateMinFontScale(textFieldLayoutProperty->GetMinFontScale().value_or(0.0f));
+    symbolProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value_or(0.0f));
 
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto iconSymbol = layoutProperty->GetCancelIconSymbol();
     if (iconSymbol &&
         AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
