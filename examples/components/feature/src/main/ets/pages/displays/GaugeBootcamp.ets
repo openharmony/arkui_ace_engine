@@ -2155,7 +2155,7 @@ export struct GaugeBootcamp {
       Column({ space: 8 }) {
 
         RadioBlock({
-          title: '显示子组件',
+          title: 'show.ChildComponents',
           isEnabled: $enableGaugeChildComponent,
           value: $gaugeChildComponent,
           dataSource: [
