@@ -5057,6 +5057,13 @@ void WebDelegate::OnTooltip(const std::string& tooltip)
         TaskExecutor::TaskType::UI, "ArkUIWebTooltip");
 }
 
+void WebDelegate::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 void WebDelegate::OnRequestFocus()
 {
     if (onRequestFocusV2_) {
