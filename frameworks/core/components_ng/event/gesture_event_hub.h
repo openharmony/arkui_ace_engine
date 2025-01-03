@@ -208,7 +208,7 @@ public:
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
-    std::string GetHitTestModeStr() const;
+    static std::string GetHitTestModeStr(const RefPtr<GestureEventHub>& GestureEventHub);
     HitTestMode GetHitTestMode() const;
     void SetHitTestMode(HitTestMode hitTestMode);
     void RemoveDragEvent();

@@ -1746,7 +1746,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(-1));
-    std::string retStr = gestureEventHub->GetHitTestModeStr();
+    std::string retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 
     /**
@@ -1754,7 +1754,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(4));
-    retStr = gestureEventHub->GetHitTestModeStr();
+    retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 }
 

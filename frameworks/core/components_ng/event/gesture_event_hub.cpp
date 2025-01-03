@@ -722,9 +722,12 @@ bool GestureEventHub::ActLongClick()
     return false;
 }
 
-std::string GestureEventHub::GetHitTestModeStr() const
+std::string GestureEventHub::GetHitTestModeStr(const RefPtr<GestureEventHub>& gestureEventHub)
 {
-    auto mode = static_cast<int32_t>(hitTestMode_);
+    if (!gestureEventHub) {
+        return HIT_TEST_MODE[0];
+    }
+    auto mode = static_cast<int32_t>(gestureEventHub->GetHitTestMode());
     if (mode < 0 || mode >= static_cast<int32_t>(std::size(HIT_TEST_MODE))) {
         return HIT_TEST_MODE[0];
     }
