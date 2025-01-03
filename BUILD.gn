@@ -47,6 +47,22 @@ config("ace_config") {
     "-Wno-non-c-typedef-for-linkage",
     "-Os",
     "-Werror=return-stack-address",
+    "-Werror=anon-enum-enum-conversion",
+    "-Werror=sizeof-array-div",
+    "-Werror=undefined-var-template",
+    "-Werror=nonportable-include-path",
+    "-Werror=user-defined-warnings",
+    "-Werror=null-pointer-arithmetic",
+    "-Werror=enum-compare-switch",
+    "-Werror=absolute-value",
+    "-Werror=header-guard",
+    "-Werror=int-to-pointer-cast",
+    "-Werror=pointer-to-int-cast",
+    "-Werror=int-in-bool-context",
+    "-Werror=xor-used-as-pow",
+    "-Werror=deprecated-copy",
+    "-Werror=unknown-warning-option",
+    "-Werror=abstract-final-class",
   ]
 
   if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&
