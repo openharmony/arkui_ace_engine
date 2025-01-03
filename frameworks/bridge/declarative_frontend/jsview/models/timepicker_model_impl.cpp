@@ -35,6 +35,11 @@ void TimePickerModelImpl::SetHour24(bool isUseMilitaryTime)
     JSViewSetProperty(&PickerTimeComponent::SetHour24, isUseMilitaryTime);
 }
 
+void TimePickerModelImpl::SetEnableCascade(bool isEnableCascade)
+{
+    JSViewSetProperty(&PickerTimeComponent::SetEnableCascade, isEnableCascade);
+}
+
 void TimePickerModelImpl::SetSelectedTime(const PickerTime& value)
 {
     JSViewSetProperty(&PickerTimeComponent::SetSelectedTime, value);
@@ -65,12 +70,14 @@ void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& picker
     RefPtr<Component> component;
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     bool isUseMilitaryTime = pickerDialog.isUseMilitaryTime;
+    bool isEnableCascade = pickerDialog.isEnableCascade;
     if (pickerDialog.isSelectedTime == true) {
         timePicker->SetSelectedTime(pickerDialog.pickerTime);
     }
     timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
+    timePicker->SetEnableCascade(isEnableCascade);
     component = timePicker;
 
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);

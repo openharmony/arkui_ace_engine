@@ -2151,6 +2151,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
 #endif
+    RegisterUIExtDataConsumer();
+    RegisterUIExtDataSendToHost();
 
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
@@ -3583,5 +3585,156 @@ void AceContainer::UpdateResourceDensity(double density)
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
     SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::RegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    auto uiExtDataConsumeCallback = [weak = WeakClaim(this)]
+        (SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) ->int32_t {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0);
+        container->DispatchUIExtDataConsume(static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+        return 0;
+    };
+    auto result = dataHandler->RegisterDataConsumer(SubSystemId::ARKUI_UIEXT, std::move(uiExtDataConsumeCallback));
+    if (result != Rosen::DataHandlerErr::OK) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "RegisterUIExtDataConsumer fail, same subSystemId repeate registe.");
+    }
+}
+
+void AceContainer::UnRegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    dataHandler->UnregisterDataConsumer(SubSystemId::ARKUI_UIEXT);
+}
+
+void AceContainer::DispatchUIExtDataConsume(NG::UIContentBusinessCode code,
+    AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(taskExecutor_);
+    AAFwk::Want businessData = data;
+    if (reply.has_value()) {
+        taskExecutor_->PostSyncTask(
+            [weak = WeakClaim(this), code, businessData, &reply] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsumeReply(code, businessData, reply);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeReplyCallback");
+    } else {
+        taskExecutor_->PostTask(
+            [weak = WeakClaim(this), code, businessData] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsume(code, businessData);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
+    }
+}
+
+bool AceContainer::FireUIExtDataSendToHost(
+    NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    if (type == NG::BusinessDataSendType::ASYNC) {
+        dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host async success, businessCode=%{public}d.", code);
+        return true;
+    }
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host async success, businessCode=%{public}d.", code);
+    return true;
+}
+
+bool AceContainer::FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data, reply);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync reply fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host sync reply success, businessCode=%{public}d.", code);
+    return true;
+}
+
+void AceContainer::RegisterUIExtDataSendToHost()
+{
+    auto uiExtDataSendSyncReply = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, AAFwk::Want& reply) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHostReply(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+    };
+    auto uiExtDataSend = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, NG::BusinessDataSendType type) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHost(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), type);
+    };
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->RegisterBusinessSendToHostReply(uiExtDataSendSyncReply);
+    uiExtManager->RegisterBusinessSendToHost(uiExtDataSend);
 }
 } // namespace OHOS::Ace::Platform

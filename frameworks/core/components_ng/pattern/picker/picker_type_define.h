@@ -108,6 +108,7 @@ struct TimePickerSettingData {
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
     bool showSecond;
+    bool isEnableCascade;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

@@ -14,7 +14,7 @@
  */
 
 #include "ext_napi_utils.h"
-
+#include <memory>
 #include <cstddef>
 
 #include "napi/native_api.h"

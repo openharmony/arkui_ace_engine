@@ -28,7 +28,6 @@ class ArkThemeWhiteList {
         'Counter',
         'DataPanel',
         'DatePicker',
-        'Divider',
         'LoadingProgress',
         'Menu',
         'MenuItem',

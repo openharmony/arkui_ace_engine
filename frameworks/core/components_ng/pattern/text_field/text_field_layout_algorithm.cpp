@@ -67,9 +67,6 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         showPlaceHolder = true;
     }
 
-    if (textFieldLayoutProperty->HasEllipsisMode()) {
-        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
-    }
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -106,6 +103,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
+    }
+    if (textFieldLayoutProperty->HasEllipsisMode() && textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
     }
 }
 
@@ -211,9 +211,9 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
 
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
-        float maxFontScale = textFieldLayoutProperty->HasMaxFontScale() ?
-            textFieldLayoutProperty->GetMaxFontScale().value() : pipeline->GetMaxAppFontScale();
+        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value_or(0.0f);
+        float maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value_or(
+            pipeline->GetMaxAppFontScale());
         float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
         indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),

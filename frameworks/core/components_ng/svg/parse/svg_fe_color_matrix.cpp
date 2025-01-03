@@ -27,6 +27,27 @@ static constexpr float LUM_COEFF_R = 0.2126f;
 static constexpr float LUM_COEFF_G = 0.7152f;
 static constexpr float LUM_COEFF_B = 0.0722f;
 
+bool ConvertStringToFloat(const std::string& str, float& result)
+{
+    char* endPtr = nullptr;
+    errno = 0; // Reset errno before calling strtof
+
+    // Check for overflow or underflow
+    result = std::strtof(str.c_str(), &endPtr);
+    if (errno == ERANGE || result == HUGE_VALF || result == -HUGE_VALF) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Out of range: string value is too large or too small for float");
+        return false;
+    }
+
+    // Check if no conversion was performed or if there are invalid characters
+    if (endPtr == str.c_str() || *endPtr != '\0') {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Invalid argument: unable to convert string to float");
+        return false;
+    }
+
+    return true;
+}
+
 inline float DegreesToRadians(float degrees)
 {
     return (degrees) * (M_PI / 180.0f);
@@ -68,7 +89,11 @@ void SvgFeColorMatrix::MakeMatrix(const std::string& value)
 
 void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 {
-    float theta = DegreesToRadians(std::stof(value));
+    float theta = 0.0;
+    float result = 0.0;
+    if (ConvertStringToFloat(value, result)) {
+        theta = DegreesToRadians(result);
+    }
     const float cosValue = cos(theta);
     const float sinValue = sin(theta);
 
@@ -98,7 +123,11 @@ void SvgFeColorMatrix::MakeHueRotate(const std::string& value)
 
 void SvgFeColorMatrix::MakeSaturate(const std::string& value)
 {
-    float satValue = std::stof(value);
+    float satValue = 1.0;
+    float result = 0.0;
+    if (ConvertStringToFloat(value, result)) {
+        satValue = result;
+    }
 
     const float RValue = HUE_R * (1 - satValue);
     const float GValue = HUE_G * (1 - satValue);

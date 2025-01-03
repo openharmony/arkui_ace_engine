@@ -156,7 +156,7 @@ export struct TipsDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlignment: TextAlign = TextAlign.Start;
+  @State textAlignment: TextAlign = TextAlign.Center;
   marginOffset: number = 0;
   // the controller of content area scroll
   contentScroller: Scroller = new Scroller();
@@ -165,11 +165,6 @@ export struct TipsDialog {
   themeColorMode?: ThemeColorMode = ThemeColorMode.SYSTEM;
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = 160;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-    if (this.content) {
-      this.textAlignment = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
-    }
-  }
   imageIndex: number = 0;
   textIndex: number = 1;
   checkBoxIndex: number = 2;
@@ -195,8 +190,7 @@ export struct TipsDialog {
       title: this.title,
       content: this.content,
       checkTips: this.checkTips,
-      minContentHeight: this.minContentHeight,
-      updateTextAlign: this.updateTextAlign
+      minContentHeight: this.minContentHeight
     }) {
       ForEach([this.imageIndex, this.textIndex, this.checkBoxIndex], (index: number) => {
         if (index === this.imageIndex) {
@@ -251,16 +245,22 @@ export struct TipsDialog {
       if (this.checkAction) {
         this.checkAction(this.isChecked);
       }
-      let eventInfo: accessibility.EventInfo = ({
-        type: 'announceForAccessibility',
-        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-        triggerAction: 'click',
-        textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
-        getContext().resourceManager.getStringSync(125833935)
-      });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        console.info(`Accessibility send event`)
-      });
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'common',
+          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          getContext().resourceManager.getStringSync(125833935)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.info(`Accessibility send event`)
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+      }
     })
     .padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT() })
@@ -367,8 +367,6 @@ struct TipsDialogContentLayout {
   title?: ResourceStr | null = null;
   content?: ResourceStr | null = null;
   checkTips?: ResourceStr | null = null;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-  };
   @Link minContentHeight: number;
   @BuilderParam dialogBuilder: () => void = this.doNothingBuilder;
   imageIndex: number = 0;
@@ -422,7 +420,6 @@ struct TipsDialogContentLayout {
 
     if (this.title !== null || this.content !== null) {
       let textChild: Measurable = children[this.textIndex];
-      this.updateTextAlign(sizeResult.width);
       let contentMaxHeight: number = Number(constraint.maxHeight) - imageMeasureResult.height - checkBoxHeight;
       let contentConstraint: ConstraintSizeOptions =
         {
@@ -514,6 +511,7 @@ export struct SelectDialog {
                       .id(String(index))
                       .focusable(false)
                       .accessibilityLevel('no')
+                      .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -649,8 +647,6 @@ struct ConfirmDialogContentLayout {
   textIndex: number = 0;
   checkboxIndex: number = 1;
   @Link minContentHeight: number;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-  };
 
   @Builder
   doNothingBuilder() {
@@ -676,7 +672,6 @@ struct ConfirmDialogContentLayout {
     if (children.length < childrenSize) {
       return sizeResult;
     }
-    this.updateTextAlign(sizeResult.width);
     let height: number = 0;
     let checkboxChild: Measurable = children[this.checkboxIndex];
     let checkboxConstraint: ConstraintSizeOptions = {
@@ -719,17 +714,12 @@ export struct ConfirmDialog {
   onCheckedChange?: Callback<boolean>;
   contentScroller: Scroller = new Scroller();
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Start;
+  @State textAlign: TextAlign = TextAlign.Center;
   marginOffset: number = 0;
   @State fontSizeScale: number = 1;
   @State minContentHeight: number = MIN_CONTENT_HEIGHT;
   textIndex: number = 0;
   checkboxIndex: number = 1;
-  updateTextAlign: (maxWidth: number) => void = (maxWidth: number) => {
-    if (this.content) {
-      this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
-    }
-  }
 
   @Builder
   textBuilder(): void {
@@ -790,16 +780,22 @@ export struct ConfirmDialog {
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
       this.isChecked = !this.isChecked;
-      let eventInfo: accessibility.EventInfo = ({
-        type: 'announceForAccessibility',
-        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-        triggerAction: 'click',
-        textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
-        getContext().resourceManager.getStringSync(125833935)
-      });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        console.info(`Accessibility send event`)
-      });
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'common',
+          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          getContext().resourceManager.getStringSync(125833935)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.info(`Accessibility send event`)
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+      }
     })
     .width('100%')
     .padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() })
@@ -807,7 +803,7 @@ export struct ConfirmDialog {
 
   @Builder
   buildContent(): void {
-    ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight, updateTextAlign: this.updateTextAlign }) {
+    ConfirmDialogContentLayout({ minContentHeight: this.minContentHeight }) {
       ForEach([this.textIndex, this.checkboxIndex], (index: number) => {
         if (index === this.textIndex) {
           WithTheme({ theme: this.theme, colorMode: this.themeColorMode }) {
@@ -871,7 +867,7 @@ export struct AlertDialog {
   primaryButton?: ButtonOptions | null = null;
   secondaryButton?: ButtonOptions | null = null;
   buttons?: ButtonOptions[] | undefined = undefined;
-  @State textAlign: TextAlign = TextAlign.Start;
+  @State textAlign: TextAlign = TextAlign.Center;
   // the controller of content area
   contentScroller: Scroller = new Scroller();
   @State fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
@@ -910,11 +906,8 @@ export struct AlertDialog {
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
-          .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
+          .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
           .textAlign(this.textAlign)
-          .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.updateTextAlign(Number(newValue.width));
-          })
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
               resolveKeyEvent(event, this.contentScroller);
@@ -932,10 +925,6 @@ export struct AlertDialog {
     this.fontColorWithTheme = this.theme?.colors?.fontPrimary ?
     this.theme.colors.fontPrimary : $r('sys.color.font_primary');
     this.initButtons();
-  }
-
-  private updateTextAlign(maxWidth: number): void {
-    this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
   }
 
   private initButtons(): void {
@@ -1209,7 +1198,7 @@ struct CustomDialogContentComponent {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -1278,7 +1267,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.primaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1298,7 +1287,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.secondaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1576,7 +1565,7 @@ function setButtonProperties(buttonOptions: ButtonOptions, buttonList?: ButtonOp
     if (!event) {
       return;
     }
-    if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) && 
+    if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
       event.type === KeyType.Down) {
       if (buttonOptions.action) {
         buttonOptions.action();
@@ -1734,43 +1723,6 @@ function getAccessibilityText(resource: ResourceStr, selected: boolean): string 
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
-}
-
-/**
- * get Text Align
- *
- * @param maxWidth maxWidth
- * @param content textContent
- * @param fontSize fontSize
- * @returns textAlign
- */
-function getTextAlign(maxWidth: number, content: ResourceStr, fontSize: number | string | Resource): TextAlign {
-  let contentSize: SizeOptions = measure.measureTextSize({
-    textContent: content,
-    fontSize: fontSize,
-    constraintWidth: maxWidth,
-  });
-  let oneLineSize: SizeOptions = measure.measureTextSize({
-    textContent: content,
-    fontSize: fontSize,
-  });
-  if (getTextHeight(contentSize) <= getTextHeight(oneLineSize)) {
-    return TextAlign.Center;
-  }
-  return TextAlign.Start;
-}
-
-/**
- * get text height
- *
- * @param textSize textSize
- * @returns text height
- */
-function getTextHeight(textSize: SizeOptions): number {
-  if (textSize && textSize.height !== null && textSize.height !== undefined) {
-    return Number(textSize.height);
-  }
-  return 0;
 }
 
 /**

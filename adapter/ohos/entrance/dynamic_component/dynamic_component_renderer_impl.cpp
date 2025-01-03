@@ -282,36 +282,39 @@ void DynamicComponentRendererImpl::FireOnErrorCallback(
 
 void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
 {
-    CHECK_NULL_VOID(uiContent_);
-    auto container = Container::GetContainer(uiContent_->GetInstanceId());
-    CHECK_NULL_VOID(container);
-    auto frontend = AceType::DynamicCast<OHOS::Ace::FormFrontendDeclarative>(container->GetFrontend());
-    CHECK_NULL_VOID(frontend);
-    auto delegate = frontend->GetDelegate();
-    CHECK_NULL_VOID(delegate);
-    auto pageRouterManager = delegate->GetPageRouterManager();
-    CHECK_NULL_VOID(pageRouterManager);
-    auto pageNode = pageRouterManager->GetCurrentPageNode();
-    CHECK_NULL_VOID(pageNode);
-    auto pagePattern = AceType::DynamicCast<PagePattern>(pageNode->GetPattern());
-    CHECK_NULL_VOID(pagePattern);
+    auto taskExecutor = GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask(
+        [weak = WeakClaim(this), aceLogTag = aceLogTag_, instanceId = uiContent_->GetInstanceId()] {
+            auto container = Container::GetContainer(instanceId);
+            auto frontend = AceType::DynamicCast<OHOS::Ace::FormFrontendDeclarative>(container->GetFrontend());
+            CHECK_NULL_VOID(frontend);
+            auto delegate = frontend->GetDelegate();
+            CHECK_NULL_VOID(delegate);
+            auto pageRouterManager = delegate->GetPageRouterManager();
+            CHECK_NULL_VOID(pageRouterManager);
+            auto pageNode = pageRouterManager->GetCurrentPageNode();
+            CHECK_NULL_VOID(pageNode);
+            auto pagePattern = AceType::DynamicCast<PagePattern>(pageNode->GetPattern());
+            CHECK_NULL_VOID(pagePattern);
 
-    auto dynamicPageSizeCallback = [weak = WeakClaim(this), aceLogTag = aceLogTag_](const SizeF& size) {
-        TAG_LOGI(aceLogTag, "card size callback: %{public}s", size.ToString().c_str());
-        auto renderer = weak.Upgrade();
-        CHECK_NULL_VOID(renderer);
-        CHECK_NULL_VOID(renderer->uiContent_);
-        auto hostTaskExecutor = renderer->GetHostTaskExecutor();
-        CHECK_NULL_VOID(hostTaskExecutor);
-        hostTaskExecutor->PostTask(
-            [weak, size]() {
+            auto dynamicPageSizeCallback = [weak, aceLogTag](const SizeF& size) {
+                TAG_LOGI(aceLogTag, "card size callback: %{public}s", size.ToString().c_str());
                 auto renderer = weak.Upgrade();
                 CHECK_NULL_VOID(renderer);
-                renderer->HandleCardSizeChangeEvent(size);
-            },
-            TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
-    };
-    pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
+                CHECK_NULL_VOID(renderer->uiContent_);
+                auto hostTaskExecutor = renderer->GetHostTaskExecutor();
+                CHECK_NULL_VOID(hostTaskExecutor);
+                hostTaskExecutor->PostTask(
+                    [weak, size]() {
+                        auto renderer = weak.Upgrade();
+                        CHECK_NULL_VOID(renderer);
+                        renderer->HandleCardSizeChangeEvent(size);
+                    },
+                    TaskExecutor::TaskType::UI, "ArkUIDynamicComponentSizeChanged");
+            };
+            pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
+        }, TaskExecutor::TaskType::UI, "ArkUIRegisterSizeChangedCallback");
 }
 
 void DynamicComponentRendererImpl::HandleCardSizeChangeEvent(const SizeF& size)

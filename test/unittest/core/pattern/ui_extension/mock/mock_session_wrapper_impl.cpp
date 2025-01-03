@@ -268,8 +268,13 @@ void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, s
 {
 }
 
-WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
 {
-    return static_cast<WindowSizeChangeReason>(0);
+    return false;
+}
+
+bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG

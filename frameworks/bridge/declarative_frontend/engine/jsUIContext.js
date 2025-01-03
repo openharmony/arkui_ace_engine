@@ -116,6 +116,20 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    getWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.getWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    getSyncWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
