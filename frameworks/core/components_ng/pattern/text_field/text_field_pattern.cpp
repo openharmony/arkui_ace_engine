@@ -3655,12 +3655,12 @@ bool TextFieldPattern::RequestKeyboardCrossPlatForm(bool isFocusViewChanged)
         if (!HasConnection()) {
             return false;
         }
-        TextEditingValue value;
-        value.text = contentController_->GetTextValue();
-        value.hint = GetPlaceHolder();
-        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
-        connection_->SetEditingState(value, GetInstanceId());
     }
+    TextEditingValue value;
+    value.text = contentController_->GetTextValue();
+    value.hint = GetPlaceHolder();
+    value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
+    connection_->SetEditingState(value, GetInstanceId());
     connection_->Show(isFocusViewChanged, GetInstanceId());
 #endif
     return true;
