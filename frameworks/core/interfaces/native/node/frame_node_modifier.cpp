@@ -683,6 +683,52 @@ void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     frameNode->RemoveExtraCustomProperty(key);
 }
 
+void GetCustomPropertyByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("GetCustomPropertyByKey doesn't run on UI thread");
+        return;
+    }
+    std::string customProperty;
+    if (!frameNode->GetCustomPropertyByKey(key, customProperty)) {
+        return;
+    }
+    *size = customProperty.size();
+    *value = new char[*size + 1];
+    customProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+}
+
+void AddNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    auto onDestroyCallback = [node, onDestroy]() {
+        onDestroy(node);
+    };
+    frameNode->AddNodeDestroyCallback(std::string(callbackKey), std::move(onDestroyCallback));
+}
+
+void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -740,6 +786,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .addExtraCustomProperty = AddExtraCustomProperty,
         .getExtraCustomProperty = GetExtraCustomProperty,
         .removeExtraCustomProperty = RemoveExtraCustomProperty,
+        .getCustomPropertyByKey = GetCustomPropertyByKey,
+        .addNodeDestroyCallback = AddNodeDestroyCallback,
+        .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
         .setDrawCompleteEvent = SetDrawCompleteEvent,
         .resetDrawCompleteEvent = ResetDrawCompleteEvent,
         .setLayoutEvent = SetLayoutEvent,

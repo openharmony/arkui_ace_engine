@@ -193,6 +193,13 @@ if (defined(global_parts_info.hiviewdfx_hichecker)) {
   hichecker_exists = false
 }
 
+if (defined(global_parts_info.thirdparty_qrcodegen)) {
+  qrcodegen_support = true
+  defines += [ "QRCODEGEN_SUPPORT" ]
+} else {
+  qrcodegen_support = false
+}
+
 if (dynamic_component_support) {
   defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
 }

@@ -104,7 +104,7 @@ void FfiOHOSAceFrameworkRichEditorAboutToIMEInput(bool(*callback)(NativeRichEdit
     auto aboutToIMEInputFunc = [cjCallback = CJLambda::Create(callback)](
         const NG::RichEditorInsertValue& insertValue) -> bool {
         NativeRichEditorInsertValue result {
-            insertValue.GetInsertOffset(), insertValue.GetInsertValue().c_str()
+            insertValue.GetInsertOffset(), UtfUtils::Str16ToStr8(insertValue.GetInsertValue()).c_str()
         };
         return cjCallback(result);
     };
@@ -137,7 +137,7 @@ void FfiOHOSAceFrameworkRichEditorOnIMEInputComplete(void(*callback)(NativeRichE
 
         NativeRichEditorTextSpanResult result {
             spanPosition,
-            textSpanResult.GetValue().c_str(),
+            UtfUtils::Str16ToStr8(textSpanResult.GetValue()).c_str(),
             textStyle,
             textSpanResult.OffsetInSpan(),
             textSpanResult.OffsetInSpan() + textSpanResult.GetEraseLength()

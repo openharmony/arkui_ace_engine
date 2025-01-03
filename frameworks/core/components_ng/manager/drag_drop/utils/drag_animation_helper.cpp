@@ -438,10 +438,6 @@ void DragAnimationHelper::DoGrayedAnimation(
     if (gestureHub->IsTextCategoryComponent(frameTag)) {
         return;
     }
-    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
-    if (!dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
-        return;
-    }
     AnimationOption option;
     option.SetCurve(cure);
     AnimationUtils::Animate(

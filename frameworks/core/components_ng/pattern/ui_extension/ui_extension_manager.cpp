@@ -321,4 +321,116 @@ void UIExtensionManager::UpdateSessionViewportConfig(const ViewportConfig& confi
         }
     }
 }
+
+bool UIExtensionManager::UIExtBusinessDataSendValid()
+{
+    if (!businessSendToHostReplyFunc_ || !businessSendToHostFunc_) {
+        return false;
+    }
+    return true;
+}
+
+// host send data to provider
+void UIExtensionManager::RegisterBusinessDataSendCallback(
+    UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback)
+{
+    businessDataSendCallbacks_.try_emplace(
+        code, std::pair<BusinessDataSendType, UIExtBusinessDataSendCallback>(type, callback));
+}
+
+bool UIExtensionManager::TriggerBusinessDataSend(UIContentBusinessCode code)
+{
+    auto it = businessDataSendCallbacks_.find(code);
+    if (it == businessDataSendCallbacks_.end()) {
+        return false;
+    }
+    auto type = it->second.first;
+    auto callback = it->second.second;
+    CHECK_NULL_RETURN(callback, false);
+    bool ret = false;
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+        for (const auto& pattern : aliveUIExtensions_) {
+            auto uiExtension = pattern.second.Upgrade();
+            if (!uiExtension) {
+                continue;
+            }
+            // data is std::optional<AAFwk::Want>, if data has value then send it.
+            auto data = callback(uiExtension);
+            if (!data.has_value()) {
+                continue;
+            }
+            ret |= uiExtension->SendBusinessData(code, std::move(data.value()), type);
+        }
+    }
+    return ret;
+}
+
+// provider consume data
+void UIExtensionManager::RegisterBusinessDataConsumeCallback(
+    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+{
+    businessDataConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::DispatchBusinessDataConsume(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    auto it = businessDataConsumeCallbacks_.find(code);
+    if (it == businessDataConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionManager::RegisterBusinessDataConsumeReplyCallback(
+    UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback)
+{
+    businessDataConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionManager::DispatchBusinessDataConsumeReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    auto it = businessDataConsumeReplyCallbacks_.find(code);
+    if (it == businessDataConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+// provider send data to host
+void UIExtensionManager::RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func)
+{
+    businessSendToHostReplyFunc_ = func;
+}
+
+void UIExtensionManager::RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func)
+{
+    businessSendToHostFunc_ = func;
+}
+
+bool UIExtensionManager::SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    if (!UIExtBusinessDataSendValid()) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
+        return false;
+    }
+    auto callback = businessSendToHostFunc_;
+    return callback(static_cast<uint32_t>(code), std::move(data), type);
+}
+
+bool UIExtensionManager::SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    if (!UIExtBusinessDataSendValid()) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "SendBusinessToHost callback not set.");
+        return false;
+    }
+    auto callback = businessSendToHostReplyFunc_;
+    return callback(static_cast<uint32_t>(code), std::move(data), reply);
+}
 } // namespace OHOS::Ace::NG

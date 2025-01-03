@@ -681,7 +681,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg014, TestSize.Level1)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 12;
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     sideBarLayoutProperty->UpdateMinSideBarWidth(DEFAULT_MIN_SIDE_BAR_WIDTH);
     sideBarLayoutProperty->UpdateMaxSideBarWidth(DEFAULT_MAX_SIDE_BAR_WIDTH);
     layoutAlgorithm->AdjustMinAndMaxSideBarWidth(&layoutWrapper);
@@ -943,7 +943,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg021, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 7;
@@ -1108,7 +1108,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg025, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->minPlatformVersion_ = 12;
@@ -1254,7 +1254,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg029, TestSize.Level1)
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutWrapper.cachedList_.push_back(tempLayoutWrapper);
     layoutAlgorithm->GetSideBarLayoutWrapper(&layoutWrapper);
-    layoutAlgorithm->UpdateDefaultValueByVersion();
+    layoutAlgorithm->UpdateDefaultValueByVersion(tempLayoutWrapper.GetRawPtr());
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->minPlatformVersion_ = 12;

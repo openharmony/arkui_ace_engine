@@ -183,7 +183,12 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto padding = tabContentPattern->GetPadding();
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabLayoutProperty);
-    auto isRTL = tabLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto tabBarLayoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(tabBarFrameNode->GetLayoutProperty());
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    auto tabsDirection = tabLayoutProperty->GetNonAutoLayoutDirection();
+    auto tabBarDirection = tabBarLayoutProperty->GetLayoutDirection();
+    auto isRTL = tabBarDirection == TextDirection::RTL ||
+             (tabBarDirection == TextDirection::AUTO && tabsDirection == TextDirection::RTL);
     if (isRTL && tabContentPattern->GetUseLocalizedPadding()) {
         PaddingProperty paddingRtl;
         paddingRtl.left = padding.right;
@@ -384,8 +389,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    auto tabBarLayoutProperty = tabBarPattern->GetLayoutProperty<TabBarLayoutProperty>();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
     auto axis = tabBarLayoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     if ((!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) &&
         !isFrameNode) {

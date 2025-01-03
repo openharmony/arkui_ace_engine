@@ -23,8 +23,5 @@ ace_unittest("qrcode_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/qrcode/qrcode_pattern.cpp",
     "qrcode_test_ng.cpp",
   ]
-  extra_deps = []
-  extra_deps += [
-    "//foundation/arkui/ace_engine/frameworks/core/components/qrcode:qrcodegen",
-  ]
+  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
 }

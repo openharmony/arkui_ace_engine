@@ -89,6 +89,7 @@ let WordBreak;
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
   WordBreak[WordBreak.BREAK_ALL = 1] = 'break-all';
   WordBreak[WordBreak.BREAK_WORD = 2] = 'break-word';
+  WordBreak[WordBreak.HYPHENATION = 3] = "hyphenation";
 })(WordBreak || (WordBreak = {}));
 
 let DpiFollowStrategy;

@@ -6275,12 +6275,10 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         getParentRectHandlerNew_(rectInfo);
         output.windowTop = rectInfo.top;
         output.windowLeft = rectInfo.left;
-        if ((rectInfo.scaleX != 1.0f) || (rectInfo.scaleY != 1.0f)) {
-            scaleX_ = rectInfo.scaleX;
-            scaleY_ = rectInfo.scaleY;
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-                "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
-        }
+        scaleX_ = rectInfo.scaleX;
+        scaleY_ = rectInfo.scaleY;
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
     } else {
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());

@@ -66,6 +66,10 @@ config("ace_config") {
     }
   }
 
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
+
   if (ace_engine_enable_circle_feature) {
     cflags += [ "-DARKUI_CIRCLE_FEATURE" ]
   }
@@ -75,6 +79,10 @@ config("ace_config") {
     "-Wno-non-c-typedef-for-linkage",
     "-Os",
   ]
+
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
 
   if (use_mingw_win) {
     cflags_cc += [ "-std=c++17" ]

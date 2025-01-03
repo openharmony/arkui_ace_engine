@@ -145,7 +145,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
     gesture->SetIsTextDraggable(true);
     auto dragStart = [](const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> NG::DragDropInfo {
         NG::DragDropInfo info;
-        info.extraInfo = INIT_VALUE_1;
+        info.extraInfo = TEST_STR;
         return info;
     };
     eventHub->SetOnDragStart(std::move(dragStart));
@@ -164,7 +164,7 @@ HWTEST_F(RichEditorDragTestNg, RichEditorDragTest002, TestSize.Level1)
     auto onDragStart = eventHub->GetOnDragStart();
     auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     auto dragDropInfo = onDragStart(event, "");
-    EXPECT_EQ(dragDropInfo.extraInfo, INIT_VALUE_1);
+    EXPECT_EQ(dragDropInfo.extraInfo, TEST_STR);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 6);
     EXPECT_EQ(pattern->status_, Status::NONE);
@@ -448,7 +448,7 @@ HWTEST_F(RichEditorDragTestNg, HandleDraggableFlag002, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     AddImageSpan();
 
     /**

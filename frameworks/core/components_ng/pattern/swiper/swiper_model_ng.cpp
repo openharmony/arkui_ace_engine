@@ -390,6 +390,25 @@ void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
     pattern->SetIndicatorIsBoolean(isBoolean);
 }
 
+void SwiperModelNG::SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
+}
+
+SwiperAutoPlayOptions SwiperModelNG::GetAutoPlayOptions(FrameNode* frameNode)
+{
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    CHECK_NULL_RETURN(frameNode, swiperAutoPlayOptions);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperAutoPlayOptions);
+    swiperAutoPlayOptions.stopWhenTouched = pattern->IsStopWhenTouched();
+    return swiperAutoPlayOptions;
+}
+
 void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
 {
     if (swiperArrowParameters.isShowBackground.has_value()) {
@@ -633,6 +652,14 @@ void SwiperModelNG::ResetDisplayCount(FrameNode* frameNode)
 void SwiperModelNG::SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve, frameNode);
+}
+
+void SwiperModelNG::SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
 }
 
 void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)

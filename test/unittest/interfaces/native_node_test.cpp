@@ -2657,6 +2657,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest026, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_OFFSET), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_ENABLE_PAGING), nullptr);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 9000.0f);
+    value[0].f32 = 100.0f;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 100.0f);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 9000.0f);
+
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT)->value->i32,
                                     ArkUI_ContentClipMode::ARKUI_CONTENT_CLIP_MODE_BOUNDARY);
 

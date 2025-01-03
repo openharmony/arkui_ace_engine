@@ -22,7 +22,9 @@ import { SelectionMenuBootcamp } from './SelectionMenuBootcamp';
 import { ContainerSpanBootcamp } from './ContainerSpanBootcamp';
 import { SearchBootcamp } from './SearchBootcamp';
 import { ImageSpanBootcamp } from './ImageSpanBootcamp';
-
+import { HyperlinkBootcamp } from './HyperlinkBootcamp';
+import { SpanBootcamp } from './SpanBootcamp';
+import { SymbolGlyphBootcamp } from './SymbolGlyphBootcamp';
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -38,6 +40,8 @@ export const inputsRoute: RouteGroup = {
     { name: 'span', label: 'Span' },
     { name: 'containerSpan', label: 'ContainerSpan/ContainerSpan' },
     { name: 'imageSpan', label: 'ImageSpan/ImageSpan' },
+    { name: 'hyperlink', label: '超链接/Hyperlink' },
+    { name: 'symbolGlyph', label: 'SymbolGlyph/SymbolGlyph' },
   ]
 };
 
@@ -61,5 +65,11 @@ export function InputsDestination(name: string, route: Route) {
     ContainerSpanBootcamp({ title: route.label })
   } else if (name === 'inputs/imageSpan') {
     ImageSpanBootcamp({ title: route.label })
+  } else if (name === 'inputs/span') {
+    SpanBootcamp({ title: route.label })
+  } else if (name === 'inputs/hyperlink') {
+    HyperlinkBootcamp({ title: route.label })
+  } else if (name === 'inputs/symbolGlyph') {
+    SymbolGlyphBootcamp({ title: route.label })
   }
 }
