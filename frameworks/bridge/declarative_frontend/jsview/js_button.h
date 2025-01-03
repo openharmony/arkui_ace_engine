@@ -51,6 +51,8 @@ public:
     static void JsRemoteMessage(const JSCallbackInfo& info);
     static void JsPadding(const JSCallbackInfo& info);
     static void SetRole(const JSCallbackInfo& info);
+    static void SetMinFontScale(const JSCallbackInfo& info);
+    static void SetMaxFontScale(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
     static void CreateWithChild(const JSCallbackInfo& info);
     static void CreateWithLabel(const JSCallbackInfo& info);

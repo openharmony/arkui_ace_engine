@@ -3158,6 +3158,32 @@ typedef enum {
     NODE_BUTTON_TYPE,
 
     /**
+    * @brief Defines the minimum font scale attribute, which can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].f32: minimum font scale, in fp.
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: minimum font scale, in fp.
+    *
+    * @since 16
+    */
+    NODE_BUTTON_MIN_FONT_SCALE,
+
+    /**
+    * @brief Defines the maximum font scale attribute, which can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].f32: maximum font scale, in fp.
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: maximum font scale, in fp.
+    *
+    * @since 16
+    */
+    NODE_BUTTON_MAX_FONT_SCALE,
+
+    /**
      * @brief Defines the current value of the progress indicator.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
