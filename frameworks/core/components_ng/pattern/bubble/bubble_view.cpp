@@ -670,6 +670,18 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
 }
 
+void BubbleView::ResetBubbleProperty(int32_t popupId)
+{
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
+    CHECK_NULL_VOID(popupNode);
+    auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
+    CHECK_NULL_VOID(popupLayoutProp);
+    popupLayoutProp->Reset();
+    auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
+    CHECK_NULL_VOID(popupPaintProp);
+    popupPaintProp->Reset();
+}
+
 RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsUseCustom)
 {
     auto textId = ElementRegister::GetInstance()->MakeUniqueId();
