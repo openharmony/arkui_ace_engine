@@ -2310,4 +2310,109 @@ HWTEST_F(TextFieldUXTest, StopBackPress, TestSize.Level1)
     EXPECT_TRUE(pattern_->OnBackPressed());
     EXPECT_TRUE(manager->IsStopBackPress());
 }
+
+/**
+ * @tc.name: SupportTextFadeoutTest002
+ * @tc.desc: Test whether the text node has the ability to support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text field node with default text and placeholder.
+     * @tc.expected: Check the textinput node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_FALSE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+}
+
+/**
+ * @tc.name: TextFadeoutStateTest001
+ * @tc.desc: Test the text fadeout and marquee state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFadeoutStateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+
+    /**
+     * @tc.steps: step2. Set theme textFadeoutEnabled_.
+     */
+    auto pipelineContext = frameNode_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    theme->textFadeoutEnabled_ = true;
+
+    /**
+     * @tc.steps: step3. Set contentSize size is less than text size and call UpdateContentModifier.
+     * @tc.expected: text need fadeout and marquee.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    paintWrapper->GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+
+    paintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_TRUE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
+    EXPECT_TRUE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
+
+/**
+ * @tc.name: TextFadeoutStateTest002
+ * @tc.desc: Test the text fadeout and marquee state.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextFadeoutStateTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the node has the ability to support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->GetTextFadeoutCapacity());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+
+    /**
+     * @tc.steps: step2. Set theme textFadeoutEnabled_.
+     */
+    auto pipelineContext = frameNode_->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(theme);
+    theme->textFadeoutEnabled_ = true;
+
+    /**
+     * @tc.steps: step3. Set contentSize size is larger than text size and call UpdateContentModifier.
+     * @tc.expected: text do not need fadeout.
+     */
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProperty);
+    ASSERT_NE(paintWrapper, nullptr);
+    paintWrapper->GetGeometryNode()->SetContentSize({ 500.0f, 500.0f });
+
+    auto paintMethod = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    EXPECT_NE(paintMethod, nullptr);
+
+    paintMethod->UpdateContentModifier(paintWrapper);
+    EXPECT_FALSE(pattern_->GetParagraph()->GetTextWidth() > paintWrapper->GetContentSize().Width());
+    EXPECT_FALSE(pattern_->textFieldContentModifier_->textFadeoutEnabled_);
+}
 } // namespace OHOS::Ace::NG
