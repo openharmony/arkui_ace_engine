@@ -42,7 +42,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -607,17 +606,15 @@ HWTEST_F(VideoTestNg, VideoPatternTest011, TestSize.Level1)
     pattern->isStop_ = true;
     pattern->autoPlay_ = true;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
-        .Times(9)
+        .Times(8)
         .WillRepeatedly(Return(true));
     pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
     pattern->isStop_ = false;
-    pattern->dragEndAutoPlay_ = true;
     pattern->OnPrepared(DURATION, 0, false);
     EXPECT_EQ(pattern->duration_, DURATION);
     EXPECT_TRUE(preparedCheck.empty());
-    EXPECT_FALSE(pattern->dragEndAutoPlay_);
 }
 
 /**
