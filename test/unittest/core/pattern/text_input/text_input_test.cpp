@@ -245,13 +245,13 @@ HWTEST_F(TextFieldUXTest, CleanNode004, TestSize.Level1)
 
 /**
  * @tc.name: CleanNode005
- * @tc.desc: Test showCancelSymbolIcon true, since VERSION_FOURTEEN
+ * @tc.desc: Test showCancelSymbolIcon true, since VERSION_SIXTEEN
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon not nullptr
@@ -292,8 +292,8 @@ HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon nullptr
@@ -1523,8 +1523,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1556,8 +1556,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1589,8 +1589,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol003, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node

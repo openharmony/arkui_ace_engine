@@ -767,8 +767,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-    if (iconSymbol &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (iconSymbol && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
         // reset symbol effect
         auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
