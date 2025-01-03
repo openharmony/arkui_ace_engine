@@ -58,7 +58,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class TimePickerDialogModel {
@@ -73,7 +73,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H
