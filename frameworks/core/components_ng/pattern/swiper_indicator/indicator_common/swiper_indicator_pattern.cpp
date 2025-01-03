@@ -95,6 +95,7 @@ void SwiperIndicatorPattern::OnModifyDone()
         CHECK_NULL_VOID(gestureHub);
         InitTouchEvent(gestureHub);
         InitLongPressEvent(gestureHub);
+        InitAccessibilityFocusEvent();
     }
 }
 
