@@ -485,39 +485,34 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
     return AceType::MakeRefPtr<CanvasPath2D>();
 }
 
-JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const EcmaVM* vm, const JSRef<JSObject> jsObject)
+JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_RETURN(vm, nullptr);
+#if !defined(PREVIEW)
+    auto engine = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+#else
+    auto engine = EngineHelper::GetCurrentEngineSafely();
+#endif
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
     panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
-    Global<JSValueRef> arkValue = valueWrapper;
-    napi_value napiValue = reinterpret_cast<napi_value>(*arkValue.ToLocal(vm));
-    panda::Local<panda::JSValueRef> nativeValue(reinterpret_cast<uintptr_t>(napiValue));
-    auto nativeObject = nativeValue->ToObject(vm);
-
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
     napi_value isImageBitmap = nullptr;
-    Local<panda::StringRef> keyType = panda::StringRef::NewFromUtf8(vm, "isImageBitmap");
-    Local<panda::JSValueRef> valueType = nativeObject->Get(vm, keyType);
-    isImageBitmap = reinterpret_cast<napi_value>(*valueType);
-    if (isImageBitmap == nullptr) {
+    if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) == napi_ok) {
+        int32_t value = 0;
+        napi_get_value_int32(env, isImageBitmap, &value);
+        if (!value) {
+            return nullptr;
+        }
+    } else {
         return nullptr;
     }
-    int32_t type = 0;
-    panda::Local<panda::JSValueRef> localType(reinterpret_cast<uintptr_t>(isImageBitmap));
-    type = localType->Int32Value(vm);
-    if (!type) {
-        return nullptr;
-    }
-
-    JSRenderImage* jsImage = nullptr;
-    Local<panda::StringRef> keyObj = panda::StringRef::GetNapiWrapperString(vm);
-    Local<panda::JSValueRef> valObj = nativeObject->Get(vm, keyObj);
-    if (valObj->IsObject(vm)) {
-        Local<panda::ObjectRef> ext(valObj);
-        auto ref = reinterpret_cast<NativeReference*>(ext->GetNativePointerField(vm, 0));
-        jsImage = ref != nullptr ? reinterpret_cast<JSRenderImage*>(ref->GetData()) : nullptr;
-    }
+    void* native = nullptr;
+    NAPI_CALL(env, napi_unwrap(env, napiValue, &native));
+    JSRenderImage* jsImage = reinterpret_cast<JSRenderImage*>(native);
     return jsImage;
 }
 
@@ -583,7 +578,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
+    auto* jsImage = UnwrapNapiImage(info[0]);
     if (jsImage) {
         if (jsImage->IsSvg()) {
             DrawSvgImage(info, jsImage);
@@ -652,7 +647,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     auto arg0 = info[0];
     if (arg0->IsObject()) {
-        auto* jsImage = UnwrapNapiImage(info.GetVm(), info[0]);
+        auto* jsImage = UnwrapNapiImage(info[0]);
         CHECK_NULL_VOID(jsImage);
         std::string repeat;
         info.GetStringArg(1, repeat);
