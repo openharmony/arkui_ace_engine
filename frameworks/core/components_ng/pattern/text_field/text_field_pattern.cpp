@@ -5897,6 +5897,7 @@ void TextFieldPattern::HandleOnPageUp()
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
     selectController_->UpdateCaretInfoByOffset(offset, true);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
 }
 
 void TextFieldPattern::HandleOnPageDown()
@@ -5908,6 +5909,7 @@ void TextFieldPattern::HandleOnPageDown()
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), maxFrameHeight);
     selectController_->UpdateCaretInfoByOffset(offset, true);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
 }
 
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
