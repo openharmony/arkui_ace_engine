@@ -4589,6 +4589,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
+    void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {

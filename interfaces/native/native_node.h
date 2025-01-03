@@ -3723,6 +3723,19 @@ typedef enum {
      */
     NODE_DATE_PICKER_SELECTED_TEXT_STYLE,
     /**
+     * @brief Defines the mode of the date picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
+     *
+     * @since 16
+     */
+    NODE_DATE_PICKER_MODE = 13007,
+    /**
      * @brief Defines the time of the selected item. in the timer picker.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

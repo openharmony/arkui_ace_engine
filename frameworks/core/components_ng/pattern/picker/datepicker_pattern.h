@@ -144,6 +144,10 @@ public:
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
 
+    void IncreaseLinkageYearMonth(PickerDate& date);
+
+    void ReduceLinkageYearMonth(PickerDate& date);
+
     void HandleSolarMonthDaysChange(bool isAdd, uint32_t index);
 
     void HandleLunarMonthDaysChange(bool isAdd, uint32_t index);
@@ -419,6 +423,16 @@ public:
         return endDateSolar_;
     }
 
+    void SetMode(const DatePickerMode& value)
+    {
+        datePickerMode_ = value;
+    }
+
+    const DatePickerMode& GetMode()
+    {
+        return datePickerMode_;
+    }
+
     void AdjustSolarDate(PickerDate& date, const PickerDate& start, const PickerDate& end) const
     {
         if (SolarDateCompare(date, start) < 0) {
@@ -576,6 +590,8 @@ public:
 
     static const std::string& GetLunarDay(uint32_t day);
 
+    const std::string GetText();
+
     FocusPattern GetFocusPattern() const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -589,6 +605,8 @@ public:
     }
 
     void ShowTitle(int32_t titleId);
+    std::string GetVisibleColumnsText();
+    void GetColumnText(const RefPtr<FrameNode>& columnNode, std::string& result);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
@@ -736,6 +754,8 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void ShowColumnByDatePickMode();
+    void UpdateStackPropVisibility(VisibleType yearType, VisibleType monthType, VisibleType dayType);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -812,6 +832,8 @@ private:
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     double curOpacity_ = 1.0;
+    DatePickerMode datePickerMode_ = DatePickerMode::DATE;
+    bool isFocus_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

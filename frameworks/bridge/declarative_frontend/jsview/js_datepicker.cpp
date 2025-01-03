@@ -652,37 +652,17 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 
 void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
     JSRef<JSVal> selectedDate;
+    JSRef<JSVal> mode;
     if (!paramObj->IsUndefined()) {
         startDate = paramObj->GetProperty("start");
         endDate = paramObj->GetProperty("end");
         selectedDate = paramObj->GetProperty("selected");
+        mode = paramObj->GetProperty("mode");
     }
-    auto parseStartDate = ParseDate(startDate);
-    auto parseEndDate = ParseDate(endDate);
-    if (parseStartDate.GetYear() <= 0) {
-        parseStartDate = theme->GetDefaultStartDate();
-    }
-    if (parseEndDate.GetYear() <= 0) {
-        parseEndDate = theme->GetDefaultEndDate();
-    }
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    if (startDays > endDays) {
-        parseStartDate = theme->GetDefaultStartDate();
-        parseEndDate = theme->GetDefaultEndDate();
-    }
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    if (startDate->IsObject()) {
-        DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
-    }
-    if (endDate->IsObject()) {
-        DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
-    }
+    ParseStartEndDate(startDate, endDate);
     if (selectedDate->IsObject()) {
         JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
         JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
@@ -695,6 +675,7 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    ParseDatePickerMode(mode);
     if (!JSDatePickerTheme::ApplyTheme()) {
         SetDefaultAttributes();
     }
@@ -722,6 +703,46 @@ void JSDatePicker::SetDefaultAttributes()
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::ParseDatePickerMode(JSRef<JSVal> mode)
+{
+    auto datePickerMode = DatePickerMode::DATE;
+    if (!mode->IsNull() && mode->IsNumber()) {
+        auto parseMode = mode->ToNumber<int32_t>();
+        if (parseMode >= static_cast<int32_t>(DatePickerMode::DATE) &&
+            parseMode <= static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+            datePickerMode = static_cast<DatePickerMode>(parseMode);
+        }
+    }
+    DatePickerModel::GetInstance()->SetMode(datePickerMode);
+}
+
+void JSDatePicker::ParseStartEndDate(JSRef<JSVal> startDate, JSRef<JSVal> endDate)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    if (startDays > endDays) {
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    if (startDate->IsObject()) {
+        DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
+    }
+    if (endDate->IsObject()) {
+        DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
+    }
 }
 
 void JSDatePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
@@ -996,6 +1017,18 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
+
+    auto mode = paramObject->GetProperty("mode");
+    auto datePickerMode = DatePickerMode::DATE;
+    if (!mode->IsNull() && mode->IsNumber()) {
+        auto parseMode = mode->ToNumber<int32_t>();
+        if (parseMode >= static_cast<int32_t>(DatePickerMode::DATE) &&
+            parseMode <= static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+            datePickerMode = static_cast<DatePickerMode>(parseMode);
+        }
+    }
+    settingData.mode = datePickerMode;
+
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
     if (dateTimeOptionsValue->IsObject()) {
         auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);

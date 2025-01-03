@@ -48,6 +48,8 @@ public:
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
+    static void ParseStartEndDate(JSRef<JSVal> startDate, JSRef<JSVal> endDate);
+    static void ParseDatePickerMode(JSRef<JSVal> mode);
     // keep compatible, need remove after
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
