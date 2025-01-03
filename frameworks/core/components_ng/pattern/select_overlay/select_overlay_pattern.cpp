@@ -695,7 +695,8 @@ void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
         taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS,
             "ArkUISelectOverlayHiddenHandle");
     } else {
-        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle");
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle",
+                               PriorityType::VIP);
     }
 }
 

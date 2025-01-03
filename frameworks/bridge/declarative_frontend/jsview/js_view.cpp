@@ -1146,7 +1146,14 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
+    JSClass<JSViewPartialUpdate>::Method(
+        "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
+}
+
+bool JSViewPartialUpdate::JSAllowReusableV2Descendant()
+{
+    return ViewPartialUpdateModel::GetInstance()->AllowReusableV2Descendant(viewNode_);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)

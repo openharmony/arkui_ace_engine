@@ -40,6 +40,11 @@ enum class LayoutStyle {
     SPACE_BETWEEN_OR_CENTER,
 };
 
+enum class TabsCacheMode {
+    CACHE_BOTH_SIDE = 0,
+    CACHE_LATEST_SWITCHED
+};
+
 struct TabsItemDivider final {
     Dimension strokeWidth = 0.0_vp;
     Dimension startMargin = 0.0_vp;
@@ -147,6 +152,7 @@ public:
     virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
+    virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

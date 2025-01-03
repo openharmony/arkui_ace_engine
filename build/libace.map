@@ -423,6 +423,7 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
+      vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;

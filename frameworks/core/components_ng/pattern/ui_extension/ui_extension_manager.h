@@ -25,6 +25,7 @@
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 
 namespace OHOS {
@@ -47,6 +48,13 @@ constexpr int64_t UI_EXTENSION_OFFSET_MIN = 10000000000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
+using UIExtBusinessDataSendCallback = std::function<std::optional<AAFwk::Want>(WeakPtr<UIExtensionPattern>)>;
+using UIExtBusinessDataConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using UIExtBusinessDataConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
+
+using UIExtBusinessSendToHostReplyFunc = std::function<bool(uint32_t, AAFwk::Want&&, AAFwk::Want&)>;
+using UIExtBusinessSendToHostFunc = std::function<bool(uint32_t, AAFwk::Want&&, BusinessDataSendType)>;
+
 }; // namespace
 
 class UIExtensionPattern;
@@ -127,13 +135,40 @@ public:
 
     void DumpUIExt();
 
+    // host send data to provider
+    void RegisterBusinessDataSendCallback(
+            UIContentBusinessCode code, BusinessDataSendType type, UIExtBusinessDataSendCallback callback);
+    bool TriggerBusinessDataSend(UIContentBusinessCode code);
+
+    // provider consume data
+    void RegisterBusinessDataConsumeReplyCallback(
+            UIContentBusinessCode code, UIExtBusinessDataConsumeReplyCallback callback);
+    void DispatchBusinessDataConsumeReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+
+    void RegisterBusinessDataConsumeCallback(UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback);
+    void DispatchBusinessDataConsume(UIContentBusinessCode code, const AAFwk::Want& data);
+    
+    // provider send data to host
+    void RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func);
+    void RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func);
+    bool SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    bool SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
 private:
+    bool UIExtBusinessDataSendValid();
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
     WeakPtr<SecurityUIExtensionPattern> securityUiExtensionFocused_;
     WeakPtr<SessionWrapper> sessionWrapper_;
     std::mutex aliveUIExtensionMutex_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::map<int32_t, OHOS::Ace::WeakPtr<SecurityUIExtensionPattern>> aliveSecurityUIExtensions_;
+    std::map<UIContentBusinessCode,
+        std::pair<BusinessDataSendType, UIExtBusinessDataSendCallback>> businessDataSendCallbacks_;
+    std::map<UIContentBusinessCode, UIExtBusinessDataConsumeCallback> businessDataConsumeCallbacks_;
+    std::map<UIContentBusinessCode, UIExtBusinessDataConsumeReplyCallback> businessDataConsumeReplyCallbacks_;
+    UIExtBusinessSendToHostReplyFunc businessSendToHostReplyFunc_;
+    UIExtBusinessSendToHostFunc businessSendToHostFunc_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MANAGER_H

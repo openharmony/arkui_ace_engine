@@ -170,7 +170,8 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     CHECK_NULL_VOID(counterNodeLayoutProperty);
     auto context = textNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    
+    auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     std::string counterText;
     if (isVisible) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
@@ -179,6 +180,15 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
                                 theme->GetOverCountTextStyle() :
                                 theme->GetCountTextStyle();
     counterNodeLayoutProperty->UpdateContent(counterText);
+    
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value();
+        counterNodeLayoutProperty->UpdateMaxFontScale(maxFontScale);
+    }
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        auto minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        counterNodeLayoutProperty->UpdateMinFontScale(minFontScale);
+    }
     counterNodeLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
     counterNodeLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
     counterNodeLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
@@ -413,7 +423,12 @@ void ErrorDecorator::UpdateErrorStyle()
     textLayoutProperty->UpdateTextColor(errorTextStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
     textLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
-    textLayoutProperty->UpdateMaxFontScale(theme->GetErrorTextMaxFontScale());
+    auto maxFontScale = theme->GetErrorTextMaxFontScale();
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(theme->GetErrorTextMaxFontScale(),
+            textFieldLayoutProperty->GetMaxFontScale().value());
+    }
+    textLayoutProperty->UpdateMaxFontScale(maxFontScale);
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
