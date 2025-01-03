@@ -201,6 +201,7 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     bubblePattern->SetMessageColor(textColor.has_value());
     bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetEnableHoverMode(param->EnableHoverMode());
+    bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
     auto popupTheme = GetPopupTheme();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     // Create child
@@ -344,6 +345,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
         popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
     }
     popupPattern->SetHasTransition(param->GetHasTransition());
+    popupPattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -665,6 +667,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
     bubblePattern->SetHasTransition(param->GetHasTransition());
+    bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
     if (param->GetHasTransition()) {
         popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
     }
