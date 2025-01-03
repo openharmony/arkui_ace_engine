@@ -2085,6 +2085,45 @@ export struct SearchBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onSubmit((value: string) =>{
+          this.compEventTriggeredLog('点击搜索按钮onSubmit触发')
+        })
+        .onChange((value:string)=>{
+          this.compEventTriggeredLog('输入内容发生变化onChange触发')
+        })
+        .onCopy((value: string)=>{
+          this.compEventTriggeredLog('进行复制操作onCopy触发')
+        })
+        .onCut((value: string)=>{
+          this.compEventTriggeredLog('进行剪切操作onCut触发')
+        })
+        .onPaste((value: string, event: PasteEvent)=>{
+          this.compEventTriggeredLog('进行粘贴操作onPaste触发')
+        })
+        .onTextSelectionChange((selectionStart: number, selectionEnd: number)=>{
+          this.compEventTriggeredLog('文本选择的位置发生变化或编辑状态下光标位置发生变化onTextSelectionChange触发')
+        })
+        .onContentScroll((totalOffsetX: number, totalOffsetY: number)=>{
+          this.compEventTriggeredLog('文本内容滚动onContentScroll触发')
+        })
+        .onEditChange((isEditing:boolean)=>{
+          this.compEventTriggeredLog('输入状态变化onEditChange触发')
+          return true
+        })
+        .onWillInsert((info: InsertValue)=>{
+          this.compEventTriggeredLog('将要输入onWillInsert触发')
+          return true
+        })
+        .onDidInsert((info: InsertValue)=>{
+          this.compEventTriggeredLog('输入完成onDidInsert触发')
+        })
+        .onWillDelete((info: DeleteValue)=>{
+          this.compEventTriggeredLog('将要删除onWillDelete触发')
+          return true
+        })
+        .onDidDelete((info: DeleteValue)=>{
+          this.compEventTriggeredLog('删除完成onDidDelete触发')
+        })
     }.justifyContent(FlexAlign.Start)
   }
 
