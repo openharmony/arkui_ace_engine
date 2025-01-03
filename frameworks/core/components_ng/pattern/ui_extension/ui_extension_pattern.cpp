@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
@@ -476,6 +477,42 @@ void UIExtensionPattern::OnAreaUpdated()
     PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
 }
 
+void UIExtensionPattern::RegisterWindowSceneVisibleChangeCallback(
+    const RefPtr<Pattern>& windowScenePattern)
+{
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(windowScenePattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnWindowSceneVisibleChange(visible);
+        }
+    };
+    systemWindowScene->RegisterVisibleChangeCallback(host->GetId(), callback);
+    weakSystemWindowScene_ = systemWindowScene;
+    UIEXT_LOGI("RegisterWindowSceneVisibleChangeCallback %{public}d.", host->GetId());
+}
+
+void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId)
+{
+    auto pattern = weakSystemWindowScene_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(pattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    systemWindowScene->UnRegisterVisibleChangeCallback(nodeId);
+    UIEXT_LOGI("UnRegisterWindowSceneVisibleChangeCallback %{public}d.", nodeId);
+}
+
+void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
+{
+    UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    if (!visible) {
+        OnWindowHide();
+    }
+}
+
 void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
 {
     ContainerScope scope(instanceId_);
@@ -679,6 +716,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
+    UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
