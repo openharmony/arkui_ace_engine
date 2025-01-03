@@ -80,7 +80,9 @@ public:
 
     void SetCalendarData(const CalendarSettingData& data)
     {
-        calendarData_ = data;
+        CalendarSettingData settingData = data;
+        settingData.selectedDate = PickerDate::AdjustDateToRange(data.selectedDate, data.startDate, data.endDate);
+        calendarData_ = settingData;
     }
 
     CalendarSettingData GetCalendarData() const
@@ -205,6 +207,10 @@ private:
     void UpdateEntryButtonBorderWidth();
     void UpdateEdgeAlign();
     void UpdateAccessibilityText();
+    void FlushAddAndSubButton();
+    bool IsAddOrSubButtonEnable(int32_t buttonIndex);
+    void PrevDateBySelectedType(PickerDate& date);
+    void NextDateBySelectedType(PickerDate& date);
 
     std::string GetEntryDateInfo();
 

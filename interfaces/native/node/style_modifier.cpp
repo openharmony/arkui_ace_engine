@@ -10482,6 +10482,92 @@ const ArkUI_AttributeItem* GetSelectedDate(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetCalendarPickerStartDate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<std::string> date;
+    StringUtils::StringSplitter(item->string, '-', date);
+    if (date.size() != NUM_3) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto startYear = StringToInt(date[NUM_0].c_str());
+    auto startMonth = StringToInt(date[NUM_1].c_str());
+    auto startDay = StringToInt(date[NUM_2].c_str());
+    if (startYear > 0 && startMonth > 0 && startDay > 0) {
+        startYear = static_cast<uint32_t>(startYear);
+        startMonth = static_cast<uint32_t>(startMonth);
+        startDay = static_cast<uint32_t>(startDay);
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!IsValidDate(startYear, startMonth, startDay)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setStartDate(
+            node->uiNodeHandle, startYear, startMonth, startDay);
+    } else {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCalendarPickerStartDate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        auto startDate = fullImpl->getNodeModifiers()->getCalendarPickerModifier()->getStartDate(node->uiNodeHandle);
+        g_attributeItem.string = startDate;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetCalendarPickerEndDate(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    std::vector<std::string> date;
+    StringUtils::StringSplitter(item->string, '-', date);
+    if (date.size() != NUM_3) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto endYear = StringToInt(date[NUM_0].c_str());
+    auto endMonth = StringToInt(date[NUM_1].c_str());
+    auto endDay = StringToInt(date[NUM_2].c_str());
+    if (endYear > 0 && endMonth > 0 && endDay > 0) {
+        endYear = static_cast<uint32_t>(endYear);
+        endMonth = static_cast<uint32_t>(endMonth);
+        endDay = static_cast<uint32_t>(endDay);
+    } else {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (!IsValidDate(endYear, endMonth, endDay)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->setEndDate(
+            node->uiNodeHandle, endYear, endMonth, endDay);
+    } else {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetCalendarPickerEndDate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        auto endDate = fullImpl->getNodeModifiers()->getCalendarPickerModifier()->getEndDate(node->uiNodeHandle);
+        g_attributeItem.string = endDate;
+    }
+    return &g_attributeItem;
+}
+
 int32_t SetEdgeAlignment(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -10587,6 +10673,22 @@ void ResetSelectedDate(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetSelectDate(node->uiNodeHandle);
+}
+
+void ResetCalendarPickerStartDate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetStartDate(node->uiNodeHandle);
+    }
+}
+
+void ResetCalendarPickerEndDate(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getCalendarPickerModifier()) {
+        fullImpl->getNodeModifiers()->getCalendarPickerModifier()->resetEndDate(node->uiNodeHandle);
+    }
 }
 
 void ResetEdgeAlignment(ArkUI_NodeHandle node)
@@ -14124,7 +14226,8 @@ void ResetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 int32_t SetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
-    static Setter* setters[] = { SetHintRadius, SetSelectedDate, SetEdgeAlignment, SetCalendarPickerTextStyle };
+    static Setter* setters[] = { SetHintRadius, SetSelectedDate, SetEdgeAlignment, SetCalendarPickerTextStyle,
+        SetCalendarPickerStartDate, SetCalendarPickerEndDate };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14135,7 +14238,7 @@ int32_t SetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, con
 void ResetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetHintRadius, ResetSelectedDate, ResetEdgeAlignment,
-        ResetCalendarPickerTextStyle };
+        ResetCalendarPickerTextStyle, ResetCalendarPickerStartDate, ResetCalendarPickerEndDate };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14145,7 +14248,8 @@ void ResetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 
 const ArkUI_AttributeItem* GetCalendarPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetHintRadius, GetSelectedDate, GetEdgeAlignment, GetCalendarPickerTextStyle };
+    static Getter* getters[] = { GetHintRadius, GetSelectedDate, GetEdgeAlignment, GetCalendarPickerTextStyle,
+        GetCalendarPickerStartDate, GetCalendarPickerEndDate };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "calendar picker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;

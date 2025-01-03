@@ -39,6 +39,10 @@ public:
 
     static bool IsLeapYear(uint32_t year);
 
+    static PickerDate AdjustDateToRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
+
+    static bool IsDateInRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
+
     uint32_t GetYear() const
     {
         return year_;
