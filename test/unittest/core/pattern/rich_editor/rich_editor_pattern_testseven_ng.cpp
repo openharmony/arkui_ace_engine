@@ -375,7 +375,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
     options.value = INIT_VALUE_1;
     richEditorPattern->AddTextSpan(options);
 
-    CaretMetricsF caretMetricsBegin = { OffsetF(0, 0), 50.0f };
+    CaretMetricsF caretMetricsBegin = { OffsetF(20.0f, 0), 50.0f };
     CaretMetricsF caretMetricsEnd = { OffsetF(100.0f, 0), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 7,
         .testCursorItems = { { 0, caretMetricsBegin, caretMetricsBegin}, {6, caretMetricsEnd, caretMetricsEnd} } };
@@ -384,19 +384,21 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
 
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::DOWNSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(0.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(0.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
-    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
-    richEditorPattern->SetCaretTouchMoveOffset(Offset(11.0, 0));
-    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
-    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(11.0, 0));
-    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
 
     richEditorPattern->caretPosition_ = 6;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
@@ -428,12 +430,13 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
     CaretMetricsF caretMetricsInLine = { OffsetF(50.0f, 0), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 38,
         .testCursorItems = { { 5, caretMetricsInLine, caretMetricsInLine},
-        { 10, caretMetricsLineEndUp, caretMetricsLineEndDown} } };
+        { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
 
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(50.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(50.0, 0));
@@ -447,6 +450,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
@@ -488,12 +492,13 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
     CaretMetricsF caretMetricsLineEndUp = { OffsetF(100.0f, 0), 50.0f };
     CaretMetricsF caretMetricsLineEndDown = { OffsetF(0, 50.0f), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 38,
-        .testCursorItems = { { 10, caretMetricsLineEndUp, caretMetricsLineEndDown} } };
+        .testCursorItems = { { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(100.0f, 0));

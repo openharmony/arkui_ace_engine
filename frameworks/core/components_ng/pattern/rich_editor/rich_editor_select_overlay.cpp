@@ -199,7 +199,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
         }
     }
     auto finalHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
-    pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex);
+    IF_TRUE(!IsSingleHandle(), pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex));
 }
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
