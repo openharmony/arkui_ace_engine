@@ -1315,6 +1315,94 @@ HWTEST_F(RichEditorPatternTestOneNg, IsShowAIWrite006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test IsShowSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    theme->searchIsSupport_ = true;
+    auto result = richEditorPattern->IsShowSearch();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: IsShowSearch002
+ * @tc.desc: test menu search
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, IsShowSearch002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step1. searchIsSupport_ set to true.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    theme->searchIsSupport_ = true;
+    auto result = richEditorPattern->IsShowSearch();
+    EXPECT_TRUE(result);
+
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. add text\image\symbol.
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorController->AddTextSpan(options);
+    AddImageSpan();
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+
+    /**
+     * @tc.steps: step3. select text.
+     */
+    richEditorPattern->textSelector_.Update(0, 6);
+    richEditorPattern->copyOption_ = CopyOptions::Local;
+    SelectMenuInfo menuInfo;
+    selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showSearch, true);
+
+    /**
+     * @tc.steps: step4. select image.
+     */
+    richEditorPattern->textSelector_.Update(6, 7);
+    selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showSearch, false);
+
+    /**
+     * @tc.steps: step5. select symbol.
+     */
+    richEditorPattern->textSelector_.Update(7, 8);
+    selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showSearch, false);
+
+    /**
+     * @tc.steps: step6. mixed selection.
+     */
+    richEditorPattern->textSelector_.Update(0, 8);
+    selectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showSearch, true);
+}
+
+/**
  * @tc.name: GetAIWriteInfo001
  * @tc.desc: test GetAIWriteInfo
  * @tc.type: FUNC
