@@ -2356,7 +2356,7 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
 SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
 {
     auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
-    CHECK_NULL_RETURN(isAPI14Plus, selectionInfo);
+    CHECK_NULL_RETURN(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN), selectionInfo);
     auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
     for (auto& resObj : resultObjects) {
         CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
