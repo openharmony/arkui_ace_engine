@@ -352,7 +352,6 @@ public:
         onClick_ = std::move(onClick);
         distanceThreshold_ = distanceThreshold;
     }
-    virtual void OnColorConfigurationUpdate() override;
 
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
@@ -766,6 +765,10 @@ public:
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
 
+    void ResetCustomFontColor();
+    void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -960,6 +963,8 @@ private:
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
+
+    bool UpdateTextComponentColor(int32_t themeScopeId);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;

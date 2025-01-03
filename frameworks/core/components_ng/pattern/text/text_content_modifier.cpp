@@ -840,6 +840,11 @@ void TextContentModifier::TextColorModifier(const Color& value)
     onlyTextColorAnimation_ = true;
 }
 
+void TextContentModifier::ResetTextColor()
+{
+    textColor_.reset();
+}
+
 void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
 {
     while (value.size() > shadows_.size()) {

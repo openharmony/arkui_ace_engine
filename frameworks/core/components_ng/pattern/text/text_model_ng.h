@@ -34,6 +34,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextCaretColor(const Color& value) override;
@@ -160,7 +161,7 @@ public:
     static Dimension GetFontSize(FrameNode* frameNode);
     static Ace::FontWeight GetFontWeight(FrameNode* frameNode);
     static Ace::FontStyle GetItalicFontStyle(FrameNode* frameNode);
-    static Color GetDefaultColor();
+    static Color GetDefaultColor(int32_t themeScopeId);
     static Color GetFontColor(FrameNode* frameNode);
     static Dimension GetTextBaselineOffset(FrameNode* frameNode);
     static std::vector<Shadow> GetTextShadow(FrameNode* frameNode);

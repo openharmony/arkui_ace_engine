@@ -67,8 +67,10 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
 
+    auto themeScopeId = frameNode->GetThemeScopeId();
     textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+            pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
@@ -318,7 +320,7 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     if (textColor.has_value()) {
         modifier->SetTextColor(textColor.value());
     } else {
-        modifier->SetTextColor(textStyle.GetTextColor(), true);
+        modifier->ResetTextColor();
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {

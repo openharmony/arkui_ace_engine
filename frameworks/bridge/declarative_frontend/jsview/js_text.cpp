@@ -29,7 +29,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -278,11 +278,8 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextStyle().GetTextColor();
+        TextModel::GetInstance()->ResetTextColor();
+        return;
     }
     TextModel::GetInstance()->SetTextColor(textColor);
 }
@@ -774,7 +771,6 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
-    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }

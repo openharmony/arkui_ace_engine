@@ -3142,7 +3142,7 @@ bool TextPattern::IsShowHandle()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = pipeline->GetTheme<TextTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(theme, false);
     return !theme->IsShowHandle();
 }
@@ -3950,18 +3950,61 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    CHECK_NULL_VOID(!textLayoutProperty->GetTextColorFlagByUserValue(false));
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    UpdateTextComponentColor(host->GetThemeScopeId());
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
+}
+
+bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto contex = host->GetRenderContext();
+    CHECK_NULL_RETURN(contex, false);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    if (!UpdateTextComponentColor(themeScopeId) && !textLayoutProperty->HasTextColor()
+        && !contex->HasForegroundColor()) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    return false;
+}
+
+bool TextPattern::UpdateTextComponentColor(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto contex = host->GetRenderContext();
+    CHECK_NULL_RETURN(contex, false);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+    if (!textLayoutProperty->HasTextColorFlagByUser()) {
+        return false;
+    }
+
+    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
+        CHECK_NULL_RETURN(textTheme, false);
+        UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
+    }
+
+    return true;
+}
+
+void TextPattern::ResetCustomFontColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textTheme);
+    auto color = textTheme->GetTextStyle().GetTextColor();
+    UpdateFontColor(color);
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()

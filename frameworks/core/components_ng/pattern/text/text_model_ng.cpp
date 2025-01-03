@@ -43,6 +43,7 @@ void TextModelNG::Create(const std::u16string& content)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false);
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
         auto pipeline = frameNode->GetContext();
@@ -159,6 +160,19 @@ void TextModelNG::SetTextColor(const Color& value)
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
+}
+
+void TextModelNG::ResetTextColor()
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ResetCustomFontColor();
 }
 
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
@@ -934,18 +948,19 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
     return value;
 }
 
-Color TextModelNG::GetDefaultColor()
+Color TextModelNG::GetDefaultColor(int32_t themeScopeId)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     return theme->GetTextStyle().GetTextColor();
 }
 
 Color TextModelNG::GetFontColor(FrameNode* frameNode)
 {
-    auto defaultColor = GetDefaultColor();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultColor(themeScopeId);
     CHECK_NULL_RETURN(frameNode, defaultColor);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultColor);
@@ -1054,7 +1069,8 @@ Color TextModelNG::GetCaretColor(FrameNode* frameNode)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     Color value = theme->GetCaretColor();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CursorColor, value, frameNode, value);
