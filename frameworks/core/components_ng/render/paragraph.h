@@ -139,6 +139,7 @@ struct ParagraphStyle {
     std::optional<LeadingMargin> leadingMargin;
     double fontSize = 14.0;
     Dimension lineHeight;
+    bool halfLeading = false;
     Dimension indent;
     Alignment leadingMarginAlign = Alignment::TOP_CENTER;
 
@@ -147,7 +148,8 @@ struct ParagraphStyle {
         return direction == others.direction && align == others.align && maxLines == others.maxLines &&
                fontLocale == others.fontLocale && wordBreak == others.wordBreak &&
                ellipsisMode == others.ellipsisMode && textOverflow == others.textOverflow &&
-               leadingMargin == others.leadingMargin && fontSize == others.fontSize && indent == others.indent;
+               leadingMargin == others.leadingMargin && fontSize == others.fontSize &&
+               halfLeading == others.halfLeading && indent == others.indent;
     }
 
     bool operator!=(const ParagraphStyle others) const

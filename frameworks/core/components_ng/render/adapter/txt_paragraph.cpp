@@ -70,6 +70,9 @@ void TxtParagraph::CreateBuilder()
     style.ellipsisModal = static_cast<Rosen::EllipsisModal>(paraStyle_.ellipsisMode);
     style.textSplitRatio = TEXT_SPLIT_RATIO;
     style.breakStrategy = static_cast<Rosen::BreakStrategy>(paraStyle_.lineBreakStrategy);
+    style.lineStyleHalfLeading = paraStyle_.halfLeading;
+    style.heightOnly = true;
+    style.lineStyleOnly = false;
 #endif
     style.locale = paraStyle_.fontLocale;
     if (paraStyle_.textOverflow == TextOverflow::ELLIPSIS) {
