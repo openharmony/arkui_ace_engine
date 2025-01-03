@@ -372,8 +372,14 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
         return;
     }
     if (!isSwitchingWindow_) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitching end, startReason_: %{public}d, endReason_: %{public}d, "
-            "updateReason_: %{public}d",
+        auto lastHub = currentFocus_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "FocusSwitch end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
+            "start: %{public}d, end: %{public}d, update: %{public}d",
+            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
+            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             reason, updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
         if (switchingFocus_ &&
@@ -397,8 +403,14 @@ void FocusManager::WindowFocusMoveEnd()
 {
     isSwitchingWindow_ = false;
     if (!isSwitchingFocus_.value_or(true)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "WindowFocusMove end, startReason_: %{public}d, endReason_: %{public}d, "
-            "updateReason_: %{public}d",
+        auto lastHub = currentFocus_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "WinFocusMove end, %{public}s/" SEC_PLD(%{public}d) " onBlur, "
+            "%{public}s/" SEC_PLD(%{public}d) " onFocus, "
+            "start: %{public}d, end: %{public}d, update: %{public}d",
+            lastHub ? lastHub->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(lastHub ? lastHub->GetFrameId() : -1),
+            switchingFocus_ ? switchingFocus_->GetFrameName().c_str() : "NULL",
+            SEC_PARAM(switchingFocus_ ? switchingFocus_->GetFrameId() : -1),
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             endReason_.value_or(SwitchingEndReason::DEFAULT),
             updateReason_.value_or(SwitchingUpdateReason::DEFAULT));

@@ -106,14 +106,6 @@ public:
 
     void SetupRootElement() override;
 
-    void EnableContainerModalGesture(bool isEnable) override;
-
-    bool GetContainerFloatingTitleVisible() override;
-
-    bool GetContainerCustomTitleVisible() override;
-
-    bool GetContainerControlButtonVisible() override;
-
     void SetupSubRootElement();
 
     bool NeedSoftKeyboard() override;
@@ -486,6 +478,7 @@ public:
     void SetContainerWindow(bool isShow) override;
     void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
+    void EnableContainerModalGesture(bool isEnable) override;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -960,6 +953,12 @@ public:
     void RemoveAttachedNode(UINode* uiNode);
 
     void PostKeyboardAvoidTask();
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
 
     std::string GetBundleName();
     std::string GetModuleName();

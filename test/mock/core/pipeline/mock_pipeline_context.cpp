@@ -901,22 +901,6 @@ bool NG::PipelineContext::CheckThreadSafe() const
 {
     return false;
 }
-void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
-{
-    CHECK_NULL_VOID(node);
-    auto layoutProperty = node->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    auto layoutConstraint = node->GetLayoutConstraint();
-    if (layoutProperty->GetLayoutRect()) {
-        node->SetActive(true, true);
-        node->Measure(std::nullopt);
-        node->Layout();
-    } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
-        node->Measure(layoutConstraint);
-        node->Layout();
-    }
-}
 
 void NG::PipelineContext::EnableContainerModalGesture(bool isEnable) {}
 
@@ -933,6 +917,23 @@ bool NG::PipelineContext::GetContainerCustomTitleVisible()
 bool NG::PipelineContext::GetContainerControlButtonVisible() 
 {
     return false;
+}
+
+void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto layoutProperty = node->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto layoutConstraint = node->GetLayoutConstraint();
+    if (layoutProperty->GetLayoutRect()) {
+        node->SetActive(true, true);
+        node->Measure(std::nullopt);
+        node->Layout();
+    } else {
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        node->Measure(layoutConstraint);
+        node->Layout();
+    }
 }
 
 void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}

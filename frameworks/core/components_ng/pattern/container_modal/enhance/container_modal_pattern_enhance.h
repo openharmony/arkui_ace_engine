@@ -41,7 +41,8 @@ public:
     }
 
     void EnableContainerModalGesture(bool isEnable) override;
-    void ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow);
+    void ClearTapGestureEvent(RefPtr<FrameNode>& node);
+    void SetTapGestureEvent(RefPtr<FrameNode>& node);
     void EnablePanEventOnNode(
         RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
     void EnableTapGestureOnNode(
@@ -62,6 +63,7 @@ protected:
 
 private:
     VisibleType controlButtonVisibleBeforeAnim_;
+    bool enableContainerModalGesture_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H
