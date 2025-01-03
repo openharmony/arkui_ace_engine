@@ -539,8 +539,6 @@ const ArkUIGridModifier* GetGridModifier()
         .setCachedCount = SetCachedCount,
         .resetCachedCount = ResetCachedCount,
         .getCachedCount = GetCachedCount,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setGridAlignItems = SetGridAlignItems,
         .resetGridAlignItems = ResetGridAlignItems,
         .setGridFadingEdge = SetGridFadingEdge,

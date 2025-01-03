@@ -89,7 +89,7 @@ class ObserveV2 {
   // queued up Set of bindId
   // elmtIds of UINodes need re-render
   // @monitor functions that need to execute
-  private elmtIdsChanged_: Set<number> = new Set();
+  public elmtIdsChanged_: Set<number> = new Set();
   private computedPropIdsChanged_: Set<number> = new Set();
   private monitorIdsChanged_: Set<number> = new Set();
   private persistenceChanged_: Set<number> = new Set();
@@ -520,7 +520,38 @@ class ObserveV2 {
     });
     aceDebugTrace.end();
   }
+  /**
+   * @function resetMonitorValues
+   * @description This function ensures that @Monitor function are reset and reinitialized
+   *  during the reuse cycle:
+   * - Clear and reinitialize monitor IDs and functions to prevent unintended triggers
+   * - Reset dirty states to ensure reusabiltiy
+   */
+  public resetMonitorValues(): void {
+    stateMgmtConsole.debug(`resetMonitorValues changed monitorIds count: ${this.monitorIdsChanged_.size}`);
+    if (this.monitorIdsChanged_.size) {
+      const monitors = this.monitorIdsChanged_;
+      this.monitorIdsChanged_ = new Set<number>();
+      this.updateDirtyMonitorsOnReuse(monitors);
+    }
+  }
 
+  public updateDirtyMonitorsOnReuse(monitors: Set<number>): void {
+    let weakMonitor: WeakRef<MonitorV2 | undefined>;
+    let monitor: MonitorV2 | undefined;
+    let monitorTarget: Object;
+    monitors.forEach((watchId) => {
+      weakMonitor = this.id2cmp_[watchId];
+      if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
+        if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
+          monitorTarget.addDelayedMonitorIds(watchId);
+        } else {
+          // only update dependecy and reset value, no call monitor..
+          monitor.notifyChangeOnReuse();
+        }
+      }
+    })
+  }
 
   public updateDirtyMonitors(monitors: Set<number>): void {
     stateMgmtConsole.debug(`ObservedV3.updateDirtyMonitors: ${Array.from(monitors).length} @monitor funcs: ${JSON.stringify(Array.from(monitors))} ...`);

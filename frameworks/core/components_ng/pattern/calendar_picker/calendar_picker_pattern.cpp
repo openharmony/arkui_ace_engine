@@ -920,6 +920,10 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
     } else {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        textFrameNode->GetRenderContext()->UpdateForegroundColor(
+            layoutProperty->GetColor().value_or(theme->GetEntryFontColor()));
     }
 }
 

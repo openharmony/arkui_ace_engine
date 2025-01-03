@@ -89,6 +89,7 @@ let WordBreak;
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
   WordBreak[WordBreak.BREAK_ALL = 1] = 'break-all';
   WordBreak[WordBreak.BREAK_WORD = 2] = 'break-word';
+  WordBreak[WordBreak.HYPHENATION = 3] = "hyphenation";
 })(WordBreak || (WordBreak = {}));
 
 let DpiFollowStrategy;
@@ -836,6 +837,12 @@ let LayoutStyle;
   LayoutStyle[LayoutStyle.ALWAYS_AVERAGE_SPLIT = 1] = 'ALWAYS_AVERAGE_SPLIT';
   LayoutStyle[LayoutStyle.SPACE_BETWEEN_OR_CENTER = 2] = 'SPACE_BETWEEN_OR_CENTER';
 })(LayoutStyle || (LayoutStyle = {}));
+
+let TabsCacheMode;
+(function (TabsCacheMode) {
+  TabsCacheMode[TabsCacheMode.CACHE_BOTH_SIDE = 0] = 'CACHE_BOTH_SIDE';
+  TabsCacheMode[TabsCacheMode.CACHE_LATEST_SWITCHED = 1] = 'CACHE_LATEST_SWITCHED';
+})(TabsCacheMode || (TabsCacheMode = {}));
 
 let SizeType;
 (function (SizeType) {

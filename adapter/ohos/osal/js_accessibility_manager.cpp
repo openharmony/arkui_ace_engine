@@ -2330,7 +2330,7 @@ inline void DumpContentListNG(const AccessibilityElementInfo& nodeInfo)
     std::vector<std::string> contentList;
     nodeInfo.GetContentList(contentList);
     std::string contents;
-    for (auto content : contentList) {
+    for (const auto& content : contentList) {
         if (!contents.empty()) {
             contents.append(",");
         }
@@ -3265,6 +3265,9 @@ bool JsAccessibilityManager::CheckGetActionIdAndOp(
     int64_t& actionAccessibilityId,
     ActionType& actionOp)
 {
+    if (EVENT_DUMP_ID_INDEX > params.size()) {
+        return false;
+    }
     if (EVENT_DUMP_ACTION_INDEX != std::clamp(EVENT_DUMP_ACTION_INDEX, EVENT_DUMP_ID_INDEX, params.size())) {
         return false;
     }
@@ -3662,7 +3665,7 @@ void JsAccessibilityManager::DumpTreeNodeCommonInfoNg(
     DumpLog::GetInstance().AddDesc("height: " + std::to_string(rect.Height()));
     auto layoutProperty = node->GetLayoutProperty();
     if (layoutProperty) {
-        if (!node->IsVisible()) {
+        if (!node->IsVisible() && layoutProperty->GetVisibility().has_value()) {
             DumpLog::GetInstance().AddDesc(
                 "visible: " + std::to_string(static_cast<int32_t>(layoutProperty->GetVisibility().value())));
         }
@@ -6275,12 +6278,10 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
         getParentRectHandlerNew_(rectInfo);
         output.windowTop = rectInfo.top;
         output.windowLeft = rectInfo.left;
-        if ((rectInfo.scaleX != 1.0f) || (rectInfo.scaleY != 1.0f)) {
-            scaleX_ = rectInfo.scaleX;
-            scaleY_ = rectInfo.scaleY;
-            TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-                "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
-        }
+        scaleX_ = rectInfo.scaleX;
+        scaleY_ = rectInfo.scaleY;
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
     } else {
         output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
         output.windowTop = GetWindowTop(ngPipeline->GetWindowId());

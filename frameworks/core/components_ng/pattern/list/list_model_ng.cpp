@@ -814,11 +814,6 @@ void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
     pattern->UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
 }
 
-void ListModelNG::SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed)
-{
-    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
-}
-
 RefPtr<ListChildrenMainSize> ListModelNG::GetOrCreateListChildrenMainSize()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

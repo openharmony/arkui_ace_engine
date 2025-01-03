@@ -1106,29 +1106,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 }
 #endif
 
-bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
-{
-    bool isShow = false;
-    if (info[0]->IsBoolean()) {
-        isShow = info[0]->ToBoolean();
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        auto isShowObj = callbackObj->GetProperty("value");
-        isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
-    }
-    TAG_LOGD(AceLogTag::ACE_SHEET, "ContentCover get isShow is: %{public}d", isShow);
-    return isShow;
-}
-
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
 {
     // parse isShow
-    bool isShow = ParseBindContentCoverIsShow(info);
     DoubleBindCallback callback = nullptr;
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
-    }
+    bool isShow = ParseSheetIsShow(info, "ContentCover", callback);
 
     // parse builder
     if (!info[1]->IsObject()) {
@@ -1203,26 +1185,31 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
     }
 }
 
-void JSViewAbstract::ParseSheetIsShow(
-    const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback)
+bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::string& name,
+    std::function<void(const std::string&)>& callback)
 {
+    bool isShow = false;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
+        if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "Try %{public}s another parsing", name.c_str());
+            callback = ParseDoubleBindCallback(info, callbackObj, "$value");
+        }
     }
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get isShow is: %{public}d", isShow);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "%{public}s get isShow is: %{public}d", name.c_str(), isShow);
+    return isShow;
 }
 
 void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 {
     // parse isShow and builder
-    bool isShow = false;
     DoubleBindCallback callback = nullptr;
-    ParseSheetIsShow(info, isShow, callback);
+    bool isShow = ParseSheetIsShow(info, "Sheet", callback);
     if (!info[1]->IsObject())
         return;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);

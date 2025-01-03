@@ -150,13 +150,17 @@ class MonitorV2 {
         stateMgmtConsole.applicationError(`@Monitor exception caught for ${this.monitorFunction.name}`, e.toString());
         throw e;
       } finally {
-        this.reset();
+        this.resetMonitor();
       }
     }
   }
 
+  public notifyChangeOnReuse(): void {
+    this.bindRun(true);
+  }
+
   // called after @Monitor function call
-  private reset(): void {
+  private resetMonitor(): void {
     this.values_.forEach(item => item.reset());
   }
 
@@ -183,7 +187,7 @@ class MonitorV2 {
   private analysisProp<T>(isInit: boolean, monitoredValue: MonitorValueV2<T>): [ success: boolean, value : T ] {
     let obj = this.target_;
     for (let prop of monitoredValue.props) {
-      if (typeof obj === 'object' && Reflect.has(obj, prop)) {
+      if (obj && typeof obj === 'object' && Reflect.has(obj, prop)) {
         obj = obj[prop];
       } else {
         isInit && stateMgmtConsole.warn(`watch prop ${monitoredValue.path} initialize not found, make sure it exists!`);

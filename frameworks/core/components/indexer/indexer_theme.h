@@ -52,6 +52,10 @@ public:
         }
     };
 
+    const Color& GetIndexerBackgroundColor() const
+    {
+        return indexerBackgroundColor_;
+    }
     const Color& GetDefaultTextColor() const
     {
         return defaultTextColor_;
@@ -164,6 +168,7 @@ public:
 protected:
     IndexerTheme() = default;
 
+    Color indexerBackgroundColor_;
     Color defaultTextColor_;
     Color selectedTextColor_;
     Color popupTextColor_;
@@ -194,6 +199,7 @@ protected:
 private:
     static void ParseColorAttributes(const RefPtr<ThemeStyle>& indexerPattern, const RefPtr<IndexerTheme>& theme)
     {
+        theme->indexerBackgroundColor_ = indexerPattern->GetAttr<Color>("indexer_bar_color", Color(0xff262626));
         theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
