@@ -26,7 +26,9 @@ var __decorate = (this && this.__decorate) || function (k1, l1, m1, n1) {
 if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+const arkuiNode = requireNapi('arkui.node');
+const LengthMetrics = arkuiNode.LengthMetrics;
+const LengthUnit = arkuiNode.LengthUnit;
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
 const MAX_PERCENTAGE = '100%';
