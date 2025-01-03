@@ -226,14 +226,14 @@ public:
     void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
-
+    void SetOnDrawReadyCallback(const std::function<void()>&& callback);
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
 
     int32_t uiExtensionId_ = 0;
     int32_t instanceId_ = Container::CurrentId();
-
+    void FireOnDrawReadyCallback();
 private:
     enum class AbilityState {
         NONE = 0,
@@ -329,6 +329,7 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
     std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap_;
+    std::function<void()> onDrawReadyCallback_;
 
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;

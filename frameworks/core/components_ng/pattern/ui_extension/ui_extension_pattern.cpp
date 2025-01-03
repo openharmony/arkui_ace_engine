@@ -497,6 +497,9 @@ void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
         case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
             OnUeaAccessibilityEventAsync();
             break;
+        case UIExtCallbackEventId::ON_DRAW_FIRST:
+            FireOnDrawReadyCallback();
+            break;
     }
 }
 
@@ -1722,5 +1725,17 @@ void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
 {
     UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
     businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::SetOnDrawReadyCallback(const std::function<void()>&& callback)
+{
+    onDrawReadyCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireOnDrawReadyCallback()
+{
+    if (onDrawReadyCallback_) {
+        onDrawReadyCallback_();
+    }
 }
 } // namespace OHOS::Ace::NG

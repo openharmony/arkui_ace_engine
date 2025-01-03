@@ -28,6 +28,7 @@
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_context.h"
+#include "ui/rs_surface_node.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -3736,5 +3737,18 @@ void AceContainer::RegisterUIExtDataSendToHost()
     CHECK_NULL_VOID(uiExtManager);
     uiExtManager->RegisterBusinessSendToHostReply(uiExtDataSendSyncReply);
     uiExtManager->RegisterBusinessSendToHost(uiExtDataSend);
+}
+
+void AceContainer::SetDrawReadyEventCallback()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto surfaceNode = uiWindow_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto callback = [weak = WeakClaim(this)] () {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(static_cast<int>(NG::UIExtCallbackEventId::ON_DRAW_FIRST));
+    };
+    surfaceNode->SetBufferAvailableCallback(callback);
 }
 } // namespace OHOS::Ace::Platform
