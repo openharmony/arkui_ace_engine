@@ -121,14 +121,6 @@ void RefreshPattern::OnModifyDone()
     pullToRefresh_ = layoutProperty->GetPullToRefresh().value_or(true);
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
-    auto context = host->GetContext();
-    if (context) {
-        auto theme = context->GetTheme<RefreshTheme>();
-        if (theme) {
-            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
-        }
-    }
     InitChildNode();
     if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
@@ -232,6 +224,12 @@ void RefreshPattern::InitProgressNode()
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<RefreshTheme>();
+    CHECK_NULL_VOID(theme);
+    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
@@ -242,10 +240,6 @@ void RefreshPattern::InitProgressNode()
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
     host->AddChild(progressChild_, 0);
     progressChild_->MarkDirtyNode();
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
     progressPaintProperty->UpdateColor(theme->GetProgressColor());
 }
 
