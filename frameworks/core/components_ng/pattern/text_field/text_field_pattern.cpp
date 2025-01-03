@@ -5890,6 +5890,9 @@ void TextFieldPattern::DeleteForwardWord()
 
 void TextFieldPattern::HandleOnPageUp()
 {
+    if (!IsTextArea()) {
+        return;
+    }
     auto border = GetBorderWidthProperty();
     float maxFrameHeight =
         frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
@@ -5901,6 +5904,9 @@ void TextFieldPattern::HandleOnPageUp()
 
 void TextFieldPattern::HandleOnPageDown()
 {
+    if (!IsTextArea()) {
+        return;
+    }
     auto border = GetBorderWidthProperty();
     float maxFrameHeight =
         frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
@@ -6081,9 +6087,6 @@ void TextFieldPattern::AfterSelection()
 
 void TextFieldPattern::HandleSelectionUp()
 {
-    if (!IsTextArea()) {
-        return;
-    }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
     }
@@ -6099,9 +6102,6 @@ void TextFieldPattern::HandleSelectionUp()
 
 void TextFieldPattern::HandleSelectionDown()
 {
-    if (!IsTextArea()) {
-        return;
-    }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
     }
