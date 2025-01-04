@@ -47,6 +47,16 @@ public:
     static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     [[maybe_unused]] static double GetScaleWidth(int32_t containerId);
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
+    static OffsetF GetPaintRectCenter(const RefPtr<FrameNode>& frameNode, bool checkWindowBoundary = true);
+    static bool IsExpandDisplay(const RefPtr<PipelineBase>& context);
+    static OffsetF GetCurrentWindowOffset(const RefPtr<PipelineBase>& context);
+    static OffsetF GetPaintRectCenterToScreen(const RefPtr<FrameNode>& frameNode);
+    static OffsetF GetFrameNodeOffsetToScreen(const RefPtr<FrameNode>& frameNode);
+    static RectF GetPaintRectToScreen(const RefPtr<FrameNode>& frameNode);
+    static void UpdateNodePositionToScreen(const RefPtr<FrameNode>& frameNode, OffsetF offset);
+    static void UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset);
+    static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
+        float width, float height);
 };
 } // namespace OHOS::Ace::NG
 
