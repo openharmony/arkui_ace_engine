@@ -542,6 +542,9 @@ void SwiperIndicatorPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestu
 
 void SwiperIndicatorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::UP) {
         HandleTouchUp();
