@@ -227,8 +227,10 @@ public:
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
+    virtual RefPtr<ScrollBar> CreateScrollBar();
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
@@ -734,6 +736,17 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetScrollBarShape(const ScrollBarShape &shape)
+    {
+        if (shape == ScrollBarShape::ARC) {
+            isRoundScroll_ = true;
+        } else {
+            isRoundScroll_ = false;
+        }
+    }
+#endif
+
 #ifdef SUPPORT_DIGITAL_CROWN
     bool GetCrownEventDragging() const
     {
@@ -741,6 +754,14 @@ public:
         auto scrollable = scrollableEvent_->GetScrollable();
         CHECK_NULL_RETURN(scrollable, false);
         return scrollable->GetCrownEventDragging();
+    }
+
+    void SetReachBoundary(bool flag)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->SetReachBoundary(flag);
     }
 #endif
 
@@ -1120,6 +1141,8 @@ private:
     uint64_t nestedScrollTimestamp_ = 0;
     bool prevHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
+
+    bool isRoundScroll_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

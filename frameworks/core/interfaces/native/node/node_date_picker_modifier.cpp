@@ -382,6 +382,30 @@ void ResetSelectedDate(ArkUINodeHandle node)
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
 }
+
+void SetDatePickerMode(ArkUINodeHandle node, int value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value > static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+        return;
+    }
+    DatePickerModelNG::SetMode(frameNode, static_cast<DatePickerMode>(value));
+}
+
+void ResetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetMode(frameNode, DatePickerMode::DATE);
+}
+
+ArkUI_Int32 GetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(DatePickerModelNG::getMode(frameNode));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -413,6 +437,9 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         GetDatePickerBackgroundColor,
         SetDatePickerBackgroundColor,
         ResetDatePickerBackgroundColor,
+        GetDatePickerMode,
+        SetDatePickerMode,
+        ResetDatePickerMode
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -454,6 +481,9 @@ const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
         GetDatePickerBackgroundColor,
         SetDatePickerBackgroundColor,
         ResetDatePickerBackgroundColor,
+        GetDatePickerMode,
+        SetDatePickerMode,
+        ResetDatePickerMode
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

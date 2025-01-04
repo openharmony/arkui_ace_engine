@@ -146,6 +146,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -158,6 +159,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     OHOS::AAFwk::Want want;
@@ -178,6 +180,7 @@ void UIExtensionComponentTestNg::ClearCallbacks(RefPtr<UIExtensionPattern> patte
     pattern->onModalDestroy_ = nullptr;
     pattern->onTerminatedCallback_ = nullptr;
     pattern->bindModalCallback_ = nullptr;
+    pattern->onDrawReadyCallback_ = nullptr;
 }
 void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern)
 {
@@ -191,6 +194,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -202,6 +206,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     pattern->SetOnErrorCallback(onError);
     pattern->SetOnResultCallback(onResult);
     pattern->SetOnTerminatedCallback(onTerminated);
+    pattern->SetOnDrawReadyCallback(onDrawReady);
     pattern->SetOnReceiveCallback(onReceive);
     pattern->SetSyncCallbacks(std::move(onSyncOnCallbackList));
     pattern->SetAsyncCallbacks(std::move(onSyncOnCallbackList));
@@ -224,6 +229,7 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     pattern->FireSyncCallbacks();
     pattern->FireAsyncCallbacks();
     pattern->FireBindModalCallback();
+    pattern->FireOnDrawReadyCallback();
 }
 
 void UIExtensionComponentTestNg::SetPlaceholder(RefPtr<UIExtensionPattern> pattern)
@@ -263,6 +269,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -275,6 +282,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     RefPtr<WantWrap> want = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
@@ -289,6 +297,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     uecNG.SetOnReceive(onReceive, NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     uecNG.SetOnTerminated(std::move(onTerminated));
     uecNG.SetOnTerminated(std::move(onTerminated), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    uecNG.SetOnDrawReady(std::move(onDrawReady));
 
     UIExtensionConfig config;
     config.sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
@@ -326,7 +335,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     EXPECT_NE(pattern->onReceiveCallback_, nullptr);
     EXPECT_NE(pattern->onErrorCallback_, nullptr);
     EXPECT_NE(pattern->onModalDestroy_, nullptr);
-
+    EXPECT_NE(pattern->onDrawReadyCallback_, nullptr);
     // Fire CallBack
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION;
     OHOS::AAFwk::Want want;

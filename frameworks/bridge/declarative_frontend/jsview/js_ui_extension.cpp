@@ -337,6 +337,7 @@ void JSUIExtension::JSBind(BindingTarget globalObj)
     JSClass<JSUIExtension>::StaticMethod("onResult", &JSUIExtension::OnResult);
     JSClass<JSUIExtension>::StaticMethod("onError", &JSUIExtension::OnError);
     JSClass<JSUIExtension>::StaticMethod("onTerminated", &JSUIExtension::OnTerminated);
+    JSClass<JSUIExtension>::StaticMethod("onDrawReady", &JSUIExtension::OnDrawReady);
     JSClass<JSUIExtension>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -383,6 +384,7 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
         }
     } while (false);
 }
+
 namespace {
 void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap)
@@ -610,5 +612,27 @@ void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
         func->ExecuteJS(1, &returnValue);
     };
     UIExtensionModel::GetInstance()->SetOnTerminated(std::move(onTerminated));
+}
+
+void JSUIExtension::OnDrawReady(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = ContainerScope::CurrentId();
+    auto onDrawReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
+        () {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("UIExtensionComponent.onDrawReady");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            auto newJSVal = JSRef<JSVal>::Make();
+            func->ExecuteJS(1, &newJSVal);
+    };
+    UIExtensionModel::GetInstance()->SetOnDrawReady(std::move(onDrawReady));
 }
 } // namespace OHOS::Ace::Framework

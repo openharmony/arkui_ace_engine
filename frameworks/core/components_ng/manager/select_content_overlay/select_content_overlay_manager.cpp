@@ -336,7 +336,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToRoot(node, false, NodeType::HANDLE);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
+            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask", PriorityType::VIP);
     } else if (mode == HandleLevelMode::EMBED) {
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
@@ -350,7 +350,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToCaller(node, false);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask");
+            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask", PriorityType::VIP);
     }
 }
 
@@ -464,7 +464,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
                 manager->NotifySelectOverlayShow(true);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate", PriorityType::VIP);
 }
 
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
@@ -498,7 +498,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
             }
             manager->NotifySelectOverlayShow(true);
         },
-        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay");
+        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay", PriorityType::VIP);
 }
 
 void SelectContentOverlayManager::MountNodeToRoot(

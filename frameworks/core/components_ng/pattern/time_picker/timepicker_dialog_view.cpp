@@ -151,6 +151,7 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }
     SetHour24(timePickerRowPattern, settingData.isUseMilitaryTime);
+    SetEnableCascade(timePickerRowPattern, settingData.isEnableCascade);
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
@@ -1161,6 +1162,12 @@ void TimePickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+}
+
+void TimePickerDialogView::SetEnableCascade(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade)
+{
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
 }
 
 } // namespace OHOS::Ace::NG

@@ -616,7 +616,7 @@ public:
     {
         return selectOverlay_->IsUsingMouse();
     }
-    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
+    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove, bool skipNewLineChar = true);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool HasText() const
@@ -1517,8 +1517,7 @@ public:
 
     bool IsShowPasswordSymbol() const
     {
-        return isPasswordSymbol_ &&
-            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
+        return isPasswordSymbol_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     }
 
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;

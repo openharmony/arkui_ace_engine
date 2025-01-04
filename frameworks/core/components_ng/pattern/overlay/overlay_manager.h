@@ -119,6 +119,7 @@ public:
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {

@@ -224,6 +224,8 @@ public:
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
 
+    float expandHeight_ = 0.0f;
+
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;
     // K: item index; V: corresponding segment index

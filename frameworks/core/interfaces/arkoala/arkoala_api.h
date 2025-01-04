@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 136
+#define ARKUI_FULL_API_VERSION 137
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 136
+#define ARKUI_NODE_API_VERSION 137
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -2571,8 +2571,6 @@ struct ArkUIListModifier {
     void (*setListChildrenMainSize)(ArkUINodeHandle node, ArkUIListChildrenMainSize option, ArkUI_Int32 unit);
     void (*resetListChildrenMainSize)(ArkUINodeHandle node);
     void (*setListCloseAllSwipeActions)(ArkUINodeHandle node, void* userData, void(onFinish)(void* userData));
-    void (*setListFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
-    void (*resetListFlingSpeedLimit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getInitialIndex)(ArkUINodeHandle node);
     void (*getlistDivider)(ArkUINodeHandle node, ArkUIdividerOptions* option, ArkUI_Int32 unit);
     void (*setInitialScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
@@ -2795,6 +2793,9 @@ struct ArkUITimepickerModifier {
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
     void (*setTimepickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
     void (*resetTimepickerEnableHapticFeedback)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTimepickerEnableCascade)(ArkUINodeHandle node);
+    void (*setTimepickerEnableCascade)(ArkUINodeHandle node, ArkUI_Bool isEnableCascade);
+    void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -2877,8 +2878,6 @@ struct ArkUIGridModifier {
     void (*setCachedCount)(ArkUINodeHandle node, ArkUI_Int32 cachedCount);
     void (*resetCachedCount)(ArkUINodeHandle node);
     ArkUI_Int32 (*getCachedCount)(ArkUINodeHandle node);
-    void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 flingSpeedLimit);
-    void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setGridAlignItems)(ArkUINodeHandle node, ArkUI_Int32 alignItems);
     void (*resetGridAlignItems)(ArkUINodeHandle node);
     void (*setGridFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue,
@@ -2943,6 +2942,9 @@ struct ArkUIScrollableModifier {
     void (*resetOnScrollStartCallBack)(ArkUINodeHandle node);
     void (*setOnScrollStopCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnScrollStopCallBack)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getFlingSpeedLimit)(ArkUINodeHandle node);
+    void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
@@ -2990,8 +2992,6 @@ struct ArkUIScrollModifier {
     void (*setScrollInitialOffset)(ArkUINodeHandle node, ArkUI_Float32 xOffsetValue, ArkUI_Int32 xOffsetUnit,
         ArkUI_Float32 yOffsetValue, ArkUI_Int32 yOffsetUnit);
     void (*resetScrollInitialOffset)(ArkUINodeHandle node);
-    void (*setScrollFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*resetScrollFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setScrollPage)(ArkUINodeHandle node, ArkUI_Int32 next, ArkUI_Int32 animation);
     void (*setScrollBy)(ArkUINodeHandle node, ArkUI_Float64 x, ArkUI_Float64 y);
     ArkUINodeHandle (*getScroll)(ArkUINodeHandle node);
@@ -3940,8 +3940,6 @@ struct ArkUIWaterFlowModifier {
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animation, ArkUI_Int32 alignment);
     void (*setWaterflowFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
     void (*resetWaterflowFooter)(ArkUINodeHandle node);
-    void (*setWaterFlowFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 maxSpeed);
-    void (*resetWaterFlowFlingSpeedLimit)(ArkUINodeHandle node);
     ArkUINodeHandle (*getScrollController)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, ArkUINodeHandle controller, ArkUINodeHandle proxy);
     ArkUI_Int32 (*getWaterFlowLayoutMode)(ArkUINodeHandle node);
@@ -4247,6 +4245,10 @@ struct ArkUICalendarPickerModifier {
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 fontSize, ArkUI_Int32 unit, ArkUI_Int32 fontWeight);
     void (*setTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontSize, ArkUI_CharPtr fontWeight);
     void (*resetTextStyle)(ArkUINodeHandle node);
+    void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetStartDate)(ArkUINodeHandle node);
+    void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetEndDate)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
@@ -4258,6 +4260,8 @@ struct ArkUICalendarPickerModifier {
     ArkUI_Float32 (*getHintRadius)(ArkUINodeHandle node);
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
     void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
@@ -4585,6 +4589,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
+    void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
@@ -5145,6 +5152,9 @@ struct ArkUIFrameNodeModifier {
     void (*addExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, void* extraData);
     void* (*getExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*removeExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*getCustomPropertyByKey)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
+    void (*addNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key, void (*onDestroy)(ArkUINodeHandle node));
+    void (*removeNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key);
     ArkUI_Int32 (*setDrawCompleteEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void* onDraw);

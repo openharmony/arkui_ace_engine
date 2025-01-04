@@ -50,6 +50,8 @@ public:
         value->propBarOverlap_ = CloneBarOverlap();
         value->propWidthAuto_ = CloneWidthAuto();
         value->propHeightAuto_ = CloneHeightAuto();
+        value->propCachedMaxCount_ = CloneCachedMaxCount();
+        value->propCacheMode_ = CloneCacheMode();
         return value;
     }
 
@@ -65,6 +67,8 @@ public:
         ResetIndex();
         ResetIndexSetByUser();
         ResetBarOverlap();
+        ResetCachedMaxCount();
+        ResetCacheMode();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
@@ -122,6 +126,11 @@ public:
         LayoutProperty::FromJson(json);
     }
 
+    std::pair<bool, bool> GetPercentSensitive() override
+    {
+        return { true, true };
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarPosition, BarPosition, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarMode, TabBarMode, PROPERTY_UPDATE_MEASURE);
@@ -133,6 +142,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarOverlap, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(WidthAuto, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HeightAuto, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedMaxCount, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CacheMode, TabsCacheMode, PROPERTY_UPDATE_NORMAL);
 };
 
 } // namespace OHOS::Ace::NG

@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 using OnTitleModeChangeEvent = std::function<void(const BaseEventInfo* eventInfo)>;
 using OnNavBarStateChangeEvent = std::function<void(bool)>;
 using OnNavigationModeChangeEvent = std::function<void(NavigationMode mode)>;
+using OnNavBarWidthChangeEvent = std::function<void(const Dimension)>;
 
 class NavigationEventHub : public EventHub {
     DECLARE_ACE_TYPE(NavigationEventHub, EventHub)
@@ -85,10 +86,23 @@ public:
 
     void FireOnAppear() override;
 
+    void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent&& event)
+    {
+        onNavBarWidthChangeEvent_ = std::move(event);
+    }
+
+    void FireNavBarWidthChangeEvent(Dimension navBarWidth)
+    {
+        if (onNavBarWidthChangeEvent_) {
+            onNavBarWidthChangeEvent_(navBarWidth);
+        }
+    }
+
 private:
     OnTitleModeChangeEvent onTitleModeChangeEvent_;
     OnNavBarStateChangeEvent onNavBarStateChangeEvent_;
     OnNavigationModeChangeEvent onNavigationModeChangeEvent_;
+    OnNavBarWidthChangeEvent onNavBarWidthChangeEvent_;
 
     std::optional<bool> isVisible_;
 };

@@ -449,6 +449,16 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
                 settingData.selectedDate = parseSelectedDate;
             }
         }
+        auto startDate = obj->GetProperty("start");
+        auto endDate = obj->GetProperty("end");
+        auto parseStartDate = ParseDate(startDate, false);
+        auto parseEndDate = ParseDate(endDate, false);
+        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+            parseStartDate = PickerDate();
+            parseEndDate = PickerDate();
+        }
+        settingData.startDate = parseStartDate;
+        settingData.endDate = parseEndDate;
     } else {
         dayRadius = calendarTheme->GetCalendarDayRadius();
     }
@@ -494,9 +504,9 @@ void JSCalendarPicker::ParseTextStyle(const JSRef<JSObject>& paramObj, NG::Picke
     }
 }
 
-PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal)
+PickerDate JSCalendarPicker::ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate)
 {
-    auto pickerDate = PickerDate::Current();
+    auto pickerDate = useCurrentDate ? PickerDate::Current() : PickerDate();
     if (!dateVal->IsObject()) {
         return pickerDate;
     }
@@ -683,9 +693,9 @@ std::map<std::string, NG::DialogCancelEvent> JSCalendarPickerDialog::LifeCycleDi
     return dialogLifeCycleEvent;
 }
 
-PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal)
+PickerDate JSCalendarPickerDialog::ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate)
 {
-    auto pickerDate = PickerDate();
+    auto pickerDate = useCurrentDate ? PickerDate::Current() : PickerDate();
     if (!dateVal->IsObject()) {
         return pickerDate;
     }
@@ -729,9 +739,20 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     CHECK_NULL_VOID(theme);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     NG::CalendarSettingData settingData;
+    auto startDate = paramObj->GetProperty("start");
+    auto endDate = paramObj->GetProperty("end");
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+        parseStartDate = PickerDate();
+        parseEndDate = PickerDate();
+    }
+    settingData.startDate = parseStartDate;
+    settingData.endDate = parseEndDate;
     auto selectedDate = paramObj->GetProperty("selected");
-    auto parseSelectedDate = ParseDate(selectedDate);
-    if (selectedDate->IsObject() && parseSelectedDate.GetYear() != 0) {
+    auto parseSelectedDate = ParseDate(selectedDate, true);
+    parseSelectedDate = PickerDate::AdjustDateToRange(parseSelectedDate, parseStartDate, parseEndDate);
+    if (parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
 

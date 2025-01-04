@@ -245,13 +245,13 @@ HWTEST_F(TextFieldUXTest, CleanNode004, TestSize.Level1)
 
 /**
  * @tc.name: CleanNode005
- * @tc.desc: Test showCancelSymbolIcon true, since VERSION_FOURTEEN
+ * @tc.desc: Test showCancelSymbolIcon true, since VERSION_SIXTEEN
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon not nullptr
@@ -292,8 +292,8 @@ HWTEST_F(TextFieldUXTest, CleanNode005, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, CleanNode006, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN));
 
     /**
      * @tc.steps: step1. Initialize text input, set cancelSymbolIcon nullptr
@@ -1523,8 +1523,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1556,8 +1556,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol001, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
 
     /**
      * @tc.steps: Create Text filed node
@@ -1589,8 +1589,8 @@ HWTEST_F(TextFieldUXTest, testShowPasswordSymbol002, TestSize.Level1)
  */
 HWTEST_F(TextFieldUXTest, testShowPasswordSymbol003, TestSize.Level1)
 {
-    int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
-    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
+    int32_t backupApiVersion = Container::Current()->GetApiTargetVersion();
+    Container::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_THIRTEEN));
 
     /**
      * @tc.steps: Create Text filed node
@@ -2270,5 +2270,44 @@ HWTEST_F(TextFieldUXTest, SupportAvoidanceTest, TestSize.Level1)
     supportAvoidance = false;
     pattern_->SetCustomKeyboardOption(supportAvoidance);
     EXPECT_FALSE(pattern_->keyboardAvoidance_);
+}
+
+/**
+ * @tc.name: StopBackPress
+ * @tc.desc: Test whether the stopBackPress property is set successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, StopBackPress, TestSize.Level1)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG& model) {
+        model.SetStopBackPress(false);
+    });
+    pattern_->isCustomKeyboardAttached_ = true;
+    /**
+     * @tc.steps: step1. Test IsStopBackPress OnBackPressed.
+     * @tc.expect: return return false.
+     */
+    EXPECT_FALSE(pattern_->IsStopBackPress());
+    EXPECT_FALSE(pattern_->OnBackPressed());
+    /**
+     * @tc.steps: step2. Test SelectContentOverlayManager::IsStopBackPress.
+     * @tc.expect: return false.
+     */
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayHolder_ = pattern_->selectOverlay_;
+    pattern_->selectOverlay_->OnBind(manager);
+    EXPECT_FALSE(manager->IsStopBackPress());
+    /**
+     * @tc.steps: step3. Set stopBackPress to true.
+     * @tc.expect: return true.
+     */
+    auto layoutProperty = pattern_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateStopBackPress(true);
+
+    EXPECT_TRUE(pattern_->IsStopBackPress());
+    EXPECT_TRUE(pattern_->OnBackPressed());
+    EXPECT_TRUE(manager->IsStopBackPress());
 }
 } // namespace OHOS::Ace::NG

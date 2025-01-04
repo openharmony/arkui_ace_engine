@@ -651,9 +651,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
 void GridScrollLayoutAlgorithm::FillCurrentLine(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
     auto mainIter = info_.gridMatrix_.find(currentMainLineIndex_);
-    auto nextMain = info_.gridMatrix_.find(currentMainLineIndex_ + 1);
-    if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_ &&
-        nextMain == info_.gridMatrix_.end()) {
+    if (mainIter != info_.gridMatrix_.end() && mainIter->second.size() < crossCount_) {
         bool doneFillCurrentLine = false;
         auto currentIndex = info_.endIndex_ + 1;
         cellAveLength_ = -1.0f;
@@ -780,6 +778,10 @@ void GridScrollLayoutAlgorithm::AdjustRowColSpan(
     }
     if (currentItemRowSpan_ > 1 || currentItemColSpan_ > 1) {
         info_.hasBigItem_ = true;
+    }
+    int32_t mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
+    if (mainSpan > 1) {
+        info_.hasMultiLineItem_ = true;
     }
 
     itemLayoutProperty->UpdateRealRowSpan(currentItemRowSpan_);
@@ -1332,9 +1334,6 @@ void GridScrollLayoutAlgorithm::AddForwardLines(
     CHECK_NULL_VOID(itemWrapper);
     AdjustRowColSpan(itemWrapper, layoutWrapper, firstItem);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    if (mainSpan > 1) {
-        info_.hasMultiLineItem_ = true;
-    }
     auto measureNumber = 0;
     currentMainLineIndex_ = (firstItem == 0 ? 0 : info_.startMainLineIndex_) - 1;
     info_.endIndex_ = firstItem - 1;
@@ -1614,9 +1613,6 @@ int32_t GridScrollLayoutAlgorithm::MeasureNewChild(const SizeF& frameSize, int32
     auto crossCount = static_cast<int32_t>(crossCount_);
     AdjustRowColSpan(childLayoutWrapper, layoutWrapper, itemIndex);
     auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    if (mainSpan > 1) {
-        info_.hasMultiLineItem_ = true;
-    }
     auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
     auto crossStart = axis_ == Axis::VERTICAL ? currentItemColStart_ : currentItemRowStart_;
     if (crossSpan > crossCount) {
@@ -2232,6 +2228,7 @@ void GridScrollLayoutAlgorithm::CheckReset(float mainSize, float crossSize, Layo
         info_.ResetPositionFlags();
         info_.clearStretch_ = true;
         isChildrenUpdated_ = true;
+        info_.hasMultiLineItem_ = false;
         ResetFocusedIndex(layoutWrapper);
         if (info_.childrenCount_ > 0) {
             ReloadToStartIndex(mainSize, crossSize, layoutWrapper);
