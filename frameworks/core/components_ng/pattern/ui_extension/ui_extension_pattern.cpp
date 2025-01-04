@@ -42,6 +42,9 @@
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/pointer_event.h"
@@ -724,6 +727,9 @@ void UIExtensionPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitCrownEvent(focusHub);
+#endif
 }
 
 void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
@@ -806,6 +812,33 @@ void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub
         return false;
     });
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void UIExtensionPattern::InitCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnCrownEventInternal([wp = WeakClaim(this)](const CrownEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->HandleCrownEvent(event);
+        }
+        return false;
+    });
+}
+
+void UIExtensionPattern::HandleCrownEvent(const CrownEvent& event)
+{
+    if (event.action == Ace::CrownAction::UNKNOWN) {
+        UIEXT_LOGE("action is UNKNOWN");
+        return;
+    }
+    auto pointerEvent = event.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    Platform::CalculatePointerEvent(pointerEvent, host);
+    DispatchPointerEvent(pointerEvent);
+}
+#endif
 
 void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
