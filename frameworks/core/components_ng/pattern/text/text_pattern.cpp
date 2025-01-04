@@ -3966,7 +3966,7 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
 
-    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !textLayoutProperty->HasTextColor() && !contex->HasForegroundColor()) {
+    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);

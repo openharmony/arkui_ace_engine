@@ -43,7 +43,6 @@ void TextModelNG::Create(const std::u16string& content)
     stack->Push(frameNode);
 
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, content);
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false);
     // set draggable for framenode
     if (frameNode->IsFirstBuilding()) {
         auto pipeline = frameNode->GetContext();
