@@ -488,14 +488,23 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         RectF visibleRect;
         RectF frameRect;
         clipNode->GetVisibleRect(visibleRect, frameRect);
+        if (GreatNotEqual(rect.Top(), visibleRect.Bottom()) || GreatNotEqual(rect.Left(), visibleRect.Right())) {
+            return;
+        }
         rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        rect.SetWidth(visibleRect.Right() - rect.Left());
         return;
     }
     // root node.
     if (prevNode) {
         auto geoNode = prevNode->GetGeometryNode();
         CHECK_NULL_VOID(geoNode);
-        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+        RectF visibleRect = geoNode->GetFrameRect();
+        if (GreatNotEqual(rect.Top(), visibleRect.Height()) || GreatNotEqual(rect.Left(), visibleRect.Width())) {
+            return;
+        }
+        rect.SetHeight(visibleRect.Height() - rect.Top());
+        rect.SetWidth(visibleRect.Width() - rect.Left());
     }
 }
 

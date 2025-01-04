@@ -185,7 +185,7 @@ HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton001, TestSize.Level1)
 HWTEST_F(RichEditorClickTestNg, HandleMouseLeftButton002, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     MouseInfo mouseInfo;
@@ -327,7 +327,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     GestureEvent info;
     info.localLocation_ = Offset(0, 0);
     richEditorPattern->isMouseSelect_ = false;
@@ -335,7 +335,7 @@ HWTEST_F(RichEditorClickTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
 
-    AddSpan(INIT_U16VALUE_3);
+    AddSpan(INIT_VALUE_3);
     info.localLocation_ = Offset(50, 50);
     richEditorPattern->textSelector_.baseOffset = -1;
     richEditorPattern->textSelector_.destinationOffset = -1;
@@ -497,7 +497,7 @@ HWTEST_F(RichEditorClickTestNg, OnVisibleChange, TestSize.Level1)
     /**
      * @tc.steps: step2. add text span and Select text
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->textSelector_ = TextSelector(0, 2);
@@ -538,7 +538,7 @@ HWTEST_F(RichEditorClickTestNg, MoveCaretOnLayoutSwap, TestSize.Level1)
     /**
      * @tc.steps: step2. add span
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     AddImageSpan();
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 

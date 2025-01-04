@@ -551,6 +551,7 @@ struct ImageMenuItem {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       if (this.item?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([$r('sys.color.ohos_id_color_text_primary')])
           .attributeModifier(this.item?.symbolStyle)
           .fontSize(`${ImageMenuItem.imageSize}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
@@ -684,6 +685,7 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
             .fontSize(`${IMAGE_SIZE}vp`)
             .effectStrategy(SymbolEffectStrategy.NONE)
@@ -737,6 +739,7 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
             .fontSize(`${IMAGE_SIZE}vp`)
             .effectStrategy(SymbolEffectStrategy.NONE)

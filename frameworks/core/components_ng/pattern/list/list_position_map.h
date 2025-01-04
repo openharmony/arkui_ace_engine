@@ -104,7 +104,8 @@ public:
         ListPosMapUpdate flag;
         if (dirty_ == LIST_NO_CHANGE) {
             flag = ListPosMapUpdate::NO_CHANGE;
-        } else if (0 == (dirty_ & (LIST_UPDATE_CHILD_SIZE | LIST_UPDATE_LANES | LIST_GROUP_UPDATE_HEADER_FOOTER))) {
+        } else if (0 == (dirty_ & (LIST_UPDATE_CHILD_SIZE | LIST_UPDATE_LANES | LIST_GROUP_UPDATE_HEADER_FOOTER |
+                                      LIST_UPDATE_HEADER_FOOTER))) {
             flag = ListPosMapUpdate::UPDATE_ALL_SIZE;
         } else {
             flag = ListPosMapUpdate::RE_CALCULATE;
@@ -321,7 +322,7 @@ public:
         }
     }
 
-    void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
+    virtual void UpdatePosMap(LayoutWrapper* layoutWrapper, int32_t lanes, float space,
         RefPtr<ListChildrenMainSize>& childrenSize)
     {
         childrenSize_ = childrenSize;
@@ -505,19 +506,21 @@ public:
         }
         return { endIndex, rowHeight };
     }
-private:
-    std::map<int32_t, PositionInfo> posMap_;
+protected:
     RefPtr<ListChildrenMainSize> childrenSize_;
-    std::function<float(int32_t)> chainOffsetFunc_;
     ListChangeFlag dirty_ = LIST_NO_CHANGE;
     int32_t totalItemCount_ = 0;
+    float space_ = 0.0f;
     int32_t lanes_ = -1;
+
+private:
+    std::map<int32_t, PositionInfo> posMap_;
+    std::function<float(int32_t)> chainOffsetFunc_;
     int32_t curLine_ = 0;
     int32_t curIndex_ = 0;
     float totalHeight_ = 0.0f;
     float prevTotalHeight_ = 0.0f;
     float curRowHeight_ = 0.0f;
-    float space_ = 0.0f;
     float headerSize_ = 0.0f;
     float footerSize_ = 0.0f;
 };

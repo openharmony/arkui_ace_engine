@@ -54,6 +54,11 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
     return this;
   }
+  enableCascade(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity,
+      TimepickerEnableCascadeModifier, value);
+    return this;
+  }
 }
 
 class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -198,6 +203,20 @@ class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
       getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
     } else {
       getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+
+class TimepickerEnableCascadeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerEnableCascade');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
     }
   }
 }

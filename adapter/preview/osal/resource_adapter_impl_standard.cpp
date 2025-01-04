@@ -68,6 +68,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_IMAGE,
     THEME_PATTERN_LIST,
     THEME_PATTERN_LIST_ITEM,
+    THEME_PATTERN_ARC_LIST,
+    THEME_PATTERN_ARC_LIST_ITEM,
     THEME_PATTERN_MARQUEE,
     THEME_PATTERN_NAVIGATION_BAR,
     THEME_PATTERN_PICKER,
@@ -526,7 +528,9 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
 uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
 {
     uint32_t result = 0;
-    resourceManager_->GetSymbolById(resId, result);
+    if (resourceManager_) {
+        resourceManager_->GetSymbolById(resId, result);
+    }
     return result;
 }
 

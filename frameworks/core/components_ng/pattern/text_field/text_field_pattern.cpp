@@ -1030,7 +1030,7 @@ void TextFieldPattern::HandleFocusEvent()
 
 void TextFieldPattern::SetFocusStyle()
 {
-    if (IsUnderlineMode()) {
+    if (IsUnderlineMode() || IsInlineMode()) {
         return;
     }
     auto host = GetHost();
@@ -3450,7 +3450,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 pattern->StartTwinkling();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea");
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::IMMEDIATE);
     return true;
 }
 
@@ -5006,7 +5006,7 @@ void TextFieldPattern::OnCursorMoveDone(TextAffinity textAffinity, std::optional
     UpdateCaretInfoToController();
 }
 
-int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove)
+int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t directionMove, bool skipNewLineChar)
 {
     if (contentController_->IsEmpty()) {
         return 0;
@@ -5028,7 +5028,7 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
     while (directionMove == 0 ? strIndex >= 0 : strIndex <= textLength) {
         auto chr = wideTextValue[strIndex];
         // skip the special character
-        if (chr == L' ' || chr == L'\n') {
+        if (chr == L' ' || (chr == L'\n' && skipNewLineChar)) {
             if (directionMove == 0) {
                 strIndex--;
             } else {
@@ -5045,10 +5045,9 @@ int32_t TextFieldPattern::GetWordLength(int32_t originCaretPosition, int32_t dir
                 offset += (strIndex - wordStart + 1); // when move left, actual offset should add 1
             }
             return std::clamp(offset, 0, textLength);
-        } else {
-            // GetWordBoundary fail
-            return 0;
         }
+        // GetWordBoundary fail
+        return 0;
     }
     return std::clamp(offset, 0, textLength);
 }
@@ -5860,7 +5859,7 @@ void TextFieldPattern::DeleteBackwardWord()
 {
     int32_t originCaretPosition = selectController_->GetCaretIndex();
     int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    int32_t leftWordLength = GetWordLength(originCaretPosition, 0);
+    int32_t leftWordLength = GetWordLength(originCaretPosition, 0, false);
     if (leftWordLength < 0) {
         // delete 1 char
         leftWordLength = 1;
@@ -5876,7 +5875,7 @@ void TextFieldPattern::DeleteForwardWord()
 {
     int32_t originCaretPosition = selectController_->GetCaretIndex();
     int32_t textLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-    int32_t rightWordLength = GetWordLength(originCaretPosition, 1);
+    int32_t rightWordLength = GetWordLength(originCaretPosition, 1, false);
     if (rightWordLength < 0) {
         // delete 1 char
         rightWordLength = 1;
@@ -5890,6 +5889,9 @@ void TextFieldPattern::DeleteForwardWord()
 
 void TextFieldPattern::HandleOnPageUp()
 {
+    if (!IsTextArea()) {
+        return;
+    }
     auto border = GetBorderWidthProperty();
     float maxFrameHeight =
         frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
@@ -5901,6 +5903,9 @@ void TextFieldPattern::HandleOnPageUp()
 
 void TextFieldPattern::HandleOnPageDown()
 {
+    if (!IsTextArea()) {
+        return;
+    }
     auto border = GetBorderWidthProperty();
     float maxFrameHeight =
         frameRect_.Height() - GetPaddingTop() - GetPaddingBottom() - GetBorderTop(border) - GetBorderBottom(border);
@@ -6081,9 +6086,6 @@ void TextFieldPattern::AfterSelection()
 
 void TextFieldPattern::HandleSelectionUp()
 {
-    if (!IsTextArea()) {
-        return;
-    }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
     }
@@ -6099,9 +6101,6 @@ void TextFieldPattern::HandleSelectionUp()
 
 void TextFieldPattern::HandleSelectionDown()
 {
-    if (!IsTextArea()) {
-        return;
-    }
     if (!IsSelected()) {
         UpdateSelection(selectController_->GetCaretIndex());
     }
@@ -8524,7 +8523,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation");
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
@@ -8844,8 +8843,8 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSelected()) {
-            uint32_t startIndex = selectController_->GetStartIndex();
-            uint32_t endIndex = selectController_->GetEndIndex();
+            uint32_t startIndex = static_cast<uint32_t>(selectController_->GetStartIndex());
+            uint32_t endIndex = static_cast<uint32_t>(selectController_->GetEndIndex());
             if (startIndex < fullStr.length() && endIndex < fullStr.length()) {
                 fullStr.erase(startIndex, endIndex - startIndex);
             }

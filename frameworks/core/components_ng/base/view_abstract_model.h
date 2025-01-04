@@ -270,6 +270,7 @@ public:
     virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
 #endif
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
@@ -310,6 +311,7 @@ public:
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
+    virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
@@ -361,6 +363,10 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
+    virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;

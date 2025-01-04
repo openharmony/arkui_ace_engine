@@ -203,7 +203,8 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
 
     auto mainMenuPattern = pattern->GetMainMenuPattern();
     CHECK_NULL_VOID(mainMenuPattern);
-    if (!mainMenuPattern->IsContextMenu() && !mainMenuPattern->IsMenu()) {
+    if (!mainMenuPattern->IsContextMenu() && !mainMenuPattern->IsMenu() &&
+        !mainMenuPattern->IsSelectOverlayRightClickMenu()) {
         return;
     }
 

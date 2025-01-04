@@ -633,7 +633,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
+    EXPECT_TRUE(pattern_->GetCursorVisible());
     pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
 }
@@ -656,9 +656,9 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
-    pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_FALSE(pattern_->GetCursorVisible());
 }
 
 /**

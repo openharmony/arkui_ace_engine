@@ -57,6 +57,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, overlayNode = selectOverlayNode, animation,
             isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
@@ -92,7 +93,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 node->ShowSelectOverlay(animation);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow", PriorityType::VIP);
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     return proxy;

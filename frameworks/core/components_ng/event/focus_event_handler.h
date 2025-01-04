@@ -84,6 +84,7 @@ public:
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
     OnFocusAxisEventFunc onFocusAxisEventCallback_;
+    OnKeyEventDispatchFunc onKeyEventDispatchCallback_;
 #ifdef SUPPORT_DIGITAL_CROWN
     OnCrownCallbackFunc onCrownEventCallback_;
     OnCrownEventFunc onCrownEventsInternal_;
@@ -140,6 +141,8 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnKeyEventDispatchCallback, OnKeyEventDispatchFunc, onKeyEventDispatchCallback)
+
 #ifdef SUPPORT_DIGITAL_CROWN
     ACE_DEFINE_FOCUS_EVENT(OnCrownCallback, OnCrownCallbackFunc, onCrownEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnCrownEventInternal, OnCrownEventFunc, onCrownEventsInternal)
@@ -158,6 +161,8 @@ private:
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool ProcessOnKeyEventInternal(const KeyEvent& event);
     bool HandleFocusAxisEvent(const FocusAxisEvent& event);
+    bool HasCustomKeyEventDispatch(const FocusEvent& event);
+    bool HandleCustomEventDispatch(const FocusEvent& event);
 #ifdef SUPPORT_DIGITAL_CROWN
     bool HandleCrownEvent(const CrownEvent& CrownEvent);
 #endif

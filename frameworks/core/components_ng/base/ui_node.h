@@ -819,6 +819,14 @@ public:
     virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
     virtual void RemoveCustomProperty(const std::string& key) {}
 
+    /**
+     * flag used by Repeat virtual scroll
+     * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
+     * adding a @ReusableV2 @ComponentV2 CustomNode
+     * allowReusableV2Descendant_ default value is true
+     */
+    void SetAllowReusableV2Descendant(bool allow);
+    bool IsAllowReusableV2Descendant() const;
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -959,6 +967,7 @@ private:
     bool isFirstAccessibilityVirtualNode_ = false;
     // the flag to block dirty mark.
     bool isFreeze_ = false;
+    bool allowReusableV2Descendant_ = true;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

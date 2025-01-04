@@ -215,7 +215,7 @@ HWTEST_F(RichEditorPatternTestSixNg, InsertValueInStyledString001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_3);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     richEditorPattern->InsertValueInStyledString(PREVIEW_TEXT_VALUE1);
     EXPECT_FALSE(richEditorPattern->textSelector_.IsValid());
 }
@@ -230,7 +230,7 @@ HWTEST_F(RichEditorPatternTestSixNg, DeleteValueInStyledString001, TestSize.Leve
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_3);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     richEditorPattern->previewLongPress_ = true;
     auto focusHub = richEditorPattern->GetFocusHub();
     focusHub->currentFocus_ = true;
@@ -307,7 +307,7 @@ HWTEST_F(RichEditorPatternTestSixNg, DeleteSpans001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = true;
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
     richEditorPattern->spans_.push_back(spanItem);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_3);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_3);
     auto eventHub = richEditorNode_->GetEventHub<RichEditorEventHub>();
     eventHub->SetOnWillChange([](const RichEditorChangeValue& value) -> bool { return false; });
     richEditorPattern->redoOperationRecords_.emplace_back();
@@ -381,7 +381,7 @@ HWTEST_F(RichEditorPatternTestSixNg, RemoveEmptySpanNodes002, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto newFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
     auto newAddFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
-    newAddFrameNode->GetSpanItem()->content = INIT_U16VALUE_3;
+    newAddFrameNode->GetSpanItem()->content = INIT_VALUE_3;
     richEditorNode_->children_.push_back(newFrameNode);
     richEditorNode_->children_.push_back(newAddFrameNode);
     richEditorPattern->RemoveEmptySpanNodes();
@@ -664,7 +664,7 @@ HWTEST_F(RichEditorPatternTestSixNg, ProcessInsertValue001, TestSize.Level1)
 {
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::string insertValue = "abc";
+    std::u16string insertValue = u"abc";
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = false;
     auto size = richEditorPattern->operationRecords_.size();
@@ -1050,7 +1050,7 @@ HWTEST_F(RichEditorPatternTestSixNg, ProcessDeleteNodes002, TestSize.Level1)
     auto nodeId = stack->ClaimNodeId();
     auto newFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
     auto newAddFrameNode = SpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG, nodeId);
-    newAddFrameNode->GetSpanItem()->content = INIT_U16VALUE_3;
+    newAddFrameNode->GetSpanItem()->content = INIT_VALUE_3;
     richEditorNode_->children_.push_back(newFrameNode);
     richEditorNode_->children_.push_back(newAddFrameNode);
 
@@ -1078,7 +1078,7 @@ HWTEST_F(RichEditorPatternTestSixNg, MouseRightFocus002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = PREVIEW_TEXT_U16VALUE2;
+    spanItem->content = PREVIEW_TEXT_VALUE2;
     spanItem->spanItemType = SpanItemType::IMAGE;
     spanItem->position = 0;
     richEditorPattern->spans_.push_back(spanItem);
@@ -1103,7 +1103,7 @@ HWTEST_F(RichEditorPatternTestSixNg, FromStyledString002, TestSize.Level1)
 
     Selection selection;
     RefPtr<SpanString> spanString;
-    spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
+    spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
     ASSERT_NE(spanString, nullptr);
     spanString->spans_.front() = nullptr;
     spanString->spans_.emplace_back();
@@ -1199,7 +1199,7 @@ HWTEST_F(RichEditorPatternTestSixNg, BeforeDrag002, TestSize.Level1)
     RichEditorChangeValue changeValue;
     int32_t innerPosition = 0;
     RichEditorPattern::OperationRecord record;
-    record.addText = "test123\n";
+    record.addText = u"test123\n";
     record.beforeCaretPosition = 20;
 
     richEditorPattern->BeforeDrag(changeValue, innerPosition, record);
@@ -1236,7 +1236,7 @@ HWTEST_F(RichEditorPatternTestSixNg, UndoDrag003, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RichEditorPattern::OperationRecord record;
-    record.addText = "test123\n";
+    record.addText = u"test123\n";
     record.deleteCaretPostion = 1;
     auto caretPosition = richEditorPattern->caretPosition_;
     richEditorPattern->UndoDrag(record);

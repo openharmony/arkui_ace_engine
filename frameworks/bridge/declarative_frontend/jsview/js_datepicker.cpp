@@ -652,37 +652,17 @@ void ParseSelectedDateTimeObject(const JSCallbackInfo& info, const JSRef<JSObjec
 
 void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
-    auto theme = GetTheme<PickerTheme>();
-    CHECK_NULL_VOID(theme);
     JSRef<JSVal> startDate;
     JSRef<JSVal> endDate;
     JSRef<JSVal> selectedDate;
+    JSRef<JSVal> mode;
     if (!paramObj->IsUndefined()) {
         startDate = paramObj->GetProperty("start");
         endDate = paramObj->GetProperty("end");
         selectedDate = paramObj->GetProperty("selected");
+        mode = paramObj->GetProperty("mode");
     }
-    auto parseStartDate = ParseDate(startDate);
-    auto parseEndDate = ParseDate(endDate);
-    if (parseStartDate.GetYear() <= 0) {
-        parseStartDate = theme->GetDefaultStartDate();
-    }
-    if (parseEndDate.GetYear() <= 0) {
-        parseEndDate = theme->GetDefaultEndDate();
-    }
-    auto startDays = parseStartDate.ToDays();
-    auto endDays = parseEndDate.ToDays();
-    if (startDays > endDays) {
-        parseStartDate = theme->GetDefaultStartDate();
-        parseEndDate = theme->GetDefaultEndDate();
-    }
-    DatePickerModel::GetInstance()->CreateDatePicker(theme);
-    if (startDate->IsObject()) {
-        DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
-    }
-    if (endDate->IsObject()) {
-        DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
-    }
+    ParseStartEndDate(startDate, endDate);
     if (selectedDate->IsObject()) {
         JSRef<JSObject> selectedDateObj = JSRef<JSObject>::Cast(selectedDate);
         JSRef<JSVal> changeEventVal = selectedDateObj->GetProperty("changeEvent");
@@ -695,6 +675,7 @@ void JSDatePicker::CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
         DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
     }
+    ParseDatePickerMode(mode);
     if (!JSDatePickerTheme::ApplyTheme()) {
         SetDefaultAttributes();
     }
@@ -722,6 +703,46 @@ void JSDatePicker::SetDefaultAttributes()
     textStyle.fontSize = normalStyle.GetFontSize();
     textStyle.fontWeight = normalStyle.GetFontWeight();
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::ParseDatePickerMode(JSRef<JSVal> mode)
+{
+    auto datePickerMode = DatePickerMode::DATE;
+    if (!mode->IsNull() && mode->IsNumber()) {
+        auto parseMode = mode->ToNumber<int32_t>();
+        if (parseMode >= static_cast<int32_t>(DatePickerMode::DATE) &&
+            parseMode <= static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+            datePickerMode = static_cast<DatePickerMode>(parseMode);
+        }
+    }
+    DatePickerModel::GetInstance()->SetMode(datePickerMode);
+}
+
+void JSDatePicker::ParseStartEndDate(JSRef<JSVal> startDate, JSRef<JSVal> endDate)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartDate = ParseDate(startDate);
+    auto parseEndDate = ParseDate(endDate);
+    if (parseStartDate.GetYear() <= 0) {
+        parseStartDate = theme->GetDefaultStartDate();
+    }
+    if (parseEndDate.GetYear() <= 0) {
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    auto startDays = parseStartDate.ToDays();
+    auto endDays = parseEndDate.ToDays();
+    if (startDays > endDays) {
+        parseStartDate = theme->GetDefaultStartDate();
+        parseEndDate = theme->GetDefaultEndDate();
+    }
+    DatePickerModel::GetInstance()->CreateDatePicker(theme);
+    if (startDate->IsObject()) {
+        DatePickerModel::GetInstance()->SetStartDate(parseStartDate);
+    }
+    if (endDate->IsObject()) {
+        DatePickerModel::GetInstance()->SetEndDate(parseEndDate);
+    }
 }
 
 void JSDatePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
@@ -996,6 +1017,18 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
+
+    auto mode = paramObject->GetProperty("mode");
+    auto datePickerMode = DatePickerMode::DATE;
+    if (!mode->IsNull() && mode->IsNumber()) {
+        auto parseMode = mode->ToNumber<int32_t>();
+        if (parseMode >= static_cast<int32_t>(DatePickerMode::DATE) &&
+            parseMode <= static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+            datePickerMode = static_cast<DatePickerMode>(parseMode);
+        }
+    }
+    settingData.mode = datePickerMode;
+
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
     if (dateTimeOptionsValue->IsObject()) {
         auto dateTimeOptionsObj = JSRef<JSObject>::Cast(dateTimeOptionsValue);
@@ -1373,6 +1406,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("selectedTextStyle", &JSTimePicker::SetSelectedTextStyle);
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
+    JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1412,6 +1446,15 @@ void JSTimePicker::EnableHapticFeedback(const JSCallbackInfo& info)
 void JSTimePicker::UseMilitaryTime(bool isUseMilitaryTime)
 {
     TimePickerModel::GetInstance()->SetHour24(isUseMilitaryTime);
+}
+
+void JSTimePicker::EnableCascade(const JSCallbackInfo& info)
+{
+    bool isEnableCascade = false;
+    if (info[0]->IsBoolean()) {
+        isEnableCascade = info[0]->ToBoolean();
+    }
+    TimePickerModel::GetInstance()->SetEnableCascade(isEnableCascade);
 }
 
 void JSTimePicker::DateTimeOptions(const JSCallbackInfo& info)
@@ -1717,10 +1760,13 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
     auto selectedTime = paramObject->GetProperty("selected");
     auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObject->GetProperty("enableCascade");
     NG::TimePickerSettingData settingData;
     PickerDialogInfo pickerDialog;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    settingData.isEnableCascade = enableCascade->ToBoolean();
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    pickerDialog.isEnableCascade = enableCascade->ToBoolean();
     if (selectedTime->IsObject()) {
         PickerDate dialogTitleDate = ParseDate(selectedTime);
         if (dialogTitleDate.GetYear() != 0) {
@@ -1830,8 +1876,10 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
 
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObj->GetProperty("enableCascade");
     NG::TimePickerSettingData settingData;
     settingData.isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    settingData.isEnableCascade = enableCascade->ToBoolean();
 
     DialogProperties properties;
     properties.alignment = theme->GetAlignment();
@@ -1869,13 +1917,16 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     auto selectedTime = paramObj->GetProperty("selected");
     auto useMilitaryTime = paramObj->GetProperty("useMilitaryTime");
+    auto enableCascade = paramObj->GetProperty("enableCascade");
     bool isUseMilitaryTime = useMilitaryTime->ToBoolean();
+    bool isEnableCascade = enableCascade->ToBoolean();
     if (selectedTime->IsObject()) {
         timePicker->SetSelectedTime(ParseTime(selectedTime));
     }
     timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
+    timePicker->SetEnableCascade(isEnableCascade);
     component = timePicker;
 }
 

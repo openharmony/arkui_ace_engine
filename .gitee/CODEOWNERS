@@ -996,6 +996,7 @@ frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.cp
 frameworks/bridge/declarative_frontend/jsview/js_ability_component_controller.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_ability_component.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_ability_component.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_accessibility.cpp @arkuiabilitygroup
 frameworks/bridge/declarative_frontend/jsview/js_animatable_arithmetic.h @arkuiframework
 frameworks/bridge/declarative_frontend/jsview/js_animator.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_animator.h @arkui_superman
@@ -1188,6 +1189,7 @@ frameworks/bridge/declarative_frontend/jsview/js_polygon.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_polygon.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_polyline.cpp @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/js_polyline.h @arkuilayout
+frameworks/bridge/declarative_frontend/jsview/js_popups.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.cpp @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_previewer_mock.h @arkuistatemgmt
 frameworks/bridge/declarative_frontend/jsview/js_progress.cpp @arkui_image

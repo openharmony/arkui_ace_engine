@@ -59,7 +59,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);

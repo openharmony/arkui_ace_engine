@@ -77,6 +77,7 @@ public:
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
+    virtual bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) = 0;
 };
 
 } // namespace OHOS::Ace

@@ -24,10 +24,13 @@ import { GridBootcamp } from './GridBootcamp';
 import { FlexBootcamp } from './FlexBootcamp';
 import { ColumnBootcamp } from './ColumnBootcamp';
 import { GridColBootcamp } from './GridColBootcamp';
+import { StackBootcamp } from './StackBootcamp';
 import { RelativeContainerBootcamp } from './RelativeContainerBootcamp';
 import { RowBootcamp } from './RowBootcamp';
 import { ScrollBootcamp } from './ScrollBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
+import { ListItemBootcamp } from './ListItemBootcamp';
+import { GridRowBootcamp } from './GridRowBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -39,14 +42,17 @@ export const containersRoute: RouteGroup = {
     { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' },
     { name: 'list-item-group', label: '分组列表/ListItemGroup'},
     { name: 'list', label: '列表/List'},
+    { name: 'list-item', label: '列表选项/ListItem'},
     { name: 'grid', label: '网格/Grid' },
     { name: 'flex', label: '弹性布局/Flex' },
     { name: 'column', label: '纵向布局/Column' },
     { name: 'grid-col', label: '栅格列/GridCol' },
+    { name: 'stack', label: '层叠布局/Stack' },
     { name: 'relative-container', label: '相对布局/RelativeContainer' },
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
-    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' }
+    { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    { name: 'gridRow', label: '栅格容器/GridRow' }
   ]
 };
 
@@ -64,6 +70,8 @@ export function ContainersDestination(name: string, route: Route) {
     ListItemGroupBootcamp({ title: route.label })
   } else if (name === 'containers/list') {
     ListBootcamp({ title: route.label })
+  }else if (name === 'containers/list-item') {
+    ListItemBootcamp({ title: route.label })
   } else if (name === 'containers/grid') {
     GridBootcamp({ title: route.label })
   } else if (name === 'containers/flex') {
@@ -72,6 +80,8 @@ export function ContainersDestination(name: string, route: Route) {
     ColumnBootcamp({ title: route.label })
   } else if (name === 'containers/grid-col') {
     GridColBootcamp({ title: route.label })
+  } else if (name === 'containers/stack') {
+    StackBootcamp({ title: route.label })
   } else if (name === 'containers/relative-container') {
     RelativeContainerBootcamp({ title: route.label })
   } else if (name === 'containers/row') {
@@ -80,5 +90,7 @@ export function ContainersDestination(name: string, route: Route) {
     ScrollBootcamp({ title: route.label })
   } else if (name === 'containers/waterFlow') {
     WaterFlowBootcamp({ title: route.label })
+  }else if (name === 'containers/gridRow') {
+    GridRowBootcamp({ title: route.label })
   }
 }

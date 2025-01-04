@@ -468,7 +468,8 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
     PlaceholderOptions options;
     CHECK_NULL_VOID(stringParameters);
     if (0 < stringParametersCount && stringParameters[0] != nullptr) { // 0: value
-        options.value = stringParameters[0];
+        std::string value = stringParameters[0];
+        options.value = UtfUtils::Str8ToStr16(value);
     }
     for (ArkUI_Uint32 index = 1; index < stringParametersCount; index++) { // 1: value
         options.fontFamilies.push_back(stringParameters[index]);
@@ -513,7 +514,7 @@ void ResetRichEditorPlaceholder(ArkUINodeHandle node)
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    options.value = "";
+    options.value = u"";
     options.fontSize = textStyle.GetFontSize();
     options.fontFamilies = textStyle.GetFontFamilies();
     options.fontWeight = textStyle.GetFontWeight();
