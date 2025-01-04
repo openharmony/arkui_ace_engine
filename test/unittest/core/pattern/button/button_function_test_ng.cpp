@@ -115,7 +115,7 @@ protected:
         const std::string& createValue, const TestProperty& testProperty);
 
 private:
-    RefPtr<FrameNode> CreateAndCheckTextOverflow(bool isSmallButton, bool isCheckTextOverflow);
+    void CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNode, bool isCheckTextOverflow);
     void CheckTextMarqueeOption(RefPtr<FrameNode> frameNode, bool isMarqueeStart);
 };
 
@@ -248,23 +248,11 @@ PaddingProperty ButtonFunctionTestNg::CreatePadding(float left, float top, float
     return padding;
 }
 
-RefPtr<FrameNode> ButtonFunctionTestNg::CreateAndCheckTextOverflow(bool isSmallButton, bool isCheckTextOverflow)
-{
+void ButtonFunctionTestNg::CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNode, bool isCheckTextOverflow)
+{    
     /**
-     * @tc.steps: step1. create button and get frameNode.
-     */
-    TestProperty testProperty;
-    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
-    if (isSmallButton) {
-        testProperty.controlSize = ControlSize::SMALL;
-    }
-    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
-    
-    /**
-     * @tc.steps: step2. get pattern and update frameNode.
-     * @tc.expected: step2. related function is called.
+     * @tc.steps: step1. get pattern and update frameNode.
+     * @tc.expected: step1. related function is called.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -272,8 +260,8 @@ RefPtr<FrameNode> ButtonFunctionTestNg::CreateAndCheckTextOverflow(bool isSmallB
     ASSERT_NE(buttonLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. updateTextOverflow then execute onModifyDone.
-     * @tc.expected: step3. check whether the properties is correct.
+     * @tc.steps: step2. updateTextOverflow then execute onModifyDone.
+     * @tc.expected: step2. check whether the properties is correct.
      */
     // set touchEventActuator_
     auto touchCallback = [](TouchEventInfo& info) {};
@@ -301,8 +289,6 @@ RefPtr<FrameNode> ButtonFunctionTestNg::CreateAndCheckTextOverflow(bool isSmallB
         buttonPattern->OnModifyDone();
         EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::MARQUEE);
     }
-
-    return frameNode;
 }
 
 void ButtonFunctionTestNg::CheckTextMarqueeOption(RefPtr<FrameNode> frameNode, bool isMarqueeStart)
@@ -1395,13 +1381,22 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
 HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest021, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. visit function CreateAndCheckTextOverflow, then get frameNode.
+     * @tc.steps: step1. get frameNode.
      */
-    auto frameNode = CreateAndCheckTextOverflow(true, true);
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    testProperty.controlSize = ControlSize::SMALL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
-     * @tc.steps: step2. buttonPattern UpdateButtonStyle.
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -1410,8 +1405,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest021, TestSize.Level1)
     buttonPattern->UpdateButtonStyle();
 
     /**
-     * @tc.steps: step3. visit function CheckTextMarqueeOption.
-     * @tc.expected: step3. check whether the properties is correct.
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
      */
     CheckTextMarqueeOption(frameNode, true);
 }
@@ -1424,13 +1419,21 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest021, TestSize.Level1)
 HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest022, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. visit function CreateAndCheckTextOverflow, then get frameNode.
+     * @tc.steps: step1. get frameNode.
      */
-    auto frameNode = CreateAndCheckTextOverflow(false, true);
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
-     * @tc.steps: step2. buttonPattern UpdateButtonStyle.
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -1440,8 +1443,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest022, TestSize.Level1)
     buttonPattern->UpdateButtonStyle();
 
     /**
-     * @tc.steps: step3. visit function CheckTextMarqueeOption.
-     * @tc.expected: step3. check whether the properties is correct.
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
      */
     CheckTextMarqueeOption(frameNode, true);
 }
@@ -1454,13 +1457,21 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest022, TestSize.Level1)
 HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest023, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. visit function CreateAndCheckTextOverflow, then get frameNode.
+     * @tc.steps: step1. get frameNode.
      */
-    auto frameNode = CreateAndCheckTextOverflow(false, true);
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
-     * @tc.steps: step2. buttonPattern UpdateButtonStyle.
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -1470,8 +1481,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest023, TestSize.Level1)
     buttonPattern->UpdateButtonStyle();
 
     /**
-     * @tc.steps: step3. visit function CheckTextMarqueeOption.
-     * @tc.expected: step3. check whether the properties is correct.
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
      */
     CheckTextMarqueeOption(frameNode, false);
 }
@@ -1484,13 +1495,21 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest023, TestSize.Level1)
 HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. visit function CreateAndCheckTextOverflow, then get frameNode.
+     * @tc.steps: step1. get frameNode.
      */
-    auto frameNode = CreateAndCheckTextOverflow(false, false);
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
     ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
 
     /**
-     * @tc.steps: step2. buttonPattern AddIsFocusActiveUpdateEvent.
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, false);
+
+    /**
+     * @tc.steps: step3. buttonPattern AddIsFocusActiveUpdateEvent.
      */
     auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
     ASSERT_NE(buttonPattern, nullptr);
@@ -1503,13 +1522,13 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
     buttonPattern->UpdateButtonStyle();
 
     /**
-     * @tc.steps: step3. visit function CheckTextMarqueeOption.
-     * @tc.expected: step3. check whether the properties is correct.
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
      */
     CheckTextMarqueeOption(frameNode, true);
 
     /**
-     * @tc.steps: step4. buttonPattern RemoveIsFocusActiveUpdateEvent.
+     * @tc.steps: step5. buttonPattern RemoveIsFocusActiveUpdateEvent.
      */
     buttonPattern->SetIsFocus(false);
     buttonPattern->HandleBlurStyleTask();
@@ -1517,8 +1536,8 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
     buttonPattern->UpdateButtonStyle();
     
     /**
-     * @tc.steps: step5. visit function CheckTextMarqueeOption.
-     * @tc.expected: step5. check whether the properties is correct.
+     * @tc.steps: step6. visit function CheckTextMarqueeOption.
+     * @tc.expected: step6. check whether the properties is correct.
      */
     CheckTextMarqueeOption(frameNode, false);
 }
