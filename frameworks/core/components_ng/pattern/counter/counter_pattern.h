@@ -129,7 +129,7 @@ public:
         CHECK_NULL_VOID(subTexNode);
         auto subButtonTextLP = subTexNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(subButtonTextLP);
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = frameNode->GetContext();
         CHECK_NULL_VOID(pipeline);
         auto textTheme = pipeline->GetTheme<TextTheme>(subTexNode->GetThemeScopeId());
         CHECK_NULL_VOID(textTheme);

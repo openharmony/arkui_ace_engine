@@ -103,6 +103,7 @@ public:
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void ResetTextColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetLineSpacing(FrameNode* frameNode, const Dimension& value);

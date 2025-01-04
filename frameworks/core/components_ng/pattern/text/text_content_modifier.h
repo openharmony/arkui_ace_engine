@@ -63,7 +63,6 @@ public:
     void SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle, bool isReset = false);
     void SetFontWeight(const FontWeight& value, bool isReset = false);
     void SetTextColor(const Color& value, bool isReset = false);
-    void ResetTextColor();
     void SetTextShadow(const std::vector<Shadow>& value);
     void SetTextDecoration(const TextDecoration& value, bool isReset = false);
     void SetTextDecorationColor(const Color& value, bool isReset = false);
