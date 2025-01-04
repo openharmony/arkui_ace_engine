@@ -3950,7 +3950,7 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    UpdateTextComponentColor(host->GetThemeScopeId());
+    OnThemeScopeUpdate(host->GetThemeScopeId());
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
@@ -3965,34 +3965,15 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     CHECK_NULL_RETURN(contex, false);
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
-    if (!UpdateTextComponentColor(themeScopeId) && !textLayoutProperty->HasTextColor()
-        && !contex->HasForegroundColor()) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    }
-    return false;
-}
 
-bool TextPattern::UpdateTextComponentColor(int32_t themeScopeId)
-{
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto contex = host->GetRenderContext();
-    CHECK_NULL_RETURN(contex, false);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProperty, false);
-    if (!textLayoutProperty->HasTextColorFlagByUser()) {
-        return false;
-    }
-
-    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
+    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !textLayoutProperty->HasTextColor() && !contex->HasForegroundColor()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
         CHECK_NULL_RETURN(textTheme, false);
         UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
     }
-
-    return true;
+    return false;
 }
 
 void TextPattern::ResetCustomFontColor()
@@ -4836,6 +4817,9 @@ void TextPattern::UpdateFontColor(const Color& value)
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    auto = textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextPattern::MarkDirtyNodeRender()
