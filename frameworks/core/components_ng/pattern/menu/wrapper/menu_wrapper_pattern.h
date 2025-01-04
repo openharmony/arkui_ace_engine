@@ -485,9 +485,12 @@ public:
         animationInfo_.clipRate = rate;
     }
 
-    void SetAnimationBorderRadius(float radius)
+    void SetAnimationBorderRadius(double rate, const BorderRadiusProperty& radius)
     {
-        animationInfo_.borderRadius = radius;
+        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->Value() * rate);
+        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->Value() * rate);
+        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->Value() * rate);
+        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->Value() * rate);
     }
 
     PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
