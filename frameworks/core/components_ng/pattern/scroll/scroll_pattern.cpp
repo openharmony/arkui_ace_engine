@@ -1343,7 +1343,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
     CHECK_NULL_VOID(scrollable);
     if (scrollable->IsSnapAnimationRunning()) {
         scrollable->UpdateScrollSnapEndWithOffset(
-            -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
         scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
         if (!IsScrolling()) {

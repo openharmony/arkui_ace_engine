@@ -102,6 +102,7 @@ declare class ModifierJS {
   SymbolSpanModifier(nativePtr: KNode, classType: ModifierType): void;
   Component3DModifier(nativePtr: KNode, classType: ModifierType): void;
   ContainerSpanModifier(nativePtr: KNode, classType: ModifierType): void;
+  LinearIndicatorModifier(nativePtr: KNode, classType: ModifierType): void;
 }
 
 declare class aceConsole {

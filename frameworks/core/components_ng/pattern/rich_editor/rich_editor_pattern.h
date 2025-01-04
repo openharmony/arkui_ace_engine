@@ -1388,6 +1388,7 @@ private:
     RefPtr<Paragraph> presetParagraph_;
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
+    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1461,7 +1462,8 @@ private:
     bool isTriggerAvoidOnCaretAvoidMode_ = false;
     RectF lastRichTextRect_;
     std::unique_ptr<OneStepDragController> oneStepDragController_;
-    std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    std::list<WeakPtr<ImageSpanNode>> imageNodes;
+    std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
 };
 } // namespace OHOS::Ace::NG
 

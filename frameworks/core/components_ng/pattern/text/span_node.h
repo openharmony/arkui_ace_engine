@@ -446,6 +446,9 @@ public:
     void UpdateColorByResourceId()
     {
         spanItem_->fontStyle->UpdateColorByResourceId();
+        if (spanItem_->backgroundStyle) {
+            spanItem_->backgroundStyle->UpdateColorByResourceId();
+        }
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);

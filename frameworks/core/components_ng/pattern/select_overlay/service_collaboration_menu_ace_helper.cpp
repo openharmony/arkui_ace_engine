@@ -199,11 +199,11 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     CHECK_NULL_RETURN(menuPipeline, nullptr);
     auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(menuTheme, nullptr);
-    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuItemPattern>());
-    CHECK_NULL_RETURN(menuItemNode, nullptr);
-    auto menuItemPattern = menuItemNode->GetPattern<MenuItemPattern>();
+    auto menuItemPattern = AceType::MakeRefPtr<MenuItemPattern>();
     menuItemPattern->onClickEventSet_ = true;
+    auto menuItemNode = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), menuItemPattern);
+    CHECK_NULL_RETURN(menuItemNode, nullptr);
     auto menuItemProperty = menuItemNode->GetLayoutProperty<MenuItemLayoutProperty>();
     CHECK_NULL_RETURN(menuItemProperty, nullptr);
     menuItemProperty->UpdatePadding({ .right = CalcLength(2.0f) });
@@ -425,6 +425,14 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
     const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
     std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
 {
+    AddHoverEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
+    AddClickEventToMainMenu(menuNode, menuWrapper, subDeviceMenuCreator);
+}
+
+void ServiceCollaborationMenuAceHelper::AddHoverEventToMainMenu(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+    std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
+{
     auto inputHub = menuNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto mouseTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper)),
@@ -474,6 +482,42 @@ void ServiceCollaborationMenuAceHelper::SubMeunMountToMainMenu(
     };
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
     inputHub->AddOnHoverEvent(hoverEvent);
+}
+
+void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
+    const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
+    std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator)
+{
+    TAG_LOGI(AceLogTag::ACE_MENU, "Service Collaborationfwk mainMenu clickTask enter");
+    auto gestureHub = menuNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto clickTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper)),
+                      weakMenuNode = WeakClaim(RawPtr(menuNode)), subDeviceMenuCreator](GestureEvent& event) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "menuitem clickTask enter");
+        auto menuItemNode = weakMenuNode.Upgrade();
+        auto menuWrapper = weakMenuWrapper.Upgrade();
+        auto helper = weakHelper.Upgrade();
+        CHECK_NULL_VOID(menuItemNode && menuWrapper && helper);
+        helper->subMenuIsShow_ = false;
+        if (!helper->subMenuIsShow_) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "clickTask create SubMenu enter.1");
+            auto subMenu = subDeviceMenuCreator();
+            CHECK_NULL_VOID(subMenu);
+            TAG_LOGI(AceLogTag::ACE_MENU, "clickTask create SubMenu enter.2");
+            auto submenuPattern = subMenu->GetPattern<MenuPattern>();
+            CHECK_NULL_VOID(submenuPattern);
+            submenuPattern->SetParentMenuItem(menuItemNode);
+            subMenu->MountToParent(menuWrapper);
+            auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
+            auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
+            OffsetF position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+            menuProps->UpdateMenuOffset(position);
+            subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+            helper->subMenuIsShow_ = true;
+        }
+    };
+    auto clickEvent = AceType::MakeRefPtr<ClickEvent>(std::move(clickTask));
+    gestureHub->AddClickEvent(clickEvent);
 }
 
 // Callback

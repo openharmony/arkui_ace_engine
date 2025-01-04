@@ -42,6 +42,11 @@ constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
+constexpr float DEFAULT_GRAYED = 0.4f;
+const RefPtr<InterpolatingSpring> DRAG_START_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 380.0f, 34.0f);
+const RefPtr<InterpolatingSpring> DRAG_END_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 228.0f, 29.0f);
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
@@ -402,5 +407,45 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         DragAnimationHelper::CalcBadgeTextPosition(menuPattern, manager, imageNode, textNode);
         DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
+}
+
+void DragAnimationHelper::SetPreOpacity(const RefPtr<FrameNode>& preNode)
+{
+    auto grayedOpacity = preNode->GetPreGrayedOpacity();
+    DoGrayedAnimation(preNode, grayedOpacity, DRAG_END_ANIMATION_CURVE);
+}
+
+void DragAnimationHelper::DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    float opacity = 1.0f;
+    if (renderContext->HasOpacity()) {
+        opacity = renderContext->GetOpacityValue();
+        frameNode->SetPreGrayedOpacity(opacity);
+    }
+    DoGrayedAnimation(frameNode, opacity * DEFAULT_GRAYED, DRAG_START_ANIMATION_CURVE);
+}
+
+void DragAnimationHelper::DoGrayedAnimation(
+    const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->IsTextCategoryComponent(frameTag)) {
+        return;
+    }
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (!dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        return;
+    }
+    AnimationOption option;
+    option.SetCurve(cure);
+    AnimationUtils::Animate(
+        option, [frameNode, opacity]() { ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode); },
+        option.GetOnFinishEvent());
 }
 }

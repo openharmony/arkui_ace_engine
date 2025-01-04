@@ -1143,7 +1143,7 @@ public:
         return menuItemContentAlign_;
     }
 
-    const int& GetMenuBackgroundBlurStyle() const
+    int GetMenuBackgroundBlurStyle() const
     {
         return menuBackgroundBlurStyle_;
     }

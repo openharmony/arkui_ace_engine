@@ -45,6 +45,22 @@ bool JSScrollable::ParseAlwaysEnable(const JSRef<JSVal>& jsValue, bool defaultVa
     return alwaysEnabled;
 }
 
+EffectEdge JSScrollable::ParseEffectEdge(const JSRef<JSVal>& jsValue)
+{
+    auto effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+    if (jsValue->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> effectEdgedParam = paramObject->GetProperty("effectEdge");
+        if (effectEdgedParam->IsNull() || effectEdgedParam->IsUndefined() ||
+            !JSViewAbstract::ParseJsInt32(effectEdgedParam, effectEdge) ||
+            effectEdge < static_cast<int32_t>(EffectEdge::START) ||
+            effectEdge > static_cast<int32_t>(EffectEdge::END)) {
+            effectEdge = static_cast<int32_t>(EffectEdge::ALL);
+        }
+    }
+    return static_cast<EffectEdge>(effectEdge);
+}
+
 DisplayMode JSScrollable::ParseDisplayMode(const JSCallbackInfo& info, DisplayMode defaultValue)
 {
     if (info.Length() < 1) {
