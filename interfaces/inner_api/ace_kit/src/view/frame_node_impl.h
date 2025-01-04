@@ -34,7 +34,7 @@ public:
 
     void Reset() override;
 
-    void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) override;
+    void Measure(const Kit::LayoutConstraintInfo& parentContraint) override;
     void Layout() override;
 
     void InitializePatternAndContext() override;

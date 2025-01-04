@@ -17,15 +17,16 @@
 
 #include "interfaces/inner_api/ace_kit/include/ui/view/layout/layout_algorithm.h"
 
+#include "core/components_ng/layout/layout_wrapper.h"
+
 namespace OHOS::Ace::NG {
 
 LayoutAlgorithmWrapper::LayoutAlgorithmWrapper(
-        const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure, bool skipLayout)
-        : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
-    {}
+    const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure, bool skipLayout)
+    : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
+{}
 
 LayoutAlgorithmWrapper::~LayoutAlgorithmWrapper() = default;
-
 
 RefPtr<LayoutAlgorithmWrapper> LayoutAlgorithmWrapper::CreateLayoutAlgorithmWrapper(
     const RefPtr<Kit::LayoutAlgorithm>& layoutAlgorithm)
@@ -46,11 +47,26 @@ std::optional<SizeF> LayoutAlgorithmWrapper::MeasureContent(
     return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
 }
 
+Kit::LayoutConstraintInfo GetLayoutConstraint(const std::optional<LayoutConstraintF>& contentConstraint)
+{
+    Kit::LayoutConstraintInfo layoutConstraintInfo;
+    if (contentConstraint.has_value()) {
+        layoutConstraintInfo.minWidth = contentConstraint.value().minSize.Width();
+        layoutConstraintInfo.minHeight = contentConstraint.value().minSize.Height();
+        layoutConstraintInfo.maxWidth = contentConstraint.value().maxSize.Width();
+        layoutConstraintInfo.maxHeight = contentConstraint.value().maxSize.Height();
+        layoutConstraintInfo.percentReferWidth = contentConstraint.value().percentReference.Width();
+        layoutConstraintInfo.percentReferHeight = contentConstraint.value().percentReference.Height();
+    }
+    return layoutConstraintInfo;
+}
+
 void LayoutAlgorithmWrapper::Measure(LayoutWrapper* layoutWrapper)
 {
     if (!layoutAlgorithm_) {
         if (absLayoutAlgorithm_) {
-            absLayoutAlgorithm_->Measure();
+            auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+            absLayoutAlgorithm_->Measure(GetLayoutConstraint(layoutConstraint));
         }
         return;
     }
@@ -71,8 +87,8 @@ void LayoutAlgorithmWrapper::Layout(LayoutWrapper* layoutWrapper)
 }
 
 void LayoutAlgorithmWrapper::SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
-    {
-        absLayoutAlgorithm_ = absLayoutAlgorithm;
-    }
+{
+    absLayoutAlgorithm_ = absLayoutAlgorithm;
+}
 
 } // namespace OHOS::Ace::NG

@@ -23,6 +23,7 @@
 #include "ui/base/ace_type.h"
 #include "ui/base/referenced.h"
 #include "ui/properties/dirty_flag.h"
+#include "ui/view/layout/layout_info.h"
 
 namespace OHOS::Ace::NG {
 class LayoutProperty;
@@ -47,7 +48,7 @@ public:
     virtual void InitializePatternAndContext() = 0;
     virtual void Reset() = 0;
 
-    virtual void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) = 0;
+    virtual void Measure(const Kit::LayoutConstraintInfo& parentContraint) = 0;
     virtual void Layout() = 0;
 
     virtual RefPtr<NG::LayoutProperty> GetLayoutProperty() = 0;

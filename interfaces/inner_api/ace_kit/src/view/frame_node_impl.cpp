@@ -23,6 +23,7 @@
 #include "ui/view/ui_context.h"
 
 #include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -83,10 +84,32 @@ AceNode* FrameNodeImpl::GetAceNodePtr()
     return frameNode_;
 }
 
-void FrameNodeImpl::Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint)
+void FrameNodeImpl::Measure(const Kit::LayoutConstraintInfo& parentContraint)
 {
     CHECK_NULL_VOID(frameNode_);
-    frameNode_->Measure(parentContraint);
+    std::optional<NG::LayoutConstraintF> constraint = std::make_optional<NG::LayoutConstraintF>();
+    //minWidth
+    constraint->minSize.SetWidth(parentContraint.minWidth);
+    //minHeight
+    constraint->minSize.SetHeight(parentContraint.minHeight);
+    //maxWidth
+    constraint->maxSize.SetWidth(parentContraint.maxWidth);
+    //maxHeight
+    constraint->maxSize.SetHeight(parentContraint.maxHeight);
+    //minWidth == maxWidth
+    if (parentContraint.minWidth == parentContraint.maxWidth) {
+        constraint->selfIdealSize.SetWidth(parentContraint.minWidth);
+    }
+    //minHeight == maxHeight
+    if (parentContraint.minHeight == parentContraint.maxHeight) {
+        constraint->selfIdealSize.SetHeight(parentContraint.minHeight);
+    }
+    //percentReferenceWidth
+    constraint->percentReference.SetWidth(parentContraint.percentReferWidth);
+    //percentReferenceHeight
+    constraint->percentReference.SetHeight(parentContraint.percentReferHeight);
+    frameNode_->SetActive(true);
+    frameNode_->Measure(constraint);
 }
 
 void FrameNodeImpl::Layout()
