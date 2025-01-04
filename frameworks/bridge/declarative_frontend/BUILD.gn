@@ -520,7 +520,7 @@ template("declarative_js_engine") {
       sources += [ "engine/functions/js_crown_function.cpp" ]
     }
 
-    if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+    if (qrcodegen_support) {
       sources += [
         "jsview/js_qrcode.cpp",
         "jsview/models/qrcode_model_impl.cpp",
@@ -998,7 +998,7 @@ template("declarative_js_engine_ng") {
         "jsview/js_pattern_lock.cpp",
         "jsview/js_relative_container.cpp",
       ]
-      if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+      if (qrcodegen_support) {
         sources += [ "jsview/js_qrcode.cpp" ]
       }
     }
