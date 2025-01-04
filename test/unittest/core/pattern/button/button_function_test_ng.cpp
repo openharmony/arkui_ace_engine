@@ -249,7 +249,7 @@ PaddingProperty ButtonFunctionTestNg::CreatePadding(float left, float top, float
 }
 
 void ButtonFunctionTestNg::CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNode, bool isCheckTextOverflow)
-{    
+{
     /**
      * @tc.steps: step1. get pattern and update frameNode.
      * @tc.expected: step1. related function is called.
