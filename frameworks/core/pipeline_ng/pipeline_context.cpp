@@ -3265,13 +3265,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
-    DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
+    DispatchMouseToTouchEvent(event, node);
     DispatchMouseEvent(event, node);
 }
 
