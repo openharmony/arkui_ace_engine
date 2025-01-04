@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -754,6 +755,11 @@ public:
         return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -852,6 +858,7 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
 };
 
 } // namespace OHOS::Ace::Platform

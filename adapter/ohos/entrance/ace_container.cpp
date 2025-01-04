@@ -886,12 +886,23 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess,
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
+                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+                                    const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        bool passThroughMode = false;
+        if (isTouchEventsPassThrough.has_value()) {
+            passThroughMode = isTouchEventsPassThrough.value();
+        } else {
+            auto container = Platform::AceContainer::GetContainer(id);
+            if (container) {
+                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
+                container->SetTouchEventsPassThroughMode(passThroughMode);
+            }
+        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node]() {
+        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -899,9 +910,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node);
+                    context->OnTouchEvent(event, node, false, mode);
                 } else {
-                    context->OnTouchEvent(event);
+                    context->OnTouchEvent(event, false, mode);
                 }
             }
             CHECK_NULL_VOID(markProcess);

@@ -51,6 +51,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
         ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
@@ -410,6 +411,8 @@ private:
     void UnregisterDisplayManagerCallback();
     void RegisterLinkJumpCallback();
     void ExecuteUITask(std::function<void()> task, const std::string& name);
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
