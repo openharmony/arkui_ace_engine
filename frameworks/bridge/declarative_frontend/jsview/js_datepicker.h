@@ -100,6 +100,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
+    static void OnEnterSelectedArea(const JSCallbackInfo& info);
     static void Loop(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void EnableHapticFeedback(const JSCallbackInfo& info);
