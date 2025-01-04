@@ -434,7 +434,9 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
 
 bool TextFieldPattern::GetIndependentControlKeyboard()
 {
-    auto theme = GetTheme();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, false);
     independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
     return independentControlKeyboard_;
