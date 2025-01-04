@@ -115,7 +115,7 @@ TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
     if (!pointerEvent) {
         return event.time;
     }
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(pointerEvent->GetSensorInputTime());
     TimeStamp time(microseconds);
     return time;
 }
@@ -183,7 +183,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     }
     auto touchPoint = ConvertTouchPoint(item);
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(pointerEvent->GetSensorInputTime());
     TimeStamp time(microseconds);
     event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
