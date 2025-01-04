@@ -4817,7 +4817,7 @@ void TextPattern::UpdateFontColor(const Color& value)
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    auto = textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->OnPropertyChangeMeasure();
 }
