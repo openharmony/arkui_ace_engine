@@ -549,6 +549,10 @@ export class ArcSlider extends ViewV2 {
             this.options.valueOptions.min = MIN_DEFAULT;
             this.options.valueOptions.progress = PROGRESS_DEFAULT;
         }
+        const min = this.options.valueOptions.min;
+        const max = this.options.valueOptions.max;
+        this.options.valueOptions.max = Math.max(min, max);
+        this.options.valueOptions.min = Math.min(min, max);
         this.options.valueOptions.max = Math.max(this.options.valueOptions.max, this.options.valueOptions.min);
         this.options.valueOptions.min = Math.min(this.options.valueOptions.max, this.options.valueOptions.min);
         this.options.valueOptions.progress = Math.min(this.options.valueOptions.max, this.options.valueOptions.progress);
@@ -1414,10 +1418,10 @@ export class ArcSlider extends ViewV2 {
                 this.crownEventCounter = 0;
             }
         }
-        this.CrownAction(event);
+        this.crownAction(event);
     }
 
-    CrownAction(event) {
+    crownAction(event) {
         if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
             if (this.meter !== INVALID_TIMEOUT_ID) {
                 clearTimeout(this.meter);
@@ -1426,7 +1430,7 @@ export class ArcSlider extends ViewV2 {
             this.isEnlarged = true;
             this.startTouchAnimator();
             this.calcBlur();
-            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
         }
@@ -1435,7 +1439,7 @@ export class ArcSlider extends ViewV2 {
                 clearTimeout(this.meter);
                 this.meter = INVALID_TIMEOUT_ID;
             }
-            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
         }
@@ -1444,7 +1448,7 @@ export class ArcSlider extends ViewV2 {
                 clearTimeout(this.meter);
                 this.meter = INVALID_TIMEOUT_ID;
             }
-            this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+            this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
             this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
             this.calcCrownValue(this.crownDeltaAngle);
         }
