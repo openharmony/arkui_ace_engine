@@ -1993,6 +1993,11 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
+        HandleOnSelectAll();
+        return true;
+    }
+
     if (keyEvent.IsShiftWith(keyEvent.code)) {
         HandleOnSelect(keyEvent.code);
         return true;
