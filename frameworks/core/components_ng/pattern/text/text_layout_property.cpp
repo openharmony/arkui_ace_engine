@@ -177,8 +177,7 @@ void TextLayoutProperty::ToJsonValueForOption(std::unique_ptr<JsonValue>& json, 
         GetTextSelectableMode().value_or(TextSelectableMode::SELECTABLE_UNFOCUSABLE)).c_str(), filter);
     json->PutExtAttr("marqueeOptions", GetTextMarqueeOptionsString().c_str(), filter);
     auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    json->PutExtAttr("privacySensitive", host->IsPrivacySensitive(), filter);
+    json->PutExtAttr("privacySensitive", host ? host->IsPrivacySensitive() : false, filter);
     json->PutExtAttr("minFontScale", std::to_string(GetMinFontScale().value_or(MINFONTSCALE)).c_str(), filter);
     json->PutExtAttr("maxFontScale", std::to_string(GetMaxFontScale().value_or(MAXFONTSCALE)).c_str(), filter);
 }

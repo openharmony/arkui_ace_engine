@@ -320,7 +320,7 @@ void MultipleParagraphLayoutAlgorithm::SetPropertyToModifier(const RefPtr<TextLa
     if (textColor.has_value()) {
         modifier->SetTextColor(textColor.value());
     } else {
-        modifier->ResetTextColor();
+        modifier->SetTextColor(textStyle.GetTextColor(), true);
     }
     auto textShadow = layoutProperty->GetTextShadow();
     if (textShadow.has_value()) {
