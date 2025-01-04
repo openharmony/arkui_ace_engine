@@ -32,7 +32,7 @@ void ArcIndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     json->PutExtAttr("color", propColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
     json->PutExtAttr("selectedColor", propSelectedColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
     json->PutExtAttr("popupColor", propPopupColor_.value_or(Color::WHITE).ColorToString().c_str(), filter);
-    json->PutExtAttr("usingPopup", propUsingPopup_.value_or(false) ? "true" : "false", filter);
+    json->PutExtAttr("usePopup", propUsingPopup_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("itemSize",
         propItemSize_.value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ToString().c_str(), filter);
     auto jsonArrayValue = JsonUtil::CreateArray(true);
