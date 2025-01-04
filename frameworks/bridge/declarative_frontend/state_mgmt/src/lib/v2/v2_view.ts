@@ -159,7 +159,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // Empty function
     }
 
-
     /**
      * @function aboutToReuseInternal
      * @description This function is triggered from the function reuseOrCreateNewComponent when the component is
