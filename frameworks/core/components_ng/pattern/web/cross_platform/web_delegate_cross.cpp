@@ -78,8 +78,11 @@ constexpr char WEB_EVENT_RUNJSCODE_RECVVALUE[] = "onRunJSRecvValue";
 constexpr char WEB_EVENT_SCROLL[] = "onScroll";
 constexpr char WEB_EVENT_SCALECHANGE[] = "onScaleChange";
 constexpr char WEB_EVENT_JS_INVOKE_METHOD[] = "onJSInvokeMethod";
+constexpr char WEB_EVENT_ON_BEFORE_UNLOAD[] = "onBeforeUnload";
 constexpr char WEB_EVENT_REFRESH_HISTORY[] = "onRefreshAccessedHistory";
 constexpr char WEB_EVENT_RENDER_EXITED[] = "onRenderExited";
+constexpr char WEB_EVENT_FULLSCREEN_ENTER[] = "onFullScreenEnter";
+constexpr char WEB_EVENT_FULLSCREEN_EXIT[] = "onFullScreenExit";
 constexpr char WEB_EVENT_URL_LOAD_INTERCEPT[] = "onUrlLoadIntercept";
 constexpr char WEB_EVENT_PAGECHANGED[] = "onProgressChanged";
 constexpr char WEB_EVENT_RECVTITLE[] = "onReceivedTitle";
@@ -458,6 +461,55 @@ std::string WebAuthRequestImpl::GetRealm() const
     return obj->GetRealm(object_);
 }
 
+std::string WebRefreshAccessedHistoryImpl::GetUrl() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetRefreshAccessedHistoryObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get RefreshAccessedHistory Url failed");
+        return std::string();
+    }
+    return obj->GetUrl(object_);
+}
+
+bool WebRefreshAccessedHistoryImpl::GetIsRefreshed() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetRefreshAccessedHistoryObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebRefreshAccessedHistoryImpl GetIsRefreshed failed");
+        return false;
+    }
+    return obj->GetIsRefreshed(object_);
+}
+
+int WebFullScreenEnterImpl::GetHeights() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebFullScreenEnterImpl GetHeights failed");
+        return 0;
+    }
+    return obj->GetHeights(object_);
+}
+int WebFullScreenEnterImpl::GetWidths() const
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager WebFullScreenEnterImpl GetWidths failed");
+        return 0;
+    }
+    return obj->GetWidths(object_);
+}
+
+void FullScreenExitHandlerImpl::ExitFullScreen()
+{
+    auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager FullScreenExitHandlerImpl ExitFullScreen failed");
+        return;
+    }
+    obj->ExitFullScreen(object_, index_);
+}
+
 std::string WebDownloadResponseImpl::GetUrl() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
@@ -822,6 +874,29 @@ void WebDelegateCross::RegisterWebObjectEvent()
             return false;
         });
     WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_REFRESH_HISTORY),
+        [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnRefreshAccessedHistory(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_FULLSCREEN_ENTER), [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnFullScreenEnter(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
+        MakeEventHash(WEB_EVENT_FULLSCREEN_EXIT),
+        [weak = WeakClaim(this)](const std::string& param, void* object) {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnFullScreenExit(object);
+            }
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEvent(
         MakeEventHash(WEB_EVENT_DOWNLOADSTART), [weak = WeakClaim(this)](const std::string& param, void* object) {
             auto delegate = weak.Upgrade();
             if (delegate) {
@@ -872,6 +947,14 @@ void WebDelegateCross::RegisterWebObjectEvent()
             auto delegate = weak.Upgrade();
             if (delegate) {
                 return delegate->OnPermissionRequest(object);
+            }
+            return false;
+        });
+    WebObjectEventManager::GetInstance().RegisterObjectEventWithBoolReturn(MakeEventHash(WEB_EVENT_ON_BEFORE_UNLOAD),
+        [weak = WeakClaim(this)](const std::string& param, void* object) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                return delegate->OnCommonDialog(object, DialogEventType::DIALOG_EVENT_BEFORE_UNLOAD);
             }
             return false;
         });
@@ -1340,6 +1423,93 @@ void WebDelegateCross::OnDownloadStart(void* object)
             }
         },
         TaskExecutor::TaskType::JS, "ArkUIWebDownloadStartEvent");
+}
+
+void WebDelegateCross::OnRefreshAccessedHistory(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto WebRefreshAccessedHistory = AceType::MakeRefPtr<WebRefreshAccessedHistoryImpl>(object);
+    CHECK_NULL_VOID(WebRefreshAccessedHistory);
+    auto url = WebRefreshAccessedHistory->GetUrl();
+    auto isRefreshed = WebRefreshAccessedHistory->GetIsRefreshed();
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), url, isRefreshed]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnRefreshAccessedHistory = webEventHub->GetOnRefreshAccessedHistoryEvent();
+                CHECK_NULL_VOID(propOnRefreshAccessedHistory);
+                auto eventParam = std::make_shared<RefreshAccessedHistoryEvent>(url, isRefreshed);
+                propOnRefreshAccessedHistory(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebRefreshAccessedHistoryEvent");
+}
+
+void WebDelegateCross::OnFullScreenEnter(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webFullScreenEnter = AceType::MakeRefPtr<WebFullScreenEnterImpl>(object);
+    CHECK_NULL_VOID(webFullScreenEnter);
+    int heights = webFullScreenEnter->GetHeights();
+    int widths = webFullScreenEnter->GetWidths();
+    auto fullScreenExitHandlerResponse = AceType::MakeRefPtr<FullScreenExitHandlerImpl>(object);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), widths, heights, fullScreenExitHandlerResponse]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenEnter = webEventHub->GetOnFullScreenEnterEvent();
+                CHECK_NULL_VOID(propOnFullScreenEnter);
+                auto eventParam = std::make_shared<FullScreenEnterEvent>(fullScreenExitHandlerResponse,
+                    widths, heights);
+                propOnFullScreenEnter(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebFullScreenEnterEvent");
+}
+
+void WebDelegateCross::OnFullScreenExit(void* object)
+{
+    ContainerScope scope(instanceId_);
+    CHECK_NULL_VOID(object);
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto webFullScreenExit = AceType::MakeRefPtr<WebFullScreenExitImpl>(object);
+    CHECK_NULL_VOID(webFullScreenExit);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            if (Container::IsCurrentUseNewPipeline()) {
+                auto webPattern = delegate->webPattern_.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                auto webEventHub = webPattern->GetWebEventHub();
+                CHECK_NULL_VOID(webEventHub);
+                auto propOnFullScreenExit = webEventHub->GetOnFullScreenExitEvent();
+                CHECK_NULL_VOID(propOnFullScreenExit);
+                auto eventParam = std::make_shared<FullScreenExitEvent>();
+                propOnFullScreenExit(eventParam);
+                return;
+            }
+        },
+        TaskExecutor::TaskType::JS, "ArkUIWebFullScreenExitEvent");
 }
 
 bool WebDelegateCross::OnCommonDialog(void* object, DialogEventType dialogEventType)
