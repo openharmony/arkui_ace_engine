@@ -1825,4 +1825,20 @@ HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
         }
     }
 }
+
+/**
+ * @tc.name: SupportTextFadeoutTest001
+ * @tc.desc: Test whether the text node has the ability to support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the textArea node do not support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_FALSE(pattern_->GetTextFadeoutCapacity());
+}
 }
