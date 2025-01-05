@@ -90,6 +90,7 @@ public:
     static void OnCancel(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void OnScrollStop(const JSCallbackInfo& info);
+    static void OnEnterSelectedArea(const JSCallbackInfo& info);
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
@@ -147,6 +148,8 @@ private:
     static bool ParseShowDataOptions(
         const JSRef<JSObject>& paramObject, ParseTextArrayParam& param, NG::TextCascadePickerOptionsAttr& attr);
     static void ParseDisableTextStyleAnimation(const JSRef<JSObject>& paramObject, bool& isDisableTextStyleAnimation);
+    static void ParseEnterSelectedAreaEvent(const JSRef<JSObject>& paramObject, const JSCallbackInfo& info,
+        const WeakPtr<NG::FrameNode>& targetNode, std::map<std::string, NG::DialogTextEvent>& dialogEvent);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTPICKER_H
