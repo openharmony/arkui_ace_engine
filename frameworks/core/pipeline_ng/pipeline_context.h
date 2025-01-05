@@ -668,31 +668,34 @@ public:
         transformHintChangedCallbackMap_.erase(callbackId);
     }
 
-    void SetMouseStyleHoldNode(int32_t id)
+    bool SetMouseStyleHoldNode(int32_t id)
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->SetMouseStyleHoldNode(id);
+            return mouseStyleManager->SetMouseStyleHoldNode(id);
         }
+        return false;
     }
 
-    void FreeMouseStyleHoldNode(int32_t id)
+    bool FreeMouseStyleHoldNode(int32_t id)
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->FreeMouseStyleHoldNode(id);
+            return mouseStyleManager->FreeMouseStyleHoldNode(id);
         }
+        return false;
     }
 
-    void FreeMouseStyleHoldNode()
+    bool FreeMouseStyleHoldNode()
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->FreeMouseStyleHoldNode();
+            return mouseStyleManager->FreeMouseStyleHoldNode();
         }
+        return false;
     }
 
     void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
