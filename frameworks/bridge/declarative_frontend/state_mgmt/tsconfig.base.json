@@ -41,6 +41,7 @@
     "src/lib/common/custom_dialog_controller.ts",
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
+    "src/lib/common/arkts_util.d.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",

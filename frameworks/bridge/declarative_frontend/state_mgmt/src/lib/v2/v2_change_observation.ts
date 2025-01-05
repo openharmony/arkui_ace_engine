@@ -433,6 +433,11 @@ class ObserveV2 {
         this.persistenceChanged_.add(id);
       }
     } // for
+
+    // report the stateVar changed when recording the profiler
+    if (stateMgmtDFX.enableProfiler) {
+      stateMgmtDFX.reportStateInfoToProfilerV2(target, attrName, changedIdSet);
+    }
   }
 
   public updateDirty(): void {
@@ -745,10 +750,42 @@ class ObserveV2 {
     return (proto && typeof proto === 'object' && proto[ObserveV2.V2_DECO_META]);
   }
 
-  public getElementInfoById(elmtId: number): string {
+  /**
+   * Get element info according to the elmtId.
+   *
+   * @param elmtId element id.
+   * @param isProfiler need to return ElementType including the id, type and isCustomNode when isProfiler is true.
+   *                   The default value is false. 
+   */
+  public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
     let weak = this.id2cmp_[elmtId];
     let view;
-    return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId) : '';
+    return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId, isProfiler) : '';
+  }
+
+  /**
+   * Get attrName decorator info. 
+   */
+  public getDecoratorInfo(target: object, attrName: string): string {
+    const meta = target[ObserveV2.V2_DECO_META]; 
+    if (!meta) {
+      return '';
+    }
+    const decorator = meta[attrName];
+    if (!decorator) {
+      return '';
+    }
+    let decoratorInfo: string = '';
+    if ('deco' in decorator) {
+      decoratorInfo = decorator.deco;
+    }
+    if ('aliasName' in decorator) {
+      decoratorInfo += `(${decorator.aliasName})`;
+    }
+    if ('deco2' in decorator) {
+      decoratorInfo = decorator.deco2;
+    }
+    return decoratorInfo;
   }
 
   public getComputedInfoById(computedId: number): string {
