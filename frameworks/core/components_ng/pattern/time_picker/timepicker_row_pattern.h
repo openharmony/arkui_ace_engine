@@ -157,9 +157,17 @@ public:
 
     void FireChangeEvent(bool refresh);
 
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value);
+
+    void FireEnterSelectedAreaEvent(bool refresh);
+
     std::string GetSelectedObject(bool isColumnChange, int32_t status = -1);
 
     PickerTime GetCurrentTime();
+
+    std::string GetEnterObject(bool isColumnChange, int32_t status = -1);
+
+    PickerTime GetCurrentEnterTime();
 
     uint32_t GetHourFromAmPm(bool isAm, uint32_t amPmhour) const;
 

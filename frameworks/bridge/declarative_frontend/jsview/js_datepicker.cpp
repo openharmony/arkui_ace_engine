@@ -549,6 +549,26 @@ void JSTimePicker::OnChange(const JSCallbackInfo& info)
     TimePickerModel::GetInstance()->SetOnChange(std::move(onChange));
 }
 
+void JSTimePicker::OnEnterSelectedArea(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onEnterSelectedArea = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const BaseEventInfo* index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
+        PipelineContext::SetCallBackNode(node);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        func->Execute(*eventInfo);
+    };
+    TimePickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+}
+
 void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBackgroundColor(info);
@@ -1407,6 +1427,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
+    JSClass<JSTimePicker>::StaticMethod("onEnterSelectedArea", &JSTimePicker::OnEnterSelectedArea);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1722,6 +1743,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
+    std::function<void(const std::string&)> enterEvent;
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
@@ -1732,6 +1754,19 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             std::vector<std::string> keys;
             keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+    }
+    auto onEnterSelectedArea = paramObject->GetProperty("onEnterSelectedArea");
+    if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onEnterSelectedArea));
+        enterEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc),
+                          node = targetNode](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys;
+            keys = { "year", "month", "day", "hour", "minute", "second" };
+            ACE_SCORING_EVENT("DatePickerDialog.onEnterSelectedArea");
             PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
@@ -1855,7 +1890,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), timePickerDialogEvent, buttonInfos);
+        std::move(acceptEvent), std::move(changeEvent), std::move(enterEvent), timePickerDialogEvent, buttonInfos);
 }
 
 void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
