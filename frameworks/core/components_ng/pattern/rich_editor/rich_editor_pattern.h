@@ -376,6 +376,26 @@ public:
     {
         return maxLength_.value_or(INT_MAX);
     }
+    
+    void SetMaxLines(int32_t maxLines)
+    {
+        maxLines_ = maxLines;
+    }
+
+    int32_t GetMaxLines()
+    {
+        return maxLines_;
+    }
+
+    void SetMaxLinesHeight(float maxLinesHeight)
+    {
+        maxLinesHeight_ = maxLinesHeight;
+    }
+
+    float GetMaxLinesHeight()
+    {
+        return maxLinesHeight_;
+    }
 
     void UpdateSpanPosition()
     {
@@ -408,6 +428,8 @@ public:
     void ProcessStyledString();
     void MountImageNode(const RefPtr<ImageSpanItem>& imageItem);
     void SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, const ImageSpanOptions& options);
+    void InsertValueInStyledStringMore(RefPtr<SpanString> insertStyledString, int32_t changeStart, int32_t changeLength,
+        std::u16string& insertValue, bool needReplaceInTextPreview);
     void InsertValueInStyledString(const std::u16string& insertValue, bool calledByImf = false);
     RefPtr<SpanString> CreateStyledStringByTextStyle(
         const std::u16string& insertValue, const struct UpdateSpanStyle& updateSpanStyle, const TextStyle& textStyle);
@@ -628,7 +650,7 @@ public:
     bool BeforeAddSymbol(RichEditorChangeValue& changeValue, const SymbolSpanOptions& options);
     void AfterContentChange(RichEditorChangeValue& changeValue);
     void DeleteToMaxLength(std::optional<int32_t> length);
-    std::u16string DeleteContentRichEditor(int32_t length);
+    void DeleteContent(int32_t length);
 
     void ResetIsMousePressed()
     {
@@ -1354,6 +1376,8 @@ private:
     void HandleOnDragDropStyledString(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
     void NotifyExitTextPreview(bool deletePreviewText = true);
     void NotifyImfFinishTextPreview();
+    int32_t CalculateTruncationLength(const std::u16string& insertValue, int32_t index, int32_t allowInsertLength);
+    bool ProcessTextTruncationOperation(std::u16string& text, bool calledByImf);
     void ProcessInsertValueMore(const std::u16string& text, OperationRecord record, OperationType operationType,
         RichEditorChangeValue changeValue, PreviewTextRecord preRecord);
     void ProcessInsertValue(const std::u16string& insertValue, OperationType operationType = OperationType::DEFAULT,
@@ -1514,6 +1538,8 @@ private:
     bool isModifyingContent_ = false;
     bool needToRequestKeyboardOnFocus_ = true;
     bool isEnableHapticFeedback_ = true;
+    float maxLinesHeight_ = FLT_MAX;
+    int32_t maxLines_ = INT32_MAX;
     std::unordered_map<std::u16string, RefPtr<SpanItem>> placeholderSpansMap_;
     std::optional<DisplayMode> barDisplayMode_ = std::nullopt;
     uint32_t twinklingInterval_ = 0;
