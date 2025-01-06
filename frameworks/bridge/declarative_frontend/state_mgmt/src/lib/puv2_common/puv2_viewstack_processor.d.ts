@@ -88,5 +88,5 @@ declare class ViewStackProcessor {
   public static getApiVersion(): number;
 
   // get send state info to profiler
-  public static sendStateInfo(stateInfo: string): number;
+  public static sendStateInfo(stateInfo: string): void;
 }
