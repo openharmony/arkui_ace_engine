@@ -3080,7 +3080,7 @@ class CustomDialogContentComponent extends ViewPU {
     updateFontScale() {
         try {
             let uiContext = this.getUIContext();
-            let systemFontScale = uiContext.getHostContext()?.config.fontSizeScale ?? 1;
+            let systemFontScale = uiContext.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
