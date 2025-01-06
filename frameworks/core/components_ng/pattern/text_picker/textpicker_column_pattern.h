@@ -501,6 +501,8 @@ private:
     void InitTextFadeOut();
     void UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
 
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance);
+
     bool isFocusColumn_ = false;
     bool isTextFadeOut_ = false;
     float localDownDistance_ = 0.0f;
