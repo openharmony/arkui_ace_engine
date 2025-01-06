@@ -53,6 +53,8 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         ACE_SCOPED_TRACE("BufferAvailableCallback[id:%d]", session->GetPersistentId());
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+            "BufferAvailableCallback id: %{public}d", session->GetPersistentId());
         if (!session->GetBufferAvailable()) {
             session->SetBufferAvailable(true);
             Rosen::SceneSessionManager::GetInstance().NotifyCompleteFirstFrameDrawing(session->GetPersistentId());
@@ -246,9 +248,11 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     auto transaction = transactionController && session_->GetSessionRect() != windowRect ?
         transactionController->GetRSTransaction() : nullptr;
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged", transaction);
-    if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
-            session_->GetPersistentId(), static_cast<int32_t>(ret));
+    auto sizeChangeReason = session_->GetSizeChangeReason();
+    if (ret != Rosen::WSError::WS_OK || sizeChangeReason == Rosen::SizeChangeReason::RESIZE ||
+        (sizeChangeReason >= Rosen::SizeChangeReason::MAXIMIZE && sizeChangeReason <= Rosen::SizeChangeReason::ROTATION)) {
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect id:%{public}d, ret:%{public}d, rect:%{public}s",
+            session_->GetPersistentId(), static_cast<int32_t>(ret), windowRect.ToString().c_str());
     }
 }
 
@@ -350,6 +354,8 @@ void WindowScene::BufferAvailableCallbackForBlank(bool fromMainThread)
 
 void WindowScene::BufferAvailableCallbackForSnapshot()
 {
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+        "BufferAvailableCallbackForSnapshot id: %{public}d", session_->GetPersistentId());
     auto uiTask = [weakThis = WeakClaim(this)]() {
         ACE_SCOPED_TRACE("WindowScene::BufferAvailableCallbackForSnapshot");
         auto self = weakThis.Upgrade();
