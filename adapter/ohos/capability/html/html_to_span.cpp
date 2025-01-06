@@ -165,6 +165,9 @@ ImageFit ConvertStrToFit(const std::string& fit)
 HtmlToSpan::Styles HtmlToSpan::ParseStyleAttr(const std::string& style)
 {
     Styles styles;
+    if (style.find(':') == std::string::npos) {
+        return styles;
+    }
     std::regex pattern(R"(\s*([^:]+):([^;]+);?)");
     std::smatch match;
     std::string::const_iterator searchStart(style.begin());
