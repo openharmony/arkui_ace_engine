@@ -560,7 +560,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    TriggerAvoidOnCaretChangeImmediately();
+    IF_TRUE(!isModifyingContent_, TriggerAvoidOnCaretChangeImmediately());
 }
 
 void RichEditorPattern::HandleEnabled()
