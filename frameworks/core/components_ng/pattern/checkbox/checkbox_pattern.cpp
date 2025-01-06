@@ -723,6 +723,7 @@ void CheckBoxPattern::InitCheckBoxStatusByGroup(RefPtr<FrameNode> checkBoxGroupN
 
 void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    CHECK_NULL_VOID(focusHub);
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -730,6 +731,24 @@ void CheckBoxPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool CheckBoxPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_FUNCTION) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 bool CheckBoxPattern::IsSquareStyleBox()

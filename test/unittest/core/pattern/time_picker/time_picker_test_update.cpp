@@ -1405,11 +1405,12 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest002, TestSize.Level1)
     std::function<void()> onCancel = []() {};
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TimePickerDialogEvent timePickerDialogEvent;
     std::vector<ButtonInfo> buttonInfos;
 
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel),
-        std::move(onAccept), std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onAccept), std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1791,11 +1792,12 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest003, TestSize.Level1)
     std::function<void()> onCancel = []() {};
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TimePickerDialogEvent timePickerDialogEvent;
     std::vector<ButtonInfo> buttonInfos;
 
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel), std::move(onAccept),
-        std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
     ASSERT_NE(frameNode, nullptr);
     pickerDialog.alignment = DialogAlignment::CENTER;
@@ -1805,7 +1807,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest003, TestSize.Level1)
     pickerDialog.offset = DimensionOffset(Offset(0, 1.0f));
     pickerDialog.isSelectedTime = true;
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel), std::move(onAccept),
-        std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     ASSERT_NE(frameNode, nullptr);
 }
 /**

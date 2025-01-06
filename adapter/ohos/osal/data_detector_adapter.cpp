@@ -58,7 +58,7 @@ void DataDetectorAdapter::GetAIEntityMenu()
             TAG_LOGI(AceLogTag::ACE_TEXT, "Get AI entity menu from ai_engine");
             DataDetectorMgr::GetInstance().GetAIEntityMenu(dataDetectorAdapter->textDetectResult_);
         },
-        "ArkUITextInitDataDetect");
+        "ArkUITextInitDataDetect", PriorityType::VIP);
 }
 
 bool DataDetectorAdapter::ShowAIEntityMenu(const AISpan& aiSpan, const NG::RectF& aiRect,
@@ -276,7 +276,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                 dataDetectorAdapter->ParseAIResult(result, startPos);
                 dataDetectorAdapter->MarkDirtyNode();
             },
-            "ArkUITextParseAIResult");
+            "ArkUITextParseAIResult", PriorityType::IMMEDIATE);
     };
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -286,7 +286,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                 info.text.size());
             DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
         },
-        "ArkUITextInitDataDetect");
+        "ArkUITextInitDataDetect", PriorityType::IMMEDIATE);
 }
 
 void DataDetectorAdapter::HandleTextUrlDetect()
@@ -311,7 +311,7 @@ void DataDetectorAdapter::HandleTextUrlDetect()
                 dataDetectorAdapter->HandleUrlResult(urlEntities);
                 dataDetectorAdapter->MarkDirtyNode();
             },
-            "ArkUITextUrlParseResult");
+            "ArkUITextUrlParseResult", PriorityType::IMMEDIATE);
     };
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
@@ -320,7 +320,7 @@ void DataDetectorAdapter::HandleTextUrlDetect()
             TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
-        "ArkUITextInitUrlDetect");
+        "ArkUITextInitUrlDetect", PriorityType::IMMEDIATE);
 }
 
 void DataDetectorAdapter::HandleUrlResult(std::vector<UrlEntity> urlEntities)

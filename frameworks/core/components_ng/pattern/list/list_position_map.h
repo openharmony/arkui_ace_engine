@@ -511,11 +511,11 @@ protected:
     ListChangeFlag dirty_ = LIST_NO_CHANGE;
     int32_t totalItemCount_ = 0;
     float space_ = 0.0f;
+    int32_t lanes_ = -1;
 
 private:
     std::map<int32_t, PositionInfo> posMap_;
     std::function<float(int32_t)> chainOffsetFunc_;
-    int32_t lanes_ = -1;
     int32_t curLine_ = 0;
     int32_t curIndex_ = 0;
     float totalHeight_ = 0.0f;

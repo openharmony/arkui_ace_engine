@@ -323,4 +323,13 @@ void UIExtensionModelNG::SetPlatformOnError(
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
 }
+
+void UIExtensionModelNG::SetOnDrawReady(std::function<void()>&& onDrawReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnDrawReadyCallback(std::move(onDrawReady));
+}
 } // namespace OHOS::Ace::NG

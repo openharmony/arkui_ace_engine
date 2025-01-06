@@ -347,6 +347,7 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     auto onAcceptFunc = [](const std::string&) {};
     auto onChangeFunc = [](const std::string&) {};
     auto onScrollStopFunc = [](const std::string&) {};
+    auto onEnterSelectedAreaFunc = [](const std::string&) {};
 
     TextPickerDialog textPickerDialog = {
         .height = 16.0_vp,
@@ -367,8 +368,8 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     };
     std::vector<ButtonInfo> buttonInfos;
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
-        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, textPickerDialog, textPickerDialogEvent,
-        buttonInfos);
+        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, onEnterSelectedAreaFunc, textPickerDialog,
+        textPickerDialogEvent, buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 

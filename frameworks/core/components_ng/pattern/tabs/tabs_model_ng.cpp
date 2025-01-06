@@ -1054,4 +1054,24 @@ void TabsModelNG::SetPageFlipMode(FrameNode* frameNode, int32_t options)
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SetPageFlipMode(options);
 }
+
+void TabsModelNG::SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetCachedMaxCount(frameNode, cachedMaxCount, cacheMode);
+}
+
+void TabsModelNG::SetCachedMaxCount(
+    FrameNode* frameNode, std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (cachedMaxCount.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, cachedMaxCount.value(), frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, cacheMode, frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CachedMaxCount, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TabsLayoutProperty, CacheMode, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

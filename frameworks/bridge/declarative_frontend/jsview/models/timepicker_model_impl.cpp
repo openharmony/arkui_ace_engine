@@ -51,6 +51,8 @@ void TimePickerModelImpl::SetOnChange(ChangeEvent&& onChange)
     JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
 }
 
+void TimePickerModelImpl::SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) {}
+
 void TimePickerModelImpl::SetBackgroundColor(const Color& color)
 {
     auto pickerBase = AceType::DynamicCast<PickerBaseComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
@@ -65,7 +67,8 @@ void TimePickerModelImpl::SetBackgroundColor(const Color& color)
 void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TimePickerDialogEvent& timePickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     RefPtr<Component> component;
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
@@ -92,6 +95,8 @@ void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& picker
     datePicker->SetDialogCancelEvent(cancelId);
     auto changeId = EventMarker(std::move(onChange));
     datePicker->SetDialogChangeEvent(changeId);
+    auto enterSelectedAreaId = EventMarker(std::move(onEnterSelectedArea));
+    datePicker->SetDialogEnterSelectedAreaEvent(enterSelectedAreaId);
     datePicker->SetDialogName("TimePickerDialog");
     datePicker->OpenDialog(properties);
 }
