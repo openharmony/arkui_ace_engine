@@ -6259,6 +6259,50 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
     }
 }
 
+AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+    const RefPtr<PipelineBase>& context)
+{
+    AccessibilityWindowInfo windowInfo;
+    CHECK_NULL_RETURN(node, windowInfo);
+    NG::WindowSceneInfo windowSceneInfo;
+    if (IsUpdateWindowSceneInfo(node, windowSceneInfo)) {
+        windowInfo.left = windowSceneInfo.left;
+        windowInfo.top = windowSceneInfo.top;
+        windowInfo.scaleX = windowSceneInfo.scaleX;
+        windowInfo.scaleY = windowSceneInfo.scaleY;
+        windowInfo.innerWindowId = windowSceneInfo.innerWindowId;
+        return windowInfo;
+    }
+    RefPtr<NG::PipelineContext> ngPipeline;
+    if (context) {
+        ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    } else {
+        ngPipeline = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext().Upgrade());
+    }
+    CHECK_NULL_RETURN(ngPipeline, windowInfo);
+
+    if (getParentRectHandler_) {
+        getParentRectHandler_(windowInfo.top, windowInfo.left);
+    } else if (getParentRectHandlerNew_) {
+        AccessibilityParentRectInfo rectInfo;
+        getParentRectHandlerNew_(rectInfo);
+        windowInfo.top = rectInfo.top;
+        windowInfo.left = rectInfo.left;
+        windowInfo.scaleX = rectInfo.scaleX;
+        windowInfo.scaleY = rectInfo.scaleY;
+    } else {
+        windowInfo.left = GetWindowLeft(ngPipeline->GetWindowId());
+        windowInfo.top = GetWindowTop(ngPipeline->GetWindowId());
+        auto container = Container::CurrentSafely();
+        if (container) {
+            auto windowScale = container->GetWindowScale();
+            windowInfo.scaleX = windowScale;
+            windowInfo.scaleY = windowScale;
+        }
+    }
+    return windowInfo;
+}
+
 void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
     const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node)
 {
@@ -6271,29 +6315,12 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     } else {
         output.windowId = static_cast<int32_t>(GetWindowId());
     }
-    if (getParentRectHandler_) {
-        getParentRectHandler_(output.windowTop, output.windowLeft);
-    } else if (getParentRectHandlerNew_) {
-        AccessibilityParentRectInfo rectInfo;
-        getParentRectHandlerNew_(rectInfo);
-        output.windowTop = rectInfo.top;
-        output.windowLeft = rectInfo.left;
-        scaleX_ = rectInfo.scaleX;
-        scaleY_ = rectInfo.scaleY;
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-            "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
-    } else {
-        output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
-        output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
-    }
-    NG::WindowSceneInfo windowSceneInfo;
-    if (IsUpdateWindowSceneInfo(node, windowSceneInfo)) {
-        output.windowLeft += windowSceneInfo.left;
-        output.windowTop += windowSceneInfo.top;
-        scaleX_ = windowSceneInfo.scaleX;
-        scaleY_ = windowSceneInfo.scaleY;
-    }
-    output.innerWindowId = windowSceneInfo.innerWindowId;
+    auto windowInfo = GenerateWindowInfo(node, context);
+    output.windowLeft = windowInfo.left;
+    output.windowTop = windowInfo.top;
+    scaleX_ = windowInfo.scaleX;
+    scaleY_ = windowInfo.scaleY;
+    output.innerWindowId = windowInfo.innerWindowId;
     auto page = stageManager->GetLastPageWithTransition();
     if (page != nullptr) {
         output.pageId = page->GetPageId();
