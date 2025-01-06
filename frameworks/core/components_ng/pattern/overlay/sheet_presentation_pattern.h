@@ -463,7 +463,7 @@ public:
 
     void ResetToInvisible();
 
-    bool IsFold();
+    bool IsFoldExpand();
 
     void SetSheetKey(const SheetKey& sheetKey)
     {
