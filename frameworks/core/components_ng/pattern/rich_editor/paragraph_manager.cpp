@@ -183,7 +183,8 @@ int32_t ParagraphManager::GetGlyphIndexByCoordinate(Offset offset, bool isSelect
         // get offset relative to each paragraph
         offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
-    return paragraphs_.back().end;
+    offset.SetY(offset.GetY() + paragraphs_.back().paragraph->GetHeight());
+    return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset, isSelectionPos) + paragraphs_.back().start;
 }
 
 bool ParagraphManager::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) const
