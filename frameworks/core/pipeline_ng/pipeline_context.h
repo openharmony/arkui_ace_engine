@@ -366,9 +366,10 @@ public:
 
     bool IsWindowSceneConsumed();
 
-    void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
-    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
-    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+    void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSystemWindow = false) override;
+    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
+    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
+
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     float GetPageAvoidOffset() override;
@@ -415,6 +416,8 @@ public:
     virtual SafeAreaInsets GetSafeArea() const;
 
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
+    virtual SafeAreaInsets GetScbSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
