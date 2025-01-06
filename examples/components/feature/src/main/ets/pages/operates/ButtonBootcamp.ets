@@ -480,6 +480,8 @@ export struct ButtonBootcamp {
   @State compLinearGradientRepeating: boolean = false;
   //Popup Control
   //bindPopup
+  @State enableCompBindPopupType: boolean = true;
+  @State compBindPopupType: boolean = true;
   @State handlePopup: boolean = false;
   @State enableCompPopupType: boolean = true;
   @State compPopupType: number = 0;
@@ -903,7 +905,7 @@ export struct ButtonBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -1507,7 +1509,7 @@ export struct ButtonBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
