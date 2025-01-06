@@ -25,6 +25,8 @@ namespace OHOS::Ace::Kit {
 
 View::View() = default;
 
+View::View(const RefPtr<FrameNode>& node) : node_(node) {}
+
 View::~View() = default;
 
 RefPtr<FrameNode> View::GetNode() const
@@ -48,6 +50,16 @@ void View::SetHeight(const CalcDimension& height)
     } else {
         NG::ViewAbstract::SetHeight(reinterpret_cast<AceNode*>(node_->GetHandle()), NG::CalcLength(height));
     }
+}
+
+void View::SetBorderWidth(const Dimension& value)
+{
+    NG::ViewAbstract::SetBorderWidth(reinterpret_cast<AceNode*>(node_->GetHandle()), value);
+}
+
+void View::SetBorderColor(const Color& color)
+{
+    NG::ViewAbstract::SetBorderColor(reinterpret_cast<AceNode*>(node_->GetHandle()), color);
 }
 
 } // namespace OHOS::Ace::Kit

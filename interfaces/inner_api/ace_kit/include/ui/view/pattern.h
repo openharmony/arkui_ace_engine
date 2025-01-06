@@ -28,8 +28,16 @@ class Pattern : public AceType {
     DECLARE_ACE_TYPE(Pattern, AceType);
 
 public:
-    virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() = 0;
-    virtual RefPtr<NodePaintMethod> CreateNodePaintMethod() = 0;
+    virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm()
+    {
+        return nullptr;
+    }
+
+    virtual RefPtr<NodePaintMethod> CreateNodePaintMethod()
+    {
+        return nullptr;
+    }
+
     virtual bool OnDirtyLayoutrSwap(const NG::DirtySwapConfig& config)
     {
         return false;

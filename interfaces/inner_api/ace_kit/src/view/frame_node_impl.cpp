@@ -16,6 +16,8 @@
 #include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
 
 #include "ui/base/ace_type.h"
+#include "ui/base/geometry/ng/offset_t.h"
+#include "ui/base/geometry/ng/size_t.h"
 #include "ui/base/referenced.h"
 #include "ui/base/utils/utils.h"
 #include "ui/view/frame_node.h"
@@ -224,4 +226,29 @@ int32_t FrameNodeImpl::GetId() const
     CHECK_NULL_RETURN(frameNode_, -1);
     return frameNode_->GetId();
 }
+
+void FrameNodeImpl::MarkModifyDone()
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->MarkModifyDone();
+}
+
+NG::SizeF FrameNodeImpl::GetMeasuredSize()
+{
+    CHECK_NULL_RETURN(frameNode_, NG::SizeF());
+    return frameNode_->GetGeometryNode()->GetFrameSize();
+}
+
+NG::OffsetF FrameNodeImpl::GetLayoutPosition()
+{
+    CHECK_NULL_RETURN(frameNode_, NG::OffsetF());
+    return frameNode_->GetGeometryNode()->GetMarginFrameOffset();
+}
+
+void FrameNodeImpl::SetLayoutPosition(const NG::OffsetF& offset)
+{
+    CHECK_NULL_VOID(frameNode_);
+    frameNode_->GetGeometryNode()->SetMarginFrameOffset(offset);
+}
+
 } // namespace OHOS::Ace::Kit

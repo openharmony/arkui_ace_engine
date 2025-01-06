@@ -53,9 +53,14 @@ public:
     std::list<RefPtr<FrameNode>> GetChildren() override;
     void MarkDirtyNode(NG::PropertyChangeFlag flag) override;
     void RemoveChild(const RefPtr<FrameNode>& child) override;
+    void MarkModifyDone() override;
 
     std::string GetTag() const override;
     int32_t GetId() const override;
+
+    NG::SizeF GetMeasuredSize() override;
+    NG::OffsetF GetLayoutPosition() override;
+    void SetLayoutPosition(const NG::OffsetF& offset) override;
 
     void MeasureChildren() override;
     void LayoutChildren() override;

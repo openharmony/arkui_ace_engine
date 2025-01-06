@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BADGE_BADGE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BADGE_BADGE_LAYOUT_ALGORITHM_H
 
+#include "ui/view/extend/badge/badge_extension.h"
+
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -33,6 +35,10 @@ public:
 
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
+    void SetExtension(const RefPtr<Kit::BadgeExtension>& extension)
+    {
+        badgeExtension_ = extension;
+    }
 
 private:
     void PerformMeasureSelf(LayoutWrapper* layoutWrapper);
@@ -56,6 +62,7 @@ private:
     }
 
     bool hasFontSize_ = true;
+    RefPtr<Kit::BadgeExtension> badgeExtension_;
 
     ACE_DISALLOW_COPY_AND_MOVE(BadgeLayoutAlgorithm);
 };

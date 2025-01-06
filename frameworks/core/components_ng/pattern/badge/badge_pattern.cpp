@@ -15,11 +15,22 @@
 
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/view/extend/badge/badge_extension.h"
+
 #include "core/components/badge/badge_theme.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/utils.h"
 
 namespace OHOS::Ace::NG {
+
+RefPtr<LayoutAlgorithm> BadgePattern::CreateLayoutAlgorithm()
+{
+    auto algorithm = MakeRefPtr<BadgeLayoutAlgorithm>();
+    if (badgeExtension_) {
+        algorithm->SetExtension(badgeExtension_);
+    }
+    return algorithm;
+}
 
 void BadgePattern::OnModifyDone()
 {
@@ -144,8 +155,8 @@ void BadgePattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("circleSize: ").append(std::to_string(circleSize->ConvertToPx())));
     DumpLog::GetInstance().AddDesc(std::string("badgeFontSize: ").append(badgeFontSize.value().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("badgeColor: ").append(badgeColor.value().ToString()));
-    DumpLog::GetInstance().AddDesc(std::string("badgeFontWeight: ")
-        .append(V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("badgeFontWeight: ").append(V2::ConvertWrapFontWeightToStirng(badgeFontWeight.value())));
     DumpLog::GetInstance().AddDesc(std::string("badgeBorderColor: ").append(badgeBorderColor.value().ToString()));
     DumpLog::GetInstance().AddDesc(std::string("badgeBorderWidth: ").append(badgeBorderWidth.value().ToString()));
 }

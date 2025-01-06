@@ -13,34 +13,23 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_VIEW_H
-#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_VIEW_H
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_LIST_ITEM_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_LIST_ITEM_H
 
-#include "ui/base/geometry/calc_dimension.h"
+#include "ui/base/geometry/dimension.h"
 #include "ui/base/macros.h"
-#include "ui/base/referenced.h"
-#include "ui/properties/color.h"
-
+#include "ui/view/view.h"
 
 namespace OHOS::Ace::Kit {
 
 class FrameNode;
 
-class ACE_FORCE_EXPORT View : public Referenced {
+class ACE_FORCE_EXPORT ListItem : public View {
 public:
-    explicit View(const RefPtr<FrameNode>& node);
-    ~View();
-    RefPtr<FrameNode> GetNode() const;
-
-    void SetWidth(const CalcDimension& width);
-    void SetHeight(const CalcDimension& height);
-    void SetBorderWidth(const Dimension& value);
-    void SetBorderColor(const Color& color);
-
-protected:
-    View();
-    RefPtr<FrameNode> node_;
+    static RefPtr<ListItem> Create();
+    ~ListItem();
+    ListItem();
 };
 
 } // namespace OHOS::Ace::Kit
-#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_VIEW_H
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_COMPONENTS_LIST_ITEM_H
