@@ -90,6 +90,7 @@ public:
     virtual bool GetSingleRange() = 0;
     virtual void SetDivider(const NG::ItemDivider& divider) {};
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetColumnWidths(const std::vector<Dimension>& widths) = 0;
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
 
