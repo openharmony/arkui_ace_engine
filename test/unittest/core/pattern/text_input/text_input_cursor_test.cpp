@@ -1095,7 +1095,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineEndTest001, TestSize.Level1)
     /**
      * @tc.expected: Moving to the right character when there is initial text
      */
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     EXPECT_EQ(pattern_->GetSelectMode(), SelectionMode::NONE);
     EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
         << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());
