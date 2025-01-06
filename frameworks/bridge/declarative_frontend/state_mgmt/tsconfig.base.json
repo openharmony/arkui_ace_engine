@@ -41,6 +41,7 @@
     "src/lib/common/custom_dialog_controller.ts",
     "src/lib/common/utils.ts",
     "src/lib/common/state_mgmt_dfx.ts",
+    "src/lib/common/arkts_util.d.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",
@@ -85,6 +86,7 @@
     "src/lib/v2/v2_decorators.ts",
     "src/lib/v2/v2_json_coder.ts",
     "src/lib/v2/v2_make_observed.ts",
+    "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
 
     // partial_update specific

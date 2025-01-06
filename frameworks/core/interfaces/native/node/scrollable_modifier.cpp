@@ -223,12 +223,33 @@ void GetFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[0].i32 = static_cast<int32_t>(ScrollableModelNG::GetFadingEdge(frameNode));
     (*values)[1].f32 = ScrollableModelNG::GetFadingEdgeLength(frameNode);
 }
+
+void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
+void ResetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
+}
+
+float GetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1.0f);
+    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIScrollableModifier* GetScrollableModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIScrollableModifier modifier = {
         .getContentClip = GetContentClip,
         .setContentClip = SetContentClip,
@@ -253,15 +274,11 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnScrollStartCallBack = ResetOnScrollStartCallBack,
         .setOnScrollStopCallBack = SetOnScrollStopCallBack,
         .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

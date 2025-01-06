@@ -514,7 +514,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove002, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
     ASSERT_NE(richEditorPattern->magnifierController_, nullptr);
@@ -535,7 +535,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove003, TestSize.Lev
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->magnifierController_ = nullptr;
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
@@ -555,7 +555,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, UpdateSelectionByTouchMove004, TestSize.Lev
     richEditorPattern->isEditing_ = true;
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->textSelector_.Update(0, 10);
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_U16VALUE_1);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(INIT_VALUE_1);
     Offset touchOffset(20.0f, 20.0f);
     richEditorPattern->UpdateSelectionByTouchMove(touchOffset);
     EXPECT_TRUE(richEditorPattern->isShowMenu_);
@@ -947,7 +947,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, SetSelection001, TestSize.Level1)
     EXPECT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 1;
     richEditorPattern->previewTextRecord_.endOffset = 10;
@@ -1453,7 +1453,7 @@ HWTEST_F(RichEditorPatternTestTwoNg, GetParagraphInfo001, TestSize.Level1)
     ClearSpan();
     auto size = richEditorPattern->GetParagraphInfo(start, end).size();
     AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2 + u"\n");
     AddSpan(INIT_VALUE_2);
     AddSpan(INIT_VALUE_2);
     EXPECT_NE(size, richEditorPattern->GetParagraphInfo(start, end).size());

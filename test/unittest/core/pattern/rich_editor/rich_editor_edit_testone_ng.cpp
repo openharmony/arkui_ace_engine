@@ -80,13 +80,13 @@ HWTEST_F(RichEditorEditTestOneNg, GetRightTextOfCursor001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 3;
-    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(2));
-    EXPECT_EQ(ret, "ol");
+    auto ret = richEditorPattern->GetRightTextOfCursor(2);
+    EXPECT_EQ(ret, u"ol");
 
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 2;
-    ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(2));
-    EXPECT_EQ(ret, "es");
+    ret = richEditorPattern->GetRightTextOfCursor(2);
+    EXPECT_EQ(ret, u"es");
 }
 
 /**
@@ -100,8 +100,8 @@ HWTEST_F(RichEditorEditTestOneNg, GetRightTextOfCursor002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetRightTextOfCursor(3));
-    EXPECT_EQ(ret, "hel");
+    auto ret = richEditorPattern->GetRightTextOfCursor(3);
+    EXPECT_EQ(ret, u"hel");
 }
 
 /**
@@ -130,10 +130,10 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    auto ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 1);
-    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, -1, 10);
-    ret = richEditorPattern->GetSelectedSpanText(INIT_U16VALUE_1, 0, 1);
-    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "h");
+    auto ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, -1, 1);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, -1, 10);
+    ret = richEditorPattern->GetSelectedSpanText(INIT_VALUE_1, 0, 1);
+    EXPECT_EQ(ret, u"h");
 }
 
 /**
@@ -190,12 +190,12 @@ HWTEST_F(RichEditorEditTestOneNg, GetSelectedSpanText001, TestSize.Level1)
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 2; ++j) {
             auto ret = richEditorPattern->GetSelectedSpanText(ori, start[i], end[j]);
-            EXPECT_EQ(StringUtils::Str16ToStr8(ret), "");
+            EXPECT_EQ(ret, u"");
         }
     }
 
     auto ret = richEditorPattern->GetSelectedSpanText(ori, 0, 1);
-    EXPECT_EQ(StringUtils::Str16ToStr8(ret), "1");
+    EXPECT_EQ(ret, u"1");
 }
 
 /**
@@ -1119,10 +1119,10 @@ HWTEST_F(RichEditorEditTestOneNg, GetChangeSpanStyle001, TestSize.Level1)
     changeValue.originalSpans_.emplace_back(span2);
 
     RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
+    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     RichEditorAbstractSpanResult& lastInfo = changeValue.originalSpans_.back();
-    int32_t lastLength = static_cast<int32_t>(StringUtils::ToWstring(lastInfo.GetValue()).length());
+    int32_t lastLength = static_cast<int32_t>(lastInfo.GetValue().length());
     lastInfo.SetEraseLength(lastLength);
 
     std::optional<TextStyle> spanTextStyle;
@@ -1162,7 +1162,7 @@ HWTEST_F(RichEditorEditTestOneNg, RichEditorPatternTestUpdatePreviewText003, Tes
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::string previewTextValue;
+    std::u16string previewTextValue;
     PreviewRange previewRange;
 
     previewRange.start = 0;

@@ -628,5 +628,17 @@ ACE_EXPORT extern const char CUSTOM_SPAN_NODE_ETS_TAG[];
 // LinearIndicator
 ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
 ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
+
+// ArcList
+ACE_EXPORT extern const char ARC_LIST_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ETS_TAG[];
+
+// ArcListItem
+ACE_EXPORT extern const char ARC_LIST_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ITEM_ETS_TAG[];
+
+// ArcScrollBar
+ACE_EXPORT extern const char ARC_SCROLL_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

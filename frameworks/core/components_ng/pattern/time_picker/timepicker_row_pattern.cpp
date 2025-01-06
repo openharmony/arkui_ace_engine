@@ -162,6 +162,11 @@ void TimePickerRowPattern::OnModifyDone()
         CHECK_NULL_VOID(refPtr);
         refPtr->FireChangeEvent(refresh);
     });
+    SetEnterSelectedAreaEventCallback([weak = WeakClaim(this)](bool refresh) {
+        auto refPtr = weak.Upgrade();
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireEnterSelectedAreaEvent(refresh);
+    });
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
@@ -377,6 +382,36 @@ void TimePickerRowPattern::FireChangeEvent(bool refresh)
     }
 }
 
+void TimePickerRowPattern::SetEnterSelectedAreaEventCallback(EventCallback&& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetEnterSelectedAreaEventCallback(std::move(value));
+    }
+}
+
+void TimePickerRowPattern::FireEnterSelectedAreaEvent(bool refresh)
+{
+    if (refresh) {
+        auto timePickerEventHub = GetEventHub<TimePickerEventHub>();
+        CHECK_NULL_VOID(timePickerEventHub);
+        auto str = GetEnterObject(true);
+        auto info = std::make_shared<DatePickerChangeEvent>(str);
+        timePickerEventHub->FireEnterSelectedAreaEvent(info.get());
+        timePickerEventHub->FireDialogEnterSelectedAreaEvent(str);
+    }
+}
+
 std::string TimePickerRowPattern::GetSelectedObject(bool isColumnChange, int32_t status)
 {
     auto time = selectedTime_;
@@ -420,6 +455,49 @@ PickerTime TimePickerRowPattern::GetCurrentTime()
     return time;
 }
 
+std::string TimePickerRowPattern::GetEnterObject(bool isColumnChange, int32_t status)
+{
+    auto time = selectedTime_;
+    if (isColumnChange) {
+        time = GetCurrentEnterTime();
+    }
+    return time.ToString(true, hasSecond_, status);
+}
+
+PickerTime TimePickerRowPattern::GetCurrentEnterTime()
+{
+    PickerTime time;
+    UpdateAllChildNode();
+    auto amPmColumn = allChildNode_["amPm"].Upgrade();
+    auto hourColumn = allChildNode_["hour"].Upgrade();
+    auto minuteColumn = allChildNode_["minute"].Upgrade();
+    CHECK_NULL_RETURN(hourColumn, time);
+    CHECK_NULL_RETURN(minuteColumn, time);
+    auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(hourPickerColumnPattern, time);
+    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_RETURN(minutePickerColumnPattern, time);
+
+    if (GetHour24()) {
+        time.SetHour(hourPickerColumnPattern->GetEnterIndex()); // hour from 0 to 23, index from 0 to 23
+    } else if (amPmColumn) {
+        auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_RETURN(amPmPickerColumnPattern, time);
+        time.SetHour(GetHourFromAmPm(
+            amPmPickerColumnPattern->GetEnterIndex() == 0, hourPickerColumnPattern->GetEnterIndex() + 1));
+    }
+
+    time.SetMinute(minutePickerColumnPattern->GetEnterIndex()); // minute from 0 to 59, index from 0 to 59
+    if (hasSecond_) {
+        auto secondColumn = allChildNode_["second"].Upgrade();
+        CHECK_NULL_RETURN(secondColumn, time);
+        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_RETURN(secondPickerColumnPattern, time);
+        time.SetSecond(secondPickerColumnPattern->GetEnterIndex()); // second from 0 to 59, index from 0 to 59
+    }
+    return time;
+}
+
 uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) const
 {
     if (isAm) {
@@ -437,6 +515,9 @@ uint32_t TimePickerRowPattern::GetHourFromAmPm(bool isAm, uint32_t amPmhour) con
 void TimePickerRowPattern::HandleColumnChange(const RefPtr<FrameNode>& tag, bool isAdd, uint32_t index, bool needNotify)
 {
     std::vector<RefPtr<FrameNode>> tags;
+    if (isEnableCascade_) {
+        OnDataLinking(tag, isAdd, index, tags);
+    }
     for (const auto& tag : tags) {
         auto iter = std::find_if(timePickerColumns_.begin(), timePickerColumns_.end(), [&tag](const auto& c) {
                 auto column = c.Upgrade();
@@ -711,6 +792,7 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
         for (uint32_t hour = 0; hour <= 23; ++hour) { // time's hour from 0 to 23.
             if (hour == selectedTime_.GetHour()) {
                 hourColumnPattern->SetCurrentIndex(hour);
+                hourColumnPattern->SetEnterIndex(hour);
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -729,14 +811,17 @@ void TimePickerRowPattern::HandleHourColumnBuilding()
 
         if (IsAmHour(selectedTime_.GetHour())) {
             amPmColumnPattern->SetCurrentIndex(0); // AM's index
+            amPmColumnPattern->SetEnterIndex(0); // AM's index
         } else {
             amPmColumnPattern->SetCurrentIndex(1); // PM's index
+            amPmColumnPattern->SetEnterIndex(1);
         }
         optionsTotalCount_[amPmColumn] = CHILD_WITHOUT_AMPM_SIZE;
         auto selectedHour = GetAmPmHour(selectedTime_.GetHour());
         for (uint32_t hour = 1; hour <= AM_PM_HOUR_12; ++hour) { // AM_PM hour start from 1 to 12
             if (hour == selectedHour) {
                 hourColumnPattern->SetCurrentIndex(hour - 1);
+                hourColumnPattern->SetEnterIndex(hour - 1);
             }
             optionsTotalCount_[hourColumn]++;
         }
@@ -767,6 +852,7 @@ void TimePickerRowPattern::HandleMinAndSecColumnBuilding()
         }
         if (minute == selectedTime_.GetMinute()) {
             minuteColumnPattern->SetCurrentIndex(minute);
+            minuteColumnPattern->SetEnterIndex(minute);
         }
         optionsTotalCount_[minuteColumn]++;
     }
@@ -790,6 +876,7 @@ void TimePickerRowPattern::HandleMinAndSecColumnBuilding()
         }
         if (second == selectedTime_.GetSecond()) {
             secondColumnPattern->SetCurrentIndex(second);
+            secondColumnPattern->SetEnterIndex(second);
         }
         optionsTotalCount_[secondColumn]++;
     }

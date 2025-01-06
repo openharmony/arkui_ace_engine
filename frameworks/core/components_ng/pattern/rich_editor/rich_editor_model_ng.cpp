@@ -574,6 +574,12 @@ void RichEditorModelNG::ResetMaxLength()
 
 void RichEditorModelNG::SetMaxLines(uint32_t value)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLinesHeight(FLT_MAX);
+    pattern->SetMaxLines(value);
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
 }
 

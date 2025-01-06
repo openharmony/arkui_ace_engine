@@ -1412,6 +1412,7 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMimeType", &JSFileSelectorParam::GetMimeType);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -1449,6 +1450,20 @@ public:
         std::vector<std::string>::iterator iterator;
         uint32_t index = 0;
         for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
+            auto valueStr = JSVal(ToJSValue(*iterator));
+            auto value = JSRef<JSVal>::Make(valueStr);
+            result->SetValueAt(index++, value);
+        }
+        args.SetReturnValue(result);
+    }
+
+    void GetMimeType(const JSCallbackInfo& args)
+    {
+        auto mimeTypes = param_->GetMimeType();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        std::vector<std::string>::iterator iterator;
+        uint32_t index = 0;
+        for (iterator = mimeTypes.begin(); iterator != mimeTypes.end(); ++iterator) {
             auto valueStr = JSVal(ToJSValue(*iterator));
             auto value = JSRef<JSVal>::Make(valueStr);
             result->SetValueAt(index++, value);

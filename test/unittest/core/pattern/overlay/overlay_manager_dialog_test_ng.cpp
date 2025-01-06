@@ -75,6 +75,7 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/napi/kits/promptaction/prompt_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1564,5 +1565,60 @@ HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest013, TestSize.Level1)
     ViewAbstract::DismissDialog();
     EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
     EXPECT_FALSE(overlayManager->DialogInMapHoldingFocus());
+}
+
+/**
+ * @tc.name: DismissDialogTest014
+ * @tc.desc: Test OverlayManager::OpenCustomDialog->Dialog Controller::CloseDialog.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerDialogTestNg, DismissDialogTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager.
+     */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    auto rootNode = overlayManager->GetRootNode().Upgrade();
+    ASSERT_NE(rootNode, nullptr);
+    /**
+     * @tc.steps: step2. create dialog content node.
+     */
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParam;
+    dialogParam.contentNode = contentNode;
+    auto contentNodeNew = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    DialogProperties dialogParamNew;
+    dialogParamNew.contentNode = contentNodeNew;
+
+    /**
+     * @tc.steps: step3. call OpenCustomDialog for contentNode.
+     * @tc.expected: OpenCustomDialog succeed and dialog of contentNode is in the dialogMap_.
+     */
+    auto openCallbackFst = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_NO_ERROR);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackFst);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
+    auto dialogNode = overlayManager->GetDialogNodeWithExistContent(contentNode);
+    EXPECT_NE(dialogNode, nullptr);
+    auto openCallbackSnd = [](int32_t errorCode) {
+        EXPECT_EQ(errorCode, ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST);
+    };
+    overlayManager->OpenCustomDialog(dialogParam, openCallbackSnd);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 5);
+
+    /**
+     * @tc.steps: step4. call CloseDialog for contentNodeNew.
+     * @tc.expected: remove  successfully.
+     */
+    Napi::PromptDialogController* controller = new Napi::PromptDialogController();
+    controller->SetNode(dialogNode);
+    controller->Close();
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 4);
 }
 } // namespace OHOS::Ace::NG

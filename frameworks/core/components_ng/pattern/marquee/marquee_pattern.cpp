@@ -245,7 +245,8 @@ void MarqueePattern::ActionAnimation(AnimationOption& option, float end, int32_t
                 onFinish();
                 return;
             }
-            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI, "ArkUIMarqueePlayAnimation");
+            taskExecutor->PostTask([onFinish]() {onFinish();}, TaskExecutor::TaskType::UI,
+                                   "ArkUIMarqueePlayAnimation", PriorityType::VIP);
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();

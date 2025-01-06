@@ -271,7 +271,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_polygon_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
-      "nativeModule/arkts_native_qrcode_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
@@ -319,6 +318,10 @@ template("declarative_js_engine_ark") {
         "nativeModule/arkts_native_side_bar_container_bridge.cpp",
         "nativeModule/arkts_native_stepper_item_bridge.cpp",
       ]
+    }
+
+    if (qrcodegen_support) {
+      sources += [ "nativeModule/arkts_native_qrcode_bridge.cpp" ]
     }
 
     deps = [

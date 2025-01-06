@@ -22,6 +22,14 @@
 #include "core/components/theme/theme_constants_defines.h"
 
 namespace OHOS::Ace {
+#ifdef ARKUI_CIRCLE_FEATURE
+namespace {
+inline constexpr double NORMAL_START_ANGLE = -30;
+inline constexpr double ACTIVE_START_ANGLE = -60;
+inline constexpr double NORMAL_MAX_OFFSET_ANGLE = 60.0;
+inline constexpr double ACTIVE_MAX_OFFSET_ANGLE = 120.0;
+} // namespace
+#endif // ARKUI_CIRCLE_FEATURE
 
 /**
  * ScrollBarTheme defines styles of scrollBar. ScrollBarTheme should be built
@@ -54,7 +62,6 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
-            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
             theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
@@ -62,14 +69,31 @@ public:
             theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
             theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
             theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
-            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
-            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(blendOpacity);
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
             theme->padding_ = Edge(padding.Value(), 0.0, padding.Value(), padding.Value(), padding.Unit());
             theme->scrollBarMargin_ = padding;
             theme->defaultWidth_ = pattern->GetAttr<Dimension>("scroll_bar_default_width", 16.0_vp);
             theme->defaultHeight_ = pattern->GetAttr<Dimension>("scroll_bar_default_height", 16.0_vp);
+#ifdef ARKUI_CIRCLE_FEATURE
+            theme->normalBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_background_width", 4.0_vp);
+            theme->activeBackgroundWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_background_width", 24.0_vp);
+            theme->normalStartAngle_ = pattern->GetAttr<double>("scroll_bar_normal_start_angle", NORMAL_START_ANGLE);
+            theme->activeStartAngle_ = pattern->GetAttr<double>("scroll_bar_active_start_angle", ACTIVE_START_ANGLE);
+            theme->normaMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_normal_max_offset_angle",
+                NORMAL_MAX_OFFSET_ANGLE);
+            theme->activeMaxOffsetAngle_ = pattern->GetAttr<double>("scroll_bar_active_max_offset_angle",
+                ACTIVE_MAX_OFFSET_ANGLE);
+            theme->normalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
+            theme->activeScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width", 22.0_vp);
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+                Color::TRANSPARENT).BlendOpacity(0.66f);
+            theme->backgroundColor_ = Color(0x7F7F7F7F);
+#else
+            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
+#endif // ARKUI_CIRCLE_FEATURE
         }
     };
 
@@ -140,6 +164,41 @@ public:
         return defaultHeight_;
     }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+    const Dimension& GetNormalBackgroundWidth() const
+    {
+        return normalBackgroundWidth_;
+    }
+    const Dimension& GetActiveBackgroundWidth() const
+    {
+        return activeBackgroundWidth_;
+    }
+    double GetNormalStartAngle() const
+    {
+        return normalStartAngle_;
+    }
+    double GetActiveStartAngle() const
+    {
+        return activeStartAngle_;
+    }
+    double GetNormaMaxOffsetAngle() const
+    {
+        return normaMaxOffsetAngle_;
+    }
+    double GetActiveMaxOffsetAngle() const
+    {
+        return activeMaxOffsetAngle_;
+    }
+    const Dimension& GetNormalScrollBarWidth() const
+    {
+        return normalScrollBarWidth_;
+    }
+    const Dimension& GetActiveScrollBarWidth() const
+    {
+        return activeScrollBarWidth_;
+    }
+#endif // ARKUI_CIRCLE_FEATURE
+
 protected:
     ScrollBarTheme() = default;
 
@@ -157,6 +216,16 @@ private:
     Color backgroundColor_;
     Color foregroundColor_;
     Edge padding_;
+#ifdef ARKUI_CIRCLE_FEATURE
+    Dimension normalBackgroundWidth_;
+    Dimension activeBackgroundWidth_;
+    double normalStartAngle_ = 0.0;
+    double activeStartAngle_ = 0.0;
+    double normaMaxOffsetAngle_ = 0.0;
+    double activeMaxOffsetAngle_ = 0.0;
+    Dimension normalScrollBarWidth_;
+    Dimension activeScrollBarWidth_;
+#endif // ARKUI_CIRCLE_FEATURE
 };
 
 } // namespace OHOS::Ace

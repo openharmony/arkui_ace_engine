@@ -126,6 +126,7 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
 
+    int32_t buttonIndex = 0;
     for (const auto& child : buttonFlexNode->GetChildren()) {
         CHECK_NULL_VOID(child);
         if (child->GetTag() == V2::BUTTON_ETS_TAG) {
@@ -144,7 +145,12 @@ void CalendarPickerPattern::UpdateEntryButtonColor()
             CHECK_NULL_VOID(imageLayoutProperty);
             auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
             CHECK_NULL_VOID(imageInfo);
-            imageInfo->SetFillColor(theme->GetEntryArrowColor());
+            auto buttonColor = theme->GetEntryArrowColor();
+            if (!IsAddOrSubButtonEnable(buttonIndex)) {
+                buttonColor = buttonColor.ChangeOpacity(DISABLE_ALPHA);
+            }
+            imageInfo->SetFillColor(buttonColor);
+            buttonIndex++;
             imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
             imageNode->MarkModifyDone();
         }
@@ -250,6 +256,7 @@ void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLoc
 {
     bool yearState = false, monthState = false, dayState = false, addState = false, subState = false;
     if (state) {
+        auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {
             case CalendarPickerSelectedType::YEAR:
                 yearState = true;
@@ -261,10 +268,16 @@ void CalendarPickerPattern::HandleHoverEvent(bool state, const Offset& globalLoc
                 dayState = true;
                 break;
             case CalendarPickerSelectedType::ADDBTN:
-                addState = true;
+                NextDateBySelectedType(currSelectdDate);
+                if (PickerDate::IsDateInRange(currSelectdDate, calendarData_.startDate, calendarData_.endDate)) {
+                    addState = true;
+                }
                 break;
             case CalendarPickerSelectedType::SUBBTN:
-                subState = true;
+                PrevDateBySelectedType(currSelectdDate);
+                if (PickerDate::IsDateInRange(currSelectdDate, calendarData_.startDate, calendarData_.endDate)) {
+                    subState = true;
+                }
                 break;
             default:
                 break;
@@ -281,12 +294,19 @@ void CalendarPickerPattern::HandleTouchEvent(bool isPressed, const Offset& globa
 {
     bool addState = false, subState = false;
     if (isPressed) {
+        auto currSelectdDate = calendarData_.selectedDate;
         switch (CheckRegion(globalLocation)) {
             case CalendarPickerSelectedType::ADDBTN:
-                addState = true;
+                NextDateBySelectedType(currSelectdDate);
+                if (PickerDate::IsDateInRange(currSelectdDate, calendarData_.startDate, calendarData_.endDate)) {
+                    addState = true;
+                }
                 break;
             case CalendarPickerSelectedType::SUBBTN:
-                subState = true;
+                PrevDateBySelectedType(currSelectdDate);
+                if (PickerDate::IsDateInRange(currSelectdDate, calendarData_.startDate, calendarData_.endDate)) {
+                    subState = true;
+                }
                 break;
             default:
                 break;
@@ -897,6 +917,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetSelectBackgroundColor());
     textFrameNode->GetRenderContext()->UpdateForegroundColor(Color::WHITE);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushAddAndSubButton();
 }
 
 void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
@@ -920,7 +941,55 @@ void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(theme->GetBackgroundHoverColor());
     } else {
         textFrameNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto layoutProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        textFrameNode->GetRenderContext()->UpdateForegroundColor(
+            layoutProperty->GetColor().value_or(theme->GetEntryFontColor()));
     }
+}
+
+void CalendarPickerPattern::FlushAddAndSubButton()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto buttonFlexNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
+    CHECK_NULL_VOID(buttonFlexNode);
+
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    int32_t buttonIndex = 0;
+    for (const auto& child : buttonFlexNode->GetChildren()) {
+        CHECK_NULL_VOID(child);
+        auto buttonNode = AceType::DynamicCast<FrameNode>(child);
+        auto image = buttonNode->GetChildren().front();
+        CHECK_NULL_VOID(image);
+        auto imageNode = AceType::DynamicCast<FrameNode>(image);
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        auto imageInfo = imageLayoutProperty->GetImageSourceInfo();
+        auto buttonColor = theme->GetEntryArrowColor();
+        if (!IsAddOrSubButtonEnable(buttonIndex)) {
+            buttonColor = buttonColor.ChangeOpacity(DISABLE_ALPHA);
+        }
+        imageInfo->SetFillColor(buttonColor);
+        imageLayoutProperty->UpdateImageSourceInfo(imageInfo.value());
+        imageNode->MarkModifyDone();
+        buttonIndex++;
+    }
+}
+
+bool CalendarPickerPattern::IsAddOrSubButtonEnable(int32_t buttonIndex)
+{
+    PickerDate dateObj = calendarData_.selectedDate;
+    if (buttonIndex == ADD_BUTTON_INDEX) {
+        NextDateBySelectedType(dateObj);
+    }
+    if (buttonIndex == SUB_BUTTON_INDEX) {
+        PrevDateBySelectedType(dateObj);
+    }
+    return PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate);
 }
 
 void CalendarPickerPattern::HandleButtonHoverEvent(bool state, int32_t index)
@@ -953,10 +1022,8 @@ void CalendarPickerPattern::HandleButtonTouchEvent(bool isPressed, int32_t index
     }
 }
 
-void CalendarPickerPattern::HandleAddButtonClick()
+void CalendarPickerPattern::NextDateBySelectedType(PickerDate& dateObj)
 {
-    auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
-    PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
     switch (GetSelectedType()) {
         case CalendarPickerSelectedType::YEAR: {
             dateObj.SetYear(dateObj.GetYear() == MAX_YEAR ? MIN_YEAR : dateObj.GetYear() + 1);
@@ -979,7 +1046,6 @@ void CalendarPickerPattern::HandleAddButtonClick()
         }
         case CalendarPickerSelectedType::DAY:
         default: {
-            SetSelectedType(CalendarPickerSelectedType::DAY);
             auto maxDay = PickerDate::GetMaxDay(dateObj.GetYear(), dateObj.GetMonth());
             if (maxDay > dateObj.GetDay()) {
                 dateObj.SetDay(dateObj.GetDay() + 1);
@@ -995,14 +1061,10 @@ void CalendarPickerPattern::HandleAddButtonClick()
             break;
         }
     }
-    SetDate(dateObj.ToString(true));
-    FireChangeEvents(dateObj.ToString(true));
 }
 
-void CalendarPickerPattern::HandleSubButtonClick()
+void CalendarPickerPattern::PrevDateBySelectedType(PickerDate& dateObj)
 {
-    auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
-    PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
     switch (GetSelectedType()) {
         case CalendarPickerSelectedType::YEAR: {
             auto getYear = dateObj.GetYear();
@@ -1029,7 +1091,6 @@ void CalendarPickerPattern::HandleSubButtonClick()
         }
         case CalendarPickerSelectedType::DAY:
         default: {
-            SetSelectedType(CalendarPickerSelectedType::DAY);
             if (dateObj.GetDay() > 1) {
                 dateObj.SetDay(dateObj.GetDay() - 1);
                 break;
@@ -1046,8 +1107,38 @@ void CalendarPickerPattern::HandleSubButtonClick()
             break;
         }
     }
-    SetDate(dateObj.ToString(true));
-    FireChangeEvents(dateObj.ToString(true));
+}
+
+void CalendarPickerPattern::HandleAddButtonClick()
+{
+    auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
+    PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
+    NextDateBySelectedType(dateObj);
+    if (PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate)) {
+        if (GetSelectedType() != CalendarPickerSelectedType::YEAR &&
+            GetSelectedType() != CalendarPickerSelectedType::MONTH) {
+            SetSelectedType(CalendarPickerSelectedType::DAY);
+        }
+        SetDate(dateObj.ToString(true));
+        FireChangeEvents(dateObj.ToString(true));
+        FlushAddAndSubButton();
+    }
+}
+
+void CalendarPickerPattern::HandleSubButtonClick()
+{
+    auto json = JsonUtil::ParseJsonString(GetEntryDateInfo());
+    PickerDate dateObj = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
+    PrevDateBySelectedType(dateObj);
+    if (PickerDate::IsDateInRange(dateObj, calendarData_.startDate, calendarData_.endDate)) {
+        if (GetSelectedType() != CalendarPickerSelectedType::YEAR &&
+            GetSelectedType() != CalendarPickerSelectedType::MONTH) {
+            SetSelectedType(CalendarPickerSelectedType::DAY);
+        }
+        SetDate(dateObj.ToString(true));
+        FireChangeEvents(dateObj.ToString(true));
+        FlushAddAndSubButton();
+    }
 }
 
 void CalendarPickerPattern::HandleEnable()
@@ -1195,8 +1286,9 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     auto contentNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(contentNode);
     auto json = JsonUtil::ParseJsonString(info);
-
-    calendarData_.selectedDate = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
+    auto selectedDate = PickerDate(json->GetUInt("year"), json->GetUInt("month"), json->GetUInt("day"));
+    calendarData_.selectedDate =
+        PickerDate::AdjustDateToRange(selectedDate, calendarData_.startDate, calendarData_.endDate);
     auto yearNode = AceType::DynamicCast<FrameNode>(contentNode->GetChildAtIndex(yearIndex_));
     CHECK_NULL_VOID(yearNode);
     auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();

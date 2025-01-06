@@ -500,6 +500,7 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
+    FireOnExtraNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -3605,22 +3606,27 @@ std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool e
     return std::make_pair(offset, error);
 }
 
-// returns a node's offset relative to page node
+// returns a node's offset relative to stage node
 // and accumulate every ancestor node's graphic properties such as rotate and transform
-// most of applications has page offset of status bar height
-OffsetF FrameNode::GetPaintRectOffsetToPage() const
+// most of applications has stage offset of status bar height
+OffsetF FrameNode::GetPaintRectOffsetToStage() const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
-    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+    while (parent && parent->GetTag() != V2::STAGE_ETS_TAG) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        // Eliminate the impact of default page transition
+        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+            offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        } else {
+            offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        }
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
+    return (parent && parent->GetTag() == V2::STAGE_ETS_TAG) ? offset : OffsetF();
 }
 
 std::optional<RectF> FrameNode::GetViewPort() const
@@ -6246,5 +6252,38 @@ void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
 void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 {
     kitNode_ = node;
+}
+
+bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
+{
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = iter->second;
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback)
+{
+    if (!callback) {
+        return;
+    }
+    destroyCallbacks_[callbackKey] = std::move(callback);
+}
+
+void FrameNode::RemoveNodeDestroyCallback(const std::string& callbackKey)
+{
+    auto iter = destroyCallbacks_.find(callbackKey);
+    if (iter != destroyCallbacks_.end()) {
+        destroyCallbacks_.erase(iter);
+    }
+}
+
+void FrameNode::FireOnExtraNodeDestroyCallback()
+{
+    for (const auto& callback : destroyCallbacks_) {
+        callback.second();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -1586,3 +1586,17 @@ class ArkNavHideTitleBarOrToolBar {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
   }
 }
+
+class ArkAutoPlay {
+  autoPlay: boolean;
+  needStopWhenTouched: boolean;
+
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+
+  isEqual(another: ArkAutoPlay): boolean {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
+  }
+}

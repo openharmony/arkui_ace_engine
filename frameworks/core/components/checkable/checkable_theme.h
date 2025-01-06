@@ -301,6 +301,11 @@ public:
         void SetCheckboxFocus(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<CheckboxTheme>& theme) const;
     };
 
+    const Dimension& GetHoverPaddingSize() const
+    {
+        return hoverPaddingSize_;
+    }
+
     const Dimension& GetBorderRadius() const
     {
         return borderRadius_;
@@ -325,6 +330,7 @@ private:
     Dimension borderRadius_;
     Dimension whiteBorderRadius_;
     Dimension checkStroke_;
+    Dimension hoverPaddingSize_;
     double colorAnimationDuration_ = 0.0;
 };
 
@@ -470,6 +476,7 @@ public:
                 theme->sizeHoverBg_ = radioPattern->GetAttr<Dimension>("radio_hover_bg_size", 2.0_vp);
                 theme->defaultWidth_ = radioPattern->GetAttr<Dimension>("radio_default_size_api_twelve", 24.0_vp);
                 theme->defaultHeight_ = theme->defaultWidth_;
+                theme->showCircleDial_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_circle_dial", 0.0));
             }
             theme->radioInnerSizeRatio_ = radioPattern->GetAttr<double>("radio_inner_size_ratio", 0.0);
             theme->needFocus_ = static_cast<bool>(radioPattern->GetAttr<double>("radio_need_focus", 0.0));
@@ -520,6 +527,14 @@ public:
             theme->sizeFocusBg_ = radioPattern->GetAttr<Dimension>("size_focused_bg", 0.0_vp);
         }
     };
+
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
+private:
+    bool showCircleDial_ = false;
 };
 
 } // namespace OHOS::Ace

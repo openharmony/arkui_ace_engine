@@ -367,12 +367,33 @@ ArkUI_Int32 GetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerUseMilitaryTime(frameNode);
 }
 
+void SetTimepickerEnableCascade(ArkUINodeHandle node, int isEnableCascade)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, isEnableCascade);
+}
+
+void ResetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, false);
+}
+
+ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
 const ArkUITimepickerModifier* GetTimepickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITimepickerModifier modifier = {
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
@@ -398,22 +419,18 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
         .setTimepickerEnableHapticFeedback = SetTimepickerEnableHapticFeedback,
         .resetTimepickerEnableHapticFeedback = ResetTimepickerEnableHapticFeedback,
+        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
+        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
+        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITimepickerModifier* GetCJUITimepickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITimepickerModifier modifier = {
         .getTimepickerSelected = GetTimepickerSelected,
         .setTimepickerSelected = SetTimepickerSelected,
@@ -437,15 +454,11 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .resetTimepickerLoop = ResetTimepickerLoop,
         .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
+        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
+        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
+        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

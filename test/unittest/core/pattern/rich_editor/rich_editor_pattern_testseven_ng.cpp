@@ -40,6 +40,41 @@ public:
     static void TearDownTestSuite();
 };
 
+class MockTextInputConnection : public TextInputConnection {
+public:
+    MockTextInputConnection(const WeakPtr<TextInputClient>& client, const RefPtr<TaskExecutor>& taskExecutor)
+        : TextInputConnection(client, taskExecutor)
+    {}
+
+    MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
+    MOCK_METHOD(void, SetEditingState, (const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+};
+
+class MockTextInputClient : public TextInputClient {
+public:
+    MOCK_METHOD(void, UpdateEditingValue, (const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
+};
+
+class MockTaskExecutor : public TaskExecutor {
+public:
+    MOCK_METHOD(void, AddTaskObserver, (Task && callback), (override));
+    MOCK_METHOD(void, RemoveTaskObserver, (), (override));
+    MOCK_METHOD(bool, WillRunOnCurrentThread, (TaskType type), (const, override));
+    MOCK_METHOD(void, RemoveTask, (TaskType type, const std::string& name), (override));
+
+    MOCK_METHOD(bool, OnPostTask,
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (const, override));
+    MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const, override));
+    MOCK_METHOD(bool, OnPostTaskWithoutTraceId,
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (const, override));
+};
+
 void RichEditorPatternTestSevenNg::SetUp()
 {
     MockPipelineContext::SetUp();
@@ -375,7 +410,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
     options.value = INIT_VALUE_1;
     richEditorPattern->AddTextSpan(options);
 
-    CaretMetricsF caretMetricsBegin = { OffsetF(0, 0), 50.0f };
+    CaretMetricsF caretMetricsBegin = { OffsetF(20.0f, 0), 50.0f };
     CaretMetricsF caretMetricsEnd = { OffsetF(100.0f, 0), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 7,
         .testCursorItems = { { 0, caretMetricsBegin, caretMetricsBegin}, {6, caretMetricsEnd, caretMetricsEnd} } };
@@ -384,19 +419,21 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
 
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::DOWNSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(0.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(0.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
-    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
-    richEditorPattern->SetCaretTouchMoveOffset(Offset(11.0, 0));
-    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
-    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(11.0, 0));
-    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
 
     richEditorPattern->caretPosition_ = 6;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
@@ -428,12 +465,13 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
     CaretMetricsF caretMetricsInLine = { OffsetF(50.0f, 0), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 38,
         .testCursorItems = { { 5, caretMetricsInLine, caretMetricsInLine},
-        { 10, caretMetricsLineEndUp, caretMetricsLineEndDown} } };
+        { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
 
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(50.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(50.0, 0));
@@ -447,6 +485,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
     EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
@@ -488,12 +527,13 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
     CaretMetricsF caretMetricsLineEndUp = { OffsetF(100.0f, 0), 50.0f };
     CaretMetricsF caretMetricsLineEndDown = { OffsetF(0, 50.0f), 50.0f };
     TestParagraphItem paragraphItem = { .start = 0, .end = 38,
-        .testCursorItems = { { 10, caretMetricsLineEndUp, caretMetricsLineEndDown} } };
+        .testCursorItems = { { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
     richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
     paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
     EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(100.0f, 0));
@@ -504,6 +544,24 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
     EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(120.0f, 0));
     EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
     EXPECT_TRUE(richEditorOverlay->originCaretVisible_->Get());
+}
+
+/**
+ * @tc.name: UnableStandardInput002
+ * @tc.desc: test RichEditorPattern UnableStandardInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, UnableStandardInput002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    richEditorPattern->imeAttached_ = true;
+    bool res = richEditorPattern->UnableStandardInput(false);
+    EXPECT_TRUE(res);
 }
 
 /**

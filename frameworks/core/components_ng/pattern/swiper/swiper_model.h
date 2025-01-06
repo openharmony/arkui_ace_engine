@@ -95,6 +95,10 @@ struct SwiperMarginOptions {
     bool ignoreBlank;
 };
 
+struct SwiperAutoPlayOptions {
+    bool stopWhenTouched = true;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -150,6 +154,7 @@ public:
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     virtual void SetIndicatorIsBoolean(bool isBoolean) {}
+    virtual void SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions) {}
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
     virtual void SetDisplayArrow(bool displayArrow) {}
     virtual void SetHoverShow(bool hoverShow) {}

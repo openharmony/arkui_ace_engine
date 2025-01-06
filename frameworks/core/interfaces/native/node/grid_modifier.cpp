@@ -486,7 +486,7 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGridModifier modifier = {
         .setGridColumnsTemplate = SetGridColumnsTemplate,
         .resetGridColumnsTemplate = ResetGridColumnsTemplate,
@@ -539,8 +539,6 @@ const ArkUIGridModifier* GetGridModifier()
         .setCachedCount = SetCachedCount,
         .resetCachedCount = ResetCachedCount,
         .getCachedCount = GetCachedCount,
-        .setFlingSpeedLimit = SetFlingSpeedLimit,
-        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
         .setGridAlignItems = SetGridAlignItems,
         .resetGridAlignItems = ResetGridAlignItems,
         .setGridFadingEdge = SetGridFadingEdge,
@@ -560,20 +558,13 @@ const ArkUIGridModifier* GetGridModifier()
         .setOnGridItemDrop = SetOnGridItemDrop,
         .resetOnGridItemDrop = ResetOnGridItemDrop,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGridModifier* GetCJUIGridModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGridModifier modifier = {
         .setGridColumnsTemplate = SetGridColumnsTemplate,
         .resetGridColumnsTemplate = ResetGridColumnsTemplate,
@@ -626,14 +617,7 @@ const CJUIGridModifier* GetCJUIGridModifier()
         .setFlingSpeedLimit = SetFlingSpeedLimit,
         .resetFlingSpeedLimit = ResetFlingSpeedLimit,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

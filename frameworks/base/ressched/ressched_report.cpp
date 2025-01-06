@@ -209,8 +209,47 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
+bool ResSchedReport::IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
+    int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime)
+{
+    if (keyEventCount == -1) {
+        startTime = std::chrono::steady_clock::now();
+        keyEventCount = 0;
+    }
+
+    if (keyEventCount > maxCount) {
+        auto curTime = std::chrono::steady_clock::now();
+        auto elapsedTime = std::chrono::duration_cast<std::chrono::seconds>(curTime - startTime).count();
+        if (elapsedTime < durTime.count()) {
+            LOGD("The event report exceeds the throttling limit");
+            return true;
+        }
+        keyEventCount = 0;
+        startTime = curTime;
+    }
+    keyEventCount++;
+    return false;
+}
+
+bool ResSchedReport::IsPerSecRateLimit()
+{
+    int64_t maxCountMS = 10;
+    auto durTimeMS = std::chrono::seconds(1);
+    return IsRateLimit(maxCountMS, durTimeMS, keyEventCountMS, startTimeMS);
+}
+
+bool ResSchedReport::IsPerMinRateLimit()
+{
+    int64_t maxCountS = 180;
+    auto durTimeS = std::chrono::seconds(60);
+    return IsRateLimit(maxCountS, durTimeS, keyEventCountS, startTimeS);
+}
+
 void ResSchedReport::OnKeyEvent(const KeyEvent& event)
 {
+    if (IsPerSecRateLimit() || IsPerMinRateLimit()) {
+        return;
+    }
     switch (event.action) {
         case KeyAction::DOWN:
             HandleKeyDown(event);

@@ -236,6 +236,7 @@ private:
     Dimension hotZoneVerticalPadding_;
     Dimension defaultPaddingSize_;
     Dimension defaultRoundPaddingSize_;
+    Dimension hoverPaddingSize_;
     Dimension shadowWidth_;
     Dimension focusBoardSize_;
     Dimension roundFocusBoardSize_;
