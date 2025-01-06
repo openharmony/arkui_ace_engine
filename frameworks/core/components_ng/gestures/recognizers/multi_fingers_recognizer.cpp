@@ -46,7 +46,7 @@ void MultiFingersRecognizer::UpdateFingerListInfo()
         fingerList_.emplace_back(fingerInfo);
         if (maxTimeStamp <= point.second.GetTimeStamp().time_since_epoch().count()
             && point.second.pointers.size() >= touchPoints_.size()) {
-            lastPointEvent_ = point.second.pointerEvent;
+            lastPointEvent_ = point.second.GetTouchEventPointerEvent();
             maxTimeStamp = point.second.GetTimeStamp().time_since_epoch().count();
         }
     }

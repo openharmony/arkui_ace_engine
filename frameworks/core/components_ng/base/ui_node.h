@@ -118,6 +118,8 @@ public:
     // process offscreen process.
     void ProcessOffscreenTask(bool recursive = false);
 
+    // Determine if the node is a SyntaxNode, default returns false.
+    // SyntaxNode classes need to override the method and return true.
     virtual bool IsSyntaxNode() const
     {
         return false;
@@ -203,7 +205,7 @@ public:
         RefPtr<ViewDataWrap> viewDataWrap, bool skipSubAutoFillContainer = false, bool needsRecordData = false);
     bool NeedRequestAutoSave();
     // DFX info.
-    void DumpTree(int32_t depth, bool hasJson = false);
+    virtual void DumpTree(int32_t depth, bool hasJson = false);
     void DumpSimplifyTree(int32_t depth, std::unique_ptr<JsonValue>& current);
     virtual bool IsContextTransparent();
 
@@ -817,6 +819,14 @@ public:
     virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
     virtual void RemoveCustomProperty(const std::string& key) {}
 
+    /**
+     * flag used by Repeat virtual scroll
+     * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
+     * adding a @ReusableV2 @ComponentV2 CustomNode
+     * allowReusableV2Descendant_ default value is true
+     */
+    void SetAllowReusableV2Descendant(bool allow);
+    bool IsAllowReusableV2Descendant() const;
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -957,6 +967,7 @@ private:
     bool isFirstAccessibilityVirtualNode_ = false;
     // the flag to block dirty mark.
     bool isFreeze_ = false;
+    bool allowReusableV2Descendant_ = true;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
 };

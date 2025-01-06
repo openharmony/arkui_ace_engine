@@ -676,7 +676,7 @@ public:
                 auto aceFoldStatus = static_cast<FoldStatus>(static_cast<uint32_t>(foldStatus));
                 context->OnFoldStatusChanged(aceFoldStatus);
             },
-            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged");
+            TaskExecutor::TaskType::UI, "ArkUIFoldStatusChanged", PriorityType::VIP);
     }
 
 private:
@@ -704,7 +704,7 @@ public:
                     auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                     context->OnFoldDisplayModeChanged(aceDisplayMode);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged");
+                TaskExecutor::TaskType::UI, "ArkUIFoldDisplayModeChanged", PriorityType::VIP);
             return;
         }
         auto container = Platform::DialogContainer::GetContainer(instanceId_);
@@ -719,7 +719,7 @@ public:
                 auto aceDisplayMode = static_cast<FoldDisplayMode>(static_cast<uint32_t>(displayMode));
                 context->OnFoldDisplayModeChanged(aceDisplayMode);
             },
-            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged");
+            TaskExecutor::TaskType::UI, "ArkUIDialogFoldDisplayModeChanged", PriorityType::VIP);
     }
 
 private:
@@ -746,7 +746,7 @@ public:
                 SubwindowManager::GetInstance()->ClearMenuNG(instanceId, targetId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
-            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear");
+            TaskExecutor::TaskType::UI, "ArkUITouchOutsideSubwindowClear", PriorityType::VIP);
     }
 
 private:
@@ -982,7 +982,9 @@ void UIContentImpl::Initialize(
         return;
     }
     AddWatchSystemParameter();
-
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDrawReadyEventCallback();
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
@@ -992,6 +994,43 @@ void UIContentImpl::Initialize(
     Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 #if !defined(ACE_UNITTEST)
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto rootNode = pipelineContext->GetRootElement();
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
+#endif
+}
+
+void UIContentImpl::InitializeByName(OHOS::Rosen::Window *window,
+    const std::string &name, napi_value storage, uint32_t focusWindowId)
+{
+    if (window == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtensionAbility [%{public}s][%{public}s][%{public}d][%{public}s]"
+            "InitializeByName failed, the window is invalid",
+            bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+        return;
+    }
+
+    auto errorCode = CommonInitialize(window, name, storage, focusWindowId);
+    if (errorCode != UIContentErrorCode::NO_ERRORS) {
+        TAG_LOGE(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "CommonInitialize failed when InitializeByName");
+        return;
+    }
+
+    AddWatchSystemParameter();
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: StartUIExtensionByName: %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
+    // run page.
+    Platform::AceContainer::RunPage(instanceId_, startUrl_, "", true);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDistributedUI(distributedUI);
+#if !defined(ACE_UNITTEST)
+    auto pipelineContext = NG::PipelineContext::GetContextByContainerId(instanceId_);
     CHECK_NULL_VOID(pipelineContext);
     auto rootNode = pipelineContext->GetRootElement();
     NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
@@ -2482,13 +2521,56 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
-            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "WindowName = " SEC_PLD(%{public}s) ", "
+            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
-            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            pointerEvent->GetId(), SEC_PARAM(container->GetWindowName().c_str()), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
+    return true;
+}
+
+bool UIContentImpl::ProcessPointerEvent(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+{
+    if (!ProcessPointerEvent(pointerEvent)) {
+        return false;
+    }
+    if (pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_RETURN(context, false);
+        auto task = [context, finallyCallback = callback]() {
+            CHECK_NULL_VOID(context);
+            CHECK_NULL_VOID(finallyCallback);
+            ContainerScope scope(context->GetInstanceId());
+            auto dragDropManager = context->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            auto isAnyDraggableHit = dragDropManager->IsAnyDraggableHit(context, MOUSE_PRESS_LEFT + MOUSE_BASE_ID);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "is any draggable node hit: %{public}d", isAnyDraggableHit);
+            dragDropManager->SetIsAnyDraggableHit(false);
+            finallyCallback(isAnyDraggableHit);
+        };
+
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            task();
+        } else {
+            taskExecutor->PostTask(
+                std::move(task), TaskExecutor::TaskType::UI, "ArkUIProcessPointerEvent", PriorityType::VIP);
+        }
+    } else {
+        CHECK_NULL_RETURN(callback, false);
+        callback(false);
+    }
     return true;
 }
 
@@ -2500,9 +2582,10 @@ bool UIContentImpl::ProcessPointerEventWithCallback(
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
-            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "WindowName = " SEC_PLD(%{public}s) ", "
+            "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
-            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            pointerEvent->GetId(), SEC_PARAM(container->GetWindowName().c_str()), container->GetWindowId(),
             container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
@@ -2514,9 +2597,10 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
 {
     TAG_LOGD(AceLogTag::ACE_INPUTTRACKING,
         "KeyEvent Process to ui_content, eventInfo: id:%{public}d, "
-        "keyEvent info: keyCode is %{private}d, "
-        "keyAction is %{public}d, keyActionTime is %{public}" PRId64,
-        touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
+        "keyEvent info: keyCode is " SEC_PLD(%{private}d) ", "
+        "keyAction is " SEC_PLD(%{public}d) ", keyActionTime is %{public}" PRId64,
+        touchEvent->GetId(), SEC_PARAM(touchEvent->GetKeyCode()), SEC_PARAM(touchEvent->GetKeyAction()),
+        touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());

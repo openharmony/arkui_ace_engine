@@ -13,64 +13,17 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
 #include "core/components/common/properties/text_style_parser.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -1743,6 +1696,43 @@ HWTEST_F(TextFieldUXTest, TextAreaLayout005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextAreaHalfLeading001
+ * @tc.desc: test TextArea halfLeading.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextAreaHalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text and placeholder
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetHalfLeading(true);
+    });
+
+    /**
+     * @tc.expected: Current caret position is end of text
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: set TextInputAction NEW_LINE and call PerformAction
+     * @tc.expected: text halfLeading
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    auto textInputAction = pattern_->GetDefaultTextInputAction();
+    EXPECT_EQ(textInputAction, TextInputAction::NEW_LINE);
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_TRUE(pattern_->GetInputFilter() != "\n");
+    pattern_->PerformAction(textInputAction, false);
+
+    EXPECT_EQ(layoutProperty_->GetHalfLeading(), true);
+}
+
+/**
  * @tc.name: TextAreaLineSpacing001
  * @tc.desc: test TextArea lineSpacing.
  * @tc.type: FUNC
@@ -1834,5 +1824,21 @@ HWTEST_F(TextFieldUXTest, TextAreaTextAlign001, TestSize.Level1)
             EXPECT_EQ(layoutProperty_->GetLayoutDirection(), textDirectoin);
         }
     }
+}
+
+/**
+ * @tc.name: SupportTextFadeoutTest001
+ * @tc.desc: Test whether the text node has the ability to support fadeout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, SupportTextFadeoutTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create text field node with default text and placeholder.
+     * @tc.expected: Check the textArea node do not support fadeout.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    EXPECT_TRUE(pattern_->IsTextArea());
+    EXPECT_FALSE(pattern_->GetTextFadeoutCapacity());
 }
 }

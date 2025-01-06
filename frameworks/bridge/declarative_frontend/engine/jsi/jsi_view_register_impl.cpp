@@ -78,6 +78,8 @@
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "bridge/declarative_frontend/jsview/js_line.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator.h"
+#include "bridge/declarative_frontend/jsview/js_linear_indicator_controller.h"
 #include "bridge/declarative_frontend/jsview/js_list.h"
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_list_item_group.h"
@@ -105,7 +107,9 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
@@ -442,7 +446,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -469,7 +475,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Radio", JSRadio::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
@@ -533,7 +541,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Counter", JSCounter::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
+#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -561,12 +571,17 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
+#endif
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
+#ifndef ARKUI_WEARABLE
     { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
+#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -581,10 +596,14 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
     { "TimePickerDialog", JSTimePickerDialog::JSBind },
+#endif
     { "DatePicker", JSDatePicker::JSBind },
+#ifndef ARKUI_WEARABLE
     { "DatePickerDialog", JSDatePickerDialog::JSBind },
+#endif
     { "PageTransitionEnter", JSPageTransition::JSBind },
     { "PageTransitionExit", JSPageTransition::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -610,8 +629,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -691,7 +711,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
+#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -766,7 +788,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureRecognizer", JSGestureRecognizer::JSBind },
     { "EventTargetInfo", JSEventTargetInfo::JSBind },
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
-    { "PanRecognizer", JSPanRecognizer::JSBind }
+    { "PanRecognizer", JSPanRecognizer::JSBind },
+    { "LinearIndicator", JSLinearIndicator::JSBind },
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)
@@ -1017,6 +1041,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {

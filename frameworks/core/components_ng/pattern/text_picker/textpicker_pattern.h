@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "core/components/theme/app_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -85,6 +86,10 @@ public:
 
     void FireScrollStopEvent(bool refresh);
 
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value);
+
+    void FireEnterSelectedAreaEvent(bool refresh);
+
     void OnColumnsBuilding();
 
     void FlushOptions();
@@ -151,7 +156,7 @@ public:
         return options_.size();
     }
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0, bool isEnterSelectedAreaEvent = false) const;
 
     std::string GetOption(uint32_t index) const
     {
@@ -187,7 +192,6 @@ public:
 
         FocusPaintParam focusPaintParams;
         focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(TEXT_FOCUS_PAINT_WIDTH);
 
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
@@ -498,6 +502,18 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitFocusEvent();
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset);
+    void CalcLeftTotalColumnWidth(const RefPtr<FrameNode>& host, float& leftTotalColumnWidth, float childSize);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
+    const RefPtr<FrameNode> GetFocusButtonNode() const;
     double CalculateHeight();
 
     void InitDisabled();
@@ -533,6 +549,11 @@ private:
     int32_t focusKeyID_ = 0;
     double defaultPickerItemHeight_ = 0.0;
     double resizePickerItemHeight_ = 0.0;
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
+    Dimension selectorItemRadius_ = 8.0_vp;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     uint32_t selectedIndex_ = 0;
     std::vector<NG::RangeContent> range_;
     std::vector<NG::RangeContent> options_;

@@ -33,20 +33,13 @@ std::string DatePickerAccessibilityProperty::GetText() const
     auto pattern = frameNode->GetPattern<DatePickerPattern>();
     CHECK_NULL_RETURN(pattern, "");
 
-    auto pickerDate = pattern->GetCurrentDate();
-
     std::string result;
     if (pattern->GetIsShowInDialog() && pattern->ShowMonthDays()) {
         result = GetColumnsText(frameNode, true);
         result.append(" ");
         result.append(GetShowTimePickerText());
     } else {
-        if (!pattern->IsShowLunar()) {
-            result = std::to_string(pickerDate.GetYear()) + "-" + std::to_string(pickerDate.GetMonth()) + "-" +
-                     std::to_string(pickerDate.GetDay());
-        } else {
-            result = GetColumnsText(frameNode, false);
-        }
+        result = GetColumnsText(frameNode, false);
     }
     return result;
 }
@@ -57,17 +50,22 @@ std::string DatePickerAccessibilityProperty::GetColumnsText(
     CHECK_NULL_RETURN(frameNode, "");
     std::string result = "";
     for (const auto& child : frameNode->GetChildren()) {
-        auto stackMonthDays = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_RETURN(stackMonthDays, "");
-        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
-        CHECK_NULL_RETURN(blendMonthDays, "");
-        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
-        CHECK_NULL_RETURN(monthDaysColumnNode, "");
-        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+        auto stackColumn = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_RETURN(stackColumn, "");
+        auto colLayoutProperty = stackColumn->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(colLayoutProperty, "");
+        if (colLayoutProperty->GetVisibility() == VisibleType::GONE) {
+            continue;
+        }
+        auto blendColumn = AceType::DynamicCast<FrameNode>(stackColumn->GetLastChild());
+        CHECK_NULL_RETURN(blendColumn, "");
+        auto dataColumnNode = AceType::DynamicCast<FrameNode>(blendColumn->GetLastChild());
+        CHECK_NULL_RETURN(dataColumnNode, "");
+        auto columnPattern = dataColumnNode->GetPattern<DatePickerColumnPattern>();
         CHECK_NULL_RETURN(columnPattern, "");
         auto index = columnPattern->GetCurrentIndex();
         auto options = columnPattern->GetOptions();
-        auto it = options.find(monthDaysColumnNode);
+        auto it = options.find(dataColumnNode);
         if (it != options.end() && index >= 0 && index < it->second.size()) {
             auto date = it->second.at(index);
             result.append(DatePickerPattern::GetFormatString(date));

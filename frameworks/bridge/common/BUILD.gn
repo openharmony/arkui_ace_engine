@@ -55,7 +55,6 @@ template("bridge_common") {
       "dom/dom_picker_view.cpp",
       "dom/dom_progress.cpp",
       "dom/dom_proxy.cpp",
-      "dom/dom_qrcode.cpp",
       "dom/dom_refresh.cpp",
       "dom/dom_search.cpp",
       "dom/dom_slider.cpp",
@@ -119,6 +118,10 @@ template("bridge_common") {
       "utils/transform_convertor.cpp",
       "utils/utils.cpp",
     ]
+
+    if (qrcodegen_support) {
+      sources += [ "dom/dom_qrcode.cpp" ]
+    }
 
     # rich components needed by phone and TV. wearable like watch do not need them
     if (defined(config.rich_components_support) &&

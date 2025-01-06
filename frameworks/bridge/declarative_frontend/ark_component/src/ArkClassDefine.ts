@@ -1221,6 +1221,20 @@ class ArkDisplayCount {
   }
 }
 
+class ArkSwiperCachedCount {
+  value: number;
+  isShown: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.isShown = undefined;
+  }
+
+  isEqual(another: ArkSwiperCachedCount): boolean {
+    return this.value === another.value && this.isShown === another.isShown;
+  }
+}
+
 class ArkPlaceholder {
   value: ResourceStr | undefined;
   style?: PlaceholderStyle | undefined;
@@ -1570,5 +1584,19 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkAutoPlay {
+  autoPlay: boolean;
+  needStopWhenTouched: boolean;
+
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+
+  isEqual(another: ArkAutoPlay): boolean {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
   }
 }

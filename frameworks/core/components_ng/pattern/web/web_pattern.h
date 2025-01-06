@@ -895,6 +895,7 @@ private:
     void HandleScaleGestureChange(const GestureEvent& event);
     void HandleScaleGestureStart(const GestureEvent& event);
     void HandleScaleGestureEnd(const GestureEvent& event);
+    void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);

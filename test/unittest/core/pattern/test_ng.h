@@ -54,6 +54,9 @@ public:
     RefPtr<FrameNode> CreateRow(const std::function<void(RowModelNG)>& callback);
     RefPtr<FrameNode> CreateColumn(const std::function<void(ColumnModelNG)>& callback);
     void SetSize(std::optional<Axis> axis, const CalcLength& crossSize, const CalcLength& mainSize);
+    AssertionResult IsExist(const RefPtr<FrameNode>& frameNode, int32_t index);
+    AssertionResult IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index);
+    AssertionResult IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index);
 
     AssertionResult IsEqual(const SizeF& actual, const SizeF& expected)
     {

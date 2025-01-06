@@ -301,18 +301,19 @@ ArkUI_Int32 GetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     return SCROLL_TO_INDEX_2;
 }
 
-void SetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetScrollEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+    ScrollModelNG::SetEdgeEffect(
+        frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, static_cast<EffectEdge>(edge));
 }
 
 void ResetScrollEdgeEffect(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true);
+    ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true, EffectEdge::ALL);
 }
 
 ArkUI_Bool GetEnableScrollInteraction(ArkUINodeHandle node)
@@ -580,7 +581,7 @@ namespace NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier()
 {
     /* clang-format off */
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIScrollModifier modifier = {
         .setScrollNestedScroll = SetScrollNestedScroll,
         .resetScrollNestedScroll = ResetScrollNestedScroll,
@@ -623,8 +624,6 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollEdge = GetScrollEdge,
         .setScrollInitialOffset = SetScrollInitialOffset,
         .resetScrollInitialOffset = ResetScrollInitialOffset,
-        .setScrollFlingSpeedLimit = SetScrollFlingSpeedLimit,
-        .resetScrollFlingSpeedLimit = ResetScrollFlingSpeedLimit,
         .setScrollPage = SetScrollPage,
         .setScrollBy = SetScrollBy,
         .getScroll = GetScroll,
@@ -652,21 +651,14 @@ const ArkUIScrollModifier* GetScrollModifier()
         .setScrollFling = SetScrollFling,
         .getScrollContentSize = GetScrollContentSize,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     /* clang-format on */
     return &modifier;
 }
 
 const CJUIScrollModifier* GetCJUIScrollModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIScrollModifier modifier = {
         .setScrollNestedScroll = SetScrollNestedScroll,
         .resetScrollNestedScroll = ResetScrollNestedScroll,
@@ -717,14 +709,7 @@ const CJUIScrollModifier* GetCJUIScrollModifier()
         .setScrollBarProxy = SetScrollBarProxy,
         .setScrollToIndex = SetScrollToIndex,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

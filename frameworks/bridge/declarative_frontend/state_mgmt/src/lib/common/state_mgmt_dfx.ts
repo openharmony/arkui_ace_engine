@@ -37,6 +37,35 @@ class stateMgmtDFX {
     };
   }
 
+  public static reportStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>): void {
+    let stateInfo: DumpInfo = new DumpInfo();
+    let decoratorInfo: string = target instanceof ViewV2 ? ObserveV2.getObserve().getDecoratorInfo(target, attrName) : '@Trace';
+
+    const dependentElementIds: Array<ElementType|string> = Array<ElementType|string>();
+    changeIdSet.forEach((id: number) => {
+      if (id < ComputedV2.MIN_COMPUTED_ID) {
+        dependentElementIds.push(ObserveV2.getObserve().getElementInfoById(id, true));
+      }
+    })
+
+    let ownedTarget: TargetInfo;
+    if (target instanceof ViewV2) {
+      ownedTarget = {componentName: target.constructor.name, id: target.id__()};
+    } else {
+      ownedTarget = {className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target)}
+    }
+    stateInfo.observedPropertiesInfo.push({
+      decorator: decoratorInfo, propertyName: attrName, idV2: Utils.getArkTsUtil().getHash(target).toString() + attrName, 
+      value: stateMgmtDFX.getRawValue(Reflect.get(target, attrName)), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
+      dependentElementIds: {mode: 'v2', propertyDependencies: dependentElementIds}, owningView: ownedTarget
+    })
+    try {
+      ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
+    } catch(error) {
+      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`)
+    }
+  }
+
   /**
    * Dump decorated variable for v1 and v2
    *
@@ -72,32 +101,13 @@ class stateMgmtDFX {
     Object.getOwnPropertyNames(meta)
       .filter((varName) => !varName.startsWith(ProviderConsumerUtilV2.ALIAS_PREFIX)) // remove provider & consumer prefix
       .forEach((varName) => {
-        dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.dumpSingleV2VariableInfo(view, varName, meta));
+        dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.dumpSingleV2VariableInfo(view, varName));
       });
   }
 
-  private static dumpSingleV2VariableInfo<T>(view: ViewV2, varName: string, meta: Object): ObservedPropertyInfo<T> {
-    let decorators: string = '';
-    const decorator: any = Reflect.get(meta, varName);
-    let prop: any = Reflect.get(view, ObserveV2.OB_PREFIX + varName);
-    if ('deco' in decorator) {
-      decorators = decorator.deco as string;
-      if (decorators === '@Consumer') {
-        prop = Reflect.get(view, varName);
-      }
-      if (decorators === '@Computed') {
-        prop = Reflect.get(view, ComputedV2.COMPUTED_CACHED_PREFIX + varName);
-      }
-      if (decorators === '@Monitor' || decorators === '@Event') {
-        prop = `${Reflect.get(view, varName)}`;
-      }
-    }
-    if ('deco2' in decorator) {
-      decorators += decorator.deco2 as string;
-    }
-    if ('aliasName' in decorator) {
-      decorators += `(${decorator.aliasName})`;
-    }
+  private static dumpSingleV2VariableInfo<T>(view: ViewV2, varName: string): ObservedPropertyInfo<T> {
+    const decorators: string = ObserveV2.getObserve().getDecoratorInfo(view, varName);
+    const prop: any = Reflect.get(view, varName);
     let dependentElmIds: Set<number> | undefined = undefined;
     if (view[ObserveV2.SYMBOL_REFS]) {
       dependentElmIds = view[ObserveV2.SYMBOL_REFS][varName];
@@ -111,8 +121,8 @@ class stateMgmtDFX {
     };
   }
 
-  private static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined): string[] {
-    let dumpElementIds: string[] = [];
+  private static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined): Array<ElementType | string> {
+    const dumpElementIds: Array<ElementType | string> = [];
     dependentElmIds?.forEach((elmtId: number) => {
       if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
         dumpElementIds.push(ObserveV2.getObserve().getElementInfoById(elmtId));
@@ -226,8 +236,8 @@ function setProfilerStatus(profilerStatus: boolean): void {
 }
 type PropertyDependenciesInfo = {
   mode: string,
-  trackPropertiesDependencies: MapItem<string, Array<ElementType | number | string>>[],
-  propertyDependencies: Array<ElementType | string>
+  trackPropertiesDependencies?: MapItem<string, Array<ElementType | number | string>>[],
+  propertyDependencies?: Array<ElementType | string>
 }
 
 type ElementType = {
@@ -237,16 +247,16 @@ type ElementType = {
 }
 
 // Data struct send to profiler or Inspector
-type ViewPUInfo = {
-  componentName: string, id: number, isV2?: boolean,
+type TargetInfo = {
+  id: number, componentName?: string, className?: string, isV2?: boolean,
   isCompFreezeAllowed_?: boolean, isViewActive_?: boolean
 };
 type ObservedPropertyInfo<T> = {
-  decorator: string, propertyName: string, value: any, id: number, changeId?: number, inRenderingElementId?: number,
+  decorator: string, propertyName: string, value: any, id?: number, idV2?: string, inRenderingElementId?: number,
   changedTrackPropertyName?: string | undefined,
   dependentElementIds: PropertyDependenciesInfo,
   length?: number
-  owningView?: ViewPUInfo, syncPeers?: ObservedPropertyInfo<T>[]
+  owningView?: TargetInfo, syncPeers?: ObservedPropertyInfo<T>[]
 };
 
 type SimpleType = string | number | boolean;
@@ -255,7 +265,7 @@ type DumpBuildInType = Array<SimpleType> | Array<[SimpleType, SimpleType]>;
 type RawValue = any;
 
 class DumpInfo {
-  public viewInfo?: ViewPUInfo;
+  public viewInfo?: TargetInfo;
   public observedPropertiesInfo: ObservedPropertyInfo<any>[] = []
 }
 

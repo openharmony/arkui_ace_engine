@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptItemsByOrder = std::vector<std::string>;
 class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();

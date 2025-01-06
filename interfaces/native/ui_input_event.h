@@ -161,6 +161,8 @@ enum {
     UI_MOUSE_EVENT_ACTION_RELEASE = 2,
     /** 鼠标移动。 */
     UI_MOUSE_EVENT_ACTION_MOVE = 3,
+    /** 鼠标按键被取消。 */
+    UI_MOUSE_EVENT_ACTION_CANCEL = 13,
 };
 
 /**
@@ -742,7 +744,7 @@ int32_t OH_ArkUI_MouseEvent_GetMouseAction(const ArkUI_UIInputEvent* event);
 int32_t OH_ArkUI_PointerEvent_SetStopPropagation(const ArkUI_UIInputEvent* event, bool stopPropagation);
 
 /**
- * @brief Obtains the ID of device that triggers a key event.
+ * @brief Obtains the ID of device that triggers UI input event.
  *
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @return Returns the device ID.
@@ -751,9 +753,7 @@ int32_t OH_ArkUI_PointerEvent_SetStopPropagation(const ArkUI_UIInputEvent* event
 int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent* event);
 
 /**
- * @brief Obtains the pressed status of modifier keys from a key event.
- * The following modifier keys are supported: Ctrl, Alt, Shift, Fn. However, the <b>Fn</b> key on external keyboards
- * is not supported.
+ * @brief Obtains all keys that are pressed from UI input event. Only supports key events currently.
  *
  * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
  * @param pressedKeyCodes Array of all keys that are pressed. You need to allocate the memory space.
@@ -761,7 +761,7 @@ int32_t OH_ArkUI_UIInputEvent_GetDeviceId(const ArkUI_UIInputEvent* event);
  *               number of the keys pressed (when used as an output parameter).
  * @return return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
- *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} if the giving buffer is not enough.
+ *         Returns {@link ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH} if the giving buffer is not enough.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
  * @since 14
  */

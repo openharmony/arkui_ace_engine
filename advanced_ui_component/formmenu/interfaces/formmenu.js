@@ -23,9 +23,10 @@ const util = requireNapi('util');
 const tag = 'AddFormMenuItem::js::';
 
 async function querySnapshotAsync(want, componentId, uiContext) {
-  let compInfo = uiContext.getComponentUtils().getRectangleById(componentId);  
+  let compInfo = uiContext.getComponentUtils().getRectangleById(componentId); 
+  let imagePackageApi = null;
   try {
-    const imagePackageApi = image.createImagePacker();
+    imagePackageApi = image.createImagePacker();
     const packOpts = {
       format: 'image/webp',
       quality: 50,

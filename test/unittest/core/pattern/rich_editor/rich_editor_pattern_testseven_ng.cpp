@@ -24,9 +24,8 @@
 #include "test/mock/core/common/mock_udmf.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
 
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
 #include "core/components_ng/render/paragraph.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -34,12 +33,11 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-class RichEditorPatternTestSevenNg : public TestNG {
+class RichEditorPatternTestSevenNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
-    RefPtr<FrameNode> richEditorNode;
 };
 
 void RichEditorPatternTestSevenNg::SetUp()
@@ -49,20 +47,20 @@ void RichEditorPatternTestSevenNg::SetUp()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    richEditorNode = FrameNode::GetOrCreateFrameNode(
+    richEditorNode_ = FrameNode::GetOrCreateFrameNode(
         V2::RICH_EDITOR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->InitScrollablePattern();
     richEditorPattern->SetRichEditorController(AceType::MakeRefPtr<RichEditorController>());
     richEditorPattern->GetRichEditorController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
     richEditorPattern->CreateNodePaintMethod();
-    richEditorNode->GetGeometryNode()->SetContentSize({});
+    richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
 void RichEditorPatternTestSevenNg::TearDown()
 {
-    richEditorNode = nullptr;
+    richEditorNode_ = nullptr;
     MockParagraph::TearDown();
 }
 
@@ -78,8 +76,8 @@ void RichEditorPatternTestSevenNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorPatternTestSevenNg, GetTextBoxes003, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
@@ -112,8 +110,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, GetTextBoxes003, TestSize.Level1)
  */
 HWTEST_F(RichEditorPatternTestSevenNg, GetTextBoxes004, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     richEditorPattern->textForDisplay_ = u"testShowHandles";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
@@ -147,8 +145,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, GetTextBoxes004, TestSize.Level1)
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString001, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -185,8 +183,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString001, TestSize
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString002, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -224,8 +222,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString002, TestSize
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString003, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -260,8 +258,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString003, TestSize
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString004, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -297,8 +295,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString004, TestSize
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString005, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -333,8 +331,8 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString005, TestSize
  */
 HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString006, TestSize.Level1)
 {
-    ASSERT_NE(richEditorNode, nullptr);
-    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
     ASSERT_NE(event, nullptr);
@@ -361,5 +359,155 @@ HWTEST_F(RichEditorPatternTestSevenNg, HandleOnDragDropStyledString006, TestSize
     EXPECT_NE(event->GetData(), nullptr);
     auto host = richEditorPattern->GetHost();
     EXPECT_FALSE(host->isRestoreInfoUsed_);
+}
+
+/**
+ * @tc.name: FloatingCaretTest001
+ * @tc.desc: test FloatingCaret
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_1;
+    richEditorPattern->AddTextSpan(options);
+
+    CaretMetricsF caretMetricsBegin = { OffsetF(20.0f, 0), 50.0f };
+    CaretMetricsF caretMetricsEnd = { OffsetF(100.0f, 0), 50.0f };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 7,
+        .testCursorItems = { { 0, caretMetricsBegin, caretMetricsBegin}, {6, caretMetricsEnd, caretMetricsEnd} } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+
+    richEditorPattern->caretPosition_ = 0;
+    richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::DOWNSTREAM_FIRST;
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(0.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(0.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(20.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+
+    richEditorPattern->caretPosition_ = 6;
+    richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(120.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(120.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+}
+
+/**
+ * @tc.name: FloatingCaretTest002
+ * @tc.desc: test FloatingCaret
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorPattern->AddTextSpan(options);
+
+    CaretMetricsF caretMetricsLineEndUp = { OffsetF(100.0f, 0), 50.0f };
+    CaretMetricsF caretMetricsLineEndDown = { OffsetF(0, 50.0f), 50.0f };
+    CaretMetricsF caretMetricsInLine = { OffsetF(50.0f, 0), 50.0f };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 38,
+        .testCursorItems = { { 5, caretMetricsInLine, caretMetricsInLine},
+        { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+
+    richEditorPattern->caretPosition_ = 5;
+    richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(50.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(50.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(70.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(70.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+
+    richEditorPattern->caretPosition_ = 10;
+    richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(100.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_FALSE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(120.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.touchMoveOffset.has_value());
+    EXPECT_EQ(richEditorPattern->floatingCaretState_.touchMoveOffset.value(), Offset(120.0, 0));
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isFloatingCaretVisible);
+    EXPECT_TRUE(richEditorPattern->floatingCaretState_.isOriginCaretVisible);
+}
+
+/**
+ * @tc.name: FloatingCaretTest003
+ * @tc.desc: test FloatingCaret
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto paintMethod = AceType::DynamicCast<RichEditorPaintMethod>(richEditorPattern->CreateNodePaintMethod());
+    ASSERT_NE(paintMethod, nullptr);
+    auto richEditorOverlay = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
+    ASSERT_NE(richEditorOverlay, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<RenderContext> renderContext = RenderContext::Create();
+    auto paintProperty = richEditorPattern->CreatePaintProperty();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty);
+
+    auto focusHub = richEditorPattern->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->RequestFocusImmediately();
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorPattern->AddTextSpan(options);
+    CaretMetricsF caretMetricsLineEndUp = { OffsetF(100.0f, 0), 50.0f };
+    CaretMetricsF caretMetricsLineEndDown = { OffsetF(0, 50.0f), 50.0f };
+    TestParagraphItem paragraphItem = { .start = 0, .end = 38,
+        .testCursorItems = { { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
+    AddParagraph(paragraphItem);
+    richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+
+    richEditorPattern->caretPosition_ = 10;
+    richEditorPattern->floatingCaretState_.Reset();
+    richEditorPattern->caretAffinityPolicy_ = CaretAffinityPolicy::UPSTREAM_FIRST;
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(100.0, 0));
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(100.0f, 0));
+    EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
+    EXPECT_FALSE(richEditorOverlay->originCaretVisible_->Get());
+    richEditorPattern->SetCaretTouchMoveOffset(Offset(120.0, 0));
+    paintMethod->UpdateOverlayModifier(AceType::RawPtr(paintWrapper));
+    EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(120.0f, 0));
+    EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
+    EXPECT_TRUE(richEditorOverlay->originCaretVisible_->Get());
 }
 } // namespace OHOS::Ace::NG

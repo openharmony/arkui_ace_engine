@@ -99,6 +99,7 @@ public:
     void ConvertRectRelativeToParent(RectF& rect);
     void RevertRectRelativeToRoot(RectF& rect);
     OffsetF GetContainerModalOffset();
+    bool IsStopBackPress() const;
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);

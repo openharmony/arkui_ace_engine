@@ -21,6 +21,7 @@ import { LoadingProgressBootcamp } from '../displays/LoadingProgressBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
+import { AlphabetIndexerBootcamp } from './AlphabetIndexerBootcamp'
 import { BadgeBootcamp } from './BadgeBootcamp'
 import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
@@ -28,6 +29,7 @@ import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
+import { ProgressLockBootcamp } from './ProgressBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -40,13 +42,15 @@ export const displaysRoute: RouteGroup = {
     { name: 'loading-progress', label: '加载进度/LoadingProgress' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
+    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
     { name: 'badge', label: '信息标记/Badge' }
     { name: 'chipGroup', label: '操作块群组/ChipGroup' }
     { name: 'chip', label: '操作块/Chip' }
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
-    { name: 'dataPanel', label: '数据面板/DataPanel'}
+    { name: 'dataPanel', label: '数据面板/DataPanel'},
     { name: 'gauge', label: '数据量规图/gauge' },
+    { name: 'Progress', label: '进度条/Progress' },
   ]
 };
 
@@ -66,6 +70,8 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'displays/alphabetIndexer'){
+    AlphabetIndexerBootcamp({ title: route.label })
   } else if (name === 'displays/badge'){
     BadgeBootcamp({ title: route.label })
   } else if (name === 'displays/chipGroup'){
@@ -80,6 +86,8 @@ export function DisplaysDestination(name: string, route: Route) {
     DataPanelBootcamp({ title: route.label})
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
+  } else if (name === 'displays/Progress') {
+    ProgressLockBootcamp({ title: route.label })
   }
 }
 

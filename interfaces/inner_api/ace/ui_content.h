@@ -117,6 +117,8 @@ public:
     }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage, uint32_t focusWindowId) {};
     virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
 
@@ -473,6 +475,12 @@ public:
     }
 
     virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
+
+    virtual bool ProcessPointerEvent(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

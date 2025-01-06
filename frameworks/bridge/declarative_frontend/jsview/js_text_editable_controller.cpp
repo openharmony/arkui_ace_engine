@@ -221,10 +221,10 @@ void JSTextEditableController::GetSelection(const JSCallbackInfo& info)
     if (controller) {
         SelectionInfo selectInfo = controller->GetSelection();
         JSRef<JSObject> selectionObject = JSRef<JSObject>::New();
-        JSRef<JSArray> selectionArray = JSRef<JSArray>::New();
-        selectionArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
-        selectionArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[1])));
-        selectionObject->SetPropertyObject("selection", selectionArray);
+        selectionObject->SetPropertyObject("start",
+            JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
+        selectionObject->SetPropertyObject("end",
+            JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[1])));
         info.SetReturnValue(JSRef<JSVal>::Cast(selectionObject));
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetSelection: The JSTextEditableController is NULL");

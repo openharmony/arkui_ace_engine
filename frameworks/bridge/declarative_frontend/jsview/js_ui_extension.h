@@ -32,6 +32,7 @@ public:
     static void OnResult(const JSCallbackInfo& info);
     static void OnError(const JSCallbackInfo& info);
     static void OnTerminated(const JSCallbackInfo& info);
+    static void OnDrawReady(const JSCallbackInfo& info);
 private:
     static void ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
         std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap);

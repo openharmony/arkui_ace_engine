@@ -85,9 +85,11 @@ const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStra
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -136,6 +138,16 @@ void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& ch
     TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void ParseTextProperty(const JSRef<JSVal>& textValue, std::optional<std::u16string>& value, std::u16string& text)
+{
+    if (JSViewAbstract::ParseJsString(textValue, text)) {
+        value = text;
+    }
+    if (textValue->IsUndefined()) {
+        value = u"";
+    }
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> placeholderSrc;
@@ -161,13 +173,14 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
+            value = u"";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -211,13 +224,13 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -537,6 +550,36 @@ void JSTextField::SetFontSize(const JSCallbackInfo& info)
 void JSTextField::SetFontWeight(const std::string& value)
 {
     TextFieldModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+}
+
+void JSTextField::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        TextFieldModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        TextFieldModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSTextField::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale = 0.0;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        TextFieldModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    TextFieldModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSTextField::SetTextColor(const JSCallbackInfo& info)
@@ -1773,6 +1816,16 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    TextFieldModel::GetInstance()->SetHalfLeading(halfLeading);
+}
+
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -1937,4 +1990,25 @@ void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(EllipsisMode::TAIL);
+        return;
+    }
+    uint32_t index = args->ToNumber<uint32_t>();
+    if (index < ELLIPSIS_MODALS.size()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+    }
+}
+
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
 } // namespace OHOS::Ace::Framework
