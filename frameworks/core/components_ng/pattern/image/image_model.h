@@ -80,6 +80,7 @@ public:
         int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
     virtual void SetImageFill(const Color &color) = 0;
+    virtual void ResetImageFill() = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;

@@ -2048,6 +2048,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get RESET() {
+    return new ColorContent('RESET');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 

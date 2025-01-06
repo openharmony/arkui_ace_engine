@@ -2395,6 +2395,7 @@ struct ArkUIImageModifier {
     void (*setMatchTextDirection)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMatchTextDirection)(ArkUINodeHandle node);
     void (*setFillColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*resetImageFill)(ArkUINodeHandle node);
     void (*resetFillColor)(ArkUINodeHandle node);
     void (*setAlt)(ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
     void (*resetAlt)(ArkUINodeHandle node);
