@@ -6838,13 +6838,11 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
-    auto preCaretPosition = caretPosition_;
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     SetCaretTouchMoveOffset(offset);
     MoveCaretToContentRect();
-    StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
     SetMagnifierLocalOffset(offset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -6853,9 +6851,19 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
 void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
 {
     double moveDistance = 0.0;
-    if (GetPositionTypeFromLine() != PositionType::DEFAULT) {
-        auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    auto positionType = GetPositionTypeFromLine();
+    if (positionType == PositionType::DEFAULT) {
+        floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
+        return;
+    }
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    bool isCaretAtEmptyParagraph =
+        positionType == PositionType::PARAGRAPH_START && caretPosition_ == GetParagraphEndPosition(caretPosition_);
+    if (isCaretAtEmptyParagraph) {
         moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());
+    } else {
+        moveDistance = caretAffinityPolicy_ == CaretAffinityPolicy::DOWNSTREAM_FIRST
+                        ? caretOffset.GetX() - localOffset.GetX() : localOffset.GetX() - caretOffset.GetX();
     }
     floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
 }
