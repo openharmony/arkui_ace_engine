@@ -57,6 +57,7 @@ public:
     static void UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset);
     static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
         float width, float height);
+    static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
 };
 } // namespace OHOS::Ace::NG
 

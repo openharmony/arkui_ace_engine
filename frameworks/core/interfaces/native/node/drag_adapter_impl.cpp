@@ -35,7 +35,7 @@ static void DragActionConvert(
 {
     CHECK_NULL_VOID(dragAction);
     CHECK_NULL_VOID(internalDragAction);
-    internalDragAction->pointer = dragAction->pointerId;
+    internalDragAction->dragPointerEvent.pointerId = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
     auto* pixelMapTemp = reinterpret_cast<std::shared_ptr<void*>*>(dragAction->pixelmapArray);
     for (int index = 0; index < dragAction->size; index++) {
