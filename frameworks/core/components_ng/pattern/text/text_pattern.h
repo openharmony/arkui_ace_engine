@@ -860,6 +860,8 @@ protected:
     void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
 
+    void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
+
     bool enabled_ = true;
     Status status_ = Status::NONE;
     bool contChange_ = false;
@@ -959,7 +961,6 @@ private:
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
 
-    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();

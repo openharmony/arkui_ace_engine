@@ -96,7 +96,8 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 }
-void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent)
+void ServiceCollaborationMenuAceHelper::CreateHeaderText(
+    const std::string& value, const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& menuItemGroupNode)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "enter, text is %{public}s", value.c_str());
     auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -110,10 +111,9 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     CHECK_NULL_VOID(textNode);
     auto textProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textProperty);
-    textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    textProperty->UpdateFontSize(textTheme->GetMenuFontSize());
-    textProperty->UpdateFontWeight(FontWeight::REGULAR);
-    textProperty->UpdateTextColor(richTheme->GetMenuTitleColor());
+    textProperty->UpdateFontSize(Dimension(static_cast<float>(HEADER_TEXT_FONT_SIZE), DimensionUnit::FP));
+    textProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textProperty->UpdateTextColor(textTheme->GetSecondaryFontColor());
     textProperty->UpdateMaxLines(HEADER_TEXT_MAX_LINE);
     textProperty->UpdateEllipsisMode(EllipsisMode::TAIL);
     textProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -130,7 +130,11 @@ void ServiceCollaborationMenuAceHelper::CreateHeaderText(const std::string& valu
     margin.top = CalcLength(static_cast<float>(HEADER_MARGIN_TOP));
     margin.bottom = CalcLength(static_cast<float>(HEADER_MARGIN_BOTTOM));
     textProperty->UpdateMargin(margin);
-    textNode->MountToParent(parent);
+    textNode->MountToParent(row);
+    auto menuItemGroupPattern = menuItemGroupNode->GetPattern<MenuItemGroupPattern>();
+    CHECK_NULL_VOID(menuItemGroupPattern);
+    menuItemGroupPattern->AddHeaderContent(textNode);
+    menuItemGroupPattern->AddHeader(row);
     textNode->MarkModifyDone();
 }
 void ServiceCollaborationMenuAceHelper::CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent)
@@ -226,7 +230,7 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     paintProperty->UpdateStrokeWidth(Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::PX));
     paintProperty->UpdateStartMargin(Dimension(12.0f, DimensionUnit::VP));
     paintProperty->UpdateEndMargin(Dimension(12.0f, DimensionUnit::VP));
-    paintProperty->UpdateDividerColor(Color::GRAY);
+    paintProperty->UpdateDividerColor(menuTheme->GetLineColor());
     rowProperty->UpdateCalcMinSize(
         CalcSize(CalcLength(static_cast<float>(MENUITEM_WIDTH), DimensionUnit::VP),
         CalcLength(static_cast<float>(MENUITEM_HEIGHT), DimensionUnit::VP)));
@@ -340,6 +344,18 @@ void ServiceCollaborationMenuAceHelper::RemoveSubmenu(const RefPtr<FrameNode>& m
         }
     }
 }
+RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuNode()
+{
+    TAG_LOGI(AceLogTag::ACE_MENU, "enter");
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<InnerMenuPattern>(INNER_MENU_ID, V2::MENU_ETS_TAG, MenuType::MULTI_MENU));
+    CHECK_NULL_RETURN(menuNode, nullptr);
+    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuLayoutProperty, nullptr);
+    menuLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
+    menuNode->MarkModifyDone();
+    return menuNode;
+}
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
     uint32_t index, const std::string& deviceName)
 {
@@ -348,6 +364,10 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<MenuItemGroupPattern>();});
     CHECK_NULL_RETURN(menuItemGroupNode, nullptr);
+    auto menuItemGroupPaintPros = menuItemGroupNode->GetPaintProperty<MenuItemGroupPaintProperty>();
+    CHECK_NULL_RETURN(menuItemGroupPaintPros, nullptr);
+    menuItemGroupPaintPros->UpdateStrokeWidth(Dimension(static_cast<float>(0), DimensionUnit::VP));
+
     TAG_LOGI(AceLogTag::ACE_MENU, "DEVICE NAME IS %{public}s", deviceName.c_str());
     auto row = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -355,12 +375,12 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
     auto rowProperty = row->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowProperty, nullptr);
     MarginProperty margin;
-    margin.right = CalcLength(static_cast<float>(GROUP_MARGIN));
-    margin.left = CalcLength(static_cast<float>(GROUP_MARGIN));
+    margin.right = CalcLength(static_cast<float>(GROUP_MARGIN), DimensionUnit::VP);
+    margin.left = CalcLength(static_cast<float>(GROUP_MARGIN), DimensionUnit::VP);
     rowProperty->UpdateCalcMinSize(
-        CalcSize(CalcLength(static_cast<float>(GROUP_MIN_WIDTH)), std::nullopt));
+        CalcSize(CalcLength(static_cast<float>(GROUP_MIN_WIDTH), DimensionUnit::VP), std::nullopt));
+    
     if (index > 0) {
-        margin.top = CalcLength(static_cast<float>(BORDER_MARGIN_TOP));
         BorderWidthProperty borderWidth;
         borderWidth.topDimen = Dimension(static_cast<float>(BORDER_WIDTH), DimensionUnit::VP);
         BorderWidthProperty borderWidth1;
@@ -369,27 +389,33 @@ RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMenuItemGroupNode(
         auto context = row->GetRenderContext();
         CHECK_NULL_RETURN(context, nullptr);
         context->UpdateBorderWidth(borderWidth1);
+        auto menuPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_RETURN(menuPipeline, nullptr);
+        auto menuTheme = menuPipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_RETURN(menuTheme, nullptr);
         BorderColorProperty borderColorProperty;
-        borderColorProperty.SetColor(Color(BORDER_COLOR));
+        borderColorProperty.SetColor(menuTheme->GetLineColor());
         context->UpdateBorderColor(borderColorProperty);
     }
     rowProperty->UpdateMargin(margin);
-    CreateHeaderText(deviceName, row);
+    CreateHeaderText(deviceName, row, menuItemGroupNode);
+
     auto focusHub = row->GetFocusHub();
     focusHub->SetEnabled(false);
-    row->MountToParent(menuItemGroupNode);
+    menuItemGroupNode->MarkModifyDone();
+    menuItemGroupNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return menuItemGroupNode;
 }
 
 
-RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceMenuOnCol(
-    const RefPtr<FrameNode>& column, const RefPtr<FrameNode>& menuWrapper)
+RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateSubDeviceOutMenu(
+    const RefPtr<FrameNode>& innerMenu, const RefPtr<FrameNode>& menuWrapper)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "CreateSubDeviceMenuOnCol");
     MenuParam param;
     param.type = MenuType::SUB_MENU;
     param.isShowInSubWindow = false;
-    auto subMenu = MenuView::Create(column, SUB_MENU_ID, SUN_MENU_TAG, param);
+    auto subMenu = MenuView::Create(innerMenu, SUB_MENU_ID, SUN_MENU_TAG, param);
     auto inputHub = subMenu->GetOrCreateInputEventHub();
     CHECK_NULL_RETURN(inputHub, nullptr);
     auto mouseTask = [weakHelper = WeakClaim(this), weakMenuWrapper = WeakClaim(RawPtr(menuWrapper))](bool isHover) {
@@ -899,7 +925,8 @@ int32_t ServiceCollaborationAceCallback::OnDataCallback(uint32_t code, uint32_t 
     });
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, -1);
-    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan");
+    taskExecutor->PostTask(caretTwinklingTask, TaskExecutor::TaskType::UI, "ArkUIRichEditorAddImageSpan",
+                           PriorityType::VIP);
     return 0;
 }
 } // namespace OHOS::Ace::NG

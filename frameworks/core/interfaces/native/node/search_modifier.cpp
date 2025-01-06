@@ -890,6 +890,20 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, true);
+}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
@@ -992,6 +1006,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchMinFontScale = ResetSearchMinFontScale,
         .setSearchMaxFontScale = SetSearchMaxFontScale,
         .resetSearchMaxFontScale = ResetSearchMaxFontScale,
+        .setStopBackPress = SetStopBackPress,
+        .resetStopBackPress = ResetStopBackPress,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

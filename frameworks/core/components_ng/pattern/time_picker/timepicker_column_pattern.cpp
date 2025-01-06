@@ -55,6 +55,7 @@ constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
+const int32_t HALF_NUMBER = 2;
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -965,13 +966,30 @@ void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
     TimePickerScrollDirection dir = delta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
+    auto shiftThreshold = shiftDistance / HALF_NUMBER;
+    uint32_t currentEnterIndex = GetCurrentIndex();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = GetOptions();
+    auto totalOptionCount = options[host];
+    if (totalOptionCount == 0) {
+        return;
+    }
+    if (dir == TimePickerScrollDirection::UP) {
+        currentEnterIndex = (totalOptionCount + currentEnterIndex + 1) % totalOptionCount;
+    } else {
+        auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
+        currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
+    }
+    if (GreatOrEqual(std::abs(scrollDelta_), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+        SetEnterIndex(currentEnterIndex);
+        HandleEnterSelectedAreaEventCallback(true);
+    }
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
     CalcAlgorithmOffset(dir, distancePercent_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 

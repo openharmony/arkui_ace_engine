@@ -255,6 +255,40 @@ public:
         scrollStopEventCallback_ = value;
     }
 
+    std::string GetEnterText() const
+    {
+        return GetOption(GetEnterIndex());
+    }
+
+    uint32_t GetEnterIndex() const
+    {
+        return currentEnterIndex_;
+    }
+
+    void SetEnterIndex(uint32_t value)
+    {
+        if (value != currentEnterIndex_) {
+            currentEnterIndex_ = value;
+        }
+    }
+
+    void HandleEnterSelectedAreaEventCallback(bool refresh)
+    {
+        if (enterSelectedAreaEventCallback_) {
+            enterSelectedAreaEventCallback_(refresh);
+        }
+    }
+
+    const EventCallback& GetEnterSelectedAreaEventCallback() const
+    {
+        return enterSelectedAreaEventCallback_;
+    }
+
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value)
+    {
+        enterSelectedAreaEventCallback_ = value;
+    }
+
     void SetLocalDownDistance(float value)
     {
         localDownDistance_ = value;
@@ -484,6 +518,7 @@ private:
     bool useButtonFocusArea_ = false;
     EventCallback EventCallback_;
     EventCallback scrollStopEventCallback_;
+    EventCallback enterSelectedAreaEventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -544,6 +579,8 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
 
     bool isDisableTextStyleAnimation_ = false;
+
+    uint32_t currentEnterIndex_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

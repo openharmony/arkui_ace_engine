@@ -380,6 +380,12 @@
       OHOS::Ace::Kit::AbstractViewFactory::*;
       OHOS::Ace::Kit::BoxLayoutAlgorithm::*;
       OHOS::Ace::Kit::ResourceParser::*;
+      OHOS::Ace::Kit::ThemeFactory::*;
+      OHOS::Ace::Kit::ThemeStyle::*;
+      OHOS::Ace::Theme::*;
+      OHOS::Ace::NG::ListModelNG::*;
+      OHOS::Ace::NG::ListItemModelNG::*;
+      OHOS::Ace::NG::ScrollBarModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -418,6 +424,11 @@
       vtable?for?OHOS::Ace::NG::MovingPhotoLayoutProperty;
       vtable?for?OHOS::Ace::NG::MovingPhotoNode;
       vtable?for?OHOS::Ace::NG::TouchEventActuator;
+      vtable?for?OHOS::Ace::NG::IndexerModelNG;
+      vtable?for?OHOS::Ace::NG::SwiperModelNG;
+      vtable?for?OHOS::Ace::NG::ListModelNG;
+      vtable?for?OHOS::Ace::NG::ListItemModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -426,6 +437,13 @@
       VTT?for?OHOS::Ace::NG::LayoutProperty;
       VTT?for?OHOS::Ace::NG::LongPressRecognizer;
       VTT?for?OHOS::Ace::NG::TouchEventActuator;
+
+      OHOS::Ace::LinearColor::TRANSPARENT;
+
+      "OHOS::Ace::CardScope::CurrentId()";
+      "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
+      "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
+      "OHOS::Ace::Framework::JsiObject::JsiObject(panda::CopyableGlobal<panda::ObjectRef> const&)";
     };
   local:
     *;

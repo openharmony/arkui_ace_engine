@@ -104,6 +104,7 @@ public:
     virtual void SetEnablePreviewText(bool enablePreviewText) = 0;
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
 
 private:
     static std::unique_ptr<SearchModel> instance_;

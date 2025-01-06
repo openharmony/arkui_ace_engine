@@ -171,6 +171,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("onDidDelete", &JSSearch::OnDidDelete);
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
+    JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -225,6 +226,11 @@ void JSSearch::Create(const JSCallbackInfo& info)
             if (changeEventVal->IsFunction()) {
                 textValue = valueObj->GetProperty("value");
             }
+            if (ParseJsString(textValue, text)) {
+                key = text;
+            }
+        } else if (param->GetProperty("$value")->IsFunction()) {
+            changeEventVal = param->GetProperty("$value");
             if (ParseJsString(textValue, text)) {
                 key = text;
             }
@@ -1402,5 +1408,14 @@ void JSSearch::SetEnableHapticFeedback(const JSCallbackInfo& info)
         state = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetEnableHapticFeedback(state);
+}
+
+void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    SearchModel::GetInstance()->SetStopBackPress(isStopBackPress);
 }
 } // namespace OHOS::Ace::Framework

@@ -31,6 +31,11 @@ public:
     void FlushUpdateTask(const UpdateTask& task) override;
     void FinishUpdate(const WeakPtr<AceType>& viewNode, int32_t id,
         std::function<void(const UpdateTask&)>&& emplaceTaskFunc) override;
+    bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) override
+    {
+        /* not used here */
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace::Framework

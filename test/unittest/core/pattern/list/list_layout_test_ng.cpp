@@ -29,9 +29,6 @@ public:
     void UpdateDividerMap();
     void PaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber, bool isClip = false);
     void GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int32_t expectLineNumber);
-    AssertionResult IsExist(int32_t index);
-    AssertionResult IsExistAndActive(int32_t index);
-    AssertionResult IsExistAndInActive(int32_t index);
 };
 
 void ListLayoutTestNg::UpdateContentModifier()
@@ -86,36 +83,6 @@ void ListLayoutTestNg::GroupPaintDivider(RefPtr<PaintWrapper> paintWrapper, int3
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawLine(_, _)).Times(expectLineNumber); // DrawLine
     paintMethod->PaintDivider(AceType::RawPtr(paintWrapper), canvas);
-}
-
-AssertionResult ListLayoutTestNg::IsExist(int32_t index)
-{
-    if (GetChildFrameNode(frameNode_, index)) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure();
-}
-
-AssertionResult ListLayoutTestNg::IsExistAndActive(int32_t index)
-{
-    if (!GetChildFrameNode(frameNode_, index)) {
-        return AssertionFailure();
-    }
-    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure();
-}
-
-AssertionResult ListLayoutTestNg::IsExistAndInActive(int32_t index)
-{
-    if (!GetChildFrameNode(frameNode_, index)) {
-        return AssertionFailure();
-    }
-    if (GetChildFrameNode(frameNode_, index)->IsActive()) {
-        return AssertionFailure();
-    }
-    return AssertionSuccess();
 }
 
 /**
@@ -1158,6 +1125,100 @@ HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutDirectionTest01
+ * @tc.desc: Test LayoutDirection
+ */
+HWTEST_F(ListLayoutTestNg, LayoutDirectionTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create an List with the ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroups(4, V2::ListItemGroupStyle::NONE, 7);
+    CreateDone();
+    auto layoutWrapper = LayoutWrapperNode(frameNode_, frameNode_->GetGeometryNode(), layoutProperty_);
+    for (int32_t index = 0; index < frameNode_->GetChildren().size(); index++) {
+        auto child = GetChildFrameNode(frameNode_, index);
+        auto childWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(child, child->GetGeometryNode(), child->GetLayoutProperty());
+        layoutWrapper.AppendChild(childWrapper);
+    }
+    ViewStackProcessor::GetInstance()->Push(frameNode_);
+
+    /**
+     * @tc.steps: step2. scroll to the first item.
+     * @tc.expected: The start index of List is 1 and the start index of the ListItemGroup is 0.
+     */
+    ScrollToIndex(1, false, ScrollAlign::START);
+    auto startIndex = pattern_->GetStartIndex();
+    EXPECT_EQ(startIndex, 1);
+    auto groupWrapper = layoutWrapper.GetOrCreateChildByIndex(1);
+    ASSERT_NE(groupWrapper, nullptr);
+    auto groupHost = groupWrapper->GetHostNode();
+    ASSERT_NE(groupHost, nullptr);
+    auto groupPattern = groupHost->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 0);
+
+    /**
+     * @tc.steps: step3. Set the different target index and target index in group to test the
+     * LayoutDirectionForTargetIndex.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->preStartIndex_ = 1;
+    auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(1);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndexInGroup(6);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndexInGroup(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    /**
+     * @tc.steps: step4. test the LayoutDirectionForTargetIndex after executing the ScrollToItemInGroup.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
+     */
+    JumpToItemInGroup(1, 1, false, ScrollAlign::START);
+    startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 1);
+    layoutAlgorithm->SetTargetIndexInGroup(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
+}
+
+/**
  * @tc.name: ListItemGroupCreateForCardModeTest001
  * @tc.desc: Test the initialization of listItem in card mode.
  * @tc.type: FUNC
@@ -2153,12 +2214,12 @@ HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(4));
-    EXPECT_TRUE(IsExistAndInActive(5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
     // below cache
-    EXPECT_FALSE(IsExist(6));
+    EXPECT_FALSE(IsExist(frameNode_, 6));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2167,18 +2228,18 @@ HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
     ScrollTo(300.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(1));
-    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(4));
-    EXPECT_TRUE(IsExistAndActive(5));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 5));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(7));
-    EXPECT_TRUE(IsExistAndInActive(8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
     // below cache
-    EXPECT_FALSE(IsExist(9));
+    EXPECT_FALSE(IsExist(frameNode_, 9));
 }
 
 /**
@@ -2195,16 +2256,16 @@ HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(6));
-    EXPECT_TRUE(IsExistAndActive(7));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 7));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(8));
-    EXPECT_TRUE(IsExistAndInActive(9));
-    EXPECT_TRUE(IsExistAndInActive(10));
-    EXPECT_TRUE(IsExistAndInActive(11));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 11));
     // below cache
-    EXPECT_FALSE(IsExist(12));
-    EXPECT_FALSE(IsExist(13));
+    EXPECT_FALSE(IsExist(frameNode_, 12));
+    EXPECT_FALSE(IsExist(frameNode_, 13));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2213,26 +2274,26 @@ HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
     ScrollTo(300.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
-    EXPECT_FALSE(IsExist(1));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_FALSE(IsExist(frameNode_, 1));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(2));
-    EXPECT_TRUE(IsExistAndInActive(3));
-    EXPECT_TRUE(IsExistAndInActive(4));
-    EXPECT_TRUE(IsExistAndInActive(5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(8));
-    EXPECT_TRUE(IsExistAndActive(9));
-    EXPECT_TRUE(IsExistAndActive(10));
-    EXPECT_TRUE(IsExistAndActive(11));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 11));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(14));
-    EXPECT_TRUE(IsExistAndInActive(15));
-    EXPECT_TRUE(IsExistAndInActive(16));
-    EXPECT_TRUE(IsExistAndInActive(17));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 14));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 15));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 16));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 17));
     // below cache
-    EXPECT_FALSE(IsExist(18));
-    EXPECT_FALSE(IsExist(19));
+    EXPECT_FALSE(IsExist(frameNode_, 18));
+    EXPECT_FALSE(IsExist(frameNode_, 19));
 }
 
 /**
@@ -2248,12 +2309,12 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     CreateDone();
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // in view
-    EXPECT_TRUE(IsExistAndActive(1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(2));
-    EXPECT_TRUE(IsExistAndInActive(3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
     // below cache
-    EXPECT_FALSE(IsExist(4));
+    EXPECT_FALSE(IsExist(frameNode_, 4));
 
     /**
      * @tc.steps: step1. Scroll the List
@@ -2262,18 +2323,18 @@ HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
     ScrollTo(600.0f);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     // above cache
-    EXPECT_FALSE(IsExist(0));
+    EXPECT_FALSE(IsExist(frameNode_, 0));
     // above view
-    EXPECT_TRUE(IsExistAndInActive(1));
-    EXPECT_TRUE(IsExistAndInActive(2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
     // in view, change to active
-    EXPECT_TRUE(IsExistAndActive(3));
-    EXPECT_TRUE(IsExistAndActive(4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
     // below view
-    EXPECT_TRUE(IsExistAndInActive(5));
-    EXPECT_TRUE(IsExistAndInActive(6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
     // below cache
-    EXPECT_FALSE(IsExist(7));
+    EXPECT_FALSE(IsExist(frameNode_, 7));
 }
 
 /**

@@ -1042,13 +1042,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     RichEditorAbstractSpanResult span2;
     changeValue.originalSpans_.emplace_back(span2);
     RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    firstInfo.SetValue("test123\n");
+    firstInfo.SetValue(u"test123\n");
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     std::u16string originalStr;
     int32_t originalPos = 0;
-    int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
+    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
     EXPECT_NE(ret, nullptr);
@@ -1087,7 +1087,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan002, TestSize.Level1)
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = INIT_U16VALUE_3;
+    it->content = INIT_VALUE_3;
     it->position = 0;
     richEditorPattern->caretPosition_ = 1;
 
@@ -1477,7 +1477,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestS
     /**
      * @tc.steps: step2. add text span without setting style
      */
-    AddSpan(INIT_U16VALUE_2);
+    AddSpan(INIT_VALUE_2);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
     richEditorPattern->textSelector_.Update(0, 6);
     EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
@@ -1515,9 +1515,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestS
     /**
      * @tc.steps: step2. add different type span and select
      */
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     AddImageSpan();
-    AddSpan(INIT_U16VALUE_2);
+    AddSpan(INIT_VALUE_2);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
 
     richEditorPattern->textSelector_.Update(4, 10);

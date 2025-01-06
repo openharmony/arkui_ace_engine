@@ -60,6 +60,23 @@ constexpr float SPRING_ACCURACY = 0.1;
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
 
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr double ANGULAR_VELOCITY_FACTOR  = 532 / 360.0 * 0.013;
+constexpr float ANGULAR_VELOCITY_SLOW = 0.1f;
+constexpr float ANGULAR_VELOCITY_MEDIUM = 0.3f;
+constexpr float ANGULAR_VELOCITY_FAST = 0.8f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 3.24f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 3.39f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 3.08f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.90f;
+constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
+constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
+constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
+
+constexpr int32_t CROWN_EVENT_NUN_THRESH = 30;
+constexpr char CROWN_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
+constexpr char CROWN_VIBRATOR_STRONG[] = "watchhaptic.feedback.crown.impact";
+#endif
 } // namespace
 
 // Static Functions.
@@ -232,6 +249,174 @@ void Scrollable::SetOnActionCancel()
     panRecognizerNG_->SetOnActionCancel(actionCancel);
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void Scrollable::ListenDigitalCrownEvent(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto onCrownEvent = [weakScroll = AceType::WeakClaim(this), weakNode = AceType::WeakClaim(AceType::RawPtr(
+        frameNode))](const CrownEvent& event) -> bool {
+        auto scroll = weakScroll.Upgrade();
+        CHECK_NULL_RETURN(scroll, false);
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_RETURN(node, false);
+
+        auto centerOffset = node->GetGeometryNode()->GetContentRect().Center();
+        scroll->HandleCrownEvent(event, centerOffset);
+        return true;
+    };
+    focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+}
+
+double Scrollable::GetCrownRotatePx(const CrownEvent& event) const
+{
+    double velocity = std::abs(event.angularVelocity * ANGULAR_VELOCITY_FACTOR);
+    double px = 0.0;
+    if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_SLOW, 0.01f)) {  // very slow
+        px = (Dimension(DISPLAY_CONTROL_RATIO_VERY_SLOW, DimensionUnit::VP) * event.degree).ConvertToPx();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_MEDIUM, 0.01f)) {  // slow
+        px = (Dimension(DISPLAY_CONTROL_RATIO_SLOW, DimensionUnit::VP) * event.degree).ConvertToPx();
+    } else if (LessOrEqualCustomPrecision(velocity, ANGULAR_VELOCITY_FAST, 0.01f)) {  // medium
+        px = (Dimension(DISPLAY_CONTROL_RATIO_MEDIUM, DimensionUnit::VP) * event.degree).ConvertToPx();
+    } else {  // fast
+        px = (Dimension(DISPLAY_CONTROL_RATIO_FAST, DimensionUnit::VP) * event.degree).ConvertToPx();
+    }
+    switch (crownSensitivity_) {
+        case CrownSensitivity::LOW:
+            px *= CROWN_SENSITIVITY_LOW;
+            break;
+        case CrownSensitivity::MEDIUM:
+            px *= CROWN_SENSITIVITY_MEDIUM;
+            break;
+        case CrownSensitivity::HIGH:
+            px *= CROWN_SENSITIVITY_HIGH;
+            break;
+        default:
+            break;
+    }
+    return px;
+}
+
+void Scrollable::UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end)
+{
+    if (axis_ == Axis::VERTICAL) {
+        accumulativeCrownPx_ += Offset(0, mainDelta);
+    } else {
+        accumulativeCrownPx_ += Offset(mainDelta, 0);
+    }
+    crownVelocityTracker_.UpdateTrackerPoint(accumulativeCrownPx_.GetX(), accumulativeCrownPx_.GetY(), timeStamp, end);
+}
+
+void Scrollable::HandleCrownEvent(const CrownEvent& event, const OffsetF& center)
+{
+    DimensionOffset centerDimension(center);
+    Offset globalLocation(centerDimension.GetX().ConvertToPx(), centerDimension.GetY().ConvertToPx());
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::CROWN);
+    info.SetSourceTool(SourceTool::UNKNOWN);
+    info.SetGlobalLocation(globalLocation);
+    double mainDelta = GetCrownRotatePx(event);
+
+    switch (event.action) {
+        case CrownAction::BEGIN:
+            reachBoundary_ = false;
+            crownEventNum_ = 0;
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->BEGIN]");
+            HandleCrownActionBegin(event.timeStamp, mainDelta, info);
+            StartVibrateFeedback();
+            break;
+        case CrownAction::UPDATE:
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->UPDATE]");
+            HandleCrownActionUpdate(event.timeStamp, mainDelta, info);
+            StartVibrateFeedback();
+            break;
+        case CrownAction::END:
+            TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "-->END]");
+            HandleCrownActionEnd(event.timeStamp, mainDelta, info);
+            break;
+        default:
+            HandleCrownActionCancel(info);
+            break;
+    }
+}
+
+void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
+{
+    accumulativeCrownPx_.Reset();
+    crownVelocityTracker_.Reset();
+    UpdateCrownVelocity(timeStamp, mainDelta, false);
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
+    isDragging_ = true;
+    isCrownEventDragging_ = true;
+    HandleDragStart(info);
+}
+
+void Scrollable::HandleCrownActionUpdate(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
+{
+    UpdateCrownVelocity(timeStamp, mainDelta, false);
+    info.SetMainDelta(mainDelta);
+    info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
+    HandleDragUpdate(info);
+}
+
+void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDelta, GestureEvent& info)
+{
+    if (NearZero(mainDelta)) {
+        info.SetMainDelta(crownVelocityTracker_.GetMainAxisDeltaPos());
+        info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
+    } else {
+        UpdateCrownVelocity(timeStamp, mainDelta, true);
+        info.SetMainDelta(mainDelta);
+        info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
+    }
+    HandleDragEnd(info);
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
+        [info](GestureEventFunc& event) {
+            auto gestureInfo = info;
+            event(gestureInfo);
+        });
+    isDragging_ = false;
+    isCrownEventDragging_ = false;
+}
+
+void Scrollable::HandleCrownActionCancel(GestureEvent& info)
+{
+    if (!isDragging_) {
+        return;
+    }
+
+    if (dragCancelCallback_) {
+        dragCancelCallback_();
+    }
+    info.SetMainDelta(0);
+    info.SetMainVelocity(0);
+    HandleDragEnd(info);
+    std::for_each(panActionEndEvents_.begin(), panActionEndEvents_.end(),
+        [info](GestureEventFunc& event) {
+            auto gestureInfo = info;
+            event(gestureInfo);
+        });
+    isDragging_ = false;
+}
+
+void Scrollable::StartVibrateFeedback()
+{
+    if (!GetCrownEventDragging()) {
+        return;
+    }
+    crownEventNum_ = (reachBoundary_ ? 0 : (crownEventNum_ + 1));
+    if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+    } else if (reachBoundary_) {
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+    }
+}
+#endif
+
 void Scrollable::SetAxis(Axis axis)
 {
     axis_ = axis;
@@ -246,6 +431,9 @@ void Scrollable::SetAxis(Axis axis)
     if (panRecognizerNG_) {
         panRecognizerNG_->SetDirection(panDirection);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    crownVelocityTracker_.SetMainAxis(axis_);
+#endif
 }
 
 void Scrollable::HandleTouchDown()
@@ -631,6 +819,11 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity,
     float friction = sFriction_.value_or(frictionTmp);
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
+    if (fixScrollParamCallback_) {
+        fixScrollParamCallback_(mainPosition, initVelocity_, finalPosition_);
+        correctVelocity = initVelocity_;
+        currentVelocity_ = correctVelocity;
+    }
     currentPos_ = mainPosition;
     SnapAnimationOptions snapAnimationOptions = {
         .snapDelta = GetFinalPosition() - mainPosition,

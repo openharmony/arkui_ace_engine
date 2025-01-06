@@ -2224,4 +2224,14 @@ void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
 }
+
+void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress);
+}
+
+void TextFieldModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, frameNode);
+}
 } // namespace OHOS::Ace::NG

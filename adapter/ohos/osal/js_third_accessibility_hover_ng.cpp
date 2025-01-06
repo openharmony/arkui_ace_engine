@@ -343,6 +343,9 @@ struct DumpInfoArgument {
 
 bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
+    if (params.empty()) {
+        return false;
+    }
     argument.isDumpSimplify = params[0].compare("-simplify") == 0;
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {

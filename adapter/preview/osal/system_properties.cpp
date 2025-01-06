@@ -45,6 +45,8 @@ std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
@@ -98,6 +100,7 @@ bool SystemProperties::navigationBlurEnabled_ = true;
 bool SystemProperties::gridCacheEnabled_ = false;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 bool SystemProperties::faultInjectEnabled_ = false;
@@ -360,11 +363,6 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 }
 
 bool SystemProperties::IsNeedSymbol()
-{
-    return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
 {
     return true;
 }

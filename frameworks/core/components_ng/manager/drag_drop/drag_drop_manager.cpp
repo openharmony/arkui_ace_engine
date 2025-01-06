@@ -835,6 +835,7 @@ void DragDropManager::DoDragReset()
     isDragWithContextMenu_ = false;
     dampingOverflowCount_ = 0;
     isDragNodeNeedClean_ = false;
+    isAnyDraggableHit_ = false;
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
 }
 
@@ -1247,17 +1248,23 @@ void DragDropManager::FireOnDragEvent(
     if (isMouseDragged_ && !isDragWindowShow_) {
         return;
     }
+    UpdateDragCursorStyle(frameNode, event, pointerEvent.pointerEventId);
+}
+
+void DragDropManager::UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<OHOS::Ace::DragEvent>& event, const int32_t eventId)
+{
     if (event->GetResult() == DragRet::ENABLE_DROP) {
         if (event->GetDragBehavior() == DragBehavior::MOVE) {
-            UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
+            UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         } else {
-            UpdateDragStyle(DragCursorStyleCore::COPY, pointerEvent.pointerEventId);
+            UpdateDragStyle(DragCursorStyleCore::COPY, eventId);
         }
     } else if (event->GetResult() == DragRet::DISABLE_DROP) {
         // simplified specifications for drag cursor style, no longer showing forbidden drag cursor
-        UpdateDragStyle(DragCursorStyleCore::MOVE, pointerEvent.pointerEventId);
+        UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
     } else {
-        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), pointerEvent.pointerEventId, event->IsCapi());
+        UpdateDragAllowDrop(frameNode, event->GetDragBehavior(), eventId, event->IsCapi());
     }
 }
 
@@ -2360,5 +2367,35 @@ void DragDropManager::RequireSummaryIfNecessary(const DragPointerEvent& pointerE
         currentPullId_ = pointerEvent.pullId;
         RequireSummary();
     }
+}
+
+bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId)
+{
+    if (isAnyDraggableHit_) {
+        return true;
+    }
+
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto eventManager = pipelineContext->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, false);
+    auto touchTestResults = eventManager->touchTestResults_;
+    const auto iter = touchTestResults.find(pointId);
+    if (iter == touchTestResults.end() || iter->second.empty()) {
+        TAG_LOGI(AceLogTag::ACE_DRAG, "touch test result is empty.");
+        return false;
+    }
+    for (const auto& touchTestResult : iter->second) {
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(touchTestResult);
+        if (recognizer) {
+            continue;
+        }
+        auto node = touchTestResult->GetAttachedNode().Upgrade();
+        CHECK_NULL_RETURN(node, false);
+        if (IsUIExtensionComponent(node)) {
+            return true;
+        }
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

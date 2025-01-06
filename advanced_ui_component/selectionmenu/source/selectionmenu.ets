@@ -116,14 +116,14 @@ const defaultTheme: SelectionMenuTheme = {
   defaultSymbolTheme: {
     fontSize: `${SYMBOL_SIZE}vp`,
     fontColor: [$r('sys.color.ohos_id_color_primary')],
-    symbolCutIcon: new SymbolGlyphModifier($r("sys.symbol.cut")),
-    symbolCopyIcon: new SymbolGlyphModifier($r("sys.symbol.plus_square_on_square")),
-    symbolPasteIcon: new SymbolGlyphModifier($r("sys.symbol.plus_square_dashed_on_square")),
-    symbolSelectAllIcon: new SymbolGlyphModifier($r("sys.symbol.checkmark_square_on_square")),
-    symbolShareIcon: new SymbolGlyphModifier($r("sys.symbol.share")),
-    symbolTranslateIcon: new SymbolGlyphModifier($r("sys.symbol.translate_c2e")),
-    symbolSearchIcon: new SymbolGlyphModifier($r("sys.symbol.magnifyingglass")),
-    symbolArrowDownIcon: new SymbolGlyphModifier($r("sys.symbol.chevron_down")),
+    symbolCutIcon: new SymbolGlyphModifier($r('sys.symbol.cut')),
+    symbolCopyIcon: new SymbolGlyphModifier($r('sys.symbol.plus_square_on_square')),
+    symbolPasteIcon: new SymbolGlyphModifier($r('sys.symbol.plus_square_dashed_on_square')),
+    symbolSelectAllIcon: new SymbolGlyphModifier($r('sys.symbol.checkmark_square_on_square')),
+    symbolShareIcon: new SymbolGlyphModifier($r('sys.symbol.share')),
+    symbolTranslateIcon: new SymbolGlyphModifier($r('sys.symbol.translate_c2e')),
+    symbolSearchIcon: new SymbolGlyphModifier($r('sys.symbol.magnifyingglass')),
+    symbolArrowDownIcon: new SymbolGlyphModifier($r('sys.symbol.chevron_down')),
   },
 }
 
@@ -454,8 +454,8 @@ struct SelectionMenuComponent {
               MenuItem({
                 startIcon: this.theme.cutIcon,
                 symbolStartIcon: this.theme.defaultSymbolTheme.symbolCutIcon,
-                content: "剪切",
-                labelInfo: "Ctrl+X"
+                content: '剪切',
+                labelInfo: 'Ctrl+X'
               })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
@@ -478,8 +478,8 @@ struct SelectionMenuComponent {
               MenuItem({
                 startIcon: this.theme.copyIcon,
                 symbolStartIcon: this.theme.defaultSymbolTheme.symbolCopyIcon,
-                content: "复制",
-                labelInfo: "Ctrl+C"
+                content: '复制',
+                labelInfo: 'Ctrl+C'
               })
                 .enabled(this.cutAndCopyEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
@@ -500,8 +500,8 @@ struct SelectionMenuComponent {
               MenuItem({
                 startIcon: this.theme.pasteIcon,
                 symbolStartIcon: this.theme.defaultSymbolTheme.symbolPasteIcon,
-                content: "粘贴",
-                labelInfo: "Ctrl+V"
+                content: '粘贴',
+                labelInfo: 'Ctrl+V'
               })
                 .enabled(this.pasteEnable)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
@@ -522,8 +522,8 @@ struct SelectionMenuComponent {
               MenuItem({
                 startIcon: this.theme.selectAllIcon,
                 symbolStartIcon: this.theme.defaultSymbolTheme.symbolSelectAllIcon,
-                content: "全选",
-                labelInfo: "Ctrl+A"
+                content: '全选',
+                labelInfo: 'Ctrl+A'
               })
                 .visibility(this.visibilityValue)
                 .height(this.fontScale > MAX_FONT_STANDARD ? 'auto' : this.theme.buttonSize)
@@ -547,7 +547,7 @@ struct SelectionMenuComponent {
           if (this.controller && !this.showExpandedMenuOptions &&
           this.expandedMenuOptions && this.expandedMenuOptions.length > 0) {
             MenuItem({
-              content: "更多",
+              content: '更多',
               endIcon: this.theme.arrowDownIcon,
               symbolEndIcon: this.theme.defaultSymbolTheme.symbolArrowDownIcon
             })

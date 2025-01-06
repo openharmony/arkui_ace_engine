@@ -28,8 +28,14 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
   }
-  autoPlay(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, value);
+  autoPlay(autoPlay: boolean, options: AutoPlayOptions): this {
+    let arkAutoPlay = new ArkAutoPlay();
+    arkAutoPlay.autoPlay = autoPlay;
+
+    if (!isNull(options) && !isUndefined(options) && typeof options === 'object') {
+      arkAutoPlay.needStopWhenTouched = options.stopWhenTouched;
+    }
+    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, arkAutoPlay);
     return this;
   }
   interval(value: number): this {
@@ -663,17 +669,18 @@ class SwiperIntervalModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SwiperAutoPlayModifier extends ModifierWithKey<boolean> {
+class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
   static identity: Symbol = Symbol('swiperAutoPlay');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().swiper.resetSwiperAutoPlay(node);
     } else {
-      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
+      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value.autoPlay, this.value.needStopWhenTouched);
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
+      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {

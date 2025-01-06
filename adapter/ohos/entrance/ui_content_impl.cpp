@@ -982,7 +982,9 @@ void UIContentImpl::Initialize(
         return;
     }
     AddWatchSystemParameter();
-
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDrawReadyEventCallback();
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.
@@ -2527,6 +2529,48 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     }
     auto aceView = AceType::DynamicCast<Platform::AceViewOhos>(container->GetAceView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
+    return true;
+}
+
+bool UIContentImpl::ProcessPointerEvent(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+{
+    if (!ProcessPointerEvent(pointerEvent)) {
+        return false;
+    }
+    if (pointerEvent->GetButtonId() == MMI::PointerEvent::MOUSE_BUTTON_LEFT &&
+        pointerEvent->GetPointerAction() == MMI::PointerEvent::POINTER_ACTION_BUTTON_DOWN) {
+        auto container = Platform::AceContainer::GetContainer(instanceId_);
+        CHECK_NULL_RETURN(container, false);
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+        CHECK_NULL_RETURN(context, false);
+        auto task = [context, finallyCallback = callback]() {
+            CHECK_NULL_VOID(context);
+            CHECK_NULL_VOID(finallyCallback);
+            ContainerScope scope(context->GetInstanceId());
+            auto dragDropManager = context->GetDragDropManager();
+            CHECK_NULL_VOID(dragDropManager);
+            auto isAnyDraggableHit = dragDropManager->IsAnyDraggableHit(context, MOUSE_PRESS_LEFT + MOUSE_BASE_ID);
+            TAG_LOGI(AceLogTag::ACE_DRAG, "is any draggable node hit: %{public}d", isAnyDraggableHit);
+            dragDropManager->SetIsAnyDraggableHit(false);
+            finallyCallback(isAnyDraggableHit);
+        };
+
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            task();
+        } else {
+            taskExecutor->PostTask(
+                std::move(task), TaskExecutor::TaskType::UI, "ArkUIProcessPointerEvent", PriorityType::VIP);
+        }
+    } else {
+        CHECK_NULL_RETURN(callback, false);
+        callback(false);
+    }
     return true;
 }
 

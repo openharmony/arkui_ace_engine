@@ -94,7 +94,7 @@ void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAct
             InteractionInterface::GetInstance()->StopDrag(dropResult);
             InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragStop");
+        TaskExecutor::TaskType::UI, "ArkUIDragStop", PriorityType::VIP);
 }
 
 bool ConfirmCurPointerEventInfo(

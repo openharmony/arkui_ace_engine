@@ -20,7 +20,7 @@
 #include "gtest/gtest.h"
 
 #include "test/unittest/core/pattern/test_ng.h"
-
+#include "core/common/container.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 

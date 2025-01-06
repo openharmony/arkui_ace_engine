@@ -2014,6 +2014,26 @@ void OverlayManager::DismissPopup()
     HidePopup(dismissPopupId_, popupInfo);
 }
 
+PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& node)
+{
+    PopupInfo popupInfoError;
+    popupInfoError.popupNode = nullptr;
+    CHECK_NULL_RETURN(node, popupInfoError);
+    auto iter = popupMap_.begin();
+
+    while (iter != popupMap_.end()) {
+        auto popupInfo = (*iter).second;
+        CHECK_NULL_RETURN(popupInfo.popupNode, popupInfoError);
+        auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_RETURN(popupPattern, popupInfoError);
+        if (popupPattern->GetCustomNode() == node) {
+            return popupInfo;
+        }
+        iter++;
+    }
+    return popupInfoError;
+}
+
 void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
 {
     CHECK_NULL_VOID(menuWrapper);
@@ -2800,11 +2820,13 @@ void OverlayManager::ShowTimeDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show time dialog enter");
+#ifndef ARKUI_WEARABLE
     auto dialogNode = TimePickerDialogView::Show(dialogProps, settingData, buttonInfos, std::move(timePickerProperty),
         std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
+#endif
 }
 
 void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const TextPickerSettingData& settingData,
@@ -2813,6 +2835,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show text dialog enter");
+#ifndef ARKUI_WEARABLE
     auto dialogNode = TextPickerDialogView::Show(
         dialogProps, settingData, buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
@@ -2823,6 +2846,7 @@ void OverlayManager::ShowTextDialog(const DialogProperties& dialogProps, const T
         builder.SetType("TextPickerDialog").SetEventType(Recorder::EventType::DIALOG_SHOW);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
+#endif
 }
 
 void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, const CalendarSettingData& settingData,
@@ -2830,11 +2854,13 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
     std::map<std::string, NG::DialogCancelEvent> dialogLifeCycleEvent, const std::vector<ButtonInfo>& buttonInfos)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
+#ifndef ARKUI_WEARABLE
     auto dialogNode = CalendarDialogView::Show(dialogProps, settingData,
         buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
     RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
     BeforeShowDialog(dialogNode);
     OpenDialogAnimation(dialogNode);
+#endif
 }
 
 void OverlayManager::PopModalDialog(int32_t maskId)
@@ -5487,7 +5513,21 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_RETURN(rootNode, keyboardOffsetInfo);
     auto finalOffset = 0.0f;
-    if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, keyboardOffsetInfo);
+    if (safeAreaManager->IsAtomicService()) {
+        for (const auto& child : rootNode->GetChildren()) {
+            if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
+                continue;
+            }
+            auto childNd = AceType::DynamicCast<FrameNode>(rootNode);
+            CHECK_NULL_RETURN(childNd, keyboardOffsetInfo);
+            auto childGeo = childNd->GetGeometryNode();
+            CHECK_NULL_RETURN(childGeo, keyboardOffsetInfo);
+            pageHeight = childGeo->GetFrameSize().Height();
+            finalOffset = pageHeight - keyboardHeight;
+        }
+    } else if (rootNode->GetTag() == V2::STACK_ETS_TAG) {
         auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
         CHECK_NULL_RETURN(rootNd, keyboardOffsetInfo);
         auto rootGeo = rootNd->GetGeometryNode();
@@ -5518,18 +5558,7 @@ void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, 
     if (!customKeyboard) {
         return;
     }
-    ACE_LAYOUT_SCOPED_TRACE("BindKeyboard[targetId:%d]", targetId);
-    customKeyboard->MountToParent(rootNode);
-    rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    customKeyboardMap_[targetId] = customKeyboard;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "BindKeyboard targetId:%{public}d", targetId);
-    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
-        auto overlayManager = weak.Upgrade();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->PlayKeyboardTransition(customKeyboard, true);
-    });
+    MountCustomKeyboard(customKeyboard, targetId);
 }
 
 void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_t targetId)
@@ -5544,11 +5573,32 @@ void OverlayManager::BindKeyboardWithNode(const RefPtr<UINode>& keyboard, int32_
     if (!customKeyboard) {
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "BindKeyboardWithNode targetId:%{public}d", targetId);
-    customKeyboard->MountToParent(rootNode);
+    MountCustomKeyboard(customKeyboard, targetId);
+}
+
+void OverlayManager::MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId)
+{
+    auto rootNode = rootNodeWeak_.Upgrade();
+    CHECK_NULL_VOID(rootNode);
+    auto rootNd = AceType::DynamicCast<FrameNode>(rootNode);
+    CHECK_NULL_VOID(rootNd);
+    auto pipeline = rootNd->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    ACE_LAYOUT_SCOPED_TRACE("BindKeyboard[targetId:%d]", targetId);
+    if (safeAreaManager->IsAtomicService()) {
+        SetNodeBeforeAppbar(rootNode, customKeyboard);
+    } else {
+        customKeyboard->MountToParent(rootNode);
+    }
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
-    PlayKeyboardTransition(customKeyboard, true);
+    pipeline->AddAfterLayoutTask([weak = WeakClaim(this), customKeyboard] {
+        auto overlayManager = weak.Upgrade();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->PlayKeyboardTransition(customKeyboard, true);
+    });
 }
 
 void OverlayManager::CloseKeyboard(int32_t targetId)
