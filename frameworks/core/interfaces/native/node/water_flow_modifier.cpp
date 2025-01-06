@@ -726,8 +726,6 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .setScrollToIndex = SetScrollToIndex,
         .setWaterflowFooter = SetWaterflowFooter,
         .resetWaterflowFooter = ResetWaterflowFooter,
-        .setWaterFlowFlingSpeedLimit = SetWaterFlowFlingSpeedLimit,
-        .resetWaterFlowFlingSpeedLimit = ResetWaterFlowFlingSpeedLimit,
         .getScrollController = GetScrollController,
         .setWaterFlowScroller = SetWaterFlowScroller,
         .getWaterFlowLayoutMode = GetWaterFlowLayoutMode,
@@ -736,6 +734,8 @@ const ArkUIWaterFlowModifier* GetWaterFlowModifier()
         .resetWaterFlowSections = ResetWaterFlowSections,
         .setWaterFlowFadingEdge = SetWaterFlowFadingEdge,
         .resetWaterFlowFadingEdge = ResetWaterFlowFadingEdge,
+        .setOnWaterFlowScrollIndexCallBack = SetOnWaterFlowScrollIndexCallBack,
+        .resetOnWaterFlowScrollIndex = ResetOnWaterFlowScrollIndex,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -966,6 +966,18 @@ void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     WaterFlowModelNG::SetOnReachStart(frameNode, std::move(onReachStart));
+}
+
+void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
+    } else {
+        WaterFlowModelNG::SetOnScrollIndex(frameNode, nullptr);
+    }
 }
 
 void ResetOnWillScroll(ArkUINodeHandle node)

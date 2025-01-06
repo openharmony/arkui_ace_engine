@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "test/mock/core/common/mock_container.h"
 #include "text_input_base.h"
 
 namespace OHOS::Ace::NG {
@@ -1553,5 +1554,140 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc079, TestSize.Level1)
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->TriggerCustomKeyboardAvoid();
     EXPECT_EQ(keyboardScd->GetPattern<KeyboardPattern>()->safeHeight_, 3);
+}
+
+/**
+ * @tc.name: TextPatternFunc080
+ * @tc.desc: test TriggerAvoidOnCaretChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc080, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto keyboardFst = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto keyboardScd = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    ASSERT_NE(textFieldManager, nullptr);
+    textFieldManager->usingCustomKeyboardAvoid_ = true;
+    pattern->isCustomKeyboardAttached_ = true;
+    pattern->selectController_->caretInfo_.rect.SetRect(0.0f, -2.0f, 0.0f, 5.0f);
+    pattern->keyboardOverlay_ = AceType::MakeRefPtr<OverlayManager>(keyboardFst);
+    auto host = pattern->GetHost();
+    auto nodeId = host->GetId();
+    pattern->keyboardOverlay_->customKeyboardMap_.emplace(std::make_pair(nodeId, AceType::RawPtr(keyboardScd)));
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
+    textFieldManager->TriggerAvoidOnCaretChange();
+    EXPECT_EQ(keyboardScd->GetPattern<KeyboardPattern>()->safeHeight_, 0);
+}
+
+/**
+ * @tc.name: TextPatternFunc081
+ * @tc.desc: test SetClickPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc081, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    ASSERT_NE(textFieldManager, nullptr);
+    MockContainer::SetUp();
+    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    ASSERT_NE(element, nullptr);
+    element->tag_ = "Panel";
+    textFieldNode->SetParent(element);
+    Offset menuOffset(960, 1660);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
+    textFieldManager->SetClickPosition(menuOffset);
+    EXPECT_NE(textFieldManager->position_, menuOffset);
+}
+
+/**
+ * @tc.name: TextPatternFunc082
+ * @tc.desc: test SetClickPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc082, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    ASSERT_NE(textFieldManager, nullptr);
+    MockContainer::SetUp();
+    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    ASSERT_NE(element, nullptr);
+    element->tag_ = "SheetPage";
+    textFieldNode->SetParent(element);
+    Offset menuOffset(960, 0.0f);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
+    textFieldManager->SetClickPosition(menuOffset);
+    EXPECT_NE(textFieldManager->position_, menuOffset);
+}
+
+/**
+ * @tc.name: TextPatternFunc083
+ * @tc.desc: test SetClickPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc083, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    ASSERT_NE(textFieldManager, nullptr);
+    MockContainer::SetUp();
+    Offset menuOffset(-1.0f, 100);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
+    textFieldManager->SetClickPosition(menuOffset);
+    EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);
+}
+
+/**
+ * @tc.name: TextPatternFunc084
+ * @tc.desc: test SetClickPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc084, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto manager = pattern->GetHost()->GetContextRefPtr()->GetTextFieldManager();
+    auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(manager);
+    ASSERT_NE(textFieldManager, nullptr);
+    MockContainer::SetUp();
+    Offset menuOffset(960, 100);
+    textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
+    textFieldManager->SetClickPosition(menuOffset);
+    EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);
 }
 } // namespace OHOS::Ace

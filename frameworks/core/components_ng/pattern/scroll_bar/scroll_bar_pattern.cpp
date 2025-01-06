@@ -141,7 +141,7 @@ void ScrollBarPattern::SetInBarRegionCallback()
     scrollableEvent_->SetInBarRegionCallback([weak = AceType::WeakClaim(this)](const PointF& point, SourceType source) {
         auto scrollBarPattern = weak.Upgrade();
         CHECK_NULL_RETURN(scrollBarPattern, false);
-        if (!scrollBarPattern->HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (scrollBarPattern->UseInnerScrollBar()) {
             auto scrollBar = scrollBarPattern->scrollBar_;
             CHECK_NULL_RETURN(scrollBar, false);
             if (source == SourceType::MOUSE) {
@@ -163,8 +163,7 @@ void ScrollBarPattern::SetBarCollectTouchTargetCallback()
             ResponseLinkResult& responseLinkResult) {
             auto scrollBarPattern = weak.Upgrade();
             CHECK_NULL_VOID(scrollBarPattern);
-            if (!scrollBarPattern->HasChild() &&
-                Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            if (scrollBarPattern->UseInnerScrollBar()) {
                 auto scrollBar = scrollBarPattern->scrollBar_;
                 CHECK_NULL_VOID(scrollBar);
                 scrollBar->OnCollectTouchTarget(
@@ -222,7 +221,7 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     }
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+        scrollBar_ = CreateScrollBar();
         // set the scroll bar style
         if (GetAxis() == Axis::HORIZONTAL) {
             scrollBar_->SetPositionMode(PositionMode::BOTTOM);
@@ -305,7 +304,9 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
         pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source);
-        pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        if (source == SCROLL_FROM_START) {
+            pattern->scrollPositionCallback_(0.0, SCROLL_FROM_START);
+        }
         return true;
     };
     scrollBar_->SetScrollPositionCallback(std::move(scrollCallback));
@@ -366,7 +367,7 @@ bool ScrollBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         return false;
     }
     bool updateFlag = false;
-    if (!HasChild() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (UseInnerScrollBar()) {
         updateFlag = true;
     } else {
         auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
@@ -597,8 +598,7 @@ void ScrollBarPattern::StartDisappearAnimator()
         auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar);
         AnimationOption option;
-        if (!scrollBar->HasChild()
-            && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (scrollBar->UseInnerScrollBar()) {
             option.SetCurve(Curves::SHARP);
         } else {
             option.SetCurve(Curves::FRICTION);
@@ -628,8 +628,7 @@ void ScrollBarPattern::StopDisappearAnimator()
     if (disappearAnimation_) {
         AnimationUtils::StopAnimation(disappearAnimation_);
     }
-    if (!HasChild()
-        && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+    if (UseInnerScrollBar()) {
         AnimationOption option;
         option.SetCurve(Curves::SHARP);
         option.SetDuration(BAR_APPEAR_DURATION);
@@ -712,7 +711,7 @@ void ScrollBarPattern::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
-    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             GestureEvent info;

@@ -1531,13 +1531,13 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
     auto bundleName = frontend->GetBundleName();
     auto moduleName = frontend->GetModuleName();
     if (bundleName.empty() || moduleName.empty()) {
-        LOGI("Get bundleName(%{public}s) or moduleName(%{public}s) failed",
+        LOGW("Get bundleName(%{public}s) or moduleName(%{public}s) failed",
             bundleName.c_str(), moduleName.c_str());
         return false;
     }
 
     std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
-    LOGI("InnerExecuteDynamicAbc bundleName: %{public}s, moduleName: %{public}s, assetPath: %{public}s",
+    LOGD("InnerExecuteDynamicAbc bundleName: %{public}s, moduleName: %{public}s, assetPath: %{public}s",
         bundleName.c_str(), moduleName.c_str(), assetPath.c_str());
     panda::TryCatch trycatch(vm);
     panda::JSNApi::SetModuleInfo(const_cast<EcmaVM*>(vm), assetPath.c_str(), entryPoint);
@@ -1548,7 +1548,7 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
 
     const char binExt[] = ".abc";
     std::string urlName = entryPoint.substr(bundleName.size() + 1) + binExt;
-    LOGI("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
+    LOGD("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
     runtime->ExecuteJsBin(urlName);
     if (trycatch.HasCaught()) {
         engine->lastException_ = trycatch.GetException();
@@ -2813,7 +2813,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
         CHECK_NULL_VOID(executor);
         executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
     };
-    
+
     LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
 #endif
 }

@@ -47,6 +47,17 @@ RefPtr<NavigationGroupNode> CreateNavigationWithTitle(const RefPtr<MockNavigatio
     return AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
 }
 
+RefPtr<NavigationGroupNode> CreateNavigationWithToolBar(const RefPtr<MockNavigationStack>& stack,
+    NavigationToolbarOptions&& options, std::vector<NG::BarItem>&& toolBarItems)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack(stack);
+    navigationModel.SetToolbarConfiguration(std::move(toolBarItems));
+    navigationModel.SetToolbarOptions(std::move(options));
+    return AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+}
+
 RefPtr<NavDestinationGroupNode> CreateNavDestinationWithTitle(
     NavigationTitlebarOptions options, std::optional<std::string> mainTitle, std::optional<std::string> subTitle)
 {
@@ -55,6 +66,16 @@ RefPtr<NavDestinationGroupNode> CreateNavDestinationWithTitle(
     navdestinationModel.ParseCommonTitle(
         subTitle.has_value(), mainTitle.has_value(), subTitle.value_or(""), mainTitle.value_or(""));
     navdestinationModel.SetTitlebarOptions(std::move(options));
+    return AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
+}
+
+RefPtr<NavDestinationGroupNode> CreateNavDestinationWithToolBar(
+    NavigationToolbarOptions&& options, std::vector<NG::BarItem>&& toolBarItems)
+{
+    NavDestinationModelNG navdestinationModel;
+    navdestinationModel.Create();
+    navdestinationModel.SetToolbarConfiguration(std::move(toolBarItems));
+    navdestinationModel.SetToolBarOptions(std::move(options));
     return AceType::DynamicCast<NavDestinationGroupNode>(ViewStackProcessor::GetInstance()->Finish());
 }
 } // namespace
@@ -421,5 +442,830 @@ HWTEST_F(BarStyleTestNg, SafeAreaPaddingTest007, TestSize.Level1)
     ASSERT_NE(safeAreaPadding, nullptr);
     ASSERT_EQ(safeAreaPadding->top.value_or(CalcLength(0.0f)),
         CalcLength(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
+}
+
+/**
+ * @tc.name: titleBarStyleTest001
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STANDARD && !navBar.hasSubtitle)
+ *           Condition: navBar.titleBarStyle == BarStyle::STANDARD && !navBar.hasSubtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD and only mainTitle.
+     */
+    auto candidateBarStyle = BarStyle::STANDARD;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: titleBarStyleTest002
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STANDARD && navBar.hasSubtitle)
+ *           Condition: navBar.titleBarStyle == BarStyle::STANDARD && navBar.hasSubtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::STANDARD;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: titleBarStyleTest003
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STANDARD && !navDestination.hasSubtitle)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STANDARD && !navDestination.hasSubtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STANDARD and only mainTitle.
+     */
+    NavigationTitlebarOptions optionsOfNavDest;
+    optionsOfNavDest.brOptions.barStyle = BarStyle::STANDARD;
+    auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", std::nullopt);
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: titleBarStyleTest004
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STANDARD && navDestination.hasSubtitle)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STANDARD && navDestination.hasSubtitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STANDARD and only mainTitle.
+     */
+    NavigationTitlebarOptions optionsOfNavDest;
+    optionsOfNavDest.brOptions.barStyle = BarStyle::STANDARD;
+    auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "navDestinationSub");
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+
+/**
+ * @tc.name: titleBarStyleTest010
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STANDARD)
+ *           Condition: navBar.titleBarStyle == BarStyle::STANDARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::STANDARD;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto geometryNode = navBarContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_NE(marginFrameOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: titleBarStyleTest011
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STACK)
+ *           Condition: navBar.titleBarStyle == BarStyle::STACK
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STACK, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::STACK;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto geometryNode = navBarContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: titleBarStyleTest012
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::SAFE_AREA_PADDING)
+ *           Condition: navBar.titleBarStyle == BarStyle::SAFE_AREA_PADDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::SAFE_AREA_PADDING;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::FULL, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto geometryNode = navBarContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: titleBarStyleTest013
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STANDARD)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STANDARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STANDARD and only mainTitle.
+     */
+    NavigationTitlebarOptions optionsOfNavDest;
+    optionsOfNavDest.brOptions.barStyle = BarStyle::STANDARD;
+    auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "navDestinationSub");
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto geometryNode = navDestinationContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_NE(marginFrameOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: titleBarStyleTest014
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STACK)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STACK
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STACK and only mainTitle.
+     */
+    NavigationTitlebarOptions optionsOfNavDest;
+    optionsOfNavDest.brOptions.barStyle = BarStyle::STACK;
+    auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "navDestinationSub");
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto geometryNode = navDestinationContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), 0.0f);
+}
+
+/**
+ * @tc.name: titleBarStyleTest015
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STANDARD && navBar.titleMode == MINI && navBar.hasSubTitle)
+ *           Condition: navBar.titleBarStyle == BarStyle::STANDARD && navBar.titleMode == MINI && navBar.hasSubTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::STANDARD;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::MINI, "navigationMainTitle", "navigationSubTitle");
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto geometryNode = navBarContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+}
+
+/**
+ * @tc.name: titleBarStyleTest016
+ * @tc.desc: Branch: if (navBar.titleBarStyle == BarStyle::STANDARD && navBar.titleMode == MINI && !navBar.hasSubTitle)
+ *           Condition: navBar.titleBarStyle == BarStyle::STANDARD && navBar.titleMode == MINI && !navBar.hasSubTitle
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD, main title and subtitle.
+     */
+    auto candidateBarStyle = BarStyle::STANDARD;
+    auto mockNavPathStack = AceType::MakeRefPtr<MockNavigationStack>();
+    NavigationTitlebarOptions options;
+    options.brOptions.barStyle = candidateBarStyle;
+    auto navigationNode = CreateNavigationWithTitle(
+        mockNavPathStack, options, NavigationTitleMode::MINI, "navigationMainTitle", std::nullopt);
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto geometryNode = navBarContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+}
+
+/**
+ * @tc.name: titleBarStyleTest017
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STANDARD)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STANDARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, titleBarStyleTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STANDARD and only mainTitle.
+     */
+    NavigationTitlebarOptions optionsOfNavDest;
+    optionsOfNavDest.brOptions.barStyle = BarStyle::STANDARD;
+    auto navDestination = CreateNavDestinationWithTitle(optionsOfNavDest, "navDestination", "navDestinationSub");
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto geometryNode = navDestinationContent->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto marginFrameOffset = geometryNode->GetMarginFrameOffset();
+    /**
+     * @tc.steps: step4. property 'marginFrameOffset' should be ...
+     */
+    ASSERT_EQ(marginFrameOffset.GetY(), DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
+}
+
+/**
+ * @tc.name: toolBarStyleTest001
+ * @tc.desc: Branch: if (navBar.toolBarStyle == BarStyle::STANDARD)
+ *           Condition: navBar.toolBarStyle == BarStyle::STANDARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STANDARD, main title and subtitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navigationNode = CreateNavigationWithToolBar(
+        AceType::MakeRefPtr<MockNavigationStack>(), std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: toolBarStyleTest002
+ * @tc.desc: Branch: if (navBar.toolBarStyle == BarStyle::STACK)
+ *           Condition: navBar.toolBarStyle == BarStyle::STACK
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle STACK, main title and subtitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::STACK;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navigationNode = CreateNavigationWithToolBar(
+        AceType::MakeRefPtr<MockNavigationStack>(), std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: toolBarStyleTest003
+ * @tc.desc: Branch: if (navBar.toolBarStyle == BarStyle::SAFE_AREA_PADDING)
+ *           Condition: navBar.toolBarStyle == BarStyle::SAFE_AREA_PADDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navigation with barStyle SAFE_AREA_PADDING, main title and subtitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::SAFE_AREA_PADDING;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navigationNode = CreateNavigationWithToolBar(
+        AceType::MakeRefPtr<MockNavigationStack>(), std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navigationNode, nullptr);
+    /**
+     * @tc.steps: step2. run navigation's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->OnModifyDone();
+    auto layoutWrapper = navigationNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navBar = AceType::DynamicCast<NavBarNode>(navigationNode->GetNavBarNode());
+    ASSERT_NE(navBar, nullptr);
+    auto navBarContent = AceType::DynamicCast<FrameNode>(navBar->GetContentNode());
+    ASSERT_NE(navBarContent, nullptr);
+    auto contentLayoutProperty = navBarContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_NE(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: toolBarStyleTest
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STANDARD)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STANDARD
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STANDARD and only mainTitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::STANDARD;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navDestination = CreateNavDestinationWithToolBar(std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: toolBarStyleTest
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::STACK)
+ *           Condition: navDestination.titleBarStyle == BarStyle::STACK
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle STACK and only mainTitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::STACK;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navDestination = CreateNavDestinationWithToolBar(std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_EQ(safeAreaPadding, nullptr);
+}
+
+/**
+ * @tc.name: toolBarStyleTest
+ * @tc.desc: Branch: if (navDestination.titleBarStyle == BarStyle::SAFE_AREA_PADDING)
+ *           Condition: navDestination.titleBarStyle == BarStyle::SAFE_AREA_PADDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(BarStyleTestNg, toolBarStyleTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init model, create navdestination with barStyle SAFE_AREA_PADDING and only mainTitle.
+     */
+    NavigationToolbarOptions options;
+    options.brOptions.barStyle = BarStyle::SAFE_AREA_PADDING;
+    std::vector<BarItem> toolbarItems = { BarItem() };
+    auto navDestination = CreateNavDestinationWithToolBar(std::move(options), std::move(toolbarItems));
+    ASSERT_NE(navDestination, nullptr);
+    auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(navDestinationPattern, nullptr);
+    /**
+     * @tc.steps: step2. run navDestinationPattern's onModifyDone and test the layout property 'safeAreaPadding'.
+     */
+    navDestinationPattern->OnModifyDone();
+    auto layoutWrapper = navDestination->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
+    BarStyleTestNg::RunMeasureAndLayout(layoutWrapper);
+    /**
+     * @tc.steps: step3. check property 'safeAreaPadding'.
+     */
+    auto navDestinationContent = AceType::DynamicCast<FrameNode>(navDestination->GetContentNode());
+    ASSERT_NE(navDestinationContent, nullptr);
+    auto contentLayoutProperty = navDestinationContent->GetLayoutProperty();
+    ASSERT_NE(contentLayoutProperty, nullptr);
+    const auto& safeAreaPadding = contentLayoutProperty->GetSafeAreaPaddingProperty();
+    /**
+     * @tc.steps: step4. property 'safeAreaPadding' should be nullptr cause no SAFE_AREA_PADDING barStyle set.
+     */
+    ASSERT_NE(safeAreaPadding, nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -206,14 +206,14 @@ void ScrollableModelNG::SetEdgeEffect(
 
 void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
-        static_cast<DisplayMode>(displayNumber), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarMode, static_cast<DisplayMode>(displayNumber), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
-        StringUtils::StringToDimensionWithUnit(value), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -262,6 +262,14 @@ void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double max)
     pattern->SetMaxFlingVelocity(max);
 }
 
+float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return static_cast<float>(pattern->GetMaxFlingVelocity() / PipelineBase::GetCurrentDensity());
+}
+
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape));
@@ -273,7 +281,11 @@ ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_RETURN(paintProperty, ContentClipMode::CONTENT_ONLY);
     const auto& clip = paintProperty->GetContentClip();
-    return clip ? clip->first : paintProperty->GetDefaultContentClip();
+    const auto mode = clip ? clip->first : ContentClipMode::DEFAULT;
+    if (mode >= ContentClipMode::CUSTOM) {
+        return paintProperty->GetDefaultContentClip();
+    }
+    return mode;
 }
 
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
@@ -286,7 +298,7 @@ void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateContentClip({paintProperty->GetDefaultContentClip(), nullptr});
+    paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
 }
 
 bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)

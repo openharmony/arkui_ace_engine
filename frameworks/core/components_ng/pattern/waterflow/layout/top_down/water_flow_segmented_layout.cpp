@@ -56,6 +56,8 @@ void WaterFlowSegmentedLayout::Measure(LayoutWrapper* wrapper)
     info_->axis_ = axis_ = props_->GetAxis();
     auto [idealSize, matchChildren] = WaterFlowLayoutUtils::PreMeasureSelf(wrapper_, axis_);
 
+    GetExpandArea(props_, info_);
+
     Init(idealSize);
 
     mainSize_ = GetMainAxisSize(idealSize, axis_);
@@ -448,9 +450,10 @@ void WaterFlowSegmentedLayout::MeasureToTarget(int32_t targetIdx, std::optional<
 
 void WaterFlowSegmentedLayout::Fill(int32_t startIdx)
 {
+    const float expandMainSize = mainSize_ + info_->expandHeight_;
     for (int32_t i = startIdx; i < info_->childrenCount_; ++i) {
         auto position = WaterFlowLayoutUtils::GetItemPosition(info_, i, mainGaps_[info_->GetSegment(i)]);
-        if (GreatOrEqual(position.startMainPos + info_->currentOffset_, mainSize_)) {
+        if (GreatOrEqual(position.startMainPos + info_->currentOffset_, expandMainSize)) {
             break;
         }
         float itemHeight = WaterFlowLayoutUtils::GetUserDefHeight(sections_, info_->GetSegment(i), i);
@@ -504,7 +507,7 @@ void WaterFlowSegmentedLayout::LayoutItem(int32_t idx, float crossPos, const Off
     auto wrapper = wrapper_->GetChildByIndex(idx, isCache);
     CHECK_NULL_VOID(wrapper);
     wrapper->GetGeometryNode()->SetMarginFrameOffset(offset + padding);
-    if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
+    if (CheckNeedLayout(wrapper, isCache)) {
         wrapper->Layout();
     } else {
         wrapper->GetHostNode()->ForceSyncGeometryNode();

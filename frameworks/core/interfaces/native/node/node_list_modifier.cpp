@@ -592,14 +592,14 @@ void SetListFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
 }
 
 void ResetListFlingSpeedLimit(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
 }
 
 ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
@@ -760,8 +760,6 @@ const ArkUIListModifier* GetListModifier()
         .setListChildrenMainSize = SetListChildrenMainSize,
         .resetListChildrenMainSize = ResetListChildrenMainSize,
         .setListCloseAllSwipeActions = SetListCloseAllSwipeActions,
-        .setListFlingSpeedLimit = SetListFlingSpeedLimit,
-        .resetListFlingSpeedLimit = ResetListFlingSpeedLimit,
         .getInitialIndex = GetInitialIndex,
         .getlistDivider = GetlistDivider,
         .setInitialScroller = SetInitialScroller,

@@ -21,6 +21,7 @@ import { LoadingProgressBootcamp } from '../displays/LoadingProgressBootcamp';
 import { ScrollBarBootcamp } from './ScrollBarBootcamp';
 import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
+import { AlphabetIndexerBootcamp } from './AlphabetIndexerBootcamp'
 import { BadgeBootcamp } from './BadgeBootcamp'
 import { ChipGroupBootcamp } from './ChipGroupBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
@@ -50,6 +51,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'dataPanel', label: '数据面板/DataPanel' },
     { name: 'gauge', label: '数据量规图/gauge' },
     { name: 'textTimer', label: '文本计时器/TextTimer' }
+    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
     { name: 'badge', label: '信息标记/Badge' }
     { name: 'chipGroup', label: '操作块群组/ChipGroup' }
     { name: 'chip', label: '操作块/Chip' }
@@ -78,6 +80,9 @@ export function DisplaysDestination(name: string, route: Route) {
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
   } else if (name === 'displays/badge') {
+  } else if (name === 'displays/alphabetIndexer'){
+    AlphabetIndexerBootcamp({ title: route.label })
+  } else if (name === 'displays/badge'){
     BadgeBootcamp({ title: route.label })
   } else if (name === 'displays/chipGroup') {
     ChipGroupBootcamp({ title: route.label })

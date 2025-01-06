@@ -179,9 +179,7 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage005, TestSize.Level1)
     // Make IsComponentRecordEnable return false.
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().globalSwitch_[index] = true;
-    std::vector<bool> eventSwitch;
-    eventSwitch[index] = false;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = false;
     navigatorEventHub.NavigatePage();
 
     EXPECT_FALSE(Recorder::EventRecorder::Get().IsComponentRecordEnable());
@@ -199,9 +197,7 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage006, TestSize.Level1)
     // Make IsComponentRecordEnable return true.
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().globalSwitch_[index] = true;
-    std::vector<bool> eventSwitch;
-    eventSwitch[index] = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
     // Make host NULL.
     navigatorEventHub.AttachHost(nullptr);
     navigatorEventHub.NavigatePage();
@@ -222,9 +218,7 @@ HWTEST_F(NavigatorEventHubTestNg, NavigatePage007, TestSize.Level1)
     // Make IsComponentRecordEnable return true.
     auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
     Recorder::EventRecorder::Get().globalSwitch_[index] = true;
-    std::vector<bool> eventSwitch;
-    eventSwitch[index] = true;
-    Recorder::EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
     // Make host not NULL.
     auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     navigatorEventHub.AttachHost(frameNode);

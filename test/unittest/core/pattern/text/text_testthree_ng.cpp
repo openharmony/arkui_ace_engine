@@ -2230,4 +2230,103 @@ HWTEST_F(TextTestThreeNg, UpdateFontFeature001, TestSize.Level1)
     TextModelNG::SetFontFeature(frameNode, FONT_FEATURE_VALUE_1);
     EXPECT_EQ(textLayoutProperty->GetFontFeature(), FONT_FEATURE_VALUE_1);
 }
+
+/**
+ * @tc.name: UpdateMarqueeOptions001
+ * @tc.desc: test MarqueeOptions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, UpdateMarqueeOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE_W);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<TextLayoutProperty> textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(layoutProperty);
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect： expect property as expect.
+     */
+    TextMarqueeOptions options;
+    options.UpdateTextMarqueeStart(true);
+    options.UpdateTextMarqueeStep(3);
+    options.UpdateTextMarqueeLoop(3);
+    options.UpdateTextMarqueeDirection(MarqueeDirection::RIGHT);
+    options.UpdateTextMarqueeDelay(3);
+    options.UpdateTextMarqueeFadeout(false);
+    options.UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+    textModelNG.SetMarqueeOptions(options);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStart().value(), true);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStep().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeLoop().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDirection().value(), MarqueeDirection::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeDelay().value(), 3);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeFadeout().value(), false);
+    EXPECT_EQ(textLayoutProperty->GetTextMarqueeStartPolicy().value(), MarqueeStartPolicy::ON_FOCUS);
+}
+
+/**
+ * @tc.name: TextMarqueeEvents001
+ * @tc.desc: Test initializing focus and hover events for marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMarqueeEvents001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set the TextOverflow value to Marquee.
+     */
+    textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+    textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+
+    /**
+     * @tc.steps: step3. call OnModifyDone function.
+     * @tc.expected: The focus and hover events are initialized.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->focusInitialized_, true);
+    EXPECT_EQ(textPattern->hoverInitialized_, true);
+}
+
+/**
+ * @tc.name: TextMarqueeEvents002
+ * @tc.desc: Test initializing focus and hover events for marquee.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestThreeNg, TextMarqueeEvents002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. call OnModifyDone function.
+     * @tc.expected: The focus and hover events are initialized.
+     */
+    textPattern->OnModifyDone();
+    EXPECT_EQ(textPattern->focusInitialized_, false);
+    EXPECT_EQ(textPattern->hoverInitialized_, false);
+}
 } // namespace OHOS::Ace::NG

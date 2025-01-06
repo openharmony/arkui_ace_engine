@@ -116,6 +116,20 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    getWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.getWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
+
+    getSyncWithUniqueId(uniqueId, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let pixelmap = this.ohos_componentSnapshot.getSyncWithUniqueId(uniqueId, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return pixelmap;
+    }
 }
 
 class DragController {
@@ -482,6 +496,13 @@ class UIContext {
         let keyBoardAvoidMode = __KeyboardAvoid__.getKeyboardAvoid();
         __JSScopeUtil__.restoreInstanceId();
         return keyBoardAvoidMode;
+    }
+
+    dispatchKeyEvent(node, event) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let result = JSViewAbstract.dispatchKeyEvent(node, event);
+        __JSScopeUtil__.restoreInstanceId();
+        return result;
     }
 
     getAtomicServiceBar() {
@@ -1166,6 +1187,55 @@ class PromptAction {
         }
     }
 
+    openCustomDialogWithController(content, controller, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        let isDialogController = controller instanceof this.ohos_prompt.DialogController;
+        if (!isDialogController) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        if (typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.openCustomDialogWithController(content.getFrameNode(), controller);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let result_ = this.ohos_prompt.openCustomDialogWithController(content.getFrameNode(), controller, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    presentCustomDialog(builder, controller, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof controller === 'undefined' && typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.presentCustomDialog(builder);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        let isDialogController = controller instanceof this.ohos_prompt.DialogController;
+        if (!isDialogController) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        if (typeof options === 'undefined') {
+            let result_ = this.ohos_prompt.presentCustomDialog(builder, controller);
+            __JSScopeUtil__.restoreInstanceId();
+            return result_;
+        }
+        let result_ = this.ohos_prompt.presentCustomDialog(builder, controller, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
     updateCustomDialog(content, options) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         let result_ = this.ohos_prompt.updateCustomDialog(content.getFrameNode(), options);
@@ -1184,6 +1254,67 @@ class PromptAction {
             __JSScopeUtil__.restoreInstanceId();
             return result_;
         }
+    }
+
+    openPopup(content, target, options) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || target === null || target === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_;
+        if (argLength === 2) {
+            result_ = Context.openPopup(content.getNodePtr(), target);
+        } else {
+            result_ = Context.openPopup(content.getNodePtr(), target, options);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    updatePopup(content, options, partialUpdate) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength < 2 || argLength > 3 || content === null || content === undefined || options === null || options === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_
+        if (argLength === 2) {
+            result_ = Context.updatePopup(content.getNodePtr(), options);
+        } else {
+            result_ = Context.updatePopup(content.getNodePtr(), options, partialUpdate);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
+    }
+
+    closePopup(content) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let argLength = arguments.length;
+        const paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+        if (argLength !== 1 || content === null || content === undefined) {
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        let result_ = Context.closePopup(content.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return result_;
     }
 
     showActionMenu(options, callback) {

@@ -81,7 +81,9 @@
 #include "core/interfaces/native/node/polygon_modifier.h"
 #include "core/interfaces/native/node/polyline_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#endif
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/interfaces/native/node/rect_modifier.h"
@@ -144,7 +146,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
+    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -185,7 +191,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetPolylineModifier,
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
     #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
     #else
@@ -197,7 +207,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #else
         .getTabsModifier = nullptr,
     #endif
+    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
@@ -222,7 +236,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getListItemModifier = NodeModifier::GetListItemModifier,
         .getListModifier = NodeModifier::GetListModifier,
         .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetLoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetTextClockModifier,
         .getTextTimerModifier = NodeModifier::GetTextTimerModifier,
@@ -289,7 +307,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 12; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
         "ensure all fields are explicitly initialized");
@@ -316,7 +334,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
+    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
@@ -357,7 +379,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getPolylineModifier = NodeModifier::GetCJUIPolylineModifier,
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
     #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
     #else
@@ -369,7 +395,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     #else
         .getTabsModifier = nullptr,
     #endif
+    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
         .getMenuItemModifier = nullptr,
@@ -393,7 +423,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getListItemModifier = NodeModifier::GetCJUIListItemModifier,
         .getListModifier = NodeModifier::GetCJUIListModifier,
         .getListItemGroupModifier = NodeModifier::GetCJUIListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetCJUIQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetCJUILoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetCJUITextClockModifier,
         .getTextTimerModifier = NodeModifier::GetCJUITextTimerModifier,
@@ -463,7 +497,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 12; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
         "ensure all fields are explicitly initialized");

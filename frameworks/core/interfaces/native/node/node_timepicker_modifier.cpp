@@ -367,6 +367,27 @@ ArkUI_Int32 GetTimepickerUseMilitaryTime(ArkUINodeHandle node)
     return TimePickerModelNG::getTimepickerUseMilitaryTime(frameNode);
 }
 
+void SetTimepickerEnableCascade(ArkUINodeHandle node, int isEnableCascade)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, isEnableCascade);
+}
+
+void ResetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetEnableCascade(frameNode, false);
+}
+
+ArkUI_Int32 GetTimepickerEnableCascade(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return TimePickerModelNG::getTimepickerEnableCascade(frameNode);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -398,6 +419,9 @@ const ArkUITimepickerModifier* GetTimepickerModifier()
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
         .setTimepickerEnableHapticFeedback = SetTimepickerEnableHapticFeedback,
         .resetTimepickerEnableHapticFeedback = ResetTimepickerEnableHapticFeedback,
+        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
+        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
+        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -437,6 +461,9 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .resetTimepickerLoop = ResetTimepickerLoop,
         .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
+        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
+        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
+        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
