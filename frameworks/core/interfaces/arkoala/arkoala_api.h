@@ -3050,6 +3050,9 @@ struct ArkUIScrollableModifier {
     ArkUI_Float32 (*getFlingSpeedLimit)(ArkUINodeHandle node);
     void (*setFlingSpeedLimit)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetFlingSpeedLimit)(ArkUINodeHandle node);
+    void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetBackToTop)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getBackToTop)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {
