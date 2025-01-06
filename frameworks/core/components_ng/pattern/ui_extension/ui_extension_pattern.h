@@ -98,6 +98,9 @@ public:
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
+    void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
+    void OnWindowSceneVisibleChange(bool visible);
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
@@ -292,6 +295,7 @@ private:
     bool isFoldStatusChanged_ = false;
     bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
+    WeakPtr<Pattern> weakSystemWindowScene_;
     // Whether to send the focus to the UIExtension
     // No multi-threading problem due to run js thread
     bool canFocusSendToUIExtension_ = true;

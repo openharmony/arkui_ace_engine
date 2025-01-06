@@ -482,7 +482,11 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
     CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
     auto hostSession = hostPattern->GetSession();
     CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
-    return hostSession->GetPersistentId();
+    int32_t windowSceneId = hostSession->GetPersistentId();
+    if (windowSceneId != INVALID_WINDOW_ID) {
+        pattern->RegisterWindowSceneVisibleChangeCallback(hostPattern);
+    }
+    return windowSceneId;
 }
 
 void SessionWrapperImpl::NotifyForeground()
