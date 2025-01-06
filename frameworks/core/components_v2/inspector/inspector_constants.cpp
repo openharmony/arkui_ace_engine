@@ -74,6 +74,8 @@ const char JS_SYNTAX_ITEM_ETS_TAG[] = "SyntaxItem";
 const char JS_REPEAT_ETS_TAG[] = "Repeat";
 // js if else node
 const char JS_IF_ELSE_ETS_TAG[] = "IfElse";
+// js with theme node
+const char JS_WITH_THEME_ETS_TAG[] = "WithTheme";
 // js node slot
 const char JS_NODE_SLOT_ETS_TAG[] = "NodeSlot";
 
@@ -613,4 +615,20 @@ const char MOVING_PHOTO_ETS_TAG[] = "MovingPhoto";
 
 // CustomSpanNode
 const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
+
+// LinearIndicator
+const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
+const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
+
+// ArcList
+const char ARC_LIST_COMPONENT_TAG[] = "ArcListComponent";
+const char ARC_LIST_ETS_TAG[] = "ArcList";
+
+// ArcListItem
+const char ARC_LIST_ITEM_COMPONENT_TAG[] = "ArcListItemComponent";
+const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
+
+// ArcScrollBar
+const char ARC_SCROLL_BAR_COMPONENT_TAG[] = "ArcScrollBarComponent";
+const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
 } // namespace OHOS::Ace::V2

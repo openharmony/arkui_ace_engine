@@ -95,6 +95,23 @@ void AceViewOhos::TransformHintChanged(const RefPtr<AceViewOhos>& view, uint32_t
     view->NotifyTransformHintChanged(transform);
 }
 
+void AceViewOhos::HandleMouseEvent(const RefPtr<AceViewOhos>& view,
+    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
+    int32_t pointerAction, bool isInjected, int32_t toolType)
+{
+    if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
+        (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
+            pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
+        (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
+        view->ProcessAxisEvent(pointerEvent, node, isInjected);
+    } else {
+        view->ProcessDragEvent(pointerEvent, node);
+        view->ProcessMouseEvent(pointerEvent, node, isInjected);
+    }
+}
+
 void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
     const std::shared_ptr<MMI::PointerEvent>& pointerEvent, const RefPtr<OHOS::Ace::NG::FrameNode>& node,
     const std::function<void()>& callback, bool isInjected)
@@ -133,17 +150,11 @@ void AceViewOhos::DispatchTouchEvent(const RefPtr<AceViewOhos>& view,
             return;
         }
         // mouse event
-        if ((pointerAction >= MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN &&
-                pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) ||
-            (pointerAction >= MMI::PointerEvent::POINTER_ACTION_ROTATE_BEGIN &&
-                pointerAction <= MMI::PointerEvent::POINTER_ACTION_ROTATE_END) ||
-            (toolType == MMI::PointerEvent::TOOL_TYPE_TOUCHPAD &&
-                pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL)) {
-            view->ProcessAxisEvent(pointerEvent, node, isInjected);
-        } else {
-            view->ProcessDragEvent(pointerEvent, node);
-            view->ProcessMouseEvent(pointerEvent, node, isInjected);
-        }
+        HandleMouseEvent(view, pointerEvent, node, pointerAction, isInjected, toolType);
+#ifdef SUPPORT_DIGITAL_CROWN
+    } else if (pointerEvent->GetSourceType() == MMI::PointerEvent::SOURCE_TYPE_CROWN) {
+        view->ProcessDigitalCrownEvent(pointerEvent, isInjected);
+#endif
     } else {
         // touch event
         view->ProcessDragEvent(pointerEvent, node);
@@ -263,6 +274,14 @@ void AceViewOhos::RegisterNonPointerEventCallback(NonPointerEventCallback&& call
     ACE_DCHECK(callback);
     nonPointerEventCallback_ = std::move(callback);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void AceViewOhos::RegisterCrownEventCallback(CrownEventCallback&& callback)
+{
+    ACE_DCHECK(callback);
+    crownEventCallback_ = std::move(callback);
+}
+#endif
 
 void AceViewOhos::RegisterMouseEventCallback(MouseEventCallback&& callback)
 {
@@ -424,7 +443,7 @@ bool AceViewOhos::ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent
     KeyEvent event;
     ConvertKeyEvent(keyEvent, event);
     event.isPreIme = isPreIme;
-    return nonPointerEventCallback_(event);
+    return nonPointerEventCallback_(event, nullptr);
 }
 
 bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
@@ -432,8 +451,33 @@ bool AceViewOhos::ProcessFocusAxisEvent(const std::shared_ptr<MMI::PointerEvent>
     CHECK_NULL_RETURN(nonPointerEventCallback_, false);
     NG::FocusAxisEvent event;
     ConvertFocusAxisEvent(pointerEvent, event);
-    return nonPointerEventCallback_(event);
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.time.time_since_epoch()).count(),
+            enabled);
+    };
+    return nonPointerEventCallback_(event, std::move(markProcess));
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool AceViewOhos::ProcessDigitalCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    bool isInjected)
+{
+    CrownEvent event;
+    ConvertCrownEvent(pointerEvent, event);
+    event.isInjected = isInjected;
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "crown event: action:%{public}d, AV:%{public}f, degree:%{public}f",
+        event.action, event.angularVelocity, event.degree);
+
+    auto markProcess = [event, enabled = pointerEvent->IsMarkEnabled()]() {
+        MMI::InputManager::GetInstance()->MarkProcessed(event.touchEventId,
+            std::chrono::duration_cast<std::chrono::microseconds>(event.timeStamp.time_since_epoch()).count(),
+            enabled);
+    };
+    CHECK_NULL_RETURN(crownEventCallback_, false);
+    return crownEventCallback_(event, markProcess);
+}
+#endif
 
 const void* AceViewOhos::GetNativeWindowById(uint64_t textureId)
 {

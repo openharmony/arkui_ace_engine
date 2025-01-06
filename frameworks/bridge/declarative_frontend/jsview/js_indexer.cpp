@@ -85,7 +85,17 @@ void JSIndexer::ParseIndexerSelectedObject(
     }
 }
 
+void JSIndexer::CreateArc(const JSCallbackInfo& args)
+{
+    Create(args, true);
+}
+
 void JSIndexer::Create(const JSCallbackInfo& args)
+{
+    Create(args, false);
+}
+
+void JSIndexer::Create(const JSCallbackInfo& args, bool isArc)
 {
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
@@ -109,15 +119,17 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
+        JSRef<JSVal> changeEventVal = paramObj->GetProperty("$selected");
+        ParseIndexerSelectedObject(args, changeEventVal);
     } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
         if (selectedValueProperty->IsNumber()) {
             selectedVal = selectedValueProperty->ToNumber<int32_t>();
         }
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
         JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
         if (!changeEventVal.IsEmpty()) {
@@ -129,7 +141,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
 
         args.ReturnSelf();
     } else {
-        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal, isArc);
         JSIndexerTheme::ApplyTheme();
     }
 }
@@ -349,15 +361,23 @@ void JSIndexer::SetAlignStyle(const JSCallbackInfo& args)
 
 void JSIndexer::SetSelected(const JSCallbackInfo& args)
 {
-    if (args.Length() >= 1) {
-        int32_t selected = 0;
-        if (ParseJsInteger<int32_t>(args[0], selected)) {
-            IndexerModel::GetInstance()->SetSelected(selected);
-        }
-        if (args.Length() > 1 && args[1]->IsFunction()) {
-            ParseIndexerSelectedObject(args, args[1], true);
-        }
+    if (args.Length() < 1) {
+        return;
     }
+    int32_t selected = 0;
+    auto selectedVal = args[0];
+    JSRef<JSVal> changeEventVal;
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (args.Length() > 1) {
+        changeEventVal = args[1];
+    }
+    if (ParseJsInteger<int32_t>(selectedVal, selected)) {
+        IndexerModel::GetInstance()->SetSelected(selected);
+    }
+    ParseIndexerSelectedObject(args, changeEventVal, true);
 }
 
 void JSIndexer::SetPopupPosition(const JSCallbackInfo& args)
@@ -553,6 +573,7 @@ void JSIndexer::JSBind(BindingTarget globalObj)
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSIndexer>::Declare("AlphabetIndexer");
     JSClass<JSIndexer>::StaticMethod("create", &JSIndexer::Create);
+    JSClass<JSIndexer>::StaticMethod("createArc", &JSIndexer::CreateArc);
     // API7 onSelected deprecated
     JSClass<JSIndexer>::StaticMethod("onSelected", &JSIndexer::JsOnSelected);
     JSClass<JSIndexer>::StaticMethod("onSelect", &JSIndexer::JsOnSelected);

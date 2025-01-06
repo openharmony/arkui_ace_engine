@@ -63,5 +63,11 @@ void RepeatVirtualScrollModelNG::OnMove(std::function<void(int32_t, int32_t)>&& 
     node->SetOnMove(std::move(onMove));
 }
 
-
+void RepeatVirtualScrollModelNG::SetCreateByTemplate(bool isCreatedByTemplate)
+{
+    auto childOfRepeat = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (childOfRepeat) {
+        childOfRepeat->SetAllowReusableV2Descendant(!isCreatedByTemplate);
+    }
+}
 } // namespace OHOS::Ace::NG

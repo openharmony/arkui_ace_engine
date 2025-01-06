@@ -125,6 +125,9 @@ float SliderLayoutAlgorithm::CalculateSliderWidth(
     auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
     auto blockHotWidth = direction == Axis::HORIZONTAL ? blockHotSize_.Height() : blockHotSize_.Width();
     auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
+    if (mode == SliderModel::SliderMode::NONE || mode == SliderModel::SliderMode::OUTSET) {
+        sliderWidth = static_cast<float>(theme->GetMeasureContentOutsetWidth().ConvertToPx());
+    }
     sliderWidth = std::max(sliderWidth, trackThickness_);
     if (mode == SliderModel::SliderMode::OUTSET) {
         sliderWidth = std::max(sliderWidth, blockHotWidth);

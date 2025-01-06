@@ -310,6 +310,12 @@ void NavigationPattern::OnModifyDone()
 
     auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto curNavBarPosition = layoutProperty->GetNavBarPositionValue(NavBarPosition::START);
+    if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition) {
+        MarkAllNavDestinationDirtyIfNeeded(hostNode);
+    }
+    preNavBarPosition_ = curNavBarPosition;
+
     auto&& opts = layoutProperty->GetSafeAreaExpandOpts();
     if (opts) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Navigation SafArea expand as %{public}s", opts->ToString().c_str());
@@ -1115,7 +1121,7 @@ void NavigationPattern::FireNavigationChange(const RefPtr<UINode>& node, bool is
 void NavigationPattern::FireNavigationLifecycleChange(const RefPtr<UINode>& node, NavDestinationLifecycle lifecycle)
 {
     CHECK_NULL_VOID(node);
-    const auto& children = node->GetChildren();
+    const auto& children = node->GetChildren(true);
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
         auto navigation = AceType::DynamicCast<NavigationGroupNode>(child);
@@ -1389,20 +1395,11 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     CHECK_NULL_VOID(eventHub);
     auto currentNavigationMode = GetNavigationMode();
 
+    auto lastStandardIndex = hostNode->GetLastStandardIndex();
     if (modeChange) {
-        if (currentNavigationMode == NavigationMode::SPLIT) {
-            if (layoutProperty->GetHideNavBarValue(false)) {
-                eventHub->FireNavBarStateChangeEvent(false);
-            } else {
-                eventHub->FireNavBarStateChangeEvent(true);
-            }
-        } else {
-            if (navigationStack_->Empty() && !layoutProperty->GetHideNavBarValue(false)) {
-                eventHub->FireNavBarStateChangeEvent(true);
-            } else {
-                eventHub->FireNavBarStateChangeEvent(false);
-            }
-        }
+        bool navbarIsHidden = (currentNavigationMode == NavigationMode::STACK && lastStandardIndex >= 0) ||
+                              layoutProperty->GetHideNavBar().value_or(false);
+        eventHub->FireNavBarStateChangeEvent(!navbarIsHidden);
         SetNavBarVisibilityChange(false);
         return;
     }
@@ -1418,7 +1415,8 @@ void NavigationPattern::OnNavBarStateChange(bool modeChange)
     }
 
     if (currentNavigationMode == NavigationMode::STACK) {
-        eventHub->FireNavBarStateChangeEvent(navigationStack_->Empty());
+        bool navbarIsHidden = (lastStandardIndex >= 0) || layoutProperty->GetHideNavBar().value_or(false);
+        eventHub->FireNavBarStateChangeEvent(!navbarIsHidden);
     }
 }
 
@@ -1497,7 +1495,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 auto navDestinationFocusHub = navDestinationNode->GetFocusHub();
                 CHECK_NULL_VOID(navDestinationFocusHub);
                 auto defaultFocusHub = navDestinationFocusHub->GetChildFocusNodeByType(FocusNodeType::DEFAULT);
-                if (!defaultFocusHub && navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
+                if (!defaultFocusHub && navDestinationNode->GetChildren(true).size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
                     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
                     CHECK_NULL_VOID(titleBarNode);
@@ -1521,6 +1519,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
     UpdateTitleModeChangeEventHub(hostNode);
+    FireNavBarWidthChangeEvent(dirty);
     AddDragBarHotZoneRect();
     AddDividerHotZoneRect();
     ifNeedInit_ = false;
@@ -1602,6 +1601,36 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
         }
     }
     return true;
+}
+
+void NavigationPattern::FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto frameWidth = frameSize.Width();
+    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    auto userSetDimensionUnit = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Unit();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithm);
+    auto navigationLayoutAlgorithm = AceType::DynamicCast<NavigationLayoutAlgorithm>(
+        layoutAlgorithm->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(navigationLayoutAlgorithm);
+    auto realBavBarWidth = navigationLayoutAlgorithm->GetRealNavBarWidth();
+    auto realNavBarWidthDimension = Dimension(realBavBarWidth, DimensionUnit::PX);
+    Dimension usrSetUnitWidth = Dimension(0.0, userSetDimensionUnit);
+    if (!NearZero(frameWidth)) {
+        usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
+            Dimension(realBavBarWidth / frameWidth, DimensionUnit::PERCENT) :
+            Dimension(realNavBarWidthDimension.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
+    }
+    auto eventHub = host->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireNavBarWidthChangeEvent(usrSetUnitWidth);
 }
 
 int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)

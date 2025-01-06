@@ -53,11 +53,14 @@ public:
         const RefPtr<FrameNode>& host, void* runtime, const IsolatedInfo& isolatedInfo);
 
     virtual void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) = 0;
+    virtual void SetBackgroundTransparent(bool backgroundTransparent) = 0;
+    virtual bool GetBackgroundTransparent() const = 0;
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 
     virtual void UpdateViewportConfig(
-        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) = 0;
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual bool TransferKeyEvent(const KeyEvent& event) = 0;
@@ -83,6 +86,7 @@ public:
     virtual void SetUIContentType(UIContentType uIContentType) {};
     virtual bool IsRestrictedWorkerThread() { return false; }
     virtual bool HasWorkerUsing(void *worker) { return false; }
+    virtual void UpdateParentOffsetToWindow(const OffsetF& offset) = 0;
 
     virtual void Dump(RendererDumpInfo &rendererDumpInfo) {}
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) {}

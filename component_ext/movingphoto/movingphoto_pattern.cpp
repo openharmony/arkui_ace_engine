@@ -576,6 +576,7 @@ void MovingPhotoPattern::UpdatePlayMode()
             SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
         }
         if (autoAndRepeatLevel_ == PlaybackMode::AUTO && currentPlayStatus_ == PlaybackStatus::PREPARED) {
+            isSetAutoPlayPeriod_ = false;
             ResetMediaPlayer();
         } else {
             MediaResetToPlay();
@@ -1144,6 +1145,17 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
+    isSetAutoPlayPeriod_ = false;
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        Pause();
+        if (autoPlayPeriodEndTime_ != -1) {
+            Seek(autoPlayPeriodEndTime_);
+        } else {
+            Seek(0);
+        }
+    }
     ResetMediaPlayer();
     if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         autoAndRepeatLevel_ = PlaybackMode::AUTO;

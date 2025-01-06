@@ -60,22 +60,14 @@ const MARGIN_OFFSET: number = 8;
 const TAG: string = 'TreeView';
 const LOG_CODE: number = 0x3900;
 const ENTER_EXIT_DURATION: number = 2000;
-
-const ARROW_DOWN: Resource | string = $r('sys.media.ohos_ic_public_arrow_down');
-
-const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
-  'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
-  'wSFlzAAAOxAAADsQBlSsOGwAAAKVJREFUeNpjYBgFo2AU0Bww4pL4////diC1hZGRcSo+A4DqWIDUZCB+AVTbiC7PhEfvByCeAjQgn4Dhy4E' +
-  '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
-  'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg=='
-
-const ARROW_RIGHT: Resource | string = $r('sys.media.ohos_ic_public_arrow_right');
-
-const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
-  'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
-  'lwSFlzAAAOxAAADsQBlSsOGwAAAKFJREFUeNpjYBgFowAE/v//bwHEPOToZSJS3XIg3k6OJcRaUALEFuRYwkyMosbGxusNDQ3XgMwCIHYAsl' +
-  'cDxX5RzQJKLGEmxbvkWMJEaqQxMjKuBVI5QGwDxOnUimR08AFK81DdAmAqArl8DhDfAOKpVLUAavh2IH4CxI7A4HpDMEgpMPwFUXFGS8NJCa' +
-  'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC'
+const ACCESSIBILITY_REFOCUS_DELAY_TIME: number = 300;
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+const MAX_SYMBOL_FONT_SCALE: number = 1.3;
+const MIN_SYMBOL_FONT_SCALE: number = 1;
+const ARROW_DOWN: Resource = $r('sys.symbol.chevron_down');
+const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
+const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_right');
+const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_right');
 
 enum Event {
   TOUCH_DOWN = 0,
@@ -266,6 +258,26 @@ interface NodeItemViewFactory {
   createNodeByNodeParam: (nodeParam: NodeParam) => NodeItemView;
 }
 
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
+
 class TreeViewNodeItemFactory implements NodeItemViewFactory {
   private static instance: TreeViewNodeItemFactory;
 
@@ -310,11 +322,14 @@ class TreeViewNodeItemFactory implements NodeItemViewFactory {
     if (nodeParam.icon) {
       nodeItemView.imageNode = new ImageNode(
         nodeParam.icon,
+        nodeParam.symbolIconStyle,
         $r('sys.float.ohos_id_alpha_content_fourth'),
         IMAGE_NODE_HEIGHT,
         IMAGE_NODE_WIDTH,
         nodeParam.selectedIcon,
+        nodeParam.symbolSelectedIconStyle,
         nodeParam.editIcon,
+        nodeParam.symbolEditIconStyle,
       );
     }
     if (nodeParam.primaryTitle) {
@@ -327,8 +342,11 @@ class TreeViewNodeItemFactory implements NodeItemViewFactory {
 let emptyNodeInfo: NodeParam = {
   isFolder: true,
   icon: '',
+  symbolIconStyle: undefined,
   selectedIcon: '',
+  symbolSelectedIconStyle: undefined,
   editIcon: '',
+  symbolEditIconStyle: undefined,
   container: () => {
   },
   secondaryTitle: '',
@@ -370,6 +388,7 @@ class TreeViewTheme {
 @Observed
 export class NodeInfo {
   public imageSource: Resource | string | undefined = '';
+  public symbolSource: SymbolGlyphModifier | undefined = undefined;
   private nodeHeight: Resource | number;
   private nodeItemView: NodeItemView;
   private nodeLeftPadding: number;
@@ -970,6 +989,7 @@ export struct TreeView {
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Provide clickButtonFlag: boolean = true;
   @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
+  @Provide isAccessibilityEnabled: boolean = false;
 
   @Builder
   NullBuilder() {
@@ -1020,15 +1040,29 @@ export struct TreeView {
     let uiContent: UIContext = this.getUIContext();
     this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
     this.maxAppFontScale = uiContent.getMaxFontScale();
+
+    accessibility.on('accessibilityStateChange', (state: boolean) => {
+      this.isAccessibilityEnabled = state;
+    })
   }
 
-  decideFontScale() {
+  decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
-    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
   }
 
   @Builder
@@ -1061,18 +1095,37 @@ export struct TreeView {
     Row() {
       if (item.getNodeItem().imageNode) {
         Row() {
-          Image(item.getNodeItem().imageNode?.normalSource)
-            .objectFit(ImageFit.Contain)
-            .height(item.getNodeItem().imageNode?.itemHeight)
-            .width(item.getNodeItem().imageNode?.itemWidth)
-            .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
-            .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT || item.getNodeItem()
-              .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+          if (item.getNodeItem().imageNode?.symbolNormalSource) {
+            SymbolGlyph()
+              .attributeModifier(item.getNodeItem().imageNode?.symbolNormalSource)
+              .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
+              .effectStrategy(SymbolEffectStrategy.NONE)
+              .symbolEffect(new SymbolEffect(), false)
+              .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+          } else {
+            if (Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)) {
+              SymbolGlyph(item.getNodeItem().imageNode?.normalSource as Resource)
+                .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
+                .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+            } else {
+              Image(item.getNodeItem().imageNode?.normalSource)
+                .objectFit(ImageFit.Contain)
+                .height(item.getNodeItem().imageNode?.itemHeight)
+                .width(item.getNodeItem().imageNode?.itemWidth)
+                .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
+                .matchTextDirection((item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT ||
+                  item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+            }
+          }
         }
         .backgroundColor(COLOR_IMAGE_ROW)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
-        .height(item.getNodeItem().imageNode?.itemHeight)
-        .width(item.getNodeItem().imageNode?.itemWidth)
+        .height(item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
+        .width(item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
       }
 
       Row() {
@@ -1127,7 +1180,11 @@ export struct TreeView {
     this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
     this.listNodeDataSource.listNode[this.viewLastIndex].setIsSelected(false);
     this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
-      this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem().imageNode?.source;
+      this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
+        .imageNode?.source;
+    this.listNodeDataSource.listNode[this.viewLastIndex].symbolSource =
+      this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
+        .imageNode?.symbolSource;
   }
 
   setImageSources(index: number, interactionStatus: InteractionStatus): void {
@@ -1144,6 +1201,88 @@ export struct TreeView {
     }
   }
 
+  private touchInner(itemInner: NodeInfo, event: TouchEvent) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (event.type === TouchType.Down) {
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+    }
+    if (event.type === TouchType.Up) {
+      this.listNodeDataSource.listNode[index].setIsSelected(true);
+      this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+      if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
+        this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
+          .getNodeItem().imageNode?.source;
+        this.listNodeDataSource.listNode[index].symbolSource = this.listNodeDataSource.listNode[index]
+          .getNodeItem().imageNode?.symbolSource;
+      }
+
+      if (index !== this.viewLastIndex) {
+        this.clearLastIndexColor();
+        this.listNodeDataSource.lastIndex = index;
+        this.listNodeDataSource.setClickIndex(index);
+      }
+      this.viewLastIndex = index;
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
+  private clickInner(itemInner: NodeInfo) {
+    this.viewLastIndex = this.listNodeDataSource.getLastIndex();
+    let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.listNodeDataSource.listNode[index].setIsSelected(true);
+    this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
+    if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
+      this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
+        .getNodeItem().imageNode?.source;
+      this.listNodeDataSource.listNode[index].symbolSource = this.listNodeDataSource.listNode[index]
+        .getNodeItem().imageNode?.symbolSource;
+    }
+
+    if (index !== this.viewLastIndex) {
+      this.clearLastIndexColor();
+      this.listNodeDataSource.lastIndex = index;
+      this.listNodeDataSource.setClickIndex(index);
+    }
+    this.viewLastIndex = index;
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+  }
+
   build() {
     List({}) {
       LazyForEach(this.listNodeDataSource, (itemInner: NodeInfo) => {
@@ -1154,47 +1293,11 @@ export struct TreeView {
               listNodeDataSource: this.listNodeDataSource,
               index: this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId()),
               listTreeViewMenu: this.listTreeViewMenu,
+              callBackClick: (): void => this.clickInner(itemInner),
             })
           }
-          .onTouch((event: TouchEvent) => {
-            this.viewLastIndex = this.listNodeDataSource.getLastIndex();
-            let index: number = this.listNodeDataSource.findIndex(itemInner.getNodeCurrentNodeId());
-
-            if (event.type === TouchType.Down) {
-              if (index !== this.viewLastIndex) {
-                this.clearLastIndexColor();
-                this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.setClickIndex(index);
-              }
-            }
-            if (event.type === TouchType.Up) {
-              this.listNodeDataSource.listNode[index].setIsSelected(true);
-              this.listNodeDataSource.setImageSource(index, InteractionStatus.SELECTED);
-              if (this.listNodeDataSource.listNode[index].getNodeItem().imageNode !== null) {
-                this.listNodeDataSource.listNode[index].imageSource = this.listNodeDataSource.listNode[index]
-                  .getNodeItem().imageNode?.source;
-              }
-
-              if (index !== this.viewLastIndex) {
-                this.clearLastIndexColor();
-                this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.setClickIndex(index);
-              }
-              this.viewLastIndex = index;
-            }
-
-            if (this.listNodeDataSource.getLastIndex() !== -1 && index !== this.listNodeDataSource.getLastIndex()) {
-              this.listNodeDataSource.setPopUpInfo(
-                PopUpType.WARNINGS,
-                InputError.NONE,
-                false,
-                this.listNodeDataSource.getLastIndex()
-              );
-              this.listNodeDataSource.setItemVisibilityOnEdit(
-                this.listNodeDataSource.getLastIndex(),
-                MenuOperation.COMMIT_NODE
-              );
-            }
+          .onTouch(this.isAccessibilityEnabled ? undefined : (event: TouchEvent) => {
+            this.touchInner(itemInner, event);
           })
         }
         .width('100%')
@@ -1248,7 +1351,8 @@ export struct TreeView {
           let primaryTitleText = this.listNodeDataSource.getAccessibleTitleText(primaryTitle);
           let secondaryTitleText = this.listNodeDataSource.getAccessibleTitleText(secondaryTitle);
           let title: string = `${primaryTitleText}, ${secondaryTitleText}`;
-          this.listNodeDataSource.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title));
+          this.listNodeDataSource.sendAccessibility(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node',
+            title));
 
           let allParentNode: number[] = [];
           for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
@@ -1472,10 +1576,6 @@ export struct TreeView {
           .mainTitleNode?.setMainTitleHighLight(false);
       }
 
-      if (this.listNodeDataSource.listNode[this.viewLastIndex] !== null) {
-        this.listNodeDataSource.listNode[this.viewLastIndex].fontColor = this.treeViewTheme.primaryTitleFontColor;
-      }
-
       this.listNodeDataSource.lastIndex = this.viewLastIndex;
       if (this.listNodeDataSource.listNode[this.viewLastIndex]) {
         if (this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
@@ -1486,6 +1586,9 @@ export struct TreeView {
           this.listNodeDataSource.listNode[this.viewLastIndex].imageSource =
             this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
               .imageNode?.source;
+          this.listNodeDataSource.listNode[this.viewLastIndex].symbolSource =
+            this.listNodeDataSource.listNode[this.viewLastIndex].getNodeItem()
+              .imageNode?.symbolSource;
         }
       }
 
@@ -1648,6 +1751,15 @@ export interface NodeParam {
   icon?: ResourceStr,
 
   /**
+   * Set the symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolIconStyle?: SymbolGlyphModifier;
+
+  /**
    * Set selected icon resource.
    * @type { ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -1663,6 +1775,15 @@ export interface NodeParam {
   selectedIcon?: ResourceStr,
 
   /**
+   * Set selected symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolSelectedIconStyle?: SymbolGlyphModifier;
+
+  /**
    * Set edit icon resource.
    * @type { ResourceStr }
    * @syscap SystemCapability.ArkUI.ArkUI.Full
@@ -1676,6 +1797,15 @@ export interface NodeParam {
    * @since 11
    */
   editIcon?: ResourceStr,
+
+  /**
+   * Set edit symbol resource.
+   * @type { ?SymbolGlyphModifier }
+   * @syscap SystemCapability.ArkUI.ArkUI.Full
+   * @atomicservice
+   * @since 16
+   */
+  symbolEditIconStyle?: SymbolGlyphModifier;
 
   /**
    * Set primary title content.
@@ -1819,8 +1949,11 @@ export class TreeController {
       {
         isFolder: newNodeParam.isFolder,
         icon: newNodeParam.icon,
+        symbolIconStyle: newNodeParam.symbolIconStyle,
         selectedIcon: newNodeParam.selectedIcon,
+        symbolSelectedIconStyle: newNodeParam.symbolSelectedIconStyle,
         editIcon: newNodeParam.editIcon,
+        symbolEditIconStyle: newNodeParam.symbolEditIconStyle,
         primaryTitle: '新建文件夹',
         container: newNodeParam.container,
         secondaryTitle: newNodeParam.secondaryTitle as ResourceStr,
@@ -1889,9 +2022,9 @@ export class TreeController {
           'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
         return this;
       }
-      if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
+      if (nodeParam.primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
         throw new Error('ListTreeNode[addNode]: ' +
-          'The icon and directory name cannot be empty at the same time.');
+          'The icon|symbolIconStyle and directory name cannot be empty at the same time.');
         return this;
       }
       if (nodeParam.currentNodeId === this.ROOT_NODE_ID || nodeParam.currentNodeId === null) {
@@ -2883,28 +3016,47 @@ class ListNodeDataSource extends BasicDataSource {
     return accessibleTitleList.join(',');
   }
 
-  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string | undefined {
-    let accessibleTitleList: string[] = [];
-    while (insertNodeCurrentNodeId !== -1) {
-      if (insertNodeCurrentNodeId === undefined) {
-        return;
-      }
-      let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
-      let parentNodeIndex= this.findIndex(insertNodeParentNodeId);
-      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+  getPlaceAccessibleTitle(insertNodeCurrentNodeId: number | undefined): string {
+    if (insertNodeCurrentNodeId === undefined) {
+      return '';
+    }
+    let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+    if (insertNodeParentNodeId === -1) {
+      let accessibleTitleList: string[] = [];
+      let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
       if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
-        return;
+        return '';
       }
-      let primaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.primaryTitle;
-      let secondaryTitle = this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle === undefined
-        ? '' : this.getData(parentNodeIndex)?.getNodeInfoData()?.secondaryTitle;
+      let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+      let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+        ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
       let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
       let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
       accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
-      insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      return accessibleTitleList.join(',');
+    } else {
+      let accessibleTitleList: string[] = [];
+      while (insertNodeCurrentNodeId !== -1) {
+        if (insertNodeCurrentNodeId === undefined) {
+          return '';
+        }
+        let insertNodeParentNodeId = this.findParentNodeId(insertNodeCurrentNodeId);
+        let nodeItem = this.nodeIdNodeItemMap.get(insertNodeParentNodeId as number);
+        if (nodeItem === undefined || insertNodeParentNodeId === undefined) {
+          return '';
+        }
+        let primaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.primaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().primaryTitle;
+        let secondaryTitle = this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData()?.secondaryTitle === undefined
+          ? '' : this.getNodeInfoByNodeItem(nodeItem).getNodeInfoData().secondaryTitle;
+        let primaryTitleText = this.getAccessibleTitleText(primaryTitle);
+        let secondaryTitleText = this.getAccessibleTitleText(secondaryTitle);
+        accessibleTitleList.unshift(`${primaryTitleText}, ${secondaryTitleText}`);
+        insertNodeCurrentNodeId = nodeItem.currentNodeId;
+      }
+      return accessibleTitleList.join(',');
     }
-    return accessibleTitleList.join(',');
   }
 
   getDraggingAccessible(allParentNode: number[], insertNodeCurrentNodeId: number | undefined,
@@ -3003,9 +3155,9 @@ class ListNodeDataSource extends BasicDataSource {
 
           let nodeItem = this.nodeIdNodeItemMap.get(insertNodeCurrentNodeId as number);
           if (!nodeItem?.childNodeInfo.isHasChildNode) {
-            this.getDraggingAccessible(allParentNode,insertNodeCurrentNodeId, insertNodeCurrentNodeId);
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
           } else {
-            this.getDraggingAccessible(allParentNode,insertNodeCurrentNodeId, insertNodeDownNodeId);
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeDownNodeId);
           }
         } else if (this.flag === Flag.UP_FLAG && index < this.totalCount() - 1) {
           this.getData(index)?.setCanShowFlagLine(true);
@@ -3017,9 +3169,9 @@ class ListNodeDataSource extends BasicDataSource {
           this.lastPassId = this.getData(index)?.getNodeCurrentNodeId();
 
           if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId !== -1) {
-            this.getDraggingAccessible(allParentNode,insertNodeCurrentNodeId, insertNodeCurrentNodeId);
+            this.getDraggingAccessible(allParentNode, insertNodeCurrentNodeId, insertNodeCurrentNodeId);
           } else if (nodeItem?.childNodeInfo.isHasChildNode && nodeItem?.parentNodeId === -1) {
-            this.getDraggingAccessible(allParentNode,insertNodeUpNodeId, insertNodeCurrentNodeId);
+            this.getDraggingAccessible(allParentNode, insertNodeUpNodeId, insertNodeCurrentNodeId);
           }
         } else if (index >= this.totalCount() - 1) {
           if (this.flag === Flag.DOWN_FLAG) {
@@ -3040,6 +3192,8 @@ class ListNodeDataSource extends BasicDataSource {
   public delayHighLightAndExpandNode(currentIndex: number, currentNodeId: number, showIndex: number): void {
     let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
     let isOverBorder: boolean | undefined = this.getData(showIndex)?.getIsOverBorder();
+    let insertNodeId: number = this.listNode[currentIndex + 1]?.getNodeCurrentNodeId();
+    let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
     if (isOverBorder) {
       this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
     } else {
@@ -3059,6 +3213,13 @@ class ListNodeDataSource extends BasicDataSource {
         let delayHighLightTime: number = this.isInnerDrag ? 1000 : 0; // ms
         this.timeoutHighLightId = setTimeout(() => {
           this.delayHighLight(currentIndex);
+          if (insertNodeParentNodeId === -1) {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(currentNodeId), 1))
+          } else {
+            this.sendAccessibility(this.getStringByName('treeview_accessibility_move_node_child',
+              this.getPlaceAccessibleTitle(insertNodeId), 1))
+          }
         }, delayHighLightTime);
       }
       if (isOverBorder || (this.lastTimeoutHighLightId !== this.INITIAL_INVALID_VALUE &&
@@ -3736,6 +3897,9 @@ class ListNodeDataSource extends BasicDataSource {
       currentNode.indexOfParent = parent.children.length;
       data.parentNodeId = parentNodeId;
       data.currentNodeId = currentNodeId;
+      if (data.symbolIconStyle && !data.icon) {
+        data.icon = 'symbolUsed';
+      }
       parent.children.push(currentNode);
       parent.getChildNodeInfo().isHasChildNode = true;
       parent.getChildNodeInfo().childNum = parent.children.length;
@@ -3813,13 +3977,19 @@ class ListNodeDataSource extends BasicDataSource {
       if (parent.children.length === 0) {
         if (nodeInfo.getNodeItem().imageNode !== undefined) {
           newNodeParam.icon = nodeInfo.getNodeItem().imageNode?.normalSource;
+          newNodeParam.symbolIconStyle = nodeInfo.getNodeItem().imageNode?.symbolNormalSource;
           newNodeParam.selectedIcon = nodeInfo.getNodeItem().imageNode?.selectedSource;
+          newNodeParam.symbolSelectedIconStyle = nodeInfo.getNodeItem().imageNode?.symbolSelectedSource;
           newNodeParam.editIcon = nodeInfo.getNodeItem().imageNode?.editSource;
+          newNodeParam.symbolEditIconStyle = nodeInfo.getNodeItem().imageNode?.symbolEditSource;
           newNodeParam.container = nodeInfo.getMenu();
         } else {
           newNodeParam.icon = undefined;
+          newNodeParam.symbolIconStyle = undefined;
           newNodeParam.selectedIcon = undefined;
+          newNodeParam.symbolSelectedIconStyle = undefined;
           newNodeParam.editIcon = undefined;
+          newNodeParam.symbolEditIconStyle = undefined;
           newNodeParam.container = nodeInfo.getMenu();
         }
       } else if (parent.children.length > 0) {
@@ -3827,15 +3997,24 @@ class ListNodeDataSource extends BasicDataSource {
         if (nodeInfo.getNodeItem().imageNode !== null) {
           newNodeParam.icon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
             childNodeInfo.getNodeItem().imageNode?.normalSource : undefined;
+          newNodeParam.symbolIconStyle = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.symbolNormalSource : undefined;
           newNodeParam.selectedIcon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
             childNodeInfo.getNodeItem().imageNode?.selectedSource : undefined;
+          newNodeParam.symbolSelectedIconStyle = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.symbolSelectedSource : undefined;
           newNodeParam.editIcon = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
             childNodeInfo.getNodeItem().imageNode?.editSource : undefined;
+          newNodeParam.symbolEditIconStyle = (childNodeInfo.getNodeItem().imageNode !== undefined) ?
+            childNodeInfo.getNodeItem().imageNode?.symbolEditSource : undefined;
           newNodeParam.container = childNodeInfo.getMenu();
         } else {
           newNodeParam.icon = undefined;
+          newNodeParam.symbolIconStyle = undefined;
           newNodeParam.selectedIcon = undefined;
+          newNodeParam.symbolSelectedIconStyle = undefined;
           newNodeParam.editIcon = undefined;
+          newNodeParam.symbolEditIconStyle = undefined;
           newNodeParam.container = childNodeInfo.getMenu();
         }
       }
@@ -4012,7 +4191,6 @@ class ListNodeDataSource extends BasicDataSource {
   }
 }
 
-
 class ButtonGestureModifier implements GestureModifier {
   public static readonly longPressTime: number = 500;
   public static readonly minFontSize: number = 1.75;
@@ -4056,7 +4234,11 @@ export struct TreeViewInner {
   @Consume treeViewTheme: TreeViewTheme;
   @Consume clickButtonFlag: boolean;
   @Consume accessibilityNodeType: AccessibilityNodeType;
+  @Consume isAccessibilityEnabled: boolean;
   @BuilderParam private listTreeViewMenu: () => void;
+  callBackClick: () => void = () => {
+
+  }
   private readonly MAX_CN_LENGTH: number = 254;
   private readonly MAX_EN_LENGTH: number = 255;
   private readonly INITIAL_INVALID_VALUE = -1;
@@ -4081,19 +4263,30 @@ export struct TreeViewInner {
   aboutToAppear(): void {
     if (this.item.getNodeItem().imageNode) {
       this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+      this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
     }
     let uiContent: UIContext = this.getUIContext();
     this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
     this.maxAppFontScale = uiContent.getMaxFontScale();
   }
 
-  decideFontScale() {
+  decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
-    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
   }
 
   getInputTextMaxFontSize() {
@@ -4141,7 +4334,7 @@ export struct TreeViewInner {
     let insertNodePosition: number = childrenItemId.indexOf(currentNodeId) + 1;
     let accessibleTitle: string | undefined = this.listNodeDataSource.getAccessibleTitle(currentNodeId);
     if (accessibleTitle === undefined) {
-      return '';
+      return ' ';
     }
 
     if (this.accessibilityNodeType === AccessibilityNodeType.PLACE) {
@@ -4169,7 +4362,7 @@ export struct TreeViewInner {
     if (this.accessibilityNodeType === AccessibilityNodeType.TEXT) {
       return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
     } else {
-      return '';
+      return ' ';
     }
   }
 
@@ -4187,10 +4380,123 @@ export struct TreeViewInner {
 
   private getAccessibilityReadButtonDescription(): string {
     if (this.clickButtonFlag === false) {
-      return '';
+      return ' ';
     } else {
       return this.listNodeDataSource.getStringByName('treeview_accessibility_implement_node');
     }
+  }
+
+  private onTouchNode(event: TouchEvent) {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId();
+
+    if (event.type === TouchType.Down) {
+      this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
+    } else if (event.type === TouchType.Up) {
+      if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+        this.item.setNodeColor(COLOR_SELECT);
+      } else {
+        this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+      }
+      if (this.item.getNodeItem().imageNode !== null) {
+        this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+        this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+        this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+        this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+      }
+
+      this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+      let callParam: CallbackParam = { currentNodeId: currentId };
+      this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+      this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+        ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+        `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+    }
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index;
+    this.count--;
+  }
+
+  private onClickNode() {
+    this.count++;
+    if (this.count > 1) {
+      this.count--;
+      return;
+    }
+
+    this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
+    this.listNodeDataSource.setClickIndex(this.index);
+    let currentId: number = this.item.getNodeCurrentNodeId();
+
+    if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
+      this.item.setNodeColor(COLOR_SELECT);
+    } else {
+      this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
+    }
+    if (this.item.getNodeItem().imageNode !== null) {
+      this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
+      this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
+      this.item.imageSource = this.item.getNodeItem().imageNode?.source;
+      this.item.symbolSource = this.item.getNodeItem().imageNode?.symbolSource;
+    }
+
+    this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
+    let callParam: CallbackParam = { currentNodeId: currentId };
+    this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
+
+    this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
+      ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
+      `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
+
+    if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
+      this.listNodeDataSource.setPopUpInfo(
+        PopUpType.WARNINGS,
+        InputError.NONE,
+        false,
+        this.listNodeDataSource.getLastIndex()
+      );
+      this.listNodeDataSource.setItemVisibilityOnEdit(
+        this.listNodeDataSource.getLastIndex(),
+        MenuOperation.COMMIT_NODE
+      );
+    }
+    this.lastIndex = this.index;
+    this.count--;
+  }
+
+  private accessibilityRefocus() {
+    this.clickButtonFlag = false;
+    let eventInfo: accessibility.EventInfo = ({
+      type: 'requestFocusForAccessibility',
+      bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+      triggerAction: 'common',
+      customId: `treeView_button${this.item.getNodeCurrentNodeId()}`
+    })
+    accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+      setTimeout(() => {
+        this.clickButtonFlag = true;
+      }, ENTER_EXIT_DURATION)
+    })
   }
 
   @Builder
@@ -4236,25 +4542,50 @@ export struct TreeViewInner {
               Row() {
                 if (this.item.getNodeItem().imageNode) {
                   Row() {
-                    Image(this.item.imageSource)
-                      .objectFit(ImageFit.Contain)
-                      .height(this.item.getNodeItem().imageNode?.itemHeight)
-                      .width(this.item.getNodeItem().imageNode?.itemWidth)
-                      .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
-                        this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
-                      .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
-                      .fillColor(this.getLeftIconColor())
-                      .matchTextDirection((this.item.getNodeItem()
-                        .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
-                        .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+                    if (this.item.symbolSource) {
+                      SymbolGlyph()
+                        .fontColor([this.getLeftIconColor()])
+                        .attributeModifier(this.item.symbolSource)
+                        .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                        this.decideSymbolFontScale(true)}vp`)
+                        .effectStrategy(SymbolEffectStrategy.NONE)
+                        .symbolEffect(new SymbolEffect(), false)
+                        .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                          this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                        .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                    } else {
+                      if (Util.isSymbolResource(this.item.imageSource)) {
+                        SymbolGlyph(this.item.imageSource as Resource)
+                          .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                          this.decideSymbolFontScale(true)}vp`)
+                          .fontColor([this.getLeftIconColor()])
+                          .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                            this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                          .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                      } else {
+                        Image(this.item.imageSource)
+                          .objectFit(ImageFit.Contain)
+                          .height(this.item.getNodeItem().imageNode?.itemHeight)
+                          .width(this.item.getNodeItem().imageNode?.itemWidth)
+                          .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
+                            this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
+                          .focusable(this.item.getNodeItem().mainTitleNode !== null ? false : true)
+                          .fillColor(this.getLeftIconColor())
+                          .matchTextDirection((this.item.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
+                            .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
+                      }
+                    }
                   }
                   .focusable(true)
                   .backgroundColor(COLOR_IMAGE_ROW)
                   .margin({
                     end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                   })
-                  .height(this.item.getNodeItem().imageNode?.itemHeight)
-                  .width(this.item.getNodeItem().imageNode?.itemWidth)
+                  .height(this.item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
+                  .width(this.item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
                 }
                 Row() {
                   if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
@@ -4370,54 +4701,39 @@ export struct TreeViewInner {
               .id(`treeView_node${this.item.getNodeCurrentNodeId()}`)
               .accessibilityText(this.getAccessibilityReadText(this.item.getNodeCurrentNodeId()))
               .accessibilityDescription(this.getAccessibilityDescription())
+              .onClick(this.isAccessibilityEnabled ? () => {
+                this.onClickNode();
+                this.callBackClick();
+              } : undefined)
 
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
-                  Image(this.item.getNodeItem().imageCollapse?.collapseSource)
-                    .fillColor(this.item.getNodeItem().imageCollapse?.isCollapse ?
-                    this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT)
-                    .align(Alignment.End)
-                    .objectFit(ImageFit.Contain)
-                    .height(this.item.getNodeItem().imageCollapse?.itemHeight)
-                    .width(this.item.getNodeItem().imageCollapse?.itemWidth)
+                  SymbolGlyph(this.item.getNodeItem().imageCollapse?.collapseSource as Resource)
+                    .fontSize(`${this.item.getNodeItem().imageCollapse?.itemHeight as number *
+                    this.decideSymbolFontScale(true)}vp`)
+                    .fontColor([this.item.getNodeItem().imageCollapse?.isCollapse ?
+                    this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT])
                     .opacity(!this.item.getIsHighLight() ?
                       this.item.getNodeItem().imageCollapse?.opacity : this.item.getNodeItem().imageCollapse?.noOpacity)
-                    .onTouch((event: TouchEvent) => {
-                      if (event.type === TouchType.Down) {
-                        this.listNodeDataSource.expandAndCollapseNode(
-                          this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
-                        this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
-
-                        this.clickButtonFlag = false;
-                      }
-                      if (event.type === TouchType.Up) {
-                        let eventInfo: accessibility.EventInfo = ({
-                          type: 'requestFocusForAccessibility',
-                          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-                          triggerAction: 'common',
-                          customId: `treeView_button${this.item.getNodeCurrentNodeId()}`
-                        })
-                        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-                          setTimeout(() => {
-                            this.clickButtonFlag = true;
-                          }, ENTER_EXIT_DURATION)
-                        })
-                      }
-                      event.stopPropagation();
-                    })
                     .focusable(true)
-                    .matchTextDirection((this.item.getNodeItem()
-                      .imageCollapse?.collapseSource === ARROW_RIGHT || this.item.getNodeItem()
-                      .imageCollapse?.collapseSource === ARROW_RIGHT_WITHE) ? true : false)
                 }
                 .focusable(true)
-                .height(this.item.getNodeItem().imageCollapse?.itemHeight)
-                .width(this.item.getNodeItem().imageCollapse?.itemWidth)
+                .justifyContent(FlexAlign.Center)
+                .height(this.item.getNodeItem().imageCollapse?.itemHeight as number * this.decideSymbolFontScale(true))
+                .width(this.item.getNodeItem().imageCollapse?.itemWidth as number * this.decideSymbolFontScale(true))
+                .onClick(() => {
+                  this.listNodeDataSource.expandAndCollapseNode(
+                    this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));
+                  this.listNodeDataSource.setCurrentFocusNodeId(this.item.getNodeCurrentNodeId());
+
+                  setTimeout(() => {
+                    this.accessibilityRefocus();
+                  }, ACCESSIBILITY_REFOCUS_DELAY_TIME)
+                })
                 .id(`treeView_button${this.item.getNodeCurrentNodeId()}`)
                 .accessibilityText(this.getAccessibilityReadButtonText(this.item.getNodeItem()
                   .imageCollapse?.collapseSource === ARROW_RIGHT))
                 .accessibilityDescription(this.getAccessibilityReadButtonDescription())
-                .accessibilityLevel('yes')
               }
             }
             .focusable(true)
@@ -4436,54 +4752,8 @@ export struct TreeViewInner {
             this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
           }
         })
-        .onTouch((event) => {
-          this.count++;
-          if (this.count > 1) {
-            this.count--;
-            return;
-          }
-
-          this.index = this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId())
-          this.listNodeDataSource.setClickIndex(this.index);
-          let currentId: number = this.item.getNodeCurrentNodeId();
-
-          if (event.type === TouchType.Down) {
-            this.item.setNodeColor(this.treeViewTheme.itemPressedBgColor);
-          } else if (event.type === TouchType.Up) {
-            if (!(typeof this.treeViewTheme.itemSelectedBgColor === 'string')) {
-              this.item.setNodeColor(COLOR_SELECT);
-            } else {
-              this.item.setNodeColor(this.treeViewTheme.itemSelectedBgColor);
-            }
-            if (this.item.getNodeItem().imageNode !== null) {
-              this.item.getNodeItem().imageNode?.setImageSource(InteractionStatus.SELECTED);
-              this.listNodeDataSource.setImageSource(this.index, InteractionStatus.SELECTED);
-              this.item.imageSource = this.item.getNodeItem().imageNode?.source;
-            }
-
-            this.item.getNodeItem().mainTitleNode?.setMainTitleSelected(true);
-            let callParam: CallbackParam = { currentNodeId: currentId };
-            this.appEventBus.emit(TreeListenType.NODE_CLICK, callParam);
-
-            this.listNodeDataSource.sendAccessibility(this.item.getIsSelected()
-              ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node',
-              `${this.getAccessibilityReadText(this.item.getNodeCurrentNodeId())}`) : '');
-          }
-
-          if (this.listNodeDataSource.getLastIndex() !== -1 && this.index !== this.listNodeDataSource.getLastIndex()) {
-            this.listNodeDataSource.setPopUpInfo(
-              PopUpType.WARNINGS,
-              InputError.NONE,
-              false,
-              this.listNodeDataSource.getLastIndex()
-            );
-            this.listNodeDataSource.setItemVisibilityOnEdit(
-              this.listNodeDataSource.getLastIndex(),
-              MenuOperation.COMMIT_NODE
-            );
-          }
-          this.lastIndex = this.index;
-          this.count--;
+        .onTouch(this.isAccessibilityEnabled ? undefined : (event) => {
+          this.onTouchNode(event);
         })
         /* backgroundColor when editing and in other states. */
         .backgroundColor((this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText &&
@@ -4608,13 +4878,16 @@ class NodeBaseInfo {
 
 export class CollapseImageNode extends NodeBaseInfo {
   private imageSource: Resource | string;
+  private symbolIconSource: SymbolGlyphModifier | undefined;
   private imageOpacity: Resource;
   private imageCollapseSource: Resource | string;
+  private symbolIconCollapseSource: SymbolGlyphModifier | undefined;
   private isImageCollapse: boolean;
   private collapseImageType: CollapseImageType;
 
   constructor(
     imageSource: Resource | string,
+    symbolSource: SymbolGlyphModifier | undefined,
     imageOpacity: Resource,
     itemWidth: number,
     itemHeight: number,
@@ -4625,17 +4898,23 @@ export class CollapseImageNode extends NodeBaseInfo {
     super();
     this.rightMargin = $r('sys.float.ohos_id_elements_margin_horizontal_m');
     this.imageSource = imageSource;
+    this.symbolIconSource = symbolSource;
     this.rightMargin = itemRightMargin;
     this.imageOpacity = imageOpacity;
     this.itemWidth = itemWidth;
     this.itemHeight = itemHeight;
     this.imageCollapseSource = imageSource;
+    this.symbolIconCollapseSource = symbolSource;
     this.isImageCollapse = isImageCollapse;
     this.collapseImageType = collapseImageType;
   }
 
   get source(): Resource | string {
     return this.imageSource;
+  }
+
+  get symbolSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSource;
   }
 
   get opacity(): Resource {
@@ -4648,6 +4927,10 @@ export class CollapseImageNode extends NodeBaseInfo {
 
   get collapseSource(): Resource | string {
     return this.imageCollapseSource;
+  }
+
+  get symbolCollapseSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconCollapseSource;
   }
 
   get isCollapse(): boolean {
@@ -4684,7 +4967,7 @@ class CollapseImageNodeFactory {
    * @returns collapse image node
    */
   public createCollapseImageNodeByType(type: CollapseImageType): CollapseImageNode {
-    let imageSource: Resource | string;
+    let imageSource: Resource;
     switch (type) {
       case CollapseImageType.ARROW_RIGHT_WHITE:
         imageSource = ARROW_RIGHT_WITHE;
@@ -4700,6 +4983,7 @@ class CollapseImageNodeFactory {
     }
     return new CollapseImageNode(
       imageSource,
+      undefined,
       $r('sys.float.ohos_id_alpha_content_tertiary'),
       IMAGE_NODE_HEIGHT,
       IMAGE_NODE_WIDTH,
@@ -4791,9 +5075,13 @@ class CollapseImageNodeFlyweightFactory {
 
 export class ImageNode extends NodeBaseInfo {
   private imageSource: Resource | string;
+  private symbolIconSource: SymbolGlyphModifier | undefined;
   private imageNormalSource: Resource | string;
+  private symbolIconNormalSource: SymbolGlyphModifier | undefined;
   private imageSelectedSource: Resource | string;
+  private symbolIconSelectedSource: SymbolGlyphModifier | undefined;
   private imageEditSource: Resource | string;
+  private symbolIconEditSource: SymbolGlyphModifier | undefined;
   private imageOpacity: Resource;
   private currentInteractionStatus: InteractionStatus;
   private imageCollapseSource: Resource | string;
@@ -4803,26 +5091,33 @@ export class ImageNode extends NodeBaseInfo {
 
   constructor(
     imageSource: Resource | string,
+    symbolSource: SymbolGlyphModifier | undefined,
     imageOpacity: Resource,
     itemWidth: number,
     itemHeight: number,
     itemSelectedIcon?: Resource | string,
+    symbolSelectedIcon?: SymbolGlyphModifier | undefined,
     itemEditIcon?: Resource | string,
+    symbolEditIcon?: SymbolGlyphModifier | undefined,
   ) {
     super();
     this.rightMargin = $r('sys.float.ohos_id_elements_margin_horizontal_m');
     this.imageSource = imageSource;
+    this.symbolIconSource = symbolSource;
     this.imageNormalSource = imageSource;
+    this.symbolIconNormalSource = symbolSource;
     if (itemSelectedIcon !== undefined) {
       this.imageSelectedSource = itemSelectedIcon;
     } else {
       this.imageSelectedSource = this.imageNormalSource;
     }
+    this.symbolIconSelectedSource = symbolSelectedIcon;
     if (itemEditIcon !== undefined) {
       this.imageEditSource = itemEditIcon;
     } else {
       this.imageEditSource = this.imageNormalSource;
     }
+    this.symbolIconEditSource = symbolEditIcon;
     this.imageOpacity = imageOpacity;
     this.itemWidth = itemWidth;
     this.itemHeight = itemHeight;
@@ -4837,16 +5132,32 @@ export class ImageNode extends NodeBaseInfo {
     return this.imageSource;
   }
 
+  get symbolSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSource;
+  }
+
   get normalSource(): Resource | string {
     return this.imageNormalSource;
+  }
+
+  get symbolNormalSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconNormalSource;
   }
 
   get selectedSource(): Resource | string {
     return this.imageSelectedSource;
   }
 
+  get symbolSelectedSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconSelectedSource;
+  }
+
   get editSource(): Resource | string {
     return this.imageEditSource;
+  }
+
+  get symbolEditSource(): SymbolGlyphModifier | undefined {
+    return this.symbolIconEditSource;
   }
 
   get opacity(): Resource {
@@ -4892,28 +5203,34 @@ export class ImageNode extends NodeBaseInfo {
     switch (interactionStatus) {
       case InteractionStatus.NORMAL:
         this.imageSource = this.imageNormalSource;
+        this.symbolIconSource = this.symbolIconNormalSource;
         this.currentInteractionStatus = interactionStatus;
         break;
       case InteractionStatus.SELECTED:
         if (this.currentInteractionStatus !== InteractionStatus.EDIT) {
           this.imageSource = this.imageSelectedSource;
+          this.symbolIconSource = this.symbolIconSelectedSource;
           this.currentInteractionStatus = interactionStatus;
         }
         break;
       case InteractionStatus.EDIT:
         this.imageSource = this.imageEditSource;
+        this.symbolIconSource = this.symbolIconEditSource;
         this.currentInteractionStatus = interactionStatus;
         break;
       case InteractionStatus.FINISH_EDIT:
         this.imageSource = this.imageSelectedSource;
+        this.symbolIconSource = this.symbolIconSelectedSource;
         this.currentInteractionStatus = interactionStatus;
         break;
       case InteractionStatus.DRAG_INSERT:
         this.imageSource = this.imageEditSource;
+        this.symbolIconSource = this.symbolIconEditSource;
         this.currentInteractionStatus = interactionStatus;
         break;
       case InteractionStatus.FINISH_DRAG_INSERT:
         this.imageSource = this.imageNormalSource;
+        this.symbolIconSource = this.symbolIconNormalSource;
         this.currentInteractionStatus = interactionStatus;
         break;
       default:

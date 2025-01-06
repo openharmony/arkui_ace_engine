@@ -245,6 +245,24 @@ _arkui_shared_libs = [
     part_name = "ace_engine"
     lib_names = [ "focuscontroller" ]
   },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_alphabet_indexer:arcalphabetindexer"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcalphabetindexer" ]
+  },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_list:arclist"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arclist" ]
+  },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_scroll_bar:arcscrollbar"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcscrollbar" ]
+  },
 ]
 
 if (defined(current_platform.config)) {
@@ -275,6 +293,13 @@ napi_modules = [
         subsystem_name = "multimedia"
         part_name = "av_session"
         lib_names = [ "avcastpicker" ]
+      },
+      {
+        label =
+            "//foundation/arkui/ace_engine/component_ext/arc_swiper:arcswiper"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcswiper" ]
       },
     ]
   },
@@ -349,6 +374,12 @@ napi_modules = [
   {
     prefix = "arkui/advanced"
     shard_libs = [
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcslider/interfaces:arcslider"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcslider" ]
+      },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component:chip"
         subsystem_name = "arkui"
@@ -498,6 +529,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "foldsplitcontainer" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcbutton/interfaces:arcbutton"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcbutton" ]
       },
     ]
   },

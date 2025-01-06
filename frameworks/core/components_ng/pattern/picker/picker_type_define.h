@@ -82,6 +82,7 @@ struct DatePickerSettingData {
     CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;
+    DatePickerMode mode;
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
@@ -108,6 +109,7 @@ struct TimePickerSettingData {
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
     bool showSecond;
+    bool isEnableCascade;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

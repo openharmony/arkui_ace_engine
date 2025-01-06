@@ -66,11 +66,6 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
-    bool DefaultSupportDrag() override
-    {
-        return true;
-    }
-
     bool IsSupportDrawModifier() const override
     {
         return false;
@@ -111,6 +106,12 @@ public:
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
+
+    void UpdateShowFirstFrame(bool showFirstFrame)
+    {
+        showFirstFrame_ = showFirstFrame;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -163,7 +164,6 @@ public:
     void ResetMediaPlayer();
     void ResetMediaPlayerOnBg();
 
-    void EnableDrag();
     void SetIsStop(bool isStop)
     {
         isStop_ = isStop;
@@ -174,19 +174,9 @@ public:
         return isStop_;
     }
 
-    void SetIsDrag(bool isDrag)
-    {
-        isDrag_ = isDrag;
-    }
-
     bool IsInitialState() const
     {
         return isInitialState_;
-    }
-
-    void SetIsDragEndAutoPlay(bool isDragEndAutoPlay)
-    {
-        dragEndAutoPlay_ = isDragEndAutoPlay;
     }
 
     const std::string& GetSrc() const
@@ -273,6 +263,10 @@ public:
         const std::string& videoSrc, int32_t instanceId);
 
     void SetShortcutKeyEnabled(bool isEnableShortcutKey);
+    bool GetShortcutKeyEnabled() const;
+
+    void SetCurrentVolume(float currentVolume);
+    float GetCurrentVolume() const;
 
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
@@ -404,12 +398,12 @@ private:
 
     // Video src.
     VideoSourceInfo videoSrcInfo_;
+    bool showFirstFrame_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
     bool isPrepared_ = false;
 
     bool isStop_ = false;
-    bool isDrag_ = false;
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -417,7 +411,6 @@ private:
 
     bool pastPlayingStatus_ = false;
 
-    bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;

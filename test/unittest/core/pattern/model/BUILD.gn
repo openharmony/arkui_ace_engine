@@ -38,8 +38,11 @@ ace_unittest("model_test_ng") {
       "form_fwk:fmskit_native",
       "form_fwk:form_manager",
       "graphic_2d:librender_service_client",
-      "graphic_3d:lib3dWidgetAdapter",
       "input:libmmi-client",
     ]
+
+    if (defined(global_parts_info.graphic_graphic_3d)) {
+      external_deps += [ "graphic_3d:lib3dWidgetAdapter" ]
+    }
   }
 }

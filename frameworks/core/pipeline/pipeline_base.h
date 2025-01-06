@@ -690,6 +690,16 @@ public:
     }
 
     template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>(themeScopeId);
+        }
+        return {};
+    }
+
+    template<typename T>
     bool GetDraggable()
     {
         if (isJsCard_ || isFormRender_) {
@@ -1412,6 +1422,11 @@ public:
     }
 
     virtual bool IsDirtyLayoutNodesEmpty() const
+    {
+        return true;
+    }
+
+    virtual bool IsDirtyPropertyNodesEmpty() const
     {
         return true;
     }

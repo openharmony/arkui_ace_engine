@@ -136,7 +136,7 @@ void ScrollModelImpl::SetScrollBarColor(const Color& color)
     JSViewSetProperty(&ScrollComponent::SetScrollBarColor, color);
 }
 
-void ScrollModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     auto scrollComponent = AceType::DynamicCast<ScrollComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     CHECK_NULL_VOID(scrollComponent);

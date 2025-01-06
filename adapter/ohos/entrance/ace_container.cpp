@@ -28,6 +28,7 @@
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_context.h"
+#include "ui/rs_surface_node.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -85,9 +86,14 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "base/ressched/ressched_report.h"
 #endif
 
 namespace OHOS::Ace::Platform {
@@ -107,7 +113,11 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
+const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
+#endif
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -959,18 +969,49 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](
+                                        const NonPointerEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, &event, &result, id]() {
+            [context, &event, &result, id, markProcess]() {
                 ContainerScope scope(id);
                 result = context->OnNonPointerEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess) {
+        if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_CROWN_ROTATION_STATUS,
+                static_cast<int32_t>(event.action), mapPayload);
+        }
+        ContainerScope scope(id);
+        bool result = false;
+        auto crownTask = [context, event, &result, markProcess, id]() {
+            ContainerScope scope(id);
+            result = context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            crownTask();
+            return result;
+        }
+        context->GetTaskExecutor()->PostTask(
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+        return result;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -1827,6 +1868,17 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
 
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
 {
+    bool isDynamicUiContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if (isDynamicUiContent) {
+        return DumpDynamicUiContent(params, info);
+    }
+
+    return DumpCommon(params, info);
+}
+
+bool AceContainer::DumpCommon(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
     if (isDumping_.test_and_set()) {
         LOGW("another dump is still running");
         return false;
@@ -1853,6 +1905,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     isDumping_.clear();
     return true;
+}
+
+bool AceContainer::DumpDynamicUiContent(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    LOGI("DumpDynamicUiContent");
+    ContainerScope scope(instanceId_);
+    return DumpInfo(params);
 }
 
 bool AceContainer::DumpInfo(const std::vector<std::string>& params)
@@ -2092,6 +2152,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
 #endif
+    RegisterUIExtDataConsumer();
+    RegisterUIExtDataSendToHost();
 
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
@@ -2647,16 +2709,7 @@ void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     if (!parsedConfig.colorMode.empty()) {
-        configurationChange.colorModeUpdate = true;
-        if (parsedConfig.colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-            SetColorScheme(ColorScheme::SCHEME_DARK);
-            resConfig.SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-            SetColorScheme(ColorScheme::SCHEME_LIGHT);
-            resConfig.SetColorMode(ColorMode::LIGHT);
-        }
+        ProcessColorModeUpdate(resConfig, configurationChange, parsedConfig);
     }
     if (!parsedConfig.deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -2688,6 +2741,23 @@ void AceContainer::BuildResConfig(
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+}
+
+void AceContainer::ProcessColorModeUpdate(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
+{
+    configurationChange.colorModeUpdate = true;
+    // clear cache of ark theme instances when configuration updates
+    NG::TokenThemeStorage::GetInstance()->CacheClear();
+    if (parsedConfig.colorMode == "dark") {
+        SystemProperties::SetColorMode(ColorMode::DARK);
+        SetColorScheme(ColorScheme::SCHEME_DARK);
+        resConfig.SetColorMode(ColorMode::DARK);
+    } else {
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        SetColorScheme(ColorScheme::SCHEME_LIGHT);
+        resConfig.SetColorMode(ColorMode::LIGHT);
     }
 }
 
@@ -3159,29 +3229,29 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
-bool AceContainer::GetCurPointerEventInfo(
-    int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
-    auto iter = currentEvents_.find(pointerId);
+    auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
-    pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) ||
+        !pointerItem.IsPressed()) {
         return false;
     }
-    sourceType = currentPointerEvent->GetSourceType();
-    globalX = pointerItem.GetDisplayX();
-    globalY = pointerItem.GetDisplayY();
-    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
-    displayId = currentPointerEvent->GetTargetDisplayId();
-    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
+    dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
 
@@ -3474,6 +3544,8 @@ void AceContainer::AddWatchSystemParameter()
         SystemProperties::AddWatchSystemParameter(
             ENABLE_PERFORMANCE_MONITOR_KEY, container,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+        SystemProperties::AddWatchSystemParameter(
+            IS_FOCUS_ACTIVE_KEY, container, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -3492,6 +3564,7 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, SystemProperties::OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)
@@ -3513,5 +3586,169 @@ void AceContainer::UpdateResourceDensity(double density)
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
     SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::RegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    auto uiExtDataConsumeCallback = [weak = WeakClaim(this)]
+        (SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) ->int32_t {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0);
+        container->DispatchUIExtDataConsume(static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+        return 0;
+    };
+    auto result = dataHandler->RegisterDataConsumer(SubSystemId::ARKUI_UIEXT, std::move(uiExtDataConsumeCallback));
+    if (result != Rosen::DataHandlerErr::OK) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "RegisterUIExtDataConsumer fail, same subSystemId repeate registe.");
+    }
+}
+
+void AceContainer::UnRegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    dataHandler->UnregisterDataConsumer(SubSystemId::ARKUI_UIEXT);
+}
+
+void AceContainer::DispatchUIExtDataConsume(NG::UIContentBusinessCode code,
+    AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(taskExecutor_);
+    AAFwk::Want businessData = data;
+    if (reply.has_value()) {
+        taskExecutor_->PostSyncTask(
+            [weak = WeakClaim(this), code, businessData, &reply] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsumeReply(code, businessData, reply);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeReplyCallback");
+    } else {
+        taskExecutor_->PostTask(
+            [weak = WeakClaim(this), code, businessData] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsume(code, businessData);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
+    }
+}
+
+bool AceContainer::FireUIExtDataSendToHost(
+    NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    if (type == NG::BusinessDataSendType::ASYNC) {
+        dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host async success, businessCode=%{public}d.", code);
+        return true;
+    }
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host async success, businessCode=%{public}d.", code);
+    return true;
+}
+
+bool AceContainer::FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data, reply);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync reply fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host sync reply success, businessCode=%{public}d.", code);
+    return true;
+}
+
+void AceContainer::RegisterUIExtDataSendToHost()
+{
+    auto uiExtDataSendSyncReply = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, AAFwk::Want& reply) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHostReply(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+    };
+    auto uiExtDataSend = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, NG::BusinessDataSendType type) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHost(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), type);
+    };
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->RegisterBusinessSendToHostReply(uiExtDataSendSyncReply);
+    uiExtManager->RegisterBusinessSendToHost(uiExtDataSend);
+}
+
+void AceContainer::SetDrawReadyEventCallback()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto surfaceNode = uiWindow_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto callback = [weak = WeakClaim(this)] () {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(static_cast<int>(NG::UIExtCallbackEventId::ON_DRAW_FIRST));
+    };
+    surfaceNode->SetBufferAvailableCallback(callback);
 }
 } // namespace OHOS::Ace::Platform

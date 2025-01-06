@@ -115,7 +115,7 @@ TimeStamp GetTouchEventOriginTimeStamp(const TouchEvent& event)
     if (!pointerEvent) {
         return event.time;
     }
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(pointerEvent->GetSensorInputTime());
     TimeStamp time(microseconds);
     return time;
 }
@@ -183,7 +183,7 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
     }
     auto touchPoint = ConvertTouchPoint(item);
     TouchEvent event = ConvertTouchEventFromTouchPoint(touchPoint);
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    std::chrono::microseconds microseconds(pointerEvent->GetSensorInputTime());
     TimeStamp time(microseconds);
     event.SetTime(time)
         .SetDeviceId(pointerEvent->GetDeviceId())
@@ -409,6 +409,30 @@ void GetNonPointerAxisEventAction(int32_t action, NG::FocusAxisEvent& event)
             break;
     }
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)
+{
+    event.touchEventId = pointerEvent->GetId();
+    int32_t pointerAction = pointerEvent->GetPointerAction();
+    if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN) {
+        event.action = Ace::CrownAction::BEGIN;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
+        event.action = Ace::CrownAction::UPDATE;
+    } else if (pointerAction == MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
+        event.action = Ace::CrownAction::END;
+    } else {
+        event.action = Ace::CrownAction::UNKNOWN;
+    }
+    int32_t orgDevice = pointerEvent->GetSourceType();
+    GetEventDevice(orgDevice, event);
+    event.angularVelocity =  pointerEvent->GetVelocity();
+    event.degree =  pointerEvent->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL);
+    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
+    TimeStamp time(microseconds);
+    event.timeStamp = time;
+}
+#endif
 
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event)
 {

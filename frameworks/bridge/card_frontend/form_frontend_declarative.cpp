@@ -65,7 +65,7 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
     const std::string& url, const std::string& params, const std::string& entryPoint)
 {
-    LOGI("InnerRunCardPage");
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunCardPage");
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
         return UIContentErrorCode::NULL_URL;
@@ -88,7 +88,7 @@ UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
 UIContentErrorCode FormFrontendDeclarative::InnerRunDynamicPage(
     const std::string& url, const std::string& params, const std::string& entryPoint)
 {
-    LOGI("InnerRunDynamicPage");
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunDynamicPage");
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetCardFrontend(AceType::WeakClaim(this), cardId_);

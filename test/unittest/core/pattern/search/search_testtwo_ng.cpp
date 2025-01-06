@@ -1601,6 +1601,38 @@ HWTEST_F(SearchTestTwoNg, PatternHandleFocusEvent001, TestSize.Level1)
     EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 
+
+/**
+ * @tc.name: HalfLeading001
+ * @tc.desc: test search halfLeading
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, HalfLeading001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set halfLeading true.
+     */
+    searchModelInstance.SetHalfLeading(true);
+    frameNode->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. test halfLeading
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetHalfLeading(), true);
+}
+
 /**
  * @tc.name: SetTextFont(FrameNode* frameNode, const Font& font)
  * @tc.desc: test search
@@ -1696,5 +1728,49 @@ HWTEST_F(SearchTestTwoNg, SymbolColorToString002, TestSize.Level1)
     std::vector<Color> colors;
     auto result = searchPattern->SymbolColorToString(colors);
     EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: StopBackPress
+ * @tc.desc: Test whether the stopBackPress property is set successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, StopBackPress, TestSize.Level1)
+{
+    SearchModelNG searchModel;
+    searchModel.Create(std::nullopt, std::nullopt, std::nullopt);
+    searchModel.SetStopBackPress(false);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->isCustomKeyboardAttached_ = true;
+    /**
+     * @tc.steps: step1. Test IsStopBackPress OnBackPressed.
+     * @tc.expect: return return false.
+     */
+    EXPECT_FALSE(textFieldPattern->IsStopBackPress());
+    EXPECT_FALSE(textFieldPattern->OnBackPressed());
+    /**
+     * @tc.steps: step2. Test SelectContentOverlayManager::IsStopBackPress.
+     * @tc.expect: return false.
+     */
+    auto manager = SelectContentOverlayManager::GetOverlayManager();
+    ASSERT_NE(manager, nullptr);
+    manager->selectOverlayHolder_ = textFieldPattern->selectOverlay_;
+    textFieldPattern->selectOverlay_->OnBind(manager);
+    EXPECT_FALSE(manager->IsStopBackPress());
+    /**
+     * @tc.steps: step3. Set stopBackPress to true.
+     * @tc.expect: return true.
+     */
+    searchModel.SetStopBackPress(true);
+
+    EXPECT_TRUE(textFieldPattern->IsStopBackPress());
+    EXPECT_TRUE(textFieldPattern->OnBackPressed());
+    EXPECT_TRUE(manager->IsStopBackPress());
 }
 } // namespace OHOS::Ace::NG

@@ -123,6 +123,8 @@ void JSRenderingContext::JSBind(BindingTarget globalObj)
         "imageSmoothingEnabled", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingEnabled);
     JSClass<JSRenderingContext>::CustomProperty(
         "imageSmoothingQuality", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetImageSmoothingQuality);
+    JSClass<JSRenderingContext>::CustomProperty(
+        "letterSpacing", &JSCanvasRenderer::JSGetEmpty, &JSCanvasRenderer::JsSetLetterSpacing);
 
     // Define all methods of the "CanvasRenderingContext2D"
     JSClass<JSRenderingContext>::CustomMethod("toDataURL", &JSCanvasRenderer::JsToDataUrl);

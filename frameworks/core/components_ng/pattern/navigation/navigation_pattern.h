@@ -462,6 +462,11 @@ public:
         return navigationSize_;
     }
 
+    bool GetIsInDividerDrag() const
+    {
+        return isInDividerDrag_;
+    }
+
 private:
     void UpdateIsFullPageNavigation(const RefPtr<FrameNode>& host);
     void UpdateSystemBarStyleOnFullPageStateChange(const RefPtr<WindowManager>& windowManager);
@@ -516,6 +521,7 @@ private:
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
+    void FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& layoutWrapper);
     void NotifyPageShow(const std::string& pageName);
     void ProcessPageShowEvent();
     int32_t FireNavDestinationStateChange(NavDestinationLifecycle lifecycle);
@@ -557,7 +563,7 @@ private:
 
     void RegisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
     void UnregisterContainerModalButtonsRectChangeListener(const RefPtr<FrameNode>& hostNode);
-    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
+    virtual void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode);
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
@@ -613,6 +619,7 @@ private:
     RefPtr<TouchEventImpl> touchEvent_;
     bool enableDragBar_ = false;
     SizeF navigationSize_;
+    std::optional<NavBarPosition> preNavBarPosition_;
 };
 
 } // namespace OHOS::Ace::NG

@@ -22,6 +22,9 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "ui/view/frame_node.h"
+#include "ui/view/pattern.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/log/ace_performance_monitor.h"
@@ -41,8 +44,12 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_component_manager.h"
+#endif
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+
 
 namespace {
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -444,6 +451,7 @@ FrameNode::FrameNode(
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     layoutProperty_->SetHost(WeakClaim(this));
     layoutSeperately_ = true;
+    paintProperty_->SetHost(WeakClaim(this));
 }
 
 FrameNode::~FrameNode()
@@ -492,6 +500,7 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
+    FireOnExtraNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -1565,6 +1574,14 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
         }
         return;
     }
+#ifdef WINDOW_SCENE_SUPPORTED
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        DynamicComponentManager::TriggerOnAreaChangeCallback(this, nanoTimestamp);
+        return;
+    }
+#endif
     if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
         lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
@@ -1887,7 +1904,10 @@ void FrameNode::ThrottledVisibleTask()
     CHECK_NULL_VOID(eventHub_);
     auto& userRatios = eventHub_->GetThrottledVisibleAreaRatios();
     auto& userCallback = eventHub_->GetThrottledVisibleAreaCallback();
-    CHECK_NULL_VOID(userCallback.callback);
+    if (!userCallback.callback) {
+        throttledCallbackOnTheWay_ = false;
+        return;
+    }
     if (!throttledCallbackOnTheWay_) {
         return;
     }
@@ -3303,7 +3323,7 @@ OffsetF FrameNode::GetPositionToScreen()
     auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         auto windowManager = pipelineContext->GetWindowManager();
         auto container = Container::CurrentSafely();
         if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
@@ -3336,7 +3356,7 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     auto windowOffset = pipelineContext->GetCurrentWindowRect().GetOffset();
     OffsetF nodeOffset = GetPositionToWindowWithTransform();
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         auto windowManager = pipelineContext->GetWindowManager();
         auto container = Container::CurrentSafely();
         if (container && windowManager && windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING) {
@@ -3348,7 +3368,7 @@ OffsetF FrameNode::GetPositionToScreenWithTransform()
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and consider every ancestor node's graphic transform rotate properties
 // ancestor will check boundary of window scene(exclude)
 OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
@@ -3363,7 +3383,7 @@ OffsetF FrameNode::GetPositionToWindowWithTransform(bool fromBottom) const
         OffsetF offsetBottom(rect.GetX() + rect.Width(), rect.GetY() + rect.Height());
         offset = offsetBottom;
     }
-    
+
     PointF pointNode(offset.GetX(), offset.GetY());
     context->GetPointTransformRotate(pointNode);
     auto parent = GetAncestorNodeOfFrame(true);
@@ -3404,7 +3424,7 @@ VectorF FrameNode::GetTransformScaleRelativeToWindow() const
     return finalScale;
 }
 
-// returns a node's rect relative to window 
+// returns a node's rect relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3421,7 +3441,7 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
     return rect;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // detail graphic properites see RosenRenderContext::GetPaintRectWithTransform
 // ancestor will check boundary of window scene(exclude)
@@ -3441,7 +3461,7 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // ancestor will NOT check boundary of window scene
 OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
@@ -3459,7 +3479,7 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
-// returns a node's offset relative to window 
+// returns a node's offset relative to window
 // and accumulate every ancestor node's graphic properties such as rotate and transform
 // can exclude querying node
 // ancestor will NOT check boundary of window scene
@@ -3586,22 +3606,27 @@ std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool e
     return std::make_pair(offset, error);
 }
 
-// returns a node's offset relative to page node
+// returns a node's offset relative to stage node
 // and accumulate every ancestor node's graphic properties such as rotate and transform
-// most of applications has page offset of status bar height
-OffsetF FrameNode::GetPaintRectOffsetToPage() const
+// most of applications has stage offset of status bar height
+OffsetF FrameNode::GetPaintRectOffsetToStage() const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
     auto parent = GetAncestorNodeOfFrame();
-    while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
+    while (parent && parent->GetTag() != V2::STAGE_ETS_TAG) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
-        offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        // Eliminate the impact of default page transition
+        if (parent->GetTag() == V2::PAGE_ETS_TAG) {
+            offset += renderContext->GetPaintRectWithoutTransform().GetOffset();
+        } else {
+            offset += renderContext->GetPaintRectWithTransform().GetOffset();
+        }
         parent = parent->GetAncestorNodeOfFrame();
     }
-    return (parent && parent->GetTag() == V2::PAGE_ETS_TAG) ? offset : OffsetF();
+    return (parent && parent->GetTag() == V2::STAGE_ETS_TAG) ? offset : OffsetF();
 }
 
 std::optional<RectF> FrameNode::GetViewPort() const
@@ -4104,6 +4129,15 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 {
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE(
+            "Measure[%s][self:%d][parent:%d][key:%s][frameRect:%s][parentConstraint:%s][calcConstraint:%s]",
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+            parentConstraint.has_value() ? parentConstraint.value().ToString().c_str() : "NA",
+            layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
+                                                       : "NA");
+    }
     ArkUIPerfMonitor::GetInstance().RecordLayoutNode();
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -4118,6 +4152,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
         geometryNode_->SetFrameSize(SizeF());
         geometryNode_->UpdateMargin(MarginPropertyF());
         isLayoutDirtyMarked_ = false;
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: VisibleType::GONE", GetTag().c_str(), GetId());
         ACE_LAYOUT_TRACE_END()
         return;
     }
@@ -4128,6 +4163,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (layoutAlgorithm_->SkipMeasure()) {
         isLayoutDirtyMarked_ = false;
         ACE_LAYOUT_TRACE_END()
+        ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d] reason: SkipMeasure", GetTag().c_str(), GetId());
         return;
     }
 
@@ -4157,7 +4193,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 
     if (isConstraintNotChanged_) {
         if (!CheckNeedForceMeasureAndLayout()) {
-            ACE_SCOPED_TRACE("SkipMeasure [%s][self:%d]", GetTag().c_str(), GetId());
+            ACE_SCOPED_TRACE(
+                "SkipMeasure [%s][self:%d] reason:ConstraintNotChanged and no force-flag", GetTag().c_str(), GetId());
             layoutAlgorithm_->SetSkipMeasure();
             ACE_LAYOUT_TRACE_END()
             return;
@@ -4204,6 +4241,12 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     }
 
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("MeasureFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s][contentSize:%s]",
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
+            GetGeometryNode()->GetContentSize().ToString().c_str());
+    }
     ACE_LAYOUT_TRACE_END()
 }
 
@@ -4212,6 +4255,11 @@ void FrameNode::Layout()
 {
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
         GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(), GetId(),
+            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            GetGeometryNode()->GetFrameRect().ToString().c_str());
+    }
     if (layoutProperty_->GetLayoutRect()) {
         GetGeometryNode()->SetFrameOffset(layoutProperty_->GetLayoutRect().value().GetOffset());
     }
@@ -4261,6 +4309,11 @@ void FrameNode::Layout()
     } else {
         ACE_SCOPED_TRACE("SkipLayout [%s][self:%d]", GetTag().c_str(), GetId());
         GetLayoutAlgorithm()->SetSkipLayout();
+    }
+    if (SystemProperties::GetMeasureDebugTraceEnabled()) {
+        ACE_MEASURE_SCOPED_TRACE("LayoutFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(),
+            GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
 
     auto pipeline = GetContext();
@@ -4361,11 +4414,19 @@ void FrameNode::ProcessAccessibilityVirtualNode()
 
 void FrameNode::UpdateAccessibilityNodeRect()
 {
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
     auto accessibilityProperty = GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     auto isFocus = accessibilityProperty->GetAccessibilityFocusState();
     if (isFocus && !IsAccessibilityVirtualNode()) {
-        renderContext_->UpdateAccessibilityRoundRect();
+        if (accessibilityProperty->IsMatchAccessibilityResponseRegion(false)) {
+            auto rectInt = accessibilityProperty->GetAccessibilityResponseRegionRect(false);
+            renderContext_->UpdateAccessibilityFocusRect(rectInt);
+        } else {
+            renderContext_->UpdateAccessibilityRoundRect();
+        }
     }
 }
 
@@ -4380,10 +4441,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     bool hasTransition = geometryTransition != nullptr && geometryTransition->IsRunning(WeakClaim(this));
     if (!isActive_ && !hasTransition) {
         layoutAlgorithm_.Reset();
+        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] !isActive && !hasTransition", GetTag().c_str(), GetId());
         return false;
     }
     if (needSkipSyncGeometryNode_ && (!geometryTransition || !geometryTransition->IsNodeInAndActive(Claim(this)))) {
         layoutAlgorithm_.Reset();
+        ACE_SCOPED_TRACE("OnLayoutFinish[%s][self:%d] needSkipSyncGeometryNode", GetTag().c_str(), GetId());
         return false;
     }
     // update layout size.
@@ -4445,7 +4508,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         MarkDirtyNode(true, true, PROPERTY_UPDATE_RENDER);
     }
     layoutAlgorithm_.Reset();
-    
+
     UpdateAccessibilityNodeRect();
     ProcessAccessibilityVirtualNode();
     auto pipeline = GetContext();
@@ -4457,9 +4520,13 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
 void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& config)
 {
     if (SystemProperties::GetSyncDebugTraceEnabled()) {
-        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
-            GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
+        ACE_LAYOUT_TRACE_BEGIN("SyncGeometryNode[%s][self:%d][parent:%d][key:%s][paintRect:%s][needSyncRsNode:%d]",
+            GetTag().c_str(), GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            renderContext_->GetPaintRectWithoutTransform().ToString().c_str(), needSyncRsNode);
         ACE_LAYOUT_TRACE_END()
+    }
+    if (!needSyncRsNode) {
+        ACE_SCOPED_TRACE("SyncGeometryNode[%s][self:%d] don't needSyncRsNode", GetTag().c_str(), GetId());
     }
 
     // update border.
@@ -5093,6 +5160,9 @@ void FrameNode::InitLastArea()
     if (!lastParentOffsetToWindow_) {
         lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
     }
+    if (!lastHostParentOffsetToWindow_) {
+        lastHostParentOffsetToWindow_ = std::make_shared<OffsetF>();
+    }
 }
 
 bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
@@ -5151,7 +5221,7 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(touchEvent.time);
     event.SetDeviceId(touchEvent.deviceId);
-    event.SetPointerEvent(touchEvent.pointerEvent);
+    event.SetPointerEvent(touchEvent.GetTouchEventPointerEvent());
     TouchLocationInfo changedInfo("onTouch", touchEvent.originalId);
     PointF lastLocalPoint(touchEvent.x, touchEvent.y);
     NGGestureRecognizer::Transform(lastLocalPoint, Claim(this), false, false);
@@ -5846,6 +5916,13 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
     childrenUpdatedFrom_ = childrenUpdatedFrom_ >= 0 ? std::min(index, childrenUpdatedFrom_) : index;
 }
 
+void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
+        MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 void FrameNode::DumpOnSizeChangeInfo(std::unique_ptr<JsonValue>& json)
 {
     std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
@@ -6149,5 +6226,64 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
         }
     }
     return list;
+}
+
+void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
+{
+    CHECK_NULL_VOID(eventHub_);
+    auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
+    auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    auto& throttledVisibleAreaCallback = eventHub_->GetThrottledVisibleAreaCallback();
+    auto pipeline = GetContext();
+    if (isApproximate) {
+        eventHub_->CleanVisibleAreaCallback(true, isApproximate);
+        if (!hasInnerCallback && !hasUserCallback && pipeline) {
+            throttledCallbackOnTheWay_ = false;
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    } else {
+        eventHub_->CleanVisibleAreaCallback(true, false);
+        if (!hasInnerCallback && !throttledVisibleAreaCallback.callback && pipeline) {
+            pipeline->RemoveVisibleAreaChangeNode(GetId());
+        }
+    }
+}
+
+void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
+{
+    kitNode_ = node;
+}
+
+bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
+{
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = iter->second;
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback)
+{
+    if (!callback) {
+        return;
+    }
+    destroyCallbacks_[callbackKey] = std::move(callback);
+}
+
+void FrameNode::RemoveNodeDestroyCallback(const std::string& callbackKey)
+{
+    auto iter = destroyCallbacks_.find(callbackKey);
+    if (iter != destroyCallbacks_.end()) {
+        destroyCallbacks_.erase(iter);
+    }
+}
+
+void FrameNode::FireOnExtraNodeDestroyCallback()
+{
+    for (const auto& callback : destroyCallbacks_) {
+        callback.second();
+    }
 }
 } // namespace OHOS::Ace::NG

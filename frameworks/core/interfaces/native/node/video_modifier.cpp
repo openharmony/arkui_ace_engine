@@ -146,44 +146,62 @@ void ResetVideoShortcutKeyEnabled(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity,
-        SetVideoSurfaceBackgroundColor,
-        ResetVideoSurfaceBackgroundColor,
-        SetVideoShortcutKeyEnabled,
-        ResetVideoShortcutKeyEnabled
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
+        .setVideoSurfaceBackgroundColor = SetVideoSurfaceBackgroundColor,
+        .resetVideoSurfaceBackgroundColor = ResetVideoSurfaceBackgroundColor,
+        .setVideoShortcutKeyEnabled = SetVideoShortcutKeyEnabled,
+        .resetVideoShortcutKeyEnabled = ResetVideoShortcutKeyEnabled,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIVideoModifier* GetCJUIVideoModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

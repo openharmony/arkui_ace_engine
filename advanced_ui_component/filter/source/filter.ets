@@ -154,8 +154,7 @@ struct ListFilterRow {
   @ObjectLink isSelectedRow: BooleanArray;
   @ObjectLink filterAccessibilityText: FilterAccessibilityText;
   filterRow: FilterParams = { name: '', options: [] };
-  onItemClick: (colIndex: number) => void = () => {
-  }
+  onItemClick: (colIndex: number) => void = () => {}
   rowIndex: number = 0
   maxAppFontScale: number = 1;
   isFollowingSystemFontScale: boolean = false;
@@ -349,8 +348,7 @@ struct MultiFilterRow {
   @ObjectLink isSelectedRow: BooleanArray;
   @ObjectLink filterAccessibilityText: FilterAccessibilityText;
   filterRow: FilterParams | null = null
-  onItemClick: (colIndex: number) => void = () => {
-  }
+  onItemClick: (colIndex: number) => void = () => {}
   @State arrowBgColorRow: Resource = $r('sys.color.ohos_id_color_hover')
   @State isArrowBgHoverRow: boolean = false
   @Prop fontSizeScale: number | undefined;
@@ -467,19 +465,19 @@ struct MultiFilterRow {
   }
 
   private sendArrowAccessibility(id: string): void {
-    this.isSendArrowAccessibility = true;
-    setTimeout(() => {
+    if (this.isSendArrowAccessibility) {
       let eventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: id,
       });
-      accessibility.sendAccessibilityEvent(eventInfo);
-    }, 100);
-    setTimeout(() => {
-      this.isSendArrowAccessibility = false;
-    }, 200);
+      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+        setTimeout(() => {
+          this.isSendArrowAccessibility = false;
+        }, 200);
+      });
+    }
   }
 
   @Builder
@@ -559,6 +557,7 @@ struct MultiFilterRow {
         }
       })
       .onClick(() => {
+        this.isSendArrowAccessibility = true;
         this.replaceEffect += 1
         if (this.isArrowIconDown.value) {
           this.isArrowIconDown.value = false
@@ -698,7 +697,7 @@ struct MultiFilterRow {
                   .accessibilityDescription(this.getAccessibilityText(option,
                     this.isSelectedRow[colIndex], FilterAccessibilityType.ACCESSIBILITY_DESC))
                   .backgroundColor(this.isBackgroundHoverRow[colIndex] ?
-                    this.backgroundColorRow[colIndex] : TRANS_COLOR)
+                  this.backgroundColorRow[colIndex] : TRANS_COLOR)
                   .onClick(() => {
                     this.onItemClick(colIndex)
                     this.sendAccessibility(option, true);
@@ -895,25 +894,25 @@ export struct Filter {
       this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
       let resourceManager = getContext()?.resourceManager;
       this.filterAccessibilityText.accessibilitySelectedText =
-      resourceManager?.getStringByNameSync('filter_accessibility_selected');
+        resourceManager?.getStringByNameSync('filter_accessibility_selected');
       this.filterAccessibilityText.accessibilityUnselectedText =
-      resourceManager?.getStringByNameSync('filter_accessibility_unselected');
+        resourceManager?.getStringByNameSync('filter_accessibility_unselected');
       this.filterAccessibilityText.accessibilityFilters =
-      resourceManager?.getStringByNameSync('filter_accessibility_filters');
+        resourceManager?.getStringByNameSync('filter_accessibility_filters');
       this.filterAccessibilityText.accessibilitySelectedDesc =
-      resourceManager?.getStringByNameSync('filter_accessibility_select_desc');
+        resourceManager?.getStringByNameSync('filter_accessibility_select_desc');
       this.filterAccessibilityText.accessibilityUnselectedDesc =
-      resourceManager?.getStringByNameSync('filter_accessibility_unselect_desc');
+        resourceManager?.getStringByNameSync('filter_accessibility_unselect_desc');
       this.filterAccessibilityText.accessibilityExpandDesc =
-      resourceManager?.getStringByNameSync('filter_accessibility_expand_desc');
+        resourceManager?.getStringByNameSync('filter_accessibility_expand_desc');
       this.filterAccessibilityText.accessibilityExpanded =
-      resourceManager?.getStringByNameSync('filter_accessibility_expanded');
+        resourceManager?.getStringByNameSync('filter_accessibility_expanded');
       this.filterAccessibilityText.accessibilityCollapsed =
-      resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
+        resourceManager?.getStringByNameSync('filter_accessibility_collapsed');
       this.filterAccessibilityText.accessibilityExpand =
-      resourceManager?.getStringByNameSync('filter_accessibility_expand');
+        resourceManager?.getStringByNameSync('filter_accessibility_expand');
       this.filterAccessibilityText.accessibilityCollapse =
-      resourceManager?.getStringByNameSync('filter_accessibility_collapse');
+        resourceManager?.getStringByNameSync('filter_accessibility_collapse');
     } catch (err) {
       let code: number = (err as BusinessError).code;
       let message: string = (err as BusinessError).message;

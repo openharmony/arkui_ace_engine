@@ -149,6 +149,8 @@ public:
     };
     virtual void SetClipEdge(bool clip) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
+    virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
+    virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};

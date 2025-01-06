@@ -19,6 +19,8 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #undef protected
@@ -170,6 +172,98 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest001
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest002
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest003
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest003, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode2;
+    if (footer2) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer2();
+        footerNode2 = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode2);
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, 0);
+}
+
+/**
+ * @tc.name: WaterFlowSetFooterWithFrameNodeTest004
+ * @tc.desc: Test Footer func
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, WaterFlowSetFooterWithFrameNodeTest004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    auto footer = GetDefaultHeaderBuilder();
+    RefPtr<NG::UINode> footerNode;
+    if (footer) {
+        NG::ScopedViewStackProcessor builderViewStackProcessor;
+        footer();
+        footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    }
+    model.SetFooterWithFrameNode(footerNode);
+    auto footer2 = nullptr;
+    model.SetFooterWithFrameNode(std::move(footer2));
+    CreateWaterFlowItems(5);
+    CreateDone();
+    EXPECT_EQ(pattern_->layoutInfo_->footerIndex_, -1);
 }
 
 /**
@@ -407,6 +501,7 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 17), 200.0f);
     EXPECT_EQ(layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_LAYOUT);
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-Infinity<float>());
     EXPECT_EQ(info->startIndex_, 36);
     EXPECT_EQ(info->endIndex_, 49);
@@ -547,6 +642,7 @@ HWTEST_F(WaterFlowTestNg, Jump002, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateWaterFlowItems(100);
     CreateDone();
+    pattern_->isAnimationStop_ = false; // to disable skipping
 
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
@@ -591,6 +687,7 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
     CreateWaterFlowItems(100);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
@@ -714,6 +811,7 @@ HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
     CreateWaterFlowItems(43);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-4000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);
@@ -787,5 +885,52 @@ HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 26);
     EXPECT_EQ(GetChildY(frameNode_, 26), 720.0f);
+}
+
+/**
+ * @tc.name: SafeAreaExpand001
+ * @tc.desc: When set SafeAreaExpand, layout expands to safeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
+{
+    // "[480.00px x 800.00px]"
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetFooter(GetDefaultHeaderBuilder());
+    for (int i = 0; i < 40; ++i) {
+        CreateItemWithHeight(100.0f);
+    }
+    bool reachEnd = false;
+    model.SetOnReachEnd([&reachEnd]() { reachEnd = true; });
+    CreateDone();
+
+    EXPECT_EQ(layoutProperty_->GetCalcLayoutConstraint()->selfIdealSize->ToString(), "[480.00px x 800.00px]");
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 15);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 0.0f);
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(4)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 18), 100.0f);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 480, 800)));
+
+    ScrollToIndex(39, false, ScrollAlign::END);
+    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_TRUE(GetChildFrameNode(frameNode_, 0)->IsActive());
+    EXPECT_EQ(reachEnd, false);
+
+    UpdateCurrentOffset(-50.0f);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(reachEnd, true);
 }
 } // namespace OHOS::Ace::NG

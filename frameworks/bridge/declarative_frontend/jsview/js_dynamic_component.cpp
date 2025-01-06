@@ -55,6 +55,7 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDynamicComponent>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSDynamicComponent>::StaticMethod("width", &JSDynamicComponent::Width, opt);
     JSClass<JSDynamicComponent>::StaticMethod("height", &JSDynamicComponent::Height, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onError", &JSDynamicComponent::JsOnError, opt);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -68,6 +69,7 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
     auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
     auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
+    auto backgroundTransparentValue = dynamicComponentArg->GetProperty("backgroundTransparent");
     if (!entryPointValue->IsString()) {
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
@@ -88,8 +90,13 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
         worker->IsRunning(), worker->GetName().c_str());
     auto entryPoint = entryPointValue->ToString();
+    bool backgroundTransparent = true;
+    if (backgroundTransparentValue->IsBoolean()) {
+        backgroundTransparent = backgroundTransparentValue->ToBoolean();
+    }
     NG::UIExtensionConfig config;
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
+    config.backgroundTransparent = backgroundTransparent;
     UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -107,6 +114,36 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
             },
             TaskExecutor::TaskType::UI, "ArkUIDynamicComponentInitialize");
     });
+}
+
+void JSDynamicComponent::JsOnError(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_ISOLATED_COMPONENT, "onError argument is invalid");
+        return;
+    }
+
+    WeakPtr<NG::FrameNode> frameNode =
+        AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto execCtx = info.GetExecutionContext();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto instanceId = Container::CurrentId();
+    auto onError = [execCtx, func = std::move(jsFunc), instanceId, node = frameNode]
+        (int32_t code, const std::string& name, const std::string& message) {
+            ContainerScope scope(instanceId);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("DynamicComponent.onError");
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            JSRef<JSObject> obj = JSRef<JSObject>::New();
+            obj->SetProperty<int32_t>("code", code);
+            obj->SetProperty<std::string>("name", name);
+            obj->SetProperty<std::string>("message", message);
+            auto returnValue = JSRef<JSVal>::Cast(obj);
+            func->ExecuteJS(1, &returnValue);
+        };
+    UIExtensionModel::GetInstance()->SetPlatformOnError(std::move(onError));
 }
 
 void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)

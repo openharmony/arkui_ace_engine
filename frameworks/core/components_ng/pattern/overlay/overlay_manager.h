@@ -68,6 +68,7 @@ struct GatherNodeChildInfo {
     float height = 0.0f;
     float halfWidth = 0.0f;
     float halfHeight = 0.0f;
+    WeakPtr<FrameNode> preImageNode;
 };
 
 struct DismissTarget {
@@ -93,6 +94,9 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+struct OverlayManagerInfo {
+    bool renderRootOverlay = true;
+};
 
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
@@ -115,6 +119,7 @@ public:
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -252,6 +257,7 @@ public:
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
@@ -636,6 +642,18 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+    {
+        if (overlayInfo_.has_value()) {
+            return false;
+        }
+        overlayInfo_ = overlayInfo;
+        return true;
+    }
+    std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return overlayInfo_;
+    }
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
@@ -798,6 +816,8 @@ private:
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
+    void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
+        const RefPtr<FrameNode> dialog, bool showComponentContent);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -819,6 +839,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -890,6 +911,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG
 

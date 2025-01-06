@@ -14,7 +14,6 @@
  */
 
 #include "text_input_base.h"
-#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 

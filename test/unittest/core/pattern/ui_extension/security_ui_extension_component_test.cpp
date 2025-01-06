@@ -920,4 +920,360 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionDpiTest, TestSiz
     EXPECT_TRUE(pattern->GetDensityDpi());
 #endif
 }
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern Initialize and CreateLayoutAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, InitializeTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    NG::UIExtensionConfig config;
+
+    /**
+     * @tc.steps: step2. sessionWrapper_ is null ptr
+     */
+    pattern->sessionWrapper_ = nullptr;
+    pattern->Initialize(config);
+
+    /**
+     * @tc.steps: step3. sessionWrapper_ is not null ptr
+     */
+    pattern->sessionWrapper_ =
+        AceType::MakeRefPtr<SecuritySessionWrapperImpl>(pattern, pattern->instanceId_, false,
+        SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->Initialize(config);
+
+    /**
+     * @tc.steps: step3. test CreateLayoutAlgorithm
+     */
+    ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern OnExtensionDetachToDisplay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, OnExtensionDetachToDisplayTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. contentNode_  is null ptr
+     */
+    pattern->contentNode_  = nullptr;
+    pattern->OnExtensionDetachToDisplay();
+
+    /**
+     * @tc.steps: step3. contentNode_  is not null ptr
+     */
+    auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto placeholderNode = FrameNode::GetOrCreateFrameNode(
+        "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    pattern->contentNode_  = placeholderNode;
+    ASSERT_NE(pattern->contentNode_, nullptr);
+    pattern->OnExtensionDetachToDisplay();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern DispatchFollowHostDensity and OnDpiConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, DispatchFollowHostDensityTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. test DispatchFollowHostDensity
+     */
+    bool densityDpi = true;
+    pattern->densityDpi_ = false;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_TRUE(pattern->densityDpi_);
+
+    densityDpi = false;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_FALSE(pattern->densityDpi_);
+
+    /**
+     * @tc.steps: step3. test OnDpiConfigurationUpdate
+     */
+    ASSERT_FALSE(pattern->GetDensityDpi());
+    pattern->OnDpiConfigurationUpdate();
+
+    densityDpi = true;
+    pattern->DispatchFollowHostDensity(densityDpi);
+    ASSERT_TRUE(pattern->GetDensityDpi());
+    pattern->OnDpiConfigurationUpdate();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern OnLanguageConfigurationUpdate, OnColorConfigurationUpdate and GetSessionId
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, OnLanguageConfigurationUpdateTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+    pattern->sessionWrapper_ = nullptr;
+    ASSERT_EQ(pattern->sessionWrapper_, nullptr);
+
+    /**
+     * @tc.steps: step2. sessionWrapper_ is nullptr
+     */
+    pattern->OnLanguageConfigurationUpdate();
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(pattern->GetSessionId(), 0);
+
+    /**
+     * @tc.steps: step3. sessionWrapper_ is not nullptr
+     */
+    pattern->sessionWrapper_ =
+        AceType::MakeRefPtr<SecuritySessionWrapperImpl>(pattern, pattern->instanceId_, false,
+        SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    pattern->OnLanguageConfigurationUpdate();
+    pattern->OnColorConfigurationUpdate();
+    ASSERT_EQ(pattern->GetSessionId(), pattern->sessionWrapper_->GetSessionId());
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionDpiTest
+ * @tc.desc: Test pattern DumpInfo and DumpInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, DumpInfoTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
+     */
+    auto pattern = CreateSecurityUEC();
+
+    /**
+     * @tc.steps: step2. test DumpInfo
+     */
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo();
+
+    /**
+     * @tc.steps: step3. test DumpInfo with one param
+     */
+    std::string testJson = "";
+    std::unique_ptr<JsonValue> testValue = JsonUtil::ParseJsonString(testJson);
+
+    pattern->platformEventProxy_ = nullptr;
+    ASSERT_EQ(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo(testValue);
+
+    pattern->platformEventProxy_ = AceType::MakeRefPtr<PlatformEventProxy>();
+    ASSERT_NE(pattern->platformEventProxy_, nullptr);
+    pattern->DumpInfo(testValue);
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionEventTest
+ * @tc.desc: Test pattern Test OnExtensionEvent, OnUeaAccessibilityEventAsync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionEventTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnExtensionEvent
+     */
+    UIExtCallbackEventId eventId = UIExtCallbackEventId::ON_AREA_CHANGED;
+    pattern->OnExtensionEvent(eventId);
+    eventId = UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY;
+    pattern->OnExtensionEvent(eventId);
+
+    /**
+     * @tc.steps: step3. test OnUeaAccessibilityEventAsync
+     */
+    pattern->AttachToFrameNode(uiExtensionNode);
+    NG::UIExtensionConfig config;
+    config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    config.transferringCaller = true;
+    config.densityDpi = true;
+    pattern->Initialize(config);
+    ASSERT_NE(pattern->sessionWrapper_, nullptr);
+    ASSERT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(pattern, 1);
+    ASSERT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
+
+    auto frameNode = pattern->frameNode_.Upgrade();
+    ASSERT_NE(frameNode, nullptr);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    ASSERT_EQ(accessibilityProperty->GetChildTreeId(), -1);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->InitializeAccessibility();
+    pattern->OnSetAccessibilityChildTree(1, 1);
+    pattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    pattern->OnAccessibilityChildTreeDeregister();
+    EXPECT_EQ(accessibilityProperty->GetChildTreeId(), 1);
+    pattern->OnUeaAccessibilityEventAsync();
+
+    pattern->frameNode_ = nullptr;
+    ASSERT_EQ(pattern->frameNode_.Upgrade(), nullptr);
+    pattern->OnUeaAccessibilityEventAsync();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionChildTreeTest
+ * @tc.desc: Test pattern about child tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionChildTreeTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtensionNode);
+    pattern->OnModifyDone();
+    auto property = uiExtensionNode->GetAccessibilityProperty<AccessibilityProperty>();
+    ASSERT_NE(property, nullptr);
+    pattern->InitializeAccessibility();
+    pattern->OnSetAccessibilityChildTree(1, 1);
+    pattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    pattern->OnAccessibilityChildTreeDeregister();
+    EXPECT_EQ(property->GetChildWindowId(), 1);
+    EXPECT_EQ(property->GetChildTreeId(), 1);
+
+    uiExtensionNode->accessibilityProperty_ = nullptr;
+    InvalidSessionWrapper(pattern);
+    pattern->InitializeAccessibility();
+    pattern->OnSetAccessibilityChildTree(1, 1);
+    pattern->OnAccessibilityChildTreeRegister(1, 1, 1);
+    pattern->OnAccessibilityChildTreeDeregister();
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    pattern->OnAccessibilityDumpChildInfo(params, info);
+    EXPECT_EQ(params.size(), 0);
+    pattern->accessibilityChildTreeCallback_ = std::make_shared<PlatformAccessibilityChildTreeCallback>(pattern, 1);
+    pattern->InitializeAccessibility();
+#endif
+}
+
+/**
+ * @tc.name: SecurityUIExtensionChildTreeCallbackTest
+ * @tc.desc: Test OnRegister, OnDeregister, OnSetChildTree, OnDumpChildInfo, OnClearRegisterFlag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionChildTreeCallbackTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct an PlatformAccessibilityChildTreeCallback
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
+    NG::UIExtensionConfig config;
+    config.sessionType = SessionType::SECURITY_UI_EXTENSION_ABILITY;
+    config.transferringCaller = true;
+    config.densityDpi = true;
+    pattern->Initialize(config);
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(pattern->GetAccessibilitySessionAdapter(), nullptr);
+    ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
+    PlatformAccessibilityChildTreeCallback callback = PlatformAccessibilityChildTreeCallback(pattern, 1);
+    ASSERT_FALSE(callback.isReg_);
+
+    /**
+     * @tc.steps: step2. Test OnRegister
+     */
+    ASSERT_TRUE(callback.OnRegister(1, 1));
+    ASSERT_TRUE(callback.isReg_);
+    ASSERT_TRUE(callback.OnRegister(1, 1));
+    auto weakPtr = WeakPtr<SecurityUIExtensionPattern>(nullptr);
+    PlatformAccessibilityChildTreeCallback callbackNull = PlatformAccessibilityChildTreeCallback(weakPtr, 1);
+    ASSERT_FALSE(callbackNull.OnRegister(1, 1));
+
+    /**
+     * @tc.steps: step3. Test OnDeregister
+     */
+    ASSERT_FALSE(callbackNull.OnDeregister());
+    ASSERT_TRUE(callback.OnDeregister());
+    ASSERT_FALSE(callbackNull.isReg_);
+    ASSERT_TRUE(callback.OnDeregister());
+
+    /**
+     * @tc.steps: step4. Test OnSetChildTree
+     */
+    ASSERT_FALSE(callbackNull.OnSetChildTree(1, 1));
+    ASSERT_TRUE(callback.OnSetChildTree(1, 1));
+
+    /**
+     * @tc.steps: step5. Test OnDumpChildInfo
+     */
+    std::vector<std::string> params;
+    std::vector<std::string> info;
+    ASSERT_FALSE(callbackNull.OnDumpChildInfo(params, info));
+    ASSERT_TRUE(callback.OnDumpChildInfo(params, info));
+
+    /**
+     * @tc.steps: step6. Test OnClearRegisterFlag
+     */
+    callbackNull.OnClearRegisterFlag();
+    callback.OnClearRegisterFlag();
+    ASSERT_FALSE(callback.isReg_);
+#endif
+}
 } //namespace OHOS::Ace::NG

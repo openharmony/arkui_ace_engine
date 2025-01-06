@@ -35,6 +35,7 @@
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 #include "core/interfaces/native/node/image_animator_modifier.h"
 #include "core/interfaces/native/node/line_modifier.h"
+#include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
@@ -80,7 +81,9 @@
 #include "core/interfaces/native/node/polygon_modifier.h"
 #include "core/interfaces/native/node/polyline_modifier.h"
 #include "core/interfaces/native/node/progress_modifier.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#endif
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/rating_modifier.h"
 #include "core/interfaces/native/node/rect_modifier.h"
@@ -100,6 +103,7 @@
 #include "core/interfaces/native/node/tabs_modifier.h"
 #include "core/interfaces/native/node/text_clock_modifier.h"
 #include "core/interfaces/native/node/text_timer_modifier.h"
+#include "core/interfaces/native/node/theme_modifier.h"
 #include "core/interfaces/native/node/video_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 
@@ -131,14 +135,22 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCounterModifier,
         .getRowModifier = NodeModifier::GetRowModifier,
+    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
         .getTextModifier = NodeModifier::GetTextModifier,
         .getButtonModifier = NodeModifier::GetButtonModifier,
         .getToggleModifier = NodeModifier::GetToggleModifier,
         .getImageSpanModifier = NodeModifier::GetImageSpanModifier,
         .getBlankModifier = NodeModifier::GetBlankModifier,
         .getSearchModifier = NodeModifier::GetSearchModifier,
+    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetSelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
         .getRadioModifier = NodeModifier::GetRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetTimepickerModifier,
@@ -147,7 +159,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getSliderModifier = NodeModifier::GetSliderModifier,
         .getDividerModifier = NodeModifier::GetDividerModifier,
         .getStackModifier = NodeModifier::GetStackModifier,
+    #ifndef ARKUI_WEARABLE
         .getFolderStackModifier = NodeModifier::GetFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
         .getNavDestinationModifier = NodeModifier::GetNavDestinationModifier,
         .getGridModifier = NodeModifier::GetGridModifier,
         .getGridColModifier = NodeModifier::GetGridColModifier,
@@ -164,24 +180,48 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetNavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetNodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
         .getLineModifier = NodeModifier::GetLineModifier,
         .getPathModifier = NodeModifier::GetPathModifier,
         .getPolygonModifier = NodeModifier::GetPolygonModifier,
         .getPolylineModifier = NodeModifier::GetPolylineModifier,
         .getSpanModifier = NodeModifier::GetSpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetSideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
+    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetTabsModifier,
+    #else
+        .getTabsModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
         .getHyperlinkModifier = NodeModifier::GetHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetMarqueeModifier,
         .getMenuItemModifier = NodeModifier::GetMenuItemModifier,
         .getMenuModifier = NodeModifier::GetMenuModifier,
         .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
+    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
+    #else
+        .getWaterFlowModifier = nullptr,
+    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetGaugeModifier,
@@ -196,7 +236,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getListItemModifier = NodeModifier::GetListItemModifier,
         .getListModifier = NodeModifier::GetListModifier,
         .getListItemGroupModifier = NodeModifier::GetListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetLoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetTextClockModifier,
         .getTextTimerModifier = NodeModifier::GetTextTimerModifier,
@@ -221,7 +265,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getFlexModifier = NodeModifier::GetFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetScrollerModifier,
+    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetTabContentModifier,
+    #else
+        .getTabContentModifier = nullptr,
+    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
@@ -238,7 +286,11 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetRelativeContainerModifier, // RelativeContainerModifier
         .getParticleModifier = NodeModifier::GetParticleModifier,
+    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetNodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
         .getSymbolGlyphModifier = NodeModifier::GetSymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetSymbolSpanModifier,
     #ifdef MODEL_COMPONENT_SUPPORTED
@@ -248,12 +300,14 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
     #endif
         .getContainerSpanModifier = NodeModifier::GetContainerSpanModifier,
         .getCustomNodeExtModifier = nullptr,
+        .getThemeModifier = NodeModifier::GetThemeModifier,
+        .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 4; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(impl) / sizeof(void*),
         "ensure all fields are explicitly initialized");
@@ -269,14 +323,22 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCheckboxGroupModifier = NodeModifier::GetCJUICheckboxGroupModifier,
         .getCounterModifier = NodeModifier::GetCJUICounterModifier,
         .getRowModifier = NodeModifier::GetCJUIRowModifier,
+    #ifndef ARKUI_WEARABLE
         .getRowSplitModifier = NodeModifier::GetCJUIRowSplitModifier,
+    #else
+        .getRowSplitModifier = nullptr,
+    #endif
         .getTextModifier = NodeModifier::GetCJUITextModifier,
         .getButtonModifier = NodeModifier::GetCJUIButtonModifier,
         .getToggleModifier = NodeModifier::GetCJUIToggleModifier,
         .getImageSpanModifier = NodeModifier::GetCJUIImageSpanModifier,
         .getBlankModifier = NodeModifier::GetCJUIBlankModifier,
         .getSearchModifier = NodeModifier::GetCJUISearchModifier,
+    #ifndef ARKUI_WEARABLE
         .getSelectModifier = NodeModifier::GetCJUISelectModifier,
+    #else
+        .getSelectModifier = nullptr,
+    #endif
         .getRadioModifier = NodeModifier::GetCJUIRadioModifier,
         .getCheckboxModifier = NodeModifier::GetCJUICheckboxModifier,
         .getTimepickerModifier = NodeModifier::GetCJUITimepickerModifier,
@@ -285,7 +347,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getSliderModifier = NodeModifier::GetCJUISliderModifier,
         .getDividerModifier = NodeModifier::GetCJUIDividerModifier,
         .getStackModifier = NodeModifier::GetCJUIStackModifier,
+    #ifndef ARKUI_WEARABLE
         .getFolderStackModifier = NodeModifier::GetCJUIFolderStackModifier,
+    #else
+        .getFolderStackModifier = nullptr,
+    #endif
         .getNavDestinationModifier = NodeModifier::GetCJUINavDestinationModifier,
         .getGridModifier = NodeModifier::GetCJUIGridModifier,
         .getGridColModifier = NodeModifier::GetCJUIGridColModifier,
@@ -302,24 +368,48 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getNavRouterModifier = NodeModifier::GetCJUINavRouterModifier,
         .getNodeContainerModifier = NodeModifier::GetCJUINodeContainerModifier,
         .getPatternLockModifier = NodeModifier::GetCJUIPatternLockModifier,
+    #ifndef ARKUI_WEARABLE
         .getColumnSplitModifier = NodeModifier::GetCJUIColumnSplitModifier,
+    #else
+        .getColumnSplitModifier = nullptr,
+    #endif
         .getLineModifier = NodeModifier::GetCJUILineModifier,
         .getPathModifier = NodeModifier::GetCJUIPathModifier,
         .getPolygonModifier = NodeModifier::GetCJUIPolygonModifier,
         .getPolylineModifier = NodeModifier::GetCJUIPolylineModifier,
         .getSpanModifier = NodeModifier::GetCJUISpanModifier,
         .getImageAnimatorModifier = NodeModifier::GetCJUIImageAnimatorModifier,
+    #ifndef ARKUI_WEARABLE
         .getSideBarContainerModifier = NodeModifier::GetCJUISideBarContainerModifier,
+    #else
+        .getSideBarContainerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
+    #else
+        .getCalendarPickerModifier = nullptr,
+    #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
+    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
+    #else
+        .getTabsModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
+    #else
+        .getStepperItemModifier = nullptr,
+    #endif
         .getHyperlinkModifier = NodeModifier::GetCJUIHyperlinkModifier,
         .getMarqueeModifier = NodeModifier::GetCJUIMarqueeModifier,
         .getMenuItemModifier = nullptr,
         .getMenuModifier = NodeModifier::GetCJUIMenuModifier,
         .getDatePickerModifier = NodeModifier::GetCJUIDatePickerModifier,
+    #ifndef ARKUI_WEARABLE
         .getWaterFlowModifier = NodeModifier::GetCJUIWaterFlowModifier,
+    #else
+        .getWaterFlowModifier = nullptr,
+    #endif
         .getAlphabetIndexerModifier = NodeModifier::GetCJUIAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetCJUIDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetCJUIGaugeModifier,
@@ -333,7 +423,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getListItemModifier = NodeModifier::GetCJUIListItemModifier,
         .getListModifier = NodeModifier::GetCJUIListModifier,
         .getListItemGroupModifier = NodeModifier::GetCJUIListItemGroupModifier,
+    #ifdef QRCODEGEN_SUPPORT
         .getQRCodeModifier = NodeModifier::GetCJUIQRCodeModifier,
+    #else
+        .getQRCodeModifier = nullptr,
+    #endif
         .getLoadingProgressModifier = NodeModifier::GetCJUILoadingProgressModifier,
         .getTextClockModifier = NodeModifier::GetCJUITextClockModifier,
         .getTextTimerModifier = NodeModifier::GetCJUITextTimerModifier,
@@ -362,7 +456,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getFlexModifier = NodeModifier::GetCJUIFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetCJUIScrollerModifier,
+    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetCJUITabContentModifier,
+    #else
+        .getTabContentModifier = nullptr,
+    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
@@ -378,7 +476,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getRichEditorControllerModifier = nullptr, // RichEditorControllerModifier
         .getTextAreaControllerModifier = nullptr, // TextAreaControllerModifier
         .getRelativeContainerModifier = NodeModifier::GetCJUIRelativeContainerModifier, // RelativeContainerModifier
+    #ifndef ARKUI_WEARABLE
         .getNodeContentModifier = NodeModifier::GetCJUINodeContentModifier,
+    #else
+        .getNodeContentModifier = nullptr,
+    #endif
         .getParticleModifier = NodeModifier::GetCJUIParticleModifier,
         .getSymbolGlyphModifier = NodeModifier::GetCJUISymbolGlyphModifier,
         .getSymbolSpanModifier = NodeModifier::GetCJUISymbolSpanModifier,
@@ -395,7 +497,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
     constexpr auto ifdefOverhead = 4; // don't modify this line
     constexpr auto overHeadLines = 3; // don't modify this line
     constexpr auto blankLines = 6; // modify this line accordingly
-    constexpr auto ifdefs = 4; // modify this line accordingly
+    constexpr auto ifdefs = 16; // modify this line accordingly
     constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
     static_assert(initializedFieldLines == sizeof(modifiers) / sizeof(void*),
         "ensure all fields are explicitly initialized");

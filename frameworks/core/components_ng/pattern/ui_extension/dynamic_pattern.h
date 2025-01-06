@@ -45,6 +45,7 @@ public:
     void SetAdaptiveHeight(bool state);
     void OnAttachContext(PipelineContext *context) override;
     void OnDetachContext(PipelineContext *context) override;
+    void DumpDynamicRenderer(int32_t depth, bool hasJson);
 
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
@@ -60,6 +61,8 @@ public:
 
     void InitializeAccessibility();
     void ResetAccessibilityChildTreeCallback();
+
+    void SetBackgroundTransparent(bool backgroundTransparent);
 
 private:
     void InitializeRender(void* runtime);
@@ -77,6 +80,7 @@ private:
     RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
     bool adaptiveWidth_ = false;
     bool adaptiveHeight_ = false;
+    bool backgroundTransparent_ = true;
     IsolatedInfo curDynamicInfo_;
     DynamicDumpInfo dynamicDumpInfo_;
     int32_t uiExtensionId_ = 0;

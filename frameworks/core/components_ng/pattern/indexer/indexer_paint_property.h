@@ -145,6 +145,22 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndexerBorderRadius, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackgroundBlurStyle, BlurStyleOption, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupTitleBackground, Color, PROPERTY_UPDATE_RENDER);
+
+protected:
+    void UpdateLayoutProperty(const IndexerPaintProperty* layoutProperty)
+    {
+        propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
+        propPopupBackground_ = ClonePopupBackground();
+        propPopupSelectedColor_ = ClonePopupSelectedColor();
+        propPopupUnselectedColor_ = ClonePopupUnselectedColor();
+        propPopupItemBackground_ = ClonePopupItemBackground();
+        propPopupBorderRadius_ = ClonePopupBorderRadius();
+        propPopupItemBorderRadius_ = ClonePopupItemBorderRadius();
+        propItemBorderRadius_ = CloneItemBorderRadius();
+        propIndexerBorderRadius_ = CloneIndexerBorderRadius();
+        propPopupBackgroundBlurStyle_ = ClonePopupBackgroundBlurStyle();
+        propPopupTitleBackground_ = ClonePopupTitleBackground();
+    }
 };
 } // namespace OHOS::Ace::NG
 

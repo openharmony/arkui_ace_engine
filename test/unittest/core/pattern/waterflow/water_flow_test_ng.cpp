@@ -14,7 +14,9 @@
  */
 
 #ifndef TEST_SEGMENTED_WATER_FLOW
+#define protected public
 #include "test/mock/base/mock_system_properties.h"
+#undef protected
 #endif
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -2131,6 +2133,7 @@ HWTEST_F(WaterFlowTestNg, Delete001, TestSize.Level1)
     CreateWaterFlowItems(43);
     CreateDone();
 
+    pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-4000.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 31);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 42);

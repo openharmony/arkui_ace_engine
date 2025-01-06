@@ -108,7 +108,11 @@ void ToastLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (GetLineCount(text, layoutConstraint) > 1) {
         auto textLayoutProp = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProp);
-        textLayoutProp->UpdateTextAlign(TextAlign::START);
+        auto context = toastNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto toastTheme = context->GetTheme<ToastTheme>();
+        CHECK_NULL_VOID(toastTheme);
+        textLayoutProp->UpdateTextAlign(toastTheme->GetMultiLineTextAlign());
     }
     text->Measure(layoutConstraint);
     PerformMeasureSelf(layoutWrapper);

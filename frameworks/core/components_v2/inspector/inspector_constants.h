@@ -79,6 +79,8 @@ ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
 // js if else node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
+// js with theme node
+ACE_EXPORT extern const char JS_WITH_THEME_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
@@ -622,5 +624,21 @@ ACE_FORCE_EXPORT extern const char MOVING_PHOTO_ETS_TAG[];
 
 // CustomSpanNode
 ACE_EXPORT extern const char CUSTOM_SPAN_NODE_ETS_TAG[];
+
+// LinearIndicator
+ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
+
+// ArcList
+ACE_EXPORT extern const char ARC_LIST_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ETS_TAG[];
+
+// ArcListItem
+ACE_EXPORT extern const char ARC_LIST_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ITEM_ETS_TAG[];
+
+// ArcScrollBar
+ACE_EXPORT extern const char ARC_SCROLL_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

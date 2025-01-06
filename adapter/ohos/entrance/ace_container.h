@@ -61,6 +61,9 @@ namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
+using SubSystemId = OHOS::Rosen::SubSystemId;
+using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -314,6 +317,10 @@ public:
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
     bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    bool DumpCommon(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
+    bool DumpDynamicUiContent(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
 
     bool DumpInfo(const std::vector<std::string>& params);
 
@@ -542,6 +549,8 @@ public:
 
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void ProcessColorModeUpdate(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration);
     void UpdateConfigurationSyncForAll(
@@ -619,8 +628,7 @@ public:
     uint32_t GetParentMainWindowId(uint32_t currentWindowId) const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback) override;
+    bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback) override;
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
@@ -728,6 +736,7 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+    void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
     {
@@ -773,6 +782,15 @@ private:
     DeviceOrientation ProcessDirectionUpdate(
         const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void InitDragEventCallback();
+
+    void RegisterUIExtDataConsumer();
+    void UnRegisterUIExtDataConsumer();
+    void DispatchUIExtDataConsume(
+        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void RegisterUIExtDataSendToHost();
+    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
