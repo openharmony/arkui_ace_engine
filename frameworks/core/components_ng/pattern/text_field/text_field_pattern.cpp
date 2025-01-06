@@ -1593,6 +1593,20 @@ void TextFieldPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 }
 
+bool TextFieldPattern::IsShowTranslate()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    return textFieldTheme->GetTranslateIsSupport();
+}
+
 void TextFieldPattern::HandleOnCameraInput()
 {
     LOGI("TextFieldPattern::HandleOnCameraInput");
@@ -2956,6 +2970,7 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
     TriggerAvoidWhenCaretGoesDown();
+    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
 }

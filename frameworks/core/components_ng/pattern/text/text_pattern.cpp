@@ -712,6 +712,17 @@ void TextPattern::HandleOnSelectAll()
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+bool TextPattern::IsShowTranslate()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, false);
+    return textTheme->IsShowTranslate();
+}
+
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     constexpr int32_t longPressDelay = 600;
@@ -2313,6 +2324,7 @@ void TextPattern::OnModifyDone()
         }
     }
     bool enabledCache = eventHub->IsEnabled();
+    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     selectOverlay_->UpdateHandleColor();
     if (textDetectEnable_ && enabledCache != enabled_) {
         enabled_ = enabledCache;

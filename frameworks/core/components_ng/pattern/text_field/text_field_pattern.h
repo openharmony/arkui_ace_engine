@@ -953,6 +953,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowTranslate();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
     void GetAIWriteInfo(AIWriteInfo& info);

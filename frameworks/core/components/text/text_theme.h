@@ -73,6 +73,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto textShowTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->isShowTranslate_ = StringUtils::StringToInt(textShowTranslate);
             theme->urlDisabledColor_ = pattern->GetAttr<Color>(
                 "text_url_disabled_color", Color(0xff007dff)).BlendOpacity(URL_DISA_OPACITY);
             theme->urlDefaultColor_ = pattern->GetAttr<Color>("text_url_default_color", Color(0xff007dff));
@@ -113,6 +115,11 @@ public:
         return isShowHandle_;
     }
 
+    bool IsShowTranslate() const
+    {
+        return isShowTranslate_;
+    }
+
     const Color& GetDragBackgroundColor() const
     {
         return dragBackgroundColor_;
@@ -149,6 +156,7 @@ private:
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    bool isShowTranslate_ = false;
     Color urlDisabledColor_;
     Color urlDefaultColor_;
     Color urlHoverColor_;

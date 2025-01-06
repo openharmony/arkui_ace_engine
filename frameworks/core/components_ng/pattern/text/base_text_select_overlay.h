@@ -261,6 +261,11 @@ public:
         return enableContainerModal_;
     }
 
+    void SetMenuTranslateIsSupport(bool menuTranslateIsSupport)
+    {
+        menuTranslateIsSupport_ = menuTranslateIsSupport;
+    }
+
 protected:
     RectF MergeSelectedBoxes(
         const std::vector<RectF>& boxes, const RectF& contentRect, const RectF& textRect, const OffsetF& paintOffset);
@@ -312,12 +317,21 @@ protected:
     {
         enableContainerModal_ = true;
     }
+    bool IsNeedMenuTranslate();
+    void HandleOnTranslate();
+    virtual bool AllowTranslate()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
     OnCreateMenuCallback onCreateMenuCallback_;
     OnMenuItemClickCallback onMenuItemClick_;
     bool isHandleMoving_ = false;
+    RectF ConvertWindowToScreenDomain(RectF rect);
+    EdgeF ConvertWindowToScreenDomain(EdgeF edge);
+    std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
@@ -342,6 +356,7 @@ private:
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
     bool enableContainerModal_ = false;
+    bool menuTranslateIsSupport_ = false;
 };
 
 } // namespace OHOS::Ace::NG

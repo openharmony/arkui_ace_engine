@@ -53,7 +53,6 @@ public:
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     std::string GetSelectedText() override;
     bool IsStopBackPress() const override;
 
@@ -94,6 +93,10 @@ public:
         return !HasRenderTransform();
     }
     std::optional<Color> GetHandleColor() override;
+
+protected:
+    bool AllowTranslate() override;
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);
