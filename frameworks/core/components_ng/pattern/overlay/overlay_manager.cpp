@@ -756,7 +756,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
             node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
             overlayManager->OnDialogCloseEvent(node);
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent", PriorityType::VIP);
 }
 
 void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
@@ -1303,7 +1303,7 @@ void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
                 overlayManager->SendToAccessibility(menuWK, false);
                 overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation", PriorityType::VIP);
     }
 }
 
@@ -1647,7 +1647,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->MountPopup(targetId, popupInfo, std::move(callback), interactiveDismiss);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayShowPopup");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayShowPopup", PriorityType::VIP);
     } else {
         MountPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     }
@@ -5083,7 +5083,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         overlayManager->RemoveChildWithService(root, sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
+                    TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation", PriorityType::VIP);
             });
     }
 }
@@ -6690,7 +6690,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
                 rootNode->RemoveChild(frameNode);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent", PriorityType::VIP);
     });
     gatherNodeWeak_ = nullptr;
     hasGatherNode_ = false;
