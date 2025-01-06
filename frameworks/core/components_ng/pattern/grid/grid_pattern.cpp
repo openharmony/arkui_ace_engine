@@ -1065,7 +1065,7 @@ void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delt
     float heightInView = info_.totalHeightOfItemsInView_;
     if (info_.HeightSumSmaller(viewport, mainGap)) {
         // content < viewport, use viewport height to calculate overScroll
-        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) - mainGap;
+        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap);
     }
     float disToBot = info_.GetDistanceToBottom(viewport, heightInView, mainGap);
     if (!info_.IsOutOfEnd(mainGap, true)) {

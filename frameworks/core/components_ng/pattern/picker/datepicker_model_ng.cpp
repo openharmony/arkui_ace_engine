@@ -329,6 +329,16 @@ void DatePickerModelNG::SetSelectedDate(const PickerDate& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
 }
 
+void DatePickerModelNG::SetMode(const DatePickerMode& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetMode(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Mode, value);
+}
+
 void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -592,6 +602,15 @@ void DatePickerModelNG::SetSelectedDate(FrameNode* frameNode, const PickerDate& 
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, SelectedDate, datePickerPattern->GetSelectDate());
 }
 
+void DatePickerModelNG::SetMode(FrameNode* frameNode, const DatePickerMode& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetMode(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Mode, value);
+}
+
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -816,6 +835,14 @@ LunarDate DatePickerModelNG::getSelectedDate(FrameNode* frameNode)
     lunarDate.month = pickerDate.GetMonth();
     lunarDate.day = pickerDate.GetDay();
     return lunarDate;
+}
+
+DatePickerMode DatePickerModelNG::getMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DatePickerMode::DATE);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, DatePickerMode::DATE);
+    return datePickerPattern->GetMode();
 }
 
 uint32_t DatePickerModelNG::getBackgroundColor(FrameNode* frameNode)

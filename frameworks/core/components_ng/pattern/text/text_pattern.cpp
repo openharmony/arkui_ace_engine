@@ -174,15 +174,13 @@ void TextPattern::ResetSelection()
 
 void TextPattern::InitSelection(const Offset& pos)
 {
+    CHECK_NULL_VOID(pManager_);
     auto selectionOffset = pos;
     if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
         selectionOffset.SetX(contentRect_.Width());
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
-    if (IsLineBreakOrEndOfParagraph(extend)) {
-        extend--;
-    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -191,13 +189,6 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(textForDisplay_, extend));
     }
     HandleSelectionChange(start, end);
-}
-
-bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
-{
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(textForDisplay_.length() + placeholderCount_), true);
-    CHECK_NULL_RETURN(textForDisplay_[pos] == WIDE_NEWLINE[0], false);
-    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
@@ -4458,13 +4449,9 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     auto options = imageItem->options;
-    auto imageInfo = CreateImageSourceInfo(options);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
-    auto index = host->GetChildren().size();
-    imageNode->MountToParent(host, index);
-    auto gesture = imageNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    imageLayoutProperty->UpdateImageSourceInfo(CreateImageSourceInfo(options));
+    imageNode->MountToParent(host, host->GetChildren().size());
+    SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
         auto imagePattern = imageNode->GetPattern<ImagePattern>();
@@ -4490,12 +4477,27 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
         }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
+{
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -4526,7 +4528,7 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
 #else
     info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
-    info.SetIsUriPureNumber(options.isUriPureNumber);
+    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
     return info;
 }
 

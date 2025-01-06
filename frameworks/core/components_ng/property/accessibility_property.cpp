@@ -248,6 +248,101 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
     return recursiveParam.hitTarget;
 }
 
+bool AccessibilityProperty::IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect)
+{
+    auto rectLeft = rect.Left();
+    auto rectTop = rect.Top();
+    auto rectRight = rect.Right();
+    auto rectBottom = rect.Bottom();
+
+    auto origLeft = origRect.Left();
+    auto origTop = origRect.Top();
+    auto origRight = origRect.Right();
+    auto origBottom = origRect.Bottom();
+    if (LessNotEqual(origLeft, rectLeft) || LessNotEqual(origTop, rectTop) || LessNotEqual(rectRight, origRight) ||
+        LessNotEqual(rectBottom, origBottom)) {
+        return false;
+    }
+    return true;
+}
+
+bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, false);
+    NG::RectF origRect;
+    if (isAccessibilityVirtualNode) {
+        origRect = host->GetTransformRectRelativeToWindow();
+    } else {
+        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        origRect = renderContext->GetPaintRectWithoutTransform();
+    }
+    auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+    if (responseRegionList.size() != 1) {
+        return false;
+    }
+    auto& rect = responseRegionList.back();
+    if (rect == origRect) {
+        return false;
+    }
+    if (!IsAccessibilityCompInResponseRegion(rect, origRect)) {
+        return false;
+    }
+    return true;
+}
+
+NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(bool isAccessibilityVirtualNode)
+{
+    NG::RectF origRect;
+    NG::RectT<int32_t> rectInt;
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, rectInt);
+    if (isAccessibilityVirtualNode) {
+        origRect = host->GetTransformRectRelativeToWindow();
+        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
+        auto& rect = responseRegionList.back();
+        rectInt = { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
+            static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
+    } else {
+        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, rectInt);
+        origRect = renderContext->GetPaintRectWithoutTransform();
+        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
+        auto& rect = responseRegionList.back();
+        rectInt = { static_cast<int32_t>(rect.GetX() - origRect.GetX()),
+            static_cast<int32_t>(rect.GetY() - origRect.GetY()),
+            static_cast<int32_t>(rect.Width()),
+            static_cast<int32_t>(rect.Height()) };
+    }
+    return  rectInt;
+}
+
+NG::RectF AccessibilityProperty::UpdateHoverTestRect(const RefPtr<FrameNode>& node)
+{
+    NG::RectF origRect;
+    CHECK_NULL_RETURN(node, origRect);
+    bool IsAccessibilityVirtualNode = node->IsAccessibilityVirtualNode();
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, origRect);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, origRect);
+    if (IsAccessibilityVirtualNode) {
+        origRect = node->GetTransformRectRelativeToWindow();
+    } else {
+        origRect = renderContext->GetPaintRectWithoutTransform();
+    }
+    if (accessibilityProperty->IsMatchAccessibilityResponseRegion(IsAccessibilityVirtualNode)) {
+        auto responseRegionList = node->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, origRect);
+        return responseRegionList.back();
+    } else {
+        return origRect;
+    }
+}
+
 bool AccessibilityProperty::HoverTestRecursive(
     const PointF& parentPoint,
     const RefPtr<FrameNode>& node,
@@ -273,7 +368,8 @@ bool AccessibilityProperty::HoverTestRecursive(
         = AccessibilityProperty::GetSearchStrategy(node, ancestorGroupFlag);
 
     auto renderContext = node->GetRenderContext();
-    auto rect = renderContext->GetPaintRectWithoutTransform();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = UpdateHoverTestRect(node);
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);

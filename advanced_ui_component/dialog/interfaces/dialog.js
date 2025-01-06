@@ -242,7 +242,7 @@ export class TipsDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlignment');
+        this.__textAlignment = new ObservedPropertySimplePU(TextAlign.Center, this, 'textAlignment');
         this.marginOffset = 0;
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
@@ -256,11 +256,6 @@ export class TipsDialog extends ViewPU {
         this.themeColorMode = ThemeColorMode.SYSTEM;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(160, this, 'minContentHeight');
-        this.updateTextAlign = (d32) => {
-            if (this.content) {
-                this.textAlignment = getTextAlign(d32, this.content, `${BODY_L * this.fontSizeScale}vp`);
-            }
-        };
         this.imageIndex = 0;
         this.textIndex = 1;
         this.checkBoxIndex = 2;
@@ -329,9 +324,6 @@ export class TipsDialog extends ViewPU {
         }
         if (w31.minContentHeight !== undefined) {
             this.minContentHeight = w31.minContentHeight;
-        }
-        if (w31.updateTextAlign !== undefined) {
-            this.updateTextAlign = w31.updateTextAlign;
         }
         if (w31.imageIndex !== undefined) {
             this.imageIndex = w31.imageIndex;
@@ -459,7 +451,6 @@ export class TipsDialog extends ViewPU {
                         content: this.content,
                         checkTips: this.checkTips,
                         minContentHeight: this.__minContentHeight,
-                        updateTextAlign: this.updateTextAlign,
                         dialogBuilder: () => {
                             this.observeComponentCreation2((u30, v30) => {
                                 ForEach.create();
@@ -516,7 +507,6 @@ export class TipsDialog extends ViewPU {
                             content: this.content,
                             checkTips: this.checkTips,
                             minContentHeight: this.minContentHeight,
-                            updateTextAlign: this.updateTextAlign,
                             dialogBuilder: () => {
                                 this.observeComponentCreation2((h30, i30) => {
                                     ForEach.create();
@@ -596,17 +586,23 @@ export class TipsDialog extends ViewPU {
                 if (this.checkAction) {
                     this.checkAction(this.isChecked);
                 }
-                let b30 = ({
-                    type: 'announceForAccessibility',
-                    bundleName: getContext()?.abilityInfo?.bundleName,
-                    triggerAction: 'click',
-                    textAnnouncedForAccessibility: this.isChecked ?
-                    getContext().resourceManager.getStringSync(125833934) :
-                    getContext().resourceManager.getStringSync(125833935)
-                });
-                accessibility.sendAccessibilityEvent(b30).then(() => {
-                    console.info(`Accessibility send event`);
-                });
+                try {
+                    let b30 = ({
+                        type: 'announceForAccessibility',
+                        bundleName: getContext()?.abilityInfo?.bundleName,
+                        triggerAction: 'click',
+                        textAnnouncedForAccessibility: this.isChecked ?
+                        getContext().resourceManager.getStringSync(125833934) :
+                        getContext().resourceManager.getStringSync(125833935)
+                    });
+                    accessibility.sendAccessibilityEvent(b30).then(() => {
+                        console.info(`Accessibility send event`);
+                    });
+                } catch (exception) {
+                    let code = exception.code;
+                    let message = exception.message;
+                    hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+                }
             });
             Row.padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() });
             Row.constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT() });
@@ -802,8 +798,6 @@ class TipsDialogContentLayout extends ViewPU {
         this.title = null;
         this.content = null;
         this.checkTips = null;
-        this.updateTextAlign = (s28) => {
-        };
         this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(n28.minContentHeight, this, 'minContentHeight');
         this.dialogBuilder = this.doNothingBuilder;
         this.imageIndex = 0;
@@ -822,9 +816,6 @@ class TipsDialogContentLayout extends ViewPU {
         }
         if (l28.checkTips !== undefined) {
             this.checkTips = l28.checkTips;
-        }
-        if (l28.updateTextAlign !== undefined) {
-            this.updateTextAlign = l28.updateTextAlign;
         }
         if (l28.dialogBuilder !== undefined) {
             this.dialogBuilder = l28.dialogBuilder;
@@ -901,7 +892,6 @@ class TipsDialogContentLayout extends ViewPU {
         m27 += s27.height;
         if (this.title !== null || this.content !== null) {
             let t27 = j27[this.textIndex];
-            this.updateTextAlign(l27.width);
             let u27 = Number(k27.maxHeight) - s27.height - n27;
             let v27 = {
                 maxWidth: k27.maxWidth,
@@ -1283,6 +1273,7 @@ export class SelectDialog extends ViewPU {
                             Radio.id(String(b25));
                             Radio.focusable(false);
                             Radio.accessibilityLevel('no');
+                            Radio.visibility(this.selectedIndex === b25 ? Visibility.Visible : Visibility.Hidden);
                             Radio.onFocus(() => {
                                 this.isFocus = true;
                                 this.currentFocusIndex = b25;
@@ -1486,8 +1477,6 @@ class ConfirmDialogContentLayout extends ViewPU {
         this.textIndex = 0;
         this.checkboxIndex = 1;
         this.__minContentHeight = new SynchedPropertySimpleTwoWayPU(k24.minContentHeight, this, 'minContentHeight');
-        this.updateTextAlign = (p24) => {
-        };
         this.dialogBuilder = this.doNothingBuilder;
         this.setInitiallyProvidedValue(k24);
         this.finalizeConstruction();
@@ -1498,9 +1487,6 @@ class ConfirmDialogContentLayout extends ViewPU {
         }
         if (i24.checkboxIndex !== undefined) {
             this.checkboxIndex = i24.checkboxIndex;
-        }
-        if (i24.updateTextAlign !== undefined) {
-            this.updateTextAlign = i24.updateTextAlign;
         }
         if (i24.dialogBuilder !== undefined) {
             this.dialogBuilder = i24.dialogBuilder;
@@ -1539,7 +1525,6 @@ class ConfirmDialogContentLayout extends ViewPU {
         if (m23.length < p23) {
             return o23;
         }
-        this.updateTextAlign(o23.width);
         let q23 = 0;
         let r23 = m23[this.checkboxIndex];
         let s23 = {
@@ -1592,17 +1577,12 @@ export class ConfirmDialog extends ViewPU {
         this.onCheckedChange = undefined;
         this.contentScroller = new Scroller();
         this.buttons = undefined;
-        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Center, this, 'textAlign');
         this.marginOffset = 0;
         this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
         this.__minContentHeight = new ObservedPropertySimplePU(MIN_CONTENT_HEIGHT, this, 'minContentHeight');
         this.textIndex = 0;
         this.checkboxIndex = 1;
-        this.updateTextAlign = (k23) => {
-            if (this.content) {
-                this.textAlign = getTextAlign(k23, this.content, `${BODY_L * this.fontSizeScale}vp`);
-            }
-        };
         this.setInitiallyProvidedValue(f23);
         this.finalizeConstruction();
     }
@@ -1663,9 +1643,6 @@ export class ConfirmDialog extends ViewPU {
         }
         if (d23.checkboxIndex !== undefined) {
             this.checkboxIndex = d23.checkboxIndex;
-        }
-        if (d23.updateTextAlign !== undefined) {
-            this.updateTextAlign = d23.updateTextAlign;
         }
     }
     updateStateVars(c23) {
@@ -1779,17 +1756,23 @@ export class ConfirmDialog extends ViewPU {
             });
             Row.onClick(() => {
                 this.isChecked = !this.isChecked;
-                let k22 = ({
-                    type: 'announceForAccessibility',
-                    bundleName: getContext()?.abilityInfo?.bundleName,
-                    triggerAction: 'click',
-                    textAnnouncedForAccessibility: this.isChecked ?
-                    getContext().resourceManager.getStringSync(125833934) :
-                    getContext().resourceManager.getStringSync(125833935)
-                });
-                accessibility.sendAccessibilityEvent(k22).then(() => {
-                    console.info(`Accessibility send event`);
-                });
+                try {
+                    let k22 = ({
+                        type: 'announceForAccessibility',
+                        bundleName: getContext()?.abilityInfo?.bundleName,
+                        triggerAction: 'click',
+                        textAnnouncedForAccessibility: this.isChecked ?
+                        getContext().resourceManager.getStringSync(125833934) :
+                        getContext().resourceManager.getStringSync(125833935)
+                    });
+                    accessibility.sendAccessibilityEvent(k22).then(() => {
+                        console.info(`Accessibility send event`);
+                    });
+                } catch (exception) {
+                    let code = exception.code;
+                    let message = exception.message;
+                    hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+                }
             });
             Row.width('100%');
             Row.padding({ top: TIP_CHECKBOX_TOP_PADDING(), bottom: TIP_CHECKBOX_BOTTOM_PADDING() });
@@ -1825,7 +1808,7 @@ export class ConfirmDialog extends ViewPU {
             this.observeComponentCreation2((c21, d21) => {
                 if (d21) {
                     let e21 = new ConfirmDialogContentLayout(this, {
-                        minContentHeight: this.__minContentHeight, updateTextAlign: this.updateTextAlign,
+                        minContentHeight: this.__minContentHeight,
                         dialogBuilder: () => {
                             this.observeComponentCreation2((r21, s21) => {
                                 ForEach.create();
@@ -1873,7 +1856,6 @@ export class ConfirmDialog extends ViewPU {
                     let f21 = () => {
                         return {
                             minContentHeight: this.minContentHeight,
-                            updateTextAlign: this.updateTextAlign,
                             dialogBuilder: () => {
                                 this.observeComponentCreation2((g21, h21) => {
                                     ForEach.create();
@@ -2012,7 +1994,7 @@ export class AlertDialog extends ViewPU {
         this.primaryButton = null;
         this.secondaryButton = null;
         this.buttons = undefined;
-        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Start, this, 'textAlign');
+        this.__textAlign = new ObservedPropertySimplePU(TextAlign.Center, this, 'textAlign');
         this.contentScroller = new Scroller();
         this.__fontColorWithTheme = new ObservedPropertyObjectPU({
             'id': -1,
@@ -2186,11 +2168,8 @@ export class AlertDialog extends ViewPU {
             Text.fontWeight(this.getFontWeight());
             Text.fontColor(ObservedObject.GetRawObject(this.fontColorWithTheme));
             Text.margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) });
-            Text.width(`calc(100% - ${PADDING_LEVEL_8}vp)`);
+            Text.width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`);
             Text.textAlign(this.textAlign);
-            Text.onSizeChange((v19, w19) => {
-                this.updateTextAlign(Number(w19.width));
-            });
             Text.onKeyEvent((u19) => {
                 if (u19) {
                     resolveKeyEvent(u19, this.contentScroller);
@@ -2211,9 +2190,6 @@ export class AlertDialog extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.initButtons();
-    }
-    updateTextAlign(q19) {
-        this.textAlign = getTextAlign(q19, this.content, `${BODY_L * this.fontSizeScale}vp`);
     }
     initButtons() {
         if (!this.primaryButton && !this.secondaryButton) {
@@ -3041,7 +3017,7 @@ class CustomDialogContentComponent extends ViewPU {
     updateFontScale() {
         try {
             let i7 = this.getUIContext();
-            let j7 = i7.getHostContext()?.config.fontSizeScale ?? 1;
+            let j7 = i7.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
@@ -3182,7 +3158,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.minFontSize(ObservedObject.GetRawObject(this.primaryTitleMinFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
-            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
         }, Text);
@@ -3223,7 +3199,7 @@ class CustomDialogContentComponent extends ViewPU {
             Text.minFontSize(ObservedObject.GetRawObject(this.secondaryTitleMinFontSize));
             Text.maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE));
             Text.maxLines(TITLE_MAX_LINES);
-            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST);
+            Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
         }, Text);
@@ -3786,27 +3762,6 @@ function getAccessibilityText(s2, t2) {
         hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${v2}, message: ${w2}`);
         return '';
     }
-}
-function getTextAlign(n2, o2, p2) {
-    let q2 = measure.measureTextSize({
-        textContent: o2,
-        fontSize: p2,
-        constraintWidth: n2,
-    });
-    let r2 = measure.measureTextSize({
-        textContent: o2,
-        fontSize: p2,
-    });
-    if (getTextHeight(q2) <= getTextHeight(r2)) {
-        return TextAlign.Center;
-    }
-    return TextAlign.Start;
-}
-function getTextHeight(m2) {
-    if (m2 && m2.height !== null && m2.height !== undefined) {
-        return Number(m2.height);
-    }
-    return 0;
 }
 function resolveKeyEvent(k2, l2) {
     if (k2.type === IGNORE_KEY_EVENT_TYPE) {

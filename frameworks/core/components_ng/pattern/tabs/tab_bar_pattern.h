@@ -151,7 +151,8 @@ enum class TabBarState {
 enum class TabBarParamType {
     NORMAL = 0,
     CUSTOM_BUILDER,
-    COMPONENT_CONTENT
+    COMPONENT_CONTENT,
+    SUB_COMPONENT_CONTENT
 };
 
 class TabBarPattern : public Pattern {
@@ -650,7 +651,7 @@ private:
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void InitTurnPageRateEvent();
-    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect);
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
@@ -661,10 +662,10 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
+    void UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme);
 
     void StartShowTabBar(int32_t delay = 0);
     void StartShowTabBarImmediately();

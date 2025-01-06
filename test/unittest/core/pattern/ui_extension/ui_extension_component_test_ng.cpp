@@ -146,6 +146,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -158,6 +159,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     OHOS::AAFwk::Want want;
@@ -178,6 +180,7 @@ void UIExtensionComponentTestNg::ClearCallbacks(RefPtr<UIExtensionPattern> patte
     pattern->onModalDestroy_ = nullptr;
     pattern->onTerminatedCallback_ = nullptr;
     pattern->bindModalCallback_ = nullptr;
+    pattern->onDrawReadyCallback_ = nullptr;
 }
 void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern)
 {
@@ -191,6 +194,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -202,6 +206,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     pattern->SetOnErrorCallback(onError);
     pattern->SetOnResultCallback(onResult);
     pattern->SetOnTerminatedCallback(onTerminated);
+    pattern->SetOnDrawReadyCallback(onDrawReady);
     pattern->SetOnReceiveCallback(onReceive);
     pattern->SetSyncCallbacks(std::move(onSyncOnCallbackList));
     pattern->SetAsyncCallbacks(std::move(onSyncOnCallbackList));
@@ -224,6 +229,7 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     pattern->FireSyncCallbacks();
     pattern->FireAsyncCallbacks();
     pattern->FireBindModalCallback();
+    pattern->FireOnDrawReadyCallback();
 }
 
 void UIExtensionComponentTestNg::SetPlaceholder(RefPtr<UIExtensionPattern> pattern)
@@ -263,6 +269,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -275,6 +282,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     RefPtr<WantWrap> want = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
@@ -289,6 +297,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     uecNG.SetOnReceive(onReceive, NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     uecNG.SetOnTerminated(std::move(onTerminated));
     uecNG.SetOnTerminated(std::move(onTerminated), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    uecNG.SetOnDrawReady(std::move(onDrawReady));
 
     UIExtensionConfig config;
     config.sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
@@ -326,7 +335,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     EXPECT_NE(pattern->onReceiveCallback_, nullptr);
     EXPECT_NE(pattern->onErrorCallback_, nullptr);
     EXPECT_NE(pattern->onModalDestroy_, nullptr);
-
+    EXPECT_NE(pattern->onDrawReadyCallback_, nullptr);
     // Fire CallBack
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION;
     OHOS::AAFwk::Want want;
@@ -1145,7 +1154,11 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest004, TestSize.Level
     ASSERT_NE(pattern->GetAccessibilitySessionAdapter(), nullptr);
     ASSERT_NE(pattern->CreateLayoutAlgorithm(), nullptr);
     ASSERT_FALSE(pattern->IsModalUec());
+    pattern->usage_ = UIExtensionUsage::MODAL;
+    ASSERT_TRUE(pattern->IsModalUec());
     ASSERT_FALSE(pattern->IsForeground());
+    pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::FOREGROUND;
+    ASSERT_TRUE(pattern->IsForeground());
     UIExtensionAccessibilityChildTreeCallback callback = UIExtensionAccessibilityChildTreeCallback(pattern, 1);
     ASSERT_FALSE(callback.isReg_);
 
@@ -1368,6 +1381,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest007, TestSize.Level
     pattern->curVisible_ = true;
     pattern->HandleVisibleAreaChange(true, SHOW_FULL);
     pattern->HandleVisibleAreaChange(true, SHOW_START);
+    pattern->HandleVisibleAreaChange(false, SHOW_FULL);
+    pattern->HandleVisibleAreaChange(false, SHOW_START);
 
     /**
      * @tc.steps: step4. test DispatchPointerEvent
@@ -1660,5 +1675,97 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     ASSERT_EQ(pattern->contentNode_, nullptr);
     pattern->OnExtensionDetachToDisplay();
 #endif
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest011
+ * @tc.desc: Test pattern Test DumpOthers
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test DumpOthers
+     */
+    pattern->AttachToFrameNode(uiExtNode);
+    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    ASSERT_NE(sessionWrapper, nullptr);
+    pattern->DumpOthers();
+
+    pattern->instanceId_ = 2;
+    pattern->DumpOthers();
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest012
+ * @tc.desc: Test pattern Test GetUiExtensionId/GetInstanceId
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtNode = CreateUecNode();
+    ASSERT_NE(uiExtNode, nullptr);
+    auto pattern = uiExtNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->AttachToFrameNode(uiExtNode);
+    ValidSession(pattern);
+
+    /**
+     * @tc.steps: step2. test GetUiExtensionId
+     */
+    auto uiExtensionId = pattern->uiExtensionId_;
+    ASSERT_EQ(pattern->GetUiExtensionId(), uiExtensionId);
+
+     /**
+     * @tc.steps: step2. test GetInstanceId
+     */
+    auto instanceId = pattern->instanceId_;
+    ASSERT_EQ(pattern->GetInstanceId(), instanceId);
+}
+
+/**
+ * @tc.name: UIExtensionComponentTest013
+ * @tc.desc: Test pattern Test OnDisconnect/NotifySizeChangeReason/RegisterVisibleAreaChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test OnDisconnect
+     */
+    pattern->OnDisconnect(true);
+
+    /**
+     * @tc.steps: step3. test NotifySizeChangeReason
+     */
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction;
+    pattern->NotifySizeChangeReason(WindowSizeChangeReason::RESIZE, rsTransaction);
+
+    /**
+     * @tc.steps: step4. test RegisterVisibleAreaChange
+     */
+    pattern->RegisterVisibleAreaChange();
 }
 } // namespace OHOS::Ace::NG

@@ -194,4 +194,37 @@ void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, cons
         ViewAbstract::SetHeight(mainSize);
     }
 }
+
+AssertionResult TestNG::IsExist(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (childNode) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionFailure();
+    }
+    return AssertionSuccess();
+}
 } // namespace OHOS::Ace::NG

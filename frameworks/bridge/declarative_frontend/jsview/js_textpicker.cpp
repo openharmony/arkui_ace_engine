@@ -216,6 +216,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
     JSClass<JSTextPicker>::StaticMethod("onScrollStop", &JSTextPicker::OnScrollStop);
+    JSClass<JSTextPicker>::StaticMethod("onEnterSelectedArea", &JSTextPicker::OnEnterSelectedArea);
     JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSTextPicker::PickerBackgroundColor);
     JSClass<JSTextPicker>::StaticMethod("gradientHeight", &JSTextPicker::SetGradientHeight);
     JSClass<JSTextPicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -1357,6 +1358,40 @@ void JSTextPicker::OnScrollStop(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSTextPicker::OnEnterSelectedArea(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+    auto onEnterSelectedArea = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                        const std::vector<std::string>& value, const std::vector<double>& index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("TextPicker.onEnterSelectedArea");
+        if (value.size() == 1 && index.size() == 1) {
+            auto params = ConvertToJSValues(value[0], index[0]);
+            func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+        } else {
+            std::vector<JSRef<JSVal>> result;
+            JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < value.size(); i++) {
+                valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+            }
+            JSRef<JSVal> valueJs = JSRef<JSVal>::Cast(valueArray);
+            result.emplace_back(valueJs);
+            JSRef<JSArray> selectedArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < index.size(); i++) {
+                selectedArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+            }
+            JSRef<JSVal> selectedJs = JSRef<JSVal>::Cast(selectedArray);
+            result.emplace_back(selectedJs);
+            func->Call(JSRef<JSObject>(), static_cast<int>(result.size()), result.data());
+        }
+    };
+    TextPickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+    info.ReturnSelf();
+}
+
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextPickerDialog>::Declare("TextPickerDialog");
@@ -1491,6 +1526,19 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             func->Execute(keys, info);
         };
     }
+    std::function<void(const std::string&)> enterSelectedAreaEvent;
+    auto onEnterSelectedArea = paramObject->GetProperty("onEnterSelectedArea");
+    if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onEnterSelectedArea));
+        enterSelectedAreaEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                              const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onEnterSelectedArea");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+    }
     NG::TextPickerSettingData settingData;
     TextPickerDialog textPickerDialog;
 
@@ -1611,8 +1659,8 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     TextPickerDialogAppearEvent(info, textPickerDialogEvent);
     TextPickerDialogDisappearEvent(info, textPickerDialogEvent);
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), std::move(scrollStopEvent), textPickerDialog,
-        textPickerDialogEvent, buttonInfos);
+        std::move(acceptEvent), std::move(changeEvent), std::move(scrollStopEvent), std::move(enterSelectedAreaEvent),
+        textPickerDialog, textPickerDialogEvent, buttonInfos);
 }
 
 void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -1820,6 +1868,24 @@ void JSTextPickerDialog::ParseTextProperties(const JSRef<JSObject>& paramObj, NG
     }
 }
 
+void JSTextPickerDialog::ParseEnterSelectedAreaEvent(const JSRef<JSObject>& paramObject, const JSCallbackInfo& info,
+    const WeakPtr<NG::FrameNode>& targetNode, std::map<std::string, NG::DialogTextEvent>& dialogEvent)
+{
+    auto onEnterSelectedArea = paramObject->GetProperty("onEnterSelectedArea");
+    if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onEnterSelectedArea));
+        auto enterSelectedAreaId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onEnterSelectedArea");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+        dialogEvent["enterSelectedAreaId"] = enterSelectedAreaId;
+    }
+}
+
 std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const JSCallbackInfo& info)
 {
     std::map<std::string, NG::DialogTextEvent> dialogEvent;
@@ -1867,6 +1933,7 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
         };
         dialogEvent["scrollStopId"] = scrollStopId;
     }
+    ParseEnterSelectedAreaEvent(paramObject, info, targetNode, dialogEvent);
     return dialogEvent;
 }
 

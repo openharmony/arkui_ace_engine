@@ -157,9 +157,17 @@ public:
 
     void FireChangeEvent(bool refresh);
 
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value);
+
+    void FireEnterSelectedAreaEvent(bool refresh);
+
     std::string GetSelectedObject(bool isColumnChange, int32_t status = -1);
 
     PickerTime GetCurrentTime();
+
+    std::string GetEnterObject(bool isColumnChange, int32_t status = -1);
+
+    PickerTime GetCurrentEnterTime();
 
     uint32_t GetHourFromAmPm(bool isAm, uint32_t amPmhour) const;
 
@@ -597,6 +605,19 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetEnableCascade(bool value)
+    {
+        if (isEnableCascade_ != value) {
+            isEnableCascade_ = false;
+        }
+        isEnableCascade_ = value;
+    }
+
+    bool GetEnableCascade() const
+    {
+        return isEnableCascade_;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -691,6 +712,7 @@ private:
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     bool isShowInDatePickerDialog_ = false;
+    bool isEnableCascade_ = false;
 };
 } // namespace OHOS::Ace::NG
 

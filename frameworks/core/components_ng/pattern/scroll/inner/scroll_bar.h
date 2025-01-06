@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/property/border_property.h"
+#include "core/components_ng/gestures/recognizers/long_press_recognizer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -52,7 +53,7 @@ enum class BarDirection {
     PAGE_DOWN,
 };
 
-class ScrollBar final : public AceType {
+class ScrollBar : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:
@@ -335,15 +336,15 @@ public:
     void OnCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
-    bool InBarTouchRegion(const Point& point) const;
-    bool InBarHoverRegion(const Point& point) const;
-    bool InBarRectRegion(const Point& point) const;
+    virtual bool InBarTouchRegion(const Point& point) const;
+    virtual bool InBarHoverRegion(const Point& point) const;
+    virtual bool InBarRectRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
         const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource);
     double GetNormalWidthToPx() const;
-    float CalcPatternOffset(float scrollBarOffset) const;
+    virtual float CalcPatternOffset(float scrollBarOffset) const;
     Color GetForegroundColor() const;
     void SetHoverWidth(const RefPtr<ScrollBarTheme>& theme);
     void SetNormalWidth(const Dimension& normalWidth);
@@ -360,7 +361,7 @@ public:
     void SetMouseEvent();
     void SetHoverEvent();
     void FlushBarWidth();
-    void CalcReservedHeight();
+    virtual void CalcReservedHeight();
     void ScheduleDisappearDelayTask();
     float GetMainOffset(const Offset& offset) const;
     void SetReverse(bool reverse);
@@ -384,17 +385,215 @@ public:
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json);
     void StopFlingAnimation();
 
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetActiveBackgroundWidth(const Dimension& activeBackgroundWidth)
+    {
+        activeBackgroundWidth_ = activeBackgroundWidth;
+    }
+
+    void SetActiveScrollBarWidth(const Dimension& activeScrollBarWidth)
+    {
+        activeScrollBarWidth_ = activeScrollBarWidth;
+    }
+#endif
+
 protected:
     void InitTheme();
+    virtual void SetBarRegion(const Offset& offset, const Size& size);
+    virtual void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset,
+        double mainScrollExtent);
+    double NormalizeToPx(const Dimension& dimension) const;
+    Dimension GetNormalWidth()
+    {
+        return normalWidth_;
+    }
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetMouseEventMember(RefPtr<InputEvent> mouseEvent)
+    {
+        mouseEvent_ = mouseEvent;
+    }
+
+    bool GetIsMousePressed()
+    {
+        return isMousePressed_;
+    }
+
+    void SetIsMousePressed(bool isMousePressed)
+    {
+        isMousePressed_ = isMousePressed;
+    }
+
+    Offset GetLocationInfo()
+    {
+        return locationInfo_;
+    }
+
+    void SetLocationInfo(Offset locationInfo)
+    {
+        locationInfo_ = locationInfo;
+    }
+
+    RefPtr<LongPressRecognizer> GetLongPressRecognizer()
+    {
+        return longPressRecognizer_;
+    }
+
+    void SetLongPressRecognizer(RefPtr<LongPressRecognizer> longPressRecognizer)
+    {
+        longPressRecognizer_ = longPressRecognizer;
+    }
+
+    void SetTouchEvent(RefPtr<TouchEventImpl> touchEvent)
+    {
+        touchEvent_ = touchEvent;
+    }
+
+    void SetPanRecognizer(RefPtr<PanRecognizer> panRecognizer)
+    {
+        panRecognizer_ = panRecognizer;
+    }
+
+    RefPtr<PanRecognizer> GetPanRecognizer()
+    {
+        return panRecognizer_;
+    }
+
+    void CallInitPanRecognizer()
+    {
+        InitPanRecognizer();
+    }
+
+    double GetEstimatedHeigh() const
+    {
+        return estimatedHeight_;
+    }
+
+    Size GetViewPortSize() const
+    {
+        return viewPortSize_;
+    }
+
+    bool IsDriving_() const
+    {
+        return isDriving_;
+    }
+
+    Dimension GetThemeNormalWidth()
+    {
+        return themeNormalWidth_;
+    }
+
+    double GetBarRegionSize() const
+    {
+        return barRegionSize_;
+    }
+
+    void SetBarRegionSize(double barRegionSize)
+    {
+        barRegionSize_ = barRegionSize;
+    }
+
+    double GetOffsetScale() const
+    {
+        return offsetScale_;
+    }
+
+    void SetOffsetScale(double offsetScale)
+    {
+        offsetScale_ = offsetScale;
+    }
+    
+    void SetNormalBackgroundWidth(const Dimension& normalBackgroundWidth)
+    {
+        normalBackgroundWidth_ = normalBackgroundWidth;
+    }
+
+    const Dimension& GetNormalBackgroundWidth() const
+    {
+        return normalBackgroundWidth_;
+    }
+
+    const Dimension& GetActiveBackgroundWidth() const
+    {
+        return activeBackgroundWidth_;
+    }
+
+    void SetNormaMaxOffsetAngle(double normaMaxOffsetAngle)
+    {
+        normaMaxOffsetAngle_ = normaMaxOffsetAngle;
+    }
+
+    double GetNormaMaxOffsetAngle() const
+    {
+        return normaMaxOffsetAngle_;
+    }
+
+    void SetNormalStartAngle(double normalStartAngle)
+    {
+        if (positionMode_ == PositionMode::LEFT) {
+            normalStartAngle = -(normalStartAngle + STRAIGHT_ANGLE);
+        }
+        normalStartAngle_ = normalStartAngle;
+    }
+
+    double GetNormalStartAngle() const
+    {
+        return normalStartAngle_;
+    }
+
+    void SetActiveStartAngle(double activeStartAngle)
+    {
+        if (positionMode_ == PositionMode::LEFT) {
+            activeStartAngle = -(activeStartAngle + STRAIGHT_ANGLE);
+        }
+        activeStartAngle_ = activeStartAngle;
+    }
+
+    double GetActiveStartAngle() const
+    {
+        return activeStartAngle_;
+    }
+
+    void SetActiveMaxOffsetAngle(double activeMaxOffsetAngle)
+    {
+        activeMaxOffsetAngle_ = activeMaxOffsetAngle;
+    }
+
+    double GetActiveMaxOffsetAngle() const
+    {
+        return activeMaxOffsetAngle_;
+    }
+
+    void SetNormalScrollBarWidth(const Dimension& normalScrollBarWidth)
+    {
+        normalScrollBarWidth_ = normalScrollBarWidth;
+    }
+
+    const Dimension& GetNormalScrollBarWidth() const
+    {
+        return normalScrollBarWidth_;
+    }
+
+    const Dimension& GetActiveScrollBarWidth() const
+    {
+        return activeScrollBarWidth_;
+    }
+#endif
+
+    double GetMinAngle() const
+    {
+        return minAngle_;
+    }
 
 private:
-    void SetBarRegion(const Offset& offset, const Size& size);
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent,
         int32_t scrollSource);
-    void SetRoundTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+    void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent);
+
     void UpdateActiveRectSize(double activeSize);
     void UpdateActiveRectOffset(double activeMainOffset);
-    double NormalizeToPx(const Dimension& dimension) const;
+    
     void InitPanRecognizer();
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
@@ -474,11 +673,22 @@ private:
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ClickEvent> clickevent_;
     RefPtr<LongPressRecognizer> longPressRecognizer_;
-    bool isMousePressed_ = false;
     Offset locationInfo_;
     // dump info
     std::list<InnerScrollBarLayoutInfo> innerScrollBarLayoutInfos_;
     bool needAddLayoutInfo = false;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool isMousePressed_ = false;
+    Dimension normalBackgroundWidth_;
+    Dimension activeBackgroundWidth_;
+    double normalStartAngle_ = 0.0;
+    double activeStartAngle_ = 0.0;
+    double normaMaxOffsetAngle_ = 0.0;
+    double activeMaxOffsetAngle_ = 0.0;
+    Dimension normalScrollBarWidth_;
+    Dimension activeScrollBarWidth_;
+#endif // ARKUI_CIRCLE_FEATURE
 };
 
 } // namespace OHOS::Ace::NG

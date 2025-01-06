@@ -14,17 +14,24 @@
  */
 
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-
+#include "core/components_ng/pattern/indexer/arc_indexer_pattern.h"
 #include "core/components_ng/pattern/indexer/indexer_pattern.h"
 
 namespace OHOS::Ace::NG {
-void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected)
+void IndexerModelNG::Create(std::vector<std::string>& arrayValue, int32_t selected, bool isArc)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::INDEXER_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isArc) {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcIndexerPattern>(); });
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::INDEXER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IndexerPattern>(); });
+    }
+    
     stack->Push(frameNode);
     if (selected < 0 || selected >= static_cast<int32_t>(arrayValue.size())) {
         selected = 0;

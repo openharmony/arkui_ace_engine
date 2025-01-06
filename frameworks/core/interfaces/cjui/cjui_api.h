@@ -967,6 +967,8 @@ struct CJUISwiperModifier {
     void (*resetSwiperInterval)(ArkUINodeHandle node);
     void (*setSwiperAutoPlay)(ArkUINodeHandle node, ArkUI_Bool autoPlay);
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
+    void (*setSwiperStopWhenTouched)(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched);
+    void (*resetSwiperStopWhenTouched)(ArkUINodeHandle node);
     void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
@@ -977,6 +979,7 @@ struct CJUISwiperModifier {
     void (*resetSwiperEnabled)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperLoop)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperAutoPlay)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSwiperStopWhenTouched)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperIndex)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperVertical)(ArkUINodeHandle node);
     ArkUI_Float32 (*getSwiperDuration)(ArkUINodeHandle node);
@@ -1075,6 +1078,9 @@ struct CJUITimepickerModifier {
     void (*setTimepickerDateTimeOptions)(
         ArkUINodeHandle node, ArkUI_Int32 hourType, ArkUI_Int32 minuteType, ArkUI_Int32 secondType);
     void (*resetTimepickerDateTimeOptions)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTimepickerEnableCascade)(ArkUINodeHandle node);
+    void (*setTimepickerEnableCascade)(ArkUINodeHandle node, ArkUI_Bool isEnableCascade);
+    void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
 };
 
 struct CJUIVideoModifier {
@@ -2294,6 +2300,10 @@ struct CJUICalendarPickerModifier {
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 fontSize, ArkUI_Int32 unit, ArkUI_Int32 fontWeight);
     void (*setTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontSize, ArkUI_CharPtr fontWeight);
     void (*resetTextStyle)(ArkUINodeHandle node);
+    void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year,  ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetStartDate)(ArkUINodeHandle node);
+    void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetEndDate)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
@@ -2305,6 +2315,8 @@ struct CJUICalendarPickerModifier {
     ArkUI_Float32 (*getHintRadius)(ArkUINodeHandle node);
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
     void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
@@ -2596,6 +2608,9 @@ struct CJUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
+    void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerMode)(ArkUINodeHandle node);
 };
 
 struct CJUISpanModifier {

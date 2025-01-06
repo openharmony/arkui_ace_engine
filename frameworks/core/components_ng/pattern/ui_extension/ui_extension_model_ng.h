@@ -56,6 +56,7 @@ public:
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
     void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
+    void SetOnDrawReady(std::function<void()>&& onDrawReady) override;
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
     void SetSecurityOnRemoteReady(

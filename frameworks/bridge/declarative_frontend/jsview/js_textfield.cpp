@@ -85,7 +85,8 @@ const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStra
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE, TextOverflow::DEFAULT };
 const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
@@ -137,6 +138,16 @@ void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& ch
     TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void ParseTextProperty(const JSRef<JSVal>& textValue, std::optional<std::u16string>& value, std::u16string& text)
+{
+    if (JSViewAbstract::ParseJsString(textValue, text)) {
+        value = text;
+    }
+    if (textValue->IsUndefined()) {
+        value = u"";
+    }
+}
+
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
 {
     std::optional<std::u16string> placeholderSrc;
@@ -162,13 +173,14 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
+            value = u"";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -212,13 +224,13 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
@@ -1989,5 +2001,14 @@ void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
     if (index < ELLIPSIS_MODALS.size()) {
         TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
     }
+}
+
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
 }
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,16 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ListModelNG : public ListModel {
+class ACE_FORCE_EXPORT ListModelNG : public ListModel {
 public:
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
@@ -73,7 +74,6 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
@@ -101,7 +101,6 @@ public:
     static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
-    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
@@ -125,6 +124,14 @@ public:
     static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
     DisplayMode GetDisplayMode() const override;
+    void SetHeader(const RefPtr<FrameNode>& headerNode) override;
+    void ResetListChildrenMainSize() override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+    static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
+#endif
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
     static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
@@ -142,6 +149,7 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
+    static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
     void AddDragFrameNodeToManager() const;
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

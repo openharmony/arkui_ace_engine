@@ -30,6 +30,8 @@ ohos_source_set("ace_kit") {
     "src/resource/resource_parser.cpp",
     "src/view/frame_node_impl.cpp",
     "src/view/layout/box_layout_algorithm.cpp",
+    "src/view/theme/theme_factory.cpp",
+    "src/view/theme/theme_style_impl.cpp",
     "src/view_factory/abstract_view_factory.cpp",
     "src/view_stack/view_stack_processor.cpp",
   ]

@@ -16,8 +16,9 @@
 
 class Utils {
     private static currentAppApiVersion: number = -1;
+    private static arkTsUtil: ArkTsUtil | undefined = undefined;
 
-    public static getApiVersion() : number {
+    public static getApiVersion(): number {
         if (Utils.currentAppApiVersion <= 0) {
             Utils.currentAppApiVersion = typeof ViewStackProcessor.getApiVersion === 'function'
                 ? ViewStackProcessor.getApiVersion() : -1;
@@ -32,5 +33,12 @@ class Utils {
             return false;
         }
         return version % 1000 >= target;
+    }
+
+    public static getArkTsUtil(): ArkTsUtil {
+        if (!Utils.arkTsUtil) {
+            Utils.arkTsUtil = requireInternal('util');
+        }
+        return Utils.arkTsUtil;
     }
 }

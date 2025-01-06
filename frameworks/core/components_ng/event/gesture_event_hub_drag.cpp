@@ -138,7 +138,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -672,8 +672,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         pixelMap = pixelMap_;
     }
-    (info.GetSourceDevice() == SourceType::MOUSE) ? HandleDragThroughMouse(frameNode)
-                                                  : HandleDragThroughTouch(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        (info.GetSourceDevice() == SourceType::MOUSE) ? HandleDragThroughMouse(frameNode)
+                                                      : HandleDragThroughTouch(frameNode);
+    }
     SetDragGatherPixelMaps(info);
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     auto dragNodePipeline = frameNode->GetContextRefPtr();
@@ -861,7 +864,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -873,8 +876,13 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 
 void GestureEventHub::HandleDragEndAction(const DragframeNodeInfo& info)
 {
-    auto frameNode = info.frameNode;
+    auto weakFrameNode = info.frameNode;
+    auto frameNode = weakFrameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (!dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        return;
+    }
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -1282,7 +1290,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;

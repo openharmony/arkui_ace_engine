@@ -39,7 +39,7 @@
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #ifdef SUPPORT_DIGITAL_CROWN
-#include "adapter/ohos/entrance/vibrator/vibrator_impl.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -1554,7 +1554,7 @@ Axis SliderPattern::GetDirection() const
 #ifdef SUPPORT_DIGITAL_CROWN
 double SliderPattern::GetCrownRotatePx(const CrownEvent& event) const
 {
-    double px = event.degree * crownDisplayControlRatio_;
+    double px = -event.degree * crownDisplayControlRatio_;
     switch (crownSensitivity_) {
         case CrownSensitivity::LOW:
             px *= CROWN_SENSITIVITY_LOW;
@@ -1603,11 +1603,11 @@ void SliderPattern::StartVibrateFeedback()
 {
     crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
     if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
             CROWN_VIBRATOR_STRONG, state);
     } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorImpl::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
             CROWN_VIBRATOR_WEAK, state);
     }
@@ -1629,7 +1629,7 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     CHECK_NULL_RETURN(theme, SliderContentModifier::Parameters());
     auto stepRatio = paintProperty->GetStepRatio();
     SliderContentModifier::Parameters parameters { trackThickness_, blockSize_, stepRatio, hotBlockShadowWidth_,
-        mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Color::TRANSPARENT,
+        mouseHoverFlag_, mousePressedFlag_, PointF(), PointF(), PointF(), PointF(), PointF(), Gradient(),
         Gradient(), Color::TRANSPARENT };
     auto contentSize = GetHostContentSize();
     CHECK_NULL_RETURN(contentSize, SliderContentModifier::Parameters());
@@ -1650,7 +1650,8 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
     if (sliderMode == SliderModel::SliderMode::NONE) {
         trackColor = theme->GetNoneModeSelectedTrackColor();
     }
-    parameters.selectColor = paintProperty->GetSelectColor().value_or(theme->GetTrackSelectedColor());
+    Gradient defaultSelectGradientColor = SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor());
+    parameters.selectGradientColor = paintProperty->GetSelectGradientColor().value_or(defaultSelectGradientColor);
     Gradient defaultValue = SliderModelNG::CreateSolidGradient(theme->GetTrackBgColor());
     parameters.trackBackgroundColor = paintProperty->GetTrackBackgroundColor().value_or(defaultValue);
     parameters.blockColor = paintProperty->GetBlockColor().value_or(theme->GetBlockColor());

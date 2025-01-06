@@ -98,6 +98,7 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetBackBorderRadius() override;
+    void SetStopBackPress(bool isStopBackPress) override;
     static RefPtr<SearchNode> CreateFrameNode(int32_t nodeId);
     static void SetTextValue(FrameNode* frameNode, const std::optional<std::string>& value);
     static void SetPlaceholder(FrameNode* frameNode, const std::optional<std::string>& placeholder);
@@ -170,6 +171,7 @@ public:
     static void OnMenuItemClickCallbackUpdate(
         FrameNode* frameNode, const NG::OnMenuItemClickCallback&& onMenuItemClick);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool state);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
 
 private:
     static RefPtr<SearchTheme> GetTheme(const RefPtr<SearchNode>& frameNode);

@@ -261,9 +261,6 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectRangeByOffset(const O
     int32_t start = 0;
     int32_t end = 0;
     auto pos = ConvertTouchOffsetToPosition(localOffset, true);
-    if (IsLineBreakOrEndOfParagraph(pos)) {
-        pos--;
-    }
     // Ensure that the end is selected.
     if (pos >= static_cast<int32_t>(paragraph_->GetParagraphText().length())) {
         pos -= 1;
@@ -319,14 +316,6 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
             "current word position = %{public}d, select position {start:%{public}d, end:%{public}d}", pos, start, end);
     }
     return { start, end };
-}
-
-bool TextSelectController::IsLineBreakOrEndOfParagraph(int32_t pos) const
-{
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(contentController_->GetTextUtf16Value().length()), true);
-    auto data = contentController_->GetTextUtf16Value();
-    CHECK_NULL_RETURN(data[pos] == WIDE_NEWLINE[0], false);
-    return true;
 }
 
 void TextSelectController::GetSubParagraphByOffset(int32_t pos, int32_t &start, int32_t &end)

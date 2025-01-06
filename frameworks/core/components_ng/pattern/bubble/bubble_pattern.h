@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -248,6 +249,26 @@ public:
         }
     }
 
+    void SetPopupParam(const RefPtr<PopupParam>& popupParam)
+    {
+        popupParam_ = popupParam;
+    }
+
+    const RefPtr<PopupParam>& GetPopupParam() const
+    {
+        return popupParam_;
+    }
+
+    void SetCustomNode(const WeakPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_.Upgrade();
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -338,6 +359,8 @@ private:
     int32_t halfFoldHoverCallbackId_ = -1;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
+    RefPtr<PopupParam> popupParam_ = nullptr;
+    WeakPtr<UINode> customNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

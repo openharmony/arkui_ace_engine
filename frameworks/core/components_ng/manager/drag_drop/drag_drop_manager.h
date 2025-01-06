@@ -133,6 +133,8 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
     float GetWindowScale() const;
+    void UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const int32_t eventId = -1);
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
@@ -475,6 +477,13 @@ public:
     {
         return grayedState_;
     }
+    
+    void SetIsAnyDraggableHit(bool isAnyDraggableHit = false)
+    {
+        isAnyDraggableHit_ = isAnyDraggableHit;
+    }
+
+    bool IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId);
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -558,6 +567,7 @@ private:
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
     bool isDragNodeNeedClean_ = false;
+    bool isAnyDraggableHit_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

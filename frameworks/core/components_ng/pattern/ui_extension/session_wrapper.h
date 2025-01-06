@@ -24,6 +24,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "core/common/window_animation_config.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 
 namespace OHOS {
 template<typename T>
@@ -149,10 +150,8 @@ public:
     // The interface for UEC dump
     virtual uint32_t GetReasonDump() const = 0;
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
-    virtual WindowSizeChangeReason GetSizeChangeReason() const
-    {
-        return WindowSizeChangeReason::UNDEFINED;
-    }
+    virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply) = 0;
+    virtual bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type) = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

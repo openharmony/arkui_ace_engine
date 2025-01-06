@@ -7,6 +7,7 @@
         // theme management
         "src/theme/lazy_for_each/ArkLazyForEachBindings.ts",
         "src/theme/list_item/ArkListItemBindings.ts",
+        "src/theme/arc_list_item/ArkArcListItemBindings.ts",
         "src/theme/ArkThemeCache.ts",
         "src/theme/ArkThemeBase.ts",
         "src/theme/system/ArkSystemColors.ts",
