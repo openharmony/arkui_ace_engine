@@ -261,6 +261,13 @@ RectF RichEditorSelectOverlay::GetSelectArea()
     return intersectRect;
 }
 
+bool RichEditorSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
+}
+
 void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
 {
     auto pattern = GetPattern<RichEditorPattern>();

@@ -378,6 +378,8 @@ public:
     virtual void SetMaxLength(std::optional<int32_t> value) {}
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

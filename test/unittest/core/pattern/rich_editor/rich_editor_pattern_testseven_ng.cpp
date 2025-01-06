@@ -505,4 +505,20 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
     EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
     EXPECT_TRUE(richEditorOverlay->originCaretVisible_->Get());
 }
+
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, IsStopBackPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isStopBackPress_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    auto result = richEditorPattern->OnBackPressed();
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG

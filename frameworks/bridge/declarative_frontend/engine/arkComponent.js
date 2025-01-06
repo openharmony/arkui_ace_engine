@@ -8894,6 +8894,24 @@ class RichEditorMaxLinesModifier extends ModifierWithKey {
 }
 RichEditorMaxLinesModifier.identity = Symbol('richEditorMaxLines');
 
+class RichEditorStopBackPressModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetStopBackPress(node);
+    }
+    else {
+      getUINativeModule().richEditor.setStopBackPress(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorStopBackPressModifier.identity = Symbol('richEditorStopBackPress');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9030,6 +9048,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   maxLines(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorMaxLinesModifier.identity, RichEditorMaxLinesModifier, value);
+    return this;
+  }
+  stopBackPress(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorStopBackPressModifier.identity, RichEditorStopBackPressModifier, value);
     return this;
   }
 }

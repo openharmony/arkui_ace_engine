@@ -586,6 +586,20 @@ void ResetRichEditorMaxLines(ArkUINodeHandle node)
     RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
 }
 
+void SetRichEditorStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetRichEditorStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetStopBackPress(frameNode, true);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -645,6 +659,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorMaxLength = ResetRichEditorMaxLength,
         .setRichEditorMaxLines = SetRichEditorMaxLines,
         .resetRichEditorMaxLines = ResetRichEditorMaxLines,
+        .setRichEditorStopBackPress = SetRichEditorStopBackPress,
+        .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

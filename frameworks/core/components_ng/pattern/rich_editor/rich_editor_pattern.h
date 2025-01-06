@@ -1051,6 +1051,15 @@ public:
     }
     HoverInfo CreateHoverInfo(const MouseInfo& info);
     std::pair<int32_t, int32_t> GetSpanRangeByLocalOffset(Offset localOffset);
+    void SetStopBackPress(bool isStopBackPress)
+    {
+        isStopBackPress_ = isStopBackPress;
+    }
+
+    bool IsStopBackPress() const
+    {
+        return isStopBackPress_;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -1523,6 +1532,7 @@ private:
     std::unique_ptr<OneStepDragController> oneStepDragController_;
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
+    bool isStopBackPress_ = true;
 };
 } // namespace OHOS::Ace::NG
 
