@@ -3157,7 +3157,7 @@ void RichEditorPattern::HandleFocusEvent()
         needToRequestKeyboardOnFocus_, windowMode, usingMouseRightButton_);
 
     bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_;
-    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING); // do not show kb in floating mode
+    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING || GetIsMidScene()); // do not show kb in floating mode
     needShowSoftKeyboard &= !usingMouseRightButton_; // do not show kb when mouseRightClick
 
     RequestKeyboard(false, true, needShowSoftKeyboard);

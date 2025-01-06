@@ -26,6 +26,7 @@ namespace OHOS::Ace {
 
 using WindowCallback = std::function<void(void)>;
 using WindowModeCallback = std::function<WindowMode(void)>;
+
 using WindowTypeCallback = std::function<WindowType(void)>;
 using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
