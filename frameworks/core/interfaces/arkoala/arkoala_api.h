@@ -2780,6 +2780,9 @@ struct ArkUIScrollableModifier {
     void (*resetOnReachStartCallBack)(ArkUINodeHandle node);
     void (*setOnReachEndCallBack)(ArkUINodeHandle node, void* callback);
     void (*resetOnReachEndCallBack)(ArkUINodeHandle node);
+    void (*setBackToTop)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetBackToTop)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getBackToTop)(ArkUINodeHandle node);
 };
 
 struct ArkUIScrollModifier {

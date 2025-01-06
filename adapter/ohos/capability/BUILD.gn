@@ -33,6 +33,7 @@ template("ace_capability_ohos_source_set") {
       "html/span_to_html.cpp",
       "package/package_event_proxy_ohos.cpp",
       "preference/storage_impl.cpp",
+      "statusbar/statusbar_event_proxy_ohos.cpp",
       "time/time_event_proxy_ohos.cpp",
     ]
     include_dirs = []

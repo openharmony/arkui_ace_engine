@@ -42,6 +42,7 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/event/mouse_event.h"
 #include "core/components_ng/event/scrollable_event.h"
+#include "core/event/statusbar/statusbar_event_proxy.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
@@ -65,7 +66,7 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer {
+class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
@@ -378,6 +379,10 @@ public:
                             bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    virtual float GetContentStartOffset() const
     {
         return 0.0f;
     }
@@ -711,9 +716,17 @@ public:
 
     SizeF GetViewSizeMinusPadding();
 
+    void SetBackToTop(bool backToTop);
+    bool GetBackToTop() const
+    {
+        return backToTop_;
+    }
+    void OnStatusBarClick() override;
+
 protected:
     void SuggestOpIncGroup(bool flag);
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
+
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
         return DisplayMode::AUTO;
@@ -975,6 +988,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
+    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
@@ -1005,6 +1019,7 @@ private:
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
     RefPtr<InputEvent> mouseEvent_;
     bool isMousePressed_ = false;
+    bool backToTop_ = false;
 };
 } // namespace OHOS::Ace::NG
 

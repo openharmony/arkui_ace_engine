@@ -19,6 +19,9 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+constexpr bool DEFAULT_BACKTOTOP = false;
+
 void SetContentClip(ArkUINodeHandle node, ArkUI_Int32 mode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -73,6 +76,28 @@ void ResetOnReachEndCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnReachEnd(frameNode, nullptr);
 }
 
+void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetBackToTop(frameNode, value);
+}
+
+void ResetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetBackToTop(frameNode, false);
+}
+
+int32_t GetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_BACKTOTOP);
+    return ScrollableModelNG::GetBackToTop(frameNode);
+}
+} // namespace
+
 namespace NodeModifier {
 const ArkUIScrollableModifier* GetScrollableModifier()
 {
@@ -83,6 +108,9 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         ResetOnReachStartCallBack,
         SetOnReachEndCallBack,
         ResetOnReachEndCallBack,
+        SetBackToTop,
+        ResetBackToTop,
+        GetBackToTop,
     };
     return &modifier;
 }
