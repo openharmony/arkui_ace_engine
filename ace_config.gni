@@ -81,7 +81,7 @@ declare_args() {
   ace_engine_feature_enable_event_extra_handling = false
 
   # Enable ace_engine circle feature
-  ace_engine_enable_circle_feature = false
+  ace_engine_enable_circle_feature = true
 }
 
 enable_dump_drawcmd = false
@@ -258,6 +258,13 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   ace_common_defines += [ "AUDIO_FRAMEWORK_EXISTS" ]
 } else {
   enable_audio_framework = false
+}
+
+if (defined(global_parts_info.thirdparty_qrcodegen)) {
+  qrcodegen_support = true
+  ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
+} else {
+  qrcodegen_support = false
 }
 
 if (!defined(global_parts_info) ||

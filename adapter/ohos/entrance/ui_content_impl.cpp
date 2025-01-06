@@ -982,7 +982,9 @@ void UIContentImpl::Initialize(
         return;
     }
     AddWatchSystemParameter();
-
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    container->SetDrawReadyEventCallback();
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[%{public}s][%{public}s][%{public}d]: StartUIExtension: %{public}s",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, startUrl_.c_str());
     // run page.

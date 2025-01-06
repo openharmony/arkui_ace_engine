@@ -1037,20 +1037,21 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 #if defined(PREVIEW) || !defined(OHOS_PLATFORM)
     return;
 #else
+    if (!LayoutInspector::GetStateProfilerStatus()) {
+        return;
+    }
     ContainerScope scope(GetInstanceId());
     auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (!LayoutInspector::GetStateProfilerStatus()) {
-        return;
-    }
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
+
     auto info = JsonUtil::ParseJsonString(stateInfo);
     info->Put("timeStamp", GetCurrentTimestampMicroSecond());
     info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", info->ToString().c_str());
     LayoutInspector::SendStateProfilerMessage(info->ToString());
 #endif
 }
@@ -1146,7 +1147,14 @@ void JSViewPartialUpdate::JSBind(BindingTarget object)
     JSClass<JSViewPartialUpdate>::CustomMethod("getUniqueId", &JSViewPartialUpdate::JSGetUniqueId);
     JSClass<JSViewPartialUpdate>::Method("setIsV2", &JSViewPartialUpdate::JSSetIsV2);
     JSClass<JSViewPartialUpdate>::CustomMethod("getDialogController", &JSViewPartialUpdate::JSGetDialogController);
+    JSClass<JSViewPartialUpdate>::Method(
+        "allowReusableV2Descendant", &JSViewPartialUpdate::JSAllowReusableV2Descendant);
     JSClass<JSViewPartialUpdate>::InheritAndBind<JSViewAbstract>(object, ConstructorCallback, DestructorCallback);
+}
+
+bool JSViewPartialUpdate::JSAllowReusableV2Descendant()
+{
+    return ViewPartialUpdateModel::GetInstance()->AllowReusableV2Descendant(viewNode_);
 }
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)

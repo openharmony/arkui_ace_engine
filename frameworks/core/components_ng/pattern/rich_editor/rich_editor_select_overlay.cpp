@@ -199,7 +199,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
         }
     }
     auto finalHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
-    pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex);
+    IF_TRUE(!IsSingleHandle(), pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex));
 }
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
@@ -400,6 +400,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
+    bool isSingleHandle = info && info->isSingleHandle;
+    IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
@@ -408,7 +410,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     IF_TRUE(needResetSelection, pattern->ResetSelection());
     IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
     if (isBackPressed) {
-        IF_TRUE((info && info->isSingleHandle), pattern->OnBackPressed());
+        IF_TRUE(isSingleHandle, pattern->OnBackPressed());
         if (!pattern->IsEditing() && pattern->HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }

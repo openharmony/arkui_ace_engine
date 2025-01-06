@@ -759,16 +759,17 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(symbolFrameNode);
     auto symbolProperty = symbolFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(symbolProperty);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     auto lastFontSize = symbolProperty->GetFontSize().value_or(GetSymbolDefaultSize());
     symbolProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textFieldTheme->GetCancelSymbolId()));
     symbolProperty->UpdateSymbolColorList({ textFieldTheme->GetSymbolColor() });
-    symbolProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    auto maxFontScale = layoutProperty->GetMaxFontScale().value_or(MAX_FONT_SCALE);
+    symbolProperty->UpdateMaxFontScale(std::min(MAX_FONT_SCALE, maxFontScale));
+    symbolProperty->UpdateMinFontScale(layoutProperty->GetMinFontScale().value_or(0.0f));
 
-    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
     auto iconSymbol = layoutProperty->GetCancelIconSymbol();
-    if (iconSymbol &&
-        AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (iconSymbol && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         iconSymbol(AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(symbolFrameNode)));
         // reset symbol effect
         auto symbolEffectOptions = symbolProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
@@ -961,7 +962,24 @@ void CleanNodeResponseArea::LoadingImageProperty()
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty->HasIconSize()) {
-        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
+        auto iconSizeValue = textFieldLayoutProperty->GetIconSizeValue();
+        if (iconSizeValue.Unit() == DimensionUnit::PERCENT) {
+            iconSize_ = iconSizeValue;
+        } else {
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto pipeline = host->GetContext();
+            CHECK_NULL_VOID(pipeline);
+            auto maxFontScale = pipeline->GetFontScale();
+            auto minFontScale = 0.0f;
+            if (textFieldLayoutProperty->HasMaxFontScale()) {
+                maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+            }
+            if (textFieldLayoutProperty->HasMinFontScale()) {
+                minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+            }
+            iconSize_ = Dimension(iconSizeValue).ConvertToPxDistribute(minFontScale, maxFontScale);
+        }
     }
     if (textFieldLayoutProperty->HasIconSrc()) {
         iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();

@@ -24,10 +24,8 @@ bool ScrollBarAccessibilityProperty::IsScrollable() const
     CHECK_NULL_RETURN(frameNode, false);
     auto scrollBarPattern = frameNode->GetPattern<ScrollBarPattern>();
     CHECK_NULL_RETURN(scrollBarPattern, false);
-    auto hasNotChild = !scrollBarPattern->HasChild() &&
-        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
     if (scrollBarPattern->GetAxis() != Axis::NONE && Positive(scrollBarPattern->GetControlDistance())
-        && (hasNotChild || Positive(scrollBarPattern->GetScrollableDistance()))) {
+        && (scrollBarPattern->UseInnerScrollBar() || Positive(scrollBarPattern->GetScrollableDistance()))) {
         return true;
     }
     return false;

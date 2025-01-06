@@ -1147,6 +1147,10 @@ public:
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
+    bool GetCustomPropertyByKey(const std::string& key, std::string& value);
+    void AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback);
+    void RemoveNodeDestroyCallback(const std::string& callbackKey);
+    void FireOnExtraNodeDestroyCallback();
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1458,6 +1462,8 @@ private:
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
+
+    std::map<std::string, std::function<void()>> destroyCallbacks_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 

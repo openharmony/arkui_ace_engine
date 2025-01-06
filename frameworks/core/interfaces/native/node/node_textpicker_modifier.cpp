@@ -579,7 +579,7 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextPickerModifier modifier = {
         .setTextPickerBackgroundColor = SetTextPickerBackgroundColor,
         .setTextPickerCanLoop = SetTextPickerCanLoop,
@@ -617,21 +617,14 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .setTextPickerDefaultTextStyle = SetTextPickerDefaultTextStyle,
         .resetTextPickerDefaultTextStyle = ResetTextPickerDefaultTextStyle,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextPickerModifier* GetCJUITextPickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextPickerModifier modifier = {
         .setTextPickerBackgroundColor = SetTextPickerBackgroundColor,
         .setTextPickerCanLoop = SetTextPickerCanLoop,
@@ -664,14 +657,7 @@ const CJUITextPickerModifier* GetCJUITextPickerModifier()
         .getTextPickerCanLoop = GetTextPickerCanLoop,
         .getTextPickerDefaultPickerItemHeight = GetTextPickerDefaultPickerItemHeight,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

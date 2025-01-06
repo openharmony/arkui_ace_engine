@@ -234,6 +234,7 @@ public:
     {
         return 0.0;
     }
+    virtual void InitAccessibilityFocusEvent(){};
 
 private:
     void OnModifyDone() override;

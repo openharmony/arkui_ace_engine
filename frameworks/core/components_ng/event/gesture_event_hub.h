@@ -91,7 +91,7 @@ struct PreparedInfoForDrag {
 };
 
 struct DragframeNodeInfo {
-    RefPtr<FrameNode> frameNode;
+    WeakPtr<FrameNode> frameNode;
     std::vector<RefPtr<FrameNode>> gatherFrameNode;
 };
 

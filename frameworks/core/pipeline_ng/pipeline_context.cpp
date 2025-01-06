@@ -1151,9 +1151,6 @@ void PipelineContext::SetupRootElement()
         }
     }
 #endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
-#endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
     if (!stageManager_) {
@@ -3268,13 +3265,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
-    DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
+    DispatchMouseToTouchEvent(event, node);
     DispatchMouseEvent(event, node);
 }
 
