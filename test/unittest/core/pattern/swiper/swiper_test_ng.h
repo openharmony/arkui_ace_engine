@@ -22,6 +22,7 @@
 #define protected public
 #include "test/mock/core/common/mock_container.h"
 
+#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_helper.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -30,6 +31,8 @@
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -68,6 +71,8 @@ public:
     void ShowNext();
     void ShowPrevious();
     void ChangeIndex(int32_t index);
+    void SwipeTo(int32_t index);
+    void SwipeToWithoutAnimation(int32_t index);
     void RemoveSwiperItem(int32_t index);
     void AddSwiperItem(int32_t slot);
     AssertionResult DigitText(std::u16string expectDigit);
