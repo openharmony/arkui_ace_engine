@@ -1800,6 +1800,20 @@ void TextFieldPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 }
 
+bool TextFieldPattern::IsShowTranslate()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    return textFieldTheme->GetTranslateIsSupport();
+}
+
 bool TextFieldPattern::IsShowSearch()
 {
     auto container = Container::Current();
@@ -3373,6 +3387,7 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
     TriggerAvoidWhenCaretGoesDown();
+    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;

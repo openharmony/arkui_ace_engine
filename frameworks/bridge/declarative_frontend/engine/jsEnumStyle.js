@@ -2121,6 +2121,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get TRANSLATE() {
+    return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
+  }
+
   static get SEARCH() {
     return new TextMenuItemId('OH_DEFAULT_SEARCH');
   }

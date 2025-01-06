@@ -27,6 +27,11 @@
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 
 namespace OHOS::Ace::NG {
+
+enum class SelectRectsType {
+    ALL_LINES, LEFT_TOP_POINT, RIGHT_BOTTOM_POINT
+};
+
 class ACE_EXPORT SelectOverlayHolder : public virtual AceType {
     DECLARE_ACE_TYPE(SelectOverlayHolder, AceType);
 
@@ -96,7 +101,19 @@ public:
 
     virtual RectF GetSelectArea()
     {
-        return {};
+        return GetSelectAreaFromRects(SelectRectsType::ALL_LINES);
+    }
+
+    virtual EdgeF GetSelectAreaStartLeftTop()
+    {
+        auto rect = GetSelectAreaFromRects(SelectRectsType::LEFT_TOP_POINT);
+        return { rect.Left(), rect.Top() };
+    }
+
+    virtual EdgeF GetSelectAreaEndRightBottom()
+    {
+        auto rect = GetSelectAreaFromRects(SelectRectsType::RIGHT_BOTTOM_POINT);
+        return { rect.Right(), rect.Bottom() };
     }
 
     virtual std::string GetSelectedText()
@@ -113,8 +130,14 @@ public:
     {
         return true;
     }
+protected:
+    virtual RectF GetSelectAreaFromRects(SelectRectsType pos)
+    {
+        return {};
+    }
 private:
     WeakPtr<AceType> bindManager_;
+
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayHolder);
 };
 } // namespace OHOS::Ace::NG
