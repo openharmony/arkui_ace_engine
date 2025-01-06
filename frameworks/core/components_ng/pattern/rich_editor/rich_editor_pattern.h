@@ -226,11 +226,18 @@ public:
             originCaretColor = colorMode == ColorMode::DARK ? Color(0x4DFFFFFF) : Color(0x4D000000);
         }
 
-        void UpdateByTouchMove(const Offset& offset, double distance)
+        void UpdateByTouchMove(const Offset& offset, double distance, const RectF& boundaryRect)
         {
             isFloatingCaretVisible = true;
             touchMoveOffset = offset;
-            isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+            bool isCaretAtBoundaryLeft = LessOrEqual(touchMoveOffset->GetX(), boundaryRect.Left());
+            bool isCaretAtBoundaryRight = GreatOrEqual(touchMoveOffset->GetX(), boundaryRect.Right());
+            if (!isCaretAtBoundaryLeft && !isCaretAtBoundaryRight) {
+                isOriginCaretVisible = GreatNotEqual(distance, showFloatingCaretDistance.ConvertToPx());
+            } else {
+                touchMoveOffset->SetX(isCaretAtBoundaryLeft ? boundaryRect.Left() : boundaryRect.Right());
+                isOriginCaretVisible = true;
+            }
         }
     };
 
@@ -1151,6 +1158,7 @@ private:
     void HandleTouchMove(const TouchLocationInfo& info);
     void UpdateCaretByTouchMove(const Offset& offset);
     void SetCaretTouchMoveOffset(const Offset& localOffset);
+    RectF GetCaretBoundaryRect();
     Offset AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset);
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
     void InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub);

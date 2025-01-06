@@ -381,6 +381,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
         .testCursorItems = { { 0, caretMetricsBegin, caretMetricsBegin}, {6, caretMetricsEnd, caretMetricsEnd} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->floatingCaretState_.Reset();
@@ -433,6 +434,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
         { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->floatingCaretState_.Reset();
@@ -495,6 +497,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
         .testCursorItems = { { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
