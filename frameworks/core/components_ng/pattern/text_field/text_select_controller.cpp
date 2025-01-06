@@ -692,7 +692,7 @@ void TextSelectController::FireSelectEvent()
         eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
             std::max(firstHandleInfo_.index, secondHandleInfo_.index));
         if (secondIndexChange) {
-            textFiled->TriggerAvoidOnCaretChange();
+            textFiled->TriggerAvoidWhenCaretGoesDown();
         }
     }
 }
