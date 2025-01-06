@@ -128,6 +128,7 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
     JSClass<JsDragEvent>::CustomMethod("getModifierKeyState", &JsDragEvent::GetModifierKeyState);
+    JSClass<JsDragEvent>::CustomMethod("executeDropAnimation", &JsDragEvent::ExecuteDropAnimation);
     JSClass<JsDragEvent>::Bind(globalObj, &JsDragEvent::Constructor, &JsDragEvent::Destructor);
 }
 
@@ -370,6 +371,23 @@ void JsDragEvent::GetModifierKeyState(const JSCallbackInfo& args)
 
     auto jsValueRef = JSRef<JSVal>::Make(ToJSValue(ret));
     args.SetReturnValue(jsValueRef);
+}
+
+void JsDragEvent::ExecuteDropAnimation(const JSCallbackInfo& args)
+{
+    if (!args[0]->IsFunction()) {
+        return;
+    }
+    RefPtr<JsFunction> jsExecuteDropAnimation =
+        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto executeDropAnimation = [execCtx = args.GetExecutionContext(), func = std::move(jsExecuteDropAnimation),
+                                    node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+    dragEvent_->SetDropAnimation(std::move(executeDropAnimation));
 }
 
 void JsDragEvent::Constructor(const JSCallbackInfo& args)
