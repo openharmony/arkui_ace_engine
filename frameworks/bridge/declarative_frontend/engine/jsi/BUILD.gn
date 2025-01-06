@@ -320,7 +320,7 @@ template("declarative_js_engine_ark") {
       ]
     }
 
-    if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+    if (qrcodegen_support) {
       sources += [ "nativeModule/arkts_native_qrcode_bridge.cpp" ]
     }
 
