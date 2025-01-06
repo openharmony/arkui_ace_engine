@@ -959,13 +959,9 @@ void TimePickerColumnPattern::CreateAnimation(double from, double to)
     });
 }
 
-void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
+void TimePickerColumnPattern::HandleEnterSelectedArea(
+    double scrollDelta, float shiftDistance, TimePickerScrollDirection dir)
 {
-    scrollDelta_ = delta;
-    auto midIndex = GetShowCount() / 2;
-    TimePickerScrollDirection dir = delta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
-    auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
-                                                                : optionProperties_[midIndex].nextDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     uint32_t currentEnterIndex = GetCurrentIndex();
     auto host = GetHost();
@@ -981,15 +977,28 @@ void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
         auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
         currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
     }
-    if (GreatOrEqual(std::abs(scrollDelta_), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
         SetEnterIndex(currentEnterIndex);
         HandleEnterSelectedAreaEventCallback(true);
     }
+}
+
+void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
+{
+    scrollDelta_ = delta;
+    auto midIndex = GetShowCount() / 2;
+    TimePickerScrollDirection dir = GreatNotEqual(delta, 0.0) ? TimePickerScrollDirection::DOWN
+                                                              : TimePickerScrollDirection::UP;
+    auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                                : optionProperties_[midIndex].nextDistance;
+    HandleEnterSelectedArea(scrollDelta_, shiftDistance, dir);
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
     UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
     CalcAlgorithmOffset(dir, distancePercent_);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
 }
 
