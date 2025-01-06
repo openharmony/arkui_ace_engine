@@ -337,7 +337,7 @@ public:
     {
         auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
         if (!obj) {
-            TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get GetFullScreenEnterObject failed");q
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get GetFullScreenEnterObject failed");
             return;
         }
         index_ = obj->AddObject(object);
