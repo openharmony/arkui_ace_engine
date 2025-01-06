@@ -16,6 +16,7 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
 const MAX_PERCENTAGE = '100%';

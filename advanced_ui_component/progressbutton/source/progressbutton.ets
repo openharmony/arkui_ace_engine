@@ -14,8 +14,14 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
-import { ProgressButtonColorOptions } from '@ohos.arkui.advanced.ProgressButton';
 import { LengthMetrics } from '@kit.ArkUI';
+
+export interface ProgressButtonColorOptions {
+  progressColor?: ResourceColor;
+  borderColor?: ResourceColor;
+  textColor?: ResourceColor;
+  backgroundColor?: ResourceColor;
+}
 
 const EMPTY_STRING: string = '';
 const MAX_PROGRESS: number = 100;
