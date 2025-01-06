@@ -25,7 +25,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t MAX_LINES = 3;
-constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 constexpr uint32_t DEFAULT_CARE_POSITION = 0;
 constexpr CopyOptions DEFAULT_TEXT_INPUT_COPY_OPTION = CopyOptions::Local;
 constexpr bool DEFAULT_SHOW_PASSWORD_ICON_VALUE = true;
@@ -74,7 +73,7 @@ void ResetTextInputCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color(DEFAULT_CARET_COLOR));
+    TextFieldModelNG::ResetCaretColor(frameNode);
 }
 
 void SetTextInputType(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -122,11 +121,7 @@ void ResetTextInputPlaceholderColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, theme->GetPlaceholderColor());
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SetTextInputCaretPosition(ArkUINodeHandle node, ArkUI_Int32 caretPosition)
@@ -667,11 +662,7 @@ void ResetTextInputFontColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    TextFieldModelNG::SetTextColor(frameNode, theme->GetTextColor());
+    TextFieldModelNG::ResetTextColor(frameNode);
 }
 
 void SetTextInputFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -1001,13 +992,7 @@ void ResetTextInputBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color backgroundColor;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    TextFieldModelNG::ResetBackgroundColor(frameNode);
 }
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor)
