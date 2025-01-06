@@ -989,7 +989,7 @@ export struct TreeView {
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Provide clickButtonFlag: boolean = true;
   @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
-  @Provide isAccessibilityEnabled: boolean = false;
+  @Provide isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
 
   @Builder
   NullBuilder() {
@@ -1041,7 +1041,7 @@ export struct TreeView {
     this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
     this.maxAppFontScale = uiContent.getMaxFontScale();
 
-    accessibility.on('accessibilityStateChange', (state: boolean) => {
+    accessibility.on('screenReaderStateChange', (state: boolean) => {
       this.isAccessibilityEnabled = state;
     })
   }
@@ -1160,11 +1160,7 @@ export struct TreeView {
       start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
       end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right),
     })
-    .shadow({
-      radius: $r('sys.float.ohos_id_corner_radius_default_m'),
-      color: SHADOW_COLOR,
-      offsetY: 0,
-    })
+    .shadow(this.listNodeDataSource.getDragPopupPara().shadow)
     .borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius) // need to doubleCheck.
   }
 
@@ -1599,6 +1595,9 @@ export struct TreeView {
 
       this.listNodeDataSource.lastIndex = currentFocusIndex;
 
+      let parentNodeId: number | undefined = currentNodeInfo?.getNodeParentNodeId();
+      this.listNodeDataSource.judgeImageCollapse(parentNodeId);
+
       /*accessibilityRead regain focus. */
       let eventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
@@ -2015,6 +2014,13 @@ export class TreeController {
       this.add(this.initBuild);
       return this;
     } else {
+      for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
+        if (nodeParam.currentNodeId === this.listNodeDataSource.listNode[i].getNodeCurrentNodeId()) {
+          throw new Error('ListTreeNode[addNode]: ' +
+            'The parameters of the new node cannot contain the same currentNodeId.');
+          return this;
+        }
+      }
       let addNodeResult: boolean = false;
       if (nodeParam.primaryTitle !== undefined &&
         !this.listNodeDataSource.checkMainTitleIsValid(nodeParam.primaryTitle.toString())) {
@@ -2292,12 +2298,12 @@ class ListNodeDataSource extends BasicDataSource {
     backgroundColor: COLOR_IMAGE_EDIT,
     height: GRAG_POP_UP_HEIGHT,
     shadow: {
-      radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+      radius: $r('sys.float.ohos_id_default_shadow_m'),
       color: SHADOW_COLOR,
       offsetX: 0,
       offsetY: SHADOW_OFFSETY,
     },
-    borderRadius: $r('sys.float.ohos_id_corner_radius_clicked'),
+    borderRadius: $r('sys.float.ohos_id_corner_radius_default_s'),
     fontColor: this.treeViewTheme.primaryTitleFontColor,
     fontSize: $r('sys.float.ohos_id_text_size_body1'),
     fontWeight: FontWeight.Regular,
@@ -3921,7 +3927,10 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  private judgeImageCollapse(parentNodeId: number): void {
+  public judgeImageCollapse(parentNodeId: number | undefined): void {
+    if (parentNodeId === undefined) {
+      return;
+    }
     let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
     let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
     if (parent.children.length > 0) {
@@ -4295,7 +4304,9 @@ export struct TreeViewInner {
   }
 
   getLeftIconColor(): ResourceColor {
-    if (this.item.getIsModify()) {
+    if (this.item.getIsModify()
+      || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT_WITHE
+      || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_DOWN_WITHE) {
       return $r('sys.color.icon_on_primary');
     } else if (this.item.getIsSelected()) {
       return this.treeViewTheme.leftIconActiveColor;
