@@ -1585,8 +1585,9 @@ void SliderPattern::HandleCrownAction(double mainDelta)
     crownMovingLength_ += mainDelta;
     crownMovingLength_ = std::clamp(crownMovingLength_, 0.0, static_cast<double>(sliderLength_));
     valueRatio_ = crownMovingLength_ / sliderLength_;
-    CHECK_NULL_VOID(stepRatio_ != 0);
-    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio_) * stepRatio_;
+    auto stepRatio = sliderPaintProperty->GetStepRatio();
+    CHECK_NULL_VOID(stepRatio != 0);
+    valueRatio_ = NearEqual(valueRatio_, 1) ? 1 : std::round(valueRatio_ / stepRatio) * stepRatio;
     float oldValue = value_;
     value_ = std::clamp(valueRatio_ * (max - min) + min, min, max);
     sliderPaintProperty->UpdateValue(value_);
@@ -1603,13 +1604,11 @@ void SliderPattern::StartVibrateFeedback()
 {
     crownEventNum_ = reachBoundary_ ? 0 : crownEventNum_ + 1;
     if (valueChangeFlag_ && reachBoundary_) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_STRONG, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_STRONG);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_STRONG);
     } else if (!reachBoundary_ && (crownEventNum_ % CROWN_EVENT_NUN_THRESH == 0)) {
-        bool state = VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
-        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s state %{public}d",
-            CROWN_VIBRATOR_WEAK, state);
+        VibratorUtils::StartVibraFeedback(CROWN_VIBRATOR_WEAK);
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider StartVibrateFeedback %{public}s", CROWN_VIBRATOR_WEAK);
     }
 }
 #endif
