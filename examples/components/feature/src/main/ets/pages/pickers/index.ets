@@ -19,6 +19,7 @@ import { CheckboxGroupBootcamp } from './CheckboxGroupBootcamp';
 import { RatingBootcamp } from './RatingBootcamp';
 import { ToggleBootcamp } from './ToggleBootcamp';
 import { SliderBootcamp } from '../pickers/SliderBootcamp';
+import { RadioBootcamp } from './RadioBootcamp';
 
 export const pickersRoute: RouteGroup = {
   name: 'pickers',
@@ -29,6 +30,7 @@ export const pickersRoute: RouteGroup = {
     { name: 'rating', label: '评分条/Rating' },
     { name: 'toggle', label: '切换按钮/Toggle' },
     { name: 'Slider', label: '滑动条/Slider' },
+    { name: 'Radio', label: '单选框/Radio' },
   ]
 };
 
@@ -44,5 +46,7 @@ export function PickersDestination(name: string, route: Route) {
     ToggleBootcamp({ title: route.label })
   } else if (name === 'pickers/Slider') {
     SliderBootcamp({ title: route.label })
+  } else if (name === 'pickers/radio') {
+    RadioBootcamp({ title: route.label })
   }
 }

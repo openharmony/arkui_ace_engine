@@ -16,7 +16,7 @@ import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { RadioBlock, SliderBlock, ColorBlock, useEnabled } from 'common';
 
 @Builder
-function RadioBuilder(config: RadioConfiguration) {
+function radioBuilder(config: RadioConfiguration) {
   Row({ space: 30 }) {
     Circle({ width: 50, height: 50 })
       .stroke(Color.Black)
@@ -44,7 +44,7 @@ class MyRadioStyle implements ContentModifier<RadioConfiguration> {
     this.selectedColor = colorType
   }
   applyContent(): WrappedBuilder<[RadioConfiguration]> {
-    return wrapBuilder(RadioBuilder)
+    return wrapBuilder(radioBuilder)
   }
 }
 
