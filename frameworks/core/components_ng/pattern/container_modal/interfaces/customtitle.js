@@ -1076,7 +1076,7 @@ class c3 extends ViewPU {
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
-            Row.create();
+            Row.create({ space: this.buttonSpacing });
             Row.id('containerModalButtonRowId');
             Row.height('100%');
             Row.padding({ left: m, right: this.buttonRightOffset + 'vp' });
@@ -1097,7 +1097,6 @@ class c3 extends ViewPU {
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
             Button.hoverEffect(HoverEffect.None);
-            Button.margin({ right: this.buttonSpacing + 'vp' });
             Button.responseRegion({
                 x: t,
                 y: u,
@@ -1163,7 +1162,6 @@ class c3 extends ViewPU {
             Button.height(this.buttonSize + 'vp');
             Button.type(ButtonType.Normal);
             Button.borderRadius('4vp');
-            Button.margin({ right: this.buttonSpacing + 'vp' });
             Button.hoverEffect(HoverEffect.None);
             Button.responseRegion({
                 x: t,
