@@ -857,7 +857,7 @@ class ArkThemeScopeManager {
         }
         else {
             const scope = this.themeScopes.find(item => item.getWithThemeId() === withThemeId);
-            scope.updateWithThemeOptions(withThemeOptions, theme);
+            scope === null || scope === void 0 ? void 0 : scope.updateWithThemeOptions(withThemeOptions, theme);
             this.forceRerenderScope(scope);
         }
     }
@@ -1082,7 +1082,6 @@ ArkThemeWhiteList.whiteList = [
     'Counter',
     'DataPanel',
     'DatePicker',
-    'Divider',
     'LoadingProgress',
     'Menu',
     'MenuItem',

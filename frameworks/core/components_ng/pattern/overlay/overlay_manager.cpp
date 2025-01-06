@@ -2014,6 +2014,26 @@ void OverlayManager::DismissPopup()
     HidePopup(dismissPopupId_, popupInfo);
 }
 
+PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& node)
+{
+    PopupInfo popupInfoError;
+    popupInfoError.popupNode = nullptr;
+    CHECK_NULL_RETURN(node, popupInfoError);
+    auto iter = popupMap_.begin();
+
+    while (iter != popupMap_.end()) {
+        auto popupInfo = (*iter).second;
+        CHECK_NULL_RETURN(popupInfo.popupNode, popupInfoError);
+        auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_RETURN(popupPattern, popupInfoError);
+        if (popupPattern->GetCustomNode() == node) {
+            return popupInfo;
+        }
+        iter++;
+    }
+    return popupInfoError;
+}
+
 void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
 {
     CHECK_NULL_VOID(menuWrapper);

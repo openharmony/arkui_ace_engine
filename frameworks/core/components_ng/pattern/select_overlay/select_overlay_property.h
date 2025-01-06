@@ -115,6 +115,7 @@ struct SelectHandleInfo {
         JSON_STRING_PUT_BOOL(jsonValue, isShow);
         JSON_STRING_PUT_BOOL(jsonValue, needLayout);
         JSON_STRING_PUT_STRINGABLE(jsonValue, paintRect);
+        JSON_STRING_PUT_STRINGABLE(jsonValue, localPaintRect);
         return jsonValue->ToString();
     }
 };
@@ -325,6 +326,7 @@ struct SelectOverlayInfo {
     std::string ToString() const
     {
         auto jsonValue = JsonUtil::Create(true);
+        JSON_STRING_PUT_INT(jsonValue, handleLevelMode);
         JSON_STRING_PUT_BOOL(jsonValue, isUsingMouse);
         JSON_STRING_PUT_BOOL(jsonValue, isSingleHandle);
         JSON_STRING_PUT_BOOL(jsonValue, handleReverse);

@@ -40,6 +40,7 @@ public:
     virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) = 0;
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
+    virtual void SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) = 0;
     virtual void SetHour24(bool isUseMilitaryTime) = 0;
     virtual void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) {};
     virtual void SetDateTimeOptions(ZeroPrefixType& hourType,
@@ -54,6 +55,7 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(ChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableCascade(bool isEnableCascade) = 0;
 
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
@@ -67,7 +69,8 @@ public:
 
     virtual void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent,
+        std::function<void(const std::string&)>&& onChange,
+        std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
         const std::vector<ButtonInfo>& buttonInfos) = 0;
 
 private:

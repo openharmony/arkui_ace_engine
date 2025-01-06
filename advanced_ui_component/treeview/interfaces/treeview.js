@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-var t = (this && this.t) || function (f19, target, key, desc) {
+var t5 = (this && this.t5) || function (u21, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === 'object' && typeof Reflect.u3 === 'function')
-        r = Reflect.u3(f19, target, key, desc);
+    if (typeof Reflect === 'object' && typeof Reflect.w21 === 'function')
+        r = Reflect.w21(u21, target, key, desc);
     else
-        for (var g19 = f19.length - 1; g19 >= 0; g19--)
-            if (d = f19[g19])
+        for (var v21 = u21.length - 1; v21 >= 0; v21--)
+            if (d = u21[v21])
                 r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
@@ -33,51 +33,53 @@ const resourceManager = requireNapi('resourceManager');
 const accessibility = requireNapi('accessibility');
 const BusinessError = requireNapi('BusinessError');
 
-const u = 24;
-const a1 = 24;
-const b1 = 0;
-const c1 = 48;
-const d1 = 32;
-const e1 = 2;
-const f1 = 0;
-const g1 = 48;
-const h1 = 0;
-const i1 = 48;
-const j1 = 10;
-const l1 = 2;
-const m1 = 0.4;
-const n1 = 1;
-const o1 = 1;
-const q1 = 2;
-const s1 = '1.0vp';
-const t1 = '0vp';
-const u1 = '2.75vp';
-const v1 = '-1.25vp';
-const w1 = '1.5vp';
-const z1 = '#FFFFFF';
-const a2 = '#00000000';
-const b2 = '#1A0A59F7';
-const c2 = '#00001E';
-const d2 = '48';
-const e2 = '128vp';
-const f2 = '208vp';
-const g2 = '80vp';
-const h2 = '160vp';
-const i2 = '112vp';
-const j2 = '192vp';
-const l2 = '#00FFFFFF';
-const m2 = 100;
-const n2 = 12;
-const o2 = 8;
-const i16 = 'TreeView';
-const j16 = 0x3900;
-const j17 = 2000;
-const s20 = 300;
-const n21 = 40000;
+const u5 = 24;
+const v5 = 24;
+const w5 = 0;
+const x5 = 48;
+const y5 = 32;
+const z5 = 2;
+const a6 = 0;
+const b6 = 48;
+const c6 = 0;
+const d6 = 48;
+const e6 = 10;
+const f6 = 2;
+const g6 = 0.4;
+const h6 = 1;
+const i6 = 1;
+const j6 = 2;
+const k6 = '1.0vp';
+const l6 = '0vp';
+const m6 = '2.75vp';
+const n6 = '-1.25vp';
+const o6 = '1.5vp';
+const p6 = '#FFFFFF';
+const q6 = '#00000000';
+const r6 = '#1A0A59F7';
+const s6 = '#00001E';
+const t6 = '48';
+const u6 = '128vp';
+const v6 = '208vp';
+const w6 = '80vp';
+const x6 = '160vp';
+const y6 = '112vp';
+const z6 = '192vp';
+const a7 = '#00FFFFFF';
+const b7 = 100;
+const c7 = 12;
+const d7 = 8;
+const e7 = 'TreeView';
+const f7 = 0x3900;
+const g7 = 2000;
+const h7 = 300;
+const a1 = 40000;
+const i7 = 1.3;
+const j7 = 1;
 const ARROW_DOWN = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_down'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const q2 = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_down'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const ARROW_RIGHT = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_forward'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-const s2 = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_forward'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const k7 = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_down'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const ARROW_RIGHT = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+const l7 = { 'id': -1, 'type': 40000, params: ['sys.symbol.chevron_right'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
 var Event;
 (function (Event) {
     Event[Event['TOUCH_DOWN'] = 0] = 'TOUCH_DOWN';
@@ -89,66 +91,66 @@ var Event;
     Event[Event['MOUSE_BUTTON_RIGHT'] = 7] = 'MOUSE_BUTTON_RIGHT';
     Event[Event['DRAG'] = 8] = 'DRAG';
 })(Event || (Event = {}));
-var t2;
-(function (e23) {
-    e23[e23['ADD_NODE'] = 0] = 'ADD_NODE';
-    e23[e23['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
-    e23[e23['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
-    e23[e23['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
-})(t2 || (t2 = {}));
-var u2;
-(function (d23) {
-    d23[d23['HINTS'] = 0] = 'HINTS';
-    d23[d23['WARNINGS'] = 1] = 'WARNINGS';
-})(u2 || (u2 = {}));
-var v2;
-(function (c23) {
-    c23[c23['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
-    c23[c23['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
-    c23[c23['NONE'] = 2] = 'NONE';
-})(v2 || (v2 = {}));
-var w2;
-(function (b23) {
-    b23[b23['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
-    b23[b23['UP_FLAG'] = 1] = 'UP_FLAG';
-    b23[b23['NONE'] = 2] = 'NONE';
-})(w2 || (w2 = {}));
-export var z2;
-(function (a23) {
-    a23[a23['EXPAND'] = 0] = 'EXPAND';
-    a23[a23['COLLAPSE'] = 1] = 'COLLAPSE';
-})(z2 || (z2 = {}));
-export var a3;
-(function (z22) {
-    z22[z22['NORMAL'] = 0] = 'NORMAL';
-    z22[z22['SELECTED'] = 1] = 'SELECTED';
-    z22[z22['EDIT'] = 2] = 'EDIT';
-    z22[z22['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
-    z22[z22['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
-    z22[z22['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
-})(a3 || (a3 = {}));
-var b3;
-(function (y22) {
-    y22[y22['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
-    y22[y22['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
-    y22[y22['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
-    y22[y22['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
-})(b3 || (b3 = {}));
-var q17;
-(function (x22) {
-    x22[x22['TEXT'] = 0] = 'TEXT';
-    x22[x22['PLACE'] = 1] = 'PLACE';
-    x22[x22['LIFT'] = 2] = 'LIFT';
-})(q17 || (q17 = {}));
+var m7;
+(function (t21) {
+    t21[t21['ADD_NODE'] = 0] = 'ADD_NODE';
+    t21[t21['REMOVE_NODE'] = 1] = 'REMOVE_NODE';
+    t21[t21['MODIFY_NODE'] = 2] = 'MODIFY_NODE';
+    t21[t21['COMMIT_NODE'] = 3] = 'COMMIT_NODE';
+})(m7 || (m7 = {}));
+var n7;
+(function (s21) {
+    s21[s21['HINTS'] = 0] = 'HINTS';
+    s21[s21['WARNINGS'] = 1] = 'WARNINGS';
+})(n7 || (n7 = {}));
+var o7;
+(function (r21) {
+    r21[r21['INVALID_ERROR'] = 0] = 'INVALID_ERROR';
+    r21[r21['LENGTH_ERROR'] = 1] = 'LENGTH_ERROR';
+    r21[r21['NONE'] = 2] = 'NONE';
+})(o7 || (o7 = {}));
+var p7;
+(function (q21) {
+    q21[q21['DOWN_FLAG'] = 0] = 'DOWN_FLAG';
+    q21[q21['UP_FLAG'] = 1] = 'UP_FLAG';
+    q21[q21['NONE'] = 2] = 'NONE';
+})(p7 || (p7 = {}));
+export var q7;
+(function (p21) {
+    p21[p21['EXPAND'] = 0] = 'EXPAND';
+    p21[p21['COLLAPSE'] = 1] = 'COLLAPSE';
+})(q7 || (q7 = {}));
+export var r7;
+(function (o21) {
+    o21[o21['NORMAL'] = 0] = 'NORMAL';
+    o21[o21['SELECTED'] = 1] = 'SELECTED';
+    o21[o21['EDIT'] = 2] = 'EDIT';
+    o21[o21['FINISH_EDIT'] = 3] = 'FINISH_EDIT';
+    o21[o21['DRAG_INSERT'] = 4] = 'DRAG_INSERT';
+    o21[o21['FINISH_DRAG_INSERT'] = 5] = 'FINISH_DRAG_INSERT';
+})(r7 || (r7 = {}));
+var s7;
+(function (n21) {
+    n21[n21['ARROW_DOWN'] = 0] = 'ARROW_DOWN';
+    n21[n21['ARROW_RIGHT'] = 1] = 'ARROW_RIGHT';
+    n21[n21['ARROW_DOWN_WHITE'] = 2] = 'ARROW_DOWN_WHITE';
+    n21[n21['ARROW_RIGHT_WHITE'] = 3] = 'ARROW_RIGHT_WHITE';
+})(s7 || (s7 = {}));
+var t7;
+(function (m21) {
+    m21[m21['TEXT'] = 0] = 'TEXT';
+    m21[m21['PLACE'] = 1] = 'PLACE';
+    m21[m21['LIFT'] = 2] = 'LIFT';
+})(t7 || (t7 = {}));
 class Util {
-    static t16(w22) {
-        if (!Util.u16(w22)) {
+    static f1(p1) {
+        if (!Util.g1(p1)) {
             return false;
         }
-        let resource = w22;
-        return resource.type === n21;
+        let resource = p1;
+        return resource.type === a1;
     }
-    static u16(resource) {
+    static g1(resource) {
         if (!resource) {
             return false;
         }
@@ -158,43 +160,43 @@ class Util {
         return true;
     }
 }
-class c3 {
+class u7 {
     constructor() {
     }
     static getInstance() {
-        if (!c3.instance) {
-            c3.instance = new c3();
+        if (!u7.instance) {
+            u7.instance = new u7();
         }
-        return c3.instance;
+        return u7.instance;
     }
     createNode() {
         return {
-            v3: undefined,
-            inputText: new t3(),
-            w3: new s3(''),
-            x3: undefined,
+            x21: undefined,
+            inputText: new i8(),
+            y21: new h8(''),
+            z21: undefined,
             fontColor: undefined,
         };
     }
-    y3(nodeParam) {
-        let w18 = this.createNode();
+    a22(nodeParam) {
+        let l21 = this.createNode();
         if (nodeParam.icon) {
-            w18.v3 = new r3(nodeParam.icon, nodeParam.v16, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, u, a1, nodeParam.selectedIcon, nodeParam.w16, nodeParam.editIcon, nodeParam.x16);
+            l21.x21 = new g8(nodeParam.icon, nodeParam.symbolIconStyle, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, u5, v5, nodeParam.selectedIcon, nodeParam.symbolSelectedIconStyle, nodeParam.editIcon, nodeParam.symbolEditIconStyle);
         }
         if (nodeParam.primaryTitle) {
-            w18.w3 = new s3(nodeParam.primaryTitle);
+            l21.y21 = new h8(nodeParam.primaryTitle);
         }
-        return w18;
+        return l21;
     }
 }
-let d3 = {
+let v7 = {
     isFolder: true,
     icon: '',
-    v16: undefined,
+    symbolIconStyle: undefined,
     selectedIcon: '',
-    w16: undefined,
+    symbolSelectedIconStyle: undefined,
     editIcon: '',
-    x16: undefined,
+    symbolEditIconStyle: undefined,
     container: () => {
     },
     secondaryTitle: '',
@@ -202,241 +204,241 @@ let d3 = {
     parentNodeId: -1,
     currentNodeId: -1,
 };
-class e3 {
+class w7 {
     constructor() {
-        this.z3 = '#1A0A59F7';
-        this.a4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.b4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.c4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_activated'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.d4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.e4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.f4 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.g4 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.h4 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.i4 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_tertiary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.b22 = '#1A0A59F7';
+        this.c22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.d22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.e22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary_activated'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.f22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_click_effect'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.g22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_hover'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.h22 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.i22 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.j22 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_secondary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.k22 = { 'id': -1, 'type': 10001, params: ['sys.color.icon_tertiary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
     }
     static getInstance() {
-        if (!e3.instance) {
-            e3.instance = new e3();
+        if (!w7.instance) {
+            w7.instance = new w7();
         }
-        return e3.instance;
+        return w7.instance;
     }
 }
-let f3 = class NodeInfo {
+let x7 = class NodeInfo {
     constructor(node, nodeParam) {
-        this.j4 = '';
-        this.y16 = undefined;
-        this.borderWidth = { has: e1, l4: f1 };
-        this.m4 = false;
-        this.n4 = false;
-        this.o4 = false;
-        this.q4 = false;
-        this.r4 = false;
-        this.treeViewTheme = e3.getInstance();
+        this.imageSource = '';
+        this.l22 = undefined;
+        this.borderWidth = { has: z5, n22: a6 };
+        this.o22 = false;
+        this.p22 = false;
+        this.q22 = false;
+        this.r22 = false;
+        this.s22 = false;
+        this.treeViewTheme = w7.getInstance();
         this.fontColor = '';
         this.node = node;
         this.nodeParam = nodeParam;
-        this.s4 = c3.getInstance().y3(nodeParam);
-        this.t4 = {
-            u4: false,
-            v4: false,
-            w4: undefined,
-            x4: '',
-            y4: undefined,
+        this.t22 = u7.getInstance().a22(nodeParam);
+        this.u22 = {
+            v22: false,
+            w22: false,
+            x22: undefined,
+            y22: '',
+            z22: undefined,
         };
-        this.z4 = g1;
-        this.a5 = node.b5 * n2 + o2;
-        this.c5 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.d5 = (this.node.b5 > 0) ? false : true;
-        this.e5 = (this.node.b5 > 0) ? h1 : i1;
-        this.f5 = true;
-        this.g5 = false;
+        this.a23 = b6;
+        this.b23 = node.c23 * c7 + d7;
+        this.d23 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.e23 = (this.node.c23 > 0) ? false : true;
+        this.f23 = (this.node.c23 > 0) ? c6 : d6;
+        this.g23 = true;
+        this.h23 = false;
         this.isSelected = false;
         this.status = {
             normal: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-            h5: this.treeViewTheme.e4,
-            i5: this.treeViewTheme.d4,
-            selected: this.treeViewTheme.z3,
-            j5: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_activated'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+            i23: this.treeViewTheme.g22,
+            j23: this.treeViewTheme.f22,
+            selected: this.treeViewTheme.b22,
+            k23: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_activated'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
         };
-        this.k5 = {
-            borderWidth: f1,
-            borderColor: this.treeViewTheme.f4,
+        this.l23 = {
+            borderWidth: a6,
+            borderColor: this.treeViewTheme.h22,
             borderRadius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
         };
-        this.l5 = node.b5 * n2 + o2;
+        this.n23 = node.c23 * c7 + d7;
     }
-    m5(v18) {
-        if (v18) {
-            this.s4.x3 =
-                q3.n5(b3.ARROW_RIGHT);
+    o23(k21) {
+        if (k21) {
+            this.t22.z21 =
+                f8.p23(s7.ARROW_RIGHT);
         }
         else {
-            this.s4.x3 = undefined;
+            this.t22.z21 = undefined;
         }
     }
-    o5(color) {
+    q23(color) {
         this.fontColor = color;
     }
-    p5() {
+    r23() {
         return this.fontColor;
     }
-    q5() {
-        return this.t4;
+    s23() {
+        return this.u22;
     }
-    r5(isShow) {
-        this.t4.u4 = isShow;
+    t23(isShow) {
+        this.u22.v22 = isShow;
     }
-    s5(u18) {
-        this.t4.v4 = u18;
+    u23(j21) {
+        this.u22.w22 = j21;
     }
-    t5(color) {
-        this.t4.w4 = color;
+    v23(color) {
+        this.u22.x22 = color;
     }
-    u5(text) {
-        this.t4.x4 = text;
+    w23(text) {
+        this.u22.y22 = text;
     }
-    v5(t18) {
-        this.t4.y4 = t18;
+    x23(i21) {
+        this.u22.z22 = i21;
     }
-    w5() {
-        return this.f5;
+    y23() {
+        return this.g23;
     }
-    x5() {
-        return this.g5;
+    z23() {
+        return this.h23;
     }
-    y5(s18) {
-        if (s18) {
-            this.f5 = false;
-            this.g5 = true;
+    a24(h21) {
+        if (h21) {
+            this.g23 = false;
+            this.h23 = true;
         }
         else {
-            this.f5 = true;
-            this.g5 = false;
+            this.g23 = true;
+            this.h23 = false;
         }
     }
-    z5(r18) {
-        if (r18) {
-            this.s4.x3 =
-                q3.n5(b3.ARROW_DOWN);
+    b24(g21) {
+        if (g21) {
+            this.t22.z21 =
+                f8.p23(s7.ARROW_DOWN);
         }
         else {
-            this.s4.x3 = undefined;
+            this.t22.z21 = undefined;
         }
     }
-    a6(q18) {
-        if (q18 === undefined) {
+    c24(f21) {
+        if (f21 === undefined) {
             return;
         }
-        this.c5 = q18;
+        this.d23 = f21;
     }
-    b6() {
-        return this.c5;
+    d24() {
+        return this.d23;
     }
-    c6(p18) {
-        this.e5 = p18;
+    e24(e21) {
+        this.f23 = e21;
     }
-    d6() {
-        return this.e5;
+    f24() {
+        return this.f23;
     }
-    e6() {
+    g24() {
         return this.node.currentNodeId;
     }
-    f6() {
+    h24() {
         return this.node.parentNodeId;
     }
-    g6() {
-        return this.a5;
+    i24() {
+        return this.b23;
     }
-    h6() {
-        return this.z4;
+    j24() {
+        return this.a23;
     }
-    i6(o18) {
-        this.d5 = o18;
+    k24(d21) {
+        this.e23 = d21;
     }
-    j6() {
-        return this.d5;
+    l24() {
+        return this.e23;
     }
-    k6() {
-        return this.s4;
+    n24() {
+        return this.t22;
     }
-    l6() {
+    o24() {
         return this.status;
     }
-    m6() {
-        return this.k5;
+    p24() {
+        return this.l23;
     }
-    n6(n18) {
-        this.k5.borderWidth = n18 ? this.borderWidth.has : this.borderWidth.l4;
+    q24(c21) {
+        this.l23.borderWidth = c21 ? this.borderWidth.has : this.borderWidth.n22;
     }
-    o6() {
-        return this.node.p6;
+    r24() {
+        return this.node.s24;
     }
-    q6() {
+    t24() {
         return this.nodeParam.container;
     }
-    r6(isSelected) {
+    u24(isSelected) {
         this.isSelected = isSelected;
     }
-    s6() {
+    v24() {
         return this.isSelected;
     }
-    t6() {
+    w24() {
         return this.nodeParam;
     }
-    u6() {
+    x24() {
         return this.node;
     }
-    v6() {
+    y24() {
         return this.nodeParam.isFolder;
     }
-    w6(m18) {
-        this.m4 = m18;
+    z24(b21) {
+        this.o22 = b21;
     }
-    x6() {
-        return this.m4;
+    a25() {
+        return this.o22;
     }
-    y6(l18) {
-        if (l18 === undefined) {
+    b25(a21) {
+        if (a21 === undefined) {
             return;
         }
-        this.l5 = l18 * n2 + o2;
+        this.n23 = a21 * c7 + d7;
     }
-    z6() {
-        return this.l5;
+    c25() {
+        return this.n23;
     }
-    a7() {
-        return this.node.b5;
+    d25() {
+        return this.node.c23;
     }
-    b7(k18) {
-        this.n4 = k18;
+    e25(z20) {
+        this.p22 = z20;
     }
-    c7() {
-        return this.n4;
+    f25() {
+        return this.p22;
     }
-    d7(j18) {
-        this.o4 = j18;
+    g25(y20) {
+        this.q22 = y20;
     }
-    e7() {
-        return this.o4;
+    h25() {
+        return this.q22;
     }
-    f7(i18) {
-        this.q4 = i18;
+    i25(x20) {
+        this.r22 = x20;
     }
-    g7() {
-        return this.q4;
+    j25() {
+        return this.r22;
     }
-    h7(h18) {
-        this.r4 = h18;
+    k25(w20) {
+        this.s22 = w20;
     }
-    i7() {
-        return this.r4;
+    l25() {
+        return this.s22;
     }
 };
-f3 = t([
+x7 = t5([
     Observed
-], f3);
-export { f3 };
+], x7);
+export { x7 };
 export var TreeListenType;
 (function (TreeListenType) {
     TreeListenType['NODE_CLICK'] = 'NodeClick';
@@ -447,17 +449,17 @@ export var TreeListenType;
 })(TreeListenType || (TreeListenType = {}));
 export class TreeListener {
     constructor() {
-        this.j7 = [];
-        this.k7 = [];
+        this.m25 = [];
+        this.n25 = [];
     }
     on(type, callback) {
         if (Array.isArray(type)) {
-            for (let g18 = 0, l = type.length; g18 < l; g18++) {
-                this.on(type[g18], callback);
+            for (let v20 = 0, l = type.length; v20 < l; v20++) {
+                this.on(type[v20], callback);
             }
         }
         else {
-            (this.j7[type] || (this.j7[type] = [])).push(callback);
+            (this.m25[type] || (this.m25[type] = [])).push(callback);
         }
     }
     once(type, callback) {
@@ -465,55 +467,55 @@ export class TreeListener {
             this.off(type, callback);
         }
         else {
-            (this.k7[type] || (this.k7[type] = [])).push(callback);
+            (this.n25[type] || (this.n25[type] = [])).push(callback);
         }
     }
     off(type, callback) {
         if (type === null) {
-            this.j7 = [];
+            this.m25 = [];
         }
         if (Array.isArray(type)) {
-            for (let f18 = 0, l = type.length; f18 < l; f18++) {
-                this.off(type[f18], callback);
+            for (let u20 = 0, l = type.length; u20 < l; u20++) {
+                this.off(type[u20], callback);
             }
         }
-        let c18 = this.j7[type];
-        if (!c18) {
+        let r20 = this.m25[type];
+        if (!r20) {
             return;
         }
         if (callback === null) {
-            this.j7[type] = null;
+            this.m25[type] = null;
         }
-        let d18 = c18.length;
-        while (d18--) {
-            let e18 = c18[d18];
-            if (e18 === callback) {
-                c18.splice(d18, 1);
+        let s20 = r20.length;
+        while (s20--) {
+            let t20 = r20[s20];
+            if (t20 === callback) {
+                r20.splice(s20, 1);
                 break;
             }
         }
     }
-    emit(event, x17) {
-        if (this.k7[event]) {
-            let a18 = Array.from(this.k7[event]);
-            if (a18) {
-                for (let b18 = 0, l = a18.length; b18 < l; b18++) {
+    emit(event, m20) {
+        if (this.n25[event]) {
+            let p20 = Array.from(this.n25[event]);
+            if (p20) {
+                for (let q20 = 0, l = p20.length; q20 < l; q20++) {
                     try {
-                        a18[b18](x17);
+                        p20[q20](m20);
                     }
                     catch (e) {
                         throw new Error('once function callbacks error.');
                     }
                 }
-                this.k7[event] = null;
+                this.n25[event] = null;
             }
         }
-        else if (this.j7[event]) {
-            let y17 = Array.from(this.j7[event]);
-            if (y17) {
-                for (let z17 = 0, l = y17.length; z17 < l; z17++) {
+        else if (this.m25[event]) {
+            let n20 = Array.from(this.m25[event]);
+            if (n20) {
+                for (let o20 = 0, l = n20.length; o20 < l; o20++) {
                     try {
-                        y17[z17](x17);
+                        n20[o20](m20);
                     }
                     catch (e) {
                         throw new Error('on function callbacks error.');
@@ -537,7 +539,7 @@ export class TreeListenerManager {
         return this.appEventBus;
     }
 }
-TreeListenerManager.l7 = 'app_key_event_bus';
+TreeListenerManager.o25 = 'app_key_event_bus';
 export class TreeView extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
@@ -545,24 +547,24 @@ export class TreeView extends ViewPU {
             this.paramsGenerator_ = paramsLambda;
         }
         this.treeController = new TreeController();
-        this.m7 = new ObservedPropertyObjectPU([], this, 'nodeList');
-        this.listNodeDataSource = new h3();
-        this.n7 = new ObservedPropertyObjectPU(null, this, 'item');
-        this.o7 = new ObservedPropertySimplePU(0, this, 'touchCount');
-        this.p7 = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
-        this.q7 = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
-        this.r7 = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
-        this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
-        this.t7 = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'listItemBgColor');
-        this.m16 = new ObservedPropertyObjectPU([], this, 'allParentNode');
-        this.u7 = new ObservedPropertyObjectPU(e3.getInstance(), this, 'treeViewTheme');
-        this.addProvidedVar('treeViewTheme', this.u7, false);
-        this.n16 = new ObservedPropertySimplePU(true, this, 'clickButtonFlag');
-        this.addProvidedVar('clickButtonFlag', this.n16, false);
-        this.r16 = new ObservedPropertySimplePU(q17.TEXT, this, 'accessibilityNodeType');
-        this.addProvidedVar('accessibilityNodeType', this.r16, false);
-        this.z16 = new ObservedPropertySimplePU(false, this, 'isAccessibilityEnabled');
-        this.addProvidedVar('isAccessibilityEnabled', this.z16, false);
+        this.__nodeList = new ObservedPropertyObjectPU([], this, 'nodeList');
+        this.listNodeDataSource = new z7();
+        this.__item = new ObservedPropertyObjectPU(null, this, 'item');
+        this.__touchCount = new ObservedPropertySimplePU(0, this, 'touchCount');
+        this.__dropSelectedIndex = new ObservedPropertySimplePU(0, this, 'dropSelectedIndex');
+        this.__viewLastIndex = new ObservedPropertySimplePU(-1, this, 'viewLastIndex');
+        this.__followingSystemFontScale = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
+        this.__listItemBgColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'listItemBgColor');
+        this.__allParentNode = new ObservedPropertyObjectPU([], this, 'allParentNode');
+        this.__treeViewTheme = new ObservedPropertyObjectPU(w7.getInstance(), this, 'treeViewTheme');
+        this.addProvidedVar('treeViewTheme', this.__treeViewTheme, false);
+        this.__clickButtonFlag = new ObservedPropertySimplePU(true, this, 'clickButtonFlag');
+        this.addProvidedVar('clickButtonFlag', this.__clickButtonFlag, false);
+        this.__accessibilityNodeType = new ObservedPropertySimplePU(t7.TEXT, this, 'accessibilityNodeType');
+        this.addProvidedVar('accessibilityNodeType', this.__accessibilityNodeType, false);
+        this.__isAccessibilityEnabled = new ObservedPropertySimplePU(false, this, 'isAccessibilityEnabled');
+        this.addProvidedVar('isAccessibilityEnabled', this.__isAccessibilityEnabled, false);
         this.listTreeViewMenu = this.NullBuilder;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
@@ -666,150 +668,159 @@ export class TreeView extends ViewPU {
     updateStateVars(params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.m7.purgeDependencyOnElmtId(rmElmtId);
-        this.n7.purgeDependencyOnElmtId(rmElmtId);
-        this.o7.purgeDependencyOnElmtId(rmElmtId);
-        this.p7.purgeDependencyOnElmtId(rmElmtId);
-        this.q7.purgeDependencyOnElmtId(rmElmtId);
-        this.r7.purgeDependencyOnElmtId(rmElmtId);
-        this.s7.purgeDependencyOnElmtId(rmElmtId);
-        this.t7.purgeDependencyOnElmtId(rmElmtId);
-        this.m16.purgeDependencyOnElmtId(rmElmtId);
-        this.u7.purgeDependencyOnElmtId(rmElmtId);
-        this.n16.purgeDependencyOnElmtId(rmElmtId);
-        this.r16.purgeDependencyOnElmtId(rmElmtId);
-        this.z16.purgeDependencyOnElmtId(rmElmtId);
+        this.__nodeList.purgeDependencyOnElmtId(rmElmtId);
+        this.__item.purgeDependencyOnElmtId(rmElmtId);
+        this.__touchCount.purgeDependencyOnElmtId(rmElmtId);
+        this.__dropSelectedIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__viewLastIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__followingSystemFontScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__maxAppFontScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__listItemBgColor.purgeDependencyOnElmtId(rmElmtId);
+        this.__allParentNode.purgeDependencyOnElmtId(rmElmtId);
+        this.__treeViewTheme.purgeDependencyOnElmtId(rmElmtId);
+        this.__clickButtonFlag.purgeDependencyOnElmtId(rmElmtId);
+        this.__accessibilityNodeType.purgeDependencyOnElmtId(rmElmtId);
+        this.__isAccessibilityEnabled.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.m7.aboutToBeDeleted();
-        this.n7.aboutToBeDeleted();
-        this.o7.aboutToBeDeleted();
-        this.p7.aboutToBeDeleted();
-        this.q7.aboutToBeDeleted();
-        this.r7.aboutToBeDeleted();
-        this.s7.aboutToBeDeleted();
-        this.t7.aboutToBeDeleted();
-        this.m16.aboutToBeDeleted();
-        this.u7.aboutToBeDeleted();
-        this.n16.aboutToBeDeleted();
-        this.r16.aboutToBeDeleted();
-        this.z16.aboutToBeDeleted();
+        this.__nodeList.aboutToBeDeleted();
+        this.__item.aboutToBeDeleted();
+        this.__touchCount.aboutToBeDeleted();
+        this.__dropSelectedIndex.aboutToBeDeleted();
+        this.__viewLastIndex.aboutToBeDeleted();
+        this.__followingSystemFontScale.aboutToBeDeleted();
+        this.__maxAppFontScale.aboutToBeDeleted();
+        this.__listItemBgColor.aboutToBeDeleted();
+        this.__allParentNode.aboutToBeDeleted();
+        this.__treeViewTheme.aboutToBeDeleted();
+        this.__clickButtonFlag.aboutToBeDeleted();
+        this.__accessibilityNodeType.aboutToBeDeleted();
+        this.__isAccessibilityEnabled.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get nodeList() {
-        return this.m7.get();
+        return this.__nodeList.get();
     }
     set nodeList(newValue) {
-        this.m7.set(newValue);
+        this.__nodeList.set(newValue);
     }
     get item() {
-        return this.n7.get();
+        return this.__item.get();
     }
     set item(newValue) {
-        this.n7.set(newValue);
+        this.__item.set(newValue);
     }
     get touchCount() {
-        return this.o7.get();
+        return this.__touchCount.get();
     }
     set touchCount(newValue) {
-        this.o7.set(newValue);
+        this.__touchCount.set(newValue);
     }
     get dropSelectedIndex() {
-        return this.p7.get();
+        return this.__dropSelectedIndex.get();
     }
     set dropSelectedIndex(newValue) {
-        this.p7.set(newValue);
+        this.__dropSelectedIndex.set(newValue);
     }
     get viewLastIndex() {
-        return this.q7.get();
+        return this.__viewLastIndex.get();
     }
     set viewLastIndex(newValue) {
-        this.q7.set(newValue);
+        this.__viewLastIndex.set(newValue);
     }
     get followingSystemFontScale() {
-        return this.r7.get();
+        return this.__followingSystemFontScale.get();
     }
     set followingSystemFontScale(newValue) {
-        this.r7.set(newValue);
+        this.__followingSystemFontScale.set(newValue);
     }
     get maxAppFontScale() {
-        return this.s7.get();
+        return this.__maxAppFontScale.get();
     }
     set maxAppFontScale(newValue) {
-        this.s7.set(newValue);
+        this.__maxAppFontScale.set(newValue);
     }
     get listItemBgColor() {
-        return this.t7.get();
+        return this.__listItemBgColor.get();
     }
     set listItemBgColor(newValue) {
-        this.t7.set(newValue);
+        this.__listItemBgColor.set(newValue);
     }
     get allParentNode() {
-        return this.m16.get();
+        return this.__allParentNode.get();
     }
     set allParentNode(newValue) {
-        this.m16.set(newValue);
+        this.__allParentNode.set(newValue);
     }
     get treeViewTheme() {
-        return this.u7.get();
+        return this.__treeViewTheme.get();
     }
     set treeViewTheme(newValue) {
-        this.u7.set(newValue);
+        this.__treeViewTheme.set(newValue);
     }
     get clickButtonFlag() {
-        return this.n16.get();
+        return this.__clickButtonFlag.get();
     }
     set clickButtonFlag(newValue) {
-        this.n16.set(newValue);
+        this.__clickButtonFlag.set(newValue);
     }
     get accessibilityNodeType() {
-        return this.r16.get();
+        return this.__accessibilityNodeType.get();
     }
     set accessibilityNodeType(newValue) {
-        this.r16.set(newValue);
+        this.__accessibilityNodeType.set(newValue);
     }
     get isAccessibilityEnabled() {
-        return this.z16.get();
+        return this.__isAccessibilityEnabled.get();
     }
     set isAccessibilityEnabled(newValue) {
-        this.z16.set(newValue);
+        this.__isAccessibilityEnabled.set(newValue);
     }
     NullBuilder(parent = null) {
     }
     onWillApplyTheme(theme) {
-        this.treeViewTheme.z3 = theme.colors.interactiveSelect;
-        this.treeViewTheme.d4 = theme.colors.interactivePressed;
-        this.treeViewTheme.e4 = theme.colors.interactiveHover;
-        this.treeViewTheme.a4 = theme.colors.fontPrimary;
-        this.treeViewTheme.b4 = theme.colors.fontSecondary;
-        this.treeViewTheme.c4 = theme.colors.interactiveActive;
-        this.treeViewTheme.f4 = theme.colors.interactiveFocus;
-        this.treeViewTheme.g4 = theme.colors.iconSecondary;
-        this.treeViewTheme.h4 = theme.colors.interactiveActive;
-        this.treeViewTheme.i4 = theme.colors.iconPrimary;
+        this.treeViewTheme.b22 = theme.colors.interactiveSelect;
+        this.treeViewTheme.f22 = theme.colors.interactivePressed;
+        this.treeViewTheme.g22 = theme.colors.interactiveHover;
+        this.treeViewTheme.c22 = theme.colors.fontPrimary;
+        this.treeViewTheme.d22 = theme.colors.fontSecondary;
+        this.treeViewTheme.e22 = theme.colors.interactiveActive;
+        this.treeViewTheme.h22 = theme.colors.interactiveFocus;
+        this.treeViewTheme.i22 = theme.colors.iconSecondary;
+        this.treeViewTheme.j22 = theme.colors.interactiveActive;
+        this.treeViewTheme.k22 = theme.colors.iconPrimary;
         this.treeController.treeViewTheme = this.treeViewTheme;
     }
     aboutToAppear() {
         if (this.treeController !== null) {
-            this.listNodeDataSource = this.treeController.v7();
-            this.nodeList = this.treeController.v7().w7;
-            this.item = this.treeController.v7().w7;
+            this.listNodeDataSource = this.treeController.p25();
+            this.nodeList = this.treeController.p25().q25;
+            this.item = this.treeController.p25().q25;
         }
-        let w17 = this.getUIContext();
-        this.followingSystemFontScale = w17.isFollowingSystemFontScale();
-        this.maxAppFontScale = w17.getMaxFontScale();
+        let l20 = this.getUIContext();
+        this.followingSystemFontScale = l20.isFollowingSystemFontScale();
+        this.maxAppFontScale = l20.getMaxFontScale();
         accessibility.on('accessibilityStateChange', (state) => {
             this.isAccessibilityEnabled = state;
         });
     }
     decideFontScale() {
-        let u17 = this.getUIContext();
-        let v17 = u17.getHostContext()?.config?.fontSizeScale ?? 1;
+        let j20 = this.getUIContext();
+        let k20 = j20.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
-        return Math.min(v17, this.maxAppFontScale, q1);
+        return Math.min(k20, this.maxAppFontScale, j6);
+    }
+    decideSymbolFontScale(f20) {
+        if (!f20 || !this.followingSystemFontScale) {
+            return 1;
+        }
+        let g20 = this.getUIContext();
+        let h20 = g20.getHostContext()?.config?.fontSizeScale ?? 1;
+        let i20 = Math.min(h20, this.maxAppFontScale, i7);
+        return Math.max(i20, j7);
     }
     popupForShowTitle(text, backgroundColor, fontColor, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -828,7 +839,7 @@ export class TreeView extends ViewPU {
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight('regular');
             Text.fontColor(fontColor);
-            Text.minFontScale(o1);
+            Text.minFontScale(i6);
             Text.maxFontScale(this.decideFontScale());
         }, Text);
         Text.pop();
@@ -840,46 +851,48 @@ export class TreeView extends ViewPU {
     draggingPopup(item, parent = null) {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
-            Row.id(`treeView_node_lift${item.e6()}`);
+            Row.id(`treeView_node_lift${item.g24()}`);
             Row.constraintSize({
-                minWidth: this.listNodeDataSource.x7().y7.minWidth,
-                maxWidth: this.listNodeDataSource.x7().y7.maxWidth,
+                minWidth: this.listNodeDataSource.r25().s25.minWidth,
+                maxWidth: this.listNodeDataSource.r25().s25.maxWidth,
             });
-            Row.height(this.listNodeDataSource.x7().height);
-            Row.backgroundColor(this.listNodeDataSource.x7().backgroundColor);
+            Row.height(this.listNodeDataSource.r25().height);
+            Row.backgroundColor(this.listNodeDataSource.r25().backgroundColor);
             Row.padding({
-                start: LengthMetrics.resource(this.listNodeDataSource.x7().padding.left),
-                end: LengthMetrics.resource(this.listNodeDataSource.x7().padding.right),
+                start: LengthMetrics.resource(this.listNodeDataSource.r25().padding.left),
+                end: LengthMetrics.resource(this.listNodeDataSource.r25().padding.right),
             });
             Row.shadow({
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                color: c2,
+                color: s6,
                 offsetY: 0,
             });
-            Row.borderRadius(this.listNodeDataSource.x7().borderRadius);
+            Row.borderRadius(this.listNodeDataSource.r25().borderRadius);
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (item.k6().v3) {
+            if (item.n24().x21) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.backgroundColor(a2);
-                        Row.margin({ end: o(item.k6().v3?.z7) });
-                        Row.height(item.k6().v3?.itemHeight);
-                        Row.width(item.k6().v3?.itemWidth);
+                        Row.backgroundColor(q6);
+                        Row.margin({ end: s5(item.n24().x21?.t25) });
+                        Row.height(item.n24().x21?.itemHeight * this.decideSymbolFontScale(item.n24().x21?.u25 !== undefined ||
+                            Util.f1(item.n24().x21?.v25)));
+                        Row.width(item.n24().x21?.itemWidth * this.decideSymbolFontScale(item.n24().x21?.u25 !== undefined ||
+                            Util.f1(item.n24().x21?.v25)));
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (item.k6().v3?.a17) {
+                        if (item.n24().x21?.u25) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     SymbolGlyph.create();
-                                    SymbolGlyph.attributeModifier.bind(this)(item.k6().v3?.a17);
-                                    SymbolGlyph.fontSize(item.k6().v3?.itemHeight);
+                                    SymbolGlyph.attributeModifier.bind(this)(item.n24().x21?.u25);
+                                    SymbolGlyph.fontSize(`${item.n24().x21?.itemHeight * this.decideSymbolFontScale(true)}vp`);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                                    SymbolGlyph.opacity(this.listNodeDataSource.x7().b8);
+                                    SymbolGlyph.opacity(this.listNodeDataSource.r25().w25);
                                 }, SymbolGlyph);
                             });
                         }
@@ -887,25 +900,25 @@ export class TreeView extends ViewPU {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (Util.t16(item.k6().v3?.a8)) {
+                                    if (Util.f1(item.n24().x21?.v25)) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                SymbolGlyph.create(item.k6().v3?.a8);
-                                                SymbolGlyph.fontSize(item.k6().v3?.itemHeight);
-                                                SymbolGlyph.opacity(this.listNodeDataSource.x7().b8);
+                                                SymbolGlyph.create(item.n24().x21?.v25);
+                                                SymbolGlyph.fontSize(`${item.n24().x21?.itemHeight * this.decideSymbolFontScale(true)}vp`);
+                                                SymbolGlyph.opacity(this.listNodeDataSource.r25().w25);
                                             }, SymbolGlyph);
                                         });
                                     }
                                     else {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                Image.create(item.k6().v3?.a8);
+                                                Image.create(item.n24().x21?.v25);
                                                 Image.objectFit(ImageFit.Contain);
-                                                Image.height(item.k6().v3?.itemHeight);
-                                                Image.width(item.k6().v3?.itemWidth);
-                                                Image.opacity(this.listNodeDataSource.x7().b8);
-                                                Image.matchTextDirection((item.k6().x3?.c8 === ARROW_RIGHT ||
-                                                    item.k6().x3?.c8 === s2) ? true : false);
+                                                Image.height(item.n24().x21?.itemHeight);
+                                                Image.width(item.n24().x21?.itemWidth);
+                                                Image.opacity(this.listNodeDataSource.r25().w25);
+                                                Image.matchTextDirection((item.n24().z21?.x25 === ARROW_RIGHT ||
+                                                    item.n24().z21?.x25 === l7) ? true : false);
                                             }, Image);
                                         });
                                     }
@@ -927,26 +940,26 @@ export class TreeView extends ViewPU {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Row.create();
             Row.constraintSize({
-                minWidth: item.k6().v3 ?
-                this.listNodeDataSource.x7().d8.e8 :
-                this.listNodeDataSource.x7().d8.f8,
-                maxWidth: item.k6().v3 ?
-                this.listNodeDataSource.x7().d8.g8 :
-                this.listNodeDataSource.x7().d8.h8,
+                minWidth: item.n24().x21 ?
+                    this.listNodeDataSource.r25().y25.z25 :
+                    this.listNodeDataSource.r25().y25.a26,
+                maxWidth: item.n24().x21 ?
+                    this.listNodeDataSource.r25().y25.b26 :
+                    this.listNodeDataSource.r25().y25.c26,
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (item.k6().w3 && item.w5()) {
+            if (item.n24().y21 && item.y23()) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                        Text.create(item.k6().w3?.title);
+                        Text.create(item.n24().y21?.title);
                         Text.maxLines(1);
-                        Text.minFontScale(o1);
+                        Text.minFontScale(i6);
                         Text.maxFontScale(this.decideFontScale());
-                        Text.fontSize(item.k6().w3?.size);
-                        Text.fontColor(this.listNodeDataSource.x7().fontColor);
-                        Text.fontWeight(this.listNodeDataSource.x7().fontWeight);
+                        Text.fontSize(item.n24().y21?.size);
+                        Text.fontColor(this.listNodeDataSource.r25().fontColor);
+                        Text.fontWeight(this.listNodeDataSource.r25().fontWeight);
                         Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     }, Text);
                     Text.pop();
@@ -965,83 +978,83 @@ export class TreeView extends ViewPU {
         if (this.viewLastIndex === -1 || this.viewLastIndex >= this.nodeList.length) {
             return;
         }
-        this.setImageSources(this.viewLastIndex, a3.NORMAL);
-        this.listNodeDataSource.i8(this.viewLastIndex, a3.NORMAL);
-        this.nodeList[this.viewLastIndex].a6({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-        this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
-        this.listNodeDataSource.w7[this.viewLastIndex].a6({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-        this.listNodeDataSource.w7[this.viewLastIndex].fontColor = this.treeViewTheme.a4;
-        this.listNodeDataSource.w7[this.viewLastIndex].r6(false);
-        this.listNodeDataSource.w7[this.viewLastIndex].j4 =
-            this.listNodeDataSource.w7[this.viewLastIndex].k6().v3?.source;
-        this.listNodeDataSource.w7[this.viewLastIndex].y16 =
-            this.listNodeDataSource.w7[this.viewLastIndex].k6().v3?.y16;
+        this.setImageSources(this.viewLastIndex, r7.NORMAL);
+        this.listNodeDataSource.d26(this.viewLastIndex, r7.NORMAL);
+        this.nodeList[this.viewLastIndex].c24({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.nodeList[this.viewLastIndex].fontColor = this.treeViewTheme.c22;
+        this.listNodeDataSource.q25[this.viewLastIndex].c24({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+        this.listNodeDataSource.q25[this.viewLastIndex].fontColor = this.treeViewTheme.c22;
+        this.listNodeDataSource.q25[this.viewLastIndex].u24(false);
+        this.listNodeDataSource.q25[this.viewLastIndex].imageSource =
+            this.listNodeDataSource.q25[this.viewLastIndex].n24().x21?.source;
+        this.listNodeDataSource.q25[this.viewLastIndex].l22 =
+            this.listNodeDataSource.q25[this.viewLastIndex].n24().x21?.l22;
     }
-    setImageSources(index, f17) {
-        let g17 = this.nodeList[index];
-        g17.r6(f17 === a3.SELECTED ||
-            f17 === a3.EDIT || f17 === a3.FINISH_EDIT);
-        if (g17.k6().w3 !== null && f17 !== a3.DRAG_INSERT &&
-            f17 !== a3.FINISH_DRAG_INSERT) {
-            g17.k6().w3?.j8(f17 === a3.SELECTED ||
-                f17 === a3.FINISH_EDIT);
+    setImageSources(index, d20) {
+        let e20 = this.nodeList[index];
+        e20.u24(d20 === r7.SELECTED ||
+            d20 === r7.EDIT || d20 === r7.FINISH_EDIT);
+        if (e20.n24().y21 !== null && d20 !== r7.DRAG_INSERT &&
+            d20 !== r7.FINISH_DRAG_INSERT) {
+            e20.n24().y21?.e26(d20 === r7.SELECTED ||
+                d20 === r7.FINISH_EDIT);
         }
-        if (g17.k6().v3 !== null) {
-            g17.k6().v3?.i8(f17);
+        if (e20.n24().x21 !== null) {
+            e20.n24().x21?.d26(d20);
         }
     }
-    touchInner(m22, event) {
-        this.viewLastIndex = this.listNodeDataSource.u9();
-        let index = this.listNodeDataSource.findIndex(m22.e6());
+    touchInner(c20, event) {
+        this.viewLastIndex = this.listNodeDataSource.f26();
+        let index = this.listNodeDataSource.findIndex(c20.g24());
         if (event.type === TouchType.Down) {
             if (index !== this.viewLastIndex) {
                 this.clearLastIndexColor();
                 this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.h9(index);
+                this.listNodeDataSource.g26(index);
             }
         }
         if (event.type === TouchType.Up) {
-            this.listNodeDataSource.w7[index].r6(true);
-            this.listNodeDataSource.i8(index, a3.SELECTED);
-            if (this.listNodeDataSource.w7[index].k6().v3 !== null) {
-                this.listNodeDataSource.w7[index].j4 = this.listNodeDataSource.w7[index].k6().v3?.source;
-                this.listNodeDataSource.w7[index].y16 = this.listNodeDataSource.w7[index].k6().v3?.y16;
+            this.listNodeDataSource.q25[index].u24(true);
+            this.listNodeDataSource.d26(index, r7.SELECTED);
+            if (this.listNodeDataSource.q25[index].n24().x21 !== null) {
+                this.listNodeDataSource.q25[index].imageSource = this.listNodeDataSource.q25[index].n24().x21?.source;
+                this.listNodeDataSource.q25[index].l22 = this.listNodeDataSource.q25[index].n24().x21?.l22;
             }
             if (index !== this.viewLastIndex) {
                 this.clearLastIndexColor();
                 this.listNodeDataSource.lastIndex = index;
-                this.listNodeDataSource.h9(index);
+                this.listNodeDataSource.g26(index);
             }
             this.viewLastIndex = index;
         }
-        if (this.listNodeDataSource.u9() !== -1 && index !== this.listNodeDataSource.u9()) {
-            this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
-            this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
+        if (this.listNodeDataSource.f26() !== -1 && index !== this.listNodeDataSource.f26()) {
+            this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, this.listNodeDataSource.f26());
+            this.listNodeDataSource.i26(this.listNodeDataSource.f26(), m7.COMMIT_NODE);
         }
     }
-    clickInner(l22) {
-        this.viewLastIndex = this.listNodeDataSource.u9();
-        let index = this.listNodeDataSource.findIndex(l22.e6());
+    clickInner(b20) {
+        this.viewLastIndex = this.listNodeDataSource.f26();
+        let index = this.listNodeDataSource.findIndex(b20.g24());
         if (index !== this.viewLastIndex) {
             this.clearLastIndexColor();
             this.listNodeDataSource.lastIndex = index;
-            this.listNodeDataSource.h9(index);
+            this.listNodeDataSource.g26(index);
         }
-        this.listNodeDataSource.w7[index].r6(true);
-        this.listNodeDataSource.i8(index, a3.SELECTED);
-        if (this.listNodeDataSource.w7[index].k6().v3 !== null) {
-            this.listNodeDataSource.w7[index].j4 = this.listNodeDataSource.w7[index].k6().v3?.source;
-            this.listNodeDataSource.w7[index].y16 = this.listNodeDataSource.w7[index].k6().v3?.y16;
+        this.listNodeDataSource.q25[index].u24(true);
+        this.listNodeDataSource.d26(index, r7.SELECTED);
+        if (this.listNodeDataSource.q25[index].n24().x21 !== null) {
+            this.listNodeDataSource.q25[index].imageSource = this.listNodeDataSource.q25[index].n24().x21?.source;
+            this.listNodeDataSource.q25[index].l22 = this.listNodeDataSource.q25[index].n24().x21?.l22;
         }
         if (index !== this.viewLastIndex) {
             this.clearLastIndexColor();
             this.listNodeDataSource.lastIndex = index;
-            this.listNodeDataSource.h9(index);
+            this.listNodeDataSource.g26(index);
         }
         this.viewLastIndex = index;
-        if (this.listNodeDataSource.u9() !== -1 && index !== this.listNodeDataSource.u9()) {
-            this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
-            this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
+        if (this.listNodeDataSource.f26() !== -1 && index !== this.listNodeDataSource.f26()) {
+            this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, this.listNodeDataSource.f26());
+            this.listNodeDataSource.i26(this.listNodeDataSource.f26(), m7.COMMIT_NODE);
         }
     }
     initialRender() {
@@ -1049,238 +1062,238 @@ export class TreeView extends ViewPU {
             List.create({});
             List.onDragMove((event, extraParams) => {
                 if (this.isMultiPress) {
-                    hilog.error(j16, i16, 'drag error, a item has been dragged');
+                    hilog.error(f7, e7, 'drag error, a item has been dragged');
                     return;
                 }
-                let b17 = i1;
+                let x19 = d6;
                 let flag = Math.floor(event.getY() /
-                    (b17 / l1)) % l1 ? w2.DOWN_FLAG : w2.UP_FLAG;
+                    (x19 / f6)) % f6 ? p7.DOWN_FLAG : p7.UP_FLAG;
                 let index = JSON.parse(extraParams).insertIndex;
-                let c17 = false;
+                let y19 = false;
                 if (index >= this.listNodeDataSource.totalCount()) {
-                    flag = w2.DOWN_FLAG;
+                    flag = p7.DOWN_FLAG;
                     index = this.listNodeDataSource.totalCount() - 1;
-                    this.listNodeDataSource.getData(index)?.b7(true);
-                    c17 = true;
+                    this.listNodeDataSource.getData(index)?.e25(true);
+                    y19 = true;
                 }
                 else {
-                    this.listNodeDataSource.getData(index)?.b7(false);
+                    this.listNodeDataSource.getData(index)?.e25(false);
                 }
-                let d17 = this.listNodeDataSource.getData(index);
-                let currentNodeId = d17?.e6();
-                if (index !== this.listNodeDataSource.k8() && this.listNodeDataSource.l8()) {
-                    let e17 = this.listNodeDataSource.m8(currentNodeId);
-                    if (e17) {
-                        this.listNodeDataSource.n8(index);
+                let z19 = this.listNodeDataSource.getData(index);
+                let currentNodeId = z19?.g24();
+                if (index !== this.listNodeDataSource.j26() && this.listNodeDataSource.k26()) {
+                    let a20 = this.listNodeDataSource.l26(currentNodeId);
+                    if (a20) {
+                        this.listNodeDataSource.m26(index);
                         if (currentNodeId !== undefined) {
-                            this.listNodeDataSource.o8(this.listNodeDataSource.findIndex(currentNodeId));
+                            this.listNodeDataSource.n26(this.listNodeDataSource.findIndex(currentNodeId));
                         }
-                        this.listNodeDataSource.p8(w2.NONE);
+                        this.listNodeDataSource.o26(p7.NONE);
                         return;
                     }
                 }
-                this.listNodeDataSource.q8(index);
-                this.listNodeDataSource.r8(flag, index - 1, c17, ObservedObject.GetRawObject(this.allParentNode));
-                if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.s8()) {
-                    this.listNodeDataSource.t8(this.listNodeDataSource.findIndex(currentNodeId), currentNodeId, index);
+                this.listNodeDataSource.p26(index);
+                this.listNodeDataSource.q26(flag, index - 1, y19, ObservedObject.GetRawObject(this.allParentNode));
+                if (currentNodeId !== undefined && currentNodeId !== this.listNodeDataSource.r26()) {
+                    this.listNodeDataSource.s26(this.listNodeDataSource.findIndex(currentNodeId), currentNodeId, index);
                 }
             });
             List.onDragEnter((event, extraParams) => {
-                if (this.listNodeDataSource.l8()) {
-                    this.listNodeDataSource.u8(true);
-                    let a17 = m1;
-                    this.listNodeDataSource.v8(a17);
+                if (this.listNodeDataSource.k26()) {
+                    this.listNodeDataSource.t26(true);
+                    let w19 = g6;
+                    this.listNodeDataSource.u26(w19);
                 }
             });
             List.onDragLeave((event, extraParams) => {
-                this.listNodeDataSource.w8();
-                this.listNodeDataSource.x8();
-                this.listNodeDataSource.y8();
-                let z16 = n1;
-                this.listNodeDataSource.v8(z16);
-                this.listNodeDataSource.u8(false);
-                this.listNodeDataSource.z8();
+                this.listNodeDataSource.v26();
+                this.listNodeDataSource.w26();
+                this.listNodeDataSource.x26();
+                let v19 = h6;
+                this.listNodeDataSource.u26(v19);
+                this.listNodeDataSource.t26(false);
+                this.listNodeDataSource.y26();
             });
             List.onDrop((event, extraParams) => {
-                this.accessibilityNodeType = q17.PLACE;
-                this.listNodeDataSource.y8();
-                let m16 = n1;
-                this.listNodeDataSource.v8(m16);
-                let n16 = JSON.parse(extraParams).insertIndex;
-                let o16 = this.dropSelectedIndex;
-                if (o16 - 1 > this.listNodeDataSource.totalCount() || o16 === undefined) {
-                    hilog.error(j16, i16, 'drag error, currentNodeIndex is not found');
-                    this.listNodeDataSource.u8(false);
+                this.accessibilityNodeType = t7.PLACE;
+                this.listNodeDataSource.x26();
+                let i19 = h6;
+                this.listNodeDataSource.u26(i19);
+                let j19 = JSON.parse(extraParams).insertIndex;
+                let k19 = this.dropSelectedIndex;
+                if (k19 - 1 > this.listNodeDataSource.totalCount() || k19 === undefined) {
+                    hilog.error(f7, e7, 'drag error, currentNodeIndex is not found');
+                    this.listNodeDataSource.t26(false);
                     return;
                 }
-                if (n16 === this.listNodeDataSource.totalCount()) {
-                    hilog.info(j16, i16, 'need to insert into the position of the last line');
-                    n16 -= 1;
+                if (j19 === this.listNodeDataSource.totalCount()) {
+                    hilog.info(f7, e7, 'need to insert into the position of the last line');
+                    j19 -= 1;
                 }
-                let p16 = this.listNodeDataSource.getData(n16);
-                if (p16 === undefined) {
+                let l19 = this.listNodeDataSource.getData(j19);
+                if (l19 === undefined) {
                     return;
                 }
-                let q16 = p16.e6();
-                if (!this.listNodeDataSource.a9() || !this.listNodeDataSource.l8()) {
-                    this.listNodeDataSource.x8();
-                    this.listNodeDataSource.b9(false);
-                    this.listNodeDataSource.w8();
-                    this.listNodeDataSource.c9();
-                    this.listNodeDataSource.d9(q16);
-                    this.listNodeDataSource.z8();
+                let m19 = l19.g24();
+                if (!this.listNodeDataSource.z26() || !this.listNodeDataSource.k26()) {
+                    this.listNodeDataSource.w26();
+                    this.listNodeDataSource.a27(false);
+                    this.listNodeDataSource.v26();
+                    this.listNodeDataSource.b27();
+                    this.listNodeDataSource.c27(m19);
+                    this.listNodeDataSource.y26();
                     return;
                 }
-                let r16 = this.listNodeDataSource.e9();
-                let s16 = p16.f6();
-                let t16 = this.listNodeDataSource.s8();
-                let u16 = this.listNodeDataSource.f9();
-                let v16 = this.listNodeDataSource.m8(q16);
-                if (v16) {
-                    this.listNodeDataSource.x8();
-                    this.listNodeDataSource.b9(false);
-                    this.listNodeDataSource.w8();
-                    this.listNodeDataSource.g9(n16);
-                    this.listNodeDataSource.c9();
-                    this.listNodeDataSource.u8(false);
-                    let y16 = this.listNodeDataSource.findIndex(t16);
-                    this.listNodeDataSource.h9(y16);
-                    this.listNodeDataSource.i9(Event.DRAG, y16);
+                let n19 = this.listNodeDataSource.d27();
+                let o19 = l19.h24();
+                let p19 = this.listNodeDataSource.r26();
+                let q19 = this.listNodeDataSource.e27();
+                let r19 = this.listNodeDataSource.l26(m19);
+                if (r19) {
+                    this.listNodeDataSource.w26();
+                    this.listNodeDataSource.a27(false);
+                    this.listNodeDataSource.v26();
+                    this.listNodeDataSource.f27(j19);
+                    this.listNodeDataSource.b27();
+                    this.listNodeDataSource.t26(false);
+                    let u19 = this.listNodeDataSource.findIndex(p19);
+                    this.listNodeDataSource.g26(u19);
+                    this.listNodeDataSource.g27(Event.DRAG, u19);
                     return;
                 }
-                if (this.listNodeDataSource.j9(t16) === z2.EXPAND) {
-                    this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(t16));
+                if (this.listNodeDataSource.h27(p19) === q7.EXPAND) {
+                    this.listNodeDataSource.i27(this.listNodeDataSource.findIndex(p19));
                 }
                 let flag = false;
-                if (this.listNodeDataSource.j9(q16) === z2.COLLAPSE) {
-                    let currentIndex = this.listNodeDataSource.findIndex(q16);
-                    if (this.listNodeDataSource.w7[currentIndex].g7()) {
-                        this.listNodeDataSource.k9(currentIndex);
+                if (this.listNodeDataSource.h27(m19) === q7.COLLAPSE) {
+                    let currentIndex = this.listNodeDataSource.findIndex(m19);
+                    if (this.listNodeDataSource.q25[currentIndex].j25()) {
+                        this.listNodeDataSource.i27(currentIndex);
                     }
                     flag = true;
                 }
-                this.listNodeDataSource.l9();
-                if (r16 !== null && t16 !== q16) {
-                    this.listNodeDataSource.m9(s16, q16, u16, t16, r16);
-                    this.listNodeDataSource.w8();
+                this.listNodeDataSource.j27();
+                if (n19 !== null && p19 !== m19) {
+                    this.listNodeDataSource.k27(o19, m19, q19, p19, n19);
+                    this.listNodeDataSource.v26();
                 }
                 else {
-                    this.listNodeDataSource.w8();
-                    this.listNodeDataSource.n9(t16);
-                    this.listNodeDataSource.w8();
+                    this.listNodeDataSource.v26();
+                    this.listNodeDataSource.l27(p19);
+                    this.listNodeDataSource.v26();
                 }
-                let w16 = this.listNodeDataSource.findIndex(this.listNodeDataSource.o9());
-                this.listNodeDataSource.p9(w16);
-                this.listNodeDataSource.x8();
-                this.listNodeDataSource.c9();
-                this.listNodeDataSource.u8(false);
-                let x16 = this.listNodeDataSource.findIndex(t16);
-                this.listNodeDataSource.h9(x16);
-                this.listNodeDataSource.i9(Event.DRAG, x16);
-                this.listNodeDataSource.b9(false);
-                this.listNodeDataSource.z8();
-                this.listNodeDataSource.w7[x16].fontColor = this.treeViewTheme.c4;
-                if (this.viewLastIndex !== -1 && o16 !== this.viewLastIndex) {
-                    this.listNodeDataSource.w7[this.viewLastIndex].k6().w3?.j8(false);
-                    this.listNodeDataSource.w7[this.viewLastIndex].k6().w3?.q9(false);
+                let s19 = this.listNodeDataSource.findIndex(this.listNodeDataSource.m27());
+                this.listNodeDataSource.n27(s19);
+                this.listNodeDataSource.w26();
+                this.listNodeDataSource.b27();
+                this.listNodeDataSource.t26(false);
+                let t19 = this.listNodeDataSource.findIndex(p19);
+                this.listNodeDataSource.g26(t19);
+                this.listNodeDataSource.g27(Event.DRAG, t19);
+                this.listNodeDataSource.a27(false);
+                this.listNodeDataSource.y26();
+                this.listNodeDataSource.q25[t19].fontColor = this.treeViewTheme.e22;
+                if (this.viewLastIndex !== -1 && k19 !== this.viewLastIndex) {
+                    this.listNodeDataSource.q25[this.viewLastIndex].n24().y21?.e26(false);
+                    this.listNodeDataSource.q25[this.viewLastIndex].n24().y21?.o27(false);
                 }
                 this.listNodeDataSource.lastIndex = this.viewLastIndex;
-                if (this.listNodeDataSource.w7[this.viewLastIndex]) {
-                    if (this.listNodeDataSource.w7[this.viewLastIndex].k6().v3 !== null) {
-                        this.listNodeDataSource.w7[this.viewLastIndex].k6().v3?.i8(a3.NORMAL);
-                        this.listNodeDataSource.w7[this.viewLastIndex].j4 =
-                            this.listNodeDataSource.w7[this.viewLastIndex].k6().v3?.source;
-                        this.listNodeDataSource.w7[this.viewLastIndex].y16 =
-                            this.listNodeDataSource.w7[this.viewLastIndex].k6().v3?.y16;
+                if (this.listNodeDataSource.q25[this.viewLastIndex]) {
+                    if (this.listNodeDataSource.q25[this.viewLastIndex].n24().x21 !== null) {
+                        this.listNodeDataSource.q25[this.viewLastIndex].n24().x21?.d26(r7.NORMAL);
+                        this.listNodeDataSource.q25[this.viewLastIndex].imageSource =
+                            this.listNodeDataSource.q25[this.viewLastIndex].n24().x21?.source;
+                        this.listNodeDataSource.q25[this.viewLastIndex].l22 =
+                            this.listNodeDataSource.q25[this.viewLastIndex].n24().x21?.l22;
                     }
                 }
-                if (this.listNodeDataSource.w7[this.viewLastIndex]) {
-                    this.listNodeDataSource.w7[this.viewLastIndex].a6({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                if (this.listNodeDataSource.q25[this.viewLastIndex]) {
+                    this.listNodeDataSource.q25[this.viewLastIndex].c24({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                 }
-                this.listNodeDataSource.lastIndex = x16;
+                this.listNodeDataSource.lastIndex = t19;
                 let eventInfo = ({
                     type: 'requestFocusForAccessibility',
                     bundleName: getContext()?.abilityInfo?.bundleName,
                     triggerAction: 'common',
-                    customId: `treeView_node${t16}`
+                    customId: `treeView_node${p19}`
                 });
                 accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                     setTimeout(() => {
-                        this.accessibilityNodeType = q17.TEXT;
-                    }, j17);
+                        this.accessibilityNodeType = t7.TEXT;
+                    }, g7);
                     console.log(`test123 Succeeded in send event, eventInfo is ${JSON.stringify(eventInfo)}`);
                 });
             });
         }, List);
         {
             const __lazyForEachItemGenFunction = _item => {
-                const u15 = _item;
+                const z18 = _item;
                 {
                     const itemCreation2 = (elmtId, isInitialRender) => {
                         ListItem.create(() => { }, false);
                         ListItem.width('100%');
-                        ListItem.height(u15.d6());
+                        ListItem.height(z18.f24());
                         ListItem.padding({
                             start: LengthMetrics.resource(this.itemPadding.left),
                             end: LengthMetrics.resource(this.itemPadding.right)
                         });
                         ListItem.align(Alignment.Start);
                         ListItem.onDragStart((event, extraParams) => {
-                            this.accessibilityNodeType = q17.LIFT;
-                            if (this.listNodeDataSource.a9() || this.listNodeDataSource.l8() || this.isMultiPress) {
-                                hilog.error(j16, i16, 'drag error, a item has been dragged');
+                            this.accessibilityNodeType = t7.LIFT;
+                            if (this.listNodeDataSource.z26() || this.listNodeDataSource.k26() || this.isMultiPress) {
+                                hilog.error(f7, e7, 'drag error, a item has been dragged');
                                 return;
                             }
                             this.dropSelectedIndex = JSON.parse(extraParams).selectedIndex;
-                            let e16 = JSON.parse(extraParams).selectedIndex;
-                            let f16 = this.listNodeDataSource.getData(e16);
-                            let g16 = u15.e6();
-                            if (e16 >= this.listNodeDataSource.totalCount() || e16 === undefined) {
-                                hilog.error(j16, i16, 'drag error, currentNodeIndex is not found in onDragStart');
+                            let a19 = JSON.parse(extraParams).selectedIndex;
+                            let b19 = this.listNodeDataSource.getData(a19);
+                            let c19 = z18.g24();
+                            if (a19 >= this.listNodeDataSource.totalCount() || a19 === undefined) {
+                                hilog.error(f7, e7, 'drag error, currentNodeIndex is not found in onDragStart');
                                 return;
                             }
-                            this.listNodeDataSource.b9(true);
-                            this.listNodeDataSource.u8(true);
-                            this.listNodeDataSource.r9(f16);
-                            this.listNodeDataSource.s9(f16?.e6());
-                            this.listNodeDataSource.t9(f16?.f6());
-                            let h16 = m1;
-                            this.listNodeDataSource.v8(h16);
-                            this.listNodeDataSource.g9(e16);
-                            if (g16 !== f16?.e6()) {
-                                hilog.error(j16, i16, 'drag is too fast, it attribute a fault to OH');
-                                this.listNodeDataSource.u8(false);
+                            this.listNodeDataSource.a27(true);
+                            this.listNodeDataSource.t26(true);
+                            this.listNodeDataSource.p27(b19);
+                            this.listNodeDataSource.q27(b19?.g24());
+                            this.listNodeDataSource.r27(b19?.h24());
+                            let d19 = g6;
+                            this.listNodeDataSource.u26(d19);
+                            this.listNodeDataSource.f27(a19);
+                            if (c19 !== b19?.g24()) {
+                                hilog.error(f7, e7, 'drag is too fast, it attribute a fault to OH');
+                                this.listNodeDataSource.t26(false);
                                 return;
                             }
-                            let primaryTitle = f16.t6()?.primaryTitle === undefined ? '' :
-                                f16.t6()?.primaryTitle;
-                            let secondaryTitle = f16.t6()?.secondaryTitle === undefined ? '' :
-                                f16.t6()?.secondaryTitle;
-                            let h21 = this.listNodeDataSource.s16(primaryTitle);
-                            let i21 = this.listNodeDataSource.s16(secondaryTitle);
-                            let title = `${h21}, ${i21}`;
-                            this.listNodeDataSource.q16(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title));
-                            let b21 = [];
-                            for (let p3 = 0; p3 < this.listNodeDataSource.w7.length; p3++) {
-                                if (this.listNodeDataSource.w7[p3].f6() === -1) {
-                                    b21.push(this.listNodeDataSource.w7[p3].e6());
+                            let primaryTitle = b19.w24()?.primaryTitle === undefined ? '' :
+                                b19.w24()?.primaryTitle;
+                            let secondaryTitle = b19.w24()?.secondaryTitle === undefined ? '' :
+                                b19.w24()?.secondaryTitle;
+                            let e19 = this.listNodeDataSource.s27(primaryTitle);
+                            let f19 = this.listNodeDataSource.s27(secondaryTitle);
+                            let title = `${e19}, ${f19}`;
+                            this.listNodeDataSource.t27(this.listNodeDataSource.getStringByName('treeview_accessibility_lift_node', title));
+                            let g19 = [];
+                            for (let h19 = 0; h19 < this.listNodeDataSource.q25.length; h19++) {
+                                if (this.listNodeDataSource.q25[h19].h24() === -1) {
+                                    g19.push(this.listNodeDataSource.q25[h19].g24());
                                 }
                             }
-                            this.allParentNode = b21;
+                            this.allParentNode = g19;
                             let eventInfo = ({
                                 type: 'requestFocusForAccessibility',
                                 bundleName: getContext()?.abilityInfo?.bundleName,
                                 triggerAction: 'common',
-                                customId: `treeView_node_lift${g16}`
+                                customId: `treeView_node_lift${c19}`
                             });
                             accessibility.sendAccessibilityEvent(eventInfo).then(() => {
                                 setTimeout(() => {
-                                    this.accessibilityNodeType = q17.TEXT;
-                                }, j17);
+                                    this.accessibilityNodeType = t7.TEXT;
+                                }, g7);
                             });
                             return { builder: () => {
-                                this.draggingPopup.call(this, f16);
-                            } };
+                                    this.draggingPopup.call(this, b19);
+                                } };
                         });
                     };
                     const observedDeepRender = () => {
@@ -1288,34 +1301,34 @@ export class TreeView extends ViewPU {
                         this.observeComponentCreation2((elmtId, isInitialRender) => {
                             Row.create();
                             Row.onTouch(this.isAccessibilityEnabled ? undefined : (event) => {
-                                this.touchInner(u15, event);
+                                this.touchInner(z18, event);
                             });
                         }, Row);
                         {
                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                 if (isInitialRender) {
-                                    let componentCall = new i3(this, {
-                                        item: u15,
+                                    let componentCall = new a8(this, {
+                                        item: z18,
                                         listNodeDataSource: this.listNodeDataSource,
-                                        index: this.listNodeDataSource.findIndex(u15.e6()),
+                                        index: this.listNodeDataSource.findIndex(z18.g24()),
                                         listTreeViewMenu: this.listTreeViewMenu,
-                                        callBackClick: () => this.clickInner(u15),
-                                    }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1275, x9: 13 });
+                                        callBackClick: () => this.clickInner(z18),
+                                    }, undefined, elmtId, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1291, m1: 13 });
                                     ViewPU.create(componentCall);
                                     let paramsLambda = () => {
                                         return {
-                                            item: u15,
+                                            item: z18,
                                             listNodeDataSource: this.listNodeDataSource,
-                                            index: this.listNodeDataSource.findIndex(u15.e6()),
+                                            index: this.listNodeDataSource.findIndex(z18.g24()),
                                             listTreeViewMenu: this.listTreeViewMenu,
-                                            callBackClick: () => this.clickInner(u15)
+                                            callBackClick: () => this.clickInner(z18)
                                         };
                                     };
                                     componentCall.paramsGenerator_ = paramsLambda;
                                 }
                                 else {
                                     this.updateStateVarsOfChildByElmtId(elmtId, {
-                                        item: u15
+                                        item: z18
                                     });
                                 }
                             }, { name: 'TreeViewInner' });
@@ -1338,124 +1351,124 @@ export class TreeView extends ViewPU {
 }
 export class TreeController {
     constructor() {
-        this.y9 = -1;
-        this.z9 = [];
-        this.listNodeDataSource = new h3();
-        this.a10 = true;
-        this.treeViewTheme = e3.getInstance();
+        this.u27 = -1;
+        this.v27 = [];
+        this.listNodeDataSource = new z7();
+        this.w27 = true;
+        this.treeViewTheme = w7.getInstance();
     }
-    v7() {
+    p25() {
         return this.listNodeDataSource;
     }
-    b10() {
-        let q15 = this.listNodeDataSource.c10();
-        return this.listNodeDataSource.b10(q15);
+    x27() {
+        let y18 = this.listNodeDataSource.y27();
+        return this.listNodeDataSource.x27(y18);
     }
-    d10() {
-        let p15 = this.listNodeDataSource.c10();
-        return this.listNodeDataSource.e10(p15);
+    z27() {
+        let x18 = this.listNodeDataSource.y27();
+        return this.listNodeDataSource.a28(x18);
     }
     removeNode() {
-        let n15 = this.listNodeDataSource.c10();
-        if (n15 < 0) {
+        let v18 = this.listNodeDataSource.y27();
+        if (v18 < 0) {
             return;
         }
-        let parentNodeId = this.listNodeDataSource.f10(n15);
-        let o15 = this.listNodeDataSource.removeNode(n15, parentNodeId);
-        this.listNodeDataSource.g10(t2.REMOVE_NODE, parentNodeId, o15);
-        this.z9.splice(this.z9.indexOf(n15), 1);
+        let parentNodeId = this.listNodeDataSource.b28(v18);
+        let w18 = this.listNodeDataSource.removeNode(v18, parentNodeId);
+        this.listNodeDataSource.c28(m7.REMOVE_NODE, parentNodeId, w18);
+        this.v27.splice(this.v27.indexOf(v18), 1);
         this.listNodeDataSource.lastIndex = -1;
     }
     modifyNode() {
-        let m15 = this.listNodeDataSource.c10();
-        this.listNodeDataSource.w9(m15, t2.MODIFY_NODE);
+        let u18 = this.listNodeDataSource.y27();
+        this.listNodeDataSource.i26(u18, m7.MODIFY_NODE);
     }
-    add(g15) {
-        let h15 = this.listNodeDataSource.c10();
-        if (h15 === this.listNodeDataSource.y9 || !this.listNodeDataSource.v6(h15)) {
+    add(o18) {
+        let p18 = this.listNodeDataSource.y27();
+        if (p18 === this.listNodeDataSource.u27 || !this.listNodeDataSource.y24(p18)) {
             return;
         }
-        let i15 = this.listNodeDataSource.h10(h15);
-        this.z9.push(this.z9[this.z9.length - 1] + 1);
-        let j15 = this.z9[this.z9.length - 1];
-        let k15 = this.listNodeDataSource.addNode(h15, j15, {
-            isFolder: i15.isFolder,
-            icon: i15.icon,
-            v16: i15.v16,
-            selectedIcon: i15.selectedIcon,
-            w16: i15.w16,
-            editIcon: i15.editIcon,
-            x16: i15.x16,
+        let q18 = this.listNodeDataSource.d28(p18);
+        this.v27.push(this.v27[this.v27.length - 1] + 1);
+        let r18 = this.v27[this.v27.length - 1];
+        let s18 = this.listNodeDataSource.addNode(p18, r18, {
+            isFolder: q18.isFolder,
+            icon: q18.icon,
+            symbolIconStyle: q18.symbolIconStyle,
+            selectedIcon: q18.selectedIcon,
+            symbolSelectedIconStyle: q18.symbolSelectedIconStyle,
+            editIcon: q18.editIcon,
+            symbolEditIconStyle: q18.symbolEditIconStyle,
             primaryTitle: '新建文件夹',
-            container: i15.container,
-            secondaryTitle: i15.secondaryTitle,
-        }, g15);
-        if (!k15) {
+            container: q18.container,
+            secondaryTitle: q18.secondaryTitle,
+        }, o18);
+        if (!s18) {
             return;
         }
-        this.listNodeDataSource.g10(t2.ADD_NODE, h15, [j15]);
-        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
-        this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
-        this.listNodeDataSource.w7[this.listNodeDataSource.u9()].o5(this.treeViewTheme.a4);
-        let l15 = this.listNodeDataSource.findIndex(j15);
-        this.listNodeDataSource.h9(l15);
-        this.listNodeDataSource.i9(Event.TOUCH_UP, l15);
+        this.listNodeDataSource.c28(m7.ADD_NODE, p18, [r18]);
+        this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, this.listNodeDataSource.f26());
+        this.listNodeDataSource.i26(this.listNodeDataSource.f26(), m7.COMMIT_NODE);
+        this.listNodeDataSource.q25[this.listNodeDataSource.f26()].q23(this.treeViewTheme.c22);
+        let t18 = this.listNodeDataSource.findIndex(r18);
+        this.listNodeDataSource.g26(t18);
+        this.listNodeDataSource.g27(Event.TOUCH_UP, t18);
     }
     addNode(nodeParam) {
         if (nodeParam === undefined) {
-            this.add(this.a10);
+            this.add(this.w27);
             return this;
         }
         else {
-            let e15 = false;
+            let m18 = false;
             if (nodeParam.primaryTitle !== undefined &&
-                !this.listNodeDataSource.i10(nodeParam.primaryTitle.toString())) {
+                !this.listNodeDataSource.e28(nodeParam.primaryTitle.toString())) {
                 throw new Error('ListTreeNode[addNode]: ' +
                     'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
                 return this;
             }
-            if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
+            if (nodeParam.primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
                 throw new Error('ListTreeNode[addNode]: ' +
-                    'The icon and directory name cannot be empty at the same time.');
+                    'The icon|symbolIconStyle and directory name cannot be empty at the same time.');
                 return this;
             }
-            if (nodeParam.currentNodeId === this.y9 || nodeParam.currentNodeId === null) {
+            if (nodeParam.currentNodeId === this.u27 || nodeParam.currentNodeId === null) {
                 throw new Error('ListTreeNode[addNode]: currentNodeId can not be -1 or null.');
                 return this;
             }
             if (nodeParam.currentNodeId !== undefined) {
-                this.z9.push(nodeParam.currentNodeId);
+                this.v27.push(nodeParam.currentNodeId);
             }
             if (nodeParam.parentNodeId !== undefined) {
                 if (nodeParam.currentNodeId !== undefined) {
-                    e15 =
-                        this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam, this.a10);
+                    m18 =
+                        this.listNodeDataSource.addNode(nodeParam.parentNodeId, nodeParam.currentNodeId, nodeParam, this.w27);
                 }
             }
-            if (!e15) {
+            if (!m18) {
                 return this;
             }
-            if (!this.a10 && nodeParam.parentNodeId !== undefined) {
-                let f15 = this.z9[this.z9.length - 1];
-                this.listNodeDataSource.g10(t2.ADD_NODE, nodeParam.parentNodeId, [f15]);
+            if (!this.w27 && nodeParam.parentNodeId !== undefined) {
+                let n18 = this.v27[this.v27.length - 1];
+                this.listNodeDataSource.c28(m7.ADD_NODE, nodeParam.parentNodeId, [n18]);
             }
             return this;
         }
     }
-    refreshNode(parentId, parentSubTitle, d15) {
-        this.listNodeDataSource.j10(parentId, parentSubTitle, d15);
+    refreshNode(parentId, parentSubTitle, l18) {
+        this.listNodeDataSource.f28(parentId, parentSubTitle, l18);
     }
     buildDone() {
-        this.listNodeDataSource.k10();
-        this.listNodeDataSource.l10();
-        this.listNodeDataSource.m10();
-        m(this.z9);
-        this.a10 = false;
+        this.listNodeDataSource.g28();
+        this.listNodeDataSource.h28();
+        this.listNodeDataSource.i28();
+        r5(this.v27);
+        this.w27 = false;
     }
 }
-class g3 {
+class y7 {
     constructor() {
-        this.n10 = [];
+        this.j28 = [];
     }
     totalCount() {
         return 0;
@@ -1464,846 +1477,846 @@ class g3 {
         return undefined;
     }
     registerDataChangeListener(listener) {
-        if (this.n10.indexOf(listener) < 0) {
-            this.n10.push(listener);
+        if (this.j28.indexOf(listener) < 0) {
+            this.j28.push(listener);
         }
     }
     unregisterDataChangeListener(listener) {
-        const pos = this.n10.indexOf(listener);
+        const pos = this.j28.indexOf(listener);
         if (pos >= 0) {
-            this.n10.splice(pos, 1);
+            this.j28.splice(pos, 1);
         }
     }
-    z8() {
-        this.n10.forEach(listener => {
+    y26() {
+        this.j28.forEach(listener => {
             listener.onDataReloaded();
         });
     }
-    o10(index) {
-        this.n10.forEach(listener => {
+    k28(index) {
+        this.j28.forEach(listener => {
             listener.onDataAdd(index);
         });
     }
-    g9(index) {
+    f27(index) {
         if (index === undefined) {
             return;
         }
-        this.n10.forEach(listener => {
+        this.j28.forEach(listener => {
             listener.onDataChange(index);
         });
     }
-    p10(index) {
-        this.n10.forEach(listener => {
+    l28(index) {
+        this.j28.forEach(listener => {
             listener.onDataDelete(index);
         });
     }
-    q10(from, to) {
-        this.n10.forEach(listener => {
+    m28(from, to) {
+        this.j28.forEach(listener => {
             listener.onDataMove(from, to);
         });
     }
 }
-function i(t14, count, u14, v14) {
+function p5(i18, count, j18, k18) {
     let taskId = setTimeout(() => {
-        v14.forEach((parentNodeId) => {
-            j(parentNodeId, u14, t14, count);
+        k18.forEach((parentNodeId) => {
+            q5(parentNodeId, j18, i18, count);
         });
         clearTimeout(taskId);
-    }, m2);
+    }, b7);
 }
-function j(parentNodeId, q14, r14, count) {
-    let s14 = parentNodeId;
-    while (s14 >= 0) {
-        if (q14.has(s14)) {
-            let parent = q14.get(s14);
-            parent.o6().r10 =
-                r14 ? parent.o6().r10 + count : parent.o6().r10 - count;
-            s14 = parent.parentNodeId;
+function q5(parentNodeId, f18, g18, count) {
+    let h18 = parentNodeId;
+    while (h18 >= 0) {
+        if (f18.has(h18)) {
+            let parent = f18.get(h18);
+            parent.r24().n28 =
+                g18 ? parent.r24().n28 + count : parent.r24().n28 - count;
+            h18 = parent.parentNodeId;
         }
         else {
-            hilog.error(j16, i16, 'updateParentChildNumHandler: parent node not found');
+            hilog.error(f7, e7, 'updateParentChildNumHandler: parent node not found');
             break;
         }
     }
 }
-function m(n14) {
+function r5(e18) {
     let taskId = setTimeout(() => {
-        n14.sort((a, b) => a - b);
+        e18.sort((a, b) => a - b);
         clearTimeout(taskId);
-    }, m2);
+    }, b7);
 }
-class h3 extends g3 {
+class z7 extends y7 {
     constructor() {
         super();
-        this.y9 = -1;
-        this.s10 = new j3(d3);
-        this.t10 = 50;
+        this.u27 = -1;
+        this.o28 = new b8(v7);
+        this.p28 = 50;
         this.MAX_CN_LENGTH = 254;
         this.MAX_EN_LENGTH = 255;
         this.INITIAL_INVALID_VALUE = -1;
-        this.w7 = [];
-        this.u10 = [];
-        this.v10 = new Map();
-        this.w10 = new Map();
+        this.q25 = [];
+        this.q28 = [];
+        this.r28 = new Map();
+        this.s28 = new Map();
         this.lastIndex = -1;
-        this.x10 = -1;
-        this.y10 = -1;
-        this.z10 = -1;
-        this.a11 = new Map();
-        this.b11 = new Map();
-        this.c11 = new Map();
-        this.d11 = false;
+        this.t28 = -1;
+        this.u28 = -1;
+        this.v28 = -1;
+        this.w28 = new Map();
+        this.x28 = new Map();
+        this.y28 = new Map();
+        this.z28 = false;
         this.appEventBus = TreeListenerManager.getInstance().getTreeListener();
-        this.e11 = false;
-        this.f11 = false;
-        this.g11 = this.INITIAL_INVALID_VALUE;
-        this.h11 = this.INITIAL_INVALID_VALUE;
-        this.i11 = null;
-        this.j11 = 1;
-        this.k11 = this.INITIAL_INVALID_VALUE;
-        this.l11 = this.INITIAL_INVALID_VALUE;
-        this.n11 = this.INITIAL_INVALID_VALUE;
-        this.o11 = this.INITIAL_INVALID_VALUE;
-        this.p11 = this.INITIAL_INVALID_VALUE;
-        this.q11 = this.INITIAL_INVALID_VALUE;
-        this.r11 = this.INITIAL_INVALID_VALUE;
-        this.s11 = this.INITIAL_INVALID_VALUE;
-        this.t11 = this.INITIAL_INVALID_VALUE;
-        this.u11 = this.INITIAL_INVALID_VALUE;
-        this.v11 = this.INITIAL_INVALID_VALUE;
-        this.w11 = this.INITIAL_INVALID_VALUE;
-        this.x11 = new Map();
-        this.flag = w2.NONE;
-        this.y11 = this.INITIAL_INVALID_VALUE;
-        this.z11 = '';
-        this.a12 = '';
-        this.b12 = this.INITIAL_INVALID_VALUE;
-        this.c12 = this.INITIAL_INVALID_VALUE;
-        this.d12 = this.INITIAL_INVALID_VALUE;
-        this.treeViewTheme = e3.getInstance();
-        this.e12 = [];
-        this.f12 = {
-            g12: s1,
-            h12: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-            xOffset: t1,
-            i12: u1,
-            j12: v1,
-            k12: w1,
+        this.a29 = false;
+        this.b29 = false;
+        this.c29 = this.INITIAL_INVALID_VALUE;
+        this.d29 = this.INITIAL_INVALID_VALUE;
+        this.e29 = null;
+        this.f29 = 1;
+        this.g29 = this.INITIAL_INVALID_VALUE;
+        this.h29 = this.INITIAL_INVALID_VALUE;
+        this.i29 = this.INITIAL_INVALID_VALUE;
+        this.j29 = this.INITIAL_INVALID_VALUE;
+        this.k29 = this.INITIAL_INVALID_VALUE;
+        this.l29 = this.INITIAL_INVALID_VALUE;
+        this.m29 = this.INITIAL_INVALID_VALUE;
+        this.n29 = this.INITIAL_INVALID_VALUE;
+        this.o29 = this.INITIAL_INVALID_VALUE;
+        this.p29 = this.INITIAL_INVALID_VALUE;
+        this.q29 = this.INITIAL_INVALID_VALUE;
+        this.r29 = this.INITIAL_INVALID_VALUE;
+        this.s29 = new Map();
+        this.flag = p7.NONE;
+        this.t29 = this.INITIAL_INVALID_VALUE;
+        this.u29 = '';
+        this.v29 = '';
+        this.w29 = this.INITIAL_INVALID_VALUE;
+        this.x29 = this.INITIAL_INVALID_VALUE;
+        this.y29 = this.INITIAL_INVALID_VALUE;
+        this.treeViewTheme = w7.getInstance();
+        this.z29 = [];
+        this.a30 = {
+            b30: k6,
+            c30: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            xOffset: l6,
+            d30: m6,
+            e30: n6,
+            f30: o6,
         };
-        this.l12 = {
-            y7: { minWidth: e2, maxWidth: f2 },
-            d8: {
-                e8: g2,
-                g8: h2,
-                f8: i2,
-                h8: j2,
+        this.g30 = {
+            s25: { minWidth: u6, maxWidth: v6 },
+            y25: {
+                z25: w6,
+                b26: x6,
+                a26: y6,
+                c26: z6,
             },
             padding: { left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level4'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } },
-            backgroundColor: z1,
-            height: d2,
+            backgroundColor: p6,
+            height: t6,
             shadow: {
                 radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                color: c2,
+                color: s6,
                 offsetX: 0,
-                offsetY: j1,
+                offsetY: e6,
             },
             borderRadius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-            fontColor: this.treeViewTheme.a4,
+            fontColor: this.treeViewTheme.c22,
             fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             fontWeight: FontWeight.Regular,
-            b8: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
+            w25: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_fourth'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }
         };
         this.subTitle = {
-            n12: this.treeViewTheme.b4,
-            o12: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+            h30: this.treeViewTheme.d22,
+            i30: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             fontWeight: FontWeight.Regular,
             margin: { left: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, right: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level12'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } }
         };
-        this.s10.b5 = -1;
-        this.v10.set(-1, this.s10);
-        this.w10.set(-1, d3);
+        this.o28.c23 = -1;
+        this.r28.set(-1, this.o28);
+        this.s28.set(-1, v7);
     }
-    p12(index) {
-        if (index < 0 || index >= this.w7.length) {
-            hilog.error(j16, i16, 'check index fail');
+    j30(index) {
+        if (index < 0 || index >= this.q25.length) {
+            hilog.error(f7, e7, 'check index fail');
             return false;
         }
         return true;
     }
-    q12(index, color) {
-        if (!this.p12(index)) {
+    k30(index, color) {
+        if (!this.j30(index)) {
             return;
         }
-        this.w7[index].a6(color);
-        this.w7[index].n6(false);
+        this.q25[index].c24(color);
+        this.q25[index].q24(false);
     }
-    b6(index) {
-        return this.w7[index].b6();
+    d24(index) {
+        return this.q25[index].d24();
     }
-    r12(index, m14) {
-        if (this.w7[index].j6()) {
-            this.w7[index].n6(m14);
+    l30(index, d18) {
+        if (this.q25[index].l24()) {
+            this.q25[index].q24(d18);
         }
     }
-    i8(index, k14) {
-        if (!this.p12(index)) {
+    d26(index, b18) {
+        if (!this.j30(index)) {
             return;
         }
-        let l14 = this.w7[index];
-        l14.r6(k14 === a3.SELECTED ||
-            k14 === a3.EDIT || k14 === a3.FINISH_EDIT);
-        if (l14.k6().w3 !== null && k14 !== a3.DRAG_INSERT &&
-            k14 !== a3.FINISH_DRAG_INSERT) {
-            l14.k6().w3?.j8(k14 === a3.SELECTED ||
-                k14 === a3.FINISH_EDIT);
+        let c18 = this.q25[index];
+        c18.u24(b18 === r7.SELECTED ||
+            b18 === r7.EDIT || b18 === r7.FINISH_EDIT);
+        if (c18.n24().y21 !== null && b18 !== r7.DRAG_INSERT &&
+            b18 !== r7.FINISH_DRAG_INSERT) {
+            c18.n24().y21?.e26(b18 === r7.SELECTED ||
+                b18 === r7.FINISH_EDIT);
         }
-        if (l14.k6().v3 !== null) {
-            l14.k6().v3?.i8(k14);
-        }
-    }
-    s12(index, i14) {
-        let j14 = this.w7[index];
-        if (j14.k6().x3 !== undefined) {
-            j14.k6().x3 = q3.t12(i14, this.a11.get(j14.e6()), j14.k6().x3?.type);
+        if (c18.n24().x21 !== null) {
+            c18.n24().x21?.d26(b18);
         }
     }
-    u12() {
-        if (!this.p12(this.lastIndex)) {
+    m30(index, z17) {
+        let a18 = this.q25[index];
+        if (a18.n24().z21 !== undefined) {
+            a18.n24().z21 = f8.n30(z17, this.w28.get(a18.g24()), a18.n24().z21?.type);
+        }
+    }
+    o30() {
+        if (!this.j30(this.lastIndex)) {
             return;
         }
-        this.i8(this.lastIndex, a3.NORMAL);
-        this.q12(this.lastIndex, this.w7[this.lastIndex].l6().normal);
-        this.r12(this.lastIndex, false);
-        this.g9(this.b11.get(this.w7[this.lastIndex].e6()));
+        this.d26(this.lastIndex, r7.NORMAL);
+        this.k30(this.lastIndex, this.q25[this.lastIndex].o24().normal);
+        this.l30(this.lastIndex, false);
+        this.f27(this.x28.get(this.q25[this.lastIndex].g24()));
     }
-    v12() {
+    p30() {
         let index = 0;
-        this.b11.clear();
-        this.c11.clear();
-        this.u10.splice(0, this.u10.length);
-        for (let h14 = 0; h14 < this.w7.length; h14++) {
-            this.c11.set(this.w7[h14].e6(), h14);
-            if (this.w7[h14].j6()) {
-                this.b11.set(this.w7[h14].e6(), index++);
-                this.u10.push(this.w7[h14]);
+        this.x28.clear();
+        this.y28.clear();
+        this.q28.splice(0, this.q28.length);
+        for (let y17 = 0; y17 < this.q25.length; y17++) {
+            this.y28.set(this.q25[y17].g24(), y17);
+            if (this.q25[y17].l24()) {
+                this.x28.set(this.q25[y17].g24(), index++);
+                this.q28.push(this.q25[y17]);
             }
         }
     }
-    w12(e14) {
-        if (e14 >= this.w7.length) {
-            hilog.error(j16, i16, 'changeNodeStatus clickIndex error.');
+    q30(v17) {
+        if (v17 >= this.q25.length) {
+            hilog.error(f7, e7, 'changeNodeStatus clickIndex error.');
             return;
         }
-        let f14 = e14;
-        let g14 = this.w7[e14].e6();
-        if (this.a11.get(g14) === z2.EXPAND) {
-            this.a11.set(g14, z2.COLLAPSE);
-            this.w7[f14].k6().x3 = q3.x12(z2.COLLAPSE, this.w7[f14].k6().x3?.y12);
+        let w17 = v17;
+        let x17 = this.q25[v17].g24();
+        if (this.w28.get(x17) === q7.EXPAND) {
+            this.w28.set(x17, q7.COLLAPSE);
+            this.q25[w17].n24().z21 = f8.r30(q7.COLLAPSE, this.q25[w17].n24().z21?.s30);
         }
-        else if (this.a11.get(g14) === z2.COLLAPSE) {
-            this.a11.set(g14, z2.EXPAND);
-            this.w7[f14].k6().x3 = q3.x12(z2.EXPAND, this.w7[f14].k6().x3?.y12);
+        else if (this.w28.get(x17) === q7.COLLAPSE) {
+            this.w28.set(x17, q7.EXPAND);
+            this.q25[w17].n24().z21 = f8.r30(q7.EXPAND, this.q25[w17].n24().z21?.s30);
         }
     }
-    z12(v13, w13) {
-        if (v13 >= this.w7.length) {
-            hilog.error(j16, i16, 'handleExpandAndCollapse clickIndex error.');
+    t30(m17, n17) {
+        if (m17 >= this.q25.length) {
+            hilog.error(f7, e7, 'handleExpandAndCollapse clickIndex error.');
             return;
         }
-        let x13 = v13;
-        let y13 = this.w7[x13].e6();
-        if (!this.a11.has(y13)) {
+        let o17 = m17;
+        let p17 = this.q25[o17].g24();
+        if (!this.w28.has(p17)) {
             return;
         }
-        let z13 = this.a11.get(y13);
-        if (this.w7[x13].o6().a13 && z13 === z2.COLLAPSE) {
-            for (let d14 = 0; d14 < this.w7[x13].o6().r10; d14++) {
-                if (this.w7[x13 + 1 + d14] === undefined) {
+        let q17 = this.w28.get(p17);
+        if (this.q25[o17].r24().u30 && q17 === q7.COLLAPSE) {
+            for (let u17 = 0; u17 < this.q25[o17].r24().n28; u17++) {
+                if (this.q25[o17 + 1 + u17] === undefined) {
                     return;
                 }
-                this.w7[x13 + 1 + d14].i6(false);
-                this.w7[x13 + 1 + d14].c6(h1);
+                this.q25[o17 + 1 + u17].k24(false);
+                this.q25[o17 + 1 + u17].e24(c6);
             }
-            this.v12();
-            this.z8();
+            this.p30();
+            this.y26();
             return;
         }
-        let a14 = new Array(this.w7[x13].o6().b13);
-        a14[0] = x13 + 1;
+        let r17 = new Array(this.q25[o17].r24().v30);
+        r17[0] = o17 + 1;
         let index = 1;
-        while (index < this.w7[x13].o6().b13) {
-            a14[index] = a14[index - 1] + this.w7[a14[index - 1]].o6().r10 + 1;
+        while (index < this.q25[o17].r24().v30) {
+            r17[index] = r17[index - 1] + this.q25[r17[index - 1]].r24().n28 + 1;
             index++;
         }
-        if (z13 === z2.EXPAND) {
-            for (let b14 = 0; b14 < a14.length; b14++) {
-                if (this.w7[a14[b14]] === undefined) {
+        if (q17 === q7.EXPAND) {
+            for (let s17 = 0; s17 < r17.length; s17++) {
+                if (this.q25[r17[s17]] === undefined) {
                     return;
                 }
-                this.w7[a14[b14]].i6(true);
-                this.w7[a14[b14]].c6(i1);
-                let c14 = this.w7[a14[b14]].e6();
-                if (this.a11.get(c14) === z2.EXPAND) {
-                    this.z12(a14[b14], false);
+                this.q25[r17[s17]].k24(true);
+                this.q25[r17[s17]].e24(d6);
+                let t17 = this.q25[r17[s17]].g24();
+                if (this.w28.get(t17) === q7.EXPAND) {
+                    this.t30(r17[s17], false);
                 }
             }
         }
-        a14 = null;
-        if (w13) {
-            this.v12();
-            this.z8();
+        r17 = null;
+        if (n17) {
+            this.p30();
+            this.y26();
         }
     }
-    m10() {
-        i(true, 1, this.v10, this.e12);
+    i28() {
+        p5(true, 1, this.r28, this.z29);
     }
-    c13(u13) {
-        u13.splice(0, u13.length);
-        this.b11.clear();
-        this.u10.splice(0, this.u10.length);
-        this.c11.clear();
-        this.x11.clear();
+    w30(l17) {
+        l17.splice(0, l17.length);
+        this.x28.clear();
+        this.q28.splice(0, this.q28.length);
+        this.y28.clear();
+        this.s29.clear();
     }
-    d13(o13, p13, q13) {
+    x30(g17, h17, i17) {
         let index = 0;
-        let r13 = 0;
-        this.c13(o13);
+        let j17 = 0;
+        this.w30(g17);
         try {
-            this.e13((node) => {
-                if (node.f13() >= 0 && this.w10.has(node.f13())) {
-                    let t13 = new f3(node, this.w10.get(node.f13()));
-                    t13.m5(node.o6().a13);
-                    o13.push(t13);
-                    this.c11.set(t13.e6(), r13++);
-                    index = this.g13(t13, index);
+            this.y30((node) => {
+                if (node.z30() >= 0 && this.s28.has(node.z30())) {
+                    let k17 = new x7(node, this.s28.get(node.z30()));
+                    k17.o23(node.r24().u30);
+                    g17.push(k17);
+                    this.y28.set(k17.g24(), j17++);
+                    index = this.a31(k17, index);
                 }
                 return false;
-            }, this.s10, p13, q13);
+            }, this.o28, h17, i17);
         }
         catch (err) {
-            hilog.error(j16, i16, 'traverseSectionNodeDF function callbacks error.');
-            this.c13(o13);
+            hilog.error(f7, e7, 'traverseSectionNodeDF function callbacks error.');
+            this.w30(g17);
         }
     }
-    g13(n13, index) {
-        if (n13.o6().a13) {
-            this.a11.set(n13.e6(), z2.COLLAPSE);
+    a31(f17, index) {
+        if (f17.r24().u30) {
+            this.w28.set(f17.g24(), q7.COLLAPSE);
         }
-        if (n13.j6()) {
-            this.b11.set(n13.e6(), index++);
-            this.u10.push(n13);
+        if (f17.l24()) {
+            this.x28.set(f17.g24(), index++);
+            this.q28.push(f17);
         }
-        if (n13.v6()) {
-            if (n13.t6().secondaryTitle !== undefined) {
-                this.x11.set(n13.e6(), n13.t6().secondaryTitle);
+        if (f17.y24()) {
+            if (f17.w24().secondaryTitle !== undefined) {
+                this.s29.set(f17.g24(), f17.w24().secondaryTitle);
             }
             else {
-                this.x11.set(n13.e6(), '');
+                this.s29.set(f17.g24(), '');
             }
         }
         return index;
     }
-    l10() {
-        let j13 = setTimeout(() => {
-            let l13 = [];
-            this.d13(l13, 0);
-            this.w7.splice(0, this.w7.length);
-            this.w7.push(...l13);
-            this.w7.forEach((value, index) => {
-                this.p10(index);
-                this.o10(index);
+    h28() {
+        let d17 = setTimeout(() => {
+            let e17 = [];
+            this.x30(e17, 0);
+            this.q25.splice(0, this.q25.length);
+            this.q25.push(...e17);
+            this.q25.forEach((value, index) => {
+                this.l28(index);
+                this.k28(index);
             });
-            clearTimeout(j13);
-        }, m2);
+            clearTimeout(d17);
+        }, b7);
     }
-    k10() {
-        this.d13(this.w7, 0, 1);
+    g28() {
+        this.x30(this.q25, 0, 1);
     }
-    h9(index) {
-        this.x10 = index;
+    g26(index) {
+        this.t28 = index;
     }
-    c10() {
-        if (!this.p12(this.x10)) {
+    y27() {
+        if (!this.j30(this.t28)) {
             return -1;
         }
-        return this.w7[this.x10].e6();
+        return this.q25[this.t28].g24();
     }
-    k9(u12) {
-        this.w12(u12);
-        this.z12(u12, true);
+    i27(c17) {
+        this.q30(c17);
+        this.t30(c17, true);
     }
-    l13() {
-        return this.d11;
+    b31() {
+        return this.z28;
     }
-    u9() {
+    f26() {
         return this.lastIndex;
     }
     findIndex(currentNodeId) {
-        let t12 = -1;
-        if (this.c11.has(currentNodeId)) {
-            t12 = this.c11.get(currentNodeId);
+        let b17 = -1;
+        if (this.y28.has(currentNodeId)) {
+            b17 = this.y28.get(currentNodeId);
         }
-        return t12;
+        return b17;
     }
-    n13(index) {
-        if (!this.p12(index)) {
+    c31(index) {
+        if (!this.j30(index)) {
             return;
         }
-        this.i8(index, a3.NORMAL);
-        this.q12(index, this.w7[index].l6().normal);
-        this.r12(index, false);
-        this.g9(this.b11.get(this.w7[index].e6()));
+        this.d26(index, r7.NORMAL);
+        this.k30(index, this.q25[index].o24().normal);
+        this.l30(index, false);
+        this.f27(this.x28.get(this.q25[index].g24()));
     }
-    i9(event, index) {
-        if (this.f11) {
+    g27(event, index) {
+        if (this.b29) {
             return;
         }
-        if (!this.p12(index)) {
+        if (!this.j30(index)) {
             return;
         }
         if (event === Event.TOUCH_DOWN || event === Event.TOUCH_UP || event === Event.MOUSE_BUTTON_RIGHT) {
             if (index !== this.lastIndex) {
-                this.u12();
+                this.o30();
             }
         }
-        this.o13(index, event);
+        this.d31(index, event);
     }
-    o13(index, event) {
-        let r12 = this.b11.get(this.w7[index].e6());
+    d31(index, event) {
+        let z16 = this.x28.get(this.q25[index].g24());
         switch (event) {
             case Event.TOUCH_DOWN:
-                this.d11 = true;
-                this.q12(index, this.w7[index].l6().i5);
-                this.g9(r12);
+                this.z28 = true;
+                this.k30(index, this.q25[index].o24().j23);
+                this.f27(z16);
                 break;
             case Event.TOUCH_UP: {
-                this.p13(index, r12);
+                this.e31(index, z16);
                 break;
             }
             case Event.HOVER:
-                if (this.b6(index) !== this.w7[index].l6().selected) {
-                    this.q12(index, this.w7[index].l6().h5);
-                    this.g9(r12);
+                if (this.d24(index) !== this.q25[index].o24().selected) {
+                    this.k30(index, this.q25[index].o24().i23);
+                    this.f27(z16);
                 }
                 break;
             case Event.HOVER_OVER:
-                if (this.b6(index) !== this.w7[index].l6().selected) {
-                    this.q12(index, this.w7[index].l6().normal);
-                    this.g9(r12);
+                if (this.d24(index) !== this.q25[index].o24().selected) {
+                    this.k30(index, this.q25[index].o24().normal);
+                    this.f27(z16);
                 }
                 break;
             case Event.FOCUS:
-                this.r12(index, true);
-                this.g9(r12);
+                this.l30(index, true);
+                this.f27(z16);
                 break;
             case Event.BLUR:
-                this.r12(index, false);
-                this.g9(r12);
+                this.l30(index, false);
+                this.f27(z16);
                 break;
             case Event.MOUSE_BUTTON_RIGHT:
                 this.lastIndex = index;
-                this.q13();
+                this.f31();
                 break;
             case Event.DRAG:
-                this.d11 = false;
-                let s12 = this.w7[index];
-                this.i8(index, a3.SELECTED);
+                this.z28 = false;
+                let a17 = this.q25[index];
+                this.d26(index, r7.SELECTED);
                 this.lastIndex = index;
-                this.q12(index, s12.l6().selected);
-                this.g9(r12);
+                this.k30(index, a17.o24().selected);
+                this.f27(z16);
                 break;
             default:
                 break;
         }
     }
-    p13(index, p12) {
-        if (this.e11) {
-            this.e11 = false;
+    e31(index, x16) {
+        if (this.a29) {
+            this.a29 = false;
         }
-        this.d11 = false;
-        let q12 = this.w7[index];
-        this.i8(index, a3.SELECTED);
-        q12.o5(this.treeViewTheme.a4);
+        this.z28 = false;
+        let y16 = this.q25[index];
+        this.d26(index, r7.SELECTED);
+        y16.q23(this.treeViewTheme.c22);
         this.lastIndex = index;
-        this.q12(index, q12.l6().selected);
-        this.g9(p12);
+        this.k30(index, y16.o24().selected);
+        this.f27(x16);
     }
-    k13(l12, operation) {
-        if (operation === t2.MODIFY_NODE) {
-            let n12 = this.w7[this.y10];
-            let o12 = {
-                currentNodeId: n12?.e6(),
-                parentNodeId: n12?.f6(),
+    g31(t16, operation) {
+        if (operation === m7.MODIFY_NODE) {
+            let v16 = this.q25[this.u28];
+            let w16 = {
+                currentNodeId: v16?.g24(),
+                parentNodeId: v16?.h24(),
             };
-            this.appEventBus.emit(TreeListenType.NODE_MODIFY, o12);
+            this.appEventBus.emit(TreeListenType.NODE_MODIFY, w16);
         }
-        else if (operation === t2.ADD_NODE) {
-            let m12 = this.w7[l12];
-            if (m12 === undefined) {
+        else if (operation === m7.ADD_NODE) {
+            let u16 = this.q25[t16];
+            if (u16 === undefined) {
                 return;
             }
-            let icon = (m12.k6().v3 !== undefined) ?
-                m12.k6().v3?.source : undefined;
-            let selectedIcon = (m12.k6().v3 !== undefined) ?
-                m12.k6().v3?.r13 : undefined;
-            let editIcon = (m12.k6().v3 !== undefined) ?
-                m12.k6().v3?.s13 : undefined;
+            let icon = (u16.n24().x21 !== undefined) ?
+                u16.n24().x21?.source : undefined;
+            let selectedIcon = (u16.n24().x21 !== undefined) ?
+                u16.n24().x21?.h31 : undefined;
+            let editIcon = (u16.n24().x21 !== undefined) ?
+                u16.n24().x21?.i31 : undefined;
             let callbackParam = {
-                currentNodeId: m12?.e6(),
-                parentNodeId: m12?.f6(),
+                currentNodeId: u16?.g24(),
+                parentNodeId: u16?.h24(),
             };
             this.appEventBus.emit(TreeListenType.NODE_ADD, callbackParam);
         }
     }
-    q13() {
-        if (this.y10 !== -1) {
-            this.i8(this.y10, a3.FINISH_EDIT);
-            this.s12(this.y10, a3.FINISH_EDIT);
-            this.w7[this.y10].h7(false);
-            this.w7[this.y10].y5(false);
-            this.k13(this.y10, this.j13);
-            this.g9(this.y10);
+    f31() {
+        if (this.u28 !== -1) {
+            this.d26(this.u28, r7.FINISH_EDIT);
+            this.m30(this.u28, r7.FINISH_EDIT);
+            this.q25[this.u28].k25(false);
+            this.q25[this.u28].a24(false);
+            this.g31(this.u28, this.j31);
+            this.f27(this.u28);
         }
     }
-    w9(h12, operation) {
+    i26(p16, operation) {
         let index = -1;
-        if (h12 === -1) {
+        if (p16 === -1) {
             return;
         }
-        if (operation === t2.MODIFY_NODE) {
-            for (let k12 = 0; k12 < this.w7.length; k12++) {
-                if (this.w7[k12]?.e6() === h12) {
-                    index = k12;
+        if (operation === m7.MODIFY_NODE) {
+            for (let s16 = 0; s16 < this.q25.length; s16++) {
+                if (this.q25[s16]?.g24() === p16) {
+                    index = s16;
                     break;
                 }
             }
-            let j12 = this.w7[index];
-            if (j12 === undefined) {
+            let r16 = this.q25[index];
+            if (r16 === undefined) {
                 return;
             }
-            j12.h7(true);
-            if (j12.k6().w3 === null) {
+            r16.k25(true);
+            if (r16.n24().y21 === null) {
                 return;
             }
-            this.j13 = t2.MODIFY_NODE;
-            j12.y5(true);
-            this.i8(index, a3.EDIT);
-            this.s12(index, a3.EDIT);
-            this.y10 = index;
-            if (j12.k6().inputText) {
-                if (j12.k6().x3 !== null) {
-                    j12.k6().inputText.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+            this.j31 = m7.MODIFY_NODE;
+            r16.a24(true);
+            this.d26(index, r7.EDIT);
+            this.m30(index, r7.EDIT);
+            this.u28 = index;
+            if (r16.n24().inputText) {
+                if (r16.n24().z21 !== null) {
+                    r16.n24().inputText.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                 }
                 else {
-                    j12.k6().inputText.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+                    r16.n24().inputText.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
                 }
             }
-            this.g9(this.b11.get(h12));
+            this.f27(this.x28.get(p16));
         }
-        index = h12;
-        if (operation === t2.COMMIT_NODE) {
-            let i12 = this.w7[index];
-            if (i12 === undefined) {
+        index = p16;
+        if (operation === m7.COMMIT_NODE) {
+            let q16 = this.q25[index];
+            if (q16 === undefined) {
                 return;
             }
-            i12.y5(false);
-            i12.h7(false);
-            this.i8(index, a3.FINISH_EDIT);
-            this.s12(index, a3.FINISH_EDIT);
-            this.k13(this.y10, this.j13);
-            this.g9(this.b11.get(i12?.e6()));
+            q16.a24(false);
+            q16.k25(false);
+            this.d26(index, r7.FINISH_EDIT);
+            this.m30(index, r7.FINISH_EDIT);
+            this.g31(this.u28, this.j31);
+            this.f27(this.x28.get(q16?.g24()));
         }
     }
-    v9(d12, e12, isShow, index) {
-        if (!this.p12(index)) {
+    h26(l16, m16, isShow, index) {
+        if (!this.j30(index)) {
             return;
         }
-        let f12 = this.w7[index];
-        if (f12 === undefined) {
+        let n16 = this.q25[index];
+        if (n16 === undefined) {
             return;
         }
-        f12.r5(isShow);
-        let g12 = this.b11.get(f12.e6());
+        n16.t23(isShow);
+        let o16 = this.x28.get(n16.g24());
         if (!isShow) {
-            this.g9(g12);
+            this.f27(o16);
             return;
         }
-        if (d12 === u2.HINTS) {
-            if (f12.k6().w3 !== null) {
-                f12.u5(f12.k6().w3?.title);
+        if (l16 === n7.HINTS) {
+            if (n16.n24().y21 !== null) {
+                n16.w23(n16.n24().y21?.title);
             }
             else {
-                f12.u5('');
-                f12.r5(false);
+                n16.w23('');
+                n16.t23(false);
             }
-            f12.s5(false);
-            f12.t5({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            f12.v5(this.treeViewTheme.b4);
+            n16.u23(false);
+            n16.v23({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+            n16.x23(this.treeViewTheme.d22);
         }
-        else if (d12 === u2.WARNINGS) {
-            if (f12.k6().inputText !== null) {
-                if (e12 === v2.INVALID_ERROR) {
-                    f12.u5('invalid error');
+        else if (l16 === n7.WARNINGS) {
+            if (n16.n24().inputText !== null) {
+                if (m16 === o7.INVALID_ERROR) {
+                    n16.w23('invalid error');
                 }
-                else if (e12 === v2.LENGTH_ERROR) {
-                    f12.u5('length error');
+                else if (m16 === o7.LENGTH_ERROR) {
+                    n16.w23('length error');
                 }
-                f12.s5(true);
-                f12.t5({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_help_tip_bg'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                f12.v5({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_hint_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                n16.u23(true);
+                n16.v23({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_help_tip_bg'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                n16.x23({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_hint_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             }
         }
-        this.g9(g12);
+        this.f27(o16);
     }
-    t13(timeout, index) {
-        if (!this.p12(index)) {
+    k31(timeout, index) {
+        if (!this.j30(index)) {
             return;
         }
-        if (this.w7[index].k6().w3 !== null) {
-            this.w7[index].k6().w3.u13 = timeout;
+        if (this.q25[index].n24().y21 !== null) {
+            this.q25[index].n24().y21.l31 = timeout;
         }
-        let c12 = this.b11.get(this.w7[index].e6());
-        this.g9(c12);
+        let k16 = this.x28.get(this.q25[index].g24());
+        this.f27(k16);
     }
-    v13(index, text) {
-        this.y10 = index;
-        if (this.w7[index].k6().w3 !== null) {
-            this.w7[index].k6().w3.title = text;
+    n31(index, text) {
+        this.u28 = index;
+        if (this.q25[index].n24().y21 !== null) {
+            this.q25[index].n24().y21.title = text;
         }
     }
     totalCount() {
-        return this.b11.size;
+        return this.x28.size;
     }
     getData(index) {
-        if (index < 0 || index >= this.u10.length) {
+        if (index < 0 || index >= this.q28.length) {
             return undefined;
         }
-        return this.u10[index];
+        return this.q28[index];
     }
-    w13(index, data) {
-        if (!this.p12(index)) {
+    o31(index, data) {
+        if (!this.j30(index)) {
             return;
         }
-        this.w7.splice(index, 0, data);
-        this.c11.set(data.e6(), index);
-        this.v12();
-        this.o10(index);
+        this.q25.splice(index, 0, data);
+        this.y28.set(data.g24(), index);
+        this.p30();
+        this.k28(index);
     }
-    x13(data) {
-        this.w7.push(data);
-        this.c11.set(data.e6(), this.w7.length);
-        this.v12();
-        this.o10(this.w7.length - 1);
+    p31(data) {
+        this.q25.push(data);
+        this.y28.set(data.g24(), this.q25.length);
+        this.p30();
+        this.k28(this.q25.length - 1);
     }
-    b9(b12) {
-        this.e11 = b12;
+    a27(j16) {
+        this.a29 = j16;
     }
-    l8() {
-        return this.e11;
+    k26() {
+        return this.a29;
     }
-    u8(a12) {
-        this.f11 = a12;
+    t26(i16) {
+        this.b29 = i16;
     }
-    a9() {
-        return this.f11;
+    z26() {
+        return this.b29;
     }
-    r9(z11) {
-        if (z11 === undefined) {
+    p27(h16) {
+        if (h16 === undefined) {
             return;
         }
-        this.i11 = z11;
+        this.e29 = h16;
     }
-    e9() {
-        return this.i11;
+    d27() {
+        return this.e29;
     }
-    t9(y11) {
-        if (y11 === undefined) {
+    r27(g16) {
+        if (g16 === undefined) {
             return;
         }
-        this.h11 = y11;
+        this.d29 = g16;
     }
-    f9() {
-        return this.h11;
+    e27() {
+        return this.d29;
     }
-    s8() {
-        return this.g11;
+    r26() {
+        return this.c29;
     }
-    s9(x11) {
-        if (x11 === undefined) {
+    q27(f16) {
+        if (f16 === undefined) {
             return;
         }
-        this.g11 = x11;
+        this.c29 = f16;
     }
-    v8(w11) {
-        this.j11 = w11;
+    u26(e16) {
+        this.f29 = e16;
     }
-    y13(item) {
-        return item.e6() === this.s8() ? this.j11 : 1;
+    q31(item) {
+        return item.g24() === this.r26() ? this.f29 : 1;
     }
-    x7() {
-        return this.l12;
+    r25() {
+        return this.g30;
     }
-    q8(v11) {
-        this.k11 = v11;
+    p26(d16) {
+        this.g29 = d16;
     }
-    k8() {
-        return this.k11;
+    j26() {
+        return this.g29;
     }
-    m8(s11) {
-        if (this.i11 === null || s11 === undefined) {
+    l26(a16) {
+        if (this.e29 === null || a16 === undefined) {
             return false;
         }
-        let t11 = this.i11.u6();
-        let parentId = t11.currentNodeId;
-        let u11 = this.v10.get(s11)?.parentNodeId;
-        while (u11 !== undefined && u11 !== -1) {
-            if (parentId === u11) {
+        let b16 = this.e29.x24();
+        let parentId = b16.currentNodeId;
+        let c16 = this.r28.get(a16)?.parentNodeId;
+        while (c16 !== undefined && c16 !== -1) {
+            if (parentId === c16) {
                 return true;
             }
             else {
-                u11 = this.v10.get(u11)?.parentNodeId;
+                c16 = this.r28.get(c16)?.parentNodeId;
             }
         }
         return false;
     }
-    n8(r11) {
-        this.n11 = r11;
+    m26(z15) {
+        this.i29 = z15;
     }
-    z13() {
-        return this.n11;
+    r31() {
+        return this.i29;
     }
-    o8(currentIndex) {
-        if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
-            let index = this.b11.get(this.l11);
-            this.w7.forEach((value) => {
-                if (value.e6() === this.l11) {
-                    value.w6(false);
+    n26(currentIndex) {
+        if (this.h29 !== this.INITIAL_INVALID_VALUE && this.x28.has(this.h29)) {
+            let index = this.x28.get(this.h29);
+            this.q25.forEach((value) => {
+                if (value.g24() === this.h29) {
+                    value.z24(false);
                     return;
                 }
             });
-            this.g9(index);
+            this.f27(index);
         }
-        if ((this.t11 !== this.INITIAL_INVALID_VALUE &&
-            this.u11 !== this.t11)) {
-            clearTimeout(this.t11);
-            if (this.v11 !== this.INITIAL_INVALID_VALUE) {
-                this.a14(this.v11);
-                let index = this.b11
-                    .get(this.w7[this.v11].e6());
-                this.g9(index);
+        if ((this.o29 !== this.INITIAL_INVALID_VALUE &&
+            this.p29 !== this.o29)) {
+            clearTimeout(this.o29);
+            if (this.q29 !== this.INITIAL_INVALID_VALUE) {
+                this.s31(this.q29);
+                let index = this.x28
+                    .get(this.q25[this.q29].g24());
+                this.f27(index);
             }
-            this.u11 = this.t11;
+            this.p29 = this.o29;
         }
-        this.t11 = this.s11;
-        this.v11 = currentIndex;
-        if ((this.q11 !== this.INITIAL_INVALID_VALUE &&
-            this.r11 !== this.q11)) {
-            clearTimeout(this.q11);
-            this.r11 = this.q11;
+        this.o29 = this.n29;
+        this.q29 = currentIndex;
+        if ((this.l29 !== this.INITIAL_INVALID_VALUE &&
+            this.m29 !== this.l29)) {
+            clearTimeout(this.l29);
+            this.m29 = this.l29;
         }
-        this.q11 = this.p11;
-        this.o11 = this.INITIAL_INVALID_VALUE;
+        this.l29 = this.k29;
+        this.j29 = this.INITIAL_INVALID_VALUE;
     }
-    a14(currentIndex) {
-        if (!this.p12(currentIndex)) {
+    s31(currentIndex) {
+        if (!this.j30(currentIndex)) {
             return;
         }
-        this.q12(currentIndex, this.w7[currentIndex].l6().normal);
-        this.b14(currentIndex, false);
-        this.i8(currentIndex, a3.FINISH_DRAG_INSERT);
-        this.s12(currentIndex, a3.FINISH_DRAG_INSERT);
-        this.w7[currentIndex].f7(false);
+        this.k30(currentIndex, this.q25[currentIndex].o24().normal);
+        this.t31(currentIndex, false);
+        this.d26(currentIndex, r7.FINISH_DRAG_INSERT);
+        this.m30(currentIndex, r7.FINISH_DRAG_INSERT);
+        this.q25[currentIndex].i25(false);
     }
-    b14(index, p11) {
-        if (this.w7[index].k6().w3 && this.w7[index].w5()) {
-            this.w7[index].k6().w3?.q9(p11);
+    t31(index, y15) {
+        if (this.q25[index].n24().y21 && this.q25[index].y23()) {
+            this.q25[index].n24().y21?.o27(y15);
         }
     }
-    g16(j5) {
-        let k3 = [];
-        while (j5 !== -1) {
-            if (j5 === undefined) {
+    u31(s15) {
+        let t15 = [];
+        while (s15 !== -1) {
+            if (s15 === undefined) {
                 return '';
             }
-            let m5 = this.f10(j5);
-            let l5 = this.v10.get(m5);
-            if (l5 === undefined || m5 === undefined) {
+            let u15 = this.b28(s15);
+            let v15 = this.r28.get(u15);
+            if (v15 === undefined || u15 === undefined) {
                 return '';
             }
-            let primaryTitle = this.a15(l5).t6()?.primaryTitle === undefined
-                ? '' : this.a15(l5).t6().primaryTitle;
-            let secondaryTitle = this.a15(l5).t6()?.secondaryTitle === undefined
-                ? '' : this.a15(l5).t6().secondaryTitle;
-            let f21 = this.s16(primaryTitle);
-            let g21 = this.s16(secondaryTitle);
-            k3.unshift(`${f21}, ${g21}`);
-            j5 = l5.currentNodeId;
+            let primaryTitle = this.v31(v15).w24()?.primaryTitle === undefined
+                ? '' : this.v31(v15).w24().primaryTitle;
+            let secondaryTitle = this.v31(v15).w24()?.secondaryTitle === undefined
+                ? '' : this.v31(v15).w24().secondaryTitle;
+            let w15 = this.s27(primaryTitle);
+            let x15 = this.s27(secondaryTitle);
+            t15.unshift(`${w15}, ${x15}`);
+            s15 = v15.currentNodeId;
         }
-        return k3.join(',');
+        return t15.join(',');
     }
-    p16(w20) {
-        if (w20 === undefined) {
+    w31(h15) {
+        if (h15 === undefined) {
             return '';
         }
-        let x3 = this.f10(w20);
-        if (x3 === -1) {
-            let e5 = [];
-            let f5 = this.v10.get(w20);
-            if (f5 === undefined || x3 === undefined) {
+        let i15 = this.b28(h15);
+        if (i15 === -1) {
+            let o15 = [];
+            let p15 = this.r28.get(h15);
+            if (p15 === undefined || i15 === undefined) {
                 return '';
             }
-            let primaryTitle = this.a15(f5).t6()?.primaryTitle === undefined
-                ? '' : this.a15(f5).t6().primaryTitle;
-            let secondaryTitle = this.a15(f5).t6()?.secondaryTitle === undefined
-                ? '' : this.a15(f5).t6().secondaryTitle;
-            let g5 = this.s16(primaryTitle);
-            let k5 = this.s16(secondaryTitle);
-            e5.unshift(`${g5}, ${k5}`);
-            return e5.join(',');
+            let primaryTitle = this.v31(p15).w24()?.primaryTitle === undefined
+                ? '' : this.v31(p15).w24().primaryTitle;
+            let secondaryTitle = this.v31(p15).w24()?.secondaryTitle === undefined
+                ? '' : this.v31(p15).w24().secondaryTitle;
+            let q15 = this.s27(primaryTitle);
+            let r15 = this.s27(secondaryTitle);
+            o15.unshift(`${q15}, ${r15}`);
+            return o15.join(',');
         }
         else {
-            let y3 = [];
-            while (w20 !== -1) {
-                if (w20 === undefined) {
+            let j15 = [];
+            while (h15 !== -1) {
+                if (h15 === undefined) {
                     return '';
                 }
-                let z3 = this.f10(w20);
-                let a4 = this.v10.get(z3);
-                if (a4 === undefined || z3 === undefined) {
+                let k15 = this.b28(h15);
+                let l15 = this.r28.get(k15);
+                if (l15 === undefined || k15 === undefined) {
                     return '';
                 }
-                let primaryTitle = this.a15(a4).t6()?.primaryTitle === undefined
-                    ? '' : this.a15(a4).t6().primaryTitle;
-                let secondaryTitle = this.a15(a4).t6()?.secondaryTitle === undefined
-                    ? '' : this.a15(a4).t6().secondaryTitle;
-                let b4 = this.s16(primaryTitle);
-                let c4 = this.s16(secondaryTitle);
-                y3.unshift(`${b4}, ${c4}`);
-                w20 = a4.currentNodeId;
+                let primaryTitle = this.v31(l15).w24()?.primaryTitle === undefined
+                    ? '' : this.v31(l15).w24().primaryTitle;
+                let secondaryTitle = this.v31(l15).w24()?.secondaryTitle === undefined
+                    ? '' : this.v31(l15).w24().secondaryTitle;
+                let m15 = this.s27(primaryTitle);
+                let n15 = this.s27(secondaryTitle);
+                j15.unshift(`${m15}, ${n15}`);
+                h15 = l15.currentNodeId;
             }
-            return y3.join(',');
+            return j15.join(',');
         }
     }
-    h16(q20, r20, v3) {
-        this.g16(v3);
-        if (r20 === undefined || v3 === undefined) {
+    x31(a15, b15, c15) {
+        this.u31(c15);
+        if (b15 === undefined || c15 === undefined) {
             return;
         }
-        let parentId = this.f10(v3);
-        let h5 = q20.indexOf(v3) + 2;
-        let t20 = this.b10(parentId);
-        let u20 = t20.map(item => item.itemId);
-        let i5 = u20.indexOf(v3) + 2;
-        if (parentId === -1 && this.j9(r20) === z2.COLLAPSE ||
-            parentId === -1 && this.j9(r20) === undefined) {
-            this.q16(this.getStringByName('treeview_accessibility_move_node_parent', h5));
+        let parentId = this.b28(c15);
+        let d15 = a15.indexOf(c15) + 2;
+        let e15 = this.x27(parentId);
+        let f15 = e15.map(item => item.itemId);
+        let g15 = f15.indexOf(c15) + 2;
+        if (parentId === -1 && this.h27(b15) === q7.COLLAPSE ||
+            parentId === -1 && this.h27(b15) === undefined) {
+            this.t27(this.getStringByName('treeview_accessibility_move_node_parent', d15));
         }
-        else if (this.j9(r20) === z2.EXPAND) {
-            this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.g16(v3), 1));
+        else if (this.h27(b15) === q7.EXPAND) {
+            this.t27(this.getStringByName('treeview_accessibility_move_node_child', this.u31(c15), 1));
         }
         else if (parentId !== -1) {
-            this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.g16(v3), i5));
+            this.t27(this.getStringByName('treeview_accessibility_move_node_child', this.u31(c15), g15));
         }
     }
     getStringByName(resName, ...args) {
@@ -2317,7 +2330,7 @@ class h3 extends g3 {
         }
         return '';
     }
-    q16(textAnnouncedForAccessibility) {
+    t27(textAnnouncedForAccessibility) {
         let eventInfo = ({
             type: 'announceForAccessibility',
             bundleName: getContext()?.abilityInfo?.bundleName,
@@ -2326,14 +2339,14 @@ class h3 extends g3 {
         });
         accessibility.sendAccessibilityEvent(eventInfo);
     }
-    s16(resource) {
-        let x20 = '';
+    s27(resource) {
+        let z14 = '';
         try {
             if (typeof resource === 'string') {
-                x20 = resource;
+                z14 = resource;
             }
             else {
-                x20 = getContext()?.resourceManager?.getStringSync(resource?.id);
+                z14 = getContext()?.resourceManager?.getStringSync(resource?.id);
             }
         }
         catch (error) {
@@ -2341,292 +2354,292 @@ class h3 extends g3 {
             let message = error.message;
             hilog.error(0x3900, 'Ace', `treeView getAccessibleTitleText error, code: ${code}, message: ${message}`);
         }
-        return x20;
+        return z14;
     }
-    r8(flag, index, k11, l20) {
-        let l11 = (this.n11 !== index || this.flag !== flag) ? true : false;
-        this.n11 = index;
-        if ((l11 || k11) && this.e11) {
+    q26(flag, index, p14, q14) {
+        let r14 = (this.i29 !== index || this.flag !== flag) ? true : false;
+        this.i29 = index;
+        if ((r14 || p14) && this.a29) {
             this.flag = flag;
-            let currentNodeId = this.getData(index)?.e6();
-            let m11 = this.getData(index)?.a7();
+            let currentNodeId = this.getData(index)?.g24();
+            let s14 = this.getData(index)?.d25();
             if (currentNodeId !== undefined) {
-                m11 = (this.a11.get(currentNodeId) === z2.EXPAND &&
-                    this.flag === w2.DOWN_FLAG) ? (m11 ? m11 + 1 : undefined) : m11;
-                if (this.l11 !== this.INITIAL_INVALID_VALUE &&
-                this.b11.has(this.l11)) {
-                    let n11 = this.b11.get(this.l11);
-                    this.w7.forEach((value) => {
-                        if (value.e6() === this.l11) {
-                            value.w6(false);
+                s14 = (this.w28.get(currentNodeId) === q7.EXPAND &&
+                    this.flag === p7.DOWN_FLAG) ? (s14 ? s14 + 1 : undefined) : s14;
+                if (this.h29 !== this.INITIAL_INVALID_VALUE &&
+                    this.x28.has(this.h29)) {
+                    let y14 = this.x28.get(this.h29);
+                    this.q25.forEach((value) => {
+                        if (value.g24() === this.h29) {
+                            value.z24(false);
                         }
                     });
-                    this.g9(n11);
+                    this.f27(y14);
                 }
-                let u3 = this.getData(index - 1)?.e6();
-                let m20 = this.getData(index + 2)?.e6();
-                let n20 = this.getData(index + 1)?.e6();
-                let o20 = this.v10.get(n20);
-                if (this.flag === w2.DOWN_FLAG && index < this.totalCount() - 1) {
-                    this.getData(index)?.w6(false);
-                    this.getData(index + 1)?.w6(true);
-                    this.getData(index)?.d7(false);
-                    this.getData(index + 1)?.y6(m11);
-                    this.g9(index);
-                    this.g9(index + 1);
-                    this.l11 = this.getData(index + 1)?.e6();
-                    let p20 = this.v10.get(n20);
-                    if (!p20?.p6.a13) {
-                        this.h16(l20, n20, n20);
+                let t14 = this.getData(index - 1)?.g24();
+                let u14 = this.getData(index + 2)?.g24();
+                let v14 = this.getData(index + 1)?.g24();
+                let w14 = this.r28.get(v14);
+                if (this.flag === p7.DOWN_FLAG && index < this.totalCount() - 1) {
+                    this.getData(index)?.z24(false);
+                    this.getData(index + 1)?.z24(true);
+                    this.getData(index)?.g25(false);
+                    this.getData(index + 1)?.b25(s14);
+                    this.f27(index);
+                    this.f27(index + 1);
+                    this.h29 = this.getData(index + 1)?.g24();
+                    let x14 = this.r28.get(v14);
+                    if (!x14?.s24.u30) {
+                        this.x31(q14, v14, v14);
                     }
                     else {
-                        this.h16(l20, n20, m20);
+                        this.x31(q14, v14, u14);
                     }
                 }
-                else if (this.flag === w2.UP_FLAG && index < this.totalCount() - 1) {
-                    this.getData(index)?.w6(true);
-                    this.getData(index + 1)?.w6(false);
-                    this.getData(index)?.d7(false);
-                    this.getData(index)?.y6(m11);
-                    this.g9(index);
-                    this.g9(index + 1);
-                    this.l11 = this.getData(index)?.e6();
-                    if (o20?.p6.a13 && o20?.parentNodeId !== -1) {
-                        this.h16(l20, n20, n20);
+                else if (this.flag === p7.UP_FLAG && index < this.totalCount() - 1) {
+                    this.getData(index)?.z24(true);
+                    this.getData(index + 1)?.z24(false);
+                    this.getData(index)?.g25(false);
+                    this.getData(index)?.b25(s14);
+                    this.f27(index);
+                    this.f27(index + 1);
+                    this.h29 = this.getData(index)?.g24();
+                    if (w14?.s24.u30 && w14?.parentNodeId !== -1) {
+                        this.x31(q14, v14, v14);
                     }
-                    else if (o20?.p6.a13 && o20?.parentNodeId === -1) {
-                        this.h16(l20, u3, n20);
+                    else if (w14?.s24.u30 && w14?.parentNodeId === -1) {
+                        this.x31(q14, t14, v14);
                     }
                 }
                 else if (index >= this.totalCount() - 1) {
-                    if (this.flag === w2.DOWN_FLAG) {
-                        this.getData(index)?.w6(false);
-                        this.getData(index)?.d7(true);
+                    if (this.flag === p7.DOWN_FLAG) {
+                        this.getData(index)?.z24(false);
+                        this.getData(index)?.g25(true);
                     }
                     else {
-                        this.getData(index)?.w6(true);
-                        this.getData(index)?.d7(false);
+                        this.getData(index)?.z24(true);
+                        this.getData(index)?.g25(false);
                     }
-                    this.getData(index)?.y6(m11);
-                    this.g9(index);
-                    this.l11 = this.getData(index)?.e6();
+                    this.getData(index)?.b25(s14);
+                    this.f27(index);
+                    this.h29 = this.getData(index)?.g24();
                 }
             }
         }
     }
-    t8(currentIndex, currentNodeId, b11) {
-        let c11 = currentIndex !== this.o11 ? true : false;
-        let d11 = this.getData(b11)?.c7();
-        if (d11) {
-            this.o11 = this.INITIAL_INVALID_VALUE;
+    s26(currentIndex, currentNodeId, g14) {
+        let h14 = currentIndex !== this.j29 ? true : false;
+        let i14 = this.getData(g14)?.f25();
+        let j14 = this.q25[currentIndex + 1]?.g24();
+        let k14 = this.b28(currentNodeId);
+        if (i14) {
+            this.j29 = this.INITIAL_INVALID_VALUE;
         }
         else {
-            this.o11 = currentIndex;
+            this.j29 = currentIndex;
         }
-        if (d11 || c11) {
-            let e11 = !d11 && (!this.e11 ||
-                (this.a11.get(currentNodeId) === z2.COLLAPSE && this.e11) ||
-                (!this.a11.has(currentNodeId) && this.w7[currentIndex].v6()));
-            if (e11) {
-                this.q12(currentIndex, this.w7[currentIndex].l6().h5);
-                this.g9(b11);
-                let i11 = this.e11 ? 1000 : 0;
-                let k22 = this.w7[currentIndex + 1].e6();
-                let w3 = this.f10(currentNodeId);
-                this.s11 = setTimeout(() => {
-                    this.c14(currentIndex);
-                    if (w3 === -1) {
-                        this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.p16(currentNodeId), 1));
+        if (i14 || h14) {
+            let l14 = !i14 && (!this.a29 ||
+                (this.w28.get(currentNodeId) === q7.COLLAPSE && this.a29) ||
+                (!this.w28.has(currentNodeId) && this.q25[currentIndex].y24()));
+            if (l14) {
+                this.k30(currentIndex, this.q25[currentIndex].o24().i23);
+                this.f27(g14);
+                let o14 = this.a29 ? 1000 : 0;
+                this.n29 = setTimeout(() => {
+                    this.y31(currentIndex);
+                    if (k14 === -1) {
+                        this.t27(this.getStringByName('treeview_accessibility_move_node_child', this.w31(currentNodeId), 1));
                     }
                     else {
-                        this.q16(this.getStringByName('treeview_accessibility_move_node_child', this.p16(k22), 1));
+                        this.t27(this.getStringByName('treeview_accessibility_move_node_child', this.w31(j14), 1));
                     }
-                }, i11);
+                }, o14);
             }
-            if (d11 || (this.t11 !== this.INITIAL_INVALID_VALUE &&
-                this.u11 !== this.t11)) {
-                clearTimeout(this.t11);
-                if (this.v11 !== this.INITIAL_INVALID_VALUE) {
-                    this.a14(this.v11);
-                    this.z8();
+            if (i14 || (this.o29 !== this.INITIAL_INVALID_VALUE &&
+                this.p29 !== this.o29)) {
+                clearTimeout(this.o29);
+                if (this.q29 !== this.INITIAL_INVALID_VALUE) {
+                    this.s31(this.q29);
+                    this.y26();
                 }
-                this.u11 = this.t11;
+                this.p29 = this.o29;
             }
-            this.t11 = this.s11;
-            this.v11 = currentIndex;
-            if (!d11 && this.a11.get(currentNodeId) === z2.COLLAPSE) {
-                let f11 = this.getData(b11)?.u6().children[0]?.currentNodeId;
-                let g11 = 2000;
-                this.p11 = setTimeout(() => {
-                    this.a14(this.v11);
-                    if (f11 !== undefined) {
-                        this.d14(currentIndex, f11);
+            this.o29 = this.n29;
+            this.q29 = currentIndex;
+            if (!i14 && this.w28.get(currentNodeId) === q7.COLLAPSE) {
+                let m14 = this.getData(g14)?.x24().children[0]?.currentNodeId;
+                let n14 = 2000;
+                this.k29 = setTimeout(() => {
+                    this.s31(this.q29);
+                    if (m14 !== undefined) {
+                        this.z31(currentIndex, m14);
                     }
-                }, g11);
+                }, n14);
             }
-            if (d11 || (this.q11 !== this.INITIAL_INVALID_VALUE &&
-                this.r11 !== this.q11)) {
-                clearTimeout(this.q11);
-                this.r11 = this.q11;
+            if (i14 || (this.l29 !== this.INITIAL_INVALID_VALUE &&
+                this.m29 !== this.l29)) {
+                clearTimeout(this.l29);
+                this.m29 = this.l29;
             }
-            this.q11 = this.p11;
+            this.l29 = this.k29;
         }
     }
-    c14(currentIndex) {
-        this.w7.forEach((value) => {
-            if (value.e6() === this.l11) {
-                value.w6(false);
-                value.d7(false);
+    y31(currentIndex) {
+        this.q25.forEach((value) => {
+            if (value.g24() === this.h29) {
+                value.z24(false);
+                value.g25(false);
                 return;
             }
         });
-        this.q12(currentIndex, this.w7[currentIndex].l6().j5);
-        this.w7[currentIndex].f7(true);
-        this.b14(currentIndex, true);
-        this.i8(currentIndex, a3.DRAG_INSERT);
-        this.s12(currentIndex, a3.DRAG_INSERT);
-        this.z8();
+        this.k30(currentIndex, this.q25[currentIndex].o24().k23);
+        this.q25[currentIndex].i25(true);
+        this.t31(currentIndex, true);
+        this.d26(currentIndex, r7.DRAG_INSERT);
+        this.m30(currentIndex, r7.DRAG_INSERT);
+        this.y26();
     }
-    d14(currentIndex, x10) {
-        this.w7.forEach((value) => {
-            if (value.e6() === this.l11) {
-                value.w6(false);
-                value.d7(false);
+    z31(currentIndex, f14) {
+        this.q25.forEach((value) => {
+            if (value.g24() === this.h29) {
+                value.z24(false);
+                value.g25(false);
             }
         });
-        this.w7.forEach((value) => {
-            if (this.e11 && value.e6() === x10) {
-                value.w6(true);
+        this.q25.forEach((value) => {
+            if (this.a29 && value.g24() === f14) {
+                value.z24(true);
             }
         });
-        this.w12(currentIndex);
-        this.z12(currentIndex, true);
-        this.l11 = x10;
+        this.q30(currentIndex);
+        this.t30(currentIndex, true);
+        this.h29 = f14;
     }
-    w8() {
-        if (this.l11 !== this.INITIAL_INVALID_VALUE && this.b11.has(this.l11)) {
-            this.w7.forEach((value) => {
-                if (value.e6() === this.l11) {
-                    value.w6(false);
-                    value.d7(false);
+    v26() {
+        if (this.h29 !== this.INITIAL_INVALID_VALUE && this.x28.has(this.h29)) {
+            this.q25.forEach((value) => {
+                if (value.g24() === this.h29) {
+                    value.z24(false);
+                    value.g25(false);
                     return;
                 }
             });
-            let index = this.b11.get(this.l11);
-            this.g9(index);
+            let index = this.x28.get(this.h29);
+            this.f27(index);
         }
     }
-    x8() {
-        if (this.t11 !== this.INITIAL_INVALID_VALUE &&
-            this.u11 !== this.t11) {
-            clearTimeout(this.t11);
-            if (this.v11 !== this.INITIAL_INVALID_VALUE) {
-                this.a14(this.v11);
+    w26() {
+        if (this.o29 !== this.INITIAL_INVALID_VALUE &&
+            this.p29 !== this.o29) {
+            clearTimeout(this.o29);
+            if (this.q29 !== this.INITIAL_INVALID_VALUE) {
+                this.s31(this.q29);
             }
         }
     }
-    y8() {
-        if (this.q11 !== this.INITIAL_INVALID_VALUE &&
-            this.r11 !== this.q11) {
-            clearTimeout(this.q11);
+    x26() {
+        if (this.l29 !== this.INITIAL_INVALID_VALUE &&
+            this.m29 !== this.l29) {
+            clearTimeout(this.l29);
         }
     }
-    e14(currentNodeId) {
-        if (this.x11.has(currentNodeId)) {
-            if (typeof this.x11.get(currentNodeId) === 'number') {
-                return this.x11.get(currentNodeId)?.toString();
+    a32(currentNodeId) {
+        if (this.s29.has(currentNodeId)) {
+            if (typeof this.s29.get(currentNodeId) === 'number') {
+                return this.s29.get(currentNodeId)?.toString();
             }
             else {
-                return this.x11.get(currentNodeId);
+                return this.s29.get(currentNodeId);
             }
         }
         else {
             return '';
         }
     }
-    f14(currentNodeId) {
-        return this.x11.has(currentNodeId);
+    b32(currentNodeId) {
+        return this.s29.has(currentNodeId);
     }
-    c9() {
-        this.v11 = this.INITIAL_INVALID_VALUE;
-        this.o11 = this.INITIAL_INVALID_VALUE;
-        this.k11 = this.INITIAL_INVALID_VALUE;
-        this.g11 = this.INITIAL_INVALID_VALUE;
-        this.flag = w2.NONE;
+    b27() {
+        this.q29 = this.INITIAL_INVALID_VALUE;
+        this.j29 = this.INITIAL_INVALID_VALUE;
+        this.g29 = this.INITIAL_INVALID_VALUE;
+        this.c29 = this.INITIAL_INVALID_VALUE;
+        this.flag = p7.NONE;
     }
-    d9(v10) {
-        this.x11.set(this.y11, this.z11);
-        this.x11.set(v10, this.a12);
-        this.g9(this.b11.get(this.y11));
-        this.g9(this.b11.get(v10));
+    c27(e14) {
+        this.s29.set(this.t29, this.u29);
+        this.s29.set(e14, this.v29);
+        this.f27(this.x28.get(this.t29));
+        this.f27(this.x28.get(e14));
     }
-    j10(s10, t10, u10) {
-        this.y11 = s10;
-        this.z11 = t10;
-        this.a12 = u10;
+    f28(b14, c14, d14) {
+        this.t29 = b14;
+        this.u29 = c14;
+        this.v29 = d14;
     }
-    g14() {
-        return this.a12;
+    c32() {
+        return this.v29;
     }
-    j9(currentNodeId) {
-        return this.a11.get(currentNodeId);
+    h27(currentNodeId) {
+        return this.w28.get(currentNodeId);
     }
-    o9() {
-        return this.w11;
+    m27() {
+        return this.r29;
     }
-    l9() {
-        this.w7.forEach((value, index) => {
-            if (index === this.v11) {
-                this.w11 = value.e6();
+    j27() {
+        this.q25.forEach((value, index) => {
+            if (index === this.q29) {
+                this.r29 = value.g24();
             }
         });
     }
-    n9(q10) {
-        this.l11 = q10;
+    l27(a14) {
+        this.h29 = a14;
     }
-    p9(p10) {
-        this.v11 = p10;
+    n27(z13) {
+        this.q29 = z13;
     }
-    m9(r9, s9, t9, u9, v9) {
-        let w9 = [];
-        let parentNodeId = r9;
-        let currentNodeId = u9;
-        let nodeParam = v9.t6();
-        let x9 = null;
-        let y9 = v9.u6();
-        let z9 = false;
-        let a10 = this.INITIAL_INVALID_VALUE;
-        let b10 = this.INITIAL_INVALID_VALUE;
-        let c10 = this.flag === w2.DOWN_FLAG ? true : false;
-        b10 = this.h14(t9, u9);
-        a10 = this.h14(r9, s9) + 1;
-        if (r9 !== t9) {
-            a10 = c10 ? a10 + 1 : a10;
+    k27(d13, e13, f13, g13, h13) {
+        let i13 = [];
+        let parentNodeId = d13;
+        let currentNodeId = g13;
+        let nodeParam = h13.w24();
+        let j13 = null;
+        let k13 = h13.x24();
+        let l13 = false;
+        let m13 = this.INITIAL_INVALID_VALUE;
+        let n13 = this.INITIAL_INVALID_VALUE;
+        let o13 = this.flag === p7.DOWN_FLAG ? true : false;
+        n13 = this.d32(f13, g13);
+        m13 = this.d32(d13, e13) + 1;
+        if (d13 !== f13) {
+            m13 = o13 ? m13 + 1 : m13;
         }
         else {
-            if (a10 > b10) {
-                a10 = c10 ? a10 : a10 - 1;
+            if (m13 > n13) {
+                m13 = o13 ? m13 : m13 - 1;
             }
             else {
-                a10 = c10 ? a10 + 1 : a10;
+                m13 = o13 ? m13 + 1 : m13;
             }
         }
-        for (let o10 = 0; o10 < this.w7.length; o10++) {
-            if (this.w7[o10].e6() === s9) {
-                z9 = this.w7[o10].g7();
-                if (this.flag === w2.DOWN_FLAG && this.a11.get(s9) === z2.EXPAND) {
-                    parentNodeId = s9;
-                    a10 = 0;
+        for (let y13 = 0; y13 < this.q25.length; y13++) {
+            if (this.q25[y13].g24() === e13) {
+                l13 = this.q25[y13].j25();
+                if (this.flag === p7.DOWN_FLAG && this.w28.get(e13) === q7.EXPAND) {
+                    parentNodeId = e13;
+                    m13 = 0;
                 }
-                else if (this.flag === w2.UP_FLAG && this.a11.get(s9) ===
-                z2.EXPAND &&
-                    this.w7[o10].x6() === false) {
-                    parentNodeId = s9;
-                    a10 = 0;
+                else if (this.flag === p7.UP_FLAG && this.w28.get(e13) ===
+                    q7.EXPAND &&
+                    this.q25[y13].a25() === false) {
+                    parentNodeId = e13;
+                    m13 = 0;
                 }
-                else if (z9) {
-                    parentNodeId = s9;
-                    a10 = 0;
+                else if (l13) {
+                    parentNodeId = e13;
+                    m13 = 0;
                 }
                 break;
             }
@@ -2634,559 +2647,562 @@ class h3 extends g3 {
         let callbackParam = {
             currentNodeId: currentNodeId,
             parentNodeId: parentNodeId,
-            childIndex: a10,
+            childIndex: m13,
         };
         this.appEventBus.emit(TreeListenType.NODE_MOVE, callbackParam);
-        w9.push({ parentId: parentNodeId, i14: currentNodeId, data: nodeParam });
-        let callback = (node, m10) => {
+        i13.push({ parentId: parentNodeId, e32: currentNodeId, data: nodeParam });
+        let callback = (node, w13) => {
             if (node) {
                 parentNodeId = node.parentNodeId;
                 currentNodeId = node.currentNodeId;
-                for (let n10 = 0; n10 < m10.length; n10++) {
-                    if (m10[n10].e6() === currentNodeId) {
-                        x9 = m10[n10];
+                for (let x13 = 0; x13 < w13.length; x13++) {
+                    if (w13[x13].g24() === currentNodeId) {
+                        j13 = w13[x13];
                         break;
                     }
                 }
-                if (x9 === null) {
+                if (j13 === null) {
                     return false;
                 }
-                let nodeParam = x9.t6();
-                if (parentNodeId !== t9) {
-                    w9.push({ parentId: parentNodeId, i14: currentNodeId, data: nodeParam });
+                let nodeParam = j13.w24();
+                if (parentNodeId !== f13) {
+                    i13.push({ parentId: parentNodeId, e32: currentNodeId, data: nodeParam });
                 }
                 return false;
             }
             return false;
         };
-        this.j14(callback, y9, this.w7);
-        let d10 = this.removeNode(u9, t9);
-        if (d10.length === 0) {
+        this.f32(callback, k13, this.q25);
+        let p13 = this.removeNode(g13, f13);
+        if (p13.length === 0) {
             return;
         }
-        let e10 = s9;
-        let isAfter = c10;
-        if (this.a11.get(s9) === z2.EXPAND) {
+        let q13 = e13;
+        let isAfter = o13;
+        if (this.w28.get(e13) === q7.EXPAND) {
             isAfter = false;
-            this.w7.forEach((value) => {
-                if (value.e6() === s9 && value.x6() === false) {
-                    if (value.u6().children.length) {
-                        e10 = value.u6().children[0].currentNodeId;
+            this.q25.forEach((value) => {
+                if (value.g24() === e13 && value.a25() === false) {
+                    if (value.x24().children.length) {
+                        q13 = value.x24().children[0].currentNodeId;
                     }
                     else {
-                        e10 = this.INITIAL_INVALID_VALUE;
+                        q13 = this.INITIAL_INVALID_VALUE;
                     }
                 }
             });
         }
-        else if (!this.a11.get(s9) && z9) {
-            this.a11.set(s9, z2.EXPAND);
+        else if (!this.w28.get(e13) && l13) {
+            this.w28.set(e13, q7.EXPAND);
         }
-        let f10 = this.k14(w9[0].parentId, w9[0].i14, e10, isAfter, w9[0].data);
-        if (!f10) {
+        let r13 = this.g32(i13[0].parentId, i13[0].e32, q13, isAfter, i13[0].data);
+        if (!r13) {
             return;
         }
-        for (let j10 = 1; j10 < w9.length; j10++) {
-            let k10 = this.addNode(w9[j10].parentId, w9[j10].i14, w9[j10].data, false);
-            if (!k10) {
+        for (let u13 = 1; u13 < i13.length; u13++) {
+            let v13 = this.addNode(i13[u13].parentId, i13[u13].e32, i13[u13].data, false);
+            if (!v13) {
                 return;
             }
         }
-        for (let i10 = 0; i10 < this.w7.length; i10++) {
-            if (this.w7[i10].e6() === t9) {
-                if (this.w7[i10].k6().x3 === null) {
-                    this.w7[i10].z5(false);
-                    this.a11.delete(t9);
+        for (let t13 = 0; t13 < this.q25.length; t13++) {
+            if (this.q25[t13].g24() === f13) {
+                if (this.q25[t13].n24().z21 === null) {
+                    this.q25[t13].b24(false);
+                    this.w28.delete(f13);
                     break;
                 }
             }
         }
-        let g10 = [...this.w7];
-        this.l14(g10);
+        let s13 = [...this.q25];
+        this.h32(s13);
     }
-    l14(m9) {
+    h32(z12) {
         let index = 0;
-        let n9 = 0;
-        this.w7.splice(0, this.w7.length);
-        this.b11.clear();
-        this.u10.splice(0, this.u10.length);
-        this.n14((node) => {
+        let a13 = 0;
+        this.q25.splice(0, this.q25.length);
+        this.x28.clear();
+        this.q28.splice(0, this.q28.length);
+        this.i32((node) => {
             let currentNodeId = node.currentNodeId;
             if (currentNodeId >= 0) {
-                if (this.w10.has(currentNodeId)) {
-                    let p9 = new f3(node, this.w10.get(currentNodeId));
-                    p9.m5(node.o6().a13);
-                    this.w7.push(p9);
-                    this.c11.set(p9.e6(), n9++);
-                    if (this.a11.get(currentNodeId) === z2.EXPAND) {
-                        p9.k6().x3 = q3.x12(z2.EXPAND, p9.k6().x3?.y12);
+                if (this.s28.has(currentNodeId)) {
+                    let b13 = new x7(node, this.s28.get(currentNodeId));
+                    b13.o23(node.r24().u30);
+                    this.q25.push(b13);
+                    this.y28.set(b13.g24(), a13++);
+                    if (this.w28.get(currentNodeId) === q7.EXPAND) {
+                        b13.n24().z21 = f8.r30(q7.EXPAND, b13.n24().z21?.s30);
                     }
-                    else if (this.a11.get(currentNodeId) === z2.COLLAPSE) {
-                        p9.k6().x3 = q3.x12(z2.COLLAPSE, p9.k6().x3?.y12);
+                    else if (this.w28.get(currentNodeId) === q7.COLLAPSE) {
+                        b13.n24().z21 = f8.r30(q7.COLLAPSE, b13.n24().z21?.s30);
                     }
-                    for (let q9 = 0; q9 < m9.length; q9++) {
-                        if (m9[q9].e6() === p9.e6()) {
-                            p9.i6(m9[q9].j6());
-                            p9.c6(m9[q9].d6());
-                            if (p9.k6().w3 && p9.w5()) {
-                                p9.k6().w3.title = m9[q9].k6().w3?.title;
+                    for (let c13 = 0; c13 < z12.length; c13++) {
+                        if (z12[c13].g24() === b13.g24()) {
+                            b13.k24(z12[c13].l24());
+                            b13.e24(z12[c13].f24());
+                            if (b13.n24().y21 && b13.y23()) {
+                                b13.n24().y21.title = z12[c13].n24().y21?.title;
                             }
                             break;
                         }
                     }
-                    if (p9.j6()) {
-                        this.b11.set(p9.e6(), index++);
-                        this.u10.push(p9);
+                    if (b13.l24()) {
+                        this.x28.set(b13.g24(), index++);
+                        this.q28.push(b13);
                     }
                 }
             }
             return false;
         });
     }
-    o14() {
-        return this.f12;
+    j32() {
+        return this.a30;
     }
-    p14(j9) {
-        let k9 = this.b11.get(j9.e6()) - 1;
-        if (k9 > this.INITIAL_INVALID_VALUE) {
-            let l9 = this.getData(k9);
-            return (j9.x6() === true && !j9.g7() && !l9?.g7()) ?
-            Visibility.Visible : Visibility.Hidden;
+    k32(w12) {
+        let x12 = this.x28.get(w12.g24()) - 1;
+        if (x12 > this.INITIAL_INVALID_VALUE) {
+            let y12 = this.getData(x12);
+            return (w12.a25() === true && !w12.j25() && !y12?.j25()) ?
+                Visibility.Visible : Visibility.Hidden;
         }
         else {
-            return (j9.x6() === true && !j9.g7()) ?
-            Visibility.Visible : Visibility.Hidden;
+            return (w12.a25() === true && !w12.j25()) ?
+                Visibility.Visible : Visibility.Hidden;
         }
     }
-    q14() {
+    l32() {
         return this.subTitle;
     }
-    v6(i9) {
-        if (this.b11.has(i9)) {
-            return this.getData(this.b11.get(i9))?.v6();
+    y24(v12) {
+        if (this.x28.has(v12)) {
+            return this.getData(this.x28.get(v12))?.y24();
         }
         return false;
     }
-    r14(h9) {
-        return h9 ? this.subTitle.o12 : this.treeViewTheme.b4;
+    n32(u12) {
+        return u12 ? this.subTitle.i30 : this.treeViewTheme.d22;
     }
-    h14(d9, e9) {
-        let f9 = this.INITIAL_INVALID_VALUE;
-        if (this.v10.has(d9)) {
-            let node = this.v10.get(d9);
-            if (node.f13() === d9) {
+    d32(r12, s12) {
+        let t12 = this.INITIAL_INVALID_VALUE;
+        if (this.r28.has(r12)) {
+            let node = this.r28.get(r12);
+            if (node.z30() === r12) {
                 node.children.forEach((value, index) => {
-                    if (value.f13() === e9) {
-                        f9 = index;
+                    if (value.z30() === s12) {
+                        t12 = index;
                         return;
                     }
                 });
             }
         }
-        return f9;
+        return t12;
     }
-    s14(c9) {
-        this.b12 = c9;
+    o32(q12) {
+        this.w29 = q12;
     }
-    t14() {
-        return this.b12;
+    p32() {
+        return this.w29;
     }
-    u14(b9) {
-        this.c12 = b9;
+    q32(p12) {
+        this.x29 = p12;
     }
-    v14() {
-        return this.c12;
+    r32() {
+        return this.x29;
     }
-    w14() {
-        return this.d12;
+    s32() {
+        return this.y29;
     }
-    p8(flag) {
+    o26(flag) {
         this.flag = flag;
     }
-    n14(callback, root = this.s10) {
+    i32(callback, root = this.o28) {
         let stack = [];
-        let z8 = false;
+        let n12 = false;
         stack.unshift(root);
-        let a9 = stack.shift();
-        while (!z8 && a9) {
-            z8 = callback(a9) === true;
-            if (!z8) {
-                stack.unshift(...a9.children);
-                a9 = stack.shift();
+        let o12 = stack.shift();
+        while (!n12 && o12) {
+            n12 = callback(o12) === true;
+            if (!n12) {
+                stack.unshift(...o12.children);
+                o12 = stack.shift();
             }
         }
     }
-    e13(callback, root = this.s10, u8, v8) {
+    y30(callback, root = this.o28, i12, j12) {
         let stack = [];
-        let w8 = false;
-        let x8 = false;
+        let k12 = false;
+        let l12 = false;
         stack.unshift(root);
-        let y8 = stack.shift();
-        while (!w8 && y8) {
+        let m12 = stack.shift();
+        while (!k12 && m12) {
             try {
-                if (u8 !== undefined && y8.b5 < u8) {
-                    x8 = true;
+                if (i12 !== undefined && m12.c23 < i12) {
+                    l12 = true;
                 }
-                if (v8 !== undefined && y8.b5 > v8) {
-                    x8 = true;
+                if (j12 !== undefined && m12.c23 > j12) {
+                    l12 = true;
                 }
-                if (!x8) {
-                    w8 = callback(y8);
+                if (!l12) {
+                    k12 = callback(m12);
                 }
             }
             catch (err) {
                 throw new Error('traverseSectionNodeDF function callbacks error');
             }
-            if (!w8) {
-                stack.unshift(...y8.children);
-                y8 = stack.shift();
-                x8 = false;
+            if (!k12) {
+                stack.unshift(...m12.children);
+                m12 = stack.shift();
+                l12 = false;
             }
         }
     }
-    x14(s8, t8, count) {
-        let parentNodeId = s8.parentNodeId;
+    t32(g12, h12, count) {
+        let parentNodeId = g12.parentNodeId;
         while (parentNodeId >= 0) {
-            if (this.v10.has(parentNodeId)) {
-                let parent = this.v10.get(parentNodeId);
-                parent.o6().r10 =
-                    t8 ? parent.o6().r10 + count : parent.o6().r10 - count;
+            if (this.r28.has(parentNodeId)) {
+                let parent = this.r28.get(parentNodeId);
+                parent.r24().n28 =
+                    h12 ? parent.r24().n28 + count : parent.r24().n28 - count;
                 parentNodeId = parent.parentNodeId;
             }
             else {
-                hilog.error(j16, i16, 'updateParentChildNum: parent node not found.');
+                hilog.error(f7, e7, 'updateParentChildNum: parent node not found.');
                 break;
             }
         }
     }
-    f10(currentNodeId) {
-        let current = new j3(d3);
-        if (this.v10.has(currentNodeId)) {
-            current = this.v10.get(currentNodeId);
+    b28(currentNodeId) {
+        let current = new b8(v7);
+        if (this.r28.has(currentNodeId)) {
+            current = this.r28.get(currentNodeId);
         }
         return current.parentNodeId;
     }
-    h13(b13, c13) {
-        let d13 = [];
-        if (b13.length === 0) {
+    u32(z11, a12) {
+        let b12 = [];
+        if (z11.length === 0) {
             return;
         }
         let startIndex = undefined;
-        for (let g13 = 0; g13 < b13.length; g13++) {
-            if (this.b11.has(b13[g13])) {
-                let i13 = this.b11.get(b13[g13]);
-                d13.push(i13);
+        for (let d12 = 0; d12 < z11.length; d12++) {
+            if (this.x28.has(z11[d12])) {
+                let f12 = this.x28.get(z11[d12]);
+                b12.push(f12);
             }
-            if (startIndex === undefined && this.c11.has(b13[g13])) {
-                startIndex = this.c11.get(b13[g13]);
+            if (startIndex === undefined && this.y28.has(z11[d12])) {
+                startIndex = this.y28.get(z11[d12]);
             }
             if (startIndex !== undefined) {
-                let h13 = this.w7.splice(startIndex, 1);
-                h13 = null;
+                let e12 = this.q25.splice(startIndex, 1);
+                e12 = null;
             }
-            if (this.a11.has(b13[g13])) {
-                this.a11.delete(b13[g13]);
+            if (this.w28.has(z11[d12])) {
+                this.w28.delete(z11[d12]);
             }
         }
-        d13.forEach((value) => {
-            this.p10(value);
-            this.g9(value);
+        b12.forEach((value) => {
+            this.l28(value);
+            this.f27(value);
         });
-        if (c13.k6().x3 === null) {
-            if (this.c11.has(c13.e6())) {
-                let f13 = this.c11.get(c13.e6());
-                this.w7[f13]?.z5(false);
+        if (a12.n24().z21 === null) {
+            if (this.y28.has(a12.g24())) {
+                let c12 = this.y28.get(a12.g24());
+                this.q25[c12]?.b24(false);
             }
-            this.a11.delete(c13.e6());
-            this.g9(this.b11.get(c13.e6()));
+            this.w28.delete(a12.g24());
+            this.f27(this.x28.get(a12.g24()));
         }
         let callbackParam = {
-            currentNodeId: c13.e6(),
-            parentNodeId: c13.f6(),
+            currentNodeId: a12.g24(),
+            parentNodeId: a12.h24(),
         };
-        this.v12();
+        this.p30();
         this.appEventBus.emit(TreeListenType.NODE_DELETE, callbackParam);
     }
-    i13(y12) {
-        let z12 = new f3(new j3(d3), d3);
-        if (this.v10.has(y12[0])) {
-            let node = this.v10.get(y12[0]);
-            z12 = new f3(node, this.w10.get(y12[0]));
-            z12.m5(node.o6().a13);
+    v32(w11) {
+        let x11 = new x7(new b8(v7), v7);
+        if (this.r28.has(w11[0])) {
+            let node = this.r28.get(w11[0]);
+            x11 = new x7(node, this.s28.get(w11[0]));
+            x11.o23(node.r24().u30);
         }
-        z12.h7(true);
+        x11.k25(true);
         let index = 0;
-        for (let a13 = 0; a13 < this.w7.length; a13++) {
-            if (this.w7[a13].e6() === z12.f6()) {
-                index = a13;
-                if (this.w7[a13].k6().x3 === null) {
-                    this.w7[a13].z5(true);
-                    this.g9(index);
+        for (let y11 = 0; y11 < this.q25.length; y11++) {
+            if (this.q25[y11].g24() === x11.h24()) {
+                index = y11;
+                if (this.q25[y11].n24().z21 === null) {
+                    this.q25[y11].b24(true);
+                    this.f27(index);
                 }
-                else if (this.a11.get(this.w7[a13].e6()) === z2.COLLAPSE) {
-                    this.w12(index);
+                else if (this.w28.get(this.q25[y11].g24()) === q7.COLLAPSE) {
+                    this.q30(index);
                 }
-                this.w7.splice(a13 + 1, 0, z12);
-                this.w7[a13 + 1].y5(true);
-                this.w7[a13 + 1].i6(true);
-                this.w7[a13 + 1].c6(i1);
-                this.c11.set(y12[0], a13 + 1);
-                this.i8(a13 + 1, a3.EDIT);
-                this.j13 = t2.ADD_NODE;
-                this.o10(a13 + 1);
-                this.k13(a13 + 1, this.j13);
+                this.q25.splice(y11 + 1, 0, x11);
+                this.q25[y11 + 1].a24(true);
+                this.q25[y11 + 1].k24(true);
+                this.q25[y11 + 1].e24(d6);
+                this.y28.set(w11[0], y11 + 1);
+                this.d26(y11 + 1, r7.EDIT);
+                this.j31 = m7.ADD_NODE;
+                this.k28(y11 + 1);
+                this.g31(y11 + 1, this.j31);
                 break;
             }
         }
-        this.y10 = index + 1;
-        this.h9(index);
+        this.u28 = index + 1;
+        this.g26(index);
         this.lastIndex = index;
-        this.a11.set(z12.f6(), z2.EXPAND);
-        this.z12(index, true);
+        this.w28.set(x11.h24(), q7.EXPAND);
+        this.t30(index, true);
     }
-    g10(operation, parentNodeId, v12) {
-        let w12 = new f3(new j3(d3), d3);
-        if (this.v10.has(parentNodeId)) {
-            let x12 = this.v10.get(parentNodeId);
-            w12 = new f3(x12, this.w10.get(parentNodeId));
-            w12.m5(x12.o6().a13);
+    c28(operation, parentNodeId, t11) {
+        let u11 = new x7(new b8(v7), v7);
+        if (this.r28.has(parentNodeId)) {
+            let v11 = this.r28.get(parentNodeId);
+            u11 = new x7(v11, this.s28.get(parentNodeId));
+            u11.o23(v11.r24().u30);
         }
-        if (operation === t2.REMOVE_NODE) {
-            this.x11.set(parentNodeId, this.z11);
-            this.g9(this.b11.get(parentNodeId));
-            this.h13(v12, w12);
+        if (operation === m7.REMOVE_NODE) {
+            this.s29.set(parentNodeId, this.u29);
+            this.f27(this.x28.get(parentNodeId));
+            this.u32(t11, u11);
         }
-        if (operation === t2.ADD_NODE) {
-            this.d12 = v12[0];
-            this.x11.set(this.c10(), this.z11);
-            this.x11.set(v12[0], this.a12);
-            this.i13(v12);
+        if (operation === m7.ADD_NODE) {
+            this.y29 = t11[0];
+            this.s29.set(this.y27(), this.u29);
+            this.s29.set(t11[0], this.v29);
+            this.v32(t11);
         }
     }
     removeNode(currentNodeId, parentNodeId) {
-        if (this.v10.has(parentNodeId) && this.v10.has(currentNodeId)) {
-            let parent = this.v10.get(parentNodeId);
-            let current = this.v10.get(currentNodeId);
-            let f8 = [];
-            let index = current.y14;
-            let g8 = 0;
+        if (this.r28.has(parentNodeId) && this.r28.has(currentNodeId)) {
+            let parent = this.r28.get(parentNodeId);
+            let current = this.r28.get(currentNodeId);
+            let p11 = [];
+            let index = current.w32;
+            let q11 = 0;
             if (index < 0) {
-                hilog.error(j16, i16, 'node does not exist.');
+                hilog.error(f7, e7, 'node does not exist.');
                 return [];
             }
             else {
-                g8 = parent.children[index].o6().r10 + 1;
-                this.z14(parent.children[index], f8);
-                for (let j8 = index; j8 < parent.children.length; j8++) {
-                    parent.children[j8].y14 -= 1;
+                q11 = parent.children[index].r24().n28 + 1;
+                this.x32(parent.children[index], p11);
+                for (let s11 = index; s11 < parent.children.length; s11++) {
+                    parent.children[s11].w32 -= 1;
                 }
                 let node = parent.children.splice(index, 1);
                 node = null;
-                this.d16(parentNodeId);
+                this.y32(parentNodeId);
             }
-            parent.o6().b13 = parent.children.length;
-            parent.o6().r10 -= (g8);
-            let h8 = [];
-            h8.push(parent.parentNodeId);
-            i(false, g8, this.v10, h8);
-            return f8;
+            parent.r24().v30 = parent.children.length;
+            parent.r24().n28 -= (q11);
+            let r11 = [];
+            r11.push(parent.parentNodeId);
+            p5(false, q11, this.r28, r11);
+            return p11;
         }
         else {
-            hilog.error(j16, i16, 'parent does not exist.');
+            hilog.error(f7, e7, 'parent does not exist.');
             return [];
         }
     }
-    addNode(parentNodeId, currentNodeId, data, p8) {
-        if (this.s10 === null) {
-            this.s10 = new j3(d3);
-            this.s10.b5 = -1;
-            this.v10.set(-1, this.s10);
-            this.w10.set(-1, d3);
+    addNode(parentNodeId, currentNodeId, data, m11) {
+        if (this.o28 === null) {
+            this.o28 = new b8(v7);
+            this.o28.c23 = -1;
+            this.r28.set(-1, this.o28);
+            this.s28.set(-1, v7);
         }
-        if (this.v10.has(parentNodeId)) {
-            let parent = this.v10.get(parentNodeId);
-            let q8 = new j3(data);
-            if (parent.b5 > this.t10) {
-                hilog.error(j16, i16, 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
+        if (this.r28.has(parentNodeId)) {
+            let parent = this.r28.get(parentNodeId);
+            let n11 = new b8(data);
+            if (parent.c23 > this.p28) {
+                hilog.error(f7, e7, 'ListDataSource[addNode]: The level of the tree view cannot exceed 50.');
                 return false;
             }
-            q8.b5 = parent.b5 + 1;
-            q8.parentNodeId = parentNodeId;
-            q8.currentNodeId = currentNodeId;
-            q8.y14 = parent.children.length;
+            n11.c23 = parent.c23 + 1;
+            n11.parentNodeId = parentNodeId;
+            n11.currentNodeId = currentNodeId;
+            n11.w32 = parent.children.length;
             data.parentNodeId = parentNodeId;
             data.currentNodeId = currentNodeId;
-            parent.children.push(q8);
-            parent.o6().a13 = true;
-            parent.o6().b13 = parent.children.length;
-            parent.o6().r10 += 1;
-            this.d16(parentNodeId);
-            if (p8) {
-                this.e12.push(parent.parentNodeId);
+            if (data.symbolIconStyle && !data.icon) {
+                data.icon = 'symbolUsed';
+            }
+            parent.children.push(n11);
+            parent.r24().u30 = true;
+            parent.r24().v30 = parent.children.length;
+            parent.r24().n28 += 1;
+            this.y32(parentNodeId);
+            if (m11) {
+                this.z29.push(parent.parentNodeId);
             }
             else {
-                let r2 = [];
-                r2.push(parent.parentNodeId);
-                i(true, 1, this.v10, r2);
+                let o11 = [];
+                o11.push(parent.parentNodeId);
+                p5(true, 1, this.r28, o11);
             }
-            this.w10.set(currentNodeId, data);
-            this.v10.set(currentNodeId, q8);
+            this.s28.set(currentNodeId, data);
+            this.r28.set(currentNodeId, n11);
             return true;
         }
         else {
-            hilog.error(j16, i16, 'ListDataSource[addNode]: Parent node not found.');
+            hilog.error(f7, e7, 'ListDataSource[addNode]: Parent node not found.');
             return false;
         }
     }
-    d16(parentNodeId) {
-        let parent = this.v10.get(parentNodeId);
-        let k2 = this.c11.get(parentNodeId);
+    y32(parentNodeId) {
+        let parent = this.r28.get(parentNodeId);
+        let l11 = this.y28.get(parentNodeId);
         if (parent.children.length > 0) {
-            if (this.c11.has(parentNodeId)) {
-                this.w7[k2]?.m5(true);
+            if (this.y28.has(parentNodeId)) {
+                this.q25[l11]?.o23(true);
             }
         }
         else {
-            this.w7[k2]?.m5(false);
+            this.q25[l11]?.o23(false);
         }
     }
-    z14(k8, l8) {
-        let m8 = [];
+    x32(i11, j11) {
+        let k11 = [];
         let callback = (node) => {
-            m8.push(node);
+            k11.push(node);
             return false;
         };
-        this.n14(callback, k8);
-        m8.forEach((value) => {
-            l8.push(value.f13());
-            this.v10.delete(value.f13());
-            this.w10.delete(value.f13());
-            value = new j3(d3);
+        this.i32(callback, i11);
+        k11.forEach((value) => {
+            j11.push(value.z30());
+            this.r28.delete(value.z30());
+            this.s28.delete(value.z30());
+            value = new b8(v7);
         });
     }
-    a15(e8) {
-        if (e8?.currentNodeId === undefined) {
-            hilog.error(j16, i16, 'getNodeInfoByNodeItem: currentId is undefined');
-            return new f3(new j3(d3), d3);
+    v31(h11) {
+        if (h11?.currentNodeId === undefined) {
+            hilog.error(f7, e7, 'getNodeInfoByNodeItem: currentId is undefined');
+            return new x7(new b8(v7), v7);
         }
-        if (!this.c11.has(e8.currentNodeId)) {
-            hilog.error(j16, i16, 'getNodeInfoByNodeItem: not has nodeItem.');
-            return new f3(new j3(d3), d3);
+        if (!this.y28.has(h11.currentNodeId)) {
+            hilog.error(f7, e7, 'getNodeInfoByNodeItem: not has nodeItem.');
+            return new x7(new b8(v7), v7);
         }
-        let index = this.c11.get(e8.currentNodeId);
-        return this.w7[index];
+        let index = this.y28.get(h11.currentNodeId);
+        return this.q25[index];
     }
-    h10(a8) {
-        let parent = new j3(d3);
-        if (this.v10.has(a8)) {
-            parent = this.v10.get(a8);
+    d28(d11) {
+        let parent = new b8(v7);
+        if (this.r28.has(d11)) {
+            parent = this.r28.get(d11);
         }
-        let b8 = d3;
+        let e11 = v7;
         if (parent) {
-            let c8 = this.a15(parent);
+            let f11 = this.v31(parent);
             if (parent.children.length === 0) {
-                if (c8.k6().v3 !== undefined) {
-                    b8.icon = c8.k6().v3?.a8;
-                    b8.v16 = c8.k6().v3?.a17;
-                    b8.selectedIcon = c8.k6().v3?.r13;
-                    b8.w16 = c8.k6().v3?.b17;
-                    b8.editIcon = c8.k6().v3?.s13;
-                    b8.x16 = c8.k6().v3?.c17;
-                    b8.container = c8.q6();
+                if (f11.n24().x21 !== undefined) {
+                    e11.icon = f11.n24().x21?.v25;
+                    e11.symbolIconStyle = f11.n24().x21?.u25;
+                    e11.selectedIcon = f11.n24().x21?.h31;
+                    e11.symbolSelectedIconStyle = f11.n24().x21?.z32;
+                    e11.editIcon = f11.n24().x21?.i31;
+                    e11.symbolEditIconStyle = f11.n24().x21?.a33;
+                    e11.container = f11.t24();
                 }
                 else {
-                    b8.icon = undefined;
-                    b8.v16 = undefined;
-                    b8.selectedIcon = undefined;
-                    b8.w16 = undefined;
-                    b8.editIcon = undefined;
-                    b8.x16 = undefined;
-                    b8.container = c8.q6();
+                    e11.icon = undefined;
+                    e11.symbolIconStyle = undefined;
+                    e11.selectedIcon = undefined;
+                    e11.symbolSelectedIconStyle = undefined;
+                    e11.editIcon = undefined;
+                    e11.symbolEditIconStyle = undefined;
+                    e11.container = f11.t24();
                 }
             }
             else if (parent.children.length > 0) {
-                let d8 = this.a15(parent.children[0]);
-                if (c8.k6().v3 !== null) {
-                    b8.icon = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.a8 : undefined;
-                    b8.v16 = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.a17 : undefined;
-                    b8.selectedIcon = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.r13 : undefined;
-                    b8.w16 = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.b17 : undefined;
-                    b8.editIcon = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.s13 : undefined;
-                    b8.x16 = (d8.k6().v3 !== undefined) ?
-                        d8.k6().v3?.c17 : undefined;
-                    b8.container = d8.q6();
+                let g11 = this.v31(parent.children[0]);
+                if (f11.n24().x21 !== null) {
+                    e11.icon = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.v25 : undefined;
+                    e11.symbolIconStyle = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.u25 : undefined;
+                    e11.selectedIcon = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.h31 : undefined;
+                    e11.symbolSelectedIconStyle = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.z32 : undefined;
+                    e11.editIcon = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.i31 : undefined;
+                    e11.symbolEditIconStyle = (g11.n24().x21 !== undefined) ?
+                        g11.n24().x21?.a33 : undefined;
+                    e11.container = g11.t24();
                 }
                 else {
-                    b8.icon = undefined;
-                    b8.v16 = undefined;
-                    b8.selectedIcon = undefined;
-                    b8.w16 = undefined;
-                    b8.editIcon = undefined;
-                    b8.x16 = undefined;
-                    b8.container = d8.q6();
+                    e11.icon = undefined;
+                    e11.symbolIconStyle = undefined;
+                    e11.selectedIcon = undefined;
+                    e11.symbolSelectedIconStyle = undefined;
+                    e11.editIcon = undefined;
+                    e11.symbolEditIconStyle = undefined;
+                    e11.container = g11.t24();
                 }
             }
         }
-        return b8;
+        return e11;
     }
-    e10(w7) {
-        let parent = new j3(d3);
-        if (this.v10.has(w7)) {
-            parent = this.v10.get(w7);
+    a28(z10) {
+        let parent = new b8(v7);
+        if (this.r28.has(z10)) {
+            parent = this.r28.get(z10);
         }
         if (parent) {
             if (parent.children.length === 0) {
                 return [];
             }
             else if (parent.children.length > 0) {
-                let x7 = new Array(parent.children.length);
-                for (let z7 = 0; z7 < x7.length; z7++) {
-                    x7[z7] = 0;
+                let a11 = new Array(parent.children.length);
+                for (let c11 = 0; c11 < a11.length; c11++) {
+                    a11[c11] = 0;
                 }
-                for (let y7 = 0; y7 < parent.children.length && y7 < x7.length; y7++) {
-                    x7[y7] = parent.children[y7].currentNodeId;
+                for (let b11 = 0; b11 < parent.children.length && b11 < a11.length; b11++) {
+                    a11[b11] = parent.children[b11].currentNodeId;
                 }
-                return x7;
+                return a11;
             }
         }
         return [];
     }
-    b10(r7) {
-        let parent = new j3(d3);
-        if (this.v10.has(r7)) {
-            parent = this.v10.get(r7);
+    x27(u10) {
+        let parent = new b8(v7);
+        if (this.r28.has(u10)) {
+            parent = this.r28.get(u10);
         }
         if (parent) {
             if (parent.children.length === 0) {
                 return [];
             }
             else if (parent.children.length > 0) {
-                let s7 = new Array(parent.children.length);
-                for (let v7 = 0; v7 < s7.length; v7++) {
-                    s7[v7] = {};
+                let v10 = new Array(parent.children.length);
+                for (let y10 = 0; y10 < v10.length; y10++) {
+                    v10[y10] = {};
                 }
-                for (let t7 = 0; t7 < parent.children.length && t7 < s7.length; t7++) {
-                    s7[t7].itemId = parent.children[t7].currentNodeId;
-                    let u7 = this.a15(parent.children[t7]);
-                    if (u7.k6().v3) {
-                        s7[t7].b15 = u7.k6().v3?.source;
+                for (let w10 = 0; w10 < parent.children.length && w10 < v10.length; w10++) {
+                    v10[w10].itemId = parent.children[w10].currentNodeId;
+                    let x10 = this.v31(parent.children[w10]);
+                    if (x10.n24().x21) {
+                        v10[w10].b33 = x10.n24().x21?.source;
                     }
-                    if (u7.k6().w3) {
-                        s7[t7].c15 = u7.k6().w3?.title;
+                    if (x10.n24().y21) {
+                        v10[w10].c33 = x10.n24().y21?.title;
                     }
-                    s7[t7].isFolder = u7.v6();
+                    v10[w10].isFolder = x10.y24();
                 }
-                return s7;
+                return v10;
             }
         }
         return [];
     }
-    i10(title) {
+    e28(title) {
         if (new RegExp('/[\\\/:*?"<>|]/').test(title)) {
             return false;
         }
@@ -3196,122 +3212,122 @@ class h3 extends g3 {
         }
         return true;
     }
-    j14(callback, root = this.s10, o7) {
+    f32(callback, root = this.o28, r10) {
         let stack = [];
-        let p7 = false;
+        let s10 = false;
         stack.unshift(root);
-        let q7 = stack.shift();
-        while (!p7 && q7) {
-            p7 = callback(q7, o7) === true;
-            if (!p7) {
-                stack.unshift(...q7.children);
-                q7 = stack.shift();
+        let t10 = stack.shift();
+        while (!s10 && t10) {
+            s10 = callback(t10, r10) === true;
+            if (!s10) {
+                stack.unshift(...t10.children);
+                t10 = stack.shift();
             }
         }
     }
-    d15(insertIndex, parent) {
-        for (let n7 = insertIndex; n7 < parent.children.length; n7++) {
-            parent.children[n7].y14 += 1;
+    d33(insertIndex, parent) {
+        for (let q10 = insertIndex; q10 < parent.children.length; q10++) {
+            parent.children[q10].w32 += 1;
         }
     }
-    k14(parentNodeId, currentNodeId, k7, isAfter, data) {
-        if (this.s10 === null) {
-            this.s10 = new j3(d3);
-            this.s10.b5 = this.INITIAL_INVALID_VALUE;
+    g32(parentNodeId, currentNodeId, n10, isAfter, data) {
+        if (this.o28 === null) {
+            this.o28 = new b8(v7);
+            this.o28.c23 = this.INITIAL_INVALID_VALUE;
         }
-        if (this.v10.has(parentNodeId)) {
-            let parent = this.v10.get(parentNodeId);
-            let l7 = new j3(data);
-            if (parent.b5 > this.t10) {
-                hilog.error(j16, i16, 'addDragNode: The level of the tree view cannot exceed 50.');
+        if (this.r28.has(parentNodeId)) {
+            let parent = this.r28.get(parentNodeId);
+            let o10 = new b8(data);
+            if (parent.c23 > this.p28) {
+                hilog.error(f7, e7, 'addDragNode: The level of the tree view cannot exceed 50.');
                 return false;
             }
-            l7.b5 = parent.b5 + 1;
-            l7.parentNodeId = parentNodeId;
-            l7.currentNodeId = currentNodeId;
+            o10.c23 = parent.c23 + 1;
+            o10.parentNodeId = parentNodeId;
+            o10.currentNodeId = currentNodeId;
             data.parentNodeId = parentNodeId;
             data.currentNodeId = currentNodeId;
             let insertIndex = this.INITIAL_INVALID_VALUE;
             if (parent.children.length) {
-                for (let m7 = 0; m7 < parent.children.length; m7++) {
-                    if (parent.children[m7].f13() === k7) {
-                        insertIndex = m7;
+                for (let p10 = 0; p10 < parent.children.length; p10++) {
+                    if (parent.children[p10].z30() === n10) {
+                        insertIndex = p10;
                         break;
                     }
                 }
                 if (isAfter) {
-                    l7.y14 = insertIndex + 1;
-                    this.d15(l7.y14, parent);
-                    parent.children.splice(insertIndex + 1, 0, l7);
+                    o10.w32 = insertIndex + 1;
+                    this.d33(o10.w32, parent);
+                    parent.children.splice(insertIndex + 1, 0, o10);
                 }
                 else {
-                    l7.y14 = insertIndex < 0 ? parent.children.length + insertIndex : insertIndex;
-                    this.d15(l7.y14, parent);
-                    parent.children.splice(insertIndex, 0, l7);
+                    o10.w32 = insertIndex < 0 ? parent.children.length + insertIndex : insertIndex;
+                    this.d33(o10.w32, parent);
+                    parent.children.splice(insertIndex, 0, o10);
                 }
             }
             else {
-                l7.y14 = parent.children.length;
-                parent.children.push(l7);
+                o10.w32 = parent.children.length;
+                parent.children.push(o10);
             }
-            parent.o6().a13 = true;
-            parent.o6().b13 = parent.children.length;
-            parent.o6().r10 += 1;
-            this.x14(parent, true, 1);
-            this.v10.set(currentNodeId, l7);
-            this.w10.set(currentNodeId, data);
+            parent.r24().u30 = true;
+            parent.r24().v30 = parent.children.length;
+            parent.r24().n28 += 1;
+            this.t32(parent, true, 1);
+            this.r28.set(currentNodeId, o10);
+            this.s28.set(currentNodeId, data);
             return true;
         }
         else {
-            hilog.error(j16, i16, 'addDragNode: Parent node not found.');
+            hilog.error(f7, e7, 'addDragNode: Parent node not found.');
             return false;
         }
     }
 }
-class k16 {
+class b1 {
     constructor(controller) {
         this.fontSize = 1;
         this.controller = null;
         this.controller = controller;
     }
     applyGesture(event) {
-        if (this.fontSize >= k16.minFontSize) {
-            event.addGesture(new LongPressGestureHandler({ repeat: false, duration: k16.e16 })
+        if (this.fontSize >= b1.minFontSize) {
+            event.addGesture(new LongPressGestureHandler({ repeat: false, duration: b1.h1 })
                 .onAction(() => {
-                    if (event) {
-                        this.controller?.open();
-                    }
-                })
+                if (event) {
+                    this.controller?.open();
+                }
+            })
                 .onActionEnd(() => {
-                    this.controller?.close();
-                }));
+                this.controller?.close();
+            }));
         }
         else {
             event.clearGestures();
         }
     }
 }
-k16.e16 = 500;
-k16.minFontSize = 1.75;
-export class i3 extends ViewPU {
+b1.h1 = 500;
+b1.minFontSize = 1.75;
+export class a8 extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
         super(parent, __localStorage, elmtId, extraInfo);
         if (typeof paramsLambda === 'function') {
             this.paramsGenerator_ = paramsLambda;
         }
-        this.n7 = new SynchedPropertyNesedObjectPU(params.item, this, 'item');
-        this.listNodeDataSource = new h3();
-        this.e15 = new ObservedPropertySimplePU(0, this, 'columnWidth');
-        this.f15 = new ObservedPropertySimplePU(false, this, 'isFocused');
-        this.g15 = new ObservedPropertySimplePU(-1, this, 'index');
-        this.h15 = new ObservedPropertySimplePU(-1, this, 'lastIndex');
-        this.i15 = new ObservedPropertySimplePU(0, this, 'count');
-        this.r7 = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
-        this.s7 = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
-        this.u7 = this.initializeConsume('treeViewTheme', 'treeViewTheme');
-        this.n16 = this.initializeConsume('clickButtonFlag', 'clickButtonFlag');
-        this.r16 = this.initializeConsume('accessibilityNodeType', 'accessibilityNodeType');
-        this.z16 = this.initializeConsume('isAccessibilityEnabled', 'isAccessibilityEnabled');
+        this.__item = new SynchedPropertyNesedObjectPU(params.item, this, 'item');
+        this.listNodeDataSource = new z7();
+        this.__columnWidth = new ObservedPropertySimplePU(0, this, 'columnWidth');
+        this.__isFocused = new ObservedPropertySimplePU(false, this, 'isFocused');
+        this.__index = new ObservedPropertySimplePU(-1, this, 'index');
+        this.__lastIndex = new ObservedPropertySimplePU(-1, this, 'lastIndex');
+        this.__count = new ObservedPropertySimplePU(0, this, 'count');
+        this.__followingSystemFontScale = new ObservedPropertySimplePU(false, this, 'followingSystemFontScale');
+        this.__maxAppFontScale = new ObservedPropertySimplePU(1, this, 'maxAppFontScale');
+        this.__treeViewTheme = this.initializeConsume('treeViewTheme', 'treeViewTheme');
+        this.__clickButtonFlag = this.initializeConsume('clickButtonFlag', 'clickButtonFlag');
+        this.__accessibilityNodeType = this.initializeConsume('accessibilityNodeType', 'accessibilityNodeType');
+        this.__isAccessibilityEnabled = this.initializeConsume('isAccessibilityEnabled', 'isAccessibilityEnabled');
         this.listTreeViewMenu = undefined;
         this.callBackClick = () => {
         };
@@ -3339,7 +3355,7 @@ export class i3 extends ViewPU {
         this.finalizeConstruction();
     }
     setInitiallyProvidedValue(params) {
-        this.n7.set(params.item);
+        this.__item.set(params.item);
         if (params.listNodeDataSource !== undefined) {
             this.listNodeDataSource = params.listNodeDataSource;
         }
@@ -3402,137 +3418,146 @@ export class i3 extends ViewPU {
         }
     }
     updateStateVars(params) {
-        this.n7.set(params.item);
+        this.__item.set(params.item);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.n7.purgeDependencyOnElmtId(rmElmtId);
-        this.e15.purgeDependencyOnElmtId(rmElmtId);
-        this.f15.purgeDependencyOnElmtId(rmElmtId);
-        this.g15.purgeDependencyOnElmtId(rmElmtId);
-        this.h15.purgeDependencyOnElmtId(rmElmtId);
-        this.i15.purgeDependencyOnElmtId(rmElmtId);
-        this.r7.purgeDependencyOnElmtId(rmElmtId);
-        this.s7.purgeDependencyOnElmtId(rmElmtId);
-        this.u7.purgeDependencyOnElmtId(rmElmtId);
-        this.n16.purgeDependencyOnElmtId(rmElmtId);
-        this.r16.purgeDependencyOnElmtId(rmElmtId);
-        this.z16.purgeDependencyOnElmtId(rmElmtId);
+        this.__item.purgeDependencyOnElmtId(rmElmtId);
+        this.__columnWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__isFocused.purgeDependencyOnElmtId(rmElmtId);
+        this.__index.purgeDependencyOnElmtId(rmElmtId);
+        this.__lastIndex.purgeDependencyOnElmtId(rmElmtId);
+        this.__count.purgeDependencyOnElmtId(rmElmtId);
+        this.__followingSystemFontScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__maxAppFontScale.purgeDependencyOnElmtId(rmElmtId);
+        this.__treeViewTheme.purgeDependencyOnElmtId(rmElmtId);
+        this.__clickButtonFlag.purgeDependencyOnElmtId(rmElmtId);
+        this.__accessibilityNodeType.purgeDependencyOnElmtId(rmElmtId);
+        this.__isAccessibilityEnabled.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.n7.aboutToBeDeleted();
-        this.e15.aboutToBeDeleted();
-        this.f15.aboutToBeDeleted();
-        this.g15.aboutToBeDeleted();
-        this.h15.aboutToBeDeleted();
-        this.i15.aboutToBeDeleted();
-        this.r7.aboutToBeDeleted();
-        this.s7.aboutToBeDeleted();
-        this.u7.aboutToBeDeleted();
-        this.n16.aboutToBeDeleted();
-        this.r16.aboutToBeDeleted();
-        this.z16.aboutToBeDeleted();
+        this.__item.aboutToBeDeleted();
+        this.__columnWidth.aboutToBeDeleted();
+        this.__isFocused.aboutToBeDeleted();
+        this.__index.aboutToBeDeleted();
+        this.__lastIndex.aboutToBeDeleted();
+        this.__count.aboutToBeDeleted();
+        this.__followingSystemFontScale.aboutToBeDeleted();
+        this.__maxAppFontScale.aboutToBeDeleted();
+        this.__treeViewTheme.aboutToBeDeleted();
+        this.__clickButtonFlag.aboutToBeDeleted();
+        this.__accessibilityNodeType.aboutToBeDeleted();
+        this.__isAccessibilityEnabled.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get item() {
-        return this.n7.get();
+        return this.__item.get();
     }
     get columnWidth() {
-        return this.e15.get();
+        return this.__columnWidth.get();
     }
     set columnWidth(newValue) {
-        this.e15.set(newValue);
+        this.__columnWidth.set(newValue);
     }
     get isFocused() {
-        return this.f15.get();
+        return this.__isFocused.get();
     }
     set isFocused(newValue) {
-        this.f15.set(newValue);
+        this.__isFocused.set(newValue);
     }
     get index() {
-        return this.g15.get();
+        return this.__index.get();
     }
     set index(newValue) {
-        this.g15.set(newValue);
+        this.__index.set(newValue);
     }
     get lastIndex() {
-        return this.h15.get();
+        return this.__lastIndex.get();
     }
     set lastIndex(newValue) {
-        this.h15.set(newValue);
+        this.__lastIndex.set(newValue);
     }
     get count() {
-        return this.i15.get();
+        return this.__count.get();
     }
     set count(newValue) {
-        this.i15.set(newValue);
+        this.__count.set(newValue);
     }
     get followingSystemFontScale() {
-        return this.r7.get();
+        return this.__followingSystemFontScale.get();
     }
     set followingSystemFontScale(newValue) {
-        this.r7.set(newValue);
+        this.__followingSystemFontScale.set(newValue);
     }
     get maxAppFontScale() {
-        return this.s7.get();
+        return this.__maxAppFontScale.get();
     }
     set maxAppFontScale(newValue) {
-        this.s7.set(newValue);
+        this.__maxAppFontScale.set(newValue);
     }
     get treeViewTheme() {
-        return this.u7.get();
+        return this.__treeViewTheme.get();
     }
     set treeViewTheme(newValue) {
-        this.u7.set(newValue);
+        this.__treeViewTheme.set(newValue);
     }
     get clickButtonFlag() {
-        return this.n16.get();
+        return this.__clickButtonFlag.get();
     }
     set clickButtonFlag(newValue) {
-        this.n16.set(newValue);
+        this.__clickButtonFlag.set(newValue);
     }
     get accessibilityNodeType() {
-        return this.r16.get();
+        return this.__accessibilityNodeType.get();
     }
     set accessibilityNodeType(newValue) {
-        this.r16.set(newValue);
+        this.__accessibilityNodeType.set(newValue);
     }
     get isAccessibilityEnabled() {
-        return this.z16.get();
+        return this.__isAccessibilityEnabled.get();
     }
     set isAccessibilityEnabled(newValue) {
-        this.z16.set(newValue);
+        this.__isAccessibilityEnabled.set(newValue);
     }
     aboutToAppear() {
-        if (this.item.k6().v3) {
-            this.item.j4 = this.item.k6().v3?.source;
-            this.item.y16 = this.item.k6().v3?.y16;
+        if (this.item.n24().x21) {
+            this.item.imageSource = this.item.n24().x21?.source;
+            this.item.l22 = this.item.n24().x21?.l22;
         }
-        let j7 = this.getUIContext();
-        this.followingSystemFontScale = j7.isFollowingSystemFontScale();
-        this.maxAppFontScale = j7.getMaxFontScale();
+        let m10 = this.getUIContext();
+        this.followingSystemFontScale = m10.isFollowingSystemFontScale();
+        this.maxAppFontScale = m10.getMaxFontScale();
     }
     decideFontScale() {
-        let h7 = this.getUIContext();
-        let i7 = h7.getHostContext()?.config?.fontSizeScale ?? 1;
+        let k10 = this.getUIContext();
+        let l10 = k10.getHostContext()?.config?.fontSizeScale ?? 1;
         if (!this.followingSystemFontScale) {
             return 1;
         }
-        return Math.min(i7, this.maxAppFontScale, q1);
+        return Math.min(l10, this.maxAppFontScale, j6);
+    }
+    decideSymbolFontScale(g10) {
+        if (!g10 || !this.followingSystemFontScale) {
+            return 1;
+        }
+        let h10 = this.getUIContext();
+        let i10 = h10.getHostContext()?.config?.fontSizeScale ?? 1;
+        let j10 = Math.min(i10, this.maxAppFontScale, i7);
+        return Math.max(j10, j7);
     }
     getInputTextMaxFontSize() {
-        let g7 = this.decideFontScale() * this.inputFontSize + 'vp';
-        return g7;
+        let f10 = this.decideFontScale() * this.inputFontSize + 'vp';
+        return f10;
     }
     getLeftIconColor() {
-        if (this.item.i7()) {
+        if (this.item.l25()) {
             return { 'id': -1, 'type': 10001, params: ['sys.color.icon_on_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
-        else if (this.item.s6()) {
-            return this.treeViewTheme.h4;
+        else if (this.item.v24()) {
+            return this.treeViewTheme.j22;
         }
         else {
-            return this.treeViewTheme.g4;
+            return this.treeViewTheme.i22;
         }
     }
     checkInvalidPattern(title) {
@@ -3542,43 +3567,43 @@ export class i3 extends ViewPU {
         return new RegExp('/^[\u4e00-\u9fa5]+$/').test(title);
     }
     getAccessibilityReadText(currentNodeId) {
-        let b20 = this.listNodeDataSource.v10.get(currentNodeId);
-        if (b20 === undefined || currentNodeId === undefined) {
+        let u9 = this.listNodeDataSource.r28.get(currentNodeId);
+        if (u9 === undefined || currentNodeId === undefined) {
             return '';
         }
-        let c20 = this.listNodeDataSource.a15(b20);
-        let primaryTitle = c20?.t6()?.primaryTitle === undefined
-            ? '' : c20?.t6()?.primaryTitle;
-        let secondaryTitle = c20?.t6()?.secondaryTitle === undefined
-            ? '' : c20?.t6()?.secondaryTitle;
-        let s17 = this.listNodeDataSource.s16(primaryTitle);
-        let j19 = this.listNodeDataSource.s16(secondaryTitle);
-        let title = `${s17}, ${j19}`;
-        let parentId = this.listNodeDataSource.f10(currentNodeId);
-        let d20 = [];
-        let e20 = 0;
-        let f20 = this.listNodeDataSource.b10(parentId);
-        let g20 = f20.map(item => item.itemId);
-        let h20 = g20.indexOf(currentNodeId) + 1;
-        let i20 = this.listNodeDataSource.g16(currentNodeId);
-        if (i20 === undefined) {
+        let v9 = this.listNodeDataSource.v31(u9);
+        let primaryTitle = v9?.w24()?.primaryTitle === undefined
+            ? '' : v9?.w24()?.primaryTitle;
+        let secondaryTitle = v9?.w24()?.secondaryTitle === undefined
+            ? '' : v9?.w24()?.secondaryTitle;
+        let w9 = this.listNodeDataSource.s27(primaryTitle);
+        let x9 = this.listNodeDataSource.s27(secondaryTitle);
+        let title = `${w9}, ${x9}`;
+        let parentId = this.listNodeDataSource.b28(currentNodeId);
+        let y9 = [];
+        let z9 = 0;
+        let a10 = this.listNodeDataSource.x27(parentId);
+        let b10 = a10.map(item => item.itemId);
+        let c10 = b10.indexOf(currentNodeId) + 1;
+        let d10 = this.listNodeDataSource.u31(currentNodeId);
+        if (d10 === undefined) {
             return ' ';
         }
-        if (this.accessibilityNodeType === q17.PLACE) {
-            if (this.listNodeDataSource.f10(currentNodeId) === -1) {
-                for (let k20 = 0; k20 < this.listNodeDataSource.w7.length; k20++) {
-                    if (this.listNodeDataSource.w7[k20].f6() === -1) {
-                        d20.push(this.listNodeDataSource.w7[k20].e6());
+        if (this.accessibilityNodeType === t7.PLACE) {
+            if (this.listNodeDataSource.b28(currentNodeId) === -1) {
+                for (let e10 = 0; e10 < this.listNodeDataSource.q25.length; e10++) {
+                    if (this.listNodeDataSource.q25[e10].h24() === -1) {
+                        y9.push(this.listNodeDataSource.q25[e10].g24());
                     }
                 }
-                e20 = d20.indexOf(currentNodeId) + 1;
-                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_parent', e20);
+                z9 = y9.indexOf(currentNodeId) + 1;
+                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_parent', z9);
             }
             else {
-                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', i20, h20);
+                return this.listNodeDataSource.getStringByName('treeview_accessibility_place_node_child', d10, c10);
             }
         }
-        else if (this.accessibilityNodeType === q17.LIFT) {
+        else if (this.accessibilityNodeType === t7.LIFT) {
             return title;
         }
         else {
@@ -3586,21 +3611,21 @@ export class i3 extends ViewPU {
         }
     }
     getAccessibilityDescription() {
-        if (this.accessibilityNodeType === q17.TEXT) {
+        if (this.accessibilityNodeType === t7.TEXT) {
             return this.listNodeDataSource.getStringByName('treeview_accessibility_node_desc');
         }
         else {
-            return ',';
+            return ' ';
         }
     }
-    getAccessibilityReadButtonText(a20) {
+    getAccessibilityReadButtonText(t9) {
         if (this.clickButtonFlag === false) {
-            return this.item.k6().x3?.c8 === ARROW_RIGHT
+            return this.item.n24().z21?.x25 === ARROW_RIGHT
                 ? this.listNodeDataSource.getStringByName('treeview_accessibility_folded_node')
                 : this.listNodeDataSource.getStringByName('treeview_accessibility_expanded_node');
         }
         else {
-            return a20 ? this.listNodeDataSource.getStringByName('treeview_accessibility_expand_node')
+            return t9 ? this.listNodeDataSource.getStringByName('treeview_accessibility_expand_node')
                 : this.listNodeDataSource.getStringByName('treeview_accessibility_fold_node');
         }
     }
@@ -3618,34 +3643,34 @@ export class i3 extends ViewPU {
             this.count--;
             return;
         }
-        this.index = this.listNodeDataSource.findIndex(this.item.e6());
-        this.listNodeDataSource.h9(this.index);
-        let h22 = this.item.e6();
+        this.index = this.listNodeDataSource.findIndex(this.item.g24());
+        this.listNodeDataSource.g26(this.index);
+        let r9 = this.item.g24();
         if (event.type === TouchType.Down) {
-            this.item.a6(this.treeViewTheme.d4);
+            this.item.c24(this.treeViewTheme.f22);
         }
         else if (event.type === TouchType.Up) {
-            if (!(typeof this.treeViewTheme.z3 === 'string')) {
-                this.item.a6(b2);
+            if (!(typeof this.treeViewTheme.b22 === 'string')) {
+                this.item.c24(r6);
             }
             else {
-                this.item.a6(this.treeViewTheme.z3);
+                this.item.c24(this.treeViewTheme.b22);
             }
-            if (this.item.k6().v3 !== null) {
-                this.item.k6().v3?.i8(a3.SELECTED);
-                this.listNodeDataSource.i8(this.index, a3.SELECTED);
-                this.item.j4 = this.item.k6().v3?.source;
-                this.item.y16 = this.item.k6().v3?.y16;
+            if (this.item.n24().x21 !== null) {
+                this.item.n24().x21?.d26(r7.SELECTED);
+                this.listNodeDataSource.d26(this.index, r7.SELECTED);
+                this.item.imageSource = this.item.n24().x21?.source;
+                this.item.l22 = this.item.n24().x21?.l22;
             }
-            this.item.k6().w3?.j8(true);
-            let i22 = { currentNodeId: h22 };
-            this.appEventBus.emit(TreeListenType.NODE_CLICK, i22);
-            this.listNodeDataSource.q16(this.item.s6()
-                ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node', `${this.getAccessibilityReadText(this.item.e6())}`) : '');
+            this.item.n24().y21?.e26(true);
+            let s9 = { currentNodeId: r9 };
+            this.appEventBus.emit(TreeListenType.NODE_CLICK, s9);
+            this.listNodeDataSource.t27(this.item.v24()
+                ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node', `${this.getAccessibilityReadText(this.item.g24())}`) : '');
         }
-        if (this.listNodeDataSource.u9() !== -1 && this.index !== this.listNodeDataSource.u9()) {
-            this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
-            this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
+        if (this.listNodeDataSource.f26() !== -1 && this.index !== this.listNodeDataSource.f26()) {
+            this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, this.listNodeDataSource.f26());
+            this.listNodeDataSource.i26(this.listNodeDataSource.f26(), m7.COMMIT_NODE);
         }
         this.lastIndex = this.index;
         this.count--;
@@ -3656,29 +3681,29 @@ export class i3 extends ViewPU {
             this.count--;
             return;
         }
-        this.index = this.listNodeDataSource.findIndex(this.item.e6());
-        this.listNodeDataSource.h9(this.index);
-        let f22 = this.item.e6();
-        if (!(typeof this.treeViewTheme.z3 === 'string')) {
-            this.item.a6(b2);
+        this.index = this.listNodeDataSource.findIndex(this.item.g24());
+        this.listNodeDataSource.g26(this.index);
+        let p9 = this.item.g24();
+        if (!(typeof this.treeViewTheme.b22 === 'string')) {
+            this.item.c24(r6);
         }
         else {
-            this.item.a6(this.treeViewTheme.z3);
+            this.item.c24(this.treeViewTheme.b22);
         }
-        if (this.item.k6().v3 !== null) {
-            this.item.k6().v3?.i8(a3.SELECTED);
-            this.listNodeDataSource.i8(this.index, a3.SELECTED);
-            this.item.j4 = this.item.k6().v3?.source;
-            this.item.y16 = this.item.k6().v3?.y16;
+        if (this.item.n24().x21 !== null) {
+            this.item.n24().x21?.d26(r7.SELECTED);
+            this.listNodeDataSource.d26(this.index, r7.SELECTED);
+            this.item.imageSource = this.item.n24().x21?.source;
+            this.item.l22 = this.item.n24().x21?.l22;
         }
-        this.item.k6().w3?.j8(true);
-        let g22 = { currentNodeId: f22 };
-        this.appEventBus.emit(TreeListenType.NODE_CLICK, g22);
-        this.listNodeDataSource.q16(this.item.s6()
-            ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node', `${this.getAccessibilityReadText(this.item.e6())}`) : '');
-        if (this.listNodeDataSource.u9() !== -1 && this.index !== this.listNodeDataSource.u9()) {
-            this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, this.listNodeDataSource.u9());
-            this.listNodeDataSource.w9(this.listNodeDataSource.u9(), t2.COMMIT_NODE);
+        this.item.n24().y21?.e26(true);
+        let q9 = { currentNodeId: p9 };
+        this.appEventBus.emit(TreeListenType.NODE_CLICK, q9);
+        this.listNodeDataSource.t27(this.item.v24()
+            ? this.listNodeDataSource.getStringByName('treeview_accessibility_select_node', `${this.getAccessibilityReadText(this.item.g24())}`) : '');
+        if (this.listNodeDataSource.f26() !== -1 && this.index !== this.listNodeDataSource.f26()) {
+            this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, this.listNodeDataSource.f26());
+            this.listNodeDataSource.i26(this.listNodeDataSource.f26(), m7.COMMIT_NODE);
         }
         this.lastIndex = this.index;
         this.count--;
@@ -3689,12 +3714,12 @@ export class i3 extends ViewPU {
             type: 'requestFocusForAccessibility',
             bundleName: getContext()?.abilityInfo?.bundleName,
             triggerAction: 'common',
-            customId: `treeView_button${this.item.e6()}`
+            customId: `treeView_button${this.item.g24()}`
         });
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
             setTimeout(() => {
                 this.clickButtonFlag = true;
-            }, j17);
+            }, g7);
         });
     }
     popupForShowTitle(text, backgroundColor, fontColor, parent = null) {
@@ -3714,7 +3739,7 @@ export class i3 extends ViewPU {
             Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body2'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
             Text.fontWeight('regular');
             Text.fontColor(fontColor);
-            Text.minFontScale(o1);
+            Text.minFontScale(i6);
             Text.maxFontScale(this.decideFontScale());
         }, Text);
         Text.pop();
@@ -3738,15 +3763,15 @@ export class i3 extends ViewPU {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
-            if (this.item.j6()) {
+            if (this.item.l24()) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Stack.create();
                         ViewStackProcessor.visualState('focused');
                         Stack.border({
                             radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                            width: l1,
-                            color: this.treeViewTheme.f4,
+                            width: f6,
+                            color: this.treeViewTheme.h22,
                             style: BorderStyle.Solid,
                         });
                         ViewStackProcessor.visualState('normal');
@@ -3758,51 +3783,51 @@ export class i3 extends ViewPU {
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Column.create();
-                        Column.opacity(this.listNodeDataSource.y13(ObservedObject.GetRawObject(this.item)));
+                        Column.opacity(this.listNodeDataSource.q31(ObservedObject.GetRawObject(this.item)));
                         Column.onHover((isHover) => {
                             if (isHover) {
-                                this.item.a6(this.treeViewTheme.e4);
+                                this.item.c24(this.treeViewTheme.g22);
                             }
                             else {
-                                this.item.a6({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                this.item.c24({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background_transparent'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                             }
                         });
                         Column.onTouch(this.isAccessibilityEnabled ? undefined : (event) => {
                             this.onTouchNode(event);
                         });
-                        Column.backgroundColor((this.item.k6().w3 && this.item.k6().inputText &&
-                        this.item.x5()) ? this.item.k6().inputText?.j15 : this.item.b6());
+                        Column.backgroundColor((this.item.n24().y21 && this.item.n24().inputText &&
+                            this.item.z23()) ? this.item.n24().inputText?.e33 : this.item.d24());
                         Column.border({
-                            width: this.item.m6().borderWidth,
-                            color: this.item.m6().borderColor,
-                            radius: this.item.m6().borderRadius,
+                            width: this.item.p24().borderWidth,
+                            color: this.item.p24().borderColor,
+                            radius: this.item.p24().borderRadius,
                         });
-                        Column.height(i1);
+                        Column.height(d6);
                         Column.focusable(true);
                         Column.onMouse((event) => {
-                            let y6 = this.listNodeDataSource.findIndex(this.item.e6());
+                            let o9 = this.listNodeDataSource.findIndex(this.item.g24());
                             if (event.button === MouseButton.Right) {
-                                this.listNodeDataSource.i9(Event.MOUSE_BUTTON_RIGHT, this.listNodeDataSource.findIndex(this.item.e6()));
-                                this.listTreeViewMenu = this.item.q6();
-                                this.listNodeDataSource.h9(y6);
-                                clearTimeout(this.item.k6().w3?.u13);
+                                this.listNodeDataSource.g27(Event.MOUSE_BUTTON_RIGHT, this.listNodeDataSource.findIndex(this.item.g24()));
+                                this.listTreeViewMenu = this.item.t24();
+                                this.listNodeDataSource.g26(o9);
+                                clearTimeout(this.item.n24().y21?.l31);
                             }
                             event.stopPropagation();
                         });
                         Column.padding({ top: 0, bottom: 0 });
-                        Column.bindPopup(this.item.q5().u4, {
+                        Column.bindPopup(this.item.s23().v22, {
                             builder: { builder: () => {
-                                this.popupForShowTitle.call(this, this.item.q5().x4, this.item.q5().w4, this.item.q5().y4);
-                            } },
+                                    this.popupForShowTitle.call(this, this.item.s23().y22, this.item.s23().x22, this.item.s23().z22);
+                                } },
                             placement: Placement.BottomLeft,
                             placementOnTop: false,
-                            popupColor: this.item.q5().w4,
+                            popupColor: this.item.s23().x22,
                             autoCancel: true,
-                            enableArrow: this.item.q5().v4
+                            enableArrow: this.item.s23().w22
                         });
                         Column.onAreaChange((oldValue, newValue) => {
-                            let x6 = Number.parseInt(newValue.width.toString());
-                            this.columnWidth = x6;
+                            let n9 = Number.parseInt(newValue.width.toString());
+                            this.columnWidth = n9;
                         });
                     }, Column);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -3811,29 +3836,29 @@ export class i3 extends ViewPU {
                     }, Stack);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Divider.create();
-                        Divider.height(this.listNodeDataSource.o14().g12);
-                        Divider.color(this.listNodeDataSource.o14().h12);
-                        Divider.visibility(this.listNodeDataSource.p14(ObservedObject.GetRawObject(this.item)));
+                        Divider.height(this.listNodeDataSource.j32().b30);
+                        Divider.color(this.listNodeDataSource.j32().c30);
+                        Divider.visibility(this.listNodeDataSource.k32(ObservedObject.GetRawObject(this.item)));
                         Divider.lineCap(LineCapStyle.Round);
-                        Divider.margin({ start: LengthMetrics.vp(this.item.z6()) });
+                        Divider.margin({ start: LengthMetrics.vp(this.item.c25()) });
                         Divider.focusable(true);
                     }, Divider);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create({});
                         Row.focusable(true);
                         Row.width('100%');
-                        Row.height(this.item.h6());
-                        Row.padding({ start: LengthMetrics.vp(this.item.g6()) });
+                        Row.height(this.item.j24());
+                        Row.padding({ start: LengthMetrics.vp(this.item.i24()) });
                         Row.bindContextMenu({ builder: this.builder.bind(this) }, ResponseType.RightClick);
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Row.create();
-                        Row.height(i1);
+                        Row.height(d6);
                         Row.layoutWeight(1);
                         Row.focusable(true);
                         Row.accessibilityGroup(true);
-                        Row.id(`treeView_node${this.item.e6()}`);
-                        Row.accessibilityText(this.getAccessibilityReadText(this.item.e6()));
+                        Row.id(`treeView_node${this.item.g24()}`);
+                        Row.accessibilityText(this.getAccessibilityReadText(this.item.g24()));
                         Row.accessibilityDescription(this.getAccessibilityDescription());
                         Row.onClick(this.isAccessibilityEnabled ? () => {
                             this.onClickNode();
@@ -3842,31 +3867,33 @@ export class i3 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.k6().v3) {
+                        if (this.item.n24().x21) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
                                     Row.focusable(true);
-                                    Row.backgroundColor(a2);
+                                    Row.backgroundColor(q6);
                                     Row.margin({
-                                        end: o(this.item.k6().v3?.z7)
+                                        end: s5(this.item.n24().x21?.t25)
                                     });
-                                    Row.height(this.item.k6().v3?.itemHeight);
-                                    Row.width(this.item.k6().v3?.itemWidth);
+                                    Row.height(this.item.n24().x21?.itemHeight * this.decideSymbolFontScale(this.item.l22 !== undefined || Util.f1(this.item.imageSource)));
+                                    Row.width(this.item.n24().x21?.itemWidth * this.decideSymbolFontScale(this.item.l22 !== undefined || Util.f1(this.item.imageSource)));
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     If.create();
-                                    if (this.item.y16) {
+                                    if (this.item.l22) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create();
-                                                SymbolGlyph.attributeModifier.bind(this)(this.item.y16);
-                                                SymbolGlyph.fontSize(this.item.k6().v3?.itemHeight);
+                                                SymbolGlyph.fontColor([this.getLeftIconColor()]);
+                                                SymbolGlyph.attributeModifier.bind(this)(this.item.l22);
+                                                SymbolGlyph.fontSize(`${this.item.n24().x21?.itemHeight *
+                                                    this.decideSymbolFontScale(true)}vp`);
                                                 SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                                 SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                                                SymbolGlyph.opacity(!this.item.s6() && !this.item.g7() ?
-                                                    this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
-                                                SymbolGlyph.focusable(this.item.k6().w3 !== null ? false : true);
+                                                SymbolGlyph.opacity(!this.item.v24() && !this.item.j25() ?
+                                                    this.item.n24().x21?.opacity : this.item.n24().x21?.f33);
+                                                SymbolGlyph.focusable(this.item.n24().y21 !== null ? false : true);
                                             }, SymbolGlyph);
                                         });
                                     }
@@ -3874,30 +3901,31 @@ export class i3 extends ViewPU {
                                         this.ifElseBranchUpdateFunction(1, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 If.create();
-                                                if (Util.t16(this.item.j4)) {
+                                                if (Util.f1(this.item.imageSource)) {
                                                     this.ifElseBranchUpdateFunction(0, () => {
                                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                            SymbolGlyph.create(this.item.j4);
-                                                            SymbolGlyph.fontSize(this.item.k6().v3?.itemHeight);
+                                                            SymbolGlyph.create(this.item.imageSource);
+                                                            SymbolGlyph.fontSize(`${this.item.n24().x21?.itemHeight *
+                                                                this.decideSymbolFontScale(true)}vp`);
                                                             SymbolGlyph.fontColor([this.getLeftIconColor()]);
-                                                            SymbolGlyph.opacity(!this.item.s6() && !this.item.g7() ?
-                                                                this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
-                                                            SymbolGlyph.focusable(this.item.k6().w3 !== null ? false : true);
+                                                            SymbolGlyph.opacity(!this.item.v24() && !this.item.j25() ?
+                                                                this.item.n24().x21?.opacity : this.item.n24().x21?.f33);
+                                                            SymbolGlyph.focusable(this.item.n24().y21 !== null ? false : true);
                                                         }, SymbolGlyph);
                                                     });
                                                 }
                                                 else {
                                                     this.ifElseBranchUpdateFunction(1, () => {
                                                         this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                            Image.create(this.item.j4);
+                                                            Image.create(this.item.imageSource);
                                                             Image.objectFit(ImageFit.Contain);
-                                                            Image.height(this.item.k6().v3?.itemHeight);
-                                                            Image.width(this.item.k6().v3?.itemWidth);
-                                                            Image.opacity(!this.item.s6() && !this.item.g7() ?
-                                                                this.item.k6().v3?.opacity : this.item.k6().v3?.k15);
-                                                            Image.focusable(this.item.k6().w3 !== null ? false : true);
+                                                            Image.height(this.item.n24().x21?.itemHeight);
+                                                            Image.width(this.item.n24().x21?.itemWidth);
+                                                            Image.opacity(!this.item.v24() && !this.item.j25() ?
+                                                                this.item.n24().x21?.opacity : this.item.n24().x21?.f33);
+                                                            Image.focusable(this.item.n24().y21 !== null ? false : true);
                                                             Image.fillColor(this.getLeftIconColor());
-                                                            Image.matchTextDirection((this.item.k6().x3?.c8 === ARROW_RIGHT || this.item.k6().x3?.c8 === s2) ? true : false);
+                                                            Image.matchTextDirection((this.item.n24().z21?.x25 === ARROW_RIGHT || this.item.n24().z21?.x25 === l7) ? true : false);
                                                         }, Image);
                                                     });
                                                 }
@@ -3923,21 +3951,21 @@ export class i3 extends ViewPU {
                     }, Row);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.k6().w3 && this.item.w5()) {
+                        if (this.item.n24().y21 && this.item.y23()) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Text.create(this.item.k6().w3?.title);
-                                    Text.minFontScale(o1);
+                                    Text.create(this.item.n24().y21?.title);
+                                    Text.minFontScale(i6);
                                     Text.maxFontScale(this.decideFontScale());
                                     Text.maxLines(1);
-                                    Text.fontSize(this.item.k6().w3?.size);
-                                    Text.fontColor(this.item.s6() ?
-                                    this.treeViewTheme.c4 : this.treeViewTheme.a4);
+                                    Text.fontSize(this.item.n24().y21?.size);
+                                    Text.fontColor(this.item.v24() ?
+                                        this.treeViewTheme.e22 : this.treeViewTheme.c22);
                                     Text.margin({
-                                        end: o(this.item.k6().w3?.z7)
+                                        end: s5(this.item.n24().y21?.t25)
                                     });
                                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-                                    Text.fontWeight(this.item.k6().w3?.weight);
+                                    Text.fontWeight(this.item.n24().y21?.weight);
                                     Text.focusable(true);
                                 }, Text);
                                 Text.pop();
@@ -3951,25 +3979,25 @@ export class i3 extends ViewPU {
                     If.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.k6().w3 && this.item.k6().inputText &&
-                        this.item.x5()) {
+                        if (this.item.n24().y21 && this.item.n24().inputText &&
+                            this.item.z23()) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
-                                    Row.backgroundColor(this.item.k6().inputText?.backgroundColor);
-                                    Row.borderRadius(this.item.k6().inputText?.borderRadius);
+                                    Row.backgroundColor(this.item.n24().inputText?.backgroundColor);
+                                    Row.borderRadius(this.item.n24().inputText?.borderRadius);
                                     Row.margin({
-                                        end: o(this.item.k6()
-                                            .inputText?.z7)
+                                        end: s5(this.item.n24()
+                                            .inputText?.t25)
                                     });
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    TextInput.create({ text: this.item.k6().w3?.title });
-                                    TextInput.height(this.item.k6().inputText?.itemHeight);
+                                    TextInput.create({ text: this.item.n24().y21?.title });
+                                    TextInput.height(this.item.n24().inputText?.itemHeight);
                                     TextInput.fontSize(this.getInputTextMaxFontSize());
-                                    TextInput.fontColor(this.item.k6().inputText?.color);
-                                    TextInput.borderRadius(this.item.k6().inputText?.borderRadius);
-                                    TextInput.backgroundColor(this.item.k6().inputText?.backgroundColor);
+                                    TextInput.fontColor(this.item.n24().inputText?.color);
+                                    TextInput.borderRadius(this.item.n24().inputText?.borderRadius);
+                                    TextInput.backgroundColor(this.item.n24().inputText?.backgroundColor);
                                     TextInput.enterKeyType(EnterKeyType.Done);
                                     TextInput.focusable(true);
                                     TextInput.padding({
@@ -3979,41 +4007,41 @@ export class i3 extends ViewPU {
                                         bottom: LengthMetrics.resource(this.textInputPadding.bottom),
                                     });
                                     TextInput.onChange((value) => {
-                                        let o19 = this.listNodeDataSource.findIndex(this.item.e6());
-                                        let p19 = '';
-                                        let q19 = false;
-                                        let r19 = false;
+                                        let i9 = this.listNodeDataSource.findIndex(this.item.g24());
+                                        let j9 = '';
+                                        let k9 = false;
+                                        let l9 = false;
                                         if (this.checkInvalidPattern(value)) {
-                                            for (let s19 = 0; s19 < value.length; s19++) {
-                                                if (!this.checkInvalidPattern(value[s19])) {
-                                                    p19 += value[s19];
+                                            for (let m9 = 0; m9 < value.length; m9++) {
+                                                if (!this.checkInvalidPattern(value[m9])) {
+                                                    j9 += value[m9];
                                                 }
                                             }
-                                            q19 = true;
-                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.INVALID_ERROR, true, o19);
+                                            k9 = true;
+                                            this.listNodeDataSource.h26(n7.WARNINGS, o7.INVALID_ERROR, true, i9);
                                         }
                                         else {
-                                            p19 = value;
-                                            q19 = false;
+                                            j9 = value;
+                                            k9 = false;
                                         }
-                                        if ((this.checkIsAllCN(p19) && p19.length > this.MAX_CN_LENGTH) ||
-                                            (!this.checkIsAllCN(p19) && p19.length > this.MAX_EN_LENGTH)) {
-                                            p19 = this.checkIsAllCN(p19) ?
-                                            p19.substr(0, this.MAX_CN_LENGTH) : p19.substr(0, this.MAX_EN_LENGTH);
-                                            r19 = true;
-                                            this.listNodeDataSource.v9(u2.WARNINGS, v2.LENGTH_ERROR, true, o19);
+                                        if ((this.checkIsAllCN(j9) && j9.length > this.MAX_CN_LENGTH) ||
+                                            (!this.checkIsAllCN(j9) && j9.length > this.MAX_EN_LENGTH)) {
+                                            j9 = this.checkIsAllCN(j9) ?
+                                                j9.substr(0, this.MAX_CN_LENGTH) : j9.substr(0, this.MAX_EN_LENGTH);
+                                            l9 = true;
+                                            this.listNodeDataSource.h26(n7.WARNINGS, o7.LENGTH_ERROR, true, i9);
                                         }
                                         else {
-                                            r19 = false;
+                                            l9 = false;
                                         }
-                                        if (!r19 && !q19) {
-                                            this.listNodeDataSource.v13(o19, p19);
+                                        if (!l9 && !k9) {
+                                            this.listNodeDataSource.n31(i9, j9);
                                         }
                                     });
                                     TextInput.onSubmit((enterKey) => {
-                                        let n19 = this.listNodeDataSource.findIndex(this.item.e6());
-                                        this.listNodeDataSource.v9(u2.WARNINGS, v2.NONE, false, n19);
-                                        this.listNodeDataSource.w9(n19, t2.COMMIT_NODE);
+                                        let h9 = this.listNodeDataSource.findIndex(this.item.g24());
+                                        this.listNodeDataSource.h26(n7.WARNINGS, o7.NONE, false, h9);
+                                        this.listNodeDataSource.i26(h9, m7.COMMIT_NODE);
                                     });
                                 }, TextInput);
                                 Row.pop();
@@ -4032,25 +4060,25 @@ export class i3 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.listNodeDataSource.f14(this.item.e6())) {
+                        if (this.listNodeDataSource.b32(this.item.g24())) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
                                     Row.create();
                                     Row.focusable(true);
                                     Row.margin({
-                                        start: LengthMetrics.resource(this.listNodeDataSource.q14().margin.left),
-                                        end: this.item.k6().x3 ?
-                                        LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
-                                        LengthMetrics.resource(this.listNodeDataSource.q14().margin.right)
+                                        start: LengthMetrics.resource(this.listNodeDataSource.l32().margin.left),
+                                        end: this.item.n24().z21 ?
+                                            LengthMetrics.resource({ 'id': -1, 'type': 10002, params: ['sys.float.padding_level0'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }) :
+                                            LengthMetrics.resource(this.listNodeDataSource.l32().margin.right)
                                     });
                                 }, Row);
                                 this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    Text.create(this.listNodeDataSource.e14(this.item.e6()));
-                                    Text.minFontScale(o1);
+                                    Text.create(this.listNodeDataSource.a32(this.item.g24()));
+                                    Text.minFontScale(i6);
                                     Text.maxFontScale(this.decideFontScale());
-                                    Text.fontSize(this.listNodeDataSource.q14().fontSize);
-                                    Text.fontColor(this.item.g7() || this.item.i7() ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : this.treeViewTheme.b4);
-                                    Text.fontWeight(this.listNodeDataSource.q14().fontWeight);
+                                    Text.fontSize(this.listNodeDataSource.l32().fontSize);
+                                    Text.fontColor(this.item.j25() || this.item.l25() ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : this.treeViewTheme.d22);
+                                    Text.fontWeight(this.listNodeDataSource.l32().fontWeight);
                                 }, Text);
                                 Text.pop();
                                 Row.pop();
@@ -4065,33 +4093,34 @@ export class i3 extends ViewPU {
                     Row.pop();
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         If.create();
-                        if (this.item.k6().x3) {
+                        if (this.item.n24().z21) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                if (!If.canRetake(`treeView_button${this.item.e6()}`)) {
+                                if (!If.canRetake(`treeView_button${this.item.g24()}`)) {
                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                                         Row.create();
                                         Row.focusable(true);
                                         Row.justifyContent(FlexAlign.Center);
-                                        Row.height(this.item.k6().x3?.itemHeight);
-                                        Row.width(this.item.k6().x3?.itemWidth);
+                                        Row.height(this.item.n24().z21?.itemHeight * this.decideSymbolFontScale(true));
+                                        Row.width(this.item.n24().z21?.itemWidth * this.decideSymbolFontScale(true));
                                         Row.onClick(() => {
-                                            this.listNodeDataSource.k9(this.listNodeDataSource.findIndex(this.item.e6()));
-                                            this.listNodeDataSource.s14(this.item.e6());
+                                            this.listNodeDataSource.i27(this.listNodeDataSource.findIndex(this.item.g24()));
+                                            this.listNodeDataSource.o32(this.item.g24());
                                             setTimeout(() => {
                                                 this.accessibilityRefocus();
-                                            }, s20);
+                                            }, h7);
                                         });
-                                        Row.id(`treeView_button${this.item.e6()}`);
-                                        Row.accessibilityText(this.getAccessibilityReadButtonText(this.item.k6().x3?.c8 === ARROW_RIGHT));
+                                        Row.id(`treeView_button${this.item.g24()}`);
+                                        Row.accessibilityText(this.getAccessibilityReadButtonText(this.item.n24().z21?.x25 === ARROW_RIGHT));
                                         Row.accessibilityDescription(this.getAccessibilityReadButtonDescription());
                                     }, Row);
                                     this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                        SymbolGlyph.create(this.item.k6().x3?.c8);
-                                        SymbolGlyph.fontSize(this.item.k6().x3?.itemHeight);
-                                        SymbolGlyph.fontColor([this.item.k6().x3?.y12 ?
-                                        this.treeViewTheme.i4 : z1]);
-                                        SymbolGlyph.opacity(!this.item.g7() ?
-                                            this.item.k6().x3?.opacity : this.item.k6().x3?.k15);
+                                        SymbolGlyph.create(this.item.n24().z21?.x25);
+                                        SymbolGlyph.fontSize(`${this.item.n24().z21?.itemHeight *
+                                            this.decideSymbolFontScale(true)}vp`);
+                                        SymbolGlyph.fontColor([this.item.n24().z21?.s30 ?
+                                                this.treeViewTheme.k22 : p6]);
+                                        SymbolGlyph.opacity(!this.item.j25() ?
+                                            this.item.n24().z21?.opacity : this.item.n24().z21?.f33);
                                         SymbolGlyph.focusable(true);
                                     }, SymbolGlyph);
                                     Row.pop();
@@ -4121,27 +4150,27 @@ export class i3 extends ViewPU {
         this.updateDirtyElements();
     }
 }
-export class j3 {
+export class b8 {
     constructor(nodeParam) {
         this.currentNodeId = nodeParam.currentNodeId ?? -1;
         this.parentNodeId = nodeParam.parentNodeId ?? -1;
         this.isFolder = nodeParam.isFolder;
-        this.b5 = -1;
-        this.y14 = -1;
-        this.p6 = { a13: false, b13: 0, r10: 0 };
+        this.c23 = -1;
+        this.w32 = -1;
+        this.s24 = { u30: false, v30: 0, n28: 0 };
         this.children = [];
     }
-    o6() {
-        return this.p6;
+    r24() {
+        return this.s24;
     }
-    f13() {
+    z30() {
         return this.currentNodeId;
     }
-    v6() {
+    y24() {
         return this.isFolder;
     }
 }
-class l3 {
+class c8 {
     constructor() {
         this.rightMargin = -1;
         this.width = -1;
@@ -4159,385 +4188,385 @@ class l3 {
     get itemHeight() {
         return this.height;
     }
-    set z7(rightMargin) {
+    set t25(rightMargin) {
         this.rightMargin = rightMargin;
     }
-    get z7() {
+    get t25() {
         return this.rightMargin;
     }
 }
-export class m3 extends l3 {
-    constructor(w4, r21, x4, itemWidth, itemHeight, y4, z4, a5) {
+export class d8 extends c8 {
+    constructor(imageSource, c9, d9, itemWidth, itemHeight, e9, f9, g9) {
         super();
         this.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.j4 = w4;
-        this.d17 = r21;
-        this.rightMargin = y4;
-        this.b8 = x4;
+        this.imageSource = imageSource;
+        this.g33 = c9;
+        this.rightMargin = e9;
+        this.w25 = d9;
         this.itemWidth = itemWidth;
         this.itemHeight = itemHeight;
-        this.l15 = w4;
-        this.e17 = r21;
-        this.m15 = z4;
-        this.n15 = a5;
+        this.h33 = imageSource;
+        this.i33 = c9;
+        this.j33 = f9;
+        this.k33 = g9;
     }
     get source() {
-        return this.j4;
+        return this.imageSource;
     }
-    get y16() {
-        return this.d17;
+    get l22() {
+        return this.g33;
     }
     get opacity() {
-        return this.b8;
+        return this.w25;
     }
-    get k15() {
+    get f33() {
         return 1;
     }
-    get c8() {
-        return this.l15;
+    get x25() {
+        return this.h33;
     }
-    get f17() {
-        return this.e17;
+    get l33() {
+        return this.i33;
     }
-    get y12() {
-        return this.m15;
+    get s30() {
+        return this.j33;
     }
     get type() {
-        return this.n15;
+        return this.k33;
     }
 }
-class n3 {
+class e8 {
     constructor() {
     }
     static getInstance() {
-        if (!n3.instance) {
-            n3.instance = new n3();
+        if (!e8.instance) {
+            e8.instance = new e8();
         }
-        return n3.instance;
+        return e8.instance;
     }
-    o15(type) {
-        let v4;
+    n33(type) {
+        let imageSource;
         switch (type) {
-            case b3.ARROW_RIGHT_WHITE:
-                v4 = s2;
+            case s7.ARROW_RIGHT_WHITE:
+                imageSource = l7;
                 break;
-            case b3.ARROW_RIGHT:
-                v4 = ARROW_RIGHT;
+            case s7.ARROW_RIGHT:
+                imageSource = ARROW_RIGHT;
                 break;
-            case b3.ARROW_DOWN_WHITE:
-                v4 = q2;
+            case s7.ARROW_DOWN_WHITE:
+                imageSource = k7;
                 break;
             default:
-                v4 = ARROW_DOWN;
+                imageSource = ARROW_DOWN;
         }
-        return new m3(v4, undefined, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_tertiary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, u, a1, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, (type === b3.ARROW_RIGHT_WHITE || type === b3.ARROW_DOWN_WHITE) ? false : true, type);
+        return new d8(imageSource, undefined, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_alpha_content_tertiary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, u5, v5, { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, (type === s7.ARROW_RIGHT_WHITE || type === s7.ARROW_DOWN_WHITE) ? false : true, type);
     }
 }
-class q3 {
-    static n5(type) {
-        let node = q3.p15.get(type);
+class f8 {
+    static p23(type) {
+        let node = f8.o33.get(type);
         if (node === undefined) {
-            node = n3.getInstance().o15(type);
-            q3.p15.set(type, node);
+            node = e8.getInstance().n33(type);
+            f8.o33.set(type, node);
         }
         return node;
     }
-    static t12(s4, t4, u4) {
-        if (u4 === undefined) {
+    static n30(z8, a9, b9) {
+        if (b9 === undefined) {
             return undefined;
         }
-        let type = u4;
-        if (s4 == a3.EDIT ||
-            s4 === a3.DRAG_INSERT) {
-            if (t4 === z2.COLLAPSE) {
-                type = b3.ARROW_RIGHT_WHITE;
+        let type = b9;
+        if (z8 == r7.EDIT ||
+            z8 === r7.DRAG_INSERT) {
+            if (a9 === q7.COLLAPSE) {
+                type = s7.ARROW_RIGHT_WHITE;
             }
             else {
-                type = b3.ARROW_DOWN_WHITE;
+                type = s7.ARROW_DOWN_WHITE;
             }
         }
-        else if (s4 === a3.FINISH_EDIT ||
-            s4 === a3.FINISH_DRAG_INSERT) {
-            if (t4 === z2.COLLAPSE) {
-                type = b3.ARROW_RIGHT;
+        else if (z8 === r7.FINISH_EDIT ||
+            z8 === r7.FINISH_DRAG_INSERT) {
+            if (a9 === q7.COLLAPSE) {
+                type = s7.ARROW_RIGHT;
             }
             else {
-                type = b3.ARROW_DOWN;
+                type = s7.ARROW_DOWN;
             }
         }
-        return q3.n5(type);
+        return f8.p23(type);
     }
-    static x12(q4, r4) {
-        if (r4 === undefined) {
+    static r30(x8, y8) {
+        if (y8 === undefined) {
             return undefined;
         }
         let type;
-        if (!r4) {
-            if (q4 === z2.COLLAPSE) {
-                type = b3.ARROW_RIGHT_WHITE;
+        if (!y8) {
+            if (x8 === q7.COLLAPSE) {
+                type = s7.ARROW_RIGHT_WHITE;
             }
             else {
-                type = b3.ARROW_DOWN_WHITE;
+                type = s7.ARROW_DOWN_WHITE;
             }
         }
         else {
-            if (q4 === z2.COLLAPSE) {
-                type = b3.ARROW_RIGHT;
+            if (x8 === q7.COLLAPSE) {
+                type = s7.ARROW_RIGHT;
             }
             else {
-                type = b3.ARROW_DOWN;
+                type = s7.ARROW_DOWN;
             }
         }
-        return q3.n5(type);
+        return f8.p23(type);
     }
 }
-q3.p15 = new Map();
-export class r3 extends l3 {
-    constructor(m4, o21, n4, itemWidth, itemHeight, o4, p21, p4, q21) {
+f8.o33 = new Map();
+export class g8 extends c8 {
+    constructor(imageSource, r8, s8, itemWidth, itemHeight, t8, u8, v8, w8) {
         super();
         this.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_elements_margin_horizontal_m'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.j4 = m4;
-        this.d17 = o21;
-        this.q15 = m4;
-        this.g17 = o21;
-        if (o4 !== undefined) {
-            this.r15 = o4;
+        this.imageSource = imageSource;
+        this.g33 = r8;
+        this.p33 = imageSource;
+        this.q33 = r8;
+        if (t8 !== undefined) {
+            this.r33 = t8;
         }
         else {
-            this.r15 = this.q15;
+            this.r33 = this.p33;
         }
-        this.h17 = p21;
-        if (p4 !== undefined) {
-            this.s15 = p4;
+        this.s33 = u8;
+        if (v8 !== undefined) {
+            this.t33 = v8;
         }
         else {
-            this.s15 = this.q15;
+            this.t33 = this.p33;
         }
-        this.i17 = q21;
-        this.b8 = n4;
+        this.u33 = w8;
+        this.w25 = s8;
         this.itemWidth = itemWidth;
         this.itemHeight = itemHeight;
-        this.l15 = m4;
-        this.t15 = ARROW_DOWN;
-        this.u15 = ARROW_RIGHT;
-        this.m15 = true;
-        this.v15 = a3.NORMAL;
+        this.h33 = imageSource;
+        this.v33 = ARROW_DOWN;
+        this.w33 = ARROW_RIGHT;
+        this.j33 = true;
+        this.x33 = r7.NORMAL;
     }
     get source() {
-        return this.j4;
+        return this.imageSource;
     }
-    get y16() {
-        return this.d17;
+    get l22() {
+        return this.g33;
     }
-    get a8() {
-        return this.q15;
+    get v25() {
+        return this.p33;
     }
-    get a17() {
-        return this.g17;
+    get u25() {
+        return this.q33;
     }
-    get r13() {
-        return this.r15;
+    get h31() {
+        return this.r33;
     }
-    get b17() {
-        return this.h17;
+    get z32() {
+        return this.s33;
     }
-    get s13() {
-        return this.s15;
+    get i31() {
+        return this.t33;
     }
-    get c17() {
-        return this.i17;
+    get a33() {
+        return this.u33;
     }
     get opacity() {
-        return this.b8;
+        return this.w25;
     }
-    get k15() {
+    get f33() {
         return 1;
     }
-    get c8() {
-        return this.l15;
+    get x25() {
+        return this.h33;
     }
-    get y12() {
-        return this.m15;
+    get s30() {
+        return this.j33;
     }
-    x12(l4) {
-        if (l4 === z2.EXPAND) {
-            this.l15 = this.t15;
+    r30(q8) {
+        if (q8 === q7.EXPAND) {
+            this.h33 = this.v33;
         }
-        else if (l4 === z2.COLLAPSE) {
-            this.l15 = this.u15;
+        else if (q8 === q7.COLLAPSE) {
+            this.h33 = this.w33;
         }
     }
-    s12(j4, k4) {
-        if (j4 === a3.EDIT || j4 === a3.DRAG_INSERT) {
-            this.t15 = q2;
-            this.u15 = s2;
-            this.m15 = false;
+    m30(o8, p8) {
+        if (o8 === r7.EDIT || o8 === r7.DRAG_INSERT) {
+            this.v33 = k7;
+            this.w33 = l7;
+            this.j33 = false;
         }
-        else if (j4 === a3.FINISH_EDIT ||
-            j4 === a3.FINISH_DRAG_INSERT) {
-            this.t15 = ARROW_DOWN;
-            this.u15 = ARROW_RIGHT;
-            this.m15 = true;
+        else if (o8 === r7.FINISH_EDIT ||
+            o8 === r7.FINISH_DRAG_INSERT) {
+            this.v33 = ARROW_DOWN;
+            this.w33 = ARROW_RIGHT;
+            this.j33 = true;
         }
-        this.l15 = (k4 === z2.COLLAPSE) ?
-        this.u15 : this.t15;
+        this.h33 = (p8 === q7.COLLAPSE) ?
+            this.w33 : this.v33;
     }
-    i8(i4) {
-        switch (i4) {
-            case a3.NORMAL:
-                this.j4 = this.q15;
-                this.d17 = this.g17;
-                this.v15 = i4;
+    d26(n8) {
+        switch (n8) {
+            case r7.NORMAL:
+                this.imageSource = this.p33;
+                this.g33 = this.q33;
+                this.x33 = n8;
                 break;
-            case a3.SELECTED:
-                if (this.v15 !== a3.EDIT) {
-                    this.j4 = this.r15;
-                    this.d17 = this.h17;
-                    this.v15 = i4;
+            case r7.SELECTED:
+                if (this.x33 !== r7.EDIT) {
+                    this.imageSource = this.r33;
+                    this.g33 = this.s33;
+                    this.x33 = n8;
                 }
                 break;
-            case a3.EDIT:
-                this.j4 = this.s15;
-                this.d17 = this.i17;
-                this.v15 = i4;
+            case r7.EDIT:
+                this.imageSource = this.t33;
+                this.g33 = this.u33;
+                this.x33 = n8;
                 break;
-            case a3.FINISH_EDIT:
-                this.j4 = this.r15;
-                this.d17 = this.h17;
-                this.v15 = i4;
+            case r7.FINISH_EDIT:
+                this.imageSource = this.r33;
+                this.g33 = this.s33;
+                this.x33 = n8;
                 break;
-            case a3.DRAG_INSERT:
-                this.j4 = this.s15;
-                this.d17 = this.i17;
-                this.v15 = i4;
+            case r7.DRAG_INSERT:
+                this.imageSource = this.t33;
+                this.g33 = this.u33;
+                this.x33 = n8;
                 break;
-            case a3.FINISH_DRAG_INSERT:
-                this.j4 = this.q15;
-                this.d17 = this.g17;
-                this.v15 = i4;
+            case r7.FINISH_DRAG_INSERT:
+                this.imageSource = this.p33;
+                this.g33 = this.q33;
+                this.x33 = n8;
                 break;
             default:
                 break;
         }
     }
 }
-class s3 extends l3 {
-    constructor(h4) {
+class h8 extends c8 {
+    constructor(m8) {
         super();
-        this.treeViewTheme = e3.getInstance();
-        this.w15 = h4;
-        this.itemWidth = b1;
-        this.itemHeight = c1;
+        this.treeViewTheme = w7.getInstance();
+        this.y33 = m8;
+        this.itemWidth = w5;
+        this.itemHeight = x5;
         this.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.x15 = {
-            fontColor: this.treeViewTheme.a4,
+        this.z33 = {
+            fontColor: this.treeViewTheme.c22,
             fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             fontWeight: FontWeight.Normal,
         };
-        this.y15 = 0;
+        this.a34 = 0;
     }
-    j8(isSelected) {
+    e26(isSelected) {
         if (isSelected) {
-            this.x15 = {
-                fontColor: this.treeViewTheme.c4,
+            this.z33 = {
+                fontColor: this.treeViewTheme.e22,
                 fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 fontWeight: FontWeight.Regular,
             };
         }
         else {
-            this.x15 = {
-                fontColor: this.treeViewTheme.a4,
+            this.z33 = {
+                fontColor: this.treeViewTheme.c22,
                 fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 fontWeight: FontWeight.Normal,
             };
         }
     }
     set title(text) {
-        this.w15 = text;
+        this.y33 = text;
     }
     get title() {
-        return this.w15;
+        return this.y33;
     }
-    set u13(g4) {
-        this.y15 = g4;
+    set l31(l8) {
+        this.a34 = l8;
     }
-    get u13() {
-        return this.y15;
+    get l31() {
+        return this.a34;
     }
     get color() {
-        return this.x15.fontColor;
+        return this.z33.fontColor;
     }
     get size() {
-        return this.x15.fontSize;
+        return this.z33.fontSize;
     }
     get weight() {
-        return this.x15.fontWeight;
+        return this.z33.fontWeight;
     }
-    q9(f4) {
-        if (f4) {
-            this.x15 = {
-                fontColor: this.treeViewTheme.c4,
+    o27(k8) {
+        if (k8) {
+            this.z33 = {
+                fontColor: this.treeViewTheme.e22,
                 fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 fontWeight: FontWeight.Regular,
             };
         }
         else {
-            this.x15 = {
-                fontColor: this.treeViewTheme.a4,
+            this.z33 = {
+                fontColor: this.treeViewTheme.c22,
                 fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                 fontWeight: FontWeight.Normal,
             };
         }
     }
 }
-export class t3 extends l3 {
+export class i8 extends c8 {
     constructor() {
         super();
         this.status = undefined;
-        this.z15 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.a16 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.b34 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        this.c34 = { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_emphasize'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         this.radius = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_default_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.treeViewTheme = e3.getInstance();
-        this.itemWidth = b1;
-        this.itemHeight = d1;
+        this.treeViewTheme = w7.getInstance();
+        this.itemWidth = w5;
+        this.itemHeight = y5;
         this.rightMargin = { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_paragraph_margin_xs'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
-        this.b16 = {
-            fontColor: this.treeViewTheme.a4,
+        this.d34 = {
+            fontColor: this.treeViewTheme.c22,
             fontSize: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_body1'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
             fontWeight: FontWeight.Normal,
         };
     }
     get color() {
-        return this.b16.fontColor;
+        return this.d34.fontColor;
     }
     get size() {
-        return this.b16.fontSize;
+        return this.d34.fontSize;
     }
     get weight() {
-        return this.b16.fontWeight;
+        return this.d34.fontWeight;
     }
     get borderRadius() {
         return this.radius;
     }
     get backgroundColor() {
-        return this.z15;
+        return this.b34;
     }
-    get j15() {
-        return this.a16;
+    get e33() {
+        return this.c34;
     }
-    get c16() {
+    get e34() {
         return this.status;
     }
 }
-function o(e4) {
-    if (!e4) {
+function s5(j8) {
+    if (!j8) {
         return LengthMetrics.vp(0);
     }
-    else if (typeof e4 === 'number') {
-        return LengthMetrics.vp(e4);
+    else if (typeof j8 === 'number') {
+        return LengthMetrics.vp(j8);
     }
     else {
-        return LengthMetrics.resource(e4);
+        return LengthMetrics.resource(j8);
     }
 }
 

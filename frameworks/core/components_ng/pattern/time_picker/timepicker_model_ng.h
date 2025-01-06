@@ -28,6 +28,7 @@ public:
     void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) override;
     void SetSelectedTime(const PickerTime& value) override;
     void SetOnChange(TimeChangeEvent&& onChange) override;
+    void SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelectedArea) override;
     void SetHour24(bool isUseMilitaryTime) override;
     void SetIsEnableHapticFeedback(bool isEnableHapticFeedback) override;
     void SetDateTimeOptions(ZeroPrefixType& hourType,
@@ -39,6 +40,7 @@ public:
     void HasUserDefinedDisappearFontFamily(bool isUserDefined) override;
     void HasUserDefinedNormalFontFamily(bool isUserDefined) override;
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
+    void SetEnableCascade(bool isEnableCascade) override;
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(TimeChangeEvent&& onChange) override;
     void HasUserDefinedOpacity() override;
@@ -63,9 +65,11 @@ public:
     static PickerTime getTimepickerSelected(FrameNode* frameNode);
     static uint32_t getTimepickerBackgroundColor(FrameNode* frameNode);
     static int32_t getTimepickerUseMilitaryTime(FrameNode* frameNode);
+    static int32_t getTimepickerEnableCascade(FrameNode* frameNode);
     static int32_t getEnableHapticFeedback(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static void SetWheelModeEnabled(FrameNode* frameNode, bool wheelModeEnabled);
+    static void SetEnableCascade(FrameNode* frameNode, bool isEnableCascade);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 private:
     static RefPtr<FrameNode> CreateStackNode();
@@ -77,7 +81,8 @@ class ACE_EXPORT TimePickerDialogModelNG : public TimePickerDialogModel {
 public:
     void SetTimePickerDialogShow(PickerDialogInfo& pickerDialog, NG::TimePickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
-        std::function<void(const std::string&)>&& onChange, TimePickerDialogEvent& timePickerDialogEvent,
+        std::function<void(const std::string&)>&& onChange,
+        std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
         const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::NG

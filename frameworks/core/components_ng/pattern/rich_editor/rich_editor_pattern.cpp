@@ -559,7 +559,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    TriggerAvoidOnCaretChangeImmediately();
+    IF_TRUE(!isModifyingContent_, TriggerAvoidOnCaretChangeImmediately());
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -2352,7 +2352,7 @@ std::list<SpanPosition> RichEditorPattern::GetSelectSpanInfo(int32_t start, int3
 SelectionInfo RichEditorPattern::GetSpansInfoByRange(int32_t start, int32_t end)
 {
     auto selectionInfo = GetSpansInfo(start, end , GetSpansMethod::GETSPANS);
-    CHECK_NULL_RETURN(isAPI14Plus, selectionInfo);
+    CHECK_NULL_RETURN(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN), selectionInfo);
     auto& resultObjects = selectionInfo.GetSelectionRef().resultObjects;
     for (auto& resObj : resultObjects) {
         CHECK_NULL_CONTINUE(resObj.type == SelectSpanType::TYPESPAN);
@@ -3331,7 +3331,7 @@ void RichEditorPattern::NotifyCaretChange()
             CHECK_NULL_VOID(pattern);
             pattern->TriggerAvoidOnCaretChange();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange");
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange", PriorityType::IMMEDIATE);
 }
 
 TextAlign RichEditorPattern::GetTextAlignByDirection()
@@ -6838,13 +6838,11 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Close select overlay while dragging caret");
         selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_NORMAL);
     }
-    auto preCaretPosition = caretPosition_;
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
     auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
     SetCaretPositionWithAffinity(positionWithAffinity);
     SetCaretTouchMoveOffset(offset);
     MoveCaretToContentRect();
-    StartVibratorByIndexChange(caretPosition_, preCaretPosition);
     CalcAndRecordLastClickCaretInfo(textOffset);
     SetMagnifierLocalOffset(offset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -6853,9 +6851,19 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
 void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
 {
     double moveDistance = 0.0;
-    if (GetPositionTypeFromLine() != PositionType::DEFAULT) {
-        auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    auto positionType = GetPositionTypeFromLine();
+    if (positionType == PositionType::DEFAULT) {
+        floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
+        return;
+    }
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    bool isCaretAtEmptyParagraph =
+        positionType == PositionType::PARAGRAPH_START && caretPosition_ == GetParagraphEndPosition(caretPosition_);
+    if (isCaretAtEmptyParagraph) {
         moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());
+    } else {
+        moveDistance = caretAffinityPolicy_ == CaretAffinityPolicy::DOWNSTREAM_FIRST
+                        ? caretOffset.GetX() - localOffset.GetX() : localOffset.GetX() - caretOffset.GetX();
     }
     floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
 }
@@ -7290,7 +7298,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation");
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
 }
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
@@ -7928,7 +7936,7 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
             CHECK_NULL_VOID(pattern);
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorScrollToSafeArea");
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorScrollToSafeArea", PriorityType::IMMEDIATE);
 }
 
 bool RichEditorPattern::IsDisabled() const

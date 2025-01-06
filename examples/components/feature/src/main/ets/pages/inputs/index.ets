@@ -39,7 +39,6 @@ export const inputsRoute: RouteGroup = {
     { name: 'search', label: '搜索框/Search' },
     { name: 'span', label: 'Span' },
     { name: 'containerSpan', label: 'ContainerSpan/ContainerSpan' },
-    { name: 'imageSpan', label: 'ImageSpan/ImageSpan' },
     { name: 'hyperlink', label: '超链接/Hyperlink' },
     { name: 'symbolGlyph', label: 'SymbolGlyph/SymbolGlyph' },
   ]

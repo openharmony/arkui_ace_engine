@@ -33,6 +33,9 @@ public:
     static void JSOpenBindSheet(const JSCallbackInfo& info);
     static void JSUpdateBindSheet(const JSCallbackInfo& info);
     static void JSCloseBindSheet(const JSCallbackInfo& info);
+    static void JSOpenPopup(const JSCallbackInfo& info);
+    static void JSUpdatePopup(const JSCallbackInfo& info);
+    static void JSClosePopup(const JSCallbackInfo& info);
     static void IsFollowingSystemFontScale(const JSCallbackInfo& info);
     static void GetMaxFontScale(const JSCallbackInfo& info);
     static void SetEnableSwipeBack(const JSCallbackInfo& info);

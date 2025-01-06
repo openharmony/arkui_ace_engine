@@ -601,10 +601,43 @@ void JSNavigation::SetNavBarPosition(int32_t value)
     }
 }
 
+void ParseNavBarWidthObject(const JSCallbackInfo& info, JSRef<JSVal> arrowFunc, bool isNumber)
+{
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arrowFunc));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                        node = targetNode, useNumber = isNumber](const Dimension& navBarWidth) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("Navigation.onNavBarWidthChangeEvent");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = useNumber ? JSRef<JSVal>::Make(ToJSValue(navBarWidth.ConvertToVp())) :
+            JSRef<JSVal>::Make(ToJSValue(navBarWidth.ToString()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    NavigationModel::GetInstance()->SetOnNavBarWidthChangeEvent(std::move(onChangeEvent));
+}
+
 void JSNavigation::SetNavBarWidth(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
         return;
+    }
+
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension value;
+        auto navBarWidthValue = callbackObj->GetProperty("value");
+        auto navBarWidthCallbackValue = callbackObj->GetProperty("$value");
+        auto isValid = JSViewAbstract::ParseJsDimensionVpNG(navBarWidthValue, value);
+        if (value.Value() <= 0) {
+            value.SetValue(DEFAULT_NAV_BAR_WIDTH);
+        }
+        bool isNumber = navBarWidthValue->IsNumber();
+        if (isValid && navBarWidthCallbackValue->IsFunction()) {
+            NavigationModel::GetInstance()->SetNavBarWidth(value, true);
+            ParseNavBarWidthObject(info, navBarWidthCallbackValue, isNumber);
+            return;
+        }
     }
 
     CalcDimension navBarWidth;

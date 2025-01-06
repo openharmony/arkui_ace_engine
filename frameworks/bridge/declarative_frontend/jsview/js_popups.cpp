@@ -158,8 +158,8 @@ static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
     popupParam->SetBlurStyle(blurStyle);
 }
 
-void ParsePopupCommonParam(
-    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
+    const RefPtr<PopupParam>& popupParam, const RefPtr<NG::FrameNode> popupTargetNode = nullptr)
 {
     auto arrowOffset = popupObj->GetProperty("arrowOffset");
     CalcDimension offset;
@@ -259,7 +259,12 @@ void ParsePopupCommonParam(
         std::vector<std::string> keys = { "isVisible" };
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        WeakPtr<NG::FrameNode> targetNode = nullptr;
+        if (popupTargetNode) {
+            targetNode = AceType::WeakClaim(AceType::RawPtr(popupTargetNode));
+        } else {
+            targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        }
         if (popupParam) {
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
                                              node = targetNode](const std::string& param) {
@@ -357,12 +362,19 @@ void ParsePopupCommonParam(
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+            if (!popupParam->IsPartialUpdate()) {
+                JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+                popupParam->SetShadow(shadow);
+            }
+        } else {
+            popupParam->SetShadow(shadow);
         }
     } else {
-        JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+        if (!popupParam->IsPartialUpdate()) {
+            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+            popupParam->SetShadow(shadow);
+        }
     }
-    popupParam->SetShadow(shadow);
 
     auto blurStyleValue = popupObj->GetProperty("backgroundBlurStyle");
     if (blurStyleValue->IsNumber()) {
@@ -371,18 +383,27 @@ void ParsePopupCommonParam(
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         } else {
-            GetBlurStyleFromTheme(popupParam);
+            if (!popupParam->IsPartialUpdate()) {
+                GetBlurStyleFromTheme(popupParam);
+            }
         }
     } else {
-       GetBlurStyleFromTheme(popupParam);
+        if (!popupParam->IsPartialUpdate()) {
+            GetBlurStyleFromTheme(popupParam);
+        }
     }
 
     auto popupTransition = popupObj->GetProperty("transition");
     if (popupTransition->IsObject()) {
         popupParam->SetHasTransition(true);
         auto obj = JSRef<JSObject>::Cast(popupTransition);
-        auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
-        popupParam->SetTransitionEffects(effects);
+        if (popupTargetNode) {
+            auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext(), popupTargetNode);
+            popupParam->SetTransitionEffects(effects);
+        } else {
+            auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
+            popupParam->SetTransitionEffects(effects);
+        }
     }
 }
 
@@ -1050,6 +1071,49 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissPopup(panda::JsiRuntime
 {
     ViewAbstractModel::GetInstance()->DismissPopup();
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+void JSViewAbstract::ParseContentPopupCommonParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    CHECK_EQUAL_VOID(popupObj->IsEmpty(), true);
+    CHECK_NULL_VOID(popupParam);
+    if (popupParam->GetTargetId().empty() || std::stoi(popupParam->GetTargetId()) < 0) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
+        return;
+    }
+    int32_t targetId = std::stoi(popupParam->GetTargetId());
+    auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+    if (!targetNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
+        return;
+    }
+    SetPopupDismiss(info, popupObj, popupParam);
+    ParsePopupCommonParam(info, popupObj, popupParam, targetNode);
+    auto focusableValue = popupObj->GetProperty("focusable");
+    if (focusableValue->IsBoolean()) {
+        popupParam->SetFocusable(focusableValue->ToBoolean());
+    }
+}
+
+int32_t JSViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->OpenPopup(param, customNode);
+}
+
+int32_t JSViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->UpdatePopup(param, customNode);
+}
+
+int32_t JSViewAbstract::ClosePopup(const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->ClosePopup(customNode);
+}
+
+int32_t JSViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->GetPopupParam(param, customNode);
 }
 
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)

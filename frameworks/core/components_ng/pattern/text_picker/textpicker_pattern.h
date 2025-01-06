@@ -86,6 +86,10 @@ public:
 
     void FireScrollStopEvent(bool refresh);
 
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value);
+
+    void FireEnterSelectedAreaEvent(bool refresh);
+
     void OnColumnsBuilding();
 
     void FlushOptions();
@@ -152,7 +156,7 @@ public:
         return options_.size();
     }
 
-    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0) const;
+    std::string GetSelectedObject(bool isColumnChange, int32_t status = 0, bool isEnterSelectedAreaEvent = false) const;
 
     std::string GetOption(uint32_t index) const
     {

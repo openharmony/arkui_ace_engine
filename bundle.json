@@ -113,7 +113,8 @@
                 "resource_schedule_service",
                 "background_task_mgr",
                 "egl",
-                "request"
+                "request",
+                "qrcodegen"
             ],
             "third_party": []
         },

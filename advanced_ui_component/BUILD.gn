@@ -71,6 +71,8 @@ foreach(module, advanced_ui_component_libs) {
 group("advanced_ui_component") {
   deps = []
   deps += [
+    "arcbutton/interfaces:arcbutton",
+    "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
     "downloadfilebutton/interfaces:downloadfilebutton",
@@ -98,9 +100,11 @@ group("advanced_ui_component") {
       "selecttitlebar/interfaces:selecttitlebar",
       "splitlayout/interfaces:splitlayout",
       "subheader/interfaces:subheader",
+      "subheaderv2/interfaces:subheaderv2",
       "swiperefresher/interfaces:swiperefresher",
       "tabtitlebar/interfaces:tabtitlebar",
       "toolbar/interfaces:toolbar",
+      "toolbarv2/interfaces:toolbarv2",
       "treeview/interfaces:treeview",
     ]
   }

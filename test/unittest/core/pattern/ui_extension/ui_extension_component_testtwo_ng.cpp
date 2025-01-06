@@ -302,4 +302,32 @@ HWTEST_F(UIExtensionComponentTestTwoNg, RegisterVisibleAreaChangeTest001, TestSi
     pattern->RegisterVisibleAreaChange();
 #endif
 }
+
+/**
+ * @tc.name: UIExtensionComponentTestTwoNg
+ * @tc.desc: Test the method of pattern RegisterEventProxyFlagCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, RegisterEventProxyFlagCallbackTest001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test RegisterEventProxyFlagCallback
+     */
+    EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 0);
+    pattern->RegisterEventProxyFlagCallback();
+    EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
+#endif
+}
 } // namespace OHOS::Ace::NG
