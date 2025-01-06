@@ -78,10 +78,10 @@ class ComposeTitleBar extends ViewPU {
         this.title = '';
         this.subtitle = '';
         this.menuItems = [];
-        this.i1 = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
-        this.j1 = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.l1 = new ObservedPropertySimplePU(-1, this, 'uniqueId');
-        this.addProvidedVar('uniqueId', this.l1, false);
+        this.__titleMaxWidth = new ObservedPropertySimplePU(0, this, 'titleMaxWidth');
+        this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__uniqueId = new ObservedPropertySimplePU(-1, this, 'uniqueId');
+        this.addProvidedVar('uniqueId', this.__uniqueId, false);
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
     }
@@ -111,34 +111,34 @@ class ComposeTitleBar extends ViewPU {
     updateStateVars(params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.i1.purgeDependencyOnElmtId(rmElmtId);
-        this.j1.purgeDependencyOnElmtId(rmElmtId);
-        this.l1.purgeDependencyOnElmtId(rmElmtId);
+        this.__titleMaxWidth.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__uniqueId.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.i1.aboutToBeDeleted();
-        this.j1.aboutToBeDeleted();
-        this.l1.aboutToBeDeleted();
+        this.__titleMaxWidth.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__uniqueId.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get titleMaxWidth() {
-        return this.i1.get();
+        return this.__titleMaxWidth.get();
     }
     set titleMaxWidth(newValue) {
-        this.i1.set(newValue);
+        this.__titleMaxWidth.set(newValue);
     }
     get fontSize() {
-        return this.j1.get();
+        return this.__fontSize.get();
     }
     set fontSize(newValue) {
-        this.j1.set(newValue);
+        this.__fontSize.set(newValue);
     }
     get uniqueId() {
-        return this.l1.get();
+        return this.__uniqueId.get();
     }
     set uniqueId(newValue) {
-        this.l1.set(newValue);
+        this.__uniqueId.set(newValue);
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -152,18 +152,18 @@ class ComposeTitleBar extends ViewPU {
             Flex.width('100%');
             Flex.height(ComposeTitleBar.totalHeight);
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Flex.onAreaChange((m1, newValue) => {
-                let n1 = Number(newValue.width);
+            Flex.onAreaChange((j8, newValue) => {
+                let k8 = Number(newValue.width);
                 if (this.menuItems !== undefined) {
-                    let o1 = this.menuItems.length;
-                    if (o1 >= c1.maxCountOfVisibleItems) {
-                        n1 = n1 - d1.imageHotZoneWidth * c1.maxCountOfVisibleItems;
+                    let l8 = this.menuItems.length;
+                    if (l8 >= c1.maxCountOfVisibleItems) {
+                        k8 = k8 - d1.imageHotZoneWidth * c1.maxCountOfVisibleItems;
                     }
-                    else if (o1 > 0) {
-                        n1 = n1 - d1.imageHotZoneWidth * o1;
+                    else if (l8 > 0) {
+                        k8 = k8 - d1.imageHotZoneWidth * l8;
                     }
                 }
-                this.titleMaxWidth = n1;
+                this.titleMaxWidth = k8;
                 this.titleMaxWidth -= ComposeTitleBar.leftPadding;
                 this.titleMaxWidth -= d1.imageHotZoneWidth;
                 if (this.item !== undefined) {
@@ -358,11 +358,11 @@ class c1 extends ViewPU {
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.firstFocusableIndex = -1;
-        this.n1 = new ObservedPropertySimplePU(false, this, 'isPopupShown');
-        this.o1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
-        this.q1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
-        this.s1 = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-        this.j1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
+        this.__isPopupShown = new ObservedPropertySimplePU(false, this, 'isPopupShown');
+        this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
+        this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
+        this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
                 let jsDialog = new e1(this, {
@@ -393,7 +393,7 @@ class c1 extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.t1 = new ObservedPropertyObjectPU(new b1(this.dialogController), this, 'buttonGestureModifier');
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new b1(this.dialogController), this, 'buttonGestureModifier');
         this.setInitiallyProvidedValue(params);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
@@ -436,7 +436,7 @@ class c1 extends ViewPU {
             this.isMoreIconOnClick = params.isMoreIconOnClick;
         }
         if (params.fontSize === undefined) {
-            this.j1.set(1);
+            this.__fontSize.set(1);
         }
         if (params.dialogController !== undefined) {
             this.dialogController = params.dialogController;
@@ -446,61 +446,61 @@ class c1 extends ViewPU {
         }
     }
     updateStateVars(params) {
-        this.j1.reset(params.fontSize);
+        this.__fontSize.reset(params.fontSize);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.n1.purgeDependencyOnElmtId(rmElmtId);
-        this.o1.purgeDependencyOnElmtId(rmElmtId);
-        this.q1.purgeDependencyOnElmtId(rmElmtId);
-        this.s1.purgeDependencyOnElmtId(rmElmtId);
-        this.j1.purgeDependencyOnElmtId(rmElmtId);
-        this.t1.purgeDependencyOnElmtId(rmElmtId);
+        this.__isPopupShown.purgeDependencyOnElmtId(rmElmtId);
+        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__isMoreIconOnHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__isMoreIconOnClick.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.n1.aboutToBeDeleted();
-        this.o1.aboutToBeDeleted();
-        this.q1.aboutToBeDeleted();
-        this.s1.aboutToBeDeleted();
-        this.j1.aboutToBeDeleted();
-        this.t1.aboutToBeDeleted();
+        this.__isPopupShown.aboutToBeDeleted();
+        this.__isMoreIconOnFocus.aboutToBeDeleted();
+        this.__isMoreIconOnHover.aboutToBeDeleted();
+        this.__isMoreIconOnClick.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__buttonGestureModifier.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get isPopupShown() {
-        return this.n1.get();
+        return this.__isPopupShown.get();
     }
     set isPopupShown(newValue) {
-        this.n1.set(newValue);
+        this.__isPopupShown.set(newValue);
     }
     get isMoreIconOnFocus() {
-        return this.o1.get();
+        return this.__isMoreIconOnFocus.get();
     }
     set isMoreIconOnFocus(newValue) {
-        this.o1.set(newValue);
+        this.__isMoreIconOnFocus.set(newValue);
     }
     get isMoreIconOnHover() {
-        return this.q1.get();
+        return this.__isMoreIconOnHover.get();
     }
     set isMoreIconOnHover(newValue) {
-        this.q1.set(newValue);
+        this.__isMoreIconOnHover.set(newValue);
     }
     get isMoreIconOnClick() {
-        return this.s1.get();
+        return this.__isMoreIconOnClick.get();
     }
     set isMoreIconOnClick(newValue) {
-        this.s1.set(newValue);
+        this.__isMoreIconOnClick.set(newValue);
     }
     get fontSize() {
-        return this.j1.get();
+        return this.__fontSize.get();
     }
     set fontSize(newValue) {
-        this.j1.set(newValue);
+        this.__fontSize.set(newValue);
     }
     get buttonGestureModifier() {
-        return this.t1.get();
+        return this.__buttonGestureModifier.get();
     }
     set buttonGestureModifier(newValue) {
-        this.t1.set(newValue);
+        this.__buttonGestureModifier.set(newValue);
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
@@ -518,9 +518,9 @@ class c1 extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let l1 = this.getUIContext();
-            this.isFollowingSystemFontScale = l1.isFollowingSystemFontScale();
-            this.maxFontScale = l1.getMaxFontScale();
+            let l5 = this.getUIContext();
+            this.isFollowingSystemFontScale = l5.isFollowingSystemFontScale();
+            this.maxFontScale = l5.getMaxFontScale();
         }
         catch (err) {
             let code = err.code;
@@ -529,7 +529,7 @@ class c1 extends ViewPU {
         }
         if (this.menuItems) {
             this.menuItems.forEach((item, index) => {
-                if (item.isEnabled && this.firstFocusableIndex == -1 &&
+                if (item.isEnabled && this.firstFocusableIndex === -1 &&
                     index > c1.maxCountOfVisibleItems - 2) {
                     this.firstFocusableIndex = this.index * 1000 + index + 1;
                 }
@@ -539,16 +539,16 @@ class c1 extends ViewPU {
     }
     decideFontScale() {
         try {
-            let k1 = this.getUIContext();
-            this.systemFontScale = k1.getHostContext()?.config?.fontSizeScale ?? 1;
+            let k5 = this.getUIContext();
+            this.systemFontScale = k5.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (j1) {
-            let code = j1.code;
-            let message = j1.message;
+        catch (j5) {
+            let code = j5.code;
+            let message = j5.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
             return 1;
         }
@@ -796,11 +796,11 @@ class d1 extends ViewPU {
         this.maxFontScale = 1;
         this.systemFontScale = 1;
         this.isPopup = false;
-        this.u1 = new ObservedPropertySimplePU(false, this, 'isOnFocus');
-        this.v1 = new ObservedPropertySimplePU(false, this, 'isOnHover');
-        this.w1 = new ObservedPropertySimplePU(false, this, 'isOnClick');
-        this.j1 = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
-        this.z1 = this.initializeConsume('uniqueId', 'parentParentUniqueId');
+        this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
+        this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
+        this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(params.fontSize, this, 'fontSize');
+        this.__parentParentUniqueId = this.initializeConsume('uniqueId', 'parentParentUniqueId');
         this.dialogController = new CustomDialogController({
             builder: () => {
                 let jsDialog = new e1(this, {
@@ -831,7 +831,7 @@ class d1 extends ViewPU {
             isModal: true,
             customStyle: true
         }, this);
-        this.t1 = new ObservedPropertyObjectPU(new b1(this.dialogController), this, 'buttonGestureModifier');
+        this.__buttonGestureModifier = new ObservedPropertyObjectPU(new b1(this.dialogController), this, 'buttonGestureModifier');
         this.setInitiallyProvidedValue(params);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
@@ -871,7 +871,7 @@ class d1 extends ViewPU {
             this.isOnClick = params.isOnClick;
         }
         if (params.fontSize === undefined) {
-            this.j1.set(1);
+            this.__fontSize.set(1);
         }
         if (params.dialogController !== undefined) {
             this.dialogController = params.dialogController;
@@ -881,61 +881,61 @@ class d1 extends ViewPU {
         }
     }
     updateStateVars(params) {
-        this.j1.reset(params.fontSize);
+        this.__fontSize.reset(params.fontSize);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.u1.purgeDependencyOnElmtId(rmElmtId);
-        this.v1.purgeDependencyOnElmtId(rmElmtId);
-        this.w1.purgeDependencyOnElmtId(rmElmtId);
-        this.j1.purgeDependencyOnElmtId(rmElmtId);
-        this.z1.purgeDependencyOnElmtId(rmElmtId);
-        this.t1.purgeDependencyOnElmtId(rmElmtId);
+        this.__isOnFocus.purgeDependencyOnElmtId(rmElmtId);
+        this.__isOnHover.purgeDependencyOnElmtId(rmElmtId);
+        this.__isOnClick.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__parentParentUniqueId.purgeDependencyOnElmtId(rmElmtId);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.u1.aboutToBeDeleted();
-        this.v1.aboutToBeDeleted();
-        this.w1.aboutToBeDeleted();
-        this.j1.aboutToBeDeleted();
-        this.z1.aboutToBeDeleted();
-        this.t1.aboutToBeDeleted();
+        this.__isOnFocus.aboutToBeDeleted();
+        this.__isOnHover.aboutToBeDeleted();
+        this.__isOnClick.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__parentParentUniqueId.aboutToBeDeleted();
+        this.__buttonGestureModifier.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
     get isOnFocus() {
-        return this.u1.get();
+        return this.__isOnFocus.get();
     }
     set isOnFocus(newValue) {
-        this.u1.set(newValue);
+        this.__isOnFocus.set(newValue);
     }
     get isOnHover() {
-        return this.v1.get();
+        return this.__isOnHover.get();
     }
     set isOnHover(newValue) {
-        this.v1.set(newValue);
+        this.__isOnHover.set(newValue);
     }
     get isOnClick() {
-        return this.w1.get();
+        return this.__isOnClick.get();
     }
     set isOnClick(newValue) {
-        this.w1.set(newValue);
+        this.__isOnClick.set(newValue);
     }
     get fontSize() {
-        return this.j1.get();
+        return this.__fontSize.get();
     }
     set fontSize(newValue) {
-        this.j1.set(newValue);
+        this.__fontSize.set(newValue);
     }
     get parentParentUniqueId() {
-        return this.z1.get();
+        return this.__parentParentUniqueId.get();
     }
     set parentParentUniqueId(newValue) {
-        this.z1.set(newValue);
+        this.__parentParentUniqueId.set(newValue);
     }
     get buttonGestureModifier() {
-        return this.t1.get();
+        return this.__buttonGestureModifier.get();
     }
     set buttonGestureModifier(newValue) {
-        this.t1.set(newValue);
+        this.__buttonGestureModifier.set(newValue);
     }
     textDialog() {
         if (this.item.value === i) {
@@ -956,16 +956,16 @@ class d1 extends ViewPU {
             return '';
         }
         else {
-            let i1 = '';
+            let i5 = '';
             try {
-                i1 = getContext()?.resourceManager?.getStringSync(resource);
+                i5 = getContext()?.resourceManager?.getStringSync(resource);
             }
             catch (err) {
                 let code = err?.code;
                 let message = err?.message;
                 hilog.error(0x3900, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${code},message:${message}`);
             }
-            return i1;
+            return i5;
         }
     }
     getAccessibilityReadText() {
@@ -1006,9 +1006,9 @@ class d1 extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let h1 = this.getUIContext();
-            this.isFollowingSystemFontScale = h1.isFollowingSystemFontScale();
-            this.maxFontScale = h1.getMaxFontScale();
+            let h5 = this.getUIContext();
+            this.isFollowingSystemFontScale = h5.isFollowingSystemFontScale();
+            this.maxFontScale = h5.getMaxFontScale();
         }
         catch (err) {
             let code = err.code;
@@ -1022,16 +1022,16 @@ class d1 extends ViewPU {
     }
     decideFontScale() {
         try {
-            let g1 = this.getUIContext();
-            this.systemFontScale = g1.getHostContext()?.config?.fontSizeScale ?? 1;
+            let g5 = this.getUIContext();
+            this.systemFontScale = g5.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (f1) {
-            let code = f1.code;
-            let message = f1.message;
+        catch (f5) {
+            let code = f5.code;
+            let message = f5.message;
             hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
             return 1;
         }
@@ -1191,10 +1191,10 @@ class e1 extends ViewPU {
         this.screenWidth = 640;
         this.verticalScreenLines = 6;
         this.horizontalsScreenLines = 1;
-        this.a2 = this.createStorageLink('mainWindow', undefined, 'mainWindow');
-        this.j1 = new ObservedPropertySimplePU(1, this, 'fontSize');
-        this.b2 = new ObservedPropertySimplePU(1, this, 'maxLines');
-        this.c2 = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
+        this.__mainWindow = this.createStorageLink('mainWindow', undefined, 'mainWindow');
+        this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
+        this.__maxLines = new ObservedPropertySimplePU(1, this, 'maxLines');
+        this.__windowStandardHeight = this.createStorageProp('windowStandardHeight', 0, 'windowStandardHeight');
         this.cancel = () => {
         };
         this.confirm = () => {
@@ -1249,16 +1249,16 @@ class e1 extends ViewPU {
     updateStateVars(params) {
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.a2.purgeDependencyOnElmtId(rmElmtId);
-        this.j1.purgeDependencyOnElmtId(rmElmtId);
-        this.b2.purgeDependencyOnElmtId(rmElmtId);
-        this.c2.purgeDependencyOnElmtId(rmElmtId);
+        this.__mainWindow.purgeDependencyOnElmtId(rmElmtId);
+        this.__fontSize.purgeDependencyOnElmtId(rmElmtId);
+        this.__maxLines.purgeDependencyOnElmtId(rmElmtId);
+        this.__windowStandardHeight.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
-        this.a2.aboutToBeDeleted();
-        this.j1.aboutToBeDeleted();
-        this.b2.aboutToBeDeleted();
-        this.c2.aboutToBeDeleted();
+        this.__mainWindow.aboutToBeDeleted();
+        this.__fontSize.aboutToBeDeleted();
+        this.__maxLines.aboutToBeDeleted();
+        this.__windowStandardHeight.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1266,28 +1266,28 @@ class e1 extends ViewPU {
         this.controller = ctr;
     }
     get mainWindow() {
-        return this.a2.get();
+        return this.__mainWindow.get();
     }
     set mainWindow(newValue) {
-        this.a2.set(newValue);
+        this.__mainWindow.set(newValue);
     }
     get fontSize() {
-        return this.j1.get();
+        return this.__fontSize.get();
     }
     set fontSize(newValue) {
-        this.j1.set(newValue);
+        this.__fontSize.set(newValue);
     }
     get maxLines() {
-        return this.b2.get();
+        return this.__maxLines.get();
     }
     set maxLines(newValue) {
-        this.b2.set(newValue);
+        this.__maxLines.set(newValue);
     }
     get windowStandardHeight() {
-        return this.c2.get();
+        return this.__windowStandardHeight.get();
     }
     set windowStandardHeight(newValue) {
-        this.c2.set(newValue);
+        this.__windowStandardHeight.set(newValue);
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1310,7 +1310,7 @@ class e1 extends ViewPU {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${o}vp`);
+                                    SymbolGlyph.fontSize(o);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.margin({
@@ -1328,7 +1328,7 @@ class e1 extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${o}vp`);
+                                                SymbolGlyph.fontSize(o);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.margin({
                                                     top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1399,7 +1399,7 @@ class e1 extends ViewPU {
                                     SymbolGlyph.create();
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${o}vp`);
+                                    SymbolGlyph.fontSize(o);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
@@ -1413,7 +1413,7 @@ class e1 extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((elmtId, isInitialRender) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${o}vp`);
+                                                SymbolGlyph.fontSize(o);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                             }, SymbolGlyph);
                                         });
