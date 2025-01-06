@@ -40,6 +40,41 @@ public:
     static void TearDownTestSuite();
 };
 
+class MockTextInputConnection : public TextInputConnection {
+public:
+    MockTextInputConnection(const WeakPtr<TextInputClient>& client, const RefPtr<TaskExecutor>& taskExecutor)
+        : TextInputConnection(client, taskExecutor)
+    {}
+
+    MOCK_METHOD(void, Show, (bool isFocusViewChanged, int32_t instanceId), (override));
+    MOCK_METHOD(void, SetEditingState, (const TextEditingValue& value, int32_t instanceId, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, Close, (int32_t instanceId), (override));
+};
+
+class MockTextInputClient : public TextInputClient {
+public:
+    MOCK_METHOD(void, UpdateEditingValue, (const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent),
+        (override));
+    MOCK_METHOD(void, PerformAction, (TextInputAction action, bool forceCloseKeyboard), (override));
+};
+
+class MockTaskExecutor : public TaskExecutor {
+public:
+    MOCK_METHOD(void, AddTaskObserver, (Task && callback), (override));
+    MOCK_METHOD(void, RemoveTaskObserver, (), (override));
+    MOCK_METHOD(bool, WillRunOnCurrentThread, (TaskType type), (const, override));
+    MOCK_METHOD(void, RemoveTask, (TaskType type, const std::string& name), (override));
+
+    MOCK_METHOD(bool, OnPostTask,
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (const, override));
+    MOCK_METHOD(Task, WrapTaskWithTraceId, (Task && task, int32_t id), (const, override));
+    MOCK_METHOD(bool, OnPostTaskWithoutTraceId,
+        (Task && task, TaskType type, uint32_t delayTime, const std::string& name, PriorityType priorityType),
+        (const, override));
+};
+
 void RichEditorPatternTestSevenNg::SetUp()
 {
     MockPipelineContext::SetUp();
@@ -509,5 +544,23 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
     EXPECT_EQ(richEditorOverlay->floatingCaretOffset_->Get(), OffsetF(120.0f, 0));
     EXPECT_TRUE(richEditorOverlay->floatingCaretVisible_->Get());
     EXPECT_TRUE(richEditorOverlay->originCaretVisible_->Get());
+}
+
+/**
+ * @tc.name: UnableStandardInput002
+ * @tc.desc: test RichEditorPattern UnableStandardInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, UnableStandardInput002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto client = AceType::MakeRefPtr<MockTextInputClient>();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>();
+    richEditorPattern->connection_ = AceType::MakeRefPtr<MockTextInputConnection>(client, taskExecutor);
+    richEditorPattern->imeAttached_ = true;
+    bool res = richEditorPattern->UnableStandardInput(false);
+    EXPECT_TRUE(res);
 }
 } // namespace OHOS::Ace::NG
