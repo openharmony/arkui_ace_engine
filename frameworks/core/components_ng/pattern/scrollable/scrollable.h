@@ -32,8 +32,10 @@
 #include "core/event/touch_event.h"
 #include "core/gestures/raw_recognizer.h"
 #include "core/gestures/timeout_recognizer.h"
+
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #endif
 
 namespace OHOS::Ace::NG {
@@ -530,10 +532,16 @@ public:
     {
         return nestedScrolling_;
     }
+
 #ifdef SUPPORT_DIGITAL_CROWN
     bool GetCrownEventDragging() const
     {
         return isCrownEventDragging_;
+    }
+
+    void SetReachBoundary(bool flag)
+    {
+        reachBoundary_ = flag;
     }
 #endif
 
@@ -588,6 +596,7 @@ private:
     void HandleCrownActionCancel(GestureEvent& info);
     double GetCrownRotatePx(const CrownEvent& event) const;
     void UpdateCrownVelocity(const TimeStamp& timeStamp, double mainDelta, bool end);
+    void StartVibrateFeedback();
 #endif
 
     /**
@@ -706,6 +715,9 @@ private:
     VelocityTracker crownVelocityTracker_;
     Offset accumulativeCrownPx_;
     bool isCrownEventDragging_ = false;
+
+    int crownEventNum_ = 0;
+    bool reachBoundary_ = false;
 #endif
 };
 

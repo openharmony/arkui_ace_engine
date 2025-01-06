@@ -204,7 +204,7 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, true, component);
       return true;
     }
-    if (component._needDiff) {
+    if (component && component._needDiff) {
       const stageTypeInfo: string = typeof this.stageValue;
       const valueTypeInfo: string = typeof this.value;
       let different: boolean = false;

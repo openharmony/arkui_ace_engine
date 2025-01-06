@@ -1244,7 +1244,7 @@ private:
     RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_;
+    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
@@ -1258,6 +1258,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t touchResampleTimeStamp_ = 0;
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;

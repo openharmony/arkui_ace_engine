@@ -193,7 +193,7 @@ private:
     void UpdateSwitchPaintProperty();
     void UpdateSwitchLayoutProperty();
     void FireBuilder();
-
+    bool OnKeyEvent(const KeyEvent& keyEventInfo);
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<SwitchMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

@@ -297,6 +297,7 @@ void SecurityUIExtensionPattern::OnConnect()
             WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
+    RegisterEventProxyFlagCallback();
 }
 
 void SecurityUIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
@@ -888,5 +889,94 @@ void SecurityUIExtensionPattern::ResetAccessibilityChildTreeCallback()
         accessibilityChildTreeCallback_->GetAccessibilityId());
     accessibilityChildTreeCallback_.reset();
     accessibilityChildTreeCallback_ = nullptr;
+}
+
+void SecurityUIExtensionPattern::RegisterEventProxyFlagCallback()
+{
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
+        [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            std::string type = "";
+            int32_t eventFlags = 0;
+            if (data.HasParameter("type")) {
+                type = data.GetStringParam("type");
+            }
+            if (type == "OccupyEvents") {
+                if (data.HasParameter("eventFlags")) {
+                    eventFlags = data.GetIntParam("eventFlags", 0);
+                }
+                pattern->SetEventProxyFlag(eventFlags);
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+}
+
+int32_t SecurityUIExtensionPattern::GetInstanceIdFromHost() const
+{
+    auto instanceId = GetHostInstanceId();
+    if (instanceId != instanceId_) {
+        UIEXT_LOGW("SecurityUIExtension pattern instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
+}
+
+bool SecurityUIExtensionPattern::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SecurityUIExtension SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool SecurityUIExtensionPattern::SendBusinessData(
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SecurityUIExtension SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void SecurityUIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("SecurityUIExtension OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void SecurityUIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("SecurityUIExtension OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void SecurityUIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("SecurityUIExtension RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void SecurityUIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("SecurityUIExtension RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
 }
 } // namespace OHOS::Ace::NG

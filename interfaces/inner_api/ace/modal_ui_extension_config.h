@@ -52,6 +52,7 @@ struct ModalUIExtensionCallbacks {
     std::function<void(int32_t, const std::string&, const std::string&)> onError;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onRemoteReady;
     std::function<void()> onDestroy;
+    std::function<void()> onDrawReady;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

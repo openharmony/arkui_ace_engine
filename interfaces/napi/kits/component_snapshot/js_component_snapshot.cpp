@@ -401,12 +401,111 @@ static napi_value JSSnapshotGetSync(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    napi_value result = nullptr;
+
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, helper.GetArgv(0), &type);
+    if (type != napi_valuetype::napi_number) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of number type.");
+        NapiThrow(env, "parameter uniqueId is not of type number", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+    // parse uniqueId
+    int32_t uniqueId;
+    napi_get_value_int32(env, helper.GetArgv(0), &uniqueId);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get delegate of ace_engine. param: %{public}d",
+            uniqueId);
+        auto callback = helper.CreateCallback(&result);
+        callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+
+    delegate->GetSnapshotByUniqueId(uniqueId, helper.CreateCallback(&result), options);
+
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
+static napi_value JSSnapshotGetSyncWithUniqueId(napi_env env, napi_callback_info info)
+{
+    napi_escapable_handle_scope scope = nullptr;
+    napi_open_escapable_handle_scope(env, &scope);
+
+    JsComponentSnapshot helper(env, info);
+
+    napi_value result = nullptr;
+
+    napi_valuetype type = napi_undefined;
+    napi_typeof(env, helper.GetArgv(0), &type);
+    if (type != napi_valuetype::napi_number) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT, "Parsing the first argument failed, not of number type.");
+        NapiThrow(env, "parameter uniqueId is not of type number", ERROR_CODE_PARAM_INVALID);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+    // parse uniqueId
+    int32_t uniqueId;
+    napi_get_value_int32(env, helper.GetArgv(0), &uniqueId);
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't get delegate of ace_engine. param: %{public}d", uniqueId);
+        NapiThrow(env, "Delegate is null", ERROR_CODE_INTERNAL_ERROR);
+        napi_close_escapable_handle_scope(env, scope);
+        return result;
+    }
+
+    NG::SnapshotOptions options;
+    helper.ParseParamForGet(options);
+
+    auto pair = delegate->GetSyncSnapshotByUniqueId(uniqueId,  options);
+    
+    switch (pair.first) {
+        case ERROR_CODE_NO_ERROR :
+#ifdef PIXEL_MAP_SUPPORTED
+            result = Media::PixelMapNapi::CreatePixelMap(env, pair.second);
+#endif
+            break;
+        case ERROR_CODE_INTERNAL_ERROR :
+            napi_get_null(env, &result);
+            NapiThrow(env, "Internal error!", ERROR_CODE_INTERNAL_ERROR);
+            break;
+        case ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT :
+            napi_get_null(env, &result);
+            NapiThrow(env, "ComponentSnapshot timeout!", ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT);
+            break;
+    }
+    napi_escape_handle(env, scope, result, &result);
+    napi_close_escapable_handle_scope(env, scope);
+    return result;
+}
+
 static napi_value ComponentSnapshotExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor snapshotDesc[] = {
         DECLARE_NAPI_FUNCTION("get", JSSnapshotGet),
         DECLARE_NAPI_FUNCTION("createFromBuilder", JSSnapshotFromBuilder),
         DECLARE_NAPI_FUNCTION("getSync", JSSnapshotGetSync),
+        DECLARE_NAPI_FUNCTION("getWithUniqueId", JSSnapshotGetWithUniqueId),
+        DECLARE_NAPI_FUNCTION("getSyncWithUniqueId", JSSnapshotGetSyncWithUniqueId),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(snapshotDesc) / sizeof(snapshotDesc[0]), snapshotDesc));
 

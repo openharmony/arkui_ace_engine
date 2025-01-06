@@ -30,7 +30,9 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#endif
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
@@ -515,6 +517,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
+#ifdef QRCODEGEN_SUPPORT
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
@@ -522,6 +525,7 @@ void* createQRcodeNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+#endif
 
 void* createBadgeNode(ArkUI_Int32 nodeId)
 {
@@ -669,7 +673,9 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
+#ifdef QRCODEGEN_SUPPORT
     createQRcodeNode,
+#endif
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,

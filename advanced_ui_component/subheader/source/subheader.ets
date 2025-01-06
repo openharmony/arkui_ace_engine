@@ -21,6 +21,7 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { HashMap } from '@kit.ArkTS';
+import { KeyCode } from '@kit.InputKit';
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
@@ -63,6 +64,7 @@ export declare class OperationOption {
   public accessibilityLevel?: string;
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 export declare class SelectOptions {
@@ -70,6 +72,7 @@ export declare class SelectOptions {
   public selected?: number;
   public value?: string;
   public onSelect?: (index: number, value?: string) => void;
+  public defaultFocus?: boolean;
 }
 
 export declare class SymbolOptions {
@@ -93,6 +96,7 @@ class ContentIconOption {
   public accessibilityLevel?: string;
   public accessibilityText?: ResourceStr;
   public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 class FontStyle {
@@ -266,6 +270,19 @@ export struct SubHeader {
 
   @Styles
   private rightAreaClickEvent() {
+    .onKeyEvent((event: KeyEvent) => {
+      if (!event) {
+        return;
+      }
+      if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
+        event.type === KeyType.Down) {
+        if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
+        this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+          this.operationItem[0].action();
+        }
+        event.stopPropagation();
+      }
+    })
     .onClick(() => {
       if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
       this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
@@ -295,7 +312,7 @@ export struct SubHeader {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -744,6 +761,7 @@ export struct SubHeader {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectValue)
+      .defaultFocus(selectParam.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -782,6 +800,7 @@ export struct SubHeader {
             maxLines: DOUBLE_LINE_NUM,
             fontColor: this.subHeaderTheme.fontButtonColor,
           })
+          .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
       .focusable(true)
@@ -848,6 +867,8 @@ export struct SubHeader {
             alignment: Alignment.End,
             fontColor: this.subHeaderTheme.fontSecondaryColor,
           })
+          .focusable(true)
+          .defaultFocus(textArrow.defaultFocus)
           .margin({
             end: this.getTextArrowMarginRight(),
           })
@@ -871,7 +892,6 @@ export struct SubHeader {
         .fillColor(this.subHeaderTheme.iconArrowColor)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
-        .focusable(true)
         .draggable(false)
         .matchTextDirection(true)
     }
@@ -981,6 +1001,7 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
+                defaultFocus: item.defaultFocus,
                 accessibilityLevel: item.accessibilityLevel,
                 accessibilityText: item.accessibilityText,
                 accessibilityDescription: item.accessibilityDescription,
@@ -1079,6 +1100,7 @@ struct SingleIconStyle {
         this.IconZone();
       }
       .focusable(true)
+      .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
       .align(Alignment.Center)

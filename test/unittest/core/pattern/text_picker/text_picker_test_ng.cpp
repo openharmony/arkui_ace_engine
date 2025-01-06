@@ -1880,6 +1880,7 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
     std::function<void(const std::string&)> onScrollStop = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TextPickerDialog textPickerDialog;
     textPickerDialog.alignment = DialogAlignment::CENTER;
     TextPickerDialogEvent textPickerDialogEvent;
@@ -1889,8 +1890,8 @@ HWTEST_F(TextPickerTestNg, TextPickerModelTest004, TestSize.Level1)
      * test method SetTextPickerDialogShow.
      */
     textPickerDialogModel.SetTextPickerDialogShow(pickerText, settingData, std::move(onCancel),
-        std::move(onAccept), std::move(onChange), std::move(onScrollStop), textPickerDialog, textPickerDialogEvent,
-        buttonInfos);
+        std::move(onAccept), std::move(onChange), std::move(onScrollStop), std::move(onEnterSelectedArea),
+        textPickerDialog, textPickerDialogEvent, buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 

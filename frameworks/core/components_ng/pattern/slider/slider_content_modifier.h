@@ -48,7 +48,7 @@ public:
         PointF backStart;
         PointF backEnd;
         PointF circleCenter;
-        Color selectColor;
+        Gradient selectGradientColor;
         Gradient trackBackgroundColor;
         Color blockColor;
     };
@@ -92,10 +92,10 @@ public:
         trackBackgroundColor_->Set(GradientArithmetic(color));
     }
 
-    void SetSelectColor(Color color)
+    void SetSelectColor(const Gradient& color)
     {
-        if (selectColor_) {
-            selectColor_->Set(LinearColor(color));
+        if (selectGradientColor_) {
+            selectGradientColor_->Set(GradientArithmetic(color));
         }
     }
 
@@ -302,7 +302,7 @@ private:
     RSRect GetTrackRect();
     std::vector<GradientColor> GetTrackBackgroundColor() const;
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
-
+    void DrawSelectColor(RSBrush& brush, RSRect& rect);
     void DrawBlock(DrawingContext& context);
     void DrawBlockShape(DrawingContext& context);
     void DrawBlockShapeCircle(DrawingContext& context, RefPtr<Circle>& circle);
@@ -327,7 +327,7 @@ private:
     RefPtr<AnimatablePropertyFloat> blockCenterY_;
     RefPtr<AnimatablePropertyFloat> trackThickness_;
     RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
-    RefPtr<AnimatablePropertyColor> selectColor_;
+    RefPtr<AnimatablePropertyVectorColor> selectGradientColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 

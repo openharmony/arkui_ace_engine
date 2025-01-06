@@ -624,8 +624,6 @@ const ArkUIScrollModifier* GetScrollModifier()
         .getScrollEdge = GetScrollEdge,
         .setScrollInitialOffset = SetScrollInitialOffset,
         .resetScrollInitialOffset = ResetScrollInitialOffset,
-        .setScrollFlingSpeedLimit = SetScrollFlingSpeedLimit,
-        .resetScrollFlingSpeedLimit = ResetScrollFlingSpeedLimit,
         .setScrollPage = SetScrollPage,
         .setScrollBy = SetScrollBy,
         .getScroll = GetScroll,
