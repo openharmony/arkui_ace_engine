@@ -1636,24 +1636,36 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 #endif
 }
 
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
 }
 
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
 }
 
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateNavArea(navSafeArea)) {
         AnimateOnSafeAreaUpdate();
@@ -1729,6 +1741,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
 PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 {
     return safeAreaManager_->GetSafeAreaWithoutProcess();
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
+{
+    return safeAreaManager_->GetScbSafeArea();
 }
 
 float PipelineContext::GetPageAvoidOffset()
