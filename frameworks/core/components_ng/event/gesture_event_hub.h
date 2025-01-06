@@ -182,6 +182,7 @@ public:
     }
 
     // call by CAPI do distinguish with AddGesture called by ARKUI;
+    void ClearGesture();
     void AttachGesture(const RefPtr<NG::Gesture>& gesture)
     {
         modifierGestures_.emplace_back(gesture);
@@ -742,8 +743,6 @@ public:
     {
         return recreateGesture_;
     }
-
-    void ClearGesture();
 
     bool IsGestureEmpty() const;
 

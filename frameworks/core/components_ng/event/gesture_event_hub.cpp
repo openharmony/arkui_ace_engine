@@ -254,26 +254,6 @@ void GestureEventHub::ProcessParallelPriorityGesture(RefPtr<NGGestureRecognizer>
     }
 }
 
-void GestureEventHub::ClearGesture()
-{
-    gestures_.clear();
-    backupGestures_.clear();
-    recreateGesture_ = true;
-}
-
-bool GestureEventHub::IsGestureEmpty() const
-{
-    return gestures_.empty();
-}
-
-bool GestureEventHub::IsPanEventEmpty() const
-{
-    if (panEventActuator_) {
-        return panEventActuator_->IsPanEventEmpty();
-    }
-    return true;
-}
-
 void GestureEventHub::ProcessExternalExclusiveRecognizer(RefPtr<NGGestureRecognizer>& current,
     std::list<RefPtr<NGGestureRecognizer>>& recognizers, int32_t& exclusiveIndex, const Offset& offset, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority)
@@ -1954,6 +1934,13 @@ void GestureEventHub::SetDragGatherPixelMaps(const GestureEvent& info)
     }
 }
 
+void GestureEventHub::ClearGesture()
+{
+    gestures_.clear();
+    backupGestures_.clear();
+    recreateGesture_ = true;
+}
+
 void GestureEventHub::SetMouseDragGatherPixelMaps()
 {
     auto frameNode = GetFrameNode();
@@ -2166,5 +2153,18 @@ void GestureEventHub::SetBindMenuStatus(bool setIsShow, bool isShow, MenuPreview
         bindMenuStatus_.isBindLongPressMenu = true;
         bindMenuStatus_.longPressPreviewMode = previewMode;
     }
+}
+
+bool GestureEventHub::IsGestureEmpty() const
+{
+    return gestures_.empty();
+}
+
+bool GestureEventHub::IsPanEventEmpty() const
+{
+    if (panEventActuator_) {
+        return panEventActuator_->IsPanEventEmpty();
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

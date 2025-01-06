@@ -319,8 +319,9 @@ void FocusHub::DumpFocusUie()
 
 bool FocusHub::RequestFocusImmediately(bool isJudgeRootTree)
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "node %{public}s/%{public}d RequestFocusImmediately",
-        GetFrameName().c_str(), GetFrameId());
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d)
+        " RequestFocusImmediately",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     return RequestFocusImmediatelyInner(isJudgeRootTree);
 }
 
@@ -426,8 +427,9 @@ void FocusHub::LostFocusToTabStop(const RefPtr<FocusHub>& focusNode)
 
 void FocusHub::LostFocus(BlurReason reason)
 {
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Node %{public}s/%{public}d lost focus. Lost reason: %{public}d.",
-        GetFrameName().c_str(), GetFrameId(), reason);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Node %{public}s/ " SEC_PLD(%{public}d)
+        " lost focus. Lost reason: %{public}d.",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), reason);
     if (IsCurrentFocus()) {
         blurReason_ = reason;
         currentFocus_ = false;
@@ -446,8 +448,8 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf(BlurReason reason)
 {
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/%{public}d remove self focus.",
-            GetFrameName().c_str(), GetFrameId());
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " remove self focus.",
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -553,8 +555,10 @@ void FocusHub::SetFocusable(bool focusable, bool isExplicit)
     }
     focusable_ = focusable;
     if (!focusable) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unfocusable",
-            GetFrameName().c_str(), GetFrameId());
+        if (SystemProperties::GetDebugEnabled()) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/ " SEC_PLD(%{public}d)
+                " to be unfocusable", GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
+        }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
 }
@@ -610,8 +614,8 @@ void FocusHub::SetEnabled(bool enabled)
 {
     if (!enabled) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be disabled", GetFrameName().c_str(),
-                GetFrameId());
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/" SEC_PLD(%{public}d)
+                " to be disabled", GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
         }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
@@ -633,8 +637,8 @@ void FocusHub::SetShow(bool show)
 {
     if (!show) {
         if (SystemProperties::GetDebugEnabled()) {
-            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/%{public}d to be unShown", GetFrameName().c_str(),
-                GetFrameId());
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Set node %{public}s/" SEC_PLD(%{public}d)
+                " to be unShown", GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
         }
         RemoveSelf(BlurReason::FOCUS_SWITCH);
     }
@@ -697,8 +701,8 @@ void FocusHub::SetIsFocusOnTouch(bool isFocusOnTouch)
         auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
             auto focusHub = weak.Upgrade();
             if (focusHub && info.GetTouches().front().GetTouchType() == TouchType::UP) {
-                TAG_LOGI(AceLogTag::ACE_FOCUS, "node %{public}s/%{public}d touch to be focused",
-                    focusHub->GetFrameName().c_str(), focusHub->GetFrameId());
+                TAG_LOGI(AceLogTag::ACE_FOCUS, "node %{public}s/" SEC_PLD(%{public}d) " touch to be focused",
+                    focusHub->GetFrameName().c_str(), SEC_PARAM(focusHub->GetFrameId()));
                 focusHub->RequestFocusImmediatelyInner();
             }
         };
@@ -1011,14 +1015,16 @@ void FocusHub::RequestFocus() const
     }
     auto context = NG::PipelineContext::GetCurrentContextSafely();
     CHECK_NULL_VOID(context);
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/%{public}d RequestFocus.", GetFrameName().c_str(), GetFrameId());
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node: %{public}s/" SEC_PLD(%{public}d) " RequestFocus.",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     context->AddDirtyFocus(GetFrameNode());
 }
 
 bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus on node: %{public}s/%{public}d by step: %{public}d.",
-        GetFrameName().c_str(), GetFrameId(), moveStep);
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Request next focus on node: %{public}s/" SEC_PLD(%{public}d)
+        " by step: %{public}d.",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), moveStep);
     SetScopeFocusAlgorithm();
     if (!focusAlgorithm_.getNextFocusNode) {
         if (focusAlgorithm_.scopeType == ScopeType::PROJECT_AREA) {
@@ -1068,8 +1074,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "Request next focus by custom focus algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
-        nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
+        "Request next focus by custom focus algorithm Return %{public}d", ret);
     return ret;
 }
 
@@ -1167,10 +1172,12 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
     auto focusNodeNeedBlur = lastWeakFocusNode_.Upgrade();
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
 
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Switch focus from %{public}s/%{public}d to %{public}s/%{public}d",
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Switch focus from %{public}s/"
+        SEC_PLD(%{public}d) " to %{public}s/" SEC_PLD(%{public}d),
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameName().c_str() : "NULL",
-        focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1, focusNode->GetFrameName().c_str(),
-        focusNode->GetFrameId());
+        SEC_PARAM(focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameId() : -1),
+        focusNode->GetFrameName().c_str(),
+        SEC_PARAM(focusNode->GetFrameId()));
     if (IsCurrentFocus()) {
         GetFocusManager()->UpdateCurrentFocus(Claim(this), SwitchingUpdateReason::SWITCH_FOCUS);
         if (focusNodeNeedBlur && focusNodeNeedBlur != focusNode) {
@@ -1341,7 +1348,8 @@ void FocusHub::OnBlur()
 
 void FocusHub::OnFocusNode()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) on focus", GetFrameName().c_str(), GetFrameId());
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " focus",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
     if (onFocusInternal_) {
         onFocusInternal_();
     }
@@ -1378,8 +1386,8 @@ void FocusHub::OnFocusNode()
 
 void FocusHub::OnBlurNode()
 {
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Node(%{public}s/%{public}d) on blur by %{public}d", GetFrameName().c_str(),
-        GetFrameId(), blurReason_);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "%{public}s/" SEC_PLD(%{public}d) " blur by %{public}d",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()), blurReason_);
     if (onBlurInternal_) {
         onBlurInternal_();
     }
@@ -1977,8 +1985,8 @@ bool FocusHub::GoToFocusByTabNodeIdx(TabIndexNodeList& tabIndexNodes, int32_t ta
         return false;
     }
     auto nodeIdNeedToFocus = nodeNeedToFocus->GetFrameId();
-    TAG_LOGI(AceLogTag::ACE_FOCUS, "Move focus to tab index node(%{public}d: %{public}s/%{public}d)", tabNodeIdx,
-        nodeNeedToFocus->GetFrameName().c_str(), nodeNeedToFocus->GetFrameId());
+    TAG_LOGI(AceLogTag::ACE_FOCUS, "Move focus to tab index node %{public}d: %{public}s/" SEC_PLD(%{public}d),
+        tabNodeIdx, nodeNeedToFocus->GetFrameName().c_str(), SEC_PARAM(nodeNeedToFocus->GetFrameId()));
     if (nodeNeedToFocus->GetFocusType() == FocusType::SCOPE && !nodeNeedToFocus->IsDefaultGroupHasFocused()) {
         auto defaultFocusNode = nodeNeedToFocus->GetChildFocusNodeByType(FocusNodeType::GROUP_DEFAULT);
         if (defaultFocusNode) {
@@ -2156,8 +2164,8 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id, bool isSyncReq
         result = false;
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "Request focus immediately %{public}s by id. The node is %{public}s/%{public}d.",
-        isSyncRequest ? "sync" : "async", focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
+        "Request focus immediately %{public}s by id. The node is %{public}s/" SEC_PLD(%{public}d),
+        isSyncRequest ? " sync" : " async", focusNode->GetFrameName().c_str(), SEC_PARAM(focusNode->GetFrameId()));
     if (result || !isSyncRequest) {
         pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
         if (isSyncRequest) {
@@ -2346,8 +2354,11 @@ RefPtr<FocusHub> FocusHub::GetNearestNodeByProjectArea(const std::list<RefPtr<Fo
             }
         }
     }
-    TAG_LOGD(AceLogTag::ACE_FOCUS, "Next focus node is %{public}s/%{public}d. Min distance is %{public}f.",
-        nextNode ? nextNode->GetFrameName().c_str() : "NULL", nextNode ? nextNode->GetFrameId() : -1, resDistance);
+    TAG_LOGD(AceLogTag::ACE_FOCUS, "Current focus node is %{public}s/" SEC_PLD(%{public}d)
+        " Next focus node is %{public}s/" SEC_PLD(%{public}d) ". Min distance is %{public}f.",
+        GetFrameName().c_str(), SEC_PARAM(GetFrameId()),
+        nextNode ? nextNode->GetFrameName().c_str() : "NULL",
+        SEC_PARAM(nextNode ? nextNode->GetFrameId() : -1), resDistance);
     return nextNode;
 }
 
@@ -2385,8 +2396,8 @@ bool FocusHub::UpdateFocusView()
         if (focusViewRootScopeChild && focusViewRootScopeChild->IsCurrentFocus()) {
             focusView->SetIsViewRootScopeFocused(false);
         }
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "UpdateFocusView by node %{public}s/%{public}d.",
-            GetFrameName().c_str(), GetFrameId());
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "UpdateFocusView by node %{public}s/" SEC_PLD(%{public}d),
+            GetFrameName().c_str(), SEC_PARAM(GetFrameId()));
         focusView->FocusViewShow(true);
     }
     return true;
