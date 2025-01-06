@@ -33,6 +33,9 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
@@ -274,6 +277,10 @@ private:
     void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitCrownEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleCrownEvent(const CrownEvent& event);
+#endif
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
