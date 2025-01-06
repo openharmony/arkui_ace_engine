@@ -470,6 +470,11 @@ void TextPickerPattern::OnModifyDone()
         CHECK_NULL_VOID(refPtr);
         refPtr->FireScrollStopEvent(refresh);
     });
+    SetEnterSelectedAreaEventCallback([weak = WeakClaim(this)](bool refresh) {
+        auto refPtr = weak.Upgrade();
+        CHECK_NULL_VOID(refPtr);
+        refPtr->FireEnterSelectedAreaEvent(refresh);
+    });
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -562,6 +567,45 @@ void TextPickerPattern::FireScrollStopEvent(bool refresh)
     textPickerEventHub->FireDialogScrollStopEvent(GetSelectedObject(true, 1));
 }
 
+void TextPickerPattern::SetEnterSelectedAreaEventCallback(EventCallback&& value)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto children = host->GetChildren();
+    for (const auto& child : children) {
+        auto stackNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(stackNode);
+        auto blendNode = DynamicCast<FrameNode>(stackNode->GetLastChild());
+        CHECK_NULL_VOID(blendNode);
+        auto childNode = DynamicCast<FrameNode>(blendNode->GetLastChild());
+        CHECK_NULL_VOID(childNode);
+        auto pickerColumnPattern = childNode->GetPattern<TextPickerColumnPattern>();
+        CHECK_NULL_VOID(pickerColumnPattern);
+        pickerColumnPattern->SetEnterSelectedAreaEventCallback(std::move(value));
+    }
+}
+
+void TextPickerPattern::FireEnterSelectedAreaEvent(bool refresh)
+{
+    auto frameNodes = GetColumnNodes();
+    std::vector<std::string> value;
+    std::vector<double> index;
+    for (auto it : frameNodes) {
+        CHECK_NULL_VOID(it.second);
+        auto textPickerColumnPattern = it.second->GetPattern<TextPickerColumnPattern>();
+        if (refresh) {
+            auto enterIndex = textPickerColumnPattern->GetEnterIndex();
+            index.emplace_back(enterIndex);
+            auto enterValue = textPickerColumnPattern->GetOption(enterIndex);
+            value.emplace_back(enterValue);
+        }
+    }
+    auto textPickerEventHub = GetEventHub<TextPickerEventHub>();
+    CHECK_NULL_VOID(textPickerEventHub);
+    textPickerEventHub->FireEnterSelectedAreaEvent(value, index);
+    textPickerEventHub->FireDialogEnterSelectedAreaEvent(GetSelectedObject(true, 1, true));
+}
+
 void TextPickerPattern::InitDisabled()
 {
     auto host = GetHost();
@@ -628,6 +672,8 @@ void TextPickerPattern::OnColumnsBuildingCascade()
                                  ? 0 : selecteds_[index] % cascadeOptions_[index].rangeResult.size();
             textPickerColumnPattern->SetCurrentIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->SetEnterIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[index].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -654,6 +700,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
                                  ? 0 : selecteds_[it.first] % cascadeOptions_[it.first].rangeResult.size();
             textPickerColumnPattern->SetCurrentIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->SetEnterIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             std::vector<NG::RangeContent> rangeContents;
             for (uint32_t i = 0; i < cascadeOptions_[it.first].rangeResult.size(); i++) {
                 NG::RangeContent rangeContent;
@@ -671,6 +719,8 @@ void TextPickerPattern::OnColumnsBuildingUnCascade()
             }
             selectedIndex_ = range_.empty() ? 0 : GetSelected() % range_.size();
             textPickerColumnPattern->SetCurrentIndex(
+                isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
+            textPickerColumnPattern->SetEnterIndex(
                 isNeedUpdateSelectedIndex_ ? selectedIndex_ : textPickerColumnPattern->GetCurrentIndex());
             textPickerColumnPattern->SetOptions(options_);
             textPickerColumnPattern->SetColumnKind(columnsKind_);
@@ -1193,7 +1243,8 @@ std::string TextPickerPattern::GetSelectedObjectMulti(const std::vector<std::str
     return result;
 }
 
-std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t status) const
+std::string TextPickerPattern::GetSelectedObject(
+    bool isColumnChange, int32_t status, bool isEnterSelectedAreaEvent) const
 {
     std::vector<std::string> values;
     std::vector<uint32_t> indexs;
@@ -1215,6 +1266,10 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
         if (isColumnChange) {
             value = textPickerColumnPattern->GetCurrentText();
             index = textPickerColumnPattern->GetCurrentIndex();
+        }
+        if (isEnterSelectedAreaEvent) {
+            value = textPickerColumnPattern->GetEnterText();
+            index = textPickerColumnPattern->GetEnterIndex();
         }
         values.emplace_back(value);
         indexs.emplace_back(index);

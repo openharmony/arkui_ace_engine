@@ -34,6 +34,12 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
+  protected get isReusable_(): boolean {
+    // property getter function are in the prototype
+    // @Reusable and @ReusableV2 decorators modify the function
+    // in decorated class' prototype to return true
+    return false;
+  }
 
   // Array.sort() converts array items to string to compare them!
   static readonly compareNumber = (a: number, b: number): number => {
@@ -76,7 +82,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected extraInfo_: ExtraInfo = undefined;
 
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
-  protected __isBlockRecycleOrReuse__: boolean = false;
+  public __isBlockRecycleOrReuse__: boolean = false;
 
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();

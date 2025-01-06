@@ -1198,4 +1198,5 @@ bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
 }
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 } // namespace OHOS::Ace

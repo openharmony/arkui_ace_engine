@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,10 +89,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     const auto& layoutConstraint = listLayoutProperty->GetLayoutConstraint().value();
 
     // calculate idealSize and set FrameSize
-    auto startOffset = listLayoutProperty->GetContentStartOffset().value_or(0.0f);
-    contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
-    auto endOffset = listLayoutProperty->GetContentEndOffset().value_or(0.0f);
-    contentEndOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(endOffset), 0.0);
+    CalcContentOffset(listLayoutProperty);
 
     // calculate main size.
     auto contentConstraint = listLayoutProperty->GetContentLayoutConstraint().value();
@@ -111,7 +108,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     paddingBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
     paddingAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
     contentMainSize_ = 0.0f;
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     scrollSnapAlign_ = listLayoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE);
     if (childrenSize_) {
         childrenSize_->ResizeChildrenSize(totalItemCount_);
@@ -137,7 +134,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentStartOffset_ = 0;
         contentEndOffset_ = 0;
     }
-
+    MeasureHeader(layoutWrapper);
     if (totalItemCount_ > 0) {
         OnSurfaceChanged(layoutWrapper);
 
@@ -165,7 +162,6 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
-
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
@@ -191,6 +187,15 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     isLayouted_ = false;
 }
 
+void ListLayoutAlgorithm::CalcContentOffset(const RefPtr<ListLayoutProperty>& property)
+{
+    CHECK_NULL_VOID(property);
+    auto startOffset = property->GetContentStartOffset().value_or(0.0f);
+    contentStartOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(startOffset), 0.0);
+    auto endOffset = property->GetContentEndOffset().value_or(0.0f);
+    contentEndOffset_ = std::max(PipelineBase::Vp2PxWithCurrentDensity(endOffset), 0.0);
+}
+
 void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
 {
     layoutWrapper->SetCacheCount(cacheCount);
@@ -203,8 +208,10 @@ void ListLayoutAlgorithm::SetActiveChildRange(LayoutWrapper* layoutWrapper,
         layoutWrapper->SetActiveChildRange(-1, -1);
         return;
     }
-    layoutWrapper->SetActiveChildRange(
-        itemPosition_.begin()->first, itemPosition_.rbegin()->first, cacheStart, cacheEnd, show);
+    auto start = itemPosition_.begin()->first;
+    auto end = itemStartIndex_ + itemPosition_.rbegin()->first;
+    cacheEnd += itemStartIndex_;
+    layoutWrapper->SetActiveChildRange(start, end, cacheStart, cacheEnd, show);
 }
 
 bool ListLayoutAlgorithm::CheckNeedMeasure(const RefPtr<LayoutWrapper>& layoutWrapper) const
@@ -243,7 +250,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
     float crossSize = -laneGutter_;
     float prevPos = GetItemPosition().begin()->second.startPos;
     for (const auto& pos : GetItemPosition()) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first, false);
+        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first + itemStartIndex_, false);
         if (!wrapper) {
             continue;
         }
@@ -265,7 +272,7 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
 void ListLayoutAlgorithm::ClearAllItemPosition(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : itemPosition_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
             continue;
         }
@@ -328,7 +335,7 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t s
     endIndex = GetLanesFloor(layoutWrapper, endIndex);
     float contentStartOffset = IsScrollSnapAlignCenter(layoutWrapper) ? 0.0f : contentStartOffset_;
     float contentEndOffset = IsScrollSnapAlignCenter(layoutWrapper) ? 0.0f : contentEndOffset_;
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex);
+    auto wrapper = GetListItem(layoutWrapper, jumpIndex);
     CHECK_NULL_VOID(wrapper);
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup && jumpIndexInGroup_) {
@@ -373,7 +380,7 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper, int32_t s
 void ListLayoutAlgorithm::HandleJumpCenter(LayoutWrapper* layoutWrapper)
 {
     int32_t index = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto wrapper = GetListItem(layoutWrapper, index);
     bool isGroup = wrapper && wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup && jumpIndexInGroup_.has_value()) {
         int32_t indexInGroup = jumpIndexInGroup_.value();
@@ -403,7 +410,7 @@ void ListLayoutAlgorithm::HandleJumpCenter(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::HandleJumpStart(LayoutWrapper* layoutWrapper)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+    auto wrapper = GetListItem(layoutWrapper, jumpIndex_.value());
     bool isGroup = wrapper && wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup && jumpIndexInGroup_.has_value()) {
         int32_t indexInGroup = jumpIndexInGroup_.value();
@@ -425,7 +432,7 @@ void ListLayoutAlgorithm::HandleJumpStart(LayoutWrapper* layoutWrapper)
 
 void ListLayoutAlgorithm::HandleJumpEnd(LayoutWrapper* layoutWrapper)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+    auto wrapper = GetListItem(layoutWrapper, jumpIndex_.value());
     bool isGroup = wrapper && wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup && jumpIndexInGroup_.has_value()) {
         int32_t indexInGroup = jumpIndexInGroup_.value();
@@ -477,7 +484,7 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper,
 bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrapper,
     int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex);
+    auto wrapper = GetListItem(layoutWrapper, jumpIndex);
     CHECK_NULL_RETURN(wrapper, true);
     if (wrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
         return true;
@@ -585,7 +592,7 @@ void ListLayoutAlgorithm::JudgeOutOfScreenScrollAutoType(const RefPtr<LayoutWrap
 bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPos, float endPos,
     int32_t startIndex, int32_t endIndex, int32_t jumpIndex, float jumpIndexStartPos)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex);
+    auto wrapper = GetListItem(layoutWrapper, jumpIndex);
     CHECK_NULL_RETURN(wrapper, true);
     if (wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG && jumpIndexInGroup_.has_value()) {
         if (CheckNoNeedJumpListItemGroup(layoutWrapper, startIndex, endIndex, jumpIndex, jumpIndexStartPos)) {
@@ -602,7 +609,7 @@ bool ListLayoutAlgorithm::NoNeedJump(LayoutWrapper* layoutWrapper, float startPo
 float ListLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWrapper, int32_t childIndex,
     bool groupLayoutAll)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
+    auto wrapper = GetListItem(layoutWrapper, childIndex);
     CHECK_NULL_RETURN(wrapper, 0.0f);
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
     if (isGroup) {
@@ -674,7 +681,7 @@ bool ListLayoutAlgorithm::CheckJumpValid(LayoutWrapper* layoutWrapper)
         return false;
     }
     if (jumpIndex_ && jumpIndexInGroup_) {
-        auto groupWrapper = layoutWrapper->GetOrCreateChildByIndex(jumpIndex_.value());
+        auto groupWrapper = GetListItem(layoutWrapper, jumpIndex_.value());
         CHECK_NULL_RETURN(groupWrapper, false);
         if (groupWrapper->GetHostTag() != V2::LIST_ITEM_GROUP_ETS_TAG) {
             return false;
@@ -702,7 +709,7 @@ void ListLayoutAlgorithm::CheckAndMeasureStartItem(LayoutWrapper* layoutWrapper,
         (forwardLayout && NonNegative(startPos)) || (!forwardLayout && LessOrEqual(startPos, prevContentMainSize_))) {
         return;
     }
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(startIndex);
+    auto wrapper = GetListItem(layoutWrapper, startIndex);
     CHECK_NULL_VOID(wrapper);
     int32_t id = wrapper->GetHostNode()->GetId();
     isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
@@ -935,7 +942,7 @@ LayoutDirection ListLayoutAlgorithm::LayoutDirectionForTargetIndex(LayoutWrapper
     } else if (startIndex > targetIndex_.value()) {
         return LayoutDirection::BACKWARD;
     } else if (targetIndexInGroup_.has_value()) {
-        auto groupWrapper = layoutWrapper->GetOrCreateChildByIndex(targetIndex_.value());
+        auto groupWrapper = GetListItem(layoutWrapper, targetIndex_.value());
         CHECK_NULL_RETURN(groupWrapper, LayoutDirection::NONE);
         auto groupHost = groupWrapper->GetHostNode();
         CHECK_NULL_RETURN(groupHost, LayoutDirection::NONE);
@@ -988,7 +995,7 @@ int32_t ListLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrapper,
         return 0;
     }
     if (!firstItemInfo_ || firstItemInfo_.value().first != currentIndex + 1) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex + 1);
+        auto wrapper = GetListItem(layoutWrapper, currentIndex + 1);
         CHECK_NULL_RETURN(wrapper, 0);
         int32_t id = wrapper->GetHostNode()->GetId();
         ++currentIndex;
@@ -1028,7 +1035,7 @@ int32_t ListLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapper,
         return 0;
     }
     if (!firstItemInfo_ || firstItemInfo_.value().first != currentIndex - 1) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex - 1);
+        auto wrapper = GetListItem(layoutWrapper, currentIndex - 1);
         CHECK_NULL_RETURN(wrapper, 0);
         int32_t id = wrapper->GetHostNode()->GetId();
         --currentIndex;
@@ -1065,7 +1072,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     float endMainPos = (overScrollFeature_ && startIndex == 0) ?
         std::max(startPos + contentMainSize_ - contentStartOffset_, endMainPos_) : endMainPos_;
     layoutEndMainPos_ = endMainPos;
-
+    float endFixPos = GetLayoutFixOffset();
     auto currentIndex = startIndex - 1;
     auto chainOffset = 0.0f;
     do {
@@ -1083,7 +1090,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
             endMainPos = layoutEndMainPos_.value_or(endMainPos_);
             forwardFeature_ = false;
         }
-    } while (LessOrEqual(currentEndPos + chainOffset, endMainPos) || forwardFeature_);
+    } while (LessNotEqual(currentEndPos + chainOffset, endMainPos + endFixPos) || forwardFeature_);
     currentEndPos += chainOffset;
 
     while (itemPosition_.size() > 1 && !targetIndex_) {
@@ -1131,8 +1138,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
     for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         // Don't recycle When the head item is Visibility.None.
-        if (GreatNotEqual(pos->second.endPos + chainOffset, startMainPos_) ||
-            GreatOrEqual(pos->second.startPos + chainOffset, startMainPos_)) {
+        if (GreatNotEqual(pos->second.endPos + chainOffset + endFixPos, startMainPos_) ||
+            GreatOrEqual(pos->second.startPos + chainOffset + endFixPos, startMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.startPos + chainOffset, true);
             }
@@ -1150,7 +1157,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     float startMainPos = (overScrollFeature_ && endIndex == totalItemCount_ - 1) ?
         std::min(endPos - contentMainSize_ + contentEndOffset_, startMainPos_) : startMainPos_;
     layoutStartMainPos_ = startMainPos;
-
+    float startFixPos = GetLayoutFixOffset();
     auto currentIndex = endIndex + 1;
     auto chainOffset = 0.0f;
     do {
@@ -1168,7 +1175,7 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             startMainPos = layoutStartMainPos_.value_or(startMainPos_);
             backwardFeature_ = false;
         }
-    } while (GreatNotEqual(currentStartPos + chainOffset, startMainPos) || backwardFeature_);
+    } while (GreatNotEqual(currentStartPos + chainOffset + startFixPos, startMainPos) || backwardFeature_);
 
     currentStartPos += chainOffset;
     // adjust offset. If edgeEffect is SPRING, jump adjust to allow list scroll through boundary
@@ -1198,8 +1205,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
     for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
         chainOffset = chainOffsetFunc_ ? chainOffsetFunc_(pos->first) : 0.0f;
         // Don't recycle When the tail item is Visibility.None.
-        if (LessNotEqual(pos->second.startPos + chainOffset, endMainPos_) ||
-            LessOrEqual(pos->second.endPos + chainOffset, endMainPos_)) {
+        if (LessNotEqual(pos->second.startPos + chainOffset - startFixPos, endMainPos_) ||
+            LessOrEqual(pos->second.endPos + chainOffset - startFixPos, endMainPos_)) {
             if (pos->second.isGroup) {
                 CheckListItemGroupRecycle(layoutWrapper, pos->first, pos->second.endPos + chainOffset, false);
             }
@@ -1507,7 +1514,7 @@ int32_t ListLayoutAlgorithm::GetListItemGroupItemCount(const RefPtr<LayoutWrappe
 void ListLayoutAlgorithm::ResetLayoutItem(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : recycledItemPosition_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
         pos.second.startPos -= currentOffset_;
         pos.second.endPos -= currentOffset_;
         if (pos.second.isGroup) {
@@ -1536,7 +1543,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
     paddingOffset_ = padding.Offset();
     float crossSize = GetCrossAxisSize(size, axis_);
-    totalItemCount_ = layoutWrapper->GetTotalChildCount();
+    totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     listItemAlign_ = listProps->GetListItemAlign().value_or(V2::ListItemAlign::START);
     int32_t startIndex = GetStartIndex();
     isReverse_ = layoutWrapper->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -1546,7 +1553,7 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // layout items.
     int32_t itemCount = 0;
     for (auto& pos : itemPosition_) {
-        auto wrapper = layoutWrapper->GetOrCreateChildByIndex(pos.first);
+        auto wrapper = GetListItem(layoutWrapper, pos.first);
         if (!wrapper) {
             continue;
         }
@@ -1576,6 +1583,8 @@ void ListLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         listProps->SetDefaultCachedCount(newCacheCount);
     }
     ProcessCacheCount(layoutWrapper, cacheCount, listProps->GetShowCachedItemsValue(false));
+    FixItemLayoutOffset(layoutWrapper);
+    LayoutHeader(layoutWrapper, paddingOffset_, crossSize);
     UpdateOverlay(layoutWrapper);
     isLayouted_ = true;
 }
@@ -1764,7 +1773,7 @@ void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper
     if (targetIndex_.has_value()) {
         return;
     }
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto wrapper = GetListItem(layoutWrapper, index);
     CHECK_NULL_VOID(wrapper);
     auto algorithmWrapper = wrapper->GetLayoutAlgorithm();
     CHECK_NULL_VOID(algorithmWrapper);
@@ -1776,7 +1785,7 @@ void ListLayoutAlgorithm::CheckListItemGroupRecycle(LayoutWrapper* layoutWrapper
 void ListLayoutAlgorithm::AdjustPostionForListItemGroup(LayoutWrapper* layoutWrapper, Axis axis, int32_t index,
     bool forwardLayout)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
+    auto wrapper = GetListItem(layoutWrapper, index);
     CHECK_NULL_VOID(wrapper);
     auto algorithmWrapper = wrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_VOID(algorithmWrapper);
@@ -1853,7 +1862,7 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper)
 bool ListLayoutAlgorithm::LayoutCachedALine(LayoutWrapper* layoutWrapper, int32_t index,
     bool forward, float &currPos, float crossSize)
 {
-    auto wrapper = layoutWrapper->GetChildByIndex(index, true);
+    auto wrapper = layoutWrapper->GetChildByIndex(index + itemStartIndex_, true);
     if (!wrapper) {
         return true;
     }
@@ -1948,7 +1957,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             if (GetSysTimestamp() > deadline) {
                 break;
             }
-            auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false, true);
+            auto wrapper = frameNode->GetOrCreateChildByIndex(*it + pattern->GetItemStartIndex(), false, true);
             if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
                 break;
             }
@@ -2020,7 +2029,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedForward(LayoutWrapper* layoutWrapper,
     curIndex = itemPosition_.rbegin()->first + 1;
     auto currPos = itemPosition_.rbegin()->second.endPos + spaceWidth_;
     while (cachedCount < cacheCount && curIndex < totalItemCount_) {
-        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, !show);
+        auto wrapper = layoutWrapper->GetChildByIndex(curIndex + itemStartIndex_, !show);
         if (!wrapper) {
             predictList.emplace_back(PredictLayoutItem { curIndex, cachedCount, -1 });
             return curIndex - 1;
@@ -2066,7 +2075,7 @@ int32_t ListLayoutAlgorithm::LayoutCachedBackward(LayoutWrapper* layoutWrapper,
     curIndex = itemPosition_.begin()->first - 1;
     auto currPos = itemPosition_.begin()->second.startPos - spaceWidth_;
     while (cachedCount < cacheCount && curIndex >= 0) {
-        auto wrapper = layoutWrapper->GetChildByIndex(curIndex, !show);
+        auto wrapper = layoutWrapper->GetChildByIndex(curIndex + itemStartIndex_, !show);
         if (!wrapper) {
             predictList.emplace_back(PredictLayoutItem { curIndex, -1, cachedCount });
             return curIndex + 1;
@@ -2113,7 +2122,7 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
     int32_t cachedForward = 0;
     int32_t cachedBackward = 0;
     if (startIndex == endIndex && itemPosition_.begin()->second.isGroup) {
-        auto wrapper = layoutWrapper->GetChildByIndex(startIndex);
+        auto wrapper = layoutWrapper->GetChildByIndex(startIndex + itemStartIndex_);
         auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, cacheCount, startIndex, false);
         if ((res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) ||
             (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount)) {
@@ -2125,7 +2134,7 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
         cachedBackward += res.backwardCacheMax;
     } else {
         if (itemPosition_.rbegin()->second.isGroup) {
-            auto wrapper = layoutWrapper->GetChildByIndex(endIndex);
+            auto wrapper = layoutWrapper->GetChildByIndex(endIndex + itemStartIndex_);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, cacheCount, -1, endIndex, false);
             if (res.forwardCachedCount < res.forwardCacheMax && res.forwardCachedCount < cacheCount) {
                 predictList.emplace_back(PredictLayoutItem { endIndex, cachedForward, -1 });
@@ -2133,7 +2142,7 @@ std::tuple<int32_t, int32_t, int32_t, int32_t> ListLayoutAlgorithm::LayoutCached
             cachedForward += res.forwardCacheMax;
         }
         if (itemPosition_.begin()->second.isGroup) {
-            auto wrapper = layoutWrapper->GetChildByIndex(startIndex);
+            auto wrapper = layoutWrapper->GetChildByIndex(startIndex + itemStartIndex_);
             auto res = GetLayoutGroupCachedCount(layoutWrapper, wrapper, -1, cacheCount, startIndex, false);
             if (res.backwardCachedCount < res.backwardCacheMax && res.backwardCachedCount < cacheCount) {
                 predictList.emplace_back(PredictLayoutItem { startIndex, -1, cachedBackward });
@@ -2216,7 +2225,7 @@ void ListLayoutAlgorithm::PredictBuildV2(
             break;
         }
         ACE_SCOPED_TRACE("predict Item:%d", (*it).index);
-        auto wrapper = frameNode->GetOrCreateChildByIndex((*it).index, show, true);
+        auto wrapper = frameNode->GetOrCreateChildByIndex((*it).index + pattern->GetItemStartIndex(), show, true);
         if (!wrapper) {
             it = param.items.erase(it);
             continue;

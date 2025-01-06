@@ -24,9 +24,7 @@ build_component_ng("qrcode_pattern_ng") {
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
   ]
-  deps = [
-    "//foundation/arkui/ace_engine/frameworks/core/components/qrcode:qrcodegen",
-  ]
+  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
 }
 
 build_component_plugin("qrcode_source") {
@@ -39,7 +37,5 @@ build_component_plugin("qrcode_source") {
     "qrcode_paint_method.cpp",
     "qrcode_pattern.cpp",
   ]
-  deps = [
-    "//foundation/arkui/ace_engine/frameworks/core/components/qrcode:qrcodegen",
-  ]
+  external_deps = [ "qrcodegen:ace_engine_qrcode" ]
 }

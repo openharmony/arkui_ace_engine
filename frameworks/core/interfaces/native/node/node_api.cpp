@@ -395,6 +395,7 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnPreDrag,
     NodeModifier::SetOnKeyPreIme,
     NodeModifier::SetOnFocusAxisEvent,
+    NodeModifier::SetOnKeyEventDispatch,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -567,9 +568,11 @@ const ComponentAsyncEventHandler RADIO_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnRadioChange,
 };
 
+#ifndef ARKUI_WEARABLE
 const ComponentAsyncEventHandler SELECT_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSelectSelect,
 };
+#endif
 
 const ComponentAsyncEventHandler IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetImageAnimatorOnStart,
@@ -1006,6 +1009,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = RADIO_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#ifndef ARKUI_WEARABLE
         case ARKUI_SELECT: {
             // select event type.
             if (subKind >= sizeof(SELECT_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
@@ -1015,6 +1019,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             eventHandle = SELECT_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
+#endif
         case ARKUI_IMAGE_ANIMATOR: {
             // imageAnimator event type.
             if (subKind >= sizeof(IMAGE_ANIMATOR_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {

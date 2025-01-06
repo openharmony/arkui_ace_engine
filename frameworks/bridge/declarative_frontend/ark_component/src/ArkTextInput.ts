@@ -126,6 +126,24 @@ class TextInputLineHeightModifier extends ModifierWithKey<number | string | Reso
   }
 }
 
+class TextInputHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetHalfLeading(node);
+    } else {
+      getUINativeModule().textInput.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | UnderlineColor | undefined> {
   constructor(value: ResourceColor | UnderlineColor | undefined) {
     super(value);
@@ -222,6 +240,42 @@ class TextInputMaxFontSizeModifier extends ModifierWithKey<number | string | Res
       getUINativeModule().textInput.setMaxFontSize(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMinFontScale(node);
+    } else {
+      getUINativeModule().textInput.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().textInput.setMaxFontScale(node, this.value!);
+    }
+  }
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -1675,6 +1729,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
     return this;
   }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
+    return this;
+  }
   underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
     return this;
@@ -1694,6 +1752,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   maxFontSize(value: number | string | Resource): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
+    return this;
+  }
+  minFontScale(value: number | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMinFontScaleModifier.identity, TextInputMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMaxFontScaleModifier.identity, TextInputMaxFontScaleModifier, value);
     return this;
   }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {

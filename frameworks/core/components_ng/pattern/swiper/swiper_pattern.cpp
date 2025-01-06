@@ -42,6 +42,7 @@
 #include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_paint_method.h"
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
+#include "core/components_ng/pattern/swiper_indicator/indicator_common/arc_swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_node.h"
@@ -77,7 +78,6 @@ constexpr uint16_t CAPTURE_PIXEL_ROUND_VALUE = static_cast<uint16_t>(PixelRoundP
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END) |
                                               static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-constexpr int32_t SWIPER_HALF = 2;
 constexpr int32_t CAPTURE_COUNT = 2;
 constexpr char APP_SWIPER_NO_ANIMATION_SWITCH[] = "APP_SWIPER_NO_ANIMATION_SWITCH";
 constexpr char APP_SWIPER_FRAME_ANIMATION[] = "APP_SWIPER_FRAME_ANIMATION";
@@ -393,6 +393,9 @@ void SwiperPattern::OnModifyDone()
         InitOnKeyEvent(focusHub);
         InitOnFocusInternal(focusHub);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+        InitOnCrownEventInternal(focusHub);
+#endif
 
     SetSwiperEventCallback(disableSwipe);
     UpdateTabBarIndicatorCurve();
@@ -594,7 +597,7 @@ void SwiperPattern::CreateCaptureCallback(int32_t targetIndex, int32_t captureId
                 CHECK_NULL_VOID(swiper);
                 swiper->UpdateCaptureSource(pixelMap, captureId, targetIndex);
             },
-            TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource");
+            TaskExecutor::TaskType::UI, "ArkUISwiperUpdateCaptureSource", PriorityType::VIP);
     };
     if (forceUpdate) {
         // The size changes caused by layout need to wait for rendering before taking a screenshot
@@ -1002,6 +1005,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         CheckMarkDirtyNodeForRenderIndicator();
     }
 
+    PlayScrollAnimation(currentDelta_);
     if (jumpIndex_) {
         auto pipeline = GetContext();
         if (pipeline) {
@@ -1047,6 +1051,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         HandleRunningTranslateAnimation();
     } else if (targetIndex_) {
         HandleTargetIndex(dirty, algo);
+#ifdef SUPPORT_DIGITAL_CROWN
+        if (IsCrownSpring()) {
+            SetIsCrownSpring(false);
+        }
+#endif
         velocity_.reset();
         pauseTargetIndex_ = targetIndex_;
     } else if (algo->GetJumpIndex().has_value()) {
@@ -1099,7 +1108,8 @@ void SwiperPattern::HandleRunningTranslateAnimation()
                 swiper->MarkDirtyNodeSelf();
             }
         });
-        taskExecutor->PostTask(resetLayoutTask_, TaskExecutor::TaskType::UI, "ArkUISwiperResetLayout");
+        taskExecutor->PostTask(
+            resetLayoutTask_, TaskExecutor::TaskType::UI, "ArkUISwiperResetLayout", PriorityType::VIP);
     }
 }
 
@@ -1992,7 +2002,7 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUIFirePreloadFinish");
+    taskExecutor->PostTask(preloadTask, TaskExecutor::TaskType::UI, "ArkUIFirePreloadFinish", PriorityType::VIP);
 }
 
 void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string message)
@@ -2152,18 +2162,37 @@ void SwiperPattern::StopFadeAnimation()
     }
 }
 
+void SwiperPattern::SaveIndicatorProperty(
+    const RefPtr<FrameNode>& indicatorNode, SwiperIndicatorType swiperIndicatorType)
+{
+    if (swiperIndicatorType == SwiperIndicatorType::DOT) {
+        SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
+    } else if (swiperIndicatorType == SwiperIndicatorType::ARC_DOT) {
+        SaveCircleDotIndicatorProperty(indicatorNode);
+    } else {
+        SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
+    }
+}
+
 void SwiperPattern::InitIndicator()
 {
     auto swiperNode = GetHost();
     CHECK_NULL_VOID(swiperNode);
     RefPtr<FrameNode> indicatorNode;
     auto indicatorType = GetIndicatorType();
+    auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!HasIndicatorNode()) {
         if (!IsShowIndicator()) {
             return;
         }
-        indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
-            [indicatorType]() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(indicatorType); });
+        if (layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::ARC_DOT) {
+            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
+                []() { return AceType::MakeRefPtr<ArcSwiperIndicatorPattern>(); });
+        } else {
+            indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG, CreateIndicatorId(),
+                []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+        }
         swiperNode->AddChild(indicatorNode);
     } else {
         indicatorNode =
@@ -2182,13 +2211,7 @@ void SwiperPattern::InitIndicator()
     }
     lastSwiperIndicatorType_ = indicatorType;
     CHECK_NULL_VOID(indicatorNode);
-    const auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(props);
-    if (props->GetIndicatorTypeValue(SwiperIndicatorType::DOT) == SwiperIndicatorType::DOT) {
-        SwiperHelper::SaveDotIndicatorProperty(indicatorNode, *this);
-    } else {
-        SwiperHelper::SaveDigitIndicatorProperty(indicatorNode, *this);
-    }
+    SaveIndicatorProperty(indicatorNode, layoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::DOT));
 
     auto renderContext = indicatorNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -2518,6 +2541,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
     if (!IsLoop() && (isDragging_ || childScrolling_)) {
         // handle edge effects
         if (CheckOverScroll(offset)) {
+            ResetCurrentFrameNodeAnimation();
             return;
         }
     }
@@ -2579,6 +2603,7 @@ bool SwiperPattern::SpringOverScroll(float offset)
         return false;
     }
 
+    ResetParentNodeColor();
     auto visibleSize = CalculateVisibleSize();
     if (LessOrEqual(visibleSize, 0.0)) {
         return true;
@@ -2867,6 +2892,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
+    CHECK_NULL_VOID(stopWhenTouched_);
     auto isOverlongIndicator = GetMaxDisplayCount() > 0;
     if (!isOverlongIndicator) {
         StopIndicatorAnimation(true);
@@ -2959,6 +2985,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
     mainDeltaSum_ = 0.0f;
+    ResetAnimationParam();
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
 }
@@ -3051,6 +3078,9 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     UpdateAnimationProperty(static_cast<float>(dragVelocity));
     // nested and reached end (but not out of bounds), need to pass velocity to parent scrollable
     auto parent = GetNestedScrollParent();
+    if (NearZero(GetDistanceToEdge())) {
+        ResetCurrentFrameNodeAnimation();
+    }
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
         StartAutoPlay();
@@ -3096,7 +3126,8 @@ int32_t SwiperPattern::ComputeSwipePageNextIndex(float velocity, bool onlyDistan
 
     auto dragDistance = iter->second.endPos;
     auto dragForward = currentIndex_ > firstIndex;
-    auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / 2 : dragDistance < swiperWidth / 2;
+    auto dragThresholdFlag = dragForward ? dragDistance > swiperWidth / swiperProportion_ :
+        dragDistance < swiperWidth / swiperProportion_;
     auto nextIndex = currentIndex_;
     if (dragThresholdFlag) {
         nextIndex = dragForward ? currentIndex_ - displayCount : currentIndex_ + displayCount;
@@ -3133,7 +3164,7 @@ float SwiperPattern::GetVelocityCoefficient()
 int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDistance) const
 {
     auto firstItemInfo = GetFirstItemInfoInVisibleArea();
-    auto swiperWidthHalf = (firstItemInfo.second.endPos - firstItemInfo.second.startPos) / SWIPER_HALF;
+    auto swiperWidthHalf = (firstItemInfo.second.endPos - firstItemInfo.second.startPos) / swiperProportion_;
     if (LessOrEqual(swiperWidthHalf, 0)) {
         return currentIndex_;
     }
@@ -3154,6 +3185,11 @@ int32_t SwiperPattern::ComputeNextIndexInSinglePage(float velocity, bool onlyDis
 
 int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDistance) const
 {
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring() && velocity == 0.0f) {
+        return currentIndex_;
+    }
+#endif
     if (IsSwipeByGroup()) {
         return ComputeSwipePageNextIndex(velocity, onlyDistance);
     }
@@ -3173,7 +3209,8 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     }
     auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag =
-        direction ? dragDistance > firstItemLength / 2 : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
+        direction ? dragDistance > firstItemLength / swiperProportion_ :
+        firstItemInfoInVisibleArea.second.endPos < firstItemLength / swiperProportion_;
     auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
@@ -3615,6 +3652,11 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
         }
         return curve;
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (IsCrownSpring()) {
+        return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1.0f, 228.0f, 30.0f);
+    }
+#endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
     return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);
@@ -4382,6 +4424,9 @@ int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
+    if (realTotalCount <= displayCount) {
+        return 1;
+    }
     if (IsSwipeByGroup() && displayCount != 0) {
         int32_t totalPages = 0;
         totalPages = realTotalCount / displayCount;
@@ -4392,7 +4437,7 @@ int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 
         return totalPages;
     } else {
-        if (IsLoop() || realTotalCount <= displayCount) {
+        if (IsLoop()) {
             return realTotalCount;
         } else {
             return realTotalCount - displayCount + 1;
@@ -4624,7 +4669,7 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToLeft()
     auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
     auto firstItemLength = firstItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
     auto firstIndexStartPos = firstItemInfoInVisibleArea.second.startPos;
-    if (std::abs(firstIndexStartPos) < (firstItemLength / 2)) {
+    if (std::abs(firstIndexStartPos) < (firstItemLength / swiperProportion_)) {
         currentIndexOffset_ = firstItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(firstItemInfoInVisibleArea.first);
     } else {
@@ -4640,7 +4685,7 @@ void SwiperPattern::TriggerAnimationEndOnSwipeToRight()
     auto firstItemLength = firstItemInfoInVisibleArea.second.endPos - firstItemInfoInVisibleArea.second.startPos;
     auto secondItemInfoInVisibleArea = GetSecondItemInfoInVisibleArea();
     auto secondIndexStartPos = secondItemInfoInVisibleArea.second.startPos;
-    if (std::abs(secondIndexStartPos) < (firstItemLength / 2)) {
+    if (std::abs(secondIndexStartPos) < (firstItemLength / swiperProportion_)) {
         currentIndexOffset_ = secondItemInfoInVisibleArea.second.startPos;
         UpdateCurrentIndex(secondItemInfoInVisibleArea.first);
     } else {
@@ -4674,7 +4719,7 @@ void SwiperPattern::UpdateIndexOnSwipePageStop(int32_t pauseTargetIndex)
 
     auto swiperWidth = MainSize();
     auto currentOffset = iter->second.startPos;
-    if (std::abs(currentOffset) < (swiperWidth / SWIPER_HALF)) {
+    if (std::abs(currentOffset) < (swiperWidth / swiperProportion_)) {
         return;
     }
 
@@ -5425,14 +5470,9 @@ ScrollResult SwiperPattern::HandleScroll(float offset, int32_t source, NestedSta
     if (state == NestedState::CHILD_CHECK_OVER_SCROLL) {
         return HandleOutBoundary(offset, source, velocity);
     }
-    if (IsDisableSwipe()) {
-        return { offset, true };
-    }
-    if (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) {
+    if (IsDisableSwipe() || (source == SCROLL_FROM_ANIMATION && DuringTranslateAnimation()) ||
+        !CheckSwiperPanEvent(offset)) {
         // deny conflicting animation from child
-        return { offset, true };
-    }
-    if (!CheckSwiperPanEvent(offset)) {
         return { offset, true };
     }
     if (state != NestedState::GESTURE) {
@@ -6333,11 +6373,14 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
     }
 
     auto indicatorType = GetIndicatorType();
+    const char* indicator = "indicator";
     if (indicatorType == SwiperIndicatorType::DOT) {
-        json->PutExtAttr("indicator", SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
+        json->PutExtAttr(indicator, SwiperHelper::GetDotIndicatorStyle(GetSwiperParameters()).c_str(), filter);
+    } else if (indicatorType == SwiperIndicatorType::ARC_DOT) {
+            json->PutExtAttr(indicator, SwiperPattern::GetArcDotIndicatorStyle().c_str(), filter);
     } else {
         json->PutExtAttr(
-            "indicator", SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
+            indicator, SwiperHelper::GetDigitIndicatorStyle(GetSwiperDigitalParameters()).c_str(), filter);
     }
 }
 
@@ -6373,6 +6416,16 @@ void SwiperPattern::SetSwiperController(const RefPtr<SwiperController>& controll
     CHECK_NULL_VOID(controller);
     swiperController_ = controller;
     SwiperHelper::InitSwiperController(controller, WeakClaim(this));
+}
+
+void SwiperPattern::SetPropertyAnimationIsRunning(bool propertyAnimationIsRunning)
+{
+    propertyAnimationIsRunning_ = propertyAnimationIsRunning;
+}
+
+bool SwiperPattern::GetPropertyAnimationIsRunning()
+{
+    return propertyAnimationIsRunning_;
 }
 
 bool SwiperPattern::IsItemOverlay() const

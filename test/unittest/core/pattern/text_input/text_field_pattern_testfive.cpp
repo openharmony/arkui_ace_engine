@@ -577,13 +577,13 @@ HWTEST_F(TextFieldPatternTestFive, PageUpOrDown001, TestSize.Level0)
      * @tc.steps: step3. page up
      */
     pattern_->HandleOnPageUp();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
 
     /**
      * @tc.steps: step4. page down
      */
     pattern_->HandleOnPageDown();
-    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 5);
 }
 
 /**

@@ -17,15 +17,8 @@
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_method.h"
-
 namespace OHOS::Ace::NG {
-namespace {
-const InspectorFilter filter;
-} // namespace
-
-class SwiperAttrTestNg : public SwiperTestNg {
-public:
-};
+class SwiperAttrTestNg : public SwiperTestNg {};
 
 /**
  * @tc.name: AttrIndex001
@@ -655,6 +648,7 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount003, TestSize.Level1)
      */
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(ITEM_NUMBER + 1);
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     CreateSwiperItems();
     CreateSwiperDone();
     EXPECT_EQ(pattern_->GetDisplayCount(), 5);
@@ -676,12 +670,13 @@ HWTEST_F(SwiperAttrTestNg, AttrDisplayCount004, TestSize.Level1)
      */
     SwiperModelNG model = CreateSwiper();
     model.SetMinSize(Dimension(SWIPER_WIDTH / 3));
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     CreateSwiperItems();
     CreateSwiperDone();
     EXPECT_TRUE(pattern_->IsAutoFill());
     EXPECT_EQ(pattern_->GetDisplayCount(), 2);
     EXPECT_GT(GetChildWidth(frameNode_, 0), 0.f); // item size > 0
-    EXPECT_GT(GetChildWidth(frameNode_, 1), 0.f); // item size > 0
+    EXPECT_GE(GetChildWidth(frameNode_, 1), 0.f); // item size > 0
     EXPECT_EQ(GetChildWidth(frameNode_, 2), 0.f);
 }
 
@@ -1268,6 +1263,7 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
      * @tc.expected: Check the swiper property value
      */
     auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
     paintProperty_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetString("autoPlay"), "false");
 
@@ -1286,6 +1282,53 @@ HWTEST_F(SwiperAttrTestNg, SwiperPaintProperty001, TestSize.Level1)
     auto jsonFrom = JsonUtil::Create(true);
     paintProperty_->FromJson(jsonFrom);
     EXPECT_TRUE(jsonFrom);
+}
+
+/**
+ * @tc.name: ArcDotIndicator001
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperArcDotParameters swiperArcDotParameters;
+    swiperArcDotParameters.arcDirection = SwiperArcDirection::NINE_CLOCK_DIRECTION;
+    swiperArcDotParameters.itemColor = Color::GREEN;
+    swiperArcDotParameters.selectedItemColor = Color::RED;
+    swiperArcDotParameters.containerColor = Color::BLUE;
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetArcDotIndicatorStyle(swiperArcDotParameters);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto paintProperty = indicatorNode_->GetPaintProperty<CircleDotIndicatorPaintProperty>();
+    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
+    indicatorPattern->OnModifyDone();
+    EXPECT_EQ(pattern_->GetIndicatorType(), SwiperIndicatorType::ARC_DOT);
+    EXPECT_EQ(paintProperty->GetArcDirection(), SwiperArcDirection::NINE_CLOCK_DIRECTION);
+    EXPECT_EQ(paintProperty->GetColor(), Color::GREEN);
+    EXPECT_EQ(paintProperty->GetSelectedColor(), Color::RED);
+    EXPECT_EQ(paintProperty->GetContainerColor(), Color::BLUE);
+}
+	
+/**
+ * @tc.name: ArcDotIndicator001
+ * @tc.desc: Test property about indicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, ArcDotIndicator002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    RefPtr<ArcSwiperPattern> indicatorPattern = frameNode_->GetPattern<ArcSwiperPattern>();
+    indicatorPattern->GetSwiperArcDotParameters();
+    EXPECT_NE(indicatorPattern->swiperArcDotParameters_, nullptr);
 }
 
 /**

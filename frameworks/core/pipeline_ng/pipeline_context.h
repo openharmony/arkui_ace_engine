@@ -48,6 +48,7 @@
 #include "core/components_ng/manager/form_gesture/form_gesture_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
+#include "core/components_ng/manager/memory/memory_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -203,9 +204,9 @@ public:
 
     // Do mouse event actively.
     void FlushMouseEvent();
-    
+
     void FlushMouseEventVoluntarily();
-    
+
     void OnFlushMouseEvent(TouchRestrict& touchRestrict);
     void OnFlushMouseEvent(const RefPtr<FrameNode> &node,
         const std::list<MouseEvent>& moseEvents, TouchRestrict& touchRestric);
@@ -851,6 +852,11 @@ public:
         return onceVsyncListener_ != nullptr;
     }
 
+    const RefPtr<MemoryManager>& GetMemoryManager() const
+    {
+        return memoryMgr_;
+    }
+
     const RefPtr<NavigationManager>& GetNavigationManager() const
     {
         return navigationMgr_;
@@ -1053,6 +1059,13 @@ public:
 
     void SetEnableSwipeBack(bool isEnable) override;
 
+    Offset GetHostParentOffsetToWindow() const
+    {
+        return lastHostParentOffsetToWindow_;
+    }
+
+    void SetHostParentOffsetToWindow(const Offset& offset);
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1194,7 +1207,7 @@ private:
     std::list<int32_t> nodesToNotifyMemoryLevel_;
 
     std::list<TouchEvent> touchEvents_;
-    
+
     std::map<RefPtr<FrameNode>, std::list<DragPointerEvent>> dragEvents_;
     std::map<RefPtr<FrameNode>, std::list<MouseEvent>> mouseEvents_;
     std::vector<std::function<void(const std::vector<std::string>&)>> dumpListeners_;
@@ -1231,7 +1244,7 @@ private:
     RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_;
+    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
@@ -1245,6 +1258,7 @@ private:
     WeakPtr<FrameNode> windowSceneNode_;
     uint32_t nextScheduleTaskId_ = 0;
     uint64_t resampleTimeStamp_ = 0;
+    uint64_t touchResampleTimeStamp_ = 0;
     uint64_t animationTimeStamp_ = 0;
     bool hasIdleTasks_ = false;
     bool isFocusingByTab_ = false;
@@ -1302,6 +1316,7 @@ private:
 
     int32_t preNodeId_ = -1;
 
+    RefPtr<MemoryManager> memoryMgr_ = MakeRefPtr<MemoryManager>();
     RefPtr<NavigationManager> navigationMgr_ = MakeRefPtr<NavigationManager>();
     RefPtr<FormVisibleManager> formVisibleMgr_ = MakeRefPtr<FormVisibleManager>();
     RefPtr<FormEventManager> formEventMgr_ = MakeRefPtr<FormEventManager>();
@@ -1330,6 +1345,7 @@ private:
     AxisEventChecker axisEventChecker_;
     std::unordered_set<UINode*> attachedNodeSet_;
     std::list<std::function<void()>> afterReloadAnimationTasks_;
+    Offset lastHostParentOffsetToWindow_ { 0, 0 };
 
     friend class ScopedLayout;
     friend class FormGestureManager;

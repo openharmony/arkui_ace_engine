@@ -1889,6 +1889,9 @@ void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPt
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    if (!isLabel && !itemProperty->HasFontColor() && isFocused_) {
+        fontColor = theme->GetMenuItemFocusedTextColor();
+    }
     auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());

@@ -443,6 +443,8 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     bindSelectionMenu(spanType: RichEditorSpanType, content: CustomBuilder, responseType: ResponseType, options?: SelectionMenuOptions): RichEditorAttribute;
     customKeyboard(value: CustomBuilder): RichEditorAttribute;
     barState(value: BarState): RichEditorAttribute;
+    maxLength(value: number): RichEditorAttribute;
+    maxLines(value: number): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1728,6 +1730,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     onDestroy(event: () => void): this;
     enableSecure(value: boolean): this;
     hdrBrightness(value: number): this;
+    enableTransparentLayer(value: boolean): this;
 }
 declare class ArkBadgeComponent extends ArkComponent implements BadgeAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -1926,6 +1929,12 @@ declare class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAtt
     scrollBarColor(value: string | number | Color): this;
     scrollBar(value: BarState): this;
     flingSpeedLimit(value: number): this;
+    onWillScroll(callback: (xOffset: number, yOffset: number,
+        scrollState: ScrollState, scrollSource: ScrollSource) => void | OffsetResult): this;
+    onDidScroll(callback: (xOffset: number, yOffset: number, scrollState: ScrollState) => void): this;
+    onScrollStart(event: () => void): this;
+    onScrollStop(event: () => void): this;
+    onScrollIndex(event: (first: number, last: number) => void): this;
 }
 declare class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<ShapeAttribute> {
     constructor(nativePtr: KNode, classType?: ModifierType);

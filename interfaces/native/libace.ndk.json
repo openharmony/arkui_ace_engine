@@ -1484,6 +1484,10 @@
         "name": "OH_ArkUI_NodeUtils_GetNodeType"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },
@@ -2506,6 +2510,10 @@
     {
         "first_introduced": "15",
         "name": "OH_ArkUI_FocusAxisEvent_SetStopPropagation"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_KeyEvent_Dispatch"
     },
     {
         "first_introduced": "16",

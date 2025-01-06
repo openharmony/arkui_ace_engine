@@ -68,6 +68,10 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+    /**
+     * @return maximum fling speed, Unit: vp/s.
+     */
+    static float GetMaxFlingSpeed(FrameNode* frameNode);
     static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect);
     static ContentClipMode GetContentClip(FrameNode* frameNode);
     static void ResetContentClip(FrameNode* frameNode);

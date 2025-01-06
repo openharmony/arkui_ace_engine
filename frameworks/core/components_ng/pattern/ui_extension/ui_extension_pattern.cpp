@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
@@ -414,6 +415,7 @@ void UIExtensionPattern::OnConnect()
     }
     InitializeAccessibility();
     ReDispatchDisplayArea();
+    RegisterEventProxyFlagCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -432,6 +434,42 @@ void UIExtensionPattern::ReplacePlaceholderByContent()
 void UIExtensionPattern::OnAreaUpdated()
 {
     PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
+}
+
+void UIExtensionPattern::RegisterWindowSceneVisibleChangeCallback(
+    const RefPtr<Pattern>& windowScenePattern)
+{
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(windowScenePattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnWindowSceneVisibleChange(visible);
+        }
+    };
+    systemWindowScene->RegisterVisibleChangeCallback(host->GetId(), callback);
+    weakSystemWindowScene_ = systemWindowScene;
+    UIEXT_LOGI("RegisterWindowSceneVisibleChangeCallback %{public}d.", host->GetId());
+}
+
+void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId)
+{
+    auto pattern = weakSystemWindowScene_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(pattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    systemWindowScene->UnRegisterVisibleChangeCallback(nodeId);
+    UIEXT_LOGI("UnRegisterWindowSceneVisibleChangeCallback %{public}d.", nodeId);
+}
+
+void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
+{
+    UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    if (!visible) {
+        OnWindowHide();
+    }
 }
 
 void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
@@ -458,6 +496,9 @@ void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
             break;
         case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
             OnUeaAccessibilityEventAsync();
+            break;
+        case UIExtCallbackEventId::ON_DRAW_FIRST:
+            FireOnDrawReadyCallback();
             break;
     }
 }
@@ -655,6 +696,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
+    UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1456,7 +1498,7 @@ int32_t UIExtensionPattern::GetInstanceId() const
     return instanceId_;
 }
 
-int32_t UIExtensionPattern::GetInstanceIdFromHost()
+int32_t UIExtensionPattern::GetInstanceIdFromHost() const
 {
     auto instanceId = GetHostInstanceId();
     if (instanceId != instanceId_) {
@@ -1605,6 +1647,95 @@ void UIExtensionPattern::DumpOthers()
                 DumpLog::GetInstance().Print(line);
             }
         }
+    }
+}
+
+void UIExtensionPattern::RegisterEventProxyFlagCallback()
+{
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
+        [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            std::string type = "";
+            int32_t eventFlags = 0;
+            if (data.HasParameter("type")) {
+                type = data.GetStringParam("type");
+            }
+            if (type == "OccupyEvents") {
+                if (data.HasParameter("eventFlags")) {
+                    eventFlags = data.GetIntParam("eventFlags", 0);
+                }
+                pattern->SetEventProxyFlag(eventFlags);
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+}
+
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::SetOnDrawReadyCallback(const std::function<void()>&& callback)
+{
+    onDrawReadyCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireOnDrawReadyCallback()
+{
+    if (onDrawReadyCallback_) {
+        onDrawReadyCallback_();
     }
 }
 } // namespace OHOS::Ace::NG

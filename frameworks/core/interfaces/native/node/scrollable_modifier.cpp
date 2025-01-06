@@ -117,6 +117,63 @@ void ResetOnDidScrollCallBack(ArkUINodeHandle node)
     ScrollableModelNG::SetOnDidScroll(frameNode, nullptr);
 }
 
+void SetOnScrollFrameBeginCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollFrameBegin = reinterpret_cast<OnScrollFrameBeginEvent*>(extraParam);
+        ScrollableModelNG::SetOnScrollFrameBegin(frameNode, std::move(*onScrollFrameBegin));
+    } else {
+        ScrollableModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+    }
+}
+
+void ResetOnScrollFrameBeginCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnScrollFrameBegin(frameNode, nullptr);
+}
+
+void SetOnScrollStartCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollStart = reinterpret_cast<OnScrollStartEvent*>(extraParam);
+        ScrollableModelNG::SetOnScrollStart(frameNode, std::move(*onScrollStart));
+    } else {
+        ScrollableModelNG::SetOnScrollStart(frameNode, nullptr);
+    }
+}
+
+void ResetOnScrollStartCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnScrollStart(frameNode, nullptr);
+}
+
+void SetOnScrollStopCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollStop = reinterpret_cast<OnScrollStopEvent*>(extraParam);
+        ScrollableModelNG::SetOnScrollStop(frameNode, std::move(*onScrollStop));
+    } else {
+        ScrollableModelNG::SetOnScrollStop(frameNode, nullptr);
+    }
+}
+
+void ResetOnScrollStopCallBack(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetOnScrollStop(frameNode, nullptr);
+}
+
 ArkUI_Int32 GetEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -166,6 +223,27 @@ void GetFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
     (*values)[0].i32 = static_cast<int32_t>(ScrollableModelNG::GetFadingEdge(frameNode));
     (*values)[1].f32 = ScrollableModelNG::GetFadingEdgeLength(frameNode);
 }
+
+void SetFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
+}
+
+void ResetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
+}
+
+float GetFlingSpeedLimit(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1.0f);
+    return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -190,6 +268,15 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .resetOnWillScrollCallBack = ResetOnWillScrollCallBack,
         .setOnDidScrollCallBack = SetOnDidScrollCallBack,
         .resetOnDidScrollCallBack = ResetOnDidScrollCallBack,
+        .setOnScrollFrameBeginCallBack = SetOnScrollFrameBeginCallBack,
+        .resetOnScrollFrameBeginCallBack = ResetOnScrollFrameBeginCallBack,
+        .setOnScrollStartCallBack = SetOnScrollStartCallBack,
+        .resetOnScrollStartCallBack = ResetOnScrollStartCallBack,
+        .setOnScrollStopCallBack = SetOnScrollStopCallBack,
+        .resetOnScrollStopCallBack = ResetOnScrollStopCallBack,
+        .getFlingSpeedLimit = GetFlingSpeedLimit,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

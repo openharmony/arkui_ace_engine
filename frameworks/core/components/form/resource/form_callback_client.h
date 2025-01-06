@@ -142,6 +142,26 @@ public:
             TaskExecutor::TaskType::UI, "ArkUIFormProcessEnableForm");
     }
 
+    void ProcessLockForm(bool lock) override
+    {
+        TAG_LOGI(AceLogTag::ACE_FORM, "FormCallbackClient::ProcessLockForm");
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId_);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [delegate = delegate_, lock]() {
+                auto formManagerDelegate = delegate.Upgrade();
+                if (!formManagerDelegate) {
+                    TAG_LOGE(AceLogTag::ACE_FORM, "formManagerDelegate is nullptr");
+                    return;
+                }
+                formManagerDelegate->ProcessLockForm(lock);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIFormProcessLockForm");
+    }
+
 private:
     int32_t instanceId_ = -1;
     WeakPtr<FormManagerDelegate> delegate_;

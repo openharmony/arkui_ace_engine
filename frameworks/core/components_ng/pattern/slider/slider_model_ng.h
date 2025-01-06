@@ -44,6 +44,7 @@ public:
     void SetTrackBackgroundColor(const Color& value) override {};
     void SetTrackBackgroundColor(const Gradient& value, bool isResourceColor = false) override;
     void SetSelectColor(const Color& value) override;
+    void SetSelectColor(const Gradient& value, bool isResourceColor = false) override;
     void SetMinLabel(float value) override;
     void SetMaxLabel(float value) override;
     void SetShowSteps(bool value) override;
@@ -97,7 +98,7 @@ public:
     static void SetBlockBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBlockColor(FrameNode* frameNode, const Color& value);
     static void SetTrackBackgroundColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
-    static void SetSelectColor(FrameNode* frameNode, const Color& value);
+    static void SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor = false);
     static void SetShowSteps(FrameNode* frameNode, bool value);
     static void SetSliderInteractionMode(FrameNode* frameNode, SliderInteraction mode);
     static void SetMinResponsiveDistance(FrameNode* frameNode, float value);
@@ -139,7 +140,7 @@ public:
 
     static Color GetBlockColor(FrameNode* frameNode);
     static Gradient GetTrackBackgroundColor(FrameNode* frameNode);
-    static Color GetSelectColor(FrameNode* frameNode);
+    static Gradient GetSelectColor(FrameNode* frameNode);
     static bool GetShowSteps(FrameNode* frameNode);
     static BlockStyleType GetBlockType(FrameNode* frameNode);
     static float GetSliderValue(FrameNode* frameNode);

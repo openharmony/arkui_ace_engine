@@ -16,56 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_CALC_DIMENSION_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_CALC_DIMENSION_H
 
-#include "base/geometry/dimension.h"
-
-namespace OHOS::Ace {
-class CalcDimension : public Dimension {
-public:
-    CalcDimension() = default;
-    ~CalcDimension() = default;
-
-    explicit CalcDimension(const std::string& value, DimensionUnit unit = DimensionUnit::CALC)
-    {
-        calcvalue_ = value;
-        SetUnit(DimensionUnit::CALC);
-    };
-
-    CalcDimension(double value, DimensionUnit unit = DimensionUnit::PX) : Dimension(value, unit) {};
-    CalcDimension(const Dimension& dimension) : Dimension(dimension) {};
-
-    const std::string& CalcValue() const
-    {
-        return calcvalue_;
-    }
-
-    void SetCalcValue(const std::string& value)
-    {
-        calcvalue_ = value;
-    }
-
-    CalcDimension& operator=(const Dimension& newDimension)
-    {
-        Dimension& dimension = *this;
-        dimension = newDimension;
-        return *this;
-    }
-
-    CalcDimension& operator=(const CalcDimension& newDimension)
-    {
-        SetCalcValue(newDimension.CalcValue());
-        SetValue(newDimension.Value());
-        SetUnit(newDimension.Unit());
-        return *this;
-    }
-
-    std::string ToString() const
-    {
-        return calcvalue_.empty() ? Dimension::ToString() : calcvalue_ + "calc";
-    }
-
-private:
-    std::string calcvalue_ = "";
-};
-} // namespace OHOS::Ace
+#include "ui/base/geometry/calc_dimension.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_CALC_DIMENSION_H

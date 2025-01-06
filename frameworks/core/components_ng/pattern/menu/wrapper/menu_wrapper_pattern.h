@@ -532,6 +532,8 @@ public:
         previewDisappearStartOffset_ = offset;
     }
 
+    bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
