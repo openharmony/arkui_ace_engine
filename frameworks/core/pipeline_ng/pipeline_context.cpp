@@ -66,7 +66,6 @@
 
 namespace {
 constexpr uint64_t ONE_MS_IN_NS = 1 * 1000 * 1000;
-constexpr uint64_t FIVE_MS_IN_NS = 5 * 1000 * 1000;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 3 millisecond
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t MILLISECONDS_TO_NANOSECONDS = 1000000; // Milliseconds to nanoseconds
@@ -516,18 +515,11 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
     uint64_t timeStamp = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
-    uint64_t touchTimeStamp = nanoTimestamp - FIVE_MS_IN_NS;
     if (timeStamp > compensationValue_) {
         resampleTimeStamp_ = timeStamp - compensationValue_;
     } else {
         LOGE("resampleTimeStamp overflow,use 0 to be default resampleTimeStamp");
         resampleTimeStamp_ = 0;
-    }
-    if (touchResampleTimeStamp_ > compensationValue_) {
-        touchResampleTimeStamp_ = touchTimeStamp - compensationValue_;
-    } else {
-        LOGE("touchResampleTimeStamp_ overflow,use 0 to be default touchResampleTimeStamp_");
-        touchResampleTimeStamp_ = 0;
     }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
@@ -3093,7 +3085,7 @@ void PipelineContext::FlushTouchEvents()
             needInterpolation = false;
         }
         if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
-            auto targetTimeStamp = touchResampleTimeStamp_;
+            auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
                 auto stamp =
                     std::chrono::duration_cast<std::chrono::nanoseconds>(idIter.second.time.time_since_epoch()).count();
