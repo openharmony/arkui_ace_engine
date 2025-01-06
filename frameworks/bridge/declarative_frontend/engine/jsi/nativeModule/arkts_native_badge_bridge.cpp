@@ -219,6 +219,10 @@ ArkUINativeModuleValue BadgeBridge::SetBadgeParamWithString(ArkUIRuntimeCallInfo
     }
     if (!valueArg->IsNull() && valueArg->IsString(vm)) {
         value = valueArg->ToString(vm)->ToString(vm).c_str();
+    } else if (!valueArg->IsNull() && valueArg->IsObject(vm)) {
+        std::string valueResult;
+        ArkTSUtils::ParseJsString(vm, valueArg, valueResult);
+        value = valueResult.c_str();
     }
 
     auto nodeModifiers = GetArkUINodeModifiers();
