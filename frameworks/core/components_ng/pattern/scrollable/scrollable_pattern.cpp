@@ -1667,6 +1667,7 @@ void ScrollablePattern::InitMouseEvent()
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
+    gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
