@@ -6854,13 +6854,13 @@ void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
     auto positionType = GetPositionTypeFromLine();
     if (positionType == PositionType::DEFAULT) {
         floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
-        return; 
+        return;
     }
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     bool isCaretAtEmptyParagraph =
         positionType == PositionType::PARAGRAPH_START && caretPosition_ == GetParagraphEndPosition(caretPosition_);
     if (isCaretAtEmptyParagraph) {
-        moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());  
+        moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());
     } else {
         moveDistance = caretAffinityPolicy_ == CaretAffinityPolicy::DOWNSTREAM_FIRST
                         ? caretOffset.GetX() - localOffset.GetX() : localOffset.GetX() - caretOffset.GetX();
