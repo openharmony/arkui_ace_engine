@@ -148,12 +148,14 @@ public:
 
     void RegisterBusinessDataConsumeCallback(UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback);
     void DispatchBusinessDataConsume(UIContentBusinessCode code, const AAFwk::Want& data);
-    
+
     // provider send data to host
     void RegisterBusinessSendToHostReply(UIExtBusinessSendToHostReplyFunc func);
     void RegisterBusinessSendToHost(UIExtBusinessSendToHostFunc func);
     bool SendBusinessToHost(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
     bool SendBusinessToHostSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
+    void NotifyWindowMode(Rosen::WindowMode mode);
 
 private:
     bool UIExtBusinessDataSendValid();

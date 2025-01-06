@@ -84,7 +84,7 @@ void JSUIExtensionProxy::Send(const JSCallbackInfo& info)
     JSValueWrapper valueWrapper = value;
     ScopeRAII scopeNapi(reinterpret_cast<napi_env>(nativeEngine));
     napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    
+
     auto wantParams = WantParamsWrap::CreateWantWrap(reinterpret_cast<napi_env>(nativeEngine), nativeValue);
     if (proxy_) {
         proxy_->SendData(wantParams);
@@ -430,6 +430,7 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
 
     bool transferringCaller = false;
     bool densityDpi = false;
+    bool windowModeStrategy = false;
     std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
     if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
@@ -441,10 +442,14 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
         if (enableDensityDPI->IsNumber()) {
             densityDpi = (enableDensityDPI->ToNumber<int32_t>())==0 ? true : false;
         }
+        JSRef<JSVal> windowModeStrategyValue = obj->GetProperty("windowModeFollowStrategy");
+        if (windowModeStrategyValue->IsNumber()) {
+            windowModeStrategy = (windowModeStrategyValue->ToNumber<int32_t>()) == 0 ? true : false;
+        }
         InsertPlaceholderObj(obj, placeholderMap);
         ResolveAreaPlaceholderParams(obj, placeholderMap);
     }
-    UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi);
+    UIExtensionModel::GetInstance()->Create(want, placeholderMap, transferringCaller, densityDpi, windowModeStrategy);
 }
 
 void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)

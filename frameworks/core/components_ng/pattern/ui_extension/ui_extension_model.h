@@ -40,6 +40,7 @@ struct InnerModalUIExtensionConfig {
     bool isAsyncModalBinding = false;
     bool isModal = true;
     bool isDensityFollowHost = false;
+    bool isWindowModeFollowHost = false;
 };
 
 struct UIExtensionConfig {
@@ -59,7 +60,7 @@ public:
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-        bool transferringCaller = false, bool densityDpi = false);
+        bool transferringCaller = false, bool densityDpi = false, bool isWindowModeFollowHost = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     virtual void Create(const NG::UIExtensionConfig& config) {}

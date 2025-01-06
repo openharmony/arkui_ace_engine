@@ -416,6 +416,7 @@ void UIExtensionPattern::OnConnect()
     InitializeAccessibility();
     ReDispatchDisplayArea();
     RegisterEventProxyFlagCallback();
+    NotifyHostWindowMode();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -1736,6 +1737,25 @@ void UIExtensionPattern::FireOnDrawReadyCallback()
 {
     if (onDrawReadyCallback_) {
         onDrawReadyCallback_();
+    }
+}
+
+void UIExtensionPattern::NotifyHostWindowMode()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto mode = container->GetWindowMode();
+    NotifyHostWindowMode(mode);
+}
+
+void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
+{
+    UIEXT_LOGI("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
+        instanceId_, isWindowModeFollowHost_, static_cast<int32_t>(mode));
+    CHECK_NULL_VOID(sessionWrapper_);
+    if (isWindowModeFollowHost_ && mode != Rosen::WindowMode::WINDOW_MODE_UNDEFINED) {
+        int32_t windowMode = static_cast<int32_t>(mode);
+        sessionWrapper_->NotifyHostWindowMode(windowMode);
     }
 }
 } // namespace OHOS::Ace::NG
