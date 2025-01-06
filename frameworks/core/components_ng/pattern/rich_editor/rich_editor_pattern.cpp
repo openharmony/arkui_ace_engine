@@ -3331,7 +3331,7 @@ void RichEditorPattern::NotifyCaretChange()
             CHECK_NULL_VOID(pattern);
             pattern->TriggerAvoidOnCaretChange();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange", PriorityType::VIP);
 }
 
 TextAlign RichEditorPattern::GetTextAlignByDirection()
@@ -7298,7 +7298,7 @@ void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, Windo
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorOnWindowSizeChangedRotation", PriorityType::VIP);
 }
 
 void RichEditorPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType)
@@ -7936,7 +7936,7 @@ void RichEditorPattern::UpdateTextFieldManager(const Offset& offset, float heigh
             CHECK_NULL_VOID(pattern);
             pattern->ScrollToSafeArea();
         },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorScrollToSafeArea", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUIRichEditorScrollToSafeArea", PriorityType::VIP);
 }
 
 bool RichEditorPattern::IsDisabled() const

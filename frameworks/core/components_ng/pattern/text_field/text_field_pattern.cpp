@@ -3455,7 +3455,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 pattern->StartTwinkling();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::VIP);
     return true;
 }
 
@@ -8538,7 +8538,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::VIP);
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
