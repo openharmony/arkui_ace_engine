@@ -18,53 +18,37 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/property/templates_parser.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-// TODO: need to merge it with grid layoutAlgorithm.
-LayoutConstraintF CreateChildConstraint(
-    const SizeF& contentSize, Axis axis, GridLayoutProperty* gridLayoutProperty, int32_t crossSpan)
+void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
-    auto itemMainSize = Infinity<float>();
-    auto gapLength = GridUtils::GetCrossGap(AceType::Claim(gridLayoutProperty), contentSize, axis);
-    auto crossLength = axis == Axis::HORIZONTAL ? contentSize.Height() : contentSize.Width();
-    auto crossCount = gridLayoutProperty->GetCrossCount();
-    auto spanLength = (crossLength - (crossCount - 1) * gapLength) / crossCount;
-    auto itemCrossSize = crossSpan * spanLength + gapLength * (crossSpan - 1);
+    params_.mainGap = GridUtils::GetMainGap(props_, viewport, axis);
 
-    SizeF itemIdealSize =
-        gridLayoutProperty->IsVertical() ? SizeF(itemCrossSize, itemMainSize) : SizeF(itemMainSize, itemCrossSize);
-    auto itemConstraint = gridLayoutProperty->CreateChildConstraint();
+    std::string args = (axis == Axis::VERTICAL ? props_.GetColumnsTemplate() : props_.GetRowsTemplate()).value_or("");
+    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), viewport.CrossSize(axis),
+        GridUtils::GetCrossGap(props_, viewport, axis), totalCnt);
 
-    // The percent size of GridItem is based on the fraction size, for e.g., if a GridItem has width of "50%" in Grid
-    // configured with columnsTemplate = "1fr 1fr", rowsTemplate = "1fr 1fr",
-    // then the GridItem width = [width of 1fr] * 50%,
-    // [itemFractionCount] is now only in direction of cross axis
-    float widthPercentBase = itemCrossSize;
-    float heightPercentBase = itemConstraint.percentReference.Height();
-    if (axis == Axis::VERTICAL) {
-        itemConstraint.percentReference = SizeF(widthPercentBase, itemConstraint.percentReference.Height());
-    } else {
-        itemConstraint.percentReference = SizeF(itemConstraint.percentReference.Width(), heightPercentBase);
+    params_.crossLens = std::vector<float>(res.first.begin(), res.first.end());
+    params_.crossGap = static_cast<float>(res.second);
+    if (params_.crossLens.empty()) {
+        params_.crossLens.push_back(viewport.CrossSize(axis));
     }
-    itemConstraint.maxSize = itemIdealSize;
-    itemConstraint.UpdateIllegalSelfMarginSizeWithCheck(axis == Axis::VERTICAL
-                                                            ? OptionalSizeF(itemCrossSize, std::nullopt)
-                                                            : OptionalSizeF(std::nullopt, itemCrossSize));
-    return itemConstraint;
+
+    info_.axis_ = axis;
+    info_.childrenCount_ = totalCnt;
 }
-} // namespace
 
 RectF GridFillAlgorithm::CalcMarkItemRect(
-    const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
+    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
 {
-    // measure item to get real size.
-    // TODO: Get the realy cross span in GridItem.
-    auto layoutConstraint = CreateChildConstraint(viewPort, axis, layoutProperty_, 1);
-    node->Measure(layoutConstraint);
+    GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
+    filler.FillMatrixOnly(index);
+    const auto pos = info_.GetItemPos(index);
+    filler.MeasureItem(params_, node, index, pos.first, pos.second);
     auto offset = slidingOffset.has_value() ? node->GetGeometryNode()->GetMarginFrameOffset() + slidingOffset.value()
                                             : node->GetGeometryNode()->GetMarginFrameOffset();
     auto size = node->GetGeometryNode()->GetMarginFrameSize();
@@ -72,47 +56,51 @@ RectF GridFillAlgorithm::CalcMarkItemRect(
 }
 
 RectF GridFillAlgorithm::CalcItemRectAfterMarkItem(
-    const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
-    // measure item to get real size.
-    // TODO: Get the realy cross span in GridItem.
-    auto layoutConstraint = CreateChildConstraint(viewPort, axis, layoutProperty_, 1);
-    node->Measure(layoutConstraint);
-    auto crossCount = layoutProperty_->GetCrossCount();
-    if (index % crossCount == 0) {
-        // new line.
-        auto mainGap = GridUtils::GetMainGap(AceType::Claim(layoutProperty_), viewPort, axis);
-        OffsetF offset = axis == Axis::VERTICAL ? OffsetF(0.0f, markItem.Bottom() + mainGap)
-                                                : OffsetF(markItem.Right() + mainGap, 0.0f);
+    GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
+    filler.FillMatrixOnly(index);
+    const auto pos = info_.GetItemPos(index);
+    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+
+    auto pivotRow = info_.FindInMatrix(index - 1);
+    if (pivotRow == info_.gridMatrix_.end() || pivotRow->first > pos.second) {
+        LOGW("grid matrix is corrupted");
+        return {};
+    }
+    if (pivotRow->first < pos.second) {
+        OffsetF offset = axis == Axis::VERTICAL ? OffsetF(0.0f, markItem.Bottom() + params_.mainGap)
+                                                : OffsetF(markItem.Right() + params_.mainGap, 0.0f);
         return { offset, node->GetGeometryNode()->GetMarginFrameSize() };
     }
-    auto crossGap = GridUtils::GetCrossGap(AceType::Claim(layoutProperty_), viewPort, axis);
-    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Right() + crossGap, markItem.Top())
-                                            : OffsetF(markItem.Left(), markItem.Bottom() + crossGap);
+    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Right() + params_.crossGap, markItem.Top())
+                                            : OffsetF(markItem.Left(), markItem.Bottom() + params_.crossGap);
     return { offset, node->GetGeometryNode()->GetMarginFrameSize() };
 }
 
 RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
-    const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
-    // measure item to get real size.
-    // TODO: Get the realy cross span in GridItem.
-    auto layoutConstraint = CreateChildConstraint(viewPort, axis, layoutProperty_, 1);
-    node->Measure(layoutConstraint);
-    auto crossCount = layoutProperty_->GetCrossCount();
-    auto size = node->GetGeometryNode()->GetMarginFrameSize();
-    if (index % crossCount == crossCount - 1) {
+    // matrix is ready
+    GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
+    const auto pos = info_.GetItemPos(index);
+    filler.MeasureItem(params_, node, index, pos.first, pos.second);
+
+    auto pivotRow = info_.FindInMatrix(index + 1);
+    if (pivotRow == info_.gridMatrix_.end() || pivotRow->first < pos.second) {
+        LOGW("grid matrix is corrupted");
+        return {};
+    }
+    const auto size = node->GetGeometryNode()->GetMarginFrameSize();
+    if (pivotRow->first > pos.second) {
         // new line.
-        auto mainGap = GridUtils::GetMainGap(AceType::Claim(layoutProperty_), viewPort, axis);
         OffsetF offset = axis == Axis::VERTICAL
-                             ? OffsetF(viewPort.Width() - size.Width(), markItem.Top() - mainGap - size.Height())
-                             : OffsetF(markItem.Left() - mainGap - size.Width(), viewPort.Height() - size.Height());
+                             ? OffsetF(viewport.Width() - size.Width(), markItem.Top() - params_.mainGap - size.Height())
+                             : OffsetF(markItem.Left() - params_.mainGap - size.Width(), viewport.Height() - size.Height());
         return { offset, size };
     }
-    auto crossGap = GridUtils::GetCrossGap(AceType::Claim(layoutProperty_), viewPort, axis);
-    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Left() - crossGap - size.Width(), markItem.Top())
-                                            : OffsetF(markItem.Left(), markItem.Top() - crossGap - size.Height());
+    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Left() - params_.crossGap - size.Width(), markItem.Top())
+                                            : OffsetF(markItem.Left(), markItem.Top() - params_.crossGap - size.Height());
     return { offset, size };
 }
-
 } // namespace OHOS::Ace::NG

@@ -20,6 +20,7 @@
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 /**
@@ -75,7 +76,7 @@ public:
      *
      * @param targetIdx The target GridItem index to fill.
      *
-     * @return Line index in which Item [targetIdx] resides.
+     * @return Line index of the last filled line.
      */
     int32_t FillMatrixOnly(int32_t targetIdx);
 
@@ -132,11 +133,17 @@ public:
      * @param itemIdx The index of the GridItem.
      * @param col The column index where the item is being added.
      * @param row The row index where the item is being added.
+     * @return item height and LayoutConstraint
      */
     std::pair<float, LayoutConstraintF> MeasureItem(
         const FillParameters& params, int32_t itemIdx, int32_t col, int32_t row, bool isCache);
 
+    void MeasureItem(const FillParameters& params, LayoutWrapper* child, int32_t itemIdx, int32_t col, int32_t row);
+
 private:
+    std::pair<float, LayoutConstraintF> MeasureItemInner(
+        const FillParameters& params, LayoutWrapper* node, int32_t itemIdx, int32_t col, int32_t row);
+
     /**
      * @brief Fills one GridItem into the Grid.
      *

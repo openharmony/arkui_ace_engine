@@ -21,34 +21,49 @@
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 
 namespace OHOS::Ace::NG {
 
 class GridFillAlgorithm : public FillAlgorithm {
 public:
-    RectF CalcMarkItemRect(const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index,
+    GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
+
+    RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index,
         const std::optional<OffsetF>& slidingOffset) override;
 
     RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
 
     RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
 
     void OnSlidingOffsetUpdate(float x, float y) override {}
 
     bool IsReady() const override
     {
-        return layoutProperty_ != nullptr;
+        return true;
     }
 
-    void UpdateGridLayoutProperty(GridLayoutProperty* layoutProperty)
+    bool CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) override
     {
-        layoutProperty_ = layoutProperty;
+        // TODO: Axis::HORIZONTAL
+        if (direction == FillDirection::START) {
+            return GreatOrEqual(markItemRect.Top(), -scrollWindowSize.Height());
+        }
+        LOGI("LazyForEach backend current bottom = %{public}f, right = %{public}f", markItemRect.Bottom(),
+            markItemRect.Right());
+        return LessNotEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2);
     }
+
+    void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
 private:
-    GridLayoutProperty* layoutProperty_ = nullptr;
+    const GridLayoutProperty& props_;
+    GridLayoutInfo& info_;
+
+    GridIrregularFiller::FillParameters params_;
 };
 
 } // namespace OHOS::Ace::NG

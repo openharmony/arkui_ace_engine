@@ -20,60 +20,14 @@
 #include <optional>
 #include <unordered_map>
 
-#include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/rect_t.h"
-#include "base/geometry/ng/size_t.h"
+#include "fill_algorithm.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
 
 class FrameNode;
-
-enum class FillDirection { START, END, INITIAL };
-
-class FillAlgorithm : public virtual AceType {
-    DECLARE_ACE_TYPE(FillAlgorithm, AceType);
-
-public:
-    virtual RectF CalcMarkItemRect(
-        const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
-    {
-        return { 0.0f, 0.0f, 0.0f, 0.0f };
-    }
-
-    virtual RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
-    {
-        return { 0.0f, 0.0f, 0.0f, 0.0f };
-    }
-
-    virtual RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewPort, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
-    {
-        return { 0.0f, 0.0f, 0.0f, 0.0f };
-    }
-
-    virtual void OnSlidingOffsetUpdate(float x, float y) {}
-
-    virtual bool CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction)
-    {
-        // TODO: Axis::HORIZONTAL
-        if (direction == FillDirection::START) {
-            return !(
-                LessOrEqual(markItemRect.Top(), -scrollWindowSize.Height()) && LessOrEqual(markItemRect.Left(), 0));
-        }
-        return !(GreatOrEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2) &&
-                 GreatOrEqual(markItemRect.Right(), scrollWindowSize.Width()));
-    }
-
-    virtual bool IsReady() const
-    {
-        return false;
-    }
-};
 
 class ScrollWindowAdapter : public virtual AceType {
     DECLARE_ACE_TYPE(ScrollWindowAdapter, AceType);
@@ -109,6 +63,8 @@ public:
             updater_(markIndex_, reinterpret_cast<void*>(0x01));
         }
     }
+
+    FrameNode* InitPivotItem(FillDirection direction);
 
     RefPtr<FrameNode> GetChildByIndex(int32_t index)
     {
