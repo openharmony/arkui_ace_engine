@@ -1584,10 +1584,6 @@ class SelectTitleBarDialog extends ViewPU {
                                     SymbolGlyph.fontSize(IMAGE_SIZE);
                                     SymbolGlyph.draggable(false);
                                     SymbolGlyph.focusable(this.selectTitleDialog.isEnabled);
-                                    SymbolGlyph.margin({
-                                        top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                        bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                    });
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     if (!e1) {
                                         SymbolGlyph.pop();
@@ -1610,10 +1606,6 @@ class SelectTitleBarDialog extends ViewPU {
                                                 SymbolGlyph.fontSize(IMAGE_SIZE);
                                                 SymbolGlyph.draggable(false);
                                                 SymbolGlyph.focusable(this.selectTitleDialog.isEnabled);
-                                                SymbolGlyph.margin({
-                                                    top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                                    bottom: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                                                });
                                                 if (!a1) {
                                                     SymbolGlyph.pop();
                                                 }
