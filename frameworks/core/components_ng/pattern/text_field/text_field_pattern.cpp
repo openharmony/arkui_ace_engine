@@ -2458,8 +2458,14 @@ void TextFieldPattern::InitDragDropCallBack()
             }
         }
         auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
-        pattern->UpdateContentScroller(
-            Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY()));
+        Offset localOffset = Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
+        if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
+            pattern->UpdateContentScroller(localOffset);
+        } else {
+            pattern->contentScroller_.OnBeforeScrollingCallback(localOffset);
+            pattern->PauseContentScroll();
+            pattern->contentScroller_.hotAreaOffset.reset();
+        }
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
