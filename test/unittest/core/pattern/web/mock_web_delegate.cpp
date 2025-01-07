@@ -622,7 +622,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled) {}
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled) {}
 void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled) {}
 void WebDelegate::UpdateCacheMode(const WebCacheMode& mode) {}
-void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool& enable) {}
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable) {}
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nullptr;

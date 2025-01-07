@@ -1801,7 +1801,7 @@ void WebDelegateCross::DragResize(
     // cross platform is not support now;
 }
 
-void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool& enable)
+void WebDelegateCross::UpdateOptimizeParserBudgetEnabled(const bool enable)
 {
     // cross platform is not support now;
 }

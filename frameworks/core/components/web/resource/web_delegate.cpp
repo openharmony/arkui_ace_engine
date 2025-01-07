@@ -7522,7 +7522,7 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
 #endif
 }
 
-void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool& enable)
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
 {
     auto context = context_.Upgrade();
     if (!context) {
