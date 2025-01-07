@@ -309,6 +309,7 @@ public:
 
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
     void UpdateObscure(const std::u16string& insertValue, bool hasInsertValue);
@@ -1533,7 +1534,7 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -1604,6 +1605,8 @@ public:
     {
         return maxFontSizeScale_;
     }
+
+    SelectionInfo GetSelection();
 
     void SetTextFadeoutCapacity(bool enabled)
     {
