@@ -680,18 +680,8 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        CHECK_NULL_VOID(HasFocus());
-        CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
-        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard());
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
-
-        auto windowMode = windowManager->GetWindowMode();
-        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed windowMode = %{public}d", windowMode);
-        if ((windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) && IsStopEditWhenCloseKeyboard()) {
+        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard()); // false when specified product
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
             FocusHub::LostFocusToViewRoot();
         }
     }
