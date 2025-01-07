@@ -5580,4 +5580,57 @@ HWTEST_F(NativeNodeTest, NativeNodeTest088, TestSize.Level1)
     ret = OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(nullptr);
     EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
+
+/**
+ * @tc.name: NativeNodeTest089
+ * @tc.desc: Test xcomponentNode of TEXTURE type function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest089, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_XCOMPONENT_TEXTURE);
+    ASSERT_NE(rootNode, nullptr);
+
+    ArkUI_NumberValue value[] = {{.i32 = ARKUI_XCOMPONENT_TYPE_TEXTURE}, {.f32 = 10.0f}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), "test"};
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_ID, &item);
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item);
+
+    uint32_t val100 = 100;
+    value[0].u32 = val100;
+    value[1].u32 = val100;
+    nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_ID), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_TYPE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest090
+ * @tc.desc: Test abnormalInput For XComponent of TEXTURE type function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest090, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_XCOMPONENT_TEXTURE);
+    ArkUI_NumberValue value0[] = {};
+    ArkUI_AttributeItem item0 = {value0, 0, nullptr, nullptr};
+    ArkUI_NumberValue value[] = {{.i32 = -1}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr};
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_ID, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_ID, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_TYPE, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(rootNode);
+}
 } // namespace OHOS::Ace
