@@ -178,6 +178,12 @@ TouchEvent& TouchEvent::SetPressedKeyCodes(const std::vector<KeyCode>& pressedKe
     return *this;
 }
 
+TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
+{
+    this->isPassThroughMode = isPassThroughMode;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -213,6 +219,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
+    event.isPassThroughMode = isPassThroughMode;
     return event;
 }
 
@@ -349,7 +356,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetSourceType(sourceType)
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
-        .SetOriginalId(originalId);
+        .SetOriginalId(originalId)
+        .SetIsPassThroughMode(isPassThroughMode);
     event.pointers.emplace_back(std::move(point));
     return event;
 }
