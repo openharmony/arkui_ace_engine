@@ -20,6 +20,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+constexpr int32_t INVALID_SCREEN_ID = -100;
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WindowNode : public FrameNode {
     DECLARE_ACE_TYPE(WindowNode, FrameNode);
@@ -27,11 +28,14 @@ class ACE_EXPORT WindowNode : public FrameNode {
 public:
     WindowNode(const std::string& tag,
         int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
-    ~WindowNode() override = default;
+    WindowNode(const std::string& tag,
+        int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot, int32_t screenId);
+    ~WindowNode() override;
 
     static RefPtr<WindowNode> GetOrCreateWindowNode(const std::string& tag,
-        int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
+        int32_t nodeId, int32_t sessionId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
+    void SetParent(const WeakPtr<UINode>& parent) override;
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
         std::vector<RectF>* regionList = nullptr) override;
     std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
@@ -40,6 +44,9 @@ private:
     RectF ConvertHotRect(const RectF& rect, int32_t sourceType);
     bool IsOutOfHotAreas(const std::vector<Rosen::Rect>& hotAreas, const PointF& parentLocalPoint);
     std::vector<RectF> ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas);
+
+    int32_t sessionId_ = 0;
+    int32_t screenId_ = INVALID_SCREEN_ID;
 };
 } // namespace OHOS::Ace::NG
 
