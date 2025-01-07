@@ -164,10 +164,10 @@ export struct ImageboxGroupBootcamp {
   @State privacySensitive: boolean = false;
   @State enableDynamicRangeMode: boolean = false;
   @State dynamicRangeMode: DynamicRangeMode = DynamicRangeMode.STANDARD
-  @State enableCompWidth: boolean = false;
-  @State compWidth: Length = 300;
-  @State enableCompHeight: boolean = false;
-  @State compHeight: Length = 300;
+  @State enableCompWidth: boolean = true;
+  @State compWidth: Length = 200;
+  @State enableCompHeight: boolean = true;
+  @State compHeight: Length = 200;
   @State enableCompPadding: boolean = false;
   @State compPadding: Padding | Length | LocalizedPadding = 0;
   @State enableCompMargin: boolean = false;
@@ -2060,6 +2060,15 @@ export struct ImageboxGroupBootcamp {
             .onTouchIntercept((event: TouchEvent) => {
               this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
               return HitTestMode.Default;
+            })
+            .onComplete((event?:undefined)=>{
+              this.compEventTriggeredLog('图片数据加载成功和解码成功onComplete触发，图片尺寸加载成功')
+            })
+            .onError((error:ImageError)=>{
+              this.compEventTriggeredLog('图片加载异常onError触发')
+            })
+            .onFinish(()=>{
+              this.compEventTriggeredLog('svg动效播放完成onFinish触发')
             })
 
 
