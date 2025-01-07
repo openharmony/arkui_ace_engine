@@ -38,6 +38,12 @@ enum class FocusViewStackState : int32_t {
     CLOSE = 2,
 };
 
+enum class FocusActiveReason : int32_t {
+    POINTER_EVENT = 0,
+    KEYBOARD_EVENT = 1,
+    USE_API = 2,
+};
+
 class FocusManager : public virtual AceType {
     DECLARE_ACE_TYPE(FocusManager, AceType);
 

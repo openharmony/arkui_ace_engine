@@ -750,9 +750,10 @@ public:
     static RenderFit GetRenderFit(FrameNode* frameNode);
     static BorderColorProperty GetOuterBorderColor(FrameNode* frameNode);
     static bool GetRenderGroup(FrameNode* frameNode);
-    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut);
     static void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority);
-    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup);
+    static void SetFocusScopeId(FrameNode* frameNode, const std::string& focusScopeId, bool isGroup,
+        bool arrowKeyStepOut);
     static void SetFocusScopePriority(FrameNode* frameNode, const std::string& focusScopeId,
         const uint32_t focusPriority);
     static void ResetBias(FrameNode* frameNode);

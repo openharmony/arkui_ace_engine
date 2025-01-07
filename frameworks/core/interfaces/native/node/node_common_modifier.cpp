@@ -5697,12 +5697,12 @@ void SetSystemBarEffect(ArkUINodeHandle node, ArkUI_Bool enable)
     ViewAbstract::SetSystemBarEffect(frameNode, enable);
 }
 
-void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup)
+void SetFocusScopeId(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_Bool isGroup, ArkUI_Bool arrowKeyStepOut)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     std::string idStr = id;
-    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup);
+    ViewAbstract::SetFocusScopeId(frameNode, idStr, isGroup, arrowKeyStepOut);
 }
 
 void ResetFocusScopeId(ArkUINodeHandle node)
@@ -5711,7 +5711,8 @@ void ResetFocusScopeId(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     std::string id = "";
     bool isGroup = false;
-    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup);
+    bool arrowKeyStepOut = true;
+    ViewAbstract::SetFocusScopeId(frameNode, id, isGroup, arrowKeyStepOut);
 }
 
 void SetFocusScopePriority(ArkUINodeHandle node, ArkUI_CharPtr scopeId, ArkUI_Int32 priority)
