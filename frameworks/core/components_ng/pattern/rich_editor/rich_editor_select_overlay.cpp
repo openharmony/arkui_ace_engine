@@ -345,7 +345,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "MenuActionId=%{public}d, MenuType=%{public}d", id, type);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    auto usingMouse = pattern->IsUsingMouse();
     switch (id) {
         case OptionMenuActionId::COPY:
             needRefreshMenu_ = !IsShowPaste() && pattern->copyOption_ != CopyOptions::None;
