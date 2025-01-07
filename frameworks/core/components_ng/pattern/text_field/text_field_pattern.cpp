@@ -621,7 +621,7 @@ void TextFieldPattern::UpdateSelectionAndHandleVisibility()
     auto end = dragTextEnd_;
     if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
         start = selectController_->GetCaretIndex()
-        - contentController_->GetInsertValue().length();
+        - static_cast<int32_t>(contentController_->GetInsertValue().length());
         end = selectController_->GetCaretIndex();
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]",
