@@ -1895,7 +1895,7 @@ void NavigationPattern::AddDragBarHotZoneRect()
     CHECK_NULL_VOID(geometryNode);
     auto dragBarGestureHub = dargBarNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(dragBarGestureHub);
-    
+
     auto dragRectOffset = geometryNode->GetMarginFrameOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_BAR_HOT_ZONE.ConvertToPx());
     dragRectOffset.SetY(0.0f);
@@ -2531,6 +2531,10 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
+    auto overlayManager = pipeline->GetOverlayManager();
+    if (overlayManager) {
+        overlayManager->RemoveAllModalInOverlay(false);
+    }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }

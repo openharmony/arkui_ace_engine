@@ -3243,9 +3243,11 @@ int32_t UIContentImpl::CreateModalUIExtension(
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "[%{public}s][%{public}s][%{public}d]: create modal page, "
         "sessionId=%{public}d, isProhibitBack=%{public}d, isAsyncModalBinding=%{public}d, "
-        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d",
+        "isAllowedBeCovered=%{public}d, prohibitedRemoveByRouter=%{public}d, "
+        "prohibitedRemoveByNavigation=%{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId, config.isProhibitBack,
-        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter);
+        config.isAsyncModalBinding, config.isAllowedBeCovered, config.prohibitedRemoveByRouter,
+        config.prohibitedRemoveByNavigation);
     return sessionId;
 }
 
@@ -3273,6 +3275,35 @@ void UIContentImpl::CloseModalUIExtension(int32_t sessionId)
             overlay->CloseModalUIExtension(sessionId);
         },
         TaskExecutor::TaskType::UI, "ArkUICloseModalUIExtension");
+}
+
+void UIContentImpl::UpdateModalUIExtensionConfig(
+    int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config)
+{
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "[%{public}s][%{public}s][%{public}d]: UpdateModalUIExtensionConfig with "
+        "sessionId: %{public}d",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, sessionId);
+    if (sessionId == 0) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExtension refuse to UpdateModalUIExtensionConfig");
+        return;
+    }
+
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [container, sessionId, config]() {
+            auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(pipeline);
+            auto overlay = pipeline->GetOverlayManager();
+            CHECK_NULL_VOID(overlay);
+            overlay->UpdateModalUIExtensionConfig(sessionId, config);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUpdateModalUIExtensionConfig");
 }
 
 void UIContentImpl::SetParentToken(sptr<IRemoteObject> token)

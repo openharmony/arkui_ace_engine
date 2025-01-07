@@ -232,6 +232,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) override;
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
