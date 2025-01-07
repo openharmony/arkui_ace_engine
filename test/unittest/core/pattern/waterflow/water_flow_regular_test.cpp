@@ -884,4 +884,29 @@ HWTEST_F(WaterFlowTestNg, Delete005, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 26);
     EXPECT_EQ(GetChildY(frameNode_, 26), 720.0f);
 }
+
+/**
+ * @tc.name: scrollPage001
+ * @tc.desc: Test the currentOffset after scrollPage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateWaterFlowItems(30);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
+    pattern_->ScrollPage(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
+
+    layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
+    EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
+    pattern_->ScrollPage(false);
+    FlushLayoutTask(frameNode_);
+    // sw need estimate currentOffset.
+    EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
+}
 } // namespace OHOS::Ace::NG
