@@ -52,12 +52,12 @@ export const displaysRoute: RouteGroup = {
     { name: 'advancedCounter', label: '计数器/advanced.Counter' },
     { name: 'dataPanel', label: '数据面板/DataPanel' },
     { name: 'gauge', label: '数据量规图/gauge' },
-    { name: 'textClock', label: '文本时钟/TextClock' }
-    { name: 'textTimer', label: '文本计时器/TextTimer' }
-    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
-    { name: 'badge', label: '信息标记/Badge' }
-    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
-    { name: 'chip', label: '操作块/Chip' }
+    { name: 'textClock', label: '文本时钟/TextClock' },
+    { name: 'textTimer', label: '文本计时器/TextTimer' },
+    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' },
+    { name: 'badge', label: '信息标记/Badge' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' },
+    { name: 'chip', label: '操作块/Chip' },
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'},
