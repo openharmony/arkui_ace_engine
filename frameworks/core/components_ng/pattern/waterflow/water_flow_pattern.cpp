@@ -804,7 +804,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
+    DumpLog::GetInstance().AddDesc(
+        "CachedCount:" + std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_)));
     DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
 
     property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
@@ -823,6 +824,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
     property->GetItemMaxSize().has_value()
         ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
         : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
+    layoutInfo_->Mode() == LayoutMode::TOP_DOWN ? DumpLog::GetInstance().AddDesc("Mode:TOP_DOWN")
+                                                : DumpLog::GetInstance().AddDesc("Mode:SLIDING_WINDOW");
 
     if (sections_) {
         DumpInfoAddSections();
