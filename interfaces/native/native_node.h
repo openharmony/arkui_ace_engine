@@ -3723,6 +3723,19 @@ typedef enum {
      */
     NODE_DATE_PICKER_SELECTED_TEXT_STYLE,
     /**
+     * @brief Defines the mode of the date picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: the mode. The value is and enum of {@link ArkUI_DatePickerMode}.\n.
+     *
+     * @since 16
+     */
+    NODE_DATE_PICKER_MODE = 13007,
+    /**
      * @brief Defines the time of the selected item. in the timer picker.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3819,6 +3832,19 @@ typedef enum {
      *
      */
     NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
+    /**
+     * @brief Defines whether the AM/PM option is cascaded with the time in 12-hour mode.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable cascade. The default value is <b>false</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to enable cascade.\n
+     *
+     * @since 16
+     */
+    NODE_TIME_PICKER_ENABLE_CASCADE = 14007,
 
     /**
      * @brief Defines the data selection range of the text picker.
@@ -4048,6 +4074,32 @@ typedef enum {
      *
      */
     NODE_CALENDAR_PICKER_TEXT_STYLE,
+    /**
+     * @brief Defines the start date of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: date. The value like <b>"1970-1-1"</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: date. \n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_START = 16004,
+    /**
+     * @brief Defines the end date of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: date. The value like <b>"2100-12-31"</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: date. \n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_END = 16005,
     /**
      * @brief Defines the color of the slider. This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5612,6 +5664,27 @@ typedef enum {
      */
     NODE_GRID_CACHED_COUNT,
 
+    /**
+    * @brief Defines the column width of the text picker.
+    * This attribute can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].f32: percentage of total width. The default value is that all colulmns are equal width.\n
+    * .value[1]?.f32: percentage of total width. The default value is that all colulmns are equal width.\n
+    * .value[2]?.f32: percentage of total width. The default value is that all colulmns are equal width.\n
+    * ...\n
+    * .value[n]?.f32: percentage of total width. The default value is that all colulmns are equal width.\n
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * value[0].f32: percentage of total width.\n
+    * value[1].f32: percentage of total width.\n
+    * value[2].f32: percentage of total width.\n
+    * ...\n
+    * value[n].f32: percentage of total width.\n
+    *
+    * @since 16
+    */
+    NODE_TEXT_PICKER_COLUMN_WIDTHS = 15009,
     /**
      * @brief 设置RelativeContaine容器内的辅助线，支持属性设置，属性重置和属性获取接口。
      *

@@ -756,29 +756,32 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
+
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
-{
-    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
-}
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
-{
-    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
-}
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
+
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow) {}
+
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow) {}
+
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow) {}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;
 }
+
 void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
+
 bool PipelineContext::UsingCaretAvoidMode()
 {
     return false;
 }
+
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+
 void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
@@ -791,6 +794,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 }
 
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
@@ -962,6 +970,7 @@ bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF&
 {
     return true;
 }
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -1003,6 +1012,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
     bool forceChange)
 {}
+
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}

@@ -98,6 +98,7 @@ public:
     void ForceCleanGestureScope();
     void ForceCleanGestureScopeState();
     void CleanGestureScopeState();
+    void CleanGestureScopeStateVoluntarily();
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
@@ -120,6 +121,8 @@ public:
 
     // Try to clean gesture scope when receive cancel event.
     void CleanGestureScope(size_t touchId);
+
+    void CleanGestureStateVoluntarily(size_t touchId);
 
     // Called by the gesture recognizer when the gesture recognizer has completed the recognition of the gesture (accept
     // or reject)

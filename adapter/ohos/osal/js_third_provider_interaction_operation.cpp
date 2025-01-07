@@ -138,7 +138,7 @@ void CopyNativeInfosToAccessibilityElementInfos(
         infos.push_back(info);
     }
 }
-}
+} // namespace
 
 JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
     const WeakPtr<AccessibilityProvider>& accessibilityProvider,

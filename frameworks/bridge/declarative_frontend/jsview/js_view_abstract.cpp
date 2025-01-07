@@ -445,6 +445,22 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
 
 decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
+void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return;
+}
+
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
     if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
@@ -1138,7 +1154,7 @@ void UpdateOptionsLabelInfo(std::vector<NG::MenuItemParam>& params)
 }
 
 RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
-    const JSRef<JSObject>& object, const JSExecutionContext& context)
+    const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node)
 {
     auto propType = object->GetProperty("type_");
     if (!propType->IsString()) {
@@ -1194,7 +1210,12 @@ RefPtr<NG::ChainedTransitionEffect> JSViewAbstract::ParseChainedTransition(
         }
         auto animationOptionObj = JSRef<JSObject>::Cast(propAnimationOption);
         JSRef<JSVal> onFinish = animationOptionObj->GetProperty("onFinish");
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        WeakPtr<NG::FrameNode> targetNode = nullptr;
+        if (node) {
+            targetNode = AceType::WeakClaim(AceType::RawPtr(node));
+        } else {
+            targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        }
         if (onFinish->IsFunction()) {
             RefPtr<JsFunction> jsFunc =
                 AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
@@ -3001,6 +3022,8 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
+    } else {
+        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3015,6 +3038,8 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
+    } else {
+        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
@@ -5382,6 +5407,22 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
+{
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            Dimension calc;
+            ParseJsLengthMetricsToDimension(value, calc);
+            result.emplace_back(calc);
+        }
+        return true;
+    }
+
     return false;
 }
 

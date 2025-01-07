@@ -94,7 +94,7 @@ private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     LayoutConstraintF GetChildConstraint(LayoutWrapper* layoutWrapper, SizeF& frameSize);
-    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& frameSize, OffsetF& childOffset);
+    void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& contentSize, OffsetF& childOffset);
     void LayoutMask(LayoutWrapper* layoutWrapper, const std::map<int32_t, OffsetF>& childOffsetDelta);
     void HandleSpaceBetweenOrCenterLayoutStyle(LayoutWrapper* layoutWrapper);
     void HandleAlwaysAverageSplitLayoutStyle(LayoutWrapper* layoutWrapper);
@@ -114,10 +114,10 @@ private:
     void MeasureMaxHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& childLayoutConstraint);
     GridSizeType GetGridSizeType(const SizeF& frameSize) const;
     float GetGridWidth(const BarGridColumnOptions& option, const SizeF& frameSize, int32_t columns) const;
-    float ApplyBarGridAlign(const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& frameSize) const;
+    float ApplyBarGridAlign(const RefPtr<TabBarLayoutProperty>& layoutProperty, const SizeF& contentSize) const;
     void ApplySymmetricExtensible(LayoutWrapper* layoutWrapper, float allocatedWidth);
     void ApplyLayoutMode(LayoutWrapper* layoutWrapper, float allocatedWidth);
-    float GetContentMainSize(LayoutWrapper* layoutWrapper, const SizeF& frameSize) const;
+    float GetContentMainSize(LayoutWrapper* layoutWrapper, const SizeF& contentSize);
     void CalculateItemWidthsForSymmetricExtensible(LayoutWrapper* layoutWrapper,
         const std::vector<float>& spaceRequests, const std::vector<float>& leftBuffer,
         const std::vector<float>& rightBuffer, float allocatedWidth);
@@ -128,6 +128,7 @@ private:
     bool NeedAdaptForAging(RefPtr<FrameNode> host);
     void SetTabBarMargin(RefPtr<LayoutWrapper> layoutWrapper, int32_t index);
     void UpdateMaxLines(LayoutWrapper* layoutWrapper, int32_t index);
+    float GetCurrentOffset(RefPtr<TabBarLayoutProperty>& layoutProperty, ScrollableBarModeOptions& layoutStyle);
 
     bool isRTL_ = false;
     Axis axis_ = Axis::NONE;
@@ -139,6 +140,7 @@ private:
     float startMainPos_ = 0.0f;
     float endMainPos_ = 0.0f;
     float currentDelta_ = 0.0f;
+    float barGridMargin_ = 0.0f;
     std::map<int32_t, float> visibleItemLength_;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     std::optional<int32_t> jumpIndex_;

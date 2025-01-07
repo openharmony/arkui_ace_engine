@@ -84,24 +84,30 @@ public:
             theme->hoverColor_ = pattern->GetAttr<Color>("search_hover_color", Color());
             theme->searchDividerColor_ = pattern->GetAttr<Color>("search_divider_color", Color());
             theme->searchButtonTextColor_ = pattern->GetAttr<Color>("search_button_text_color", Color());
-            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
             theme->searchButtonTextPadding_ = pattern->GetAttr<Dimension>("search_button_text_padding", Dimension());
             theme->searchButtonSpace_ = pattern->GetAttr<Dimension>("search_button_space", Dimension());
             theme->dividerSideSpace_ = pattern->GetAttr<Dimension>("search_divider_side_space", Dimension());
-            theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
-            theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
-            theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
-            theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             theme->cancelSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.xmark");
             theme->borderColor_ = pattern->GetAttr<Color>("search_border_color", Color());
             theme->borderWidth_ = pattern->GetAttr<Dimension>("search_border_width", 0.0_vp);
             theme->focusBgColor_ = pattern->GetAttr<Color>("search_focus_bg_color", Color());
-            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
             theme->needFocusBox_ = static_cast<bool>(pattern->GetAttr<double>("search_need_focus_box", 0.0));
             theme->cancelButtonStyle_ = static_cast<CancelButtonStyle>(
                 static_cast<int32_t>(pattern->GetAttr<double>("search_cancel_button_style", 2.0f)));
             theme->searchFocusPadding_ = pattern->GetAttr<Dimension>("search_focus_glow_padding", 0.0_vp);
+            ParsePatternIconTheme(pattern, theme);
+        }
+
+        void ParsePatternIconTheme(const RefPtr<ThemeStyle>& pattern, const RefPtr<SearchTheme>& theme) const
+        {
+            theme->searchIconColor_ = pattern->GetAttr<Color>("search_icon_color", Color());
+            theme->iconHeight_ = pattern->GetAttr<Dimension>("search_icon_height", Dimension());
+            theme->searchIconLeftSpace_ = pattern->GetAttr<Dimension>("search_icon_left_space", Dimension());
+            theme->searchIconRightSpace_ = pattern->GetAttr<Dimension>("search_icon_right_space", Dimension());
+            theme->symbolIconColor_ = pattern->GetAttr<Color>("search_symbol_icon_color", Color());
+            theme->symbolIconHeight_ = pattern->GetAttr<Dimension>("search_symbol_icon_height", 16.0_fp);
+            theme->focusIconColor_ = pattern->GetAttr<Color>("search_focus_icon_color", Color());
         }
     };
 
@@ -267,6 +273,11 @@ public:
         return symbolIconColor_;
     }
 
+    const Dimension& GetSymbolIconHeight() const
+    {
+        return symbolIconHeight_;
+    }
+
     const Dimension& GetRightPaddingWithoutButton() const
     {
         return rightPaddingWithoutButton_;
@@ -338,6 +349,7 @@ private:
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
     Color symbolIconColor_;
+    Dimension symbolIconHeight_;
     Dimension rightPaddingWithoutButton_;
     Color borderColor_;
     Dimension borderWidth_;

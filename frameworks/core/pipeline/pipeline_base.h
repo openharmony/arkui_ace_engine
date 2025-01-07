@@ -1038,11 +1038,12 @@ public:
     Rect GetCurrentWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
-    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
-    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
+    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) {}
 
-    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 

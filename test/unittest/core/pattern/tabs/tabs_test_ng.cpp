@@ -431,11 +431,11 @@ HWTEST_F(TabsTestNg, TabsNodeGetScrollableBarModeOptions001, TestSize.Level2)
     frameNode_->tabBarId_ = frameNode_->GetTabBarId();
     ScrollableBarModeOptions option = frameNode_->GetScrollableBarModeOptions();
     EXPECT_EQ(option.margin.Value(), 0.0f);
-    EXPECT_EQ(option.nonScrollableLayoutStyle, LayoutStyle::ALWAYS_CENTER);
+    EXPECT_EQ(option.nonScrollableLayoutStyle, std::nullopt);
     frameNode_->tabBarId_ = {};
     option = frameNode_->GetScrollableBarModeOptions();
     EXPECT_EQ(option.margin.Value(), 0.0f);
-    EXPECT_EQ(option.nonScrollableLayoutStyle, LayoutStyle::ALWAYS_CENTER);
+    EXPECT_EQ(option.nonScrollableLayoutStyle, std::nullopt);
 }
 
 /**

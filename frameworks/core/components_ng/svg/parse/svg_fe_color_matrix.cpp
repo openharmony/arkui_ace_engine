@@ -31,9 +31,9 @@ bool ConvertStringToFloat(const std::string& str, float& result)
 {
     char* endPtr = nullptr;
     errno = 0; // Reset errno before calling strtof
-    result = std::strtof(str.c_str(), &endPtr);
 
     // Check for overflow or underflow
+    result = std::strtof(str.c_str(), &endPtr);
     if (errno == ERANGE || result == HUGE_VALF || result == -HUGE_VALF) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Out of range: string value is too large or too small for float");
         return false;

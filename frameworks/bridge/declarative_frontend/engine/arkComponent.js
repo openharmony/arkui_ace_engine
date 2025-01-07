@@ -141,7 +141,7 @@ class ModifierWithKey {
       this.applyPeer(node, true, component);
       return true;
     }
-    if (component._needDiff) {
+    if (component && component._needDiff) {
       const stageTypeInfo = typeof this.stageValue;
       const valueTypeInfo = typeof this.value;
       let different = false;
@@ -10693,7 +10693,7 @@ class ArkSpanComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -20151,6 +20151,10 @@ class ArkTimePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, TimepickerSelectedTextStyleModifier.identity, TimepickerSelectedTextStyleModifier, value);
     return this;
   }
+  enableCascade(value) {
+    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity, TimepickerEnableCascadeModifier, value);
+    return this;
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
@@ -20318,6 +20322,21 @@ class TimepickerLoopModifier extends ModifierWithKey {
   }
 }
 TimepickerLoopModifier.identity = Symbol('timepickerLoop');
+
+class TimepickerEnableCascadeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
+    }
+  }
+}
+TimepickerEnableCascadeModifier.identity = Symbol('timepickerEnableCascade');
 
 class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
   constructor(value) {
@@ -26844,7 +26863,7 @@ class ArkXComponentComponent extends ArkComponent {
   applyModifierPatch() {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });

@@ -282,7 +282,12 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormWidth(resizedWidth);
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
-        uiContent_->OnFormSurfaceChange(resizedWidth, resizedHeight);
+        std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
+        if (eventHandler) {
+            eventHandler->PostTask([uiContent = uiContent_, resizedWidth, resizedHeight]() {
+                uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
+            });
+        }
         rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
     }
 }

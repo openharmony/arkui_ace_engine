@@ -403,7 +403,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/positioned:ace_core_components_positioned_$platform",
       "$ace_root/frameworks/core/components/progress:ace_core_components_progress_$platform",
       "$ace_root/frameworks/core/components/proxy:ace_core_components_proxy_$platform",
-      "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/relative_container:ace_core_components_relative_container_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
@@ -480,11 +479,17 @@ template("ace_core_source_set") {
 
     deps += [
       "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
+
+    if (qrcodegen_support) {
+      deps += [
+        "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
+      ]
+    }
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
@@ -985,10 +990,10 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
-      deps += [
-        "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform" ]
+      if (qrcodegen_support) {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
+      }
     }
 
     if (defined(config.enable_ability_component) &&
