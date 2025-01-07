@@ -631,4 +631,8 @@ const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
 // ArcScrollBar
 const char ARC_SCROLL_BAR_COMPONENT_TAG[] = "ArcScrollBarComponent";
 const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
+
+// ArcAlphabetIndexer
+const char ARC_INDEXER_COMPONENT_TAG[] = "ArcIndexerComponent";
+const char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
 } // namespace OHOS::Ace::V2
