@@ -17711,6 +17711,14 @@ class ArkButtonComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ButtonControlSizeModifier.identity, ButtonControlSizeModifier, value);
     return this;
   }
+  minFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonMinFontScaleModifier.identity, ButtonMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonMaxFontScaleModifier.identity, ButtonMaxFontScaleModifier, value);
+    return this;
+  }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -17777,6 +17785,49 @@ class ButtonControlSizeModifier extends ModifierWithKey {
   }
 }
 ButtonControlSizeModifier.identity = Symbol('buttonControlSize');
+
+class ButtonMinFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetMinFontScale(node);
+    }
+    else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().button.resetMinFontScale(node);
+    }
+    else {
+      getUINativeModule().button.setMinFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonMinFontScaleModifier.identity = Symbol('buttonMinFontScale');
+
+class ButtonMaxFontScaleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetMaxFontScale(node);
+    }
+    else if (!isNumber(this.value) && !isResource(this.value)) {
+      getUINativeModule().button.resetMaxFontScale(node);
+    }
+    else {
+      getUINativeModule().button.setMaxFontScale(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ButtonMaxFontScaleModifier.identity = Symbol('buttonMaxFontScale');
+
 class ButtonStateEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

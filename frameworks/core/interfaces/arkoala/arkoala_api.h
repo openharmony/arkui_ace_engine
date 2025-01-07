@@ -2365,6 +2365,12 @@ struct ArkUIButtonModifier {
     void (*setButtonOptions)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle, ArkUI_Uint32 buttonRole);
     void (*resetButtonOptions)(ArkUINodeHandle node);
     void (*setCreateWithLabel)(ArkUINodeHandle node, bool createWithLabel);
+    void (*setButtonMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
+    void (*resetButtonMinFontScale)(ArkUINodeHandle node);
+    void (*setButtonMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
+    void (*resetButtonMaxFontScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getButtonMinFontScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getButtonMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
