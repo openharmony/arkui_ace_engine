@@ -445,6 +445,22 @@ bool ParseLocationPropsEdges(const JSRef<JSObject>& edgesObj, EdgesParam& edges)
 
 decltype(JSViewAbstract::ParseJsLengthMetricsVp)* ParseJsLengthMetrics = JSViewAbstract::ParseJsLengthMetricsVp;
 
+void ParseJsLengthMetricsToDimension(const JSRef<JSObject>& obj, Dimension& result)
+{
+    auto value = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+    if (!value->IsNumber()) {
+        return;
+    }
+    auto unit = DimensionUnit::VP;
+    auto jsUnit = obj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+    if (jsUnit->IsNumber()) {
+        unit = static_cast<DimensionUnit>(jsUnit->ToNumber<int32_t>());
+    }
+    CalcDimension dimension(value->ToNumber<double>(), unit);
+    result = dimension;
+    return;
+}
+
 bool CheckLengthMetrics(const JSRef<JSObject>& object)
 {
     if (object->HasProperty(static_cast<int32_t>(ArkUIIndex::START)) ||
@@ -5391,6 +5407,22 @@ bool JSViewAbstract::ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<st
         result = resourceWrapper->GetStringArray(resId->ToNumber<uint32_t>());
         return true;
     }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result)
+{
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            Dimension calc;
+            ParseJsLengthMetricsToDimension(value, calc);
+            result.emplace_back(calc);
+        }
+        return true;
+    }
+
     return false;
 }
 

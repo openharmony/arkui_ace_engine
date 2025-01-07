@@ -147,8 +147,10 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
 
     auto tabsNode = FindTabsNode(tabContent);
     CHECK_NULL_VOID(tabsNode);
-    auto tabBarNode = tabsNode->GetTabBar();
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
     CHECK_NULL_VOID(tabBarNode);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
     auto tabContentPattern = tabContentNode->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(tabContentPattern);
     const auto& tabBarParam = tabContentPattern->GetTabBarParam();
@@ -168,10 +170,8 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
-    columnRenderContext->UpdateClipEdge(true);
-    auto tabBarFrameNode = AceType::DynamicCast<FrameNode>(tabBarNode);
-    CHECK_NULL_VOID(tabBarFrameNode);
-    auto tabBarPattern = tabBarFrameNode->GetPattern<TabBarPattern>();
+    columnRenderContext->UpdateClipEdge(tabBarRenderContext->GetClipEdgeValue(true));
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->SetTabBarStyle(tabBarParam.GetTabBarStyle());
     tabBarPattern->AddTabBarItemClickEvent(columnNode);
@@ -183,7 +183,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto padding = tabContentPattern->GetPadding();
     auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabLayoutProperty);
-    auto tabBarLayoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(tabBarFrameNode->GetLayoutProperty());
+    auto tabBarLayoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(tabBarNode->GetLayoutProperty());
     CHECK_NULL_VOID(tabBarLayoutProperty);
     auto tabsDirection = tabLayoutProperty->GetNonAutoLayoutDirection();
     auto tabBarDirection = tabBarLayoutProperty->GetLayoutDirection();
@@ -275,7 +275,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
             CalcLength(tabBarItemPadding), CalcLength(tabBarItemPadding), {}, {} });
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::COMPONENT_CONTENT);
-        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
 
@@ -300,7 +300,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
         columnNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
         tabBarPattern->AddTabBarItemType(columnNode->GetId(), TabBarParamType::CUSTOM_BUILDER);
         tabBarPattern->SetIsExecuteBuilder(true);
-        tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
         return;
     }
 
@@ -501,7 +501,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     textNode->MarkModifyDone();
     textNode->MarkDirtyNode();
     iconNode->MarkModifyDone();
-    tabBarFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TabContentModelNG::RemoveTabBarItem(const RefPtr<TabContentNode>& tabContentNode)

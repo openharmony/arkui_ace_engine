@@ -18,6 +18,7 @@
 #include <shared_mutex>
 #include <regex>
 
+#include "display_info.h"
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
@@ -891,9 +892,10 @@ float SystemProperties::GetDefaultResolution()
     // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-    }
+    CHECK_NULL_RETURN(defaultDisplay, density);
+    auto displayInfo = defaultDisplay->GetDisplayInfoWithCache();
+    CHECK_NULL_RETURN(displayInfo, density);
+    density = displayInfo->GetVirtualPixelRatio();
     return density;
 }
 

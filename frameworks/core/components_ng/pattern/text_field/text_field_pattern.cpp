@@ -117,6 +117,7 @@ const std::string NEWLINE = "\n";
 const std::wstring WIDE_NEWLINE = StringUtils::ToWstring(NEWLINE);
 const std::string INSPECTOR_PREFIX = "__SearchField__";
 const std::string ERRORNODE_PREFIX = "ErrorNodeField__";
+const OffsetF DEFAULT_NEGATIVE_CARET_OFFSET {-1.0f, -1.0f};
 constexpr Dimension FLOATING_CARET_SHOW_ORIGIN_CARET_DISTANCE = 10.0_vp;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr int32_t AUTO_FILL_CANCEL = 2;
@@ -430,11 +431,14 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     if (SystemProperties::GetDebugEnabled()) {
         twinklingInterval_ = 3000; // 3000 : for AtuoUITest
     }
+    ResetOriginCaretPosition();
 }
 
 bool TextFieldPattern::GetIndependentControlKeyboard()
 {
-    auto theme = GetTheme();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    auto theme = context->GetTheme<TextFieldTheme>();
     CHECK_NULL_RETURN(theme, false);
     independentControlKeyboard_ = theme->GetIndependentControlKeyboard();
     return independentControlKeyboard_;
@@ -1425,6 +1429,7 @@ void TextFieldPattern::HandleBlurEvent()
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField(host->GetId());
     }
+    ResetOriginCaretPosition();
 
     shiftFlag_ = false;
     ProcBorderAndUnderlineInBlurEvent();
@@ -1952,6 +1957,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchInfo = GetAcceptedTouchLocationInfo(info);
     CHECK_NULL_VOID(touchInfo);
     DoGestureSelection(info);
+    ResetOriginCaretPosition();
     auto touchType = touchInfo->GetTouchType();
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(touchInfo->GetLocalLocation());
@@ -3427,6 +3433,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     if (textCache == contentController_->GetTextUtf16Value() && previewTextCache.value == curPreviewText.value) {
         return false;
     }
+    ResetOriginCaretPosition();
     host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, UtfUtils::Str16ToStr8(textCache),
         UtfUtils::Str16ToStr8(contentController_->GetTextUtf16Value()));
     AutoFillValueChanged();
@@ -3450,7 +3457,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
                 pattern->StartTwinkling();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldScrollToSafeArea", PriorityType::VIP);
     return true;
 }
 
@@ -4128,6 +4135,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
         selectOverlay_->SetUsingMouse(false);
     }
+    if (!IsSelected()) {
+        ResetOriginCaretPosition();
+    }
 }
 
 void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
@@ -4704,6 +4714,33 @@ void TextFieldPattern::CalcCounterAfterFilterInsertValue(
     int32_t sum = curLength + static_cast<int32_t>(result.length());
     showCountBorderStyle_ = sum > maxLength;
     HandleCountStyle();
+}
+
+int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertValue, int32_t offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offset);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    int32_t originLength =
+        static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    bool hasInsertValue =
+        contentController_->InsertValue(offset, insertValue);
+    int32_t caretMoveLength =
+        abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - originLength);
+    if (layoutProperty->HasMaxLength()) {
+        CalcCounterAfterFilterInsertValue(originLength, insertValue,
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
+    }
+    int32_t newCaretIndex = offset + caretMoveLength;
+    selectController_->UpdateCaretIndex(offset + caretMoveLength);
+    UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
+    TwinklingByFocus();
+    CloseSelectOverlay(true);
+    ScrollToSafeArea();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return newCaretIndex;
 }
 
 void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
@@ -5899,6 +5936,7 @@ void TextFieldPattern::HandleOnPageUp()
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), GetPaddingTop() + GetBorderTop(border));
     selectController_->UpdateCaretInfoByOffset(offset, true);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
 }
 
 void TextFieldPattern::HandleOnPageDown()
@@ -5913,6 +5951,7 @@ void TextFieldPattern::HandleOnPageDown()
     auto caretRectOffset = selectController_->GetCaretRect().GetOffset();
     Offset offset(caretRectOffset.GetX(), maxFrameHeight);
     selectController_->UpdateCaretInfoByOffset(offset, true);
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
 }
 
 void TextFieldPattern::GetEmojiSubStringRange(int32_t& start, int32_t& end)
@@ -6091,8 +6130,12 @@ void TextFieldPattern::HandleSelectionUp()
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() - PreferredLineHeight() * 0.5 - textRect_.GetY();
     if (GreatOrEqual(newOffsetY, 0.0)) {
+        OffsetF originCaretPosition;
+        auto caretXPosition = GetOriginCaretPosition(originCaretPosition) &&
+            GreatNotEqual(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), 0) ? // handle when line head
+            originCaretPosition.GetX() : selectController_->GetCaretRect().GetX();
         selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
-            Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)));
+            Offset(caretXPosition - contentRect_.GetX(), newOffsetY)));
     } else {
         selectController_->MoveSecondHandleByKeyBoard(0);
     }
@@ -6106,10 +6149,11 @@ void TextFieldPattern::HandleSelectionDown()
     }
     auto newOffsetY = selectController_->GetCaretRect().GetY() + PreferredLineHeight() * 1.5 - textRect_.GetY();
     if (LessOrEqual(newOffsetY, textRect_.Height())) {
-        selectController_->MoveSecondHandleByKeyBoard(
-            paragraph_->GetGlyphIndexByCoordinate(
-                Offset(selectController_->GetCaretRect().GetX() - contentRect_.GetX(), newOffsetY)),
-            TextAffinity::DOWNSTREAM);
+        OffsetF originCaretPosition;
+        auto caretXPosition = GetOriginCaretPosition(originCaretPosition) ?
+            originCaretPosition.GetX() : selectController_->GetCaretRect().GetX();
+        selectController_->MoveSecondHandleByKeyBoard(paragraph_->GetGlyphIndexByCoordinate(
+            Offset(caretXPosition - contentRect_.GetX(), newOffsetY)), TextAffinity::DOWNSTREAM);
     } else {
         selectController_->MoveSecondHandleByKeyBoard(
             static_cast<int32_t>(contentController_->GetTextUtf16Value().length()));
@@ -8523,7 +8567,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
                 }
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::IMMEDIATE);
+        TaskExecutor::TaskType::UI, "ArkUITextFieldOnWindowSizeChangedRotation", PriorityType::VIP);
 }
 
 void TextFieldPattern::PasswordResponseKeyEvent()
@@ -9295,7 +9339,7 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     return false;
 }
 
-void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 {
     auto length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     if (start > end) {
@@ -9308,12 +9352,16 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
     }
     GetEmojiSubStringRange(start, end);
     auto value = contentController_->GetSelectedValue(start, end);
-    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
-    CHECK_NULL_VOID(isDelete);
+    if (isIME) {
+        auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+        CHECK_NULL_VOID(isDelete);
+    }
     ResetObscureTickCountDown();
     CheckAndUpdateRecordBeforeOperation();
     Delete(start, end);
-    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    if (isIME) {
+        AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    }
     showCountBorderStyle_ = false;
     HandleCountStyle();
 }
@@ -9953,6 +10001,14 @@ void TextFieldPattern::ResetFirstClickAfterGetFocus()
         firstClickResetTask_, TaskExecutor::TaskType::UI, TWINKLING_INTERVAL_MS, "ResetFirstClickAfterGetFocusTask");
 }
 
+SelectionInfo TextFieldPattern::GetSelection()
+{
+    SelectionInfo selection;
+    selection.SetSelectionStart(selectController_->GetStartIndex());
+    selection.SetSelectionEnd(selectController_->GetEndIndex());
+    return selection;
+}
+
 FocusPattern TextFieldPattern::GetFocusPattern() const
 {
     FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::FORCE_NONE };
@@ -9967,5 +10023,31 @@ FocusPattern TextFieldPattern::GetFocusPattern() const
         focusPattern.SetStyleType(FocusStyleType::OUTER_BORDER);
     }
     return focusPattern;
+}
+
+// return: whether the offset is valid, return false if invalid
+bool TextFieldPattern::GetOriginCaretPosition(OffsetF& offset) const
+{
+    if (!originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    offset = originCaretPosition_;
+    return true;
+}
+
+void TextFieldPattern::ResetOriginCaretPosition()
+{
+    originCaretPosition_ = DEFAULT_NEGATIVE_CARET_OFFSET;
+}
+
+// Record current caret position if originCaretPosition_ is invalid
+// return: whether the current offset is recorded and valid
+bool TextFieldPattern::RecordOriginCaretPosition()
+{
+    if (originCaretPosition_.NonNegative()) {
+        return false;
+    }
+    originCaretPosition_ = selectController_->GetCaretRect().GetOffset();
+    return originCaretPosition_.NonNegative();
 }
 } // namespace OHOS::Ace::NG

@@ -61,84 +61,76 @@ std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
 std::unique_ptr<DatePickerDialogModel> DatePickerDialogModel::datePickerDialogInstance_ = nullptr;
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
 std::unique_ptr<TimePickerDialogModel> TimePickerDialogModel::timePickerDialogInstance_ = nullptr;
-std::mutex DatePickerModel::mutex_;
-std::mutex DatePickerDialogModel::mutex_;
-std::mutex TimePickerModel::mutex_;
-std::mutex TimePickerDialogModel::mutex_;
+std::once_flag DatePickerModel::onceFlag_;
+std::once_flag DatePickerDialogModel::onceFlag_;
+std::once_flag TimePickerModel::onceFlag_;
+std::once_flag TimePickerDialogModel::onceFlag_;
 
 DatePickerModel* DatePickerModel::GetInstance()
 {
-    if (!datePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!datePickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            datePickerInstance_.reset(new NG::DatePickerModelNG());
+        datePickerInstance_.reset(new NG::DatePickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                datePickerInstance_.reset(new NG::DatePickerModelNG());
-            } else {
-                datePickerInstance_.reset(new Framework::DatePickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            datePickerInstance_.reset(new NG::DatePickerModelNG());
+        } else {
+            datePickerInstance_.reset(new Framework::DatePickerModelImpl());
         }
-    }
+#endif
+    });
+
     return datePickerInstance_.get();
 }
 
 DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 {
-    if (!datePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!datePickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
+        datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
-            } else {
-                datePickerDialogInstance_.reset(new Framework::DatePickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
+        } else {
+            datePickerDialogInstance_.reset(new Framework::DatePickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return datePickerDialogInstance_.get();
 }
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    if (!timePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            timePickerInstance_.reset(new NG::TimePickerModelNG());
+        timePickerInstance_.reset(new NG::TimePickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                timePickerInstance_.reset(new NG::TimePickerModelNG());
-            } else {
-                timePickerInstance_.reset(new Framework::TimePickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            timePickerInstance_.reset(new NG::TimePickerModelNG());
+        } else {
+            timePickerInstance_.reset(new Framework::TimePickerModelImpl());
         }
-    }
+#endif
+    });
+
     return timePickerInstance_.get();
 }
 
 TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 {
-    if (!timePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+        timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
-            } else {
-                timePickerDialogInstance_.reset(new Framework::TimePickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+        } else {
+            timePickerDialogInstance_.reset(new Framework::TimePickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return timePickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace
@@ -547,6 +539,26 @@ void JSTimePicker::OnChange(const JSCallbackInfo& info)
         func->Execute(*eventInfo);
     };
     TimePickerModel::GetInstance()->SetOnChange(std::move(onChange));
+}
+
+void JSTimePicker::OnEnterSelectedArea(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<DatePickerChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), DatePickerChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onEnterSelectedArea = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                        const BaseEventInfo* index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("datePicker.onEnterSelectedArea");
+        PipelineContext::SetCallBackNode(node);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        func->Execute(*eventInfo);
+    };
+    TimePickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void JSDatePicker::PickerBackgroundColor(const JSCallbackInfo& info)
@@ -1407,6 +1419,7 @@ void JSTimePicker::JSBind(BindingTarget globalObj)
     JSClass<JSTimePicker>::StaticMethod("dateTimeOptions", &JSTimePicker::DateTimeOptions);
     JSClass<JSTimePicker>::StaticMethod("opacity", &JSTimePicker::JsOpacity);
     JSClass<JSTimePicker>::StaticMethod("enableCascade", &JSTimePicker::EnableCascade);
+    JSClass<JSTimePicker>::StaticMethod("onEnterSelectedArea", &JSTimePicker::OnEnterSelectedArea);
     JSClass<JSTimePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1722,6 +1735,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     std::function<void()> cancelEvent;
     std::function<void(const std::string&)> acceptEvent;
     std::function<void(const std::string&)> changeEvent;
+    std::function<void(const std::string&)> enterEvent;
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = paramObject->GetProperty("onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction()) {
@@ -1732,6 +1746,19 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             std::vector<std::string> keys;
             keys = { "year", "month", "day", "hour", "minute", "second" };
             ACE_SCORING_EVENT("DatePickerDialog.onChange");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+    }
+    auto onEnterSelectedArea = paramObject->GetProperty("onEnterSelectedArea");
+    if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onEnterSelectedArea));
+        enterEvent = [execCtx = info.GetExecutionContext(), type = DatePickerType::TIME, func = std::move(jsFunc),
+                          node = targetNode](const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys;
+            keys = { "year", "month", "day", "hour", "minute", "second" };
+            ACE_SCORING_EVENT("DatePickerDialog.onEnterSelectedArea");
             PipelineContext::SetCallBackNode(node);
             func->Execute(keys, info);
         };
@@ -1855,7 +1882,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
     TimePickerDialogModel::GetInstance()->SetTimePickerDialogShow(pickerDialog, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), timePickerDialogEvent, buttonInfos);
+        std::move(acceptEvent), std::move(changeEvent), std::move(enterEvent), timePickerDialogEvent, buttonInfos);
 }
 
 void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,

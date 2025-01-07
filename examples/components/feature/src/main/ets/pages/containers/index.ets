@@ -24,6 +24,7 @@ import { GridBootcamp } from './GridBootcamp';
 import { FlexBootcamp } from './FlexBootcamp';
 import { ColumnBootcamp } from './ColumnBootcamp';
 import { GridColBootcamp } from './GridColBootcamp';
+import { FolderStackBootcamp } from './FolderStackBootcamp';
 import { StackBootcamp } from './StackBootcamp';
 import { RelativeContainerBootcamp } from './RelativeContainerBootcamp';
 import { RowBootcamp } from './RowBootcamp';
@@ -52,7 +53,8 @@ export const containersRoute: RouteGroup = {
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
-    { name: 'gridRow', label: '栅格容器/GridRow' }
+    { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'folder-stack', label: '折叠布局/FolderStack' },
   ]
 };
 
@@ -92,5 +94,7 @@ export function ContainersDestination(name: string, route: Route) {
     WaterFlowBootcamp({ title: route.label })
   }else if (name === 'containers/gridRow') {
     GridRowBootcamp({ title: route.label })
+  } else if (name === 'containers/folder-stack') {
+    FolderStackBootcamp({ title: route.label })
   }
 }

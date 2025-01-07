@@ -46,7 +46,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, name);
+        TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 } // namespace
 
@@ -778,7 +778,8 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -857,7 +858,7 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>&
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
             overlayManager->CloseCustomDialog(node, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
@@ -887,7 +888,7 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
@@ -1103,7 +1104,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel", PriorityType::VIP);
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
         LOGI("Begin to show dialog ");
@@ -1145,7 +1146,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel", PriorityType::VIP);
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -1155,7 +1156,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu", PriorityType::VIP);
     return;
 }
 

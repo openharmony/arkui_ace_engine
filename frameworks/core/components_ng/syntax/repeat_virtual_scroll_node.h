@@ -142,7 +142,7 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {

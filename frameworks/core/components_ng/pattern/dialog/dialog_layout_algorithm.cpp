@@ -57,6 +57,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogPattern);
     expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
+    keyboardAvoidDistance_ = dialogPattern->GetDialogProperties().keyboardAvoidDistance;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
@@ -865,7 +866,11 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0);
     auto bottom = dialogTheme->GetDefaultDialogMarginBottom();
-    return pipelineContext->NormalizeToPx(bottom);
+    if (keyboardAvoidDistance_.has_value()) {
+        return pipelineContext->NormalizeToPx(keyboardAvoidDistance_.value());
+    } else {
+        return pipelineContext->NormalizeToPx(bottom);
+    }
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
@@ -897,7 +902,11 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
             resizeFlag_ = true;
             dialogChildSize_ = childSize;
-            dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            if (limitPos - childOffset.GetY() > dialogChildSize_.Height()) {
+                dialogChildSize_.MinusHeight(dialogChildSize_.Height());
+            } else {
+                dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            }
             childOffset.SetY(limitPos);
         }
     }

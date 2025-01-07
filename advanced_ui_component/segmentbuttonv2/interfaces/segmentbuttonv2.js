@@ -50,19 +50,31 @@ const b1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.comp_background_tertiary'],
+    params: ['sys.color.segment_button_v2_tab_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonBorderRadius: {
     id: -1,
     type: 10002,
-    params: ['sys.float.corner_radius_level10'],
+    params: ['sys.float.segment_button_v2_background_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  buttonMinHeight: 40,
-  i1: 64,
+  buttonMinHeight: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_singleline_background_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  i1: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_doubleline_background_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   buttonPadding: {
     id: -1,
     type: 10002,
@@ -73,21 +85,14 @@ const b1 = {
   itemSelectedBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.white'],
+    params: ['sys.color.segment_button_v2_tab_selected_item_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBorderRadius: {
     id: -1,
     type: 10002,
-    params: ['sys.float.corner_radius_level9'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  j1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.corner_radius_level10'],
+    params: ['sys.float.segment_button_v2_selected_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -145,8 +150,20 @@ const b1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  itemMinHeight: 36,
-  l1: 60,
+  itemMinHeight: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_singleline_selected_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  j1: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_doubleline_selected_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   itemPadding: {
     top: LengthMetrics.resource({
       id: -1,
@@ -165,43 +182,55 @@ const b1 = {
     start: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: o,
-  m1: o,
-  n1: t,
+  l1: o,
+  m1: t,
   itemMinFontScale: u,
-  o1: u,
-  q1: a1,
+  n1: u,
+  o1: a1,
 };
 const c1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.ohos_id_color_button_normal'],
+    params: ['sys.color.segment_button_v2_tab_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   buttonBorderRadius: {
     id: -1,
     type: 10002,
-    params: ['sys.float.corner_radius_level9'],
+    params: ['sys.float.segment_button_v2_background_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  buttonMinHeight: 36,
-  i1: 64,
+  buttonMinHeight: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_singleline_background_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  i1: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_doubleline_background_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   buttonPadding: {
     id: -1,
     type: 10002,
@@ -212,25 +241,18 @@ const c1 = {
   itemSelectedBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.brand'],
+    params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBorderRadius: {
     id: -1,
     type: 10002,
-    params: ['sys.float.corner_radius_level8'],
+    params: ['sys.float.segment_button_v2_selected_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  j1: {
-    id: -1,
-    type: 10002,
-    params: ['sys.float.corner_radius_level9'],
-    bundleName: '__harDefaultBundleName__',
-    moduleName: '__harDefaultModuleName__',
-  },
-  itemSpace: LengthMetrics.vp(2),
+  itemSpace: LengthMetrics.vp(0),
   itemFontSize: {
     id: -1,
     type: 10002,
@@ -284,8 +306,20 @@ const c1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  itemMinHeight: 32,
-  l1: 60,
+  itemMinHeight: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_singleline_selected_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  j1: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_doubleline_selected_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   itemPadding: {
     top: LengthMetrics.resource({
       id: -1,
@@ -304,25 +338,25 @@ const c1 = {
     start: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: o,
-  m1: o,
-  n1: t,
+  l1: o,
+  m1: t,
   itemMinFontScale: u,
-  o1: u,
-  q1: a1,
+  n1: u,
+  o1: a1,
 };
 let SegmentButtonV2Item = class SegmentButtonV2Item {
   constructor(options) {
@@ -593,8 +627,8 @@ export class TabSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 289,
-                s1: 5,
+                line: 286,
+                q1: 5,
               }
             );
             ViewV2.create(componentCall);
@@ -1057,8 +1091,8 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 399,
-                s1: 5,
+                line: 396,
+                q1: 5,
               }
             );
             ViewV2.create(componentCall);
@@ -1419,6 +1453,7 @@ class d1 extends ViewV2 {
               Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
               Button.backgroundColor(Color.Transparent);
               Button.borderRadius(this.getItemBorderRadius());
+              Button.direction(this.languageDirection);
               Button.enabled(repeatItem.item.enabled);
               Button.hoverEffect(HoverEffect.None);
               Button.layoutWeight(1);
@@ -1511,8 +1546,8 @@ class d1 extends ViewV2 {
                       () => {},
                       {
                         page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                        line: 568,
-                        s1: 13,
+                        line: 565,
+                        q1: 13,
                       }
                     );
                     ViewV2.create(componentCall);
@@ -1826,6 +1861,7 @@ class d1 extends ViewV2 {
         minWidth: '100%',
         minHeight: this.getButtonMinHeight(),
       });
+      Stack.direction(this.languageDirection);
     }, Stack);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
@@ -1834,6 +1870,7 @@ class d1 extends ViewV2 {
         this.getButtonBackgroundBlurStyle(),
         this.getButtonBackgroundBlurStyleOptions()
       );
+      Stack.direction(this.languageDirection);
     }, Stack);
     this.EffectLayer.bind(this)();
     this.BackplateLayer.bind(this)();
@@ -1900,7 +1937,7 @@ class d1 extends ViewV2 {
       return {
         id: -1,
         type: 10001,
-        params: ['sys.color.ohos_id_color_click_effect'],
+        params: ['sys.color.interactive_click'],
         bundleName: '__harDefaultBundleName__',
         moduleName: '__harDefaultModuleName__',
       };
@@ -1909,7 +1946,7 @@ class d1 extends ViewV2 {
       return {
         id: -1,
         type: 10001,
-        params: ['sys.color.ohos_id_color_hover'],
+        params: ['sys.color.interactive_hover'],
         bundleName: '__harDefaultBundleName__',
         moduleName: '__harDefaultModuleName__',
       };
@@ -1917,10 +1954,10 @@ class d1 extends ViewV2 {
     return Color.Transparent;
   }
   getItemBorderRadius() {
-    if (this.itemBorderRadius && g1.getInstance().t1(this.itemBorderRadius)) {
+    if (this.itemBorderRadius && g1.getInstance().s1(this.itemBorderRadius)) {
       return g1.getInstance().stringify(this.itemBorderRadius);
     }
-    return this.items.hasHybrid ? this.theme.j1 : this.theme.itemBorderRadius;
+    return this.theme.itemBorderRadius;
   }
   getItemSelectedBackgroundColor() {
     if (this.itemSelectedBackgroundColor) {
@@ -1929,7 +1966,7 @@ class d1 extends ViewV2 {
     return this.theme.itemSelectedBackgroundColor;
   }
   getItemSpace() {
-    if (this.itemSpace && g1.getInstance().t1(this.itemSpace)) {
+    if (this.itemSpace && g1.getInstance().s1(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -2001,7 +2038,7 @@ class d1 extends ViewV2 {
     return repeatItem.index === this.normalizedSelectedIndex;
   }
   getButtonPadding() {
-    if (this.buttonPadding && g1.getInstance().t1(this.buttonPadding)) {
+    if (this.buttonPadding && g1.getInstance().s1(this.buttonPadding)) {
       return g1.getInstance().stringify(this.buttonPadding);
     }
     return this.theme.buttonPadding;
@@ -2009,7 +2046,7 @@ class d1 extends ViewV2 {
   getButtonBorderRadius() {
     if (
       this.buttonBorderRadius &&
-      g1.getInstance().t1(this.buttonBorderRadius)
+      g1.getInstance().s1(this.buttonBorderRadius)
     ) {
       return g1.getInstance().stringify(this.buttonBorderRadius);
     }
@@ -2022,7 +2059,7 @@ class d1 extends ViewV2 {
     return this.theme.buttonBackgroundColor;
   }
   getButtonMinHeight() {
-    if (this.buttonMinHeight && g1.getInstance().t1(this.buttonMinHeight)) {
+    if (this.buttonMinHeight && g1.getInstance().s1(this.buttonMinHeight)) {
       return g1.getInstance().stringify(this.buttonMinHeight);
     }
     return this.items.hasHybrid ? this.theme.i1 : this.theme.buttonMinHeight;
@@ -2190,21 +2227,21 @@ const e1 = {
   itemBorderRadius: {
     id: -1,
     type: 10002,
-    params: ['sys.float.corner_radius_level10'],
+    params: ['sys.float.segment_button_v2_multi_corner_radius'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.comp_background_tertiary'],
+    params: ['sys.color.segment_button_v2_multi_capsule_button_background'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
   itemSelectedBackgroundColor: {
     id: -1,
     type: 10001,
-    params: ['sys.color.brand'],
+    params: ['sys.color.comp_background_emphasize'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
@@ -2280,26 +2317,38 @@ const e1 = {
     start: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
     end: LengthMetrics.resource({
       id: -1,
       type: 10002,
-      params: ['sys.float.padding_level8'],
+      params: ['sys.float.padding_level4'],
       bundleName: '__harDefaultBundleName__',
       moduleName: '__harDefaultModuleName__',
     }),
   },
-  itemMinHeight: 40,
-  l1: 64,
+  itemMinHeight: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_multi_singleline_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
+  j1: {
+    id: -1,
+    type: 10002,
+    params: ['sys.float.segment_button_v2_multi_doubleline_height'],
+    bundleName: '__harDefaultBundleName__',
+    moduleName: '__harDefaultModuleName__',
+  },
   itemMaxFontScale: o,
-  m1: o,
-  n1: t,
+  l1: o,
+  m1: t,
   itemMinFontScale: u,
-  o1: u,
-  q1: a1,
+  n1: u,
+  o1: a1,
 };
 export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   constructor(
@@ -2382,6 +2431,24 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
         : undefined
     );
     this.initParam(
+      'itemBackgroundEffect',
+      params && 'itemBackgroundEffect' in params
+        ? params.itemBackgroundEffect
+        : undefined
+    );
+    this.initParam(
+      'itemBackgroundBlurStyle',
+      params && 'itemBackgroundBlurStyle' in params
+        ? params.itemBackgroundBlurStyle
+        : undefined
+    );
+    this.initParam(
+      'itemBackgroundBlurStyleOptions',
+      params && 'itemBackgroundBlurStyleOptions' in params
+        ? params.itemBackgroundBlurStyleOptions
+        : undefined
+    );
+    this.initParam(
       'itemSelectedBackgroundColor',
       params && 'itemSelectedBackgroundColor' in params
         ? params.itemSelectedBackgroundColor
@@ -2460,8 +2527,10 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             );
             Button.accessibilityLevel(repeatItem.item.accessibilityLevel);
             Button.backgroundColor(this.getItemBackgroundColor(repeatItem));
+            Button.backgroundEffect(this.itemBackgroundEffect);
             Button.borderRadius(this.getItemButtonBorderRadius(repeatItem));
             Button.constraintSize({ minHeight: this.getItemMinHeight() });
+            Button.direction(this.languageDirection);
             Button.enabled(repeatItem.item.enabled);
             Button.layoutWeight(1);
             Button.padding(0);
@@ -2485,6 +2554,14 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
               this.$selectedIndexes(selection);
             });
           }, Button);
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            __Common__.create();
+            __Common__.borderRadius(this.getItemButtonBorderRadius(repeatItem));
+            __Common__.backgroundBlurStyle(
+              this.getItemBackgroundBlurStyle(),
+              this.getItemBackgroundBlurStyleOptions()
+            );
+          }, __Common__);
           {
             this.observeComponentCreation2(
               (elmtId, isInitialRender) => {
@@ -2520,8 +2597,8 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     () => {},
                     {
                       page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                      line: 1060,
-                      s1: 13,
+                      line: 1065,
+                      q1: 13,
                     }
                   );
                   ViewV2.create(componentCall);
@@ -2582,12 +2659,25 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
               { name: 'SegmentButtonV2ItemContent' }
             );
           }
+          __Common__.pop();
           Button.pop();
         })
         .render(isInitialRender);
     }, Repeat);
     Flex.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  getItemBackgroundBlurStyleOptions() {
+    if (this.itemBackgroundEffect) {
+      return undefined;
+    }
+    return this.itemBackgroundBlurStyleOptions;
+  }
+  getItemBackgroundBlurStyle() {
+    if (this.itemBackgroundEffect) {
+      return undefined;
+    }
+    return this.itemBackgroundBlurStyle;
   }
   getItemAccessibilityDescription(repeatItem) {
     if (typeof repeatItem.item.accessibilityDescription === 'object') {
@@ -2608,13 +2698,13 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     }
   }
   getItemSpace() {
-    if (this.itemSpace && g1.getInstance().t1(this.itemSpace)) {
+    if (this.itemSpace && g1.getInstance().s1(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && g1.getInstance().t1(this.itemMinHeight)) {
+    if (this.itemMinHeight && g1.getInstance().s1(this.itemMinHeight)) {
       return g1.getInstance().stringify(this.itemMinHeight);
     }
     return this.theme.itemMinHeight;
@@ -2705,6 +2795,21 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     if ('itemBackgroundColor' in params) {
       this.updateParam('itemBackgroundColor', params.itemBackgroundColor);
     }
+    if ('itemBackgroundEffect' in params) {
+      this.updateParam('itemBackgroundEffect', params.itemBackgroundEffect);
+    }
+    if ('itemBackgroundBlurStyle' in params) {
+      this.updateParam(
+        'itemBackgroundBlurStyle',
+        params.itemBackgroundBlurStyle
+      );
+    }
+    if ('itemBackgroundBlurStyleOptions' in params) {
+      this.updateParam(
+        'itemBackgroundBlurStyleOptions',
+        params.itemBackgroundBlurStyleOptions
+      );
+    }
     if ('itemSelectedBackgroundColor' in params) {
       this.updateParam(
         'itemSelectedBackgroundColor',
@@ -2784,6 +2889,24 @@ m(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundColor',
+  void 0
+);
+m(
+  [Param],
+  MultiCapsuleSegmentButtonV2.prototype,
+  'itemBackgroundEffect',
+  void 0
+);
+m(
+  [Param],
+  MultiCapsuleSegmentButtonV2.prototype,
+  'itemBackgroundBlurStyle',
+  void 0
+);
+m(
+  [Param],
+  MultiCapsuleSegmentButtonV2.prototype,
+  'itemBackgroundBlurStyleOptions',
   void 0
 );
 m(
@@ -2938,7 +3061,11 @@ class f1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create({ space: 2 });
-      Column.constraintSize({ minHeight: this.getItemMinHeight() });
+      Column.constraintSize({
+        minHeight: this.getItemMinHeight(),
+        minWidth: '100%',
+      });
+      Column.direction(this.languageDirection);
       Column.justifyContent(FlexAlign.Center);
       Column.padding(this.getItemPadding());
     }, Column);
@@ -2950,6 +3077,7 @@ class f1 extends ViewV2 {
             SymbolGlyph.create(this.item.symbol);
             SymbolGlyph.fontSize(this.getSymbolFontSize());
             SymbolGlyph.fontColor([this.getItemSymbolFillColor()]);
+            SymbolGlyph.direction(this.languageDirection);
             SymbolGlyph.attributeModifier.bind(this)(this.item.symbolModifier);
           }, SymbolGlyph);
         });
@@ -2960,6 +3088,7 @@ class f1 extends ViewV2 {
             Image.fillColor(this.getItemIconFillColor());
             Image.width(this.getItemIconWidth());
             Image.height(this.getItemIconHeight());
+            Image.direction(this.languageDirection);
             Image.draggable(false);
             Image.attributeModifier.bind(this)(this.item.iconModifier);
           }, Image);
@@ -2975,12 +3104,14 @@ class f1 extends ViewV2 {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.item.text);
+            Text.direction(this.languageDirection);
             Text.fontSize(this.getItemFontSize());
             Text.fontColor(this.getItemFontColor());
             Text.fontWeight(this.getItemFontWeight());
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
-            Text.minFontScale(this.getItemMinFontScale());
+            Text.maxLines(1);
             Text.maxFontScale(this.getItemMaxFontScale());
+            Text.minFontScale(this.getItemMinFontScale());
             Text.attributeModifier.bind(this)(this.item.textModifier);
           }, Text);
           Text.pop();
@@ -3011,7 +3142,7 @@ class f1 extends ViewV2 {
   getSymbolFontSize() {
     if (
       this.itemSymbolFontSize &&
-      g1.getInstance().t1(this.itemSymbolFontSize)
+      g1.getInstance().s1(this.itemSymbolFontSize)
     ) {
       return g1.getInstance().stringify(this.itemSymbolFontSize);
     }
@@ -3019,23 +3150,23 @@ class f1 extends ViewV2 {
   }
   getItemMaxFontScale() {
     if (typeof this.itemMaxFontScale === 'number') {
-      return normalize(this.itemMaxFontScale, this.theme.m1, this.theme.n1);
+      return normalize(this.itemMaxFontScale, this.theme.l1, this.theme.m1);
     }
     if (typeof this.itemMaxFontScale === 'object') {
       const itemMaxFontScale =
         j(this.getUIContext(), this.itemMaxFontScale) ?? o;
-      return normalize(itemMaxFontScale, this.theme.m1, this.theme.n1);
+      return normalize(itemMaxFontScale, this.theme.l1, this.theme.m1);
     }
     return o;
   }
   getItemMinFontScale() {
     if (typeof this.itemMinFontScale === 'number') {
-      return normalize(this.itemMinFontScale, this.theme.o1, this.theme.q1);
+      return normalize(this.itemMinFontScale, this.theme.n1, this.theme.o1);
     }
     if (typeof this.itemMinFontScale === 'object') {
       const itemMinFontScale =
         j(this.getUIContext(), this.itemMinFontScale) ?? u;
-      return normalize(itemMinFontScale, this.theme.o1, this.theme.q1);
+      return normalize(itemMinFontScale, this.theme.n1, this.theme.o1);
     }
     return u;
   }
@@ -3046,31 +3177,31 @@ class f1 extends ViewV2 {
       start: this.theme.itemPadding.start,
       end: this.theme.itemPadding.end,
     };
-    if (this.itemPadding?.top && g1.getInstance().t1(this.itemPadding.top)) {
+    if (this.itemPadding?.top && g1.getInstance().s1(this.itemPadding.top)) {
       itemPadding.top = this.itemPadding.top;
     }
     if (
       this.itemPadding?.bottom &&
-      g1.getInstance().t1(this.itemPadding.bottom)
+      g1.getInstance().s1(this.itemPadding.bottom)
     ) {
       itemPadding.bottom = this.itemPadding.bottom;
     }
     if (
       this.itemPadding?.start &&
-      g1.getInstance().t1(this.itemPadding.start)
+      g1.getInstance().s1(this.itemPadding.start)
     ) {
       itemPadding.start = this.itemPadding.start;
     }
-    if (this.itemPadding?.end && g1.getInstance().t1(this.itemPadding.end)) {
+    if (this.itemPadding?.end && g1.getInstance().s1(this.itemPadding.end)) {
       itemPadding.end = this.itemPadding.end;
     }
     return itemPadding;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && g1.getInstance().t1(this.itemMinHeight)) {
+    if (this.itemMinHeight && g1.getInstance().s1(this.itemMinHeight)) {
       return g1.getInstance().stringify(this.itemMinHeight);
     }
-    return this.hasHybrid ? this.theme.l1 : this.theme.itemMinHeight;
+    return this.hasHybrid ? this.theme.j1 : this.theme.itemMinHeight;
   }
   getItemFontColor() {
     if (this.selected) {
@@ -3088,13 +3219,13 @@ class f1 extends ViewV2 {
     if (this.selected) {
       if (
         this.itemSelectedFontSize &&
-        g1.getInstance().t1(this.itemSelectedFontSize)
+        g1.getInstance().s1(this.itemSelectedFontSize)
       ) {
         return g1.getInstance().stringify(this.itemSelectedFontSize);
       }
       return this.theme.itemFontSize;
     }
-    if (this.itemFontSize && g1.getInstance().t1(this.itemFontSize)) {
+    if (this.itemFontSize && g1.getInstance().s1(this.itemFontSize)) {
       return g1.getInstance().stringify(this.itemFontSize);
     }
     return this.theme.itemFontSize;
@@ -3102,7 +3233,7 @@ class f1 extends ViewV2 {
   getItemIconHeight() {
     if (
       this.itemIconSize?.height &&
-      g1.getInstance().t1(this.itemIconSize.height)
+      g1.getInstance().s1(this.itemIconSize.height)
     ) {
       return g1.getInstance().stringify(this.itemIconSize.height);
     }
@@ -3111,7 +3242,7 @@ class f1 extends ViewV2 {
   getItemIconWidth() {
     if (
       this.itemIconSize?.width &&
-      g1.getInstance().t1(this.itemIconSize.width)
+      g1.getInstance().s1(this.itemIconSize.width)
     ) {
       return g1.getInstance().stringify(this.itemIconSize.width);
     }
@@ -3252,7 +3383,7 @@ class g1 {
         return `${metrics.value}lpx`;
     }
   }
-  t1(metrics) {
+  s1(metrics) {
     return metrics.value >= 0;
   }
 }

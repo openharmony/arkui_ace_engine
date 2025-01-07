@@ -18,6 +18,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
+constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 class PinchRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -1386,5 +1388,117 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerPtrHandleTouchMoveEventTest005, T
     recognizerTest.inputEventType_ = InputEventType::AXIS;
     recognizerTest.SendCallbackMsg(callback);
     EXPECT_EQ(recognizerTest.inputEventType_, InputEventType::AXIS);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest001
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with touch event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PinchRecognizerTestNg.
+     */
+    PinchRecognizer pinchRecognizer = PinchRecognizer(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: pinchRecognizer's callback onActionCancel is not nullptr.
+     */
+    pinchRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    pinchRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(pinchRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value. pinchRecognizer.refereeState_ = RefereeState::READY
+     */
+    TouchEvent touchEvent;
+    pinchRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer.activeFingers_.push_back(touchEvent.id);
+    pinchRecognizer.fingers_ = 1;
+    pinchRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(pinchRecognizer.refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest002
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with axis event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PinchRecognizerTestNg.
+     */
+    PinchRecognizer pinchRecognizer = PinchRecognizer(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: pinchRecognizer's callback onActionCancel is not nullptr.
+     */
+    pinchRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    pinchRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(pinchRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    AxisEvent axisEvent;
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    pinchRecognizer.HandleTouchCancelEvent(axisEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest003
+ * @tc.desc: Test SendCallbackMsg function in the ReconcileFrom. The onActionCancel function will return
+ * GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PinchRecognizerTestNg, SetOnActionCancelTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create PinchRecognizer.
+     */
+    PinchRecognizer pinchRecognizer = PinchRecognizer(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+    RefPtr<PinchRecognizer> pinchRecognizerPtr =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: pinchRecognizer's callback onActionCancel is not nullptr.
+     */
+    pinchRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    pinchRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(pinchRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke ReconcileFrom when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    pinchRecognizer.fingers_ = 0;
+    pinchRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto result = pinchRecognizer.ReconcileFrom(pinchRecognizerPtr);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG

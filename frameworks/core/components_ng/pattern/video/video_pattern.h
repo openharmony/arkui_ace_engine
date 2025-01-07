@@ -265,6 +265,9 @@ public:
     void SetShortcutKeyEnabled(bool isEnableShortcutKey);
     bool GetShortcutKeyEnabled() const;
 
+    void SetCurrentVolume(float currentVolume);
+    float GetCurrentVolume() const;
+
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif

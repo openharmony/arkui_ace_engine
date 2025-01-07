@@ -232,6 +232,9 @@ bool FocusEventHandler::HandleCrownEvent(const CrownEvent& CrownEvent)
             GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
     } else {
         retCallback = ProcessOnCrownEventInternal(CrownEvent);
+        TAG_LOGI(AceLogTag::ACE_FOCUS,
+            "OnCrownEventInternal: Node %{public}s/%{public}d handle CrownAction:%{public}d",
+            GetFrameName().c_str(), GetFrameId(), CrownEvent.action);
     }
     return retCallback;
 }

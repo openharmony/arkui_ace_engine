@@ -821,7 +821,7 @@ void VideoPattern::UpdateMuted()
             [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
-                if (isMuted) {
+                if (isMuted || NearZero(currentVolume)) {
                     mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
                     mediaPlayer->SetVolume(0.0f, 0.0f);
                 } else {
@@ -2000,6 +2000,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
     SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+    SetCurrentVolume(videoPattern->GetCurrentVolume());
 
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src, instanceId_);
@@ -2069,6 +2070,16 @@ void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
 bool VideoPattern::GetShortcutKeyEnabled() const
 {
     return isEnableShortcutKey_;
+}
+
+void VideoPattern::SetCurrentVolume(float currentVolume)
+{
+    currentVolume_ = currentVolume;
+}
+
+float VideoPattern::GetCurrentVolume() const
+{
+    return currentVolume_;
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)

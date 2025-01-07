@@ -397,4 +397,25 @@ void ExclusiveRecognizer::DispatchEventToAllRecognizers(const TouchEvent& point)
         }
     }
 }
+
+void ExclusiveRecognizer::CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (activeRecognizer_ == recognizer) {
+        SetIsNeedResetRecognizer(true);
+    }
+}
+
+void ExclusiveRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+    if (IsNeedResetRecognizerState()) {
+        activeRecognizer_ = nullptr;
+        refereeState_ = RefereeState::READY;
+        SetIsNeedResetRecognizer(false);
+    }
+}
 } // namespace OHOS::Ace::NG

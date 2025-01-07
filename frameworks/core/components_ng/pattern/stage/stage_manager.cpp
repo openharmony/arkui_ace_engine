@@ -680,7 +680,7 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
 bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_RETURN(pageNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetPageInTransition();

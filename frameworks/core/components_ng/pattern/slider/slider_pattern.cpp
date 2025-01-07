@@ -1554,7 +1554,7 @@ Axis SliderPattern::GetDirection() const
 #ifdef SUPPORT_DIGITAL_CROWN
 double SliderPattern::GetCrownRotatePx(const CrownEvent& event) const
 {
-    double px = event.degree * crownDisplayControlRatio_;
+    double px = -event.degree * crownDisplayControlRatio_;
     switch (crownSensitivity_) {
         case CrownSensitivity::LOW:
             px *= CROWN_SENSITIVITY_LOW;

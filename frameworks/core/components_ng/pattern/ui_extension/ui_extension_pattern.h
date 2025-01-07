@@ -33,6 +33,9 @@
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
 
@@ -69,6 +72,7 @@ class ModalUIExtensionProxy;
 namespace OHOS::Rosen {
 class AvoidArea;
 class RSTransaction;
+enum class WindowMode : uint32_t;
 } // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
@@ -227,6 +231,18 @@ public:
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
     void SetOnDrawReadyCallback(const std::function<void()>&& callback);
+
+    void SetIsWindowModeFollowHost(bool isWindowModeFollowHost)
+    {
+        isWindowModeFollowHost_ = isWindowModeFollowHost;
+    }
+    bool GetIsWindowModeFollowHost() const
+    {
+        return isWindowModeFollowHost_;
+    }
+    void NotifyHostWindowMode(Rosen::WindowMode mode);
+    void NotifyHostWindowMode();
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -261,6 +277,10 @@ private:
     void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
     void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitCrownEvent(const RefPtr<FocusHub>& focusHub);
+    void HandleCrownEvent(const CrownEvent& event);
+#endif
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -374,6 +394,8 @@ private:
     bool forceProcessOnKeyEventInternal_ = false;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
+
+    bool isWindowModeFollowHost_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
