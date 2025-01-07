@@ -1703,8 +1703,12 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
     popupPattern->AddPipelineCallBack();
-    popupPattern->SetInteractiveDismiss(interactiveDismiss);
-    popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
+    auto param = popupPattern->GetPopupParam();
+    CHECK_NULL_VOID(param);
+    if ((!(param->GetIsPartialUpdate().has_value()))) {
+        popupPattern->SetInteractiveDismiss(interactiveDismiss);
+        popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
+    }
     if ((isTypeWithOption && !isShowInSubWindow) ||
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && popupInfo.focusable)) {
         ShowPopupAnimation(popupNode);

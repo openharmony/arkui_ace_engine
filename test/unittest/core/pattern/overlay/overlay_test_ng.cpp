@@ -750,6 +750,9 @@ HWTEST_F(OverlayTestNg, PopupTest006, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     popupPattern->SetHasTransition(true);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+    popupPattern->SetPopupParam(popupParam);
     overlayManager->ShowPopup(targetId, popupInfo);
     EXPECT_TRUE(popupPattern->GetHasTransition());
     auto layoutProp1 = popupInfo.popupNode->GetLayoutProperty();

@@ -831,9 +831,6 @@ private:
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
     static int32_t OpenBindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static int32_t CloseBindPopup(
-        const RefPtr<PopupParam>& param, const int32_t& targetId, const RefPtr<UINode>& customNode);
-    static bool PopupIsCurrentOnShow(const RefPtr<UINode>& customNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
