@@ -22,10 +22,10 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
-#include "base/utils/ng/system_properties.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/property/image_property.h"
+#include "core/components_ng/property/property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
