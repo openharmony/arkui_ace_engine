@@ -3214,8 +3214,8 @@ export struct GaugeBootcamp {
     .id('scroll')
     .height('52%')
     .onScrollStop(()=>{
-      let column:componentUtils.ComponentInfo = componentUtils.getRectangleById("column");
-      let scroll:componentUtils.ComponentInfo = componentUtils.getRectangleById("scroll");
+      let column:componentUtils.ComponentInfo = componentUtils.getRectangleById('column');
+      let scroll:componentUtils.ComponentInfo = componentUtils.getRectangleById('scroll');
       if ((this.scroller.currentOffset().yOffset + px2vp(scroll.size.height))/px2vp(column.size.height) > 0.8) {
         this.scrollShow++
       }
