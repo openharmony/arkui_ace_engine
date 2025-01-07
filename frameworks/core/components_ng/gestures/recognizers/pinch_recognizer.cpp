@@ -58,6 +58,7 @@ void PinchRecognizer::OnAccepted()
     refereeState_ = RefereeState::SUCCEED;
     isLastPinchFinished_ = false;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
 }
 
 void PinchRecognizer::OnRejected()
@@ -141,6 +142,12 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (fingersId_.empty()) {
         isLastPinchFinished_ = true;
     }
+    if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+        ResetStateVoluntarily();
+        isNeedResetVoluntarily_ = false;
+        activeFingers_.remove(event.id);
+        return;
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -176,6 +183,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
         firstInputTime_.reset();
+        isNeedResetVoluntarily_ = true;
     }
     activeFingers_.remove(event.id);
 }
