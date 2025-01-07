@@ -16,10 +16,17 @@
 #include <unistd.h>
 
 #include "movingphoto_pattern.h"
+#include "movingphoto_layout_property.h"
 #include "movingphoto_node.h"
 #include "movingphoto_utils.h"
 
+#include "base/geometry/ng/size.t.h"
+#include "base/log/ace_trace.h"
+#include "base/utils/ng/system_properties.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/property/image_property.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -190,7 +197,6 @@ void MovingPhotoPattern::HandleLongPress(GestureEvent& info)
     }
     if (isSetAutoPlayPeriod_ && (currentPlayStatus_ == PlaybackStatus::PLAYBACK_COMPLETE ||
         currentPlayStatus_ == PlaybackStatus::PAUSED)) {
-        isSetAutoPlayPeriod_ = false;
         int32_t duration = DURATION_FLAG;
         mediaPlayer_->GetDuration(duration);
         SetAutoPlayPeriod(PERIOD_START, duration);
@@ -279,7 +285,7 @@ void MovingPhotoPattern::UpdateImageNode()
 
 void MovingPhotoPattern::MovingPhotoFormatConvert(MovingPhotoFormat format)
 {
-    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoFormatConvert %{public}d.", format);
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "MovingPhotoFormatConvert1 %{public}d.", format);
     switch (format) {
         case MovingPhotoFormat::RGBA_8888:
             imageFormat_ = PixelFormat::RGBA_8888;
@@ -1141,7 +1147,7 @@ void MovingPhotoPattern::SetAutoPlayPeriod(int64_t startTime, int64_t endTime)
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "MediaPlayer is null or invalid.");
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphotoview SetAutoPlayPeriod start.");
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
