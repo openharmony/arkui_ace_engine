@@ -325,6 +325,8 @@ public:
     bool IsGestureEmpty() const;
 
     bool IsPanEventEmpty() const;
+
+    void SetExcludedAxisForPanEvent(bool isExcludedAxis);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
