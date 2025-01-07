@@ -52,7 +52,7 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetFirstHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.firstHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = dragHandleIndex_ == DragHandleIndex::FIRST || CheckHandleVisible(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -67,7 +67,8 @@ std::optional<SelectHandleInfo> RichEditorSelectOverlay::GetSecondHandleInfo()
     CHECK_NULL_RETURN(pattern, std::nullopt);
     SelectHandleInfo handleInfo;
     handleInfo.paintRect = pattern->textSelector_.secondHandle;
-    handleInfo.isShow = CheckHandleVisible(handleInfo.paintRect);
+    handleInfo.isShow = (dragHandleIndex_ == DragHandleIndex::SECOND && !IsSingleHandle()) ||
+        CheckHandleVisible(handleInfo.paintRect);
 
     auto localPaintRect = handleInfo.paintRect;
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
@@ -208,6 +209,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
+    BaseTextSelectOverlay::OnHandleMoveDone(handleRect, isFirstHandle);
     isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -480,6 +482,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
 
 void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
+    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
     isHandleMoving_ = true;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
