@@ -91,6 +91,10 @@ typedef enum {
     ARKUI_NODE_RADIO = 18,
     /** Frame-by-frame animation component. */
     ARKUI_NODE_IMAGE_ANIMATOR = 19,
+    /** XComponent of type TEXTURE.
+     *  @since 16
+     */
+    ARKUI_NODE_XCOMPONENT_TEXTURE,
     /** Check box group.
      *  @since 16
      */

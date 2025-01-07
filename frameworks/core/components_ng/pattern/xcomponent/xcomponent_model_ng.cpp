@@ -336,7 +336,9 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, nullptr);
-    xcPattern->SetImageAIOptions(params->aiOptions);
+    if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+        xcPattern->SetImageAIOptions(params->aiOptions);
+    }
     return frameNode;
 }
 

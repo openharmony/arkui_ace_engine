@@ -63,7 +63,8 @@ void SetXComponentOpacity(ArkUINodeHandle node, ArkUI_Float32 opacity)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
@@ -76,7 +77,8 @@ void ResetXComponentOpacity(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (!XComponentModelNG::IsTexture(frameNode)) {
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     ViewAbstract::SetOpacity(frameNode, 1.0f);
@@ -215,6 +217,9 @@ void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
         renderFit = static_cast<RenderFit>(renderFitNumber);
     }
     auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
     if (type == XComponentType::TEXTURE) {
         ViewAbstract::SetRenderFit(frameNode, renderFit);
         return;
@@ -227,6 +232,9 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
     if (type == XComponentType::TEXTURE) {
         ViewAbstract::SetRenderFit(frameNode, RenderFit::RESIZE_FILL);
         return;

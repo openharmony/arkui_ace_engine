@@ -261,6 +261,7 @@ std::unordered_map<uint32_t, std::string> ACCESSIBILITY_ROLE_CONVERT_PROPERTY_MA
     { static_cast<uint32_t>(ARKUI_NODE_GRID), "Grid" },
     { static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM), "GridItem" },
     { static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN), "CustomSpan" },
+    { static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE), "XComponentTexture" },
 };
 
 std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP = {
@@ -300,6 +301,7 @@ std::unordered_map<std::string, uint32_t> ACCESSIBILITY_ROLE_CONVERT_NATIVE_MAP 
     { "Grid", static_cast<uint32_t>(ARKUI_NODE_GRID) },
     { "GridItem", static_cast<uint32_t>(ARKUI_NODE_GRID_ITEM) },
     { "CustomSpan", static_cast<uint32_t>(ARKUI_NODE_CUSTOM_SPAN) },
+    { "XComponentTexture", static_cast<uint32_t>(ARKUI_NODE_XCOMPONENT_TEXTURE) },
 };
 
 void ResetAttributeItem()
@@ -14776,11 +14778,11 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
         SetImageSpanAttribute, SetImageAttribute, SetToggleAttribute, SetLoadingProgressAttribute,
         SetTextInputAttribute, SetTextAreaAttribute, SetButtonAttribute, SetProgressAttribute, SetCheckboxAttribute,
         SetXComponentAttribute, SetDatePickerAttribute, SetTimePickerAttribute, SetTextPickerAttribute,
-        SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetImageAnimatorAttribute, nullptr,
-        SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute,
-        SetScrollAttribute, SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute,
-        SetRowAttribute, SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr,
-        SetRelativeContainerAttribute, SetGridAttribute };
+        SetCalendarPickerAttribute, SetSliderAttribute, SetRadioAttribute, SetImageAnimatorAttribute,
+        SetXComponentAttribute, SetCheckboxGroupAttribute, SetStackAttribute, SetSwiperAttribute, SetScrollAttribute,
+        SetListAttribute, SetListItemAttribute, SetListItemGroupAttribute, SetColumnAttribute, SetRowAttribute,
+        SetFlexAttribute, SetRefreshAttribute, SetWaterFlowAttribute, nullptr, SetRelativeContainerAttribute,
+        SetGridAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -14807,11 +14809,10 @@ const ArkUI_AttributeItem* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAtt
         GetImageSpanAttribute, GetImageAttribute, GetToggleAttribute, GetLoadingProgressAttribute,
         GetTextInputAttribute, GetTextAreaAttribute, GetButtonAttribute, GetProgressAttribute, GetCheckboxAttribute,
         GetXComponentAttribute, GetDatePickerAttribute, GetTimePickerAttribute, GetTextPickerAttribute,
-        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute, nullptr,
-        GetCheckboxGroupAttribute, GetStackAttribute,
-        GetSwiperAttribute, GetScrollAttribute, GetListAttribute, nullptr, GetListItemGroupAttribute,
-        GetColumnAttribute, GetRowAttribute, GetFlexAttribute, GetRefreshAttribute, GetWaterFlowAttribute, nullptr,
-        GetRelativeContainerAttribute, GetGridAttribute };
+        GetCalendarPickerAttribute, GetSliderAttribute, GetRadioAttribute, GetImageAnimatorAttribute,
+        GetXComponentAttribute, GetCheckboxGroupAttribute, GetStackAttribute, GetSwiperAttribute, GetScrollAttribute,
+        GetListAttribute, nullptr, GetListItemGroupAttribute, GetColumnAttribute, GetRowAttribute, GetFlexAttribute,
+        GetRefreshAttribute, GetWaterFlowAttribute, nullptr, GetRelativeContainerAttribute, GetGridAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     int32_t nodeSubTypeClass =
@@ -14835,7 +14836,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
         ResetTextInputAttribute, ResetTextAreaAttribute, ResetButtonAttribute, ResetProgressAttribute,
         ResetCheckboxAttribute, ResetXComponentAttribute, ResetDatePickerAttribute, ResetTimePickerAttribute,
         ResetTextPickerAttribute, ResetCalendarPickerAttribute, ResetSliderAttribute, ResetRadioAttribute,
-        ResetImageAnimatorAttribute, nullptr, ResetCheckboxGroupAttribute,
+        ResetImageAnimatorAttribute, ResetXComponentAttribute, ResetCheckboxGroupAttribute,
         ResetStackAttribute, ResetSwiperAttribute, ResetScrollAttribute, ResetListAttribute, ResetListItemAttribute,
         ResetListItemGroupAttribute, ResetColumnAttribute, ResetRowAttribute, ResetFlexAttribute, ResetRefreshAttribute,
         ResetWaterFlowAttribute, nullptr, ResetRelativeContainerAttribute, ResetGridAttribute };
