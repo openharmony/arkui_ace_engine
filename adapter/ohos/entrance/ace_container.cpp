@@ -2520,7 +2520,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowSplitSecondaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
-        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetWindowMode()); });
     windowManager->SetWindowGetIsMidSceneCallBack(
         [window = uiWindow_](bool& isMidScene) -> int32_t {
             return static_cast<int32_t>(window->GetIsMidScene(isMidScene));
