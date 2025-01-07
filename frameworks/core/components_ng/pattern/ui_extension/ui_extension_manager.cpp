@@ -433,4 +433,16 @@ bool UIExtensionManager::SendBusinessToHostSyncReply(UIContentBusinessCode code,
     auto callback = businessSendToHostReplyFunc_;
     return callback(static_cast<uint32_t>(code), std::move(data), reply);
 }
+
+void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
+{
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "NotifyWindowMode aliveUIExtensions = %{public}zu",
+        aliveUIExtensions_.size());
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->NotifyHostWindowMode(mode);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

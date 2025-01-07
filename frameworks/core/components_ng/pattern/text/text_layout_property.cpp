@@ -79,9 +79,10 @@ std::string TextLayoutProperty::GetTextMarqueeOptionsString() const
     jsonValue->Put("step",
         StringUtils::DoubleToString(GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx())).c_str());
     jsonValue->Put("loop", std::to_string(GetTextMarqueeLoop().value_or(-1)).c_str());
-    jsonValue->Put("direction", GetTextMarqueeDirection().value_or(MarqueeDirection::LEFT) == MarqueeDirection::LEFT
-                                    ? "MarqueeDirection.LEFT"
-                                    : "MarqueeDirection.RIGHT");
+    jsonValue->Put(
+        "direction", GetTextMarqueeDirection().value_or(MarqueeDirection::DEFAULT) == MarqueeDirection::DEFAULT
+                         ? "MarqueeDirection.DEFAULT"
+                         : "MarqueeDirection.DEFAULT_REVERSE");
     jsonValue->Put("delay", std::to_string(GetTextMarqueeDelay().value_or(0)).c_str());
     jsonValue->Put("fadeout", GetTextMarqueeFadeout().value_or(false));
     jsonValue->Put(

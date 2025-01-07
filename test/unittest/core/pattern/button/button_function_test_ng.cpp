@@ -113,6 +113,10 @@ protected:
     RefPtr<FrameNode> CreateLabelButtonParagraph(const std::string& createValue, const TestProperty& testProperty);
     RefPtr<FrameNode> CreateLabelButtonParagraphByRoundedRect(
         const std::string& createValue, const TestProperty& testProperty);
+
+private:
+    void CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNode, bool isCheckTextOverflow);
+    void CheckTextMarqueeOption(RefPtr<FrameNode> frameNode, bool isMarqueeStart);
 };
 
 RefPtr<FrameNode> ButtonFunctionTestNg::CreateLabelButtonParagraph(
@@ -242,6 +246,62 @@ PaddingProperty ButtonFunctionTestNg::CreatePadding(float left, float top, float
     padding.top = CalcLength(top);
     padding.bottom = CalcLength(bottom);
     return padding;
+}
+
+void ButtonFunctionTestNg::CreateAndCheckTextOverflow(RefPtr<FrameNode> frameNode, bool isCheckTextOverflow)
+{
+    /**
+     * @tc.steps: step1. get pattern and update frameNode.
+     * @tc.expected: step1. related function is called.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    auto buttonLayoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. updateTextOverflow then execute onModifyDone.
+     * @tc.expected: step2. check whether the properties is correct.
+     */
+    // set touchEventActuator_
+    auto touchCallback = [](TouchEventInfo& info) {};
+    auto touchEvent = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    buttonPattern->touchListener_ = touchEvent;
+    auto text = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(text, nullptr);
+    auto textLayoutProp = text->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProp, nullptr);
+
+    if (isCheckTextOverflow) {
+        buttonLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+        buttonPattern->OnModifyDone();
+        EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::CLIP);
+
+        buttonLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
+        buttonPattern->OnModifyDone();
+        EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::ELLIPSIS);
+
+        buttonLayoutProperty->UpdateTextOverflow(TextOverflow::NONE);
+        buttonPattern->OnModifyDone();
+        EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::NONE);
+
+        buttonLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        buttonPattern->OnModifyDone();
+        EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::MARQUEE);
+    }
+}
+
+void ButtonFunctionTestNg::CheckTextMarqueeOption(RefPtr<FrameNode> frameNode, bool isMarqueeStart)
+{
+    auto textFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textLayoutProp = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProp, nullptr);
+
+    EXPECT_EQ(textLayoutProp->GetTextOverflow(), TextOverflow::MARQUEE);
+    EXPECT_EQ(textLayoutProp->GetTextMarqueeFadeout(), true);
+    EXPECT_EQ(textLayoutProp->GetTextMarqueeStart(), isMarqueeStart);
+    EXPECT_EQ(textLayoutProp->GetTextMarqueeStartPolicy(), MarqueeStartPolicy::DEFAULT);
 }
 
 /**
@@ -1312,4 +1372,174 @@ HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest020, TestSize.Level1)
     bool result = buttonLayoutAlgorithm->NeedAgingMeasure(AccessibilityManager::RawPtr(layoutWrapper));
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: ButtonFunctionTest021
+ * @tc.desc: test textOverflow enum value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    testProperty.controlSize = ControlSize::SMALL;
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->isTextFadeOut_ = true;
+    buttonPattern->SetIsFocus(true);
+    buttonPattern->UpdateButtonStyle();
+
+    /**
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    CheckTextMarqueeOption(frameNode, true);
+}
+
+/**
+ * @tc.name: ButtonFunctionTest022
+ * @tc.desc: test textOverflow enum value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->isTextFadeOut_ = true;
+    buttonPattern->isHover_ = true;
+    buttonPattern->SetIsFocus(false);
+    buttonPattern->UpdateButtonStyle();
+
+    /**
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    CheckTextMarqueeOption(frameNode, true);
+}
+
+/**
+ * @tc.name: ButtonFunctionTest023
+ * @tc.desc: test textOverflow enum value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, true);
+
+    /**
+     * @tc.steps: step3. buttonPattern UpdateButtonStyle.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->isTextFadeOut_ = true;
+    buttonPattern->isHover_ = false;
+    buttonPattern->SetIsFocus(false);
+    buttonPattern->UpdateButtonStyle();
+
+    /**
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    CheckTextMarqueeOption(frameNode, false);
+}
+
+/**
+ * @tc.name: ButtonFunctionTest024
+ * @tc.desc: test AddIsFocusActiveUpdateEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonFunctionTestNg, ButtonFunctionTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.borderRadius = std::make_optional(BORDER_RADIUS);
+    auto frameNode = CreateLabelButtonParagraph(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::BUTTON_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. visit function CreateAndCheckTextOverflow, then check whether the properties is correct.
+     */
+    CreateAndCheckTextOverflow(frameNode, false);
+
+    /**
+     * @tc.steps: step3. buttonPattern AddIsFocusActiveUpdateEvent.
+     */
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->OnModifyDone();
+    buttonPattern->isTextFadeOut_ = true;
+    buttonPattern->HandleFocusStatusStyle();
+    buttonPattern->SetIsFocus(true);
+    buttonPattern->HandleFocusStyleTask();
+    buttonPattern->AddIsFocusActiveUpdateEvent();
+    buttonPattern->UpdateButtonStyle();
+
+    /**
+     * @tc.steps: step4. visit function CheckTextMarqueeOption.
+     * @tc.expected: step4. check whether the properties is correct.
+     */
+    CheckTextMarqueeOption(frameNode, true);
+
+    /**
+     * @tc.steps: step5. buttonPattern RemoveIsFocusActiveUpdateEvent.
+     */
+    buttonPattern->SetIsFocus(false);
+    buttonPattern->HandleBlurStyleTask();
+    buttonPattern->RemoveIsFocusActiveUpdateEvent();
+    buttonPattern->UpdateButtonStyle();
+    
+    /**
+     * @tc.steps: step6. visit function CheckTextMarqueeOption.
+     * @tc.expected: step6. check whether the properties is correct.
+     */
+    CheckTextMarqueeOption(frameNode, false);
+}
+
 } // namespace OHOS::Ace::NG

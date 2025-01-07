@@ -1804,7 +1804,7 @@ void ResetStopBackPress(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextAreaModifier* GetTextAreaModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextAreaModifier modifier = {
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
@@ -1967,20 +1967,13 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUITextAreaModifier* GetCJUITextAreaModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextAreaModifier modifier = {
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
@@ -2124,14 +2117,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .resetTextAreaEnablePreviewText = ResetTextAreaEnablePreviewText,
         .getTextAreaPadding = GetTextAreaPadding,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

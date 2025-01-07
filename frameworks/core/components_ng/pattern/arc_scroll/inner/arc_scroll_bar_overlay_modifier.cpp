@@ -22,8 +22,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double FULL_ALPHA = 255.0;
-constexpr double ARC_FULL_ALPHA = 169.0;
-constexpr double BG_ARC_FULL_ALPHA = 38.0;
 constexpr int32_t BAR_GROW_DURATION = 150;       // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250;     // 250ms, scroll bar width shrinks from 8dp to 4dp
 } // namespace
@@ -72,7 +70,6 @@ void ArcScrollBarOverlayModifier::SetBackgroundArcRect(const ArcRound& backgroun
 {
     backgroundStrokeWidth_->Set(backgroundArcBarRect.GetWidth());
     backgroundCurveRadius_->Set(backgroundArcBarRect.GetRadius());
-    backgroundBarColor_->Set(backgroundArcBarRect.GetColor());
     backgroundStartAngle_->Set(backgroundArcBarRect.GetStartAngle());
     backgroundSweepAngle_->Set(backgroundArcBarRect.GetSweepAngle());
 }
@@ -162,7 +159,7 @@ void ArcScrollBarOverlayModifier::DrawArc(DrawingContext& context)
     pen.SetAntiAlias(true);
     pen.SetWidth(strokeWidth);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    auto barOpacity = (ARC_FULL_ALPHA  / FULL_ALPHA) * GetOpacity() / FULL_ALPHA;
+    auto barOpacity = GetOpacity() / FULL_ALPHA;
     pen.SetColor(ToRSColor(GetBarColor()->Get().BlendOpacity(barOpacity)));
     canvas.AttachPen(pen);
     auto center = curveCenter_->Get();
@@ -186,7 +183,7 @@ void ArcScrollBarOverlayModifier::DrawBackgroundArc(DrawingContext& context)
     pen.SetAntiAlias(true);
     pen.SetWidth(strokeWidth);
     pen.SetCapStyle(ToRSCapStyle(LineCap::ROUND));
-    auto barOpacity = (BG_ARC_FULL_ALPHA  / FULL_ALPHA) * GetOpacity() / FULL_ALPHA;
+    auto barOpacity = GetOpacity() / FULL_ALPHA;
     pen.SetColor(ToRSColor(backgroundBarColor_->Get().BlendOpacity(barOpacity)));
 
     canvas.AttachPen(pen);

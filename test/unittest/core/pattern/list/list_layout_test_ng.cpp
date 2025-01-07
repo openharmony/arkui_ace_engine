@@ -1164,31 +1164,48 @@ HWTEST_F(ListLayoutTestNg, LayoutDirectionTest01, TestSize.Level1)
     /**
      * @tc.steps: step3. Set the different target index and target index in group to test the
      * LayoutDirectionForTargetIndex.
-     * @tc.expected: The result of LayoutDirection is correct.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
      */
     auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->preStartIndex_ = 1;
     auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
     layoutAlgorithm->SetTargetIndex(0);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
     layoutAlgorithm->SetTargetIndex(2);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
     layoutAlgorithm->SetTargetIndex(1);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
     layoutAlgorithm->SetTargetIndexInGroup(6);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
     layoutAlgorithm->SetTargetIndexInGroup(2);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
-
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
     /**
      * @tc.steps: step4. test the LayoutDirectionForTargetIndex after executing the ScrollToItemInGroup.
-     * @tc.expected: The result of LayoutDirection is correct.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
      */
     JumpToItemInGroup(1, 1, false, ScrollAlign::START);
     startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
@@ -1196,6 +1213,9 @@ HWTEST_F(ListLayoutTestNg, LayoutDirectionTest01, TestSize.Level1)
     layoutAlgorithm->SetTargetIndexInGroup(0);
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
 }
 
 /**

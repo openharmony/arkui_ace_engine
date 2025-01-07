@@ -1037,20 +1037,21 @@ void JSViewPartialUpdate::JSSendStateInfo(const std::string& stateInfo)
 #if defined(PREVIEW) || !defined(OHOS_PLATFORM)
     return;
 #else
+    if (!LayoutInspector::GetStateProfilerStatus()) {
+        return;
+    }
     ContainerScope scope(GetInstanceId());
     auto node = AceType::DynamicCast<NG::UINode>(this->GetViewNode());
     CHECK_NULL_VOID(node);
     auto pipeline = node->GetContext();
     CHECK_NULL_VOID(pipeline);
-    if (!LayoutInspector::GetStateProfilerStatus()) {
-        return;
-    }
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", stateInfo.c_str());
+
     auto info = JsonUtil::ParseJsonString(stateInfo);
     info->Put("timeStamp", GetCurrentTimestampMicroSecond());
     info->Put("vsyncID", (int32_t)pipeline->GetFrameCount());
     info->Put("processID", getpid());
     info->Put("windowID", (int32_t)pipeline->GetWindowId());
+    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "ArkUI SendStateInfo %{public}s", info->ToString().c_str());
     LayoutInspector::SendStateProfilerMessage(info->ToString());
 #endif
 }

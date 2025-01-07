@@ -2833,6 +2833,6 @@ HWTEST_F(TextFieldPatternTest, HandleOnPageUpAndPageDownTest, TestSize.Level1)
     pattern_->selectController_->paragraph_ = paragraph;
     pattern_->HandleOnPageUp();
     int32_t upCaret = pattern_->selectController_->GetCaretIndex();
-    EXPECT_NE(downCaret, upCaret);
+    EXPECT_EQ(downCaret, upCaret);
 }
 } // namespace OHOS::Ace::NG

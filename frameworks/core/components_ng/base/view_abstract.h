@@ -356,6 +356,11 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static void DismissDialog();
     static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
@@ -824,6 +829,11 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static int32_t OpenBindPopup(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
+    static int32_t CloseBindPopup(
+        const RefPtr<PopupParam>& param, const int32_t& targetId, const RefPtr<UINode>& customNode);
+    static bool PopupIsCurrentOnShow(const RefPtr<UINode>& customNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

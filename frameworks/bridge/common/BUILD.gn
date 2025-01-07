@@ -119,7 +119,7 @@ template("bridge_common") {
       "utils/utils.cpp",
     ]
 
-    if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+    if (qrcodegen_support) {
       sources += [ "dom/dom_qrcode.cpp" ]
     }
 

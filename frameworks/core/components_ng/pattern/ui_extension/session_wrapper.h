@@ -152,6 +152,8 @@ public:
     virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
     virtual bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply) = 0;
     virtual bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type) = 0;
+
+    virtual void NotifyHostWindowMode(int32_t mode) {}
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

@@ -36,6 +36,7 @@ public:
     static void SetEnableCascade(
         const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogEnterSelectedArea(const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,

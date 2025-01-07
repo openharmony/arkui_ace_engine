@@ -236,73 +236,59 @@ void ResetSideBarContainerDivider(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISideBarContainerModifier modifier = {
-        SetSideBarWidth,
-        ResetSideBarWidth,
-        SetMinSideBarWidth,
-        ResetMinSideBarWidth,
-        SetControlButton,
-        ResetControlButton,
-        SetShowControlButton,
-        ResetShowControlButton,
-        SetAutoHide,
-        ResetAutoHide,
-        SetSideBarContainerMaxSideBarWidth,
-        ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth,
-        ResetSideBarContainerMinContentWidth,
-        SetSideBarPosition,
-        ResetSideBarPosition,
-        SetShowSideBar,
-        ResetShowSideBar,
-        SetSideBarContainerDivider,
-        ResetSideBarContainerDivider,
+        .setSideBarWidth = SetSideBarWidth,
+        .resetSideBarWidth = ResetSideBarWidth,
+        .setMinSideBarWidth = SetMinSideBarWidth,
+        .resetMinSideBarWidth = ResetMinSideBarWidth,
+        .setControlButton = SetControlButton,
+        .resetControlButton = ResetControlButton,
+        .setShowControlButton = SetShowControlButton,
+        .resetShowControlButton = ResetShowControlButton,
+        .setAutoHide = SetAutoHide,
+        .resetAutoHide = ResetAutoHide,
+        .setSideBarContainerMaxSideBarWidth = SetSideBarContainerMaxSideBarWidth,
+        .resetSideBarContainerMaxSideBarWidth = ResetSideBarContainerMaxSideBarWidth,
+        .setSideBarContainerMinContentWidth = SetSideBarContainerMinContentWidth,
+        .resetSideBarContainerMinContentWidth = ResetSideBarContainerMinContentWidth,
+        .setSideBarPosition = SetSideBarPosition,
+        .resetSideBarPosition = ResetSideBarPosition,
+        .setShowSideBar = SetShowSideBar,
+        .resetShowSideBar = ResetShowSideBar,
+        .setSideBarContainerDivider = SetSideBarContainerDivider,
+        .resetSideBarContainerDivider = ResetSideBarContainerDivider,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISideBarContainerModifier modifier = {
-        SetSideBarWidth,
-        ResetSideBarWidth,
-        SetMinSideBarWidth,
-        ResetMinSideBarWidth,
-        SetControlButton,
-        ResetControlButton,
-        SetShowControlButton,
-        ResetShowControlButton,
-        SetAutoHide,
-        ResetAutoHide,
-        SetSideBarContainerMaxSideBarWidth,
-        ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth,
-        ResetSideBarContainerMinContentWidth,
-        SetSideBarPosition,
-        ResetSideBarPosition,
-        SetShowSideBar,
-        ResetShowSideBar,
-        SetSideBarContainerDivider,
-        ResetSideBarContainerDivider,
+        .setSideBarWidth = SetSideBarWidth,
+        .resetSideBarWidth = ResetSideBarWidth,
+        .setMinSideBarWidth = SetMinSideBarWidth,
+        .resetMinSideBarWidth = ResetMinSideBarWidth,
+        .setControlButton = SetControlButton,
+        .resetControlButton = ResetControlButton,
+        .setShowControlButton = SetShowControlButton,
+        .resetShowControlButton = ResetShowControlButton,
+        .setAutoHide = SetAutoHide,
+        .resetAutoHide = ResetAutoHide,
+        .setSideBarContainerMaxSideBarWidth = SetSideBarContainerMaxSideBarWidth,
+        .resetSideBarContainerMaxSideBarWidth = ResetSideBarContainerMaxSideBarWidth,
+        .setSideBarContainerMinContentWidth = SetSideBarContainerMinContentWidth,
+        .resetSideBarContainerMinContentWidth = ResetSideBarContainerMinContentWidth,
+        .setSideBarPosition = SetSideBarPosition,
+        .resetSideBarPosition = ResetSideBarPosition,
+        .setShowSideBar = SetShowSideBar,
+        .resetShowSideBar = ResetShowSideBar,
+        .setSideBarContainerDivider = SetSideBarContainerDivider,
+        .resetSideBarContainerDivider = ResetSideBarContainerDivider,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

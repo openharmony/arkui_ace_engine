@@ -581,6 +581,11 @@ protected:
     }
 #endif
 
+    double GetMinAngle() const
+    {
+        return minAngle_;
+    }
+
 private:
     void SetRectTrickRegion(const Offset& offset, const Size& size, const Offset& lastOffset, double mainScrollExtent,
         int32_t scrollSource);

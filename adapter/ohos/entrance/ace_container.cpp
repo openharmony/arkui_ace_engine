@@ -28,6 +28,7 @@
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_context.h"
+#include "ui/rs_surface_node.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -81,6 +82,7 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
@@ -2185,9 +2187,15 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
     if (uiWindow_) {
-        auto windowType = uiWindow_->GetType();
-        pipelineContext_->SetIsAppWindow(
-            windowType < Rosen::WindowType::SYSTEM_WINDOW_BASE && windowType >= Rosen::WindowType::APP_WINDOW_BASE);
+        bool isAppWindow = uiWindow_->IsAppWindow();
+        bool isSystemWindow = uiWindow_->IsSystemWindow();
+        bool isSceneBoardWindow = uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+        pipelineContext_->SetIsAppWindow(isAppWindow);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->SetWindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
     }
     if (installationFree_) {
         pipelineContext_->SetInstallationFree(installationFree_);
@@ -2534,11 +2542,20 @@ void AceContainer::InitWindowCallback()
     });
 }
 
-NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
+NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+    std::optional<NG::RectF> windowRect)
 {
     CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
-    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    Rosen::WMError ret;
+    if (windowRect.has_value()) {
+        auto rect = windowRect.value();
+        Rosen::Rect rosenRect = { static_cast<int32_t>(rect.GetX()), static_cast<int32_t>(rect.GetY()),
+            static_cast<uint32_t>(rect.Width()), static_cast<uint32_t>(rect.Height()) };
+        ret = uiWindow_->GetAvoidAreaByType(type, avoidArea, rosenRect);
+    } else {
+        ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
         TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
@@ -3736,5 +3753,18 @@ void AceContainer::RegisterUIExtDataSendToHost()
     CHECK_NULL_VOID(uiExtManager);
     uiExtManager->RegisterBusinessSendToHostReply(uiExtDataSendSyncReply);
     uiExtManager->RegisterBusinessSendToHost(uiExtDataSend);
+}
+
+void AceContainer::SetDrawReadyEventCallback()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto surfaceNode = uiWindow_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto callback = [weak = WeakClaim(this)] () {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(static_cast<int>(NG::UIExtCallbackEventId::ON_DRAW_FIRST));
+    };
+    surfaceNode->SetBufferAvailableCallback(callback);
 }
 } // namespace OHOS::Ace::Platform

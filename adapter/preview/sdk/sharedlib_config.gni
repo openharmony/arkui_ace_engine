@@ -257,6 +257,12 @@ _arkui_shared_libs = [
     part_name = "ace_engine"
     lib_names = [ "arclist" ]
   },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_scroll_bar:arcscrollbar"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcscrollbar" ]
+  },
 ]
 
 if (defined(current_platform.config)) {
@@ -523,6 +529,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "foldsplitcontainer" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcbutton/interfaces:arcbutton"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcbutton" ]
       },
     ]
   },

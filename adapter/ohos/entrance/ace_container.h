@@ -593,13 +593,20 @@ public:
         return webHapPath_;
     }
 
-    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+        std::optional<NG::RectF> windowRect = std::nullopt);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     uint32_t GetStatusBarHeight();
+
+    Rosen::WindowMode GetWindowMode() const
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+        return uiWindow_->GetMode();
+    }
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -736,6 +743,7 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+    void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
     {

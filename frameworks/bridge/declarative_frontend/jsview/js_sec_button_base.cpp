@@ -329,6 +329,9 @@ void JSSecButtonBase::SetMaxLines(const JSCallbackInfo& info)
     if (args->ToString() != "Infinity") {
         ParseJsInt32(args, value);
     }
+    if (value <= 0) {
+        return;
+    }
     SecurityComponentModelNG::SetMaxLines(value);
 }
 

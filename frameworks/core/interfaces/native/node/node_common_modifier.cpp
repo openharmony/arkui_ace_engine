@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
@@ -6355,6 +6358,71 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
 }
 
+void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onFocus = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
+}
+
+void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onBlur = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
+}
+
+void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+        ArkUINodeEvent event;
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+        }
+        eventReceiver(node, event);
+    };
+    ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
+}
+
+void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
+        eventReceiver(node, isHover);
+    };
+    ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
+}
+
+void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onChange = [node, eventReceiver](const bool isOn) {
+        eventReceiver(node, isOn);
+    };
+    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else {
+        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    }
+}
+
 void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -6419,7 +6487,7 @@ OHOS::Ace::TouchEventInfo globalEventInfo("global");
 
 const ArkUICommonModifier* GetCommonModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -6808,27 +6876,25 @@ const ArkUICommonModifier* GetCommonModifier()
         .setTabStop = SetTabStop,
         .resetTabStop = ResetTabStop,
         .getTabStop = GetTabStop,
+        .setOnFocus = SetOnFocusExt,
+        .setOnBlur = SetOnBlurExt,
+        .setOnTouch = SetOnTouchExt,
+        .setOnHover = SetOnHoverExt,
+        .setOnChange = SetOnChangeExt,
         .setOnClick = SetOnClickExt,
         .setOnAppear = SetOnAppearExt,
         .dispatchKeyEvent = DispatchKeyEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICommonModifier* GetCJUICommonModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -7206,14 +7272,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

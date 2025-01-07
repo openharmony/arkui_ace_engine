@@ -516,6 +516,10 @@ export struct ArcSlider {
       this.options.valueOptions.min = MIN_DEFAULT;
       this.options.valueOptions.progress = PROGRESS_DEFAULT;
     }
+    const min = this.options.valueOptions.min;
+    const max = this.options.valueOptions.max;
+    this.options.valueOptions.max = Math.max(min, max);
+    this.options.valueOptions.min = Math.min(min, max);
     this.options.valueOptions.max = Math.max(this.options.valueOptions.max, this.options.valueOptions.min);
     this.options.valueOptions.min = Math.min(this.options.valueOptions.max, this.options.valueOptions.min);
     this.options.valueOptions.progress = Math.min(this.options.valueOptions.max, this.options.valueOptions.progress);
@@ -1330,10 +1334,10 @@ export struct ArcSlider {
         this.crownEventCounter = 0;
       }
     }
-    this.CrownAction(event);
+    this.crownAction(event);
   }
 
-  CrownAction(event: CrownEvent) {
+  crownAction(event: CrownEvent) {
     if (event.action === CrownAction.BEGIN && !this.isEnlarged) {
       if (this.meter !== INVALID_TIMEOUT_ID) {
         clearTimeout(this.meter);
@@ -1342,7 +1346,7 @@ export struct ArcSlider {
       this.isEnlarged = true;
       this.startTouchAnimator();
       this.calcBlur();
-      this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if (event.action === CrownAction.BEGIN && this.isEnlarged) {
@@ -1350,7 +1354,7 @@ export struct ArcSlider {
         clearTimeout(this.meter);
         this.meter = INVALID_TIMEOUT_ID;
       }
-      this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if ((this.isEnlarged) && (this.isTouchAnimatorFinished) && (event.action === CrownAction.UPDATE)) {
@@ -1358,7 +1362,7 @@ export struct ArcSlider {
         clearTimeout(this.meter);
         this.meter = INVALID_TIMEOUT_ID;
       }
-      this.crownDeltaAngle = this.getUIContext().px2vp(event.degree *
+      this.crownDeltaAngle = this.getUIContext().px2vp(-event.degree *
       this.calcDisplayControlRatio(this.options.digitalCrownSensitivity)) / this.radius;
       this.calcCrownValue(this.crownDeltaAngle);
     } else if (this.isEnlarged && event.action === CrownAction.END) {
