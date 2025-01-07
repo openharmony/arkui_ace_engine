@@ -477,6 +477,13 @@ public:
     {
         return grayedState_;
     }
+    
+    void SetIsAnyDraggableHit(bool isAnyDraggableHit = false)
+    {
+        isAnyDraggableHit_ = isAnyDraggableHit;
+    }
+
+    bool IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId);
 
 private:
     double CalcDragPreviewDistanceWithPoint(
@@ -560,6 +567,7 @@ private:
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
     bool isDragNodeNeedClean_ = false;
+    bool isAnyDraggableHit_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };

@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
+#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -239,6 +240,7 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         startIndex = startIndex < realTotalCount_ ? startIndex : 0;
         endIndex = std::min(endIndex, realTotalCount_ - 1);
         if (!isLoop_) {
+            HandleTabsCachedMaxCount(layoutWrapper, startIndex, endIndex);
             layoutWrapper->SetActiveChildRange(startIndex, endIndex, std::min(cachedCount_, startIndex),
                 std::min(cachedCount_, totalItemCount_ - 1 - endIndex));
         } else {
@@ -387,6 +389,35 @@ void SwiperLayoutAlgorithm::MeasureTabsCustomAnimation(LayoutWrapper* layoutWrap
 
     for (const auto& index : removeIndexs) {
         needUnmountIndexs_.erase(index);
+    }
+}
+
+void SwiperLayoutAlgorithm::HandleTabsCachedMaxCount(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex)
+{
+    if (startIndex > endIndex) {
+        return;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(parent);
+    auto tabsLayoutProperty = parent->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(tabsLayoutProperty);
+    auto cachedMaxCount = tabsLayoutProperty->GetCachedMaxCount().value_or(-1);
+    if (cachedMaxCount < 0) {
+        return;
+    }
+    for (int32_t index = 0; index < realTotalCount_; ++index) {
+        if (index >= startIndex - cachedMaxCount && index <= endIndex + cachedMaxCount) {
+            continue;
+        }
+        auto child = AceType::DynamicCast<FrameNode>(layoutWrapper->GetChildByIndex(index));
+        if (child) {
+            auto tabContentPattern = AceType::DynamicCast<TabContentPattern>(child->GetPattern<TabContentPattern>());
+            if (tabContentPattern) {
+                tabContentPattern->CleanChildren();
+            }
+        }
     }
 }
 

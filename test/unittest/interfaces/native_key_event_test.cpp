@@ -167,4 +167,29 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     EXPECT_EQ(time, ARKUI_TIME);
     EXPECT_NE(keyText, nullptr);
 }
+
+/**
+ * @tc.name: NativeKeyEventTest005
+ * @tc.desc: test NODE_DISPATCH_KEY_EVENT;
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    EXPECT_EQ(nodeAPI->registerNodeEvent(nullptr, NODE_ON_KEY_EVENT, 0, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->registerNodeEvent(node, static_cast<ArkUI_NodeEventType>(-1), 0, nullptr),
+        ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
+    nodeAPI->unregisterNodeEvent(nullptr, NODE_DISPATCH_KEY_EVENT);
+    nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
+    nodeAPI->disposeNode(node);
+}
 } // namespace OHOS::Ace

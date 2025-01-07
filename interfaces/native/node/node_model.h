@@ -105,7 +105,7 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 21;
+constexpr int BASIC_COMPONENT_NUM = 22;
 
 #ifdef __cplusplus
 };

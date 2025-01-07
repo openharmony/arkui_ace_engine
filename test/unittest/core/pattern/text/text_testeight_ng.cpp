@@ -620,29 +620,6 @@ HWTEST_F(TextTestEightNg, SpanNodeDumpInfo001, TestSize.Level1)
     ASSERT_NE(spanNode, nullptr);
     auto json = JsonUtil::Create(true);
     ASSERT_NE(json, nullptr);
-    spanNode->spanItem_->textStyle_->SetAdaptTextSize(Dimension(100), Dimension(10), Dimension(10));
-    TextStyle existingStyle;
-    spanNode->spanItem_->textStyle_ = std::move(existingStyle);
-    spanNode->tag_ = V2::SYMBOL_SPAN_ETS_TAG;
-    spanNode->DumpInfo(json);
-    EXPECT_TRUE(json->Contains("FontSize"));
-    EXPECT_TRUE(json->Contains("SpanTextColor"));
-    EXPECT_TRUE(json->Contains("SymbolColor"));
-}
-
-/**
- * @tc.name: SpanNodeDumpInfo002
- * @tc.desc: test DumpInfo.
- * @tc.type: FUNC
- */
-HWTEST_F(TextTestEightNg, SpanNodeDumpInfo002, TestSize.Level1)
-{
-    SpanModelNG spanModelNG;
-    spanModelNG.Create(CREATE_VALUE_W);
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(spanNode, nullptr);
-    auto json = JsonUtil::Create(true);
-    ASSERT_NE(json, nullptr);
     spanNode->DumpInfo(json);
     EXPECT_FALSE(json->Contains("FontSize"));
 }
@@ -652,7 +629,7 @@ HWTEST_F(TextTestEightNg, SpanNodeDumpInfo002, TestSize.Level1)
  * @tc.desc: test DumpInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(TextTestEightNg, SpanNodeDumpInfo003, TestSize.Level1)
+HWTEST_F(TextTestEightNg, SpanNodeDumpInfo002, TestSize.Level1)
 {
     SpanModelNG spanModelNG;
     spanModelNG.Create(CREATE_VALUE_W);

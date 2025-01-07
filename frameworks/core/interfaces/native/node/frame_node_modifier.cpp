@@ -683,10 +683,56 @@ void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     frameNode->RemoveExtraCustomProperty(key);
 }
 
+void GetCustomPropertyByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("GetCustomPropertyByKey doesn't run on UI thread");
+        return;
+    }
+    std::string customProperty;
+    if (!frameNode->GetCustomPropertyByKey(key, customProperty)) {
+        return;
+    }
+    *size = customProperty.size();
+    *value = new char[*size + 1];
+    customProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+}
+
+void AddNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    auto onDestroyCallback = [node, onDestroy]() {
+        onDestroy(node);
+    };
+    frameNode->AddNodeDestroyCallback(std::string(callbackKey), std::move(onDestroyCallback));
+}
+
+void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -740,25 +786,21 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .addExtraCustomProperty = AddExtraCustomProperty,
         .getExtraCustomProperty = GetExtraCustomProperty,
         .removeExtraCustomProperty = RemoveExtraCustomProperty,
+        .getCustomPropertyByKey = GetCustomPropertyByKey,
+        .addNodeDestroyCallback = AddNodeDestroyCallback,
+        .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
         .setDrawCompleteEvent = SetDrawCompleteEvent,
         .resetDrawCompleteEvent = ResetDrawCompleteEvent,
         .setLayoutEvent = SetLayoutEvent,
         .resetLayoutEvent = ResetLayoutEvent,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -796,14 +838,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getLayoutSize = GetLayoutSize,
         .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

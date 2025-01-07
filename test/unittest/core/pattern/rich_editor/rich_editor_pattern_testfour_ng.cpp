@@ -215,7 +215,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ReplacePreviewText001, TestSize.Level1)
 
     AddSpan("test");
     PreviewRange previewRange;
-    std::string previewTextValue;
+    std::u16string previewTextValue;
     previewRange.start = -1;
     previewRange.end = -2;
     richEditorPattern->ReplaceText(previewTextValue, previewRange);
@@ -258,7 +258,7 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
 
     PreviewRange previewRange;
 
-    std::string previewTextValue;
+    std::u16string previewTextValue;
     previewRange.start = -2;
     previewRange.end = -2;
     bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
@@ -267,7 +267,7 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
     previewRange.end = 9;
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
-    previewTextValue = "abc";
+    previewTextValue = u"abc";
     previewRange.start = -2;
     previewRange.end = -2;
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
@@ -278,22 +278,22 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText002, TestSize.Level1)
 
     previewRange.start = -1;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -1;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     ASSERT_NE(res, false);
@@ -315,26 +315,26 @@ HWTEST_F(RichEditorPatternTestFourNg, UpdatePreviewText003, TestSize.Level1)
 
     PreviewRange previewRange;
 
-    std::string previewTextValue;
+    std::u16string previewTextValue;
 
     previewRange.start = -2;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     bool res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -2;
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     previewRange.start = -2;
     previewRange.end = -1;
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     res = richEditorPattern->UpdatePreviewText(previewTextValue, previewRange);
 
     ASSERT_NE(res, true);
@@ -351,7 +351,7 @@ HWTEST_F(RichEditorPatternTestFourNg, FinishTextPreview004, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     richEditorPattern->FinishTextPreview();
     ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
 }
@@ -367,7 +367,7 @@ HWTEST_F(RichEditorPatternTestFourNg, InsertValueToSpanNode001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::string insertValue = "abc";
+    std::u16string insertValue = u"abc";
 
     auto spanNode = SpanNode::GetOrCreateSpanNode(V2::SPAN_ETS_TAG, 0);
     TextInsertValueInfo info;
@@ -433,7 +433,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
@@ -457,7 +457,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward002, TestSize.Level1)
      * @tc.steps: step1. delete image&text
      */
     AddImageSpan();
-    std::string emoji = "👨‍👩‍👧‍👦";
+    std::u16string emoji = u"👨‍👩‍👧‍👦";
     AddSpan(emoji);
     auto contentLength = richEditorPattern->GetTextContentLength();
     richEditorPattern->caretPosition_ = contentLength;
@@ -477,7 +477,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteBackward002, TestSize.Level1)
     /**
      * @tc.steps: step3. delete emojis
      */
-    std::string emojis = "12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️";
+    std::u16string emojis = u"12345📡👨‍👩‍👧‍👦👁️\n🇨🇳3️⃣👁️‍🗨️";
     AddSpan(emojis);
     contentLength = richEditorPattern->GetTextContentLength();
     richEditorPattern->caretPosition_ = contentLength;
@@ -530,7 +530,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DeleteForward001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
@@ -549,7 +549,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessInsertValue001, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::string insertValue = "abc";
+    std::u16string insertValue = u"abc";
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->previewTextRecord_.needReplacePreviewText = true;
@@ -615,7 +615,7 @@ HWTEST_F(RichEditorPatternTestFourNg, ProcessStyledString002, TestSize.Level1)
     ret = richEditorPattern->CanStartAITask();
     EXPECT_TRUE(ret);
 
-    richEditorPattern->textForDisplay_ = INIT_U16VALUE_1;
+    richEditorPattern->textForDisplay_ = INIT_VALUE_1;
     richEditorPattern->dataDetectorAdapter_->aiDetectInitialized_ = true;
     richEditorPattern->ProcessStyledString();
 
@@ -661,7 +661,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetSelection007, TestSize.Level1)
     ASSERT_NE(focusHub, nullptr);
     focusHub->currentFocus_ = true;
 
-    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
     richEditorPattern->previewTextRecord_.startOffset = 1;
     richEditorPattern->previewTextRecord_.endOffset = 10;
 
@@ -696,7 +696,7 @@ HWTEST_F(RichEditorPatternTestFourNg, SetSelection008, TestSize.Level1)
     std::u16string content = u"TEST123";
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(content);
-    richEditorPattern->previewTextRecord_.previewContent = "test";
+    richEditorPattern->previewTextRecord_.previewContent = u"test";
     richEditorPattern->previewTextRecord_.startOffset = -1;
     richEditorPattern->previewTextRecord_.endOffset = 10;
 
@@ -1059,7 +1059,7 @@ HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
 
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     richEditorPattern->GetDeletedSpan(changeValue, innerPosition, -99, RichEditorDeleteDirection::BACKWARD);
 
     EXPECT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
@@ -1188,7 +1188,7 @@ HWTEST_F(RichEditorPatternTestFourNg, DoDeleteActions001, TestSize.Level1)
     RichEditorDeleteValue info;
     richEditorPattern->DoDeleteActions(0, 0, info);
 
-    richEditorPattern->previewTextRecord_.previewContent = "123";
+    richEditorPattern->previewTextRecord_.previewContent = u"123";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
@@ -1262,7 +1262,7 @@ HWTEST_F(RichEditorPatternTestFourNg, InsertValueOperation001, TestSize.Level1)
     struct UpdateSpanStyle typingStyle;
     TextStyle textStyle(5);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    std::string insertValue = "test123";
+    std::u16string insertValue = u"test123";
     RichEditorPattern::OperationRecord record;
 
     richEditorPattern->InsertValueOperation(insertValue, &record, OperationType::DEFAULT);

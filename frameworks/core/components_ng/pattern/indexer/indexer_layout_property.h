@@ -117,6 +117,9 @@ public:
 private:
     static std::unique_ptr<JsonValue> ToJsonObjectValue(const TextStyle& textStyle);
     static std::string AlignStyleToString(const AlignStyle& alignStyle);
+
+protected:
+    void UpdateLayoutProperty(const IndexerLayoutProperty* layoutProperty);
 };
 } // namespace OHOS::Ace::NG
 

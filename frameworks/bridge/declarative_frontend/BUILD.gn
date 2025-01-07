@@ -263,6 +263,7 @@ template("declarative_js_engine") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
@@ -345,8 +346,8 @@ template("declarative_js_engine") {
       "jsview/js_persistent.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
-      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
@@ -457,7 +458,6 @@ template("declarative_js_engine") {
       "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
-      "jsview/models/qrcode_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
@@ -518,6 +518,13 @@ template("declarative_js_engine") {
 
     if (ace_engine_feature_enable_digital_crown) {
       sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
+    if (qrcodegen_support) {
+      sources += [
+        "jsview/js_qrcode.cpp",
+        "jsview/models/qrcode_model_impl.cpp",
+      ]
     }
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
@@ -820,6 +827,7 @@ template("declarative_js_engine_ng") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
@@ -895,6 +903,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_path_shape.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
@@ -987,9 +996,11 @@ template("declarative_js_engine_ng") {
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
         "jsview/js_pattern_lock.cpp",
-        "jsview/js_qrcode.cpp",
         "jsview/js_relative_container.cpp",
       ]
+      if (qrcodegen_support) {
+        sources += [ "jsview/js_qrcode.cpp" ]
+      }
     }
 
     if (defined(config.video_components_support) &&

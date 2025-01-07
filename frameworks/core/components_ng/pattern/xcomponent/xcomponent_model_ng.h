@@ -59,6 +59,7 @@ public:
     void SetRenderFit(RenderFit renderFit) override;
     void EnableSecure(bool isSecure) override;
     void HdrBrightness(float hdrBrightness) override;
+    void EnableTransparentLayer(bool isTransparentLayer) override;
 
     static bool IsTexture(FrameNode* frameNode);
     static XComponentType GetType(FrameNode* frameNode);
@@ -84,6 +85,7 @@ public:
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void EnableSecure(FrameNode* frameNode, bool enable);
     static void HdrBrightness(FrameNode* frameNode, float hdrBrightness);
+    static void EnableTransparentLayer(FrameNode* frameNode, bool enable);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
 
 private:

@@ -1759,4 +1759,209 @@ HWTEST_F(NavrouterModelTestNg, AccessibilityTest001, TestSize.Level1)
     auto text2 = AccessibilityProperty2->GetAccessibilityText();
     EXPECT_EQ(text2, "NavdestinationMenu");
 }
+
+/**
+ * @tc.name: MeasureIgnoreLayoutSafeArea001
+ * @tc.desc: Test Measure func when set IgnoreLayoutSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterModelTestNg, MeasureIgnoreLayoutSafeArea001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create NavBar and property
+     */
+    auto algorithm = AceType::MakeRefPtr<NavBarLayoutAlgorithm>();
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2.set titleBar and toolBar to NavBar
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto text4 = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto titleGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto titleLayoutProperty = AceType::MakeRefPtr<TitleBarLayoutProperty>();
+    auto titleBarNode2 = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 23, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
+    auto subTitle =
+        TitleBarNode::GetOrCreateTitleBarNode("subTitle", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto toolBarNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto navBarContentNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarChild = FrameNode::CreateFrameNode("text", 99, AceType::MakeRefPtr<TextPattern>());
+    navBar->UpdatePrevMenuIsCustom(true);
+    navBar->UpdatePrevToolBarIsCustom(true);
+    navBar->GetGeometryNode()->SetFrameSize(SizeF(2000, 2000));
+    /**
+     * @tc.steps: step3.create layout constaint for measure task
+     */
+    LayoutConstraintF constraint;
+    LayoutConstraintF constraint2;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    layoutProperty->propHideTitleBar_ = true;
+    layoutProperty->contentConstraint_ = constraint2;
+    navBar->contentNode_ = navBarContentNode;
+    navBar->toolBarNode_ = toolBarNode;
+    navBar->titleBarNode_ = titleBarNode;
+    navBar->children_.push_back(text4);
+    layoutWrapper->childrenMap_[0] = childWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    layoutProperty->propHideToolBar_ = false;
+    /**
+     * @tc.steps: step4.run measure task
+     * @tc.expected: since padding, ignoreLayoutSafeArea failed and keep the same height
+     */
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+    PaddingProperty padding;
+    padding.left = CalcLength(100.0f);
+    padding.top = CalcLength(100.0f);
+    layoutProperty->UpdatePadding(padding);
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+}
+
+/**
+ * @tc.name: MeasureIgnoreLayoutSafeArea002
+ * @tc.desc: Test Measure func when set IgnoreLayoutSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterModelTestNg, MeasureIgnoreLayoutSafeArea002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create NavBar and property
+     */
+    auto algorithm = AceType::MakeRefPtr<NavBarLayoutAlgorithm>();
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2.set titleBar and toolBar to NavBar
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto text4 = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto titleGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto titleLayoutProperty = AceType::MakeRefPtr<TitleBarLayoutProperty>();
+    auto titleBarNode2 = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 23, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
+    auto subTitle =
+        TitleBarNode::GetOrCreateTitleBarNode("subTitle", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto toolBarNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto navBarContentNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarChild = FrameNode::CreateFrameNode("text", 99, AceType::MakeRefPtr<TextPattern>());
+    navBar->UpdatePrevMenuIsCustom(true);
+    navBar->UpdatePrevToolBarIsCustom(true);
+    navBar->GetGeometryNode()->SetFrameSize(SizeF(2000, 2000));
+    /**
+     * @tc.steps: step3.create layout constaint for measure task
+     */
+    LayoutConstraintF constraint;
+    LayoutConstraintF constraint2;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    layoutProperty->propHideTitleBar_ = true;
+    layoutProperty->contentConstraint_ = constraint2;
+    navBar->contentNode_ = navBarContentNode;
+    navBar->toolBarNode_ = toolBarNode;
+    navBar->titleBarNode_ = titleBarNode;
+    navBar->children_.push_back(text4);
+    layoutWrapper->childrenMap_[0] = childWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    layoutProperty->propHideToolBar_ = false;
+    /**
+     * @tc.steps: step4.run measure task
+     * @tc.expected: set invalid ignoreLayoutSafeArea type and keep the same height
+     */
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_ALL });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_EDGE_ALL, .edges = SAFE_AREA_EDGE_NONE });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+}
+
+/**
+ * @tc.name: MeasureIgnoreLayoutSafeArea003
+ * @tc.desc: Test Measure func when set IgnoreLayoutSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavrouterModelTestNg, MeasureIgnoreLayoutSafeArea003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create NavBar and property
+     */
+    auto algorithm = AceType::MakeRefPtr<NavBarLayoutAlgorithm>();
+    auto navBar =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 11, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutProperty = AceType::MakeRefPtr<NavBarLayoutProperty>();
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(navBar)), geometryNode, layoutProperty);
+    /**
+     * @tc.steps: step2.set titleBar and toolBar to NavBar
+     */
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto text4 = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto titleGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto titleLayoutProperty = AceType::MakeRefPtr<TitleBarLayoutProperty>();
+    auto titleBarNode2 = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 23, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto childWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        AceType::WeakClaim(AceType::RawPtr(titleBarNode2)), titleGeometryNode, titleLayoutProperty);
+    auto subTitle =
+        TitleBarNode::GetOrCreateTitleBarNode("subTitle", 22, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    auto toolBarNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto navBarContentNode = FrameNode::CreateFrameNode("text", 22, AceType::MakeRefPtr<TextPattern>());
+    auto toolBarChild = FrameNode::CreateFrameNode("text", 99, AceType::MakeRefPtr<TextPattern>());
+    navBar->UpdatePrevMenuIsCustom(true);
+    navBar->UpdatePrevToolBarIsCustom(true);
+    navBar->GetGeometryNode()->SetFrameSize(SizeF(2000, 2000));
+    /**
+     * @tc.steps: step3.create layout constaint for measure task
+     */
+    LayoutConstraintF constraint;
+    LayoutConstraintF constraint2;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    layoutProperty->layoutConstraint_ = constraint;
+    layoutProperty->propHideTitleBar_ = true;
+    layoutProperty->contentConstraint_ = constraint2;
+    navBar->contentNode_ = navBarContentNode;
+    navBar->toolBarNode_ = toolBarNode;
+    navBar->titleBarNode_ = titleBarNode;
+    navBar->children_.push_back(text4);
+    layoutWrapper->childrenMap_[0] = childWrapper;
+    layoutWrapper->currentChildCount_ = 1;
+    layoutProperty->propHideToolBar_ = false;
+    /**
+     * @tc.steps: step4.run measure task
+     * @tc.expected: set invalid ignoreLayoutSafeArea type and keep the same height
+     */
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_NONE });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_TOP });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+    layoutProperty->UpdateIgnoreLayoutSafeArea({ .type = SAFE_AREA_TYPE_ALL, .edges = SAFE_AREA_EDGE_BOTTOM });
+    algorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(navBar->GetGeometryNode()->GetFrameSize().Width(), 2000);
+}
 } // namespace OHOS::Ace::NG

@@ -1280,7 +1280,7 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll002, TestSize.Level1)
 }
 
 /**
- * @tc.name: OverScroll002
+ * @tc.name: OverScroll003
  * @tc.desc: Test Spring animation with different line heights
  * @tc.type: FUNC
  */
@@ -1312,6 +1312,43 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll003, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     FlushUITasks();
 
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: OverScroll004
+ * @tc.desc: Test top overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    model.SetRowsGap(Dimension(5.0));
+    CreateFixedHeightItems(1, 100.0f);
+    CreateFixedHeightItems(1, 50.0f);
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(1000.f);
+    info.SetMainDelta(250.f);
+    ASSERT_TRUE(pattern_->GetScrollableEvent());
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 62.5183945);
     scrollable->HandleTouchUp();
     (*scrollable->panRecognizerNG_->onActionEnd_)(info);
     EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);

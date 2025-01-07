@@ -2513,6 +2513,10 @@
     },
     {
         "first_introduced": "16",
+        "name": "OH_ArkUI_KeyEvent_Dispatch"
+    },
+    {
+        "first_introduced": "16",
         "name": "OH_ArkUI_NodeEvent_GetTextChangeEvent"
     },
     {

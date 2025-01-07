@@ -46,7 +46,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, name);
+        TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 } // namespace
 
@@ -857,7 +857,7 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>&
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
             overlayManager->CloseCustomDialog(node, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
@@ -887,7 +887,7 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
@@ -1103,7 +1103,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel", PriorityType::VIP);
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
         LOGI("Begin to show dialog ");
@@ -1145,7 +1145,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel", PriorityType::VIP);
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -1155,7 +1155,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu", PriorityType::VIP);
     return;
 }
 
@@ -1216,6 +1216,24 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
 {
 #ifdef ENABLE_ROSEN_BACKEND
     return NG::ComponentSnapshot::GetSync(componentId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarativeNG::GetSnapshotByUniqueId(int32_t uniqueId,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetByUniqueId(uniqueId, std::move(callback), options);
+#endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarativeNG::GetSyncSnapshotByUniqueId(
+    int32_t uniqueId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }

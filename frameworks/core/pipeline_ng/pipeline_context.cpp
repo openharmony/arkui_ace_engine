@@ -1151,9 +1151,6 @@ void PipelineContext::SetupRootElement()
         }
     }
 #endif
-#ifdef WINDOW_SCENE_SUPPORTED
-    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
-#endif
     accessibilityManagerNG_ = MakeRefPtr<AccessibilityManagerNG>();
     stageManager_ = ViewAdvancedRegister::GetInstance()->GenerateStageManager(stageNode);
     if (!stageManager_) {
@@ -1631,24 +1628,36 @@ void PipelineContext::SetRootRect(double width, double height, double offset)
 #endif
 }
 
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateSystemSafeArea(systemSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
 }
 
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
 }
 
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
 {
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
     CHECK_NULL_VOID(minPlatformVersion_ >= PLATFORM_VERSION_TEN);
     if (safeAreaManager_->UpdateNavArea(navSafeArea)) {
         AnimateOnSafeAreaUpdate();
@@ -1724,6 +1733,11 @@ PipelineBase::SafeAreaInsets PipelineContext::GetSafeArea() const
 PipelineBase::SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
 {
     return safeAreaManager_->GetSafeAreaWithoutProcess();
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
+{
+    return safeAreaManager_->GetScbSafeArea();
 }
 
 float PipelineContext::GetPageAvoidOffset()
@@ -3268,13 +3282,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
-    DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
+    DispatchMouseToTouchEvent(event, node);
     DispatchMouseEvent(event, node);
 }
 

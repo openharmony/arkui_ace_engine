@@ -1861,4 +1861,13 @@ ColorMode UINode::GetLocalColorMode() const
     return theme ? theme->GetColorMode() : ColorMode::COLOR_MODE_UNDEFINED;
 }
 
+void UINode::SetAllowReusableV2Descendant(bool allow)
+{
+    allowReusableV2Descendant_ = allow;
+}
+
+bool UINode::IsAllowReusableV2Descendant() const
+{
+    return allowReusableV2Descendant_;
+}
 } // namespace OHOS::Ace::NG

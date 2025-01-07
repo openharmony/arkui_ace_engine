@@ -557,4 +557,35 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg017, TestSize.Level1)
                 SetSecurityLayer(false)).Times(0);
     pattern->EnableSecure(false);
 }
+
+/**
+ * @tc.name: EnableLayerTransparentTest
+ * @tc.desc: Test EnableLayerTransparent Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, EnableLayerTransparentTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetTransparentLayer(true)).WillOnce(Return());
+    pattern->EnableTransparentLayer(true);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetTransparentLayer(false)).WillOnce(Return());
+    pattern->EnableTransparentLayer(false);
+
+    pattern->type_ = XCOMPONENT_TEXTURE_TYPE_VALUE;
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetTransparentLayer(true)).Times(0);
+    pattern->EnableTransparentLayer(true);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetTransparentLayer(false)).Times(0);
+    pattern->EnableTransparentLayer(false);
+}
 } // namespace OHOS::Ace::NG

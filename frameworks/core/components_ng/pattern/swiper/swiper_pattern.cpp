@@ -2892,6 +2892,7 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         childScrolling_ = false;
     }
 
+    CHECK_NULL_VOID(stopWhenTouched_);
     auto isOverlongIndicator = GetMaxDisplayCount() > 0;
     if (!isOverlongIndicator) {
         StopIndicatorAnimation(true);
@@ -4423,6 +4424,9 @@ int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
+    if (realTotalCount <= displayCount) {
+        return 1;
+    }
     if (IsSwipeByGroup() && displayCount != 0) {
         int32_t totalPages = 0;
         totalPages = realTotalCount / displayCount;
@@ -4433,7 +4437,7 @@ int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 
         return totalPages;
     } else {
-        if (IsLoop() || realTotalCount <= displayCount) {
+        if (IsLoop()) {
             return realTotalCount;
         } else {
             return realTotalCount - displayCount + 1;
