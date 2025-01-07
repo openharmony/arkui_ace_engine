@@ -20,7 +20,7 @@
 #include "movingphoto_node.h"
 #include "movingphoto_utils.h"
 
-#include "base/geometry/ng/size.t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_trace.h"
 #include "base/utils/ng/system_properties.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
