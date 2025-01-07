@@ -2096,6 +2096,11 @@ struct ArkUICommonModifier {
     void (*setTabStop)(ArkUINodeHandle node, ArkUI_Bool tabstop);
     void (*resetTabStop)(ArkUINodeHandle node);
     ArkUI_Bool (*getTabStop)(ArkUINodeHandle node);
+    void (*setOnFocus)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
+    void (*setOnBlur)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
+    void (*setOnTouch)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
+    void (*setOnHover)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover));
+    void (*setOnChange)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn));
     void (*setOnClick)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
@@ -4456,6 +4461,10 @@ struct ArkUITextPickerModifier {
         ArkUI_Int32 rangeType);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
+    void (*setTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*resetTextPickerColumnWidths)(ArkUINodeHandle node);
+    void (*getTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getTextPickerColumnWidthsSize)(ArkUINodeHandle node);
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);

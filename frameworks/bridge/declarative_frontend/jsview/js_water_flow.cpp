@@ -188,6 +188,7 @@ RefPtr<NG::UINode> SetWaterFlowBuilderNode(const JSRef<JSObject>& footerJsObject
 
 void JSWaterFlow::UpdateWaterFlowFooter(NG::FrameNode* frameNode, const JSRef<JSVal>& args)
 {
+    CHECK_NULL_VOID(args->IsObject());
     JSRef<JSObject> footerJsObject = JSRef<JSObject>::Cast(args); // 4 is the index of footerContent
     if (footerJsObject->HasProperty("builderNode_")) {
         RefPtr<NG::UINode> refPtrUINode = SetWaterFlowBuilderNode(footerJsObject);

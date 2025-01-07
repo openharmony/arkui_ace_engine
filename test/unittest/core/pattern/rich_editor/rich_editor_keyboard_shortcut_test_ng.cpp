@@ -900,6 +900,34 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDeletedSpan001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent001
+ * @tc.desc: test HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. declare and init variables.
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
+    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto scrollBar = richEditorPattern->GetScrollBar();
+    ASSERT_NE(scrollBar, nullptr);
+    scrollBar->isHover_ = true;
+    scrollBar->isPressed_ = true;
+    MouseInfo info;
+    richEditorPattern->HandleMouseEvent(info);
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    EXPECT_TRUE(mouseStyleManager->mouseStyleNodeId_.has_value());
+}
+
+/**
  * @tc.name: HandleMouseLeftButtonRelease001
  * @tc.desc: test HandleMouseLeftButtonRelease
  * @tc.type: FUNC

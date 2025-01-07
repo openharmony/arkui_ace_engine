@@ -553,7 +553,7 @@ protected:
     std::optional<int32_t> targetIndexStaged_;
     std::optional<float> predictSnapOffset_;
     std::optional<float> predictSnapEndPos_;
-    float scrollSnapVelocity_;
+    float scrollSnapVelocity_ = 0.0f;
 
     PositionMap itemPosition_;
     PositionMap recycledItemPosition_;

@@ -1564,7 +1564,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 
@@ -1782,7 +1782,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 
@@ -2129,7 +2129,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 }
@@ -2181,7 +2181,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 }

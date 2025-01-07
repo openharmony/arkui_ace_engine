@@ -151,6 +151,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) {};
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};

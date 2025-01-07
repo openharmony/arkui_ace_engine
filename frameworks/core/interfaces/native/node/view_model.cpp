@@ -675,6 +675,8 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createSymbolNode,
 #ifdef QRCODEGEN_SUPPORT
     createQRcodeNode,
+#else
+    nullptr,
 #endif
     createBadgeNode,
     createTextClockNode,

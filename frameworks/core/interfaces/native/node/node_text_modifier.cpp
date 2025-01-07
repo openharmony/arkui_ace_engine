@@ -1265,7 +1265,7 @@ void ResetOnMarqueeStateChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextModifier modifier = {
         .setContent = SetTextContent,
         .setFontWeight = SetFontWeight,
@@ -1398,21 +1398,14 @@ const ArkUITextModifier* GetTextModifier()
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .setImmutableFontWeight = SetImmutableFontWeight,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextModifier* GetCJUITextModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextModifier modifier = {
         .setContent = SetTextContent,
         .setFontWeight = SetFontWeight,
@@ -1535,14 +1528,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .setTextResponseRegion = SetResponseRegion,
         .resetTextResponseRegion = ResetResponseRegion,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
