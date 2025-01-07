@@ -231,16 +231,22 @@ export struct TipsDialogV2 {
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
       this.isCheckedInner = !this.isCheckedInner;
-      let eventInfo: accessibility.EventInfo = ({
-        type: 'announceForAccessibility',
-        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-        triggerAction: 'click',
-        textAnnouncedForAccessibility: this.isCheckedInner ? getContext().resourceManager.getStringSync(125833934) :
-        getContext().resourceManager.getStringSync(125833935)
-      });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        console.info(`Accessibility send event`)
-      });
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'common',
+          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          getContext().resourceManager.getStringSync(125833935)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.info(`Accessibility send event`)
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+      }
     })
     .padding({ top: 8, bottom: 8 })
     .constraintSize({ minHeight: CHECKBOX_CONTAINER_HEIGHT })
@@ -503,6 +509,7 @@ export struct SelectDialogV2 {
                       .id(String(index))
                       .focusable(false)
                       .accessibilityLevel('no')
+                      .visibility(this.selectedIndex === index ? Visibility.Visible : Visibility.Hidden)
                       .onFocus(() => {
                         this.isFocus = true;
                         this.currentFocusIndex = index;
@@ -749,16 +756,22 @@ export struct ConfirmDialogV2 {
     $r('sys.string.slider_accessibility_unselectedDesc'))
     .onClick(() => {
       this.isCheckedInner = !this.isCheckedInner;
-      let eventInfo: accessibility.EventInfo = ({
-        type: 'announceForAccessibility',
-        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
-        triggerAction: 'click',
-        textAnnouncedForAccessibility: this.isCheckedInner ? getContext().resourceManager.getStringSync(125833934) :
-        getContext().resourceManager.getStringSync(125833935)
-      });
-      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-        console.info(`Accessibility send event`)
-      });
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'common',
+          textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
+          getContext().resourceManager.getStringSync(125833935)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.info(`Accessibility send event`)
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        hilog.error(0x3900, 'Ace', `Faild to send event, cause, code: ${code}, message: ${message}`);
+      }
     })
     .width('100%')
     .padding({ top: 8, bottom: 8 })
@@ -848,7 +861,7 @@ export struct AlertDialogV2 {
           .fontWeight(this.getFontWeight())
           .fontColor(this.fontColorWithTheme)
           .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
-          .width(`calc(100% - ${PADDING_LEVEL_8}vp)`)
+          .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
           .textAlign(this.textAlign)
           .onKeyEvent((event: KeyEvent) => {
             if (event) {
@@ -1102,7 +1115,7 @@ struct CustomDialogContentComponent {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -1167,7 +1180,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.primaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1187,7 +1200,7 @@ struct CustomDialogContentComponent {
           .minFontSize(this.secondaryTitleMinFontSize)
           .maxFontScale(Math.min(this.appMaxFontScale, MAX_FONT_SCALE))
           .maxLines(TITLE_MAX_LINES)
-          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MIN_FONT_SIZE_FIRST)
+          .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
       }
@@ -1557,19 +1570,6 @@ function getAccessibilityText(resource: ResourceStr, selected: boolean): string 
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
-}
-
-/**
- * get text height
- *
- * @param textSize textSize
- * @returns text height
- */
-function getTextHeight(textSize: SizeOptions): number {
-  if (textSize && textSize.height !== null && textSize.height !== undefined) {
-    return Number(textSize.height);
-  }
-  return 0;
 }
 
 /**
