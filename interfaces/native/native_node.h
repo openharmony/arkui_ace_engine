@@ -3833,6 +3833,33 @@ typedef enum {
      */
     NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
     /**
+     * @brief Defines the start time of the time picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: time. The default value is <b>"00:00:00"</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: time. The default value is <b>"00:00:00"</b>.\n
+     *
+     * @since 16
+     */
+    NODE_TIME_PICKER_START = 14005,
+    /**
+     * @brief Defines the end time of the time picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: time. The default value is <b>"23:59:59"</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: time. The default value is <b>"23:59:59"</b>.\n
+     *
+     * @since 16
+     */
+    NODE_TIME_PICKER_END = 14006,
+
+    /**
      * @brief Defines whether the AM/PM option is cascaded with the time in 12-hour mode.
      * This attribute can be set, reset, and obtained as required through APIs.
      *

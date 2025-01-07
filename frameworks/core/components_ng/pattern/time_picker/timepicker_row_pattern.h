@@ -136,7 +136,7 @@ public:
 
     void UpdateAllChildNode();
 
-    void HandleHourColumnBuilding();
+    void HandleHourColumnBuilding(const PickerTime& value);
 
     void HandleMinAndSecColumnBuilding();
 
@@ -264,16 +264,30 @@ public:
         options_[hourColumn].clear();
     }
 
-    void SetSelectedTime(const PickerTime& value)
-    {
-        selectedTime_ = value;
-        isFiredTimeChange_ = firedTimeStr_.has_value() && firedTimeStr_.value() == value.ToString(true, hasSecond_);
-        firedTimeStr_.reset();
-    }
-
+    void SetSelectedTime(const PickerTime& value);
     const PickerTime& GetSelectedTime()
     {
         return selectedTime_;
+    }
+
+    void SetStartTime(const PickerTime& value)
+    {
+        startTime_ = value;
+    }
+
+    const PickerTime& GetStartTime() const
+    {
+        return startTime_;
+    }
+
+    void SetEndTime(const PickerTime& value)
+    {
+        endTime_ = value;
+    }
+
+    const PickerTime& GetEndTime() const
+    {
+        return endTime_;
     }
 
     void SetDialogTitleDate(const PickerDate& value)
@@ -650,6 +664,13 @@ private:
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<FrameNode>& host, RefPtr<TimePickerColumnPattern>& pattern, KeyCode& code,
                           int32_t currentIndex, uint32_t totalOptionCount, int32_t childSize);
+    void HandleAmPmColumnBuilding(const PickerTime& value);
+    void HandleAmPmColumnChange(uint32_t selectedHour);
+    void HandleAmToPmHourColumnBuilding(uint32_t selectedHour, uint32_t startHour, uint32_t endHour);
+    void HandleMinColumnBuilding();
+    void HandleMinColumnChange(const PickerTime& value);
+    uint32_t ParseHourOf24(uint32_t hourOf24) const;
+    const PickerTime& AdjustTime(const PickerTime& time);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -665,6 +686,8 @@ private:
     ZeroPrefixType prefixHour_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixMinute_ = ZeroPrefixType::AUTO;
     ZeroPrefixType prefixSecond_ = ZeroPrefixType::AUTO;
+    PickerTime startTime_ = PickerTime(0, 0, 0);
+    PickerTime endTime_ = PickerTime(23, 59, 59);
     PickerTime selectedTime_ = PickerTime::Current();
     PickerDate dialogTitleDate_ = PickerDate::Current();
     std::optional<int32_t> amPmId_;
