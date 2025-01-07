@@ -29,7 +29,7 @@ type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: V
  */
 function Reusable<T extends Constructor>(BaseClass: T): T {
   stateMgmtConsole.debug(`@Reusable ${BaseClass.name}: Redefining isReusable_ as true.`);
-  Reflect.defineProperty(BaseClass.prototype, "isReusable_", {
+  Reflect.defineProperty(BaseClass.prototype, 'isReusable_', {
     get: () => {
       return true;
     }
@@ -318,7 +318,7 @@ abstract class ViewPU extends PUV2ViewBase
  * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
  */
-  public setActiveInternal(active: boolean): void {
+  public setActiveInternal(active: boolean, isReuse = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
       this.setActiveCount(active);
@@ -331,7 +331,7 @@ abstract class ViewPU extends PUV2ViewBase
     for (const child of this.childrenWeakrefMap_.values()) {
       const childView: IView | undefined = child.deref();
       if (childView) {
-        childView.setActiveInternal(active);
+        childView.setActiveInternal(active, isReuse);
       }
     }
     stateMgmtProfiler.end();
@@ -867,17 +867,7 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.flushDelayCompleteRerender();
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (
-        child &&
-        (child instanceof ViewPU || child instanceof ViewV2) &&
-        !child.hasBeenRecycled_ &&
-        !child.__isBlockRecycleOrReuse__
-      ) {
-        child.aboutToReuseInternal();
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     this.runReuse_ = false;
   }
 
@@ -895,17 +885,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.preventRecursiveRecycle_ = false;
       return;
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (
-        child &&
-        (child instanceof ViewPU || child instanceof ViewV2) &&
-        !child.hasBeenRecycled_ &&
-        !child.__isBlockRecycleOrReuse__
-      ) {
-        child.aboutToRecycleInternal();
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doRecycle);
     this.runReuse_ = false;
   }
 
