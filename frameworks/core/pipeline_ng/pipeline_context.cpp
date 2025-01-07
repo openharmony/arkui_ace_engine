@@ -4533,7 +4533,12 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
 void PipelineContext::EnableContainerModalGesture(bool isEnable)
 {
     CHECK_NULL_VOID(rootNode_);
-    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    const auto &children = rootNode_->GetChildren();
+    if (children.empty()) {
+        LOGW("rootNode children list is empty.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
     if (!containerNode) {
         LOGW("container node is null when set event on gesture row");
         return;
