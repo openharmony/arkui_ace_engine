@@ -3308,6 +3308,12 @@ void UIContentImpl::InitializeSubWindow(OHOS::Rosen::Window* window, bool isDial
     OHOS::Rosen::DisplayManager::GetInstance().RegisterFoldStatusListener(foldStatusListener_);
     foldDisplayModeListener_ = new FoldDisplayModeListener(instanceId_, isDialog);
     OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayModeListener(foldDisplayModeListener_);
+
+    auto isAppOrSystemWindow = window_->IsAppWindow() || window_->IsSystemWindow();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isAppOrSystemWindow) {
+        avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
+        window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
+    }
 }
 
 void UIContentImpl::SetNextFrameLayoutCallback(std::function<void()>&& callback)
