@@ -36,6 +36,40 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
     }
 }
 
+FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
+{
+    // get the really item.
+    // TODO: LazyForEach has initial offset index.
+    auto* item = GetChildPtrByIndex(markIndex_);
+    if (!item) {
+        item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
+    }
+    if (!item) {
+        LOGE("current node of %{public}d is nullptr", markIndex_);
+        return nullptr;
+    }
+    RectF rect;
+    auto iter = itemRectMap_.find(item);
+    if (iter == itemRectMap_.end()) {
+        // 1: remeasure the mark item and get the new size.
+        rect = fillAlgorithm_->CalcMarkItemRect(size_, axis_, item, markIndex_, markItemOffset_);
+        markItemOffset_.reset();
+        indexToNode_.clear();
+        nodeToIndex_.clear();
+        itemRectMap_.try_emplace(item, rect);
+    } else {
+        rect = iter->second;
+    }
+    indexToNode_[markIndex_] = WeakClaim(item);
+    nodeToIndex_[item] = markIndex_;
+    // 2: check if more space for new item.
+    if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
+        LOGI("no more space left");
+        return nullptr;
+    }
+    return item;
+}
+
 FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirection direction)
 {
     CHECK_NULL_RETURN(fillAlgorithm_->IsReady(), nullptr);
@@ -50,38 +84,10 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     if (markItem == nullptr) {
         return reinterpret_cast<FrameNode*>(requestNewItemFlag);
     }
-    // the first loop item flag.
     if (markItem == reinterpret_cast<FrameNode*>(requestNewItemFlag)) {
-        // get the really item.
-        // TODO: LazyForEach has initial offset index.
-        auto* item = GetChildPtrByIndex(markIndex_);
-        if (!item) {
-            item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
-        }
-        if (!item) {
-            LOGE("current node of %{public}d is nullptr", markIndex_);
-            return nullptr;
-        }
-        RectF rect;
-        auto iter = itemRectMap_.find(item);
-        if (iter == itemRectMap_.end()) {
-            // 1: remeasure the mark item and get the new size.
-            rect = fillAlgorithm_->CalcMarkItemRect(size_, axis_, item, markIndex_, markItemOffset_);
-            markItemOffset_.reset();
-            indexToNode_.clear();
-            nodeToIndex_.clear();
-            itemRectMap_.try_emplace(item, rect);
-        } else {
-            rect = iter->second;
-        }
-        indexToNode_[markIndex_] = WeakClaim(item);
-        nodeToIndex_[item] = markIndex_;
-        // 2: check if more space for new item.
-        if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
-            LOGI("no more space left");
-            return nullptr;
-        }
-        return item;
+        fillAlgorithm_->PreFill(size_, axis_, totalCount_);
+        // first iteration
+        return InitPivotItem(direction);
     }
     auto* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));

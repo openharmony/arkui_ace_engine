@@ -129,7 +129,7 @@ void GridPattern::OnModifyDone()
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
-        gridFillAlgorithm_.Reset();
+        fillAlgo_.Reset();
         scrollWindowAdapter_.Reset();
         return;
     }
@@ -172,8 +172,8 @@ ScrollWindowAdapter* GridPattern::GetOrCreateScrollWindowAdapter()
     }
     // initialize ArkUI2.0 scrollWindowAdapter.
     if (!scrollWindowAdapter_) {
-        gridFillAlgorithm_ = MakeRefPtr<GridFillAlgorithm>();
-        scrollWindowAdapter_ = MakeRefPtr<ScrollWindowAdapter>(GetUnsafeHostPtr(), gridFillAlgorithm_);
+        fillAlgo_ = MakeRefPtr<GridFillAlgorithm>(* gridLayoutProperty, info_);
+        scrollWindowAdapter_ = MakeRefPtr<ScrollWindowAdapter>(GetUnsafeHostPtr(), fillAlgo_);
     }
     return scrollWindowAdapter_.GetRawPtr();
 }
@@ -485,7 +485,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
             scrollWindowAdapter_->UpdateSize(gridLayoutInfo.lastCrossSize_, gridLayoutInfo.lastMainSize_);
         }
         scrollWindowAdapter_->UpdateAxis(gridLayoutInfo.axis_);
-        gridFillAlgorithm_->UpdateGridLayoutProperty(GetLayoutProperty<GridLayoutProperty>().GetRawPtr());
     }
 
     bool indexChanged =
