@@ -514,13 +514,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
     window_->RecordFrameTime(nanoTimestamp, abilityName);
-    uint64_t timeStamp = nanoTimestamp - static_cast<uint64_t>(window_->GetVSyncPeriod()) + ONE_MS_IN_NS;
-    if (timeStamp > compensationValue_) {
-        resampleTimeStamp_ = timeStamp - compensationValue_;
-    } else {
-        LOGE("resampleTimeStamp overflow,use 0 to be default resampleTimeStamp");
-        resampleTimeStamp_ = 0;
-    }
+    uint64_t vsyncPeriod = static_cast<uint64_t>(window_->GetVSyncPeriod());
+    uint64_t timeStamp = (nanoTimestamp > vsyncPeriod) ? (nanoTimestamp - vsyncPeriod + ONE_MS_IN_NS) : ONE_MS_IN_NS;
+    resampleTimeStamp_ = (timeStamp > compensationValue_) ? (timeStamp - compensationValue_) : 0;
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
