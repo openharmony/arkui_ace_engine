@@ -157,15 +157,25 @@ void JSRadio::Checked(const JSCallbackInfo& info)
     if (info.Length() < 1 || info.Length() > 2) {
         return;
     }
-
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        RadioModel::GetInstance()->SetChecked(info[0]->ToBoolean());
-    } else {
-        RadioModel::GetInstance()->SetChecked(false);
+    bool checked = false;
+    JSRef<JSVal> changeEventVal;
+    auto checkedVal = info[0];
+    if (checkedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(checkedVal);
+        checkedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
     }
 
-    if (info.Length() > 1 && info[1]->IsFunction()) {
-        ParseCheckedObject(info, info[1]);
+    if (checkedVal->IsBoolean()) {
+        checked = checkedVal->ToBoolean();
+    }
+
+    RadioModel::GetInstance()->SetChecked(checked);
+
+    if (changeEventVal->IsFunction()) {
+        ParseCheckedObject(info, changeEventVal);
     }
 }
 
@@ -240,9 +250,8 @@ NG::PaddingPropertyF JSRadio::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSRadio::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (info[0]->IsObject()) {
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(info[0]);
         CommonCalcDimension commonCalcDimension;
@@ -266,9 +275,8 @@ NG::PaddingProperty JSRadio::GetPadding(const std::optional<CalcDimension>& top,
     const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
     const std::optional<CalcDimension>& right)
 {
-    NG::PaddingProperty padding({
-        NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp)
-    });
+    NG::PaddingProperty padding({ NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp), NG::CalcLength(0.0_vp),
+        NG::CalcLength(0.0_vp), std::nullopt, std::nullopt });
     if (left.has_value() && left.value().IsNonNegative()) {
         padding.left = NG::CalcLength(left.value());
     }

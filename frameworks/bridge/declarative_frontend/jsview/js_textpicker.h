@@ -34,6 +34,7 @@ struct ParseTextArrayParam {
     std::vector<NG::RangeContent> result;
     uint32_t kind = 0;
     uint32_t selected = 0;
+    std::vector<Dimension> columnWidths;
     std::string value;
     std::vector<NG::TextCascadePickerOptions> options;
     std::vector<uint32_t> selecteds;
@@ -44,8 +45,7 @@ struct ParseTextArrayParam {
 
 class JSTextPickerParser : public JSViewAbstract {
 public:
-    static bool ParseIconTextArray(const JSRef<JSObject>& paramObject, std::vector<NG::RangeContent>& result,
-        uint32_t& kind, uint32_t& selected);
+    static bool ParseIconTextArray(const JSRef<JSObject>& paramObject,  ParseTextArrayParam& param);
     static bool ParseTextArray(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle, const std::string& pos);
     static bool ParseMultiTextArray(const JSRef<JSObject>& paramObj, ParseTextArrayParam& param);
@@ -61,6 +61,7 @@ public:
         uint32_t index, bool isHasSelectAttr, std::vector<std::string>& resultStr);
     static bool ParseMultiTextArrayValue(const JsiRef<JsiValue>& jsValue, ParseTextArrayParam& param);
     static bool ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSelectedValue, ParseTextArrayParam& param);
+    static bool ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue, ParseTextArrayParam& param);
     static void ParseMultiTextArraySelectInternal(const std::vector<NG::TextCascadePickerOptions>& options,
         const std::vector<std::string>& values, std::vector<uint32_t>& selecteds);
     static bool ParseMultiTextArrayRange(const JSRef<JSArray>& jsRangeValue,
@@ -75,6 +76,8 @@ public:
         const std::vector<NG::TextCascadePickerOptions>& options, const std::string& value,
         std::vector<std::string>& values);
     static void IsUserDefinedFontFamily(const std::string& pos);
+    static void ParseDefaultTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
+    static bool ParseColumnWidths(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param);
 };
 
 class JSTextPicker : public JSViewAbstract {
@@ -89,6 +92,7 @@ public:
     static void OnCancel(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void OnScrollStop(const JSCallbackInfo& info);
+    static void OnEnterSelectedArea(const JSCallbackInfo& info);
     static void SetDisappearTextStyle(const JSCallbackInfo& info);
     static void SetTextStyle(const JSCallbackInfo& info);
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
@@ -97,13 +101,15 @@ public:
     static void SetDivider(const JSCallbackInfo& info);
     static void SetGradientHeight(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
+
+    static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
+    static void SetDefaultTextStyle(const JSCallbackInfo& info);
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,
         uint32_t index, std::vector<uint32_t>& selecteds);
-    static bool ProcessCascadeOptions(const JSRef<JSObject>& paramObjec,
-        std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selecteds,
-        std::vector<std::string>& values, NG::TextCascadePickerOptionsAttr& attr);
+    static bool ProcessCascadeOptions(const JSRef<JSObject>& paramObject, ParseTextArrayParam& param,
+        NG::TextCascadePickerOptionsAttr& attr);
     static void SetSelectedIndexMulti(const JsiRef<JsiValue>& jsSelectedValue);
     static void SetSelectedIndexMultiInternal(uint32_t count, std::vector<NG::TextCascadePickerOptions>& options,
         std::vector<uint32_t>& selecteds);
@@ -113,9 +119,9 @@ private:
     static bool ProcessSingleRangeValue(const JSRef<JSObject>& paramObjec, ParseTextArrayParam& param);
     static void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptions>& options,
         uint32_t count, uint32_t& selectedValue, std::vector<uint32_t>& selectedValues);
-    static void CreateMulti(const RefPtr<PickerTheme>& theme, const std::vector<std::string>& values,
-        const std::vector<uint32_t>& selectedValues, const NG::TextCascadePickerOptionsAttr& attr,
-        const std::vector<NG::TextCascadePickerOptions>& options);
+    static void CreateSingle(const RefPtr<PickerTheme>& theme, ParseTextArrayParam& param);
+    static void CreateMulti(const RefPtr<PickerTheme>& theme,
+        const NG::TextCascadePickerOptionsAttr& attr, ParseTextArrayParam& param);
     static bool CheckDividerValue(const Dimension &dimension);
 };
 
@@ -139,10 +145,12 @@ private:
         NG::TextCascadePickerOptionsAttr& attr, NG::TextPickerSettingData& settingData);
     static bool ParseShowDataAttribute(const JSRef<JSObject>& paramObject,
         NG::TextPickerSettingData& settingData);
-    static bool ParseCanLoop(const JSRef<JSObject>& paramObject,
-        bool& canLoop);
+    static bool ParseCanLoop(const JSRef<JSObject>& paramObject, bool& canLoop);
     static bool ParseShowDataOptions(
         const JSRef<JSObject>& paramObject, ParseTextArrayParam& param, NG::TextCascadePickerOptionsAttr& attr);
+    static void ParseDisableTextStyleAnimation(const JSRef<JSObject>& paramObject, bool& isDisableTextStyleAnimation);
+    static void ParseEnterSelectedAreaEvent(const JSRef<JSObject>& paramObject, const JSCallbackInfo& info,
+        const WeakPtr<NG::FrameNode>& targetNode, std::map<std::string, NG::DialogTextEvent>& dialogEvent);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_TEXTPICKER_H

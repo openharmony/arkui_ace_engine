@@ -65,6 +65,7 @@ void SwipeRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
     int64_t overTime = GetSysTimestamp();
@@ -73,6 +74,9 @@ void SwipeRecognizer::OnAccepted()
             static_cast<long long>(inputTime), static_cast<long long>(overTime));
     }
     firstInputTime_.reset();
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
+    }
 }
 
 void SwipeRecognizer::OnRejected()
@@ -84,6 +88,7 @@ void SwipeRecognizer::OnRejected()
 
 void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -91,6 +96,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe %{public}d down, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
     if (fingers_ > MAX_SWIPE_FINGERS) {
+        extraInfo_ += "fingers exceeds the maximum dingers of the swipe gesture.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -99,6 +105,7 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Swipe recognizer direction is none, node tag = %{public}s, id = %{public}s",
             node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+        extraInfo_ += "swipe direction is NONE.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -124,12 +131,14 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void SwipeRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, swipe axis start, state: %{public}d", event.touchEventId,
         refereeState_);
     if (direction_.type == SwipeDirection::NONE) {
+        extraInfo_ += "swipe direction is NONE in axis case.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -268,6 +277,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         prevAngle_ = newAngle;
         return;
     }
+    extraInfo_ += "swipe move event angle doesn't meet the requirement.";
     Adjudicate(Claim(this), GestureDisposal::REJECT);
 }
 
@@ -305,6 +315,7 @@ void SwipeRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
         prevAngle_ = newAngle;
         return;
     }
+    extraInfo_ += "swipe move event angle doesn't meet the requirement in axis case.";
     Adjudicate(Claim(this), GestureDisposal::REJECT);
 }
 
@@ -317,7 +328,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -330,7 +341,7 @@ void SwipeRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 

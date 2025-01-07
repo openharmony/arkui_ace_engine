@@ -183,7 +183,7 @@ static bool CheckRecognizer(const RefPtr<NGGestureRecognizer>& recognizer)
             return true;
         }
     }
-    return false;
+    return group->CheckGroupState();
 }
 
 bool GestureScope::CheckRecognizerState()
@@ -213,6 +213,18 @@ bool GestureScope::HasFailRecognizer()
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer && recognizer->GetRefereeState() == RefereeState::FAIL) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool GestureScope::IsAnySucceedRecognizerExist()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer && (recognizer->GetRefereeState() == RefereeState::SUCCEED ||
+                              recognizer->GetRefereeState() == RefereeState::SUCCEED_BLOCKED)) {
             return true;
         }
     }
@@ -252,6 +264,16 @@ void GestureScope::CleanGestureScopeState()
     }
 }
 
+void GestureScope::CleanGestureScopeStateVoluntarily()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->CleanRecognizerStateVoluntarily();
+        }
+    }
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -281,6 +303,16 @@ void GestureReferee::CleanGestureScope(size_t touchId)
         }
         scope->Close();
         gestureScopes_.erase(iter);
+    }
+}
+
+void GestureReferee::CleanGestureStateVoluntarily(size_t touchId)
+{
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        CHECK_NULL_VOID(scope);
+        scope->CleanGestureScopeStateVoluntarily();
     }
 }
 
@@ -367,6 +399,19 @@ bool GestureReferee::HasFailRecognizer(int32_t touchId)
     CHECK_NULL_RETURN(scope, false);
 
     return scope->HasFailRecognizer();
+}
+
+bool GestureReferee::IsAnySucceedRecognizerExist(int32_t touchId)
+{
+    const auto& iter = gestureScopes_.find(touchId);
+    if (iter == gestureScopes_.end()) {
+        return false;
+    }
+
+    const auto& scope = iter->second;
+    CHECK_NULL_RETURN(scope, false);
+
+    return scope->IsAnySucceedRecognizerExist();
 }
 
 void GestureReferee::ForceCleanGestureReferee()

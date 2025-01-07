@@ -24,7 +24,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string INIT_STRING_1 = "初始属性字符串";
+const std::u16string INIT_STRING_1 = u"初始属性字符串";
+const std::u16string INIT_U16STRING_1 = u"初始属性字符串";
 const int32_t TEST_MAX_LINE = 10;
 const Dimension TEST_BASELINE_OFFSET = Dimension(5, DimensionUnit::PX);
 const Dimension TEST_TEXT_INDENT = Dimension(20, DimensionUnit::PX);
@@ -65,7 +66,7 @@ public:
     static void TearDownTestSuite();
     void SetSpanStringMode(bool isSpanStringMode);
 
-    RefPtr<MutableSpanString> CreateTextStyledString(const std::string& content);
+    RefPtr<MutableSpanString> CreateTextStyledString(const std::u16string& content);
 
 protected:
     static void MockKeyboardBuilder() {}
@@ -115,7 +116,7 @@ void RichEditorAccessibilityTestNg::SetSpanStringMode(bool isSpanStringMode)
     richEditorNode_->GetGeometryNode()->SetContentSize({});
 }
 
-RefPtr<MutableSpanString> RichEditorAccessibilityTestNg::CreateTextStyledString(const std::string& content)
+RefPtr<MutableSpanString> RichEditorAccessibilityTestNg::CreateTextStyledString(const std::u16string& content)
 {
     auto styledString = AceType::MakeRefPtr<MutableSpanString>(content);
     auto length = styledString->GetLength();
@@ -217,7 +218,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1
     /**
      * @tc.steps: step1. create styledString with text
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
 
     /**
      * @tc.steps: step2. get richEditor styledString controller
@@ -281,7 +282,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
     /**
      * @tc.steps: step1. create styledString with text & onClick
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     auto length = mutableStr->GetLength();
@@ -398,7 +399,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
     /**
      * @tc.steps: step1. create styledString with text & onClick
      */
-    auto mutableStr = CreateTextStyledString(INIT_STRING_1);
+    auto mutableStr = CreateTextStyledString(INIT_U16STRING_1);
     GestureStyle gestureInfo;
     ConstructGestureStyle(gestureInfo);
     auto length = mutableStr->GetLength();

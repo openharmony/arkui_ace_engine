@@ -51,20 +51,24 @@ void ResetShaderInputBuffer(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIComponent3DModifier* GetComponent3DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIComponent3DModifier modifier = {
-        SetShaderInputBuffer,
-        ResetShaderInputBuffer,
+        .setShaderInputBuffer = SetShaderInputBuffer,
+        .resetShaderInputBuffer = ResetShaderInputBuffer,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIComponent3DModifier* GetCJUIComponent3DModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIComponent3DModifier modifier = {
-        SetShaderInputBuffer,
-        ResetShaderInputBuffer,
+        .setShaderInputBuffer = SetShaderInputBuffer,
+        .resetShaderInputBuffer = ResetShaderInputBuffer,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

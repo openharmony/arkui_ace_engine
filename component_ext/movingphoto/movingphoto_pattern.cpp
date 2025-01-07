@@ -161,15 +161,22 @@ void MovingPhotoPattern::InitEvent()
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (longPressEvent_) {
+        if (isEnableAnalyzer_) {
+            gestureHub->SetLongPressEvent(nullptr);
+            longPressEvent_ = nullptr;
+        } else {
+            gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
+        }
+    }
+    if (!isEnableAnalyzer_) {
+        auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleLongPress(info);
+        };
+        longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
         gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
     }
-    auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleLongPress(info);
-    };
-    longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
-    gestureHub->SetLongPressEvent(longPressEvent_, false, false, LONG_PRESS_DELAY);
 
     if (touchEvent_) {
         gestureHub->AddTouchEvent(touchEvent_);
@@ -258,7 +265,7 @@ void MovingPhotoPattern::HandleTouchEvent(TouchEventInfo& info)
     if (!isPrepared_ || isPlayByController_) {
         return;
     }
-    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_) {
+    if (autoAndRepeatLevel_ == PlaybackMode::NONE && isEnableAnalyzer_ && isAnalyzerPlaying_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "HandleTouchEvent isEnableAnalyzer_ return.");
         return;
     }
@@ -295,6 +302,9 @@ void MovingPhotoPattern::UpdateImageNode()
     DynamicRangeModeConvert(dynamicRangeMode_);
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, DynamicMode, dynamicRangeMode_, image);
     ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicRangeMode, dynamicRangeMode_, image);
+    auto imagePattern = image->GetPattern<ImagePattern>();
+    CHECK_NULL_VOID(imagePattern);
+    imagePattern->SetOrientation(ImageRotateOrientation::AUTO);
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto set HDR.%{public}d", dynamicRangeMode_);
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -319,8 +329,6 @@ void MovingPhotoPattern::UpdateImageNode()
         auto imageLayoutProperty = image->GetLayoutProperty<ImageLayoutProperty>();
         imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         imageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-        auto imagePattern = image->GetPattern<ImagePattern>();
-        CHECK_NULL_VOID(imagePattern);
         MovingPhotoFormatConvert(movingPhotoFormat_);
         imagePattern->SetExternalDecodeFormat(imageFormat_);
         imageLayoutProperty->UpdateImageFit(imageFit);
@@ -568,6 +576,7 @@ void MovingPhotoPattern::UpdatePlayMode()
             SetAutoPlayPeriod(autoPlayPeriodStartTime_, autoPlayPeriodEndTime_);
         }
         if (autoAndRepeatLevel_ == PlaybackMode::AUTO && currentPlayStatus_ == PlaybackStatus::PREPARED) {
+            isSetAutoPlayPeriod_ = false;
             ResetMediaPlayer();
         } else {
             MediaResetToPlay();
@@ -1058,16 +1067,27 @@ void MovingPhotoPattern::StartAnimation()
     });
     startAnimationFlag_ = true;
     AnimationUtils::Animate(animationOption,
-        [imageRsContext, videoRsContext, flag = historyAutoAndRepeatLevel_]() {
+        [imageRsContext, videoRsContext, flag = autoAndRepeatLevel_, movingPhotoPattern]() {
             imageRsContext->UpdateOpacity(0.0);
-            if (flag == PlaybackMode::REPEAT || flag == PlaybackMode::AUTO) {
-                videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-                imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-            } else {
-                videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-                imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-            }
+            auto movingPhoto = movingPhotoPattern.Upgrade();
+            CHECK_NULL_VOID(movingPhoto);
+            movingPhoto->RsContextUpdateTransformScale(imageRsContext, videoRsContext, flag);
         }, animationOption.GetOnFinishEvent());
+}
+
+void MovingPhotoPattern::RsContextUpdateTransformScale(const RefPtr<RenderContext>& imageRsContext,
+    const RefPtr<RenderContext>& videoRsContext, PlaybackMode playbackMode)
+{
+    if (playbackMode == PlaybackMode::REPEAT) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    } else if (playbackMode == PlaybackMode::AUTO) {
+        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
+    } else {
+        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
+    }
 }
 
 void MovingPhotoPattern::StopPlayback()
@@ -1125,6 +1145,17 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
+    isSetAutoPlayPeriod_ = false;
+    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+        autoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        historyAutoAndRepeatLevel_ = PlaybackMode::REPEAT;
+        Pause();
+        if (autoPlayPeriodEndTime_ != -1) {
+            Seek(autoPlayPeriodEndTime_);
+        } else {
+            Seek(0);
+        }
+    }
     ResetMediaPlayer();
     if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
         autoAndRepeatLevel_ = PlaybackMode::AUTO;
@@ -1158,16 +1189,10 @@ void MovingPhotoPattern::StopAnimation()
     CHECK_NULL_VOID(video);
     auto videoRsContext = video->GetRenderContext();
     CHECK_NULL_VOID(videoRsContext);
-    
+
     imageLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     imageRsContext->UpdateOpacity(0.0);
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT || historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        imageRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-        videoRsContext->UpdateTransformScale({NORMAL_SCALE, NORMAL_SCALE});
-    } else {
-        imageRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-        videoRsContext->UpdateTransformScale({ZOOM_IN_SCALE, ZOOM_IN_SCALE});
-    }
+    RsContextUpdateTransformScale(imageRsContext, videoRsContext, autoAndRepeatLevel_);
     image->MarkModifyDone();
     video->MarkModifyDone();
     auto movingPhotoPattern = WeakClaim(this);

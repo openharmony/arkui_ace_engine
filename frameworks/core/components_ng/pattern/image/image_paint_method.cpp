@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/image/image_dfx.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 
@@ -47,18 +48,26 @@ void ImagePaintMethod::UpdateBorderRadius(PaintWrapper* paintWrapper, ImageDfxCo
 {
     auto renderCtx = paintWrapper->GetRenderContext();
     CHECK_NULL_VOID(renderCtx);
-    auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
     auto borderRadius = renderCtx->GetBorderRadius();
 
-    BorderRadiusArray radiusXY = {
-        PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
-            borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),
-        PointF(borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth),
-            borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth)),
-        PointF(borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth),
-            borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth)),
-        PointF(borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth),
-            borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth)) };
+    BorderRadiusArray radiusXY = BorderRadiusArray();
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto paintRectWidth = renderCtx->GetPaintRectWithoutTransform().Width();
+        radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth),
+                         borderRadius->radiusTopLeft->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusTopRight->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusBottomLeft->ConvertToPxWithSize(paintRectWidth)),
+            PointF(borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth),
+                borderRadius->radiusBottomRight->ConvertToPxWithSize(paintRectWidth)) };
+    } else {
+        radiusXY = { PointF(borderRadius->radiusTopLeft->ConvertToPx(), borderRadius->radiusTopLeft->ConvertToPx()),
+            PointF(borderRadius->radiusTopRight->ConvertToPx(), borderRadius->radiusTopRight->ConvertToPx()),
+            PointF(borderRadius->radiusBottomLeft->ConvertToPx(), borderRadius->radiusBottomLeft->ConvertToPx()),
+            PointF(borderRadius->radiusBottomRight->ConvertToPx(), borderRadius->radiusBottomRight->ConvertToPx()) };
+    }
 
     // adjust image radius to match border (concentric round rects)
     auto width = renderCtx->GetBorderWidth();
@@ -123,6 +132,21 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
 
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
+    }
+    auto ImageFit = renderProps->GetImageFit().value_or(ImageFit::COVER);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 defaultValue = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    if (ImageFit == ImageFit::MATRIX) {
+        config.imageMatrix_ = renderProps->GetImageMatrix().value_or(defaultValue);
     }
 }
 

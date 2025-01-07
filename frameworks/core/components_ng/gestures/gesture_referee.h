@@ -94,9 +94,11 @@ public:
 
     bool IsReady();
     bool HasFailRecognizer();
+    bool IsAnySucceedRecognizerExist();
     void ForceCleanGestureScope();
     void ForceCleanGestureScopeState();
     void CleanGestureScopeState();
+    void CleanGestureScopeStateVoluntarily();
 private:
     bool Existed(const RefPtr<NGGestureRecognizer>& recognizer);
     std::list<WeakPtr<NGGestureRecognizer>> recognizers_;
@@ -120,6 +122,8 @@ public:
     // Try to clean gesture scope when receive cancel event.
     void CleanGestureScope(size_t touchId);
 
+    void CleanGestureStateVoluntarily(size_t touchId);
+
     // Called by the gesture recognizer when the gesture recognizer has completed the recognition of the gesture (accept
     // or reject)
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal);
@@ -139,6 +143,7 @@ public:
 
     bool IsReady();
     bool HasFailRecognizer(int32_t touchId);
+    bool IsAnySucceedRecognizerExist(int32_t touchId);
     void ForceCleanGestureReferee();
     void ForceCleanGestureRefereeState();
     void CleanGestureRefereeState(int32_t touchId);

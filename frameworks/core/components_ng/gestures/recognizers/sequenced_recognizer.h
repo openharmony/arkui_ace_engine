@@ -52,7 +52,15 @@ public:
     {
         isEventHandoverNeeded_ = isEventHandoverNeeded;
     }
-    
+
+    RefereeState CheckStates(size_t touchId) override;
+
+    bool CheckGroupState() override;
+
+    void CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer) override;
+
+    void CleanRecognizerStateVoluntarily() override;
+
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};
     void HandleTouchUpEvent(const TouchEvent& event) override {};
@@ -63,11 +71,14 @@ private:
 
     bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer) override;
     void OnResetStatus() override;
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void DeadlineTimer();
     void HandleOverdueDeadline();
     void UpdateCurrentIndex();
     void SendTouchEventToNextRecognizer(const RefPtr<NGGestureRecognizer> curRecognizer, int64_t beforeDuration = 0);
     bool CheckBetweenTwoLongPressRecognizer(int32_t currentIndex = 0);
+    bool NeedStartDeadlineTimerInner(const RefPtr<NGGestureRecognizer> curRecognizer, SourceTool sourceTool);
+    RefPtr<NGGestureRecognizer> GetCurrentRecognizer();
 
     bool isEventHandoverNeeded_ = false;
     int32_t currentIndex_ = 0;

@@ -592,7 +592,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar004, TestSize.Level1)
      */
     float dragDelta = -24;
     DragScrollBarAction(Offset(239, 398), dragDelta);
-    float expectOffset = -HORIZONTAL_SCROLLABLE_DISTANCE - dragDelta / HORIZONTAL_RATIO;
+    float expectOffset = dragDelta / HORIZONTAL_RATIO;
     EXPECT_TRUE(Position(expectOffset));
 
     /**

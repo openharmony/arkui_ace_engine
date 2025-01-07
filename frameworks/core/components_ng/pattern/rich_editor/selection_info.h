@@ -71,6 +71,7 @@ struct SpanPosition {
 struct SymbolSpanStyle {
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
     std::string symbolColor;
@@ -125,6 +126,7 @@ struct TextStyleResult {
     std::string fontColor;
     double fontSize = 0.0;
     double lineHeight = 0.0;
+    bool halfLeading = false;
     double letterSpacing = 0.0;
     double lineSpacing = 0.0;
     int32_t fontStyle = 0;
@@ -154,8 +156,8 @@ struct ResultObject {
     SpanPosition spanPosition;
     SelectSpanType type = SelectSpanType::TYPESPAN;
     int32_t offsetInSpan[2] = { 0, 0 };
-    std::string valueString;
-    std::string previewText;
+    std::u16string valueString;
+    std::u16string previewText;
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
@@ -180,6 +182,11 @@ public:
     ~SelectionInfo() = default;
 
     Selection GetSelection() const
+    {
+        return selection_;
+    }
+
+    Selection& GetSelectionRef()
     {
         return selection_;
     }

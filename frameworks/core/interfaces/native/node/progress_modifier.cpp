@@ -1,6 +1,6 @@
 
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -256,6 +256,13 @@ void SetCapsuleStyleOptions(FrameNode* node, ArkUIProgressStyle* value)
     ProgressModelNG::SetFontWeight(node, static_cast<FontWeight>(fontWeight));
     ProgressModelNG::SetFontFamily(node, families);
     ProgressModelNG::SetItalicFontStyle(node, static_cast<Ace::FontStyle>(fontStyle));
+    if (Negative(value->borderRadiusValue) ||
+        (static_cast<DimensionUnit>(value->borderRadiusUnit) == DimensionUnit::PERCENT)) {
+        ProgressModelNG::ResetBorderRadius(node);
+    } else {
+        ProgressModelNG::SetBorderRadius(node, Dimension(value->borderRadiusValue,
+            static_cast<DimensionUnit>(value->borderRadiusUnit)));
+    }
 }
 
 void SetProgressStyle(ArkUINodeHandle node, ArkUIProgressStyle* value)
@@ -323,6 +330,7 @@ void SetCapsuleStyleOptions(FrameNode* node)
     ProgressModelNG::SetFontWeight(node, textTheme->GetTextStyle().GetFontWeight());
     ProgressModelNG::SetFontFamily(node, textTheme->GetTextStyle().GetFontFamilies());
     ProgressModelNG::SetItalicFontStyle(node, textTheme->GetTextStyle().GetFontStyle());
+    ProgressModelNG::ResetBorderRadius(node); // Set default value.
 }
 
 void ResetProgressStyle(ArkUINodeHandle node)
@@ -426,19 +434,55 @@ void ResetProgressInitialize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
-    static const ArkUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
-        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIProgressModifier modifier = {
+        .setProgressValue = SetProgressValue,
+        .resetProgressValue = ResetProgressValue,
+        .setProgressGradientColor = SetProgressGradientColor,
+        .setProgressColor = SetProgressColor,
+        .resetProgressColor = ResetProgressColor,
+        .setProgressStyle = SetProgressStyle,
+        .resetProgressStyle = ResetProgressStyle,
+        .setProgressBackgroundColor = SetProgressBackgroundColor,
+        .resetProgressBackgroundColor = ResetProgressBackgroundColor,
+        .setProgressTotal = SetProgressTotal,
+        .setProgressType = SetProgressType,
+        .resetProgressType = ResetProgressType,
+        .getProgressValue = GetProgressValue,
+        .getProgressTotal = GetProgressTotal,
+        .getProgressType = GetProgressType,
+        .getProgressColor = GetProgressColor,
+        .setProgressInitialize = SetProgressInitialize,
+        .resetProgressInitialize = ResetProgressInitialize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIProgressModifier* GetCJUIProgressModifier()
 {
-    static const CJUIProgressModifier modifier = { SetProgressValue, ResetProgressValue, SetProgressGradientColor,
-        SetProgressColor, ResetProgressColor, SetProgressStyle, ResetProgressStyle, SetProgressBackgroundColor,
-        ResetProgressBackgroundColor, SetProgressTotal, SetProgressType, ResetProgressType, GetProgressValue,
-        GetProgressTotal, GetProgressType, GetProgressColor, SetProgressInitialize, ResetProgressInitialize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIProgressModifier modifier = {
+        .setProgressValue = SetProgressValue,
+        .resetProgressValue = ResetProgressValue,
+        .setProgressGradientColor = SetProgressGradientColor,
+        .setProgressColor = SetProgressColor,
+        .resetProgressColor = ResetProgressColor,
+        .setProgressStyle = SetProgressStyle,
+        .resetProgressStyle = ResetProgressStyle,
+        .setProgressBackgroundColor = SetProgressBackgroundColor,
+        .resetProgressBackgroundColor = ResetProgressBackgroundColor,
+        .setProgressTotal = SetProgressTotal,
+        .setProgressType = SetProgressType,
+        .resetProgressType = ResetProgressType,
+        .getProgressValue = GetProgressValue,
+        .getProgressTotal = GetProgressTotal,
+        .getProgressType = GetProgressType,
+        .getProgressColor = GetProgressColor,
+        .setProgressInitialize = SetProgressInitialize,
+        .resetProgressInitialize = ResetProgressInitialize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

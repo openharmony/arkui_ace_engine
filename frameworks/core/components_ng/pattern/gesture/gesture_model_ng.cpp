@@ -193,13 +193,13 @@ RefPtr<GestureProcessor> TimeoutGestureModelNG::GetGestureProcessor()
     return gestureProcessor;
 }
 
-void GestureModelNG::SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter)
+void GestureModelNG::SetOnGestureEvent(const GestureEventFunc& gestureEventFunc)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto gesture = gestureProcessor->TopGestureNG();
     CHECK_NULL_VOID(gesture);
-    gesture->SetOnActionCancelId(gestureEventNoParameter);
+    gesture->SetOnActionCancelId(gestureEventFunc);
 }
 
 void GestureModelNG::SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action)

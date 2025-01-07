@@ -64,6 +64,7 @@ public:
 
     int32_t StartDrag(const DragDataCore& dragData, std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback)
     {
+        gDragData_ = dragData;
         return gStartDrag;
     }
 
@@ -74,6 +75,7 @@ public:
 private:
     std::function<void()> gDragOutCallback = nullptr;
     int gStartDrag = 0;
+    DragDataCore gDragData_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_CORE_COMMON_MOCK_INTERACTION_H

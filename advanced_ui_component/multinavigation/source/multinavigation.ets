@@ -248,7 +248,11 @@ export struct SubNavigation {
       return NavigationMode.Stack;
     }
     if (this.displayMode === display.FoldStatus.FOLD_STATUS_UNKNOWN) {
-      this.displayMode = display.getFoldStatus();
+      try {
+        this.displayMode = display.getFoldStatus();
+      } catch (err) {
+        hilog.warn(0x0000, 'MultiNavigation', 'Failed to get fold status. error:' + JSON.stringify(err));
+      }
     }
     if (DeviceHelper.isTablet() && this.isPortrait) {
       hilog.info(0x0000, 'MultiNavigation', 'SubNavigation getMode tablet portrait');
@@ -385,7 +389,11 @@ export struct MultiNavigation {
       this.multiStack.isLarge = isLarge;
       this.multiStack.handleRefreshPlaceHolderIfNeeded();
     });
-    this.multiStack.needRenderDisplayMode.displayMode = display.getFoldStatus();
+    try {
+      this.multiStack.needRenderDisplayMode.displayMode = display.getFoldStatus();
+    } catch (err) {
+      hilog.warn(0x0000, 'MultiNavigation', 'Failed to get fold status. error:' + JSON.stringify(err));
+    }
     DeviceListenerManager.getInstance().initListener();
     this.multiStack.registerHomeChangeListener({
       onHomeShowOnTop: (name) => {
@@ -1052,7 +1060,7 @@ export class MultiNavPathStack extends NavPathStack {
     this.mPolicyMap = policyMap;
   }
 
-  switchFullScreen(isFullScreen?: boolean): boolean {
+  switchFullScreenState(isFullScreen?: boolean): boolean {
     let totalStackSize = this.totalStack.length;
     let subStackListLength = this.subStackList.length;
     if (subStackListLength < 1 || totalStackSize < 1) {

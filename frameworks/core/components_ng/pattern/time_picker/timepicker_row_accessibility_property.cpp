@@ -24,8 +24,6 @@ namespace OHOS::Ace::NG {
 namespace {
 const int DOUBLE_DIGIT = 10;
 const std::string COLON = ":";
-const std::string AM = "上午";
-const std::string PM = "下午";
 const std::string ZERO = "0";
 } // namespace
 
@@ -68,10 +66,10 @@ std::string TimePickerRowAccessibilityProperty::GetText() const
         auto amPmColumn = allChildNode["amPm"].Upgrade();
         CHECK_NULL_RETURN(amPmColumn, "");
         auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
-        if (amPmPickerColumnPattern->GetCurrentIndex() == 0) {
-            result = AM + result;
-        } else {
-            result = PM + result;
+        CHECK_NULL_RETURN(amPmPickerColumnPattern, "");
+        auto optionIndex = amPmPickerColumnPattern->GetCurrentIndex();
+        if (optionIndex >= 0) {
+            result = timePickerRowPattern->GetOptionValue(amPmColumn, optionIndex).append(" ") + result;
         }
     }
 

@@ -112,6 +112,11 @@ public:
         return false;
     }
 
+    virtual void SetEnableSwipeBack(bool isEnable)
+    {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "enable swipe back is not support");
+    }
+
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RootPattern);
 };

@@ -28,8 +28,11 @@ constexpr int32_t DEFAULT_GROUP_DIVIDER_VALUES_COUNT = 3;
 const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
+constexpr float MAX_PERCENT = 100.0f;
 std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
+const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
+    TextOverflow::MARQUEE };
 
 void SetTextPickerBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -334,6 +337,47 @@ void SetTextPickerValue(ArkUINodeHandle node, ArkUI_CharPtr valueStr)
     }
 }
 
+void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size)
+{
+    std::vector<Dimension> widths;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    for (uint32_t i = 0; i < size; i++) {
+        widths.emplace_back(Dimension(values[i] * MAX_PERCENT, DimensionUnit::PERCENT));
+    }
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+}
+
+void ResetTextPickerColumnWidths(ArkUINodeHandle node)
+{
+    std::vector<Dimension> widths;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto childCount = static_cast<float>(frameNode->GetChildren().size());
+    for (uint32_t i = 0; i < childCount; i++) {
+        widths.emplace_back(Dimension(MAX_PERCENT / childCount, DimensionUnit::PERCENT));
+    }
+    TextPickerModelNG::SetColumnWidths(frameNode, widths);
+}
+
+ArkUI_Int32 GetTextPickerColumnWidthsSize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, 0);
+    return TextPickerModelNG::GetColumnWidthsSize(frameNode);
+}
+
+void GetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto size = GetTextPickerColumnWidthsSize(node);
+    std::vector<Dimension> widths = TextPickerModelNG::GetColumnWidths(frameNode);
+    for (int32_t i = 0; i < size; i++) {
+        values[i] = widths[i].Value() / MAX_PERCENT;
+    }
+}
+
 ArkUI_CharPtr GetTextPickerSelectedTextStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -495,6 +539,73 @@ void ResetTextPickerGradientHeight(ArkUINodeHandle node)
     TextPickerModelNG::SetGradientHeight(frameNode, height);
 }
 
+void SetTextPickerDisableTextStyleAnimation(ArkUINodeHandle node, int disableTextStyleAnimation)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, disableTextStyleAnimation);
+}
+
+void ResetTextPickerDisableTextStyleAnimation(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetDisableTextStyleAnimation(frameNode, false);
+}
+
+void SetTextPickerDefaultTextStyle(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo, ArkUI_Int32 style,
+    ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+ 
+    NG::PickerTextStyle textStyle;
+    std::vector<std::string> res;
+    std::string fontValues = std::string(fontInfo);
+    StringUtils::StringSplitter(fontValues, DEFAULT_DELIMITER, res);
+    if (res.size() != NUM_3) {
+        return;
+    }
+    textStyle.fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (style >= 0 && style < static_cast<int32_t>(FONT_STYLES.size())) {
+        textStyle.fontStyle = FONT_STYLES[style];
+    } else {
+        textStyle.fontStyle = FONT_STYLES[0];
+    }
+    textStyle.fontFamily = Framework::ConvertStrToFontFamilies(res[POS_2]);
+    textStyle.fontWeight = StringUtils::StringToFontWeight(res[POS_1]);
+    textStyle.textColor = Color(color);
+    textStyle.minFontSize = StringUtils::StringToCalcDimension(minFontSize, false, DimensionUnit::FP);
+    textStyle.maxFontSize = StringUtils::StringToCalcDimension(maxFontSize, false, DimensionUnit::FP);
+    if (overflow >= 0 && overflow < static_cast<int32_t>(TEXT_OVERFLOWS.size())) {
+        textStyle.textOverflow = TEXT_OVERFLOWS[overflow];
+    } else {
+        textStyle.textOverflow = TEXT_OVERFLOWS[0];
+    }
+
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, textStyle);
+}
+
+void ResetTextPickerDefaultTextStyle(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto theme = themeManager->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle pickerTextStyle;
+    TextPickerModelNG::SetDefaultTextStyle(frameNode, theme, pickerTextStyle);
+}
+
 ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -510,31 +621,89 @@ ArkUI_Int32 GetTextPickerSelectedSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextPickerModifier* GetTextPickerModifier()
 {
-    static const ArkUITextPickerModifier modifier = { SetTextPickerBackgroundColor, SetTextPickerCanLoop,
-        GetTextPickerSelectedIndex, SetTextPickerSelectedIndex, GetTextPickerTextStyle, SetTextPickerTextStyle,
-        GetTextPickerSelectedTextStyle, SetTextPickerSelectedTextStyle, GetTextPickerDisappearTextStyle,
-        SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
-        ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
-        ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
-        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
-        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight,
-        ResetTextPickerDividerNull };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUITextPickerModifier modifier = {
+        .setTextPickerBackgroundColor = SetTextPickerBackgroundColor,
+        .setTextPickerCanLoop = SetTextPickerCanLoop,
+        .getTextPickerSelectedIndex = GetTextPickerSelectedIndex,
+        .setTextPickerSelectedIndex = SetTextPickerSelectedIndex,
+        .getTextPickerTextStyle = GetTextPickerTextStyle,
+        .setTextPickerTextStyle = SetTextPickerTextStyle,
+        .getTextPickerSelectedTextStyle = GetTextPickerSelectedTextStyle,
+        .setTextPickerSelectedTextStyle = SetTextPickerSelectedTextStyle,
+        .getTextPickerDisappearTextStyle = GetTextPickerDisappearTextStyle,
+        .setTextPickerDisappearTextStyle = SetTextPickerDisappearTextStyle,
+        .setTextPickerDefaultPickerItemHeight = SetTextPickerDefaultPickerItemHeight,
+        .resetTextPickerCanLoop = ResetTextPickerCanLoop,
+        .resetTextPickerSelectedIndex = ResetTextPickerSelectedIndex,
+        .resetTextPickerTextStyle = ResetTextPickerTextStyle,
+        .resetTextPickerSelectedTextStyle = ResetTextPickerSelectedTextStyle,
+        .resetTextPickerDisappearTextStyle = ResetTextPickerDisappearTextStyle,
+        .resetTextPickerDefaultPickerItemHeight = ResetTextPickerDefaultPickerItemHeight,
+        .resetTextPickerBackgroundColor = ResetTextPickerBackgroundColor,
+        .getTextPickerRangeStr = GetTextPickerRangeStr,
+        .getTextPickerSingleRange = GetTextPickerSingleRange,
+        .setTextPickerRangeStr = SetTextPickerRangeStr,
+        .getTextPickerValue = GetTextPickerValue,
+        .setTextPickerValue = SetTextPickerValue,
+        .setTextPickerColumnWidths = SetTextPickerColumnWidths,
+        .resetTextPickerColumnWidths = ResetTextPickerColumnWidths,
+        .getTextPickerColumnWidthsSize = GetTextPickerColumnWidthsSize,
+        .getTextPickerColumnWidths = GetTextPickerColumnWidths,
+        .setTextPickerDivider = SetTextPickerDivider,
+        .resetTextPickerDivider = ResetTextPickerDivider,
+        .setTextPickerGradientHeight = SetTextPickerGradientHeight,
+        .resetTextPickerGradientHeight = ResetTextPickerGradientHeight,
+        .getTextPickerSelectedSize = GetTextPickerSelectedSize,
+        .getTextPickerCanLoop = GetTextPickerCanLoop,
+        .getTextPickerDefaultPickerItemHeight = GetTextPickerDefaultPickerItemHeight,
+        .resetTextPickerDividerNull = ResetTextPickerDividerNull,
+        .setTextPickerDisableTextStyleAnimation = SetTextPickerDisableTextStyleAnimation,
+        .resetTextPickerDisableTextStyleAnimation = ResetTextPickerDisableTextStyleAnimation,
+        .setTextPickerDefaultTextStyle = SetTextPickerDefaultTextStyle,
+        .resetTextPickerDefaultTextStyle = ResetTextPickerDefaultTextStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextPickerModifier* GetCJUITextPickerModifier()
 {
-    static const CJUITextPickerModifier modifier = { SetTextPickerBackgroundColor, SetTextPickerCanLoop,
-        GetTextPickerSelectedIndex, SetTextPickerSelectedIndex, GetTextPickerTextStyle, SetTextPickerTextStyle,
-        GetTextPickerSelectedTextStyle, SetTextPickerSelectedTextStyle, GetTextPickerDisappearTextStyle,
-        SetTextPickerDisappearTextStyle, SetTextPickerDefaultPickerItemHeight, ResetTextPickerCanLoop,
-        ResetTextPickerSelectedIndex, ResetTextPickerTextStyle, ResetTextPickerSelectedTextStyle,
-        ResetTextPickerDisappearTextStyle, ResetTextPickerDefaultPickerItemHeight, ResetTextPickerBackgroundColor,
-        GetTextPickerRangeStr, GetTextPickerSingleRange, SetTextPickerRangeStr, GetTextPickerValue, SetTextPickerValue,
-        SetTextPickerDivider, ResetTextPickerDivider, SetTextPickerGradientHeight, ResetTextPickerGradientHeight,
-        GetTextPickerSelectedSize, GetTextPickerCanLoop, GetTextPickerDefaultPickerItemHeight };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUITextPickerModifier modifier = {
+        .setTextPickerBackgroundColor = SetTextPickerBackgroundColor,
+        .setTextPickerCanLoop = SetTextPickerCanLoop,
+        .getTextPickerSelectedIndex = GetTextPickerSelectedIndex,
+        .setTextPickerSelectedIndex = SetTextPickerSelectedIndex,
+        .getTextPickerTextStyle = GetTextPickerTextStyle,
+        .setTextPickerTextStyle = SetTextPickerTextStyle,
+        .getTextPickerSelectedTextStyle = GetTextPickerSelectedTextStyle,
+        .setTextPickerSelectedTextStyle = SetTextPickerSelectedTextStyle,
+        .getTextPickerDisappearTextStyle = GetTextPickerDisappearTextStyle,
+        .setTextPickerDisappearTextStyle = SetTextPickerDisappearTextStyle,
+        .setTextPickerDefaultPickerItemHeight = SetTextPickerDefaultPickerItemHeight,
+        .resetTextPickerCanLoop = ResetTextPickerCanLoop,
+        .resetTextPickerSelectedIndex = ResetTextPickerSelectedIndex,
+        .resetTextPickerTextStyle = ResetTextPickerTextStyle,
+        .resetTextPickerSelectedTextStyle = ResetTextPickerSelectedTextStyle,
+        .resetTextPickerDisappearTextStyle = ResetTextPickerDisappearTextStyle,
+        .resetTextPickerDefaultPickerItemHeight = ResetTextPickerDefaultPickerItemHeight,
+        .resetTextPickerBackgroundColor = ResetTextPickerBackgroundColor,
+        .getTextPickerRangeStr = GetTextPickerRangeStr,
+        .getTextPickerSingleRange = GetTextPickerSingleRange,
+        .setTextPickerRangeStr = SetTextPickerRangeStr,
+        .getTextPickerValue = GetTextPickerValue,
+        .setTextPickerValue = SetTextPickerValue,
+        .setTextPickerDivider = SetTextPickerDivider,
+        .resetTextPickerDivider = ResetTextPickerDivider,
+        .setTextPickerGradientHeight = SetTextPickerGradientHeight,
+        .resetTextPickerGradientHeight = ResetTextPickerGradientHeight,
+        .getTextPickerSelectedSize = GetTextPickerSelectedSize,
+        .getTextPickerCanLoop = GetTextPickerCanLoop,
+        .getTextPickerDefaultPickerItemHeight = GetTextPickerDefaultPickerItemHeight,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

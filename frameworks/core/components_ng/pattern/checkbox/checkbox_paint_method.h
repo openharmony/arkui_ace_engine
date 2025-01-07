@@ -125,6 +125,16 @@ public:
         checkboxModifier_->SetEnabled(enabled_);
         checkboxModifier_->SetTouchHoverAnimationType(touchHoverType_);
         checkboxModifier_->UpdateAnimatableProperty();
+        if (paintProperty->HasCheckBoxUnSelectedColor()) {
+            auto pipeline = PipelineBase::GetCurrentContextSafely();
+            CHECK_NULL_VOID(pipeline);
+            auto checkBoxTheme = pipeline->GetTheme<CheckboxTheme>();
+            CHECK_NULL_VOID(checkBoxTheme);
+            checkboxModifier_->SetHasUnselectedColor(
+                paintProperty->GetCheckBoxUnSelectedColorValue() != checkBoxTheme->GetInactiveColor());
+        } else {
+            checkboxModifier_->SetHasUnselectedColor(false);
+        }
 
         SetHoverEffectType(paintProperty);
         SetModifierBoundsRect(size, offset);

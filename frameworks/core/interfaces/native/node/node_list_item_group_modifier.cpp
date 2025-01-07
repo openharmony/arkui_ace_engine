@@ -135,18 +135,37 @@ void ResetListItemGroupStyle(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIListItemGroupModifier* GetListItemGroupModifier()
 {
-    static const ArkUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
-        ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
-        ResetListItemGroupChildrenMainSize, GetlistDivider, SetListItemGroupSpace, ResetListItemGroupSpace,
-        SetListItemGroupStyle, ResetListItemGroupStyle };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIListItemGroupModifier modifier = {
+        .listItemGroupSetDivider = ListItemGroupSetDivider,
+        .listItemGroupResetDivider = ListItemGroupResetDivider,
+        .listItemGroupSetHeader = ListItemGroupSetHeader,
+        .listItemGroupSetFooter = ListItemGroupSetFooter,
+        .setListItemGroupChildrenMainSize = SetListItemGroupChildrenMainSize,
+        .resetListItemGroupChildrenMainSize = ResetListItemGroupChildrenMainSize,
+        .getlistItemGroupDivider = GetlistDivider,
+        .setListItemGroupSpace = SetListItemGroupSpace,
+        .resetListItemGroupSpace = ResetListItemGroupSpace,
+        .setListItemGroupStyle = SetListItemGroupStyle,
+        .resetListItemGroupStyle = ResetListItemGroupStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIListItemGroupModifier* GetCJUIListItemGroupModifier()
 {
-    static const CJUIListItemGroupModifier modifier = { ListItemGroupSetDivider, ListItemGroupResetDivider,
-        ListItemGroupSetHeader, ListItemGroupSetFooter, SetListItemGroupChildrenMainSize,
-        ResetListItemGroupChildrenMainSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIListItemGroupModifier modifier = {
+        .listItemGroupSetDivider = ListItemGroupSetDivider,
+        .listItemGroupResetDivider = ListItemGroupResetDivider,
+        .listItemGroupSetHeader = ListItemGroupSetHeader,
+        .listItemGroupSetFooter = ListItemGroupSetFooter,
+        .setListItemGroupChildrenMainSize = SetListItemGroupChildrenMainSize,
+        .resetListItemGroupChildrenMainSize = ResetListItemGroupChildrenMainSize,
+        .getlistItemGroupDivider = nullptr,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

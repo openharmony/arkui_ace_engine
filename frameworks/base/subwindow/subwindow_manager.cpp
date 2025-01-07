@@ -181,6 +181,19 @@ const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId)
     }
 }
 
+const RefPtr<Subwindow> SubwindowManager::GetSubwindow(int32_t instanceId, uint64_t displayId)
+{
+    SubwindowKey searchKey {.instanceId = instanceId, .displayId = displayId };
+    std::lock_guard<std::mutex> lock(subwindowMutex_);
+    auto result = subwindowMap_.find(searchKey);
+    if (result != subwindowMap_.end()) {
+        return result->second;
+    }
+    TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Fail to find subwindow in subwindowMap_, searchKey is %{public}s.",
+        searchKey.ToString().c_str());
+    return nullptr;
+}
+
 const RefPtr<Subwindow> SubwindowManager::GetToastSubwindow(int32_t instanceId)
 {
     SubwindowKey searchKey = GetCurrentSubwindowKey(instanceId);
@@ -449,7 +462,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup", PriorityType::VIP);
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -479,7 +492,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             }
             subwindow->ShowMenu(menu);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu", PriorityType::VIP);
 }
 
 void SubwindowManager::CloseMenu()
@@ -711,7 +724,7 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG", PriorityType::VIP);
 }
 
 ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
@@ -769,12 +782,12 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, toastInfo, callbackParam = std::move(callback)] {
-		auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindow(containerId, toastInfo.showMode);
+        auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindow(containerId, toastInfo.showMode);
                 CHECK_NULL_VOID(subwindow);
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
+            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast", PriorityType::VIP);
     }
 }
 
@@ -1147,9 +1160,16 @@ void SubwindowManager::ClearToastInSystemSubwindow()
             containerId = container->GetInstanceId();
         }
     }
-    auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
+    RefPtr<Subwindow> subwindow;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
+            subwindow = GetSystemToastWindow(containerId);
+        }
+    } else {
+        auto parentContainerId = containerId >= MIN_SUBCONTAINER_ID ?
             GetParentContainerId(containerId) : containerId;
-    auto subwindow = GetSystemToastWindow(parentContainerId);
+        subwindow = GetSystemToastWindow(parentContainerId);
+    }
     if (subwindow) {
         subwindow->ClearToast();
     } else {

@@ -26,11 +26,11 @@
 
 namespace OHOS::Ace {
 using LoadEvent = std::function<void(const std::string&)>;
-using DestroyEvent = std::function<void()>;
+using DestroyEvent = std::function<void(const std::string&)>;
 using DetachCallback = std::function<void(const std::string&)>;
-using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&, const std::string&)>;
 using SurfaceChangedEvent = std::function<void(const std::string&, const NG::RectF&)>;
-using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
 class XComponentModel {
 public:
@@ -82,6 +82,7 @@ public:
     virtual void SetRenderFit(RenderFit renderFit) {}
     virtual void EnableSecure(bool isSecure) {}
     virtual void HdrBrightness(float hdrBrightness) {}
+    virtual void EnableTransparentLayer(bool isTransparentLayer) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H

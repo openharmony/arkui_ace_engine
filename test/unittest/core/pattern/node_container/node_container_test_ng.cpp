@@ -860,4 +860,166 @@ HWTEST_F(NodeContainerTestNg, PaintWrapperTest006, TestSize.Level1)
         AceType::DynamicCast<OverlayModifier>(imageMethod->GetOverlayModifier(AceType::RawPtr(paintWrapper)));
     EXPECT_EQ(overlayModifier->extensionHandler_, nullptr);
 }
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnAttach001
+ * @tc.desc: Test the SetOnAttach function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnAttach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    int32_t flag = 0;
+    auto builderFunc = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnAttach.
+     */
+    modelNg.SetOnAttach(std::move(builderFunc));
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnAttach();
+    EXPECT_EQ(flag, 1);
+}
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnDetach001
+ * @tc.desc: Test the SetOnDetach function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnDetach001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    int32_t flag = 0;
+    auto builderFunc = [&flag]() { flag = 1; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnDetach.
+     */
+    modelNg.SetOnDetach(std::move(builderFunc));
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<NodeContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnDetach();
+    EXPECT_EQ(flag, 1);
+}
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnWillBind001
+ * @tc.desc: Test the SetOnWillBind function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnWillBind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    int32_t flag = 0;
+    auto builderFunc = [&flag, nodeContainerId](int32_t) { flag = nodeContainerId; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnWillBind.
+     */
+    modelNg.SetOnWillBind(std::move(builderFunc));
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->FireOnWillBind(nodeContainerId);
+    EXPECT_EQ(flag, nodeContainerId);
+}
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnWillUnbind001
+ * @tc.desc: Test the SetOnWillUnbind function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnWillUnbind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    int32_t flag = 0;
+    auto builderFunc = [&flag, nodeContainerId](int32_t) { flag = nodeContainerId; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnWillUnbind.
+     */
+    modelNg.SetOnWillUnbind(std::move(builderFunc));
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->FireOnWillUnbind(nodeContainerId);
+    EXPECT_EQ(flag, nodeContainerId);
+}
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnBind001
+ * @tc.desc: Test the SetOnBind function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnBind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    int32_t flag = 0;
+    auto builderFunc = [&flag, nodeContainerId](int32_t) { flag = nodeContainerId; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnBind.
+     */
+    modelNg.SetOnBind(std::move(builderFunc));
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->FireOnBind(nodeContainerId);
+    EXPECT_EQ(flag, nodeContainerId);
+}
+
+/**
+ * @tc.name: NodeContainerModelNGSetOnUnbind001
+ * @tc.desc: Test the SetOnUnbind function of NodeContainerModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeContainerTestNg, NodeContainerModelNGSetOnUnbind001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create modelNg.
+     */
+    NodeContainerModelNG modelNg;
+    modelNg.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    int32_t flag = 0;
+    auto builderFunc = [&flag, nodeContainerId](int32_t) { flag = nodeContainerId; };
+
+    /**
+     * @tc.steps: step2. call the function SetOnUnbind.
+     */
+    modelNg.SetOnUnbind(std::move(builderFunc));
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->FireOnUnbind(nodeContainerId);
+    EXPECT_EQ(flag, nodeContainerId);
+}
 } // namespace OHOS::Ace::NG

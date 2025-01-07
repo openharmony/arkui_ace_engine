@@ -151,13 +151,14 @@ void RepeatVirtualScrollNode::CheckActiveRange(int32_t start, int32_t end, int32
     const int32_t signed_totalCount = static_cast<int32_t>(totalCount_);
     int32_t nStart = start - cacheStart;
     int32_t nEnd = end + cacheEnd;
+    const int32_t divider = 2;
 
     if (start > end) { // swiper-loop scenario
         nStart = std::min(nStart, signed_totalCount);
         nEnd = std::max(nEnd, 0);
         if (nStart <= nEnd) { // overlapped
-            nStart = (signed_totalCount >> 1) + 1;
-            nEnd = signed_totalCount >> 1;
+            nStart = signed_totalCount / divider + 1;
+            nEnd = signed_totalCount / divider;
         }
     } else {
         if (nStart >= signed_totalCount || nEnd < 0) {
@@ -342,6 +343,8 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
     TAG_LOGD(AceLogTag::ACE_REPEAT, "Repeat(%{public}d).GetFrameChildByIndex index %{public}d -> key '%{public}s', "
         "needBuild==true, node: %{public}s .", static_cast<int32_t>(GetId()), static_cast<int32_t>(index),
         key->c_str(), caches_.DumpUINode(node4Index).c_str());
+    
+    node4Index->UpdateThemeScopeId(GetThemeScopeId());
 
     if (isActive_) {
         node4Index->SetJSViewActive(true);
@@ -418,6 +421,24 @@ const std::list<RefPtr<UINode>>& RepeatVirtualScrollNode::GetChildren(bool /*not
         children_.emplace_back(child);
     }
     return children_;
+}
+
+void RepeatVirtualScrollNode::OnRecycle()
+{
+    for (auto& [key, child]: caches_.GetAllNodes()) {
+        if (caches_.IsInL1Cache(key) && child.item) {
+            child.item->OnRecycle();
+        }
+    }
+}
+
+void RepeatVirtualScrollNode::OnReuse()
+{
+    for (auto& [key, child]: caches_.GetAllNodes()) {
+        if (caches_.IsInL1Cache(key) && child.item) {
+            child.item->OnReuse();
+        }
+    }
 }
 
 void RepeatVirtualScrollNode::UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule)

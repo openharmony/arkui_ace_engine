@@ -104,6 +104,23 @@ public:
         return "";
     }
 
+    std::string ToJsonSelectColor() const
+    {
+        if (HasSelectGradientColor()) {
+            Gradient colors = GetSelectGradientColor().value();
+            if (GetSelectIsResourceColorValue(false)) {
+                return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
+            } else {
+                return GradientToJson(colors);
+            }
+        }
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, "");
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, "");
+        return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
@@ -130,8 +147,7 @@ public:
         json->PutExtAttr("blockColor",
             GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("trackColor", ToJsonTrackBackgroundColor().c_str(), filter);
-        json->PutExtAttr("selectedColor",
-            GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectedColor", ToJsonSelectColor().c_str(), filter);
         json->PutExtAttr("showSteps", GetShowSteps().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("showTips", GetShowTips().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("blockBorderColor",
@@ -159,6 +175,24 @@ public:
             slideRange->Put("to", std::to_string(slideRangeValues.value()->GetToValue()).c_str());
             json->PutExtAttr("slideRange", slideRange, filter);
         }
+#ifdef SUPPORT_DIGITAL_CROWN
+        static const std::array<std::string, 3> SLIDER_CROWN_SENSITIVITY_TO_STRING = {
+            "CrownSensitivity.LOW",
+            "CrownSensitivity.MEDIUM",
+            "CrownSensitivity.HIGH",
+        };
+        json->PutExtAttr("digitalCrownSensitivity",
+            SLIDER_CROWN_SENSITIVITY_TO_STRING
+                .at(static_cast<int>(GetDigitalCrownSensitivityValue(CrownSensitivity::MEDIUM)))
+                .c_str(),
+            filter);
+#endif
+    }
+
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        PaintProperty::ToTreeJson(json, config);
+        json->Put(TreeKey::CONTENT, GetCustomContent().value_or("").c_str());
     }
 
     SizeF GetBlockSizeValue(const SizeF& defaultValue)
@@ -196,6 +230,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)
@@ -214,6 +250,10 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SliderMode, SliderModel::SliderMode, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, ValidSlideRange, RefPtr<SliderModel::SliderValidRange>, PROPERTY_UPDATE_RENDER)
+#ifdef SUPPORT_DIGITAL_CROWN
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
+        SliderPaintStyle, DigitalCrownSensitivity, CrownSensitivity, PROPERTY_UPDATE_RENDER)
+#endif
     ACE_DEFINE_PROPERTY_GROUP(SliderTipStyle, SliderTipStyle)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, ShowTips, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderTipStyle, Padding, Dimension, PROPERTY_UPDATE_RENDER)

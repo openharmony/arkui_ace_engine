@@ -46,6 +46,7 @@ constexpr Dimension MARGIN_SPACE = 6.0_vp;
 constexpr Dimension DRAW_EDGES_SPACE = 1.0_vp;
 constexpr double BUBBLE_ARROW_HALF = 2.0;
 constexpr size_t ALIGNMENT_STEP_OFFSET = 1;
+constexpr Dimension KEYBOARD_SPACE = 8.0_vp;
 
 // help value to calculate p2 p4 position
 constexpr Dimension DEFAULT_BUBBLE_ARROW_WIDTH = 16.0_vp;
@@ -271,6 +272,14 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
+    if (avoidKeyboard_) {
+        childLayoutConstraint.maxSize.SetHeight(wrapperSize_.Height());
+        childLayoutConstraint.maxSize.SetWidth(wrapperSize_.Width());
+    }
+    float minHeight = minHeight_.ConvertToPx();
+    if (minHeight > 0.0f) {
+        childLayoutConstraint.minSize.SetHeight(minHeight);
+    }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
         return;
@@ -340,7 +349,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-Dimension GetMaxWith()
+Dimension GetMaxWith(uint32_t maxColumns)
 {
     auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
     auto parent = gridColumnInfo->GetParent();
@@ -348,6 +357,9 @@ Dimension GetMaxWith()
         parent->BuildColumnWidth();
     }
     auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+    if (maxColumns > 0) {
+        maxWidth = Dimension(gridColumnInfo->GetWidth(maxColumns));
+    }
     return maxWidth;
 }
 
@@ -364,7 +376,7 @@ SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, con
     if (showInSubWindow) {
         maxHeight = SystemProperties::GetDeviceHeight();
     }
-    auto popupMaxWidth = GetMaxWith().Value();
+    auto popupMaxWidth = GetMaxWith(maxColumns_).Value();
     if (useCustom_) {
         popupMaxWidth = width;
     }
@@ -539,7 +551,7 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
                 auto subWindowMgr = SubwindowManager::GetInstance();
                 subWindowMgr->SetHotAreas(rects, frameNode->GetId(), containerId);
             },
-            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas");
+            TaskExecutor::TaskType::UI, "ArkUIPopupSetHotAreas", PriorityType::VIP);
     }
 }
 
@@ -616,10 +628,45 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginTop_ = top_ + DRAW_EDGES_SPACE.ConvertToPx();
     marginBottom_ = bottom_ + DRAW_EDGES_SPACE.ConvertToPx();
+    HandleKeyboard(layoutWrapper, showInSubWindow);
     showArrow_ = false;
+    minHeight_ = popupTheme->GetMinHeight();
+    maxColumns_ = popupTheme->GetMaxColumns();
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
     InitWrapperRect(layoutWrapper);
     UpdateScrollHeight(layoutWrapper, showInSubWindow);
+}
+
+void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
+{
+    auto bubbleNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(bubbleNode);
+    auto bubblePattern = bubbleNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(bubblePattern);
+    avoidKeyboard_ = bubblePattern->GetAvoidKeyboard();
+    if (!avoidKeyboard_) {
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
+    if (GreatNotEqual(keyboardHeight, 0)) {
+        marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+        if (showInSubWindow) {
+            wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
+        }
+    } else if (showInSubWindow) {
+        auto currentContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(currentContext);
+        auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
+        CHECK_NULL_VOID(currentSafeAreaManager);
+        auto currentKeyboardHeight = currentSafeAreaManager->GetKeyboardInset().Length();
+        if (GreatNotEqual(currentKeyboardHeight, 0)) {
+            marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+        }
+    }
 }
 
 void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
@@ -824,6 +871,8 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
     OffsetF ArrowOffset;
     OffsetF position = defaultPosition;
     auto positionOffset = positionOffset_;
+    auto originPlacement = placement_;
+    auto originPosition = GetPositionWithPlacementNew(childSize, topPosition, bottomPosition, ArrowOffset);
     bool didNeedArrow = false;
     std::vector<Placement> currentPlacementStates = PLACEMENT_STATES.find(Placement::BOTTOM)->second;
     if (PLACEMENT_STATES.find(placement_) != PLACEMENT_STATES.end()) {
@@ -873,7 +922,12 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
         position = GetAdjustPosition(currentPlacementStates, step, childSize, topPosition, bottomPosition, ArrowOffset);
         if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
             showArrow_ = false;
-            position = AdjustPosition(defaultPosition, childSize.Width(), childSize.Height(), targetSecurity_);
+            if (avoidKeyboard_) {
+                placement_ = originPlacement;
+                position = AdjustPositionNew(originPosition, childSize.Width(), childSize.Height());
+            } else {
+                position = AdjustPosition(defaultPosition, childSize.Width(), childSize.Height(), targetSecurity_);
+            }
             if (NearEqual(position, OffsetF(0.0f, 0.0f))) {
                 auto x = std::clamp(
                     defaultPosition.GetX(), marginStart_, wrapperSize_.Width() - childSize.Width() - marginEnd_);
@@ -886,6 +940,25 @@ OffsetF BubbleLayoutAlgorithm::GetChildPositionNew(
     arrowPlacement_ = placement_;
     arrowPosition_ = ArrowOffset;
     return position;
+}
+
+OffsetF BubbleLayoutAlgorithm::AdjustPositionNew(const OffsetF& position, float width, float height)
+{
+    OffsetF result = position;
+    OffsetF positionEnd = position + OffsetF(width, height);
+    if (GreatNotEqual(positionEnd.GetX(), wrapperSize_.Width() - marginEnd_)) {
+        result.SetX(wrapperSize_.Width() - marginEnd_ - width);
+    }
+    if (GreatNotEqual(positionEnd.GetY(), wrapperSize_.Height() - marginBottom_)) {
+        result.SetY(wrapperSize_.Height()- marginBottom_ - height);
+    }
+    if (LessNotEqual(position.GetX(), marginStart_)) {
+        result.SetX(marginStart_);
+    }
+    if (LessNotEqual(position.GetY(), marginTop_)) {
+        result.SetY(marginTop_);
+    }
+    return result;
 }
 
 OffsetF BubbleLayoutAlgorithm::GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step,
@@ -1030,9 +1103,113 @@ OffsetF BubbleLayoutAlgorithm::AdjustPosition(const OffsetF& position, float wid
         auto y = std::clamp(position.GetY(), yMin, yMax);
         return OffsetF(0.0f, y + yTargetOffset);
     }
+    auto result = GetBubblePosition(position, xMin, xMax, yMin, yMax);
+    CheckArrowPosition(result, width, height);
+    return result;
+}
+
+OffsetF BubbleLayoutAlgorithm::GetBubblePosition(const OffsetF& position, float xMin,
+    float xMax, float yMin, float yMax)
+{
     auto x = std::clamp(position.GetX(), xMin, xMax);
     auto y = std::clamp(position.GetY(), yMin, yMax);
+    if (!showArrow_ || !avoidKeyboard_) {
+        return OffsetF(x, y);
+    }
+    bool isHorizontal = false;
+    if (setHorizontal_.find(placement_) != setHorizontal_.end()) {
+        isHorizontal = true;
+    }
+    if (isHorizontal) {
+        if (GreatNotEqual(position.GetX(), xMax)) {
+            showArrow_ = false;
+            x += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (LessNotEqual(position.GetX(), xMin)) {
+            showArrow_ = false;
+        }
+    } else {
+        if (GreatNotEqual(position.GetY(), yMax)) {
+            showArrow_ = false;
+            y += BUBBLE_ARROW_HEIGHT.ConvertToPx();
+        } else if (LessNotEqual(position.GetY(), yMin)) {
+            showArrow_ = false;
+        }
+    }
     return OffsetF(x, y);
+}
+
+Placement GetSimplePlacement(Placement& placement)
+{
+    switch (placement) {
+        case Placement::LEFT_TOP:
+        case Placement::LEFT_BOTTOM:
+        case Placement::LEFT: {
+            return Placement::LEFT;
+        }
+        case Placement::RIGHT_TOP:
+        case Placement::RIGHT_BOTTOM:
+        case Placement::RIGHT: {
+            return Placement::RIGHT;
+        }
+        case Placement::TOP_LEFT:
+        case Placement::TOP_RIGHT:
+        case Placement::TOP: {
+            return Placement::TOP;
+        }
+        case Placement::BOTTOM_LEFT:
+        case Placement::BOTTOM_RIGHT:
+        case Placement::BOTTOM: {
+            return Placement::BOTTOM;
+        }
+        default:
+            return Placement::NONE;
+    }
+}
+
+void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, float height)
+{
+    if (!showArrow_ || !avoidKeyboard_) {
+        return;
+    }
+    float xMax = 0.0f;
+    float yMax = 0.0f;
+    float xMin = 1.0f;
+    float yMin = 1.0f;
+    float cornerDistance = borderRadius_.ConvertToPx() + BUBBLE_ARROW_WIDTH.ConvertToPx() / DOUBLE;
+    auto simplePlacement = GetSimplePlacement(placement_);
+    if (simplePlacement == Placement::LEFT) {
+        yMin = position.GetY() + cornerDistance;
+        yMax = position.GetY() + height - cornerDistance;
+        if (GreatNotEqual(yMin, targetOffset_.GetY() + targetSize_.Height()) ||
+            LessNotEqual(yMax, targetOffset_.GetY())) {
+            showArrow_ = false;
+            position.SetX(position.GetX() + BUBBLE_ARROW_HEIGHT.ConvertToPx());
+        }
+    } else if (simplePlacement == Placement::RIGHT) {
+        yMin = position.GetY() + cornerDistance;
+        yMax = position.GetY() + height - cornerDistance;
+        if (GreatNotEqual(yMin, targetOffset_.GetY() + targetSize_.Height()) ||
+            LessNotEqual(yMax, targetOffset_.GetY())) {
+            showArrow_ = false;
+            position.SetX(position.GetX() - BUBBLE_ARROW_HEIGHT.ConvertToPx());
+        }
+    } else if (simplePlacement == Placement::TOP) {
+        xMin = position.GetX() + cornerDistance;
+        xMax = position.GetX() + height - cornerDistance;
+        if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
+            LessNotEqual(xMax, targetOffset_.GetX())) {
+            showArrow_ = false;
+            position.SetY(position.GetY() + BUBBLE_ARROW_HEIGHT.ConvertToPx());
+        }
+    } else if (simplePlacement == Placement::BOTTOM) {
+        xMin = position.GetX() + cornerDistance;
+        xMax = position.GetX() + height - cornerDistance;
+        if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
+            LessNotEqual(xMax, targetOffset_.GetX())) {
+            showArrow_ = false;
+            position.SetY(position.GetY() - BUBBLE_ARROW_HEIGHT.ConvertToPx());
+        }
+    }
 }
 
 OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementNew(
@@ -1611,7 +1788,6 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
 {
     Edge edge;
     double arrowOffset;
-    double edgeValue = 0.0;
     double maxMotionRange = 0.0;
     double minMotionRange = 0.0;
     double targetOffsetXOrY = 0.0;
@@ -1625,24 +1801,20 @@ float BubbleLayoutAlgorithm::GetArrowOffset(const Placement& placement)
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
-            edgeValue = edge.Top().Value();
             bHorizontal = true;
             break;
         case Placement::BOTTOM:
         case Placement::BOTTOM_LEFT:
         case Placement::BOTTOM_RIGHT:
-            edgeValue = edge.Bottom().Value();
             bHorizontal = true;
             break;
         case Placement::LEFT:
         case Placement::LEFT_TOP:
         case Placement::LEFT_BOTTOM:
-            edgeValue = edge.Left().Value();
             break;
         case Placement::RIGHT:
         case Placement::RIGHT_TOP:
         case Placement::RIGHT_BOTTOM:
-            edgeValue = edge.Right().Value();
             break;
         default:
             break;

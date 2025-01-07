@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
@@ -2412,6 +2415,56 @@ void ResetPadding(ArkUINodeHandle node)
     ViewAbstract::SetPadding(frameNode, paddings);
 }
 
+void SetSafeAreaPadding(
+    ArkUINodeHandle node, const struct ArkUIPaddingType* safeAreaPadding, ArkUI_Bool isLengthMetrics)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength endDimen;
+    CalcLength bottomDimen;
+    CalcLength startDimen;
+    if (safeAreaPadding->top.string != nullptr) {
+        topDimen = CalcLength(safeAreaPadding->top.string);
+    } else {
+        topDimen = CalcLength(safeAreaPadding->top.value, static_cast<DimensionUnit>(safeAreaPadding->top.unit));
+    }
+    if (safeAreaPadding->end.string != nullptr) {
+        endDimen = CalcLength(safeAreaPadding->end.string);
+    } else {
+        endDimen = CalcLength(safeAreaPadding->end.value, static_cast<DimensionUnit>(safeAreaPadding->end.unit));
+    }
+    if (safeAreaPadding->bottom.string != nullptr) {
+        bottomDimen = CalcLength(safeAreaPadding->bottom.string);
+    } else {
+        bottomDimen =
+            CalcLength(safeAreaPadding->bottom.value, static_cast<DimensionUnit>(safeAreaPadding->bottom.unit));
+    }
+    if (safeAreaPadding->start.string != nullptr) {
+        startDimen = CalcLength(safeAreaPadding->start.string);
+    } else {
+        startDimen = CalcLength(safeAreaPadding->start.value, static_cast<DimensionUnit>(safeAreaPadding->start.unit));
+    }
+    NG::PaddingProperty paddings;
+    paddings.top = std::optional<CalcLength>(topDimen);
+    paddings.bottom = std::optional<CalcLength>(bottomDimen);
+    if (isLengthMetrics) {
+        paddings.end = std::optional<CalcLength>(endDimen);
+        paddings.start = std::optional<CalcLength>(startDimen);
+    } else {
+        paddings.right = std::optional<CalcLength>(endDimen);
+        paddings.left = std::optional<CalcLength>(startDimen);
+    }
+    ViewAbstract::SetSafeAreaPadding(frameNode, paddings);
+}
+
+void ResetSafeAreaPadding(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetSafeAreaPadding(frameNode);
+}
+
 /**
  * @param values value value
  * values[0] : left, values[1] : top, values[2] : right, values[3] : bottom
@@ -3456,7 +3509,7 @@ void SetBackgroundEffect(ArkUINodeHandle node, ArkUI_Float32 radiusArg, ArkUI_Fl
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension radius;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         radius = CalcDimension(radiusArg, DimensionUnit::VP);
     } else {
         radius = CalcDimension(radiusArg, DimensionUnit::PX);
@@ -3580,18 +3633,27 @@ void ResetForegroundBrightness(ArkUINodeHandle node)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
-    }
     isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        default:
+            break;
+    }
 }
 
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
@@ -3627,8 +3689,8 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(
+        frameNode, { true, false, false, false, false, false, true, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
@@ -5755,6 +5817,15 @@ void SetAccessibilityValue(ArkUINodeHandle node, const ArkUIAccessibilityValue& 
     if (value.current.isSet) {
         accessibilityProperty->SetUserCurrentValue(value.current.value);
     }
+    if (value.rangeMin.isSet) {
+        accessibilityProperty->SetUserRangeMinValue(value.rangeMin.value);
+    }
+    if (value.rangeMax.isSet) {
+        accessibilityProperty->SetUserRangeMaxValue(value.rangeMax.value);
+    }
+    if (value.rangeCurrent.isSet) {
+        accessibilityProperty->SetUserRangeCurrentValue(value.rangeCurrent.value);
+    }
     if (value.text.isSet) {
         accessibilityProperty->SetUserTextValue(value.text.value);
     }
@@ -5772,6 +5843,12 @@ void GetAccessibilityValue(ArkUINodeHandle node, ArkUIAccessibilityValue& value)
     value.max.value = accessibilityProperty->GetUserMaxValue();
     value.current.isSet = accessibilityProperty->HasUserCurrentValue();
     value.current.value = accessibilityProperty->GetUserCurrentValue();
+    value.rangeMin.isSet = accessibilityProperty->HasUserRangeMinValue();
+    value.rangeMin.value = accessibilityProperty->GetUserRangeMinValue();
+    value.rangeMax.isSet = accessibilityProperty->HasUserRangeMaxValue();
+    value.rangeMax.value = accessibilityProperty->GetUserRangeMaxValue();
+    value.rangeCurrent.isSet = accessibilityProperty->HasUserRangeCurrentValue();
+    value.rangeCurrent.value = accessibilityProperty->GetUserRangeCurrentValue();
     value.text.isSet = accessibilityProperty->HasUserTextValue();
     g_strValue = accessibilityProperty->GetUserTextValue();
     value.text.value = g_strValue.c_str();
@@ -5791,6 +5868,15 @@ void ResetAccessibilityValue(ArkUINodeHandle node)
     }
     if (accessibilityProperty->HasUserCurrentValue()) {
         accessibilityProperty->SetUserCurrentValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMinValue()) {
+        accessibilityProperty->SetUserRangeMinValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeMaxValue()) {
+        accessibilityProperty->SetUserRangeMaxValue(-1);
+    }
+    if (accessibilityProperty->HasUserRangeCurrentValue()) {
+        accessibilityProperty->SetUserRangeCurrentValue(-1);
     }
     if (accessibilityProperty->HasUserTextValue()) {
         accessibilityProperty->SetUserTextValue("");
@@ -6249,6 +6335,149 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
+
+void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkUIkeyEvent);
+    KeyEvent keyEvent;
+    keyEvent.action = static_cast<KeyAction>(arkUIkeyEvent->type);
+    keyEvent.code = static_cast<KeyCode>(arkUIkeyEvent->keyCode);
+    keyEvent.key = arkUIkeyEvent->keyText;
+    keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
+    keyEvent.deviceId = arkUIkeyEvent->deviceId;
+    keyEvent.unicode = arkUIkeyEvent->unicode;
+    std::chrono::milliseconds milliseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
+    TimeStamp timeStamp(milliseconds);
+    keyEvent.timeStamp = timeStamp;
+    for (int32_t i = 0; i < arkUIkeyEvent->keyCodesLength; i ++) {
+        keyEvent.pressedCodes.push_back(static_cast<KeyCode>(arkUIkeyEvent->pressedKeyCodes[i]));
+    }
+    keyEvent.keyIntention = static_cast<KeyIntention>(arkUIkeyEvent->intentionCode);
+    ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
+}
+
+void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onFocus = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
+}
+
+void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onBlur = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
+}
+
+void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+        ArkUINodeEvent event;
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+        }
+        eventReceiver(node, event);
+    };
+    ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
+}
+
+void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
+        eventReceiver(node, isHover);
+    };
+    ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
+}
+
+void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onChange = [node, eventReceiver](const bool isOn) {
+        eventReceiver(node, isOn);
+    };
+    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else {
+        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    }
+}
+
+void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onClick = [node, eventReceiver](GestureEvent& info) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.componentAsyncEvent.subKind = ON_CLICK;
+        auto target = info.GetTarget();
+        event.touchEvent.target = { target.id.c_str(), target.type.c_str(),
+            { static_cast<ArkUI_Int32>(target.area.GetOffset().GetX().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetOffset().GetY().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetWidth().Value()),
+                static_cast<ArkUI_Int32>(target.area.GetHeight().Value()) },
+            { static_cast<ArkUI_Int32>(target.origin.GetX().Value()),
+                static_cast<ArkUI_Int32>(target.origin.GetY().Value()) } };
+        Offset globalOffset = info.GetGlobalLocation();
+        Offset localOffset = info.GetLocalLocation();
+        Offset screenOffset = info.GetScreenLocation();
+        // x
+        event.componentAsyncEvent.data[0].f32 = localOffset.GetX();
+        // y
+        event.componentAsyncEvent.data[1].f32 = localOffset.GetY();
+        // timestamp
+        event.componentAsyncEvent.data[2].f32 = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        // source
+        event.componentAsyncEvent.data[3].i32 = static_cast<int32_t>(info.GetSourceDevice());
+        // windowX
+        event.componentAsyncEvent.data[4].f32 = globalOffset.GetX();
+        // windowY
+        event.componentAsyncEvent.data[5].f32 = globalOffset.GetY();
+        // displayX
+        event.componentAsyncEvent.data[6].f32 = screenOffset.GetX();
+        // displayY
+        event.componentAsyncEvent.data[7].f32 = screenOffset.GetY();
+        eventReceiver(node, event);
+    };
+    if (uiNode->GetTag() == V2::SPAN_ETS_TAG) {
+        SpanModelNG::SetOnClick(uiNode, std::move(onClick));
+    } else if (uiNode->GetTag() == V2::TEXT_ETS_TAG) {
+        TextModelNG::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }  else {
+        ViewAbstract::SetOnClick(reinterpret_cast<FrameNode*>(node), std::move(onClick));
+    }
+}
+
+void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onAppear = [node, weak = AceType::WeakClaim(frameNode), eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6258,147 +6487,792 @@ OHOS::Ace::TouchEventInfo globalEventInfo("global");
 
 const ArkUICommonModifier* GetCommonModifier()
 {
-    static const ArkUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
-        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
-        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
-        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
-        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
-        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
-        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
-        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
-        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
-        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
-        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
-        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
-        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
-        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
-        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
-        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
-        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
-        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
-        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
-        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
-        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
-        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
-        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
-        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
-        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
-        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
-        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
-        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
-        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
-        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
-        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
-        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
-        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
-        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
-        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
-        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
-        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
-        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
-        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
-        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
-        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
-        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
-        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
-        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
-        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
-        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
-        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
-        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview, GetNodeUniqueId, SetFocusBoxStyle, ResetFocusBoxStyle, SetClickDistance, ResetClickDistance,
-        SetDisAllowDrop, SetBlendModeByBlender, SetTabStop, ResetTabStop, GetTabStop };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUICommonModifier modifier = {
+        .setBackgroundColor = SetBackgroundColor,
+        .resetBackgroundColor = ResetBackgroundColor,
+        .setWidth = SetWidth,
+        .resetWidth = ResetWidth,
+        .setHeight = SetHeight,
+        .resetHeight = ResetHeight,
+        .setBorderRadius = SetBorderRadius,
+        .resetBorderRadius = ResetBorderRadius,
+        .setBorderWidth = SetBorderWidth,
+        .resetBorderWidth = ResetBorderWidth,
+        .setTransform = SetTransform,
+        .resetTransform = ResetTransform,
+        .setBorderColor = SetBorderColor,
+        .resetBorderColor = ResetBorderColor,
+        .setPosition = SetPosition,
+        .resetPosition = ResetPosition,
+        .setPositionEdges = SetPositionEdges,
+        .resetPositionEdges = ResetPositionEdges,
+        .setBorderStyle = SetBorderStyle,
+        .resetBorderStyle = ResetBorderStyle,
+        .setBackShadow = SetBackShadow,
+        .resetBackShadow = ResetBackShadow,
+        .setHitTestBehavior = SetHitTestBehavior,
+        .resetHitTestBehavior = ResetHitTestBehavior,
+        .setZIndex = SetZIndex,
+        .resetZIndex = ResetZIndex,
+        .setOpacity = SetOpacity,
+        .resetOpacity = ResetOpacity,
+        .setAlign = SetAlign,
+        .resetAlign = ResetAlign,
+        .setBackdropBlur = SetBackdropBlur,
+        .resetBackdropBlur = ResetBackdropBlur,
+        .setHueRotate = SetHueRotate,
+        .resetHueRotate = ResetHueRotate,
+        .setInvert = SetInvert,
+        .resetInvert = ResetInvert,
+        .setSepia = SetSepia,
+        .resetSepia = ResetSepia,
+        .setSaturate = SetSaturate,
+        .resetSaturate = ResetSaturate,
+        .setColorBlend = SetColorBlend,
+        .resetColorBlend = ResetColorBlend,
+        .setGrayscale = SetGrayscale,
+        .resetGrayscale = ResetGrayscale,
+        .setContrast = SetContrast,
+        .resetContrast = ResetContrast,
+        .setBrightness = SetBrightness,
+        .resetBrightness = ResetBrightness,
+        .setBlur = SetBlur,
+        .resetBlur = ResetBlur,
+        .setLinearGradient = SetLinearGradient,
+        .resetLinearGradient = ResetLinearGradient,
+        .setSweepGradient = SetSweepGradient,
+        .resetSweepGradient = ResetSweepGradient,
+        .setRadialGradient = SetRadialGradient,
+        .resetRadialGradient = ResetRadialGradient,
+        .setOverlay = SetOverlay,
+        .resetOverlay = ResetOverlay,
+        .setBorderImage = SetBorderImage,
+        .resetBorderImage = ResetBorderImage,
+        .setBorderImageGradient = SetBorderImageGradient,
+        .setForegroundBlurStyle = SetForegroundBlurStyle,
+        .resetForegroundBlurStyle = ResetForegroundBlurStyle,
+        .setLinearGradientBlur = SetLinearGradientBlur,
+        .resetLinearGradientBlur = ResetLinearGradientBlur,
+        .setBackgroundBlurStyle = SetBackgroundBlurStyle,
+        .resetBackgroundBlurStyle = ResetBackgroundBlurStyle,
+        .setBorder = SetBorder,
+        .resetBorder = ResetBorder,
+        .setBackgroundImagePosition = SetBackgroundImagePosition,
+        .resetBackgroundImagePosition = ResetBackgroundImagePosition,
+        .setBackgroundImageSize = SetBackgroundImageSize,
+        .resetBackgroundImageSize = ResetBackgroundImageSize,
+        .setBackgroundImage = SetBackgroundImage,
+        .resetBackgroundImage = ResetBackgroundImage,
+        .setTranslate = SetTranslate,
+        .resetTranslate = ResetTranslate,
+        .setScale = SetScale,
+        .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
+        .resetScale = ResetScale,
+        .setRotate = SetRotate,
+        .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .resetRotate = ResetRotate,
+        .setGeometryTransition = SetGeometryTransition,
+        .resetGeometryTransition = ResetGeometryTransition,
+        .setPixelStretchEffect = SetPixelStretchEffect,
+        .resetPixelStretchEffect = ResetPixelStretchEffect,
+        .setLightUpEffect = SetLightUpEffect,
+        .resetLightUpEffect = ResetLightUpEffect,
+        .setSphericalEffect = SetSphericalEffect,
+        .resetSphericalEffect = ResetSphericalEffect,
+        .setRenderGroup = SetRenderGroup,
+        .resetRenderGroup = ResetRenderGroup,
+        .setRenderFit = SetRenderFit,
+        .resetRenderFit = ResetRenderFit,
+        .setUseEffect = SetUseEffect,
+        .resetUseEffect = ResetUseEffect,
+        .setForegroundColor = SetForegroundColor,
+        .resetForegroundColor = ResetForegroundColor,
+        .setMotionPath = SetMotionPath,
+        .resetMotionPath = ResetMotionPath,
+        .setMotionBlur = SetMotionBlur,
+        .resetMotionBlur = ResetMotionBlur,
+        .setGroupDefaultFocus = SetGroupDefaultFocus,
+        .resetGroupDefaultFocus = ResetGroupDefaultFocus,
+        .setFocusOnTouch = SetFocusOnTouch,
+        .resetFocusOnTouch = ResetFocusOnTouch,
+        .setFocusable = SetFocusable,
+        .resetFocusable = ResetFocusable,
+        .setTouchable = SetTouchable,
+        .resetTouchable = ResetTouchable,
+        .setDefaultFocus = SetDefaultFocus,
+        .resetDefaultFocus = ResetDefaultFocus,
+        .setDisplayPriority = SetDisplayPriority,
+        .resetDisplayPriority = ResetDisplayPriority,
+        .setOffset = SetOffset,
+        .setOffsetEdges = SetOffsetEdges,
+        .resetOffset = ResetOffset,
+        .setPadding = SetPadding,
+        .resetPadding = ResetPadding,
+        .setMargin = SetMargin,
+        .resetMargin = ResetMargin,
+        .setSafeAreaPadding = SetSafeAreaPadding,
+        .resetSafeAreaPadding = ResetSafeAreaPadding,
+        .setMarkAnchor = SetMarkAnchor,
+        .resetMarkAnchor = ResetMarkAnchor,
+        .setVisibility = SetVisibility,
+        .resetVisibility = ResetVisibility,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAllowDrop = SetAllowDrop,
+        .resetAllowDrop = ResetAllowDrop,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setLayoutWeight = SetLayoutWeight,
+        .resetLayoutWeight = ResetLayoutWeight,
+        .setMinWidth = SetMinWidth,
+        .resetMinWidth = ResetMinWidth,
+        .setMaxWidth = SetMaxWidth,
+        .resetMaxWidth = ResetMaxWidth,
+        .setMinHeight = SetMinHeight,
+        .resetMinHeight = ResetMinHeight,
+        .setMaxHeight = SetMaxHeight,
+        .resetMaxHeight = ResetMaxHeight,
+        .setSize = SetSize,
+        .resetSize = ResetSize,
+        .clearWidthOrHeight = ClearWidthOrHeight,
+        .setAlignSelf = SetAlignSelf,
+        .resetAlignSelf = ResetAlignSelf,
+        .setAspectRatio = SetAspectRatio,
+        .resetAspectRatio = ResetAspectRatio,
+        .setFlexGrow = SetFlexGrow,
+        .resetFlexGrow = ResetFlexGrow,
+        .setFlexShrink = SetFlexShrink,
+        .resetFlexShrink = ResetFlexShrink,
+        .setGridOffset = SetGridOffset,
+        .resetGridOffset = ResetGridOffset,
+        .setGridSpan = SetGridSpan,
+        .resetGridSpan = ResetGridSpan,
+        .setExpandSafeArea = SetExpandSafeArea,
+        .resetExpandSafeArea = ResetExpandSafeArea,
+        .setFlexBasis = SetFlexBasis,
+        .resetFlexBasis = ResetFlexBasis,
+        .setAlignRules = SetAlignRules,
+        .resetAlignRules = ResetAlignRules,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setId = SetId,
+        .resetId = ResetId,
+        .setKey = SetKey,
+        .resetKey = ResetKey,
+        .setRestoreId = SetRestoreId,
+        .resetRestoreId = ResetRestoreId,
+        .setTabIndex = SetTabIndex,
+        .resetTabIndex = ResetTabIndex,
+        .setObscured = SetObscured,
+        .resetObscured = ResetObscured,
+        .setResponseRegion = SetResponseRegion,
+        .resetResponseRegion = ResetResponseRegion,
+        .setForegroundEffect = SetForegroundEffect,
+        .resetForegroundEffect = ResetForegroundEffect,
+        .setBackgroundEffect = SetBackgroundEffect,
+        .resetBackgroundEffect = ResetBackgroundEffect,
+        .setBackgroundBrightness = SetBackgroundBrightness,
+        .resetBackgroundBrightness = ResetBackgroundBrightness,
+        .setBackgroundBrightnessInternal = SetBackgroundBrightnessInternal,
+        .resetBackgroundBrightnessInternal = ResetBackgroundBrightnessInternal,
+        .setForegroundBrightness = SetForegroundBrightness,
+        .resetForegroundBrightness = ResetForegroundBrightness,
+        .setDragPreviewOptions = SetDragPreviewOptions,
+        .resetDragPreviewOptions = ResetDragPreviewOptions,
+        .setMouseResponseRegion = SetMouseResponseRegion,
+        .resetMouseResponseRegion = ResetMouseResponseRegion,
+        .setEnabled = SetEnabled,
+        .resetEnabled = ResetEnabled,
+        .setUseShadowBatching = SetUseShadowBatching,
+        .resetUseShadowBatching = ResetUseShadowBatching,
+        .setDraggable = SetDraggable,
+        .resetDraggable = ResetDraggable,
+        .setAccessibilityGroup = SetAccessibilityGroup,
+        .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setHoverEffect = SetHoverEffect,
+        .resetHoverEffect = ResetHoverEffect,
+        .setClickEffect = SetClickEffect,
+        .resetClickEffect = ResetClickEffect,
+        .setKeyBoardShortCut = SetKeyBoardShortCut,
+        .resetKeyBoardShortCut = ResetKeyBoardShortCut,
+        .setPointLightPosition = SetPointLightPosition,
+        .resetPointLightPosition = ResetPointLightPosition,
+        .setPointLightIntensity = SetPointLightIntensity,
+        .resetPointLightIntensity = ResetPointLightIntensity,
+        .setPointLightColor = SetPointLightColor,
+        .resetPointLightColor = ResetPointLightColor,
+        .setPointLightIlluminated = SetPointLightIlluminated,
+        .resetPointLightIlluminated = ResetPointLightIlluminated,
+        .setPointLightBloom = SetPointLightBloom,
+        .resetPointLightBloom = ResetPointLightBloom,
+        .setClip = SetClip,
+        .setClipShape = SetClipShape,
+        .setClipPath = SetClipPath,
+        .resetClip = ResetClip,
+        .setTransitionCenter = SetTransitionCenter,
+        .setOpacityTransition = SetOpacityTransition,
+        .setRotateTransition = SetRotateTransition,
+        .setScaleTransition = SetScaleTransition,
+        .setTranslateTransition = SetTranslateTransition,
+        .setMaskShape = SetMaskShape,
+        .setMaskPath = SetMaskPath,
+        .setProgressMask = SetProgressMask,
+        .setBlendMode = SetBlendMode,
+        .resetBlendMode = ResetBlendMode,
+        .setMonopolizeEvents = SetMonopolizeEvents,
+        .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .setConstraintSize = SetConstraintSize,
+        .resetConstraintSize = ResetConstraintSize,
+        .setOutlineColor = SetOutlineColor,
+        .resetOutlineColor = ResetOutlineColor,
+        .setOutlineRadius = SetOutlineRadius,
+        .resetOutlineRadius = ResetOutlineRadius,
+        .setOutlineWidth = SetOutlineWidth,
+        .resetOutlineWidth = ResetOutlineWidth,
+        .setOutlineStyle = SetOutlineStyle,
+        .resetOutlineStyle = ResetOutlineStyle,
+        .setOutline = SetOutline,
+        .resetOutline = ResetOutline,
+        .setBindPopup = SetBindPopup,
+        .resetBindPopup = ResetBindPopup,
+        .getFocusable = GetFocusable,
+        .getDefaultFocus = GetDefaultFocus,
+        .getResponseRegion = GetResponseRegion,
+        .getOverlay = GetOverlay,
+        .getAccessibilityGroup = GetAccessibilityGroup,
+        .getAccessibilityText = GetAccessibilityText,
+        .getAccessibilityDescription = GetAccessibilityDescription,
+        .getAccessibilityLevel = GetAccessibilityLevel,
+        .setNeedFocus = SetNeedFocus,
+        .getNeedFocus = GetNeedFocus,
+        .getOpacity = GetOpacity,
+        .getBorderWidth = GetBorderWidth,
+        .getBorderWidthDimension = GetBorderWidthDimension,
+        .getBorderRadius = GetBorderRadius,
+        .getBorderColor = GetBorderColor,
+        .getBorderStyle = GetBorderStyle,
+        .getZIndex = GetZIndex,
+        .getVisibility = GetVisibility,
+        .getClip = GetClip,
+        .getClipShape = GetClipShape,
+        .getTransform = GetTransform,
+        .getHitTestBehavior = GetHitTestBehavior,
+        .getPosition = GetPosition,
+        .getShadow = GetShadow,
+        .getCustomShadow = GetCustomShadow,
+        .getSweepGradient = GetSweepGradient,
+        .getRadialGradient = GetRadialGradient,
+        .getMask = GetMask,
+        .getBlendMode = GetBlendMode,
+        .getDirection = GetDirection,
+        .getAlignSelf = GetAlignSelf,
+        .getTransformCenter = GetTransformCenter,
+        .getOpacityTransition = GetOpacityTransition,
+        .getRotateTransition = GetRotateTransition,
+        .getScaleTransition = GetScaleTransition,
+        .getTranslateTransition = GetTranslateTransition,
+        .getOffset = GetOffset,
+        .getMarkAnchor = GetMarkAnchor,
+        .getAlignRules = GetAlignRules,
+        .getBackgroundBlurStyle = GetBackgroundBlurStyle,
+        .getBackgroundImageSize = GetBackgroundImageSize,
+        .getBackgroundImageSizeWithStyle = GetBackgroundImageSizeWidthStyle,
+        .setOutlineWidthFloat = SetOutlineWidthFloat,
+        .getOutlineWidthFloat = GetOutlineWidthFloat,
+        .getDisplayPriority = GetDisplayPriority,
+        .setAlignRulesWidthType = SetAlignRulesWidthType,
+        .getLayoutWeight = GetLayoutWeight,
+        .getScale = GetScale,
+        .getRotate = GetRotate,
+        .getBrightness = GetBrightness,
+        .getSaturate = GetSaturate,
+        .getBackgroundImagePosition = GetBackgroundImagePosition,
+        .getFlexGrow = GetFlexGrow,
+        .getFlexShrink = GetFlexShrink,
+        .getFlexBasis = GetFlexBasis,
+        .getConstraintSize = GetConstraintSize,
+        .getGrayScale = GetGrayScale,
+        .getInvert = GetInvert,
+        .getSepia = GetSepia,
+        .getContrast = GetContrast,
+        .getForegroundColor = GetForegroundColor,
+        .getBlur = GetBlur,
+        .getLinearGradient = GetLinearGradient,
+        .getAlign = GetAlign,
+        .getWidth = GetWidth,
+        .getHeight = GetHeight,
+        .getBackgroundColor = GetBackgroundColor,
+        .getBackgroundImage = GetBackgroundImage,
+        .getPadding = GetPadding,
+        .getPaddingDimension = GetPaddingDimension,
+        .getConfigSize = GetConfigSize,
+        .getKey = GetKey,
+        .getEnabled = GetEnabled,
+        .getMargin = GetMargin,
+        .getMarginDimension = GetMarginDimension,
+        .getTranslate = GetTranslate,
+        .setMoveTransition = SetMoveTransition,
+        .getMoveTransition = GetMoveTransition,
+        .resetMask = ResetMask,
+        .getAspectRatio = GetAspectRatio,
+        .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .resetBackgroundImageResizable = ResetBackgroundImageResizable,
+        .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
+        .getRenderFit = GetRenderFit,
+        .getOutlineColor = GetOutlineColor,
+        .getSize = GetSize,
+        .getRenderGroup = GetRenderGroup,
+        .setOnVisibleAreaChange = SetOnVisibleAreaChange,
+        .getGeometryTransition = GetGeometryTransition,
+        .setChainStyle = SetChainStyle,
+        .getChainStyle = GetChainStyle,
+        .resetChainStyle = ResetChainStyle,
+        .setBias = SetBias,
+        .getBias = GetBias,
+        .resetBias = ResetBias,
+        .getColorBlend = GetColorBlend,
+        .getForegroundBlurStyle = GetForegroundBlurStyle,
+        .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
+        .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setLayoutRect = SetLayoutRect,
+        .getLayoutRect = GetLayoutRect,
+        .resetLayoutRect = ResetLayoutRect,
+        .getFocusOnTouch = GetFocusOnTouch,
+        .setSystemBarEffect = SetSystemBarEffect,
+        .getAccessibilityID = GetAccessibilityID,
+        .setAccessibilityState = SetAccessibilityState,
+        .getAccessibilityState = GetAccessibilityState,
+        .resetAccessibilityState = ResetAccessibilityState,
+        .setAccessibilityValue = SetAccessibilityValue,
+        .getAccessibilityValue = GetAccessibilityValue,
+        .resetAccessibilityValue = ResetAccessibilityValue,
+        .setAccessibilityActions = SetAccessibilityActions,
+        .resetAccessibilityActions = ResetAccessibilityActions,
+        .getAccessibilityActions = GetAccessibilityActions,
+        .setAccessibilityRole = SetAccessibilityRole,
+        .resetAccessibilityRole = ResetAccessibilityRole,
+        .getAccessibilityRole = GetAccessibilityRole,
+        .setFocusScopeId = SetFocusScopeId,
+        .resetFocusScopeId = ResetFocusScopeId,
+        .setFocusScopePriority = SetFocusScopePriority,
+        .resetFocusScopePriority = ResetFocusScopePriority,
+        .setPixelRound = SetPixelRound,
+        .resetPixelRound = ResetPixelRound,
+        .setBorderDashParams = SetBorderDashParams,
+        .getExpandSafeArea = GetExpandSafeArea,
+        .setTransition = SetTransition,
+        .setDragPreview = SetDragPreview,
+        .resetDragPreview = ResetDragPreview,
+        .getNodeUniqueId = GetNodeUniqueId,
+        .setFocusBoxStyle = SetFocusBoxStyle,
+        .resetFocusBoxStyle = ResetFocusBoxStyle,
+        .setClickDistance = SetClickDistance,
+        .resetClickDistance = ResetClickDistance,
+        .setDisAllowDrop = SetDisAllowDrop,
+        .setBlendModeByBlender = SetBlendModeByBlender,
+        .setTabStop = SetTabStop,
+        .resetTabStop = ResetTabStop,
+        .getTabStop = GetTabStop,
+        .setOnFocus = SetOnFocusExt,
+        .setOnBlur = SetOnBlurExt,
+        .setOnTouch = SetOnTouchExt,
+        .setOnHover = SetOnHoverExt,
+        .setOnChange = SetOnChangeExt,
+        .setOnClick = SetOnClickExt,
+        .setOnAppear = SetOnAppearExt,
+        .dispatchKeyEvent = DispatchKeyEvent,
+        .resetEnableAnalyzer = nullptr,
+        .setEnableAnalyzer = nullptr,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICommonModifier* GetCJUICommonModifier()
 {
-    static const CJUICommonModifier modifier = { SetBackgroundColor, ResetBackgroundColor, SetWidth, ResetWidth,
-        SetHeight, ResetHeight, SetBorderRadius, ResetBorderRadius, SetBorderWidth, ResetBorderWidth, SetTransform,
-        ResetTransform, SetBorderColor, ResetBorderColor, SetPosition, ResetPosition, SetPositionEdges,
-        ResetPositionEdges, SetBorderStyle, ResetBorderStyle, SetBackShadow, ResetBackShadow, SetHitTestBehavior,
-        ResetHitTestBehavior, SetZIndex, ResetZIndex, SetOpacity, ResetOpacity, SetAlign, ResetAlign, SetBackdropBlur,
-        ResetBackdropBlur, SetHueRotate, ResetHueRotate, SetInvert, ResetInvert, SetSepia, ResetSepia, SetSaturate,
-        ResetSaturate, SetColorBlend, ResetColorBlend, SetGrayscale, ResetGrayscale, SetContrast, ResetContrast,
-        SetBrightness, ResetBrightness, SetBlur, ResetBlur, SetLinearGradient, ResetLinearGradient, SetSweepGradient,
-        ResetSweepGradient, SetRadialGradient, ResetRadialGradient, SetOverlay, ResetOverlay, SetBorderImage,
-        ResetBorderImage, SetBorderImageGradient, SetForegroundBlurStyle, ResetForegroundBlurStyle,
-        SetLinearGradientBlur, ResetLinearGradientBlur, SetBackgroundBlurStyle, ResetBackgroundBlurStyle, SetBorder,
-        ResetBorder, SetBackgroundImagePosition, ResetBackgroundImagePosition, SetBackgroundImageSize,
-        ResetBackgroundImageSize, SetBackgroundImage, ResetBackgroundImage, SetTranslate, ResetTranslate, SetScale,
-        SetScaleWithoutTransformCenter, ResetScale, SetRotate, SetRotateWithoutTransformCenter, ResetRotate,
-        SetGeometryTransition, ResetGeometryTransition, SetPixelStretchEffect, ResetPixelStretchEffect,
-        SetLightUpEffect, ResetLightUpEffect, SetSphericalEffect, ResetSphericalEffect, SetRenderGroup,
-        ResetRenderGroup, SetRenderFit, ResetRenderFit, SetUseEffect, ResetUseEffect, SetForegroundColor,
-        ResetForegroundColor, SetMotionPath, ResetMotionPath, SetMotionBlur, ResetMotionBlur, SetGroupDefaultFocus,
-        ResetGroupDefaultFocus, SetFocusOnTouch, ResetFocusOnTouch, SetFocusable, ResetFocusable, SetTouchable,
-        ResetTouchable, SetDefaultFocus, ResetDefaultFocus, SetDisplayPriority, ResetDisplayPriority, SetOffset,
-        SetOffsetEdges, ResetOffset, SetPadding, ResetPadding, SetMargin, ResetMargin, SetMarkAnchor, ResetMarkAnchor,
-        SetVisibility, ResetVisibility, SetAccessibilityText, ResetAccessibilityText, SetAllowDrop, ResetAllowDrop,
-        SetAccessibilityLevel, ResetAccessibilityLevel, SetDirection, ResetDirection, SetLayoutWeight,
-        ResetLayoutWeight, SetMinWidth, ResetMinWidth, SetMaxWidth, ResetMaxWidth, SetMinHeight, ResetMinHeight,
-        SetMaxHeight, ResetMaxHeight, SetSize, ResetSize, ClearWidthOrHeight, SetAlignSelf, ResetAlignSelf,
-        SetAspectRatio, ResetAspectRatio, SetFlexGrow, ResetFlexGrow, SetFlexShrink, ResetFlexShrink, SetGridOffset,
-        ResetGridOffset, SetGridSpan, ResetGridSpan, SetExpandSafeArea, ResetExpandSafeArea, SetFlexBasis,
-        ResetFlexBasis, SetAlignRules, ResetAlignRules, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetId, ResetId, SetKey, ResetKey, SetRestoreId, ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured,
-        ResetObscured, SetResponseRegion, ResetResponseRegion, SetForegroundEffect, ResetForegroundEffect,
-        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
-        SetBackgroundBrightnessInternal, ResetBackgroundBrightnessInternal, SetForegroundBrightness,
-        ResetForegroundBrightness, SetDragPreviewOptions, ResetDragPreviewOptions, SetMouseResponseRegion,
-        ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetUseShadowBatching, ResetUseShadowBatching, SetDraggable,
-        ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
-        SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut, SetPointLightPosition,
-        ResetPointLightPosition, SetPointLightIntensity, ResetPointLightIntensity, SetPointLightColor,
-        ResetPointLightColor, SetPointLightIlluminated, ResetPointLightIlluminated, SetPointLightBloom,
-        ResetPointLightBloom, SetClip, SetClipShape, SetClipPath, ResetClip, SetTransitionCenter, SetOpacityTransition,
-        SetRotateTransition, SetScaleTransition, SetTranslateTransition, SetMaskShape, SetMaskPath, SetProgressMask,
-        SetBlendMode, ResetBlendMode, SetMonopolizeEvents, ResetMonopolizeEvents, SetConstraintSize,
-        ResetConstraintSize, SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius, SetOutlineWidth,
-        ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline, SetBindPopup, ResetBindPopup,
-        GetFocusable, GetDefaultFocus, GetResponseRegion, GetOverlay, GetAccessibilityGroup, GetAccessibilityText,
-        GetAccessibilityDescription, GetAccessibilityLevel, SetNeedFocus, GetNeedFocus, GetOpacity, GetBorderWidth,
-        GetBorderWidthDimension, GetBorderRadius, GetBorderColor, GetBorderStyle, GetZIndex, GetVisibility, GetClip,
-        GetClipShape, GetTransform, GetHitTestBehavior, GetPosition, GetShadow, GetCustomShadow, GetSweepGradient,
-        GetRadialGradient, GetMask, GetBlendMode, GetDirection, GetAlignSelf, GetTransformCenter, GetOpacityTransition,
-        GetRotateTransition, GetScaleTransition, GetTranslateTransition, GetOffset, GetMarkAnchor, GetAlignRules,
-        GetBackgroundBlurStyle, GetBackgroundImageSize, GetBackgroundImageSizeWidthStyle, SetOutlineWidthFloat,
-        GetOutlineWidthFloat, GetDisplayPriority, SetAlignRulesWidthType, GetLayoutWeight, GetScale, GetRotate,
-        GetBrightness, GetSaturate, GetBackgroundImagePosition, GetFlexGrow, GetFlexShrink, GetFlexBasis,
-        GetConstraintSize, GetGrayScale, GetInvert, GetSepia, GetContrast, GetForegroundColor, GetBlur,
-        GetLinearGradient, GetAlign, GetWidth, GetHeight, GetBackgroundColor, GetBackgroundImage, GetPadding,
-        GetPaddingDimension, GetConfigSize, GetKey, GetEnabled, GetMargin, GetMarginDimension, GetTranslate,
-        SetMoveTransition, GetMoveTransition, ResetMask, GetAspectRatio, SetBackgroundImageResizable,
-        ResetBackgroundImageResizable, SetBackgroundImageSizeWithUnit, GetRenderFit, GetOutlineColor, GetSize,
-        GetRenderGroup, SetOnVisibleAreaChange, GetGeometryTransition, SetChainStyle, GetChainStyle, ResetChainStyle,
-        SetBias, GetBias, ResetBias, GetColorBlend, GetForegroundBlurStyle,
-        SetBackgroundImagePixelMap, SetBackgroundImagePixelMapByPixelMapPtr,
-        SetLayoutRect, GetLayoutRect, ResetLayoutRect, GetFocusOnTouch, SetSystemBarEffect,
-        GetAccessibilityID, SetAccessibilityState, GetAccessibilityState, ResetAccessibilityState,
-        SetAccessibilityValue, GetAccessibilityValue, ResetAccessibilityValue, SetAccessibilityActions,
-        ResetAccessibilityActions, GetAccessibilityActions, SetAccessibilityRole, ResetAccessibilityRole,
-        GetAccessibilityRole, SetFocusScopeId, ResetFocusScopeId, SetFocusScopePriority, ResetFocusScopePriority,
-        SetPixelRound, ResetPixelRound, SetBorderDashParams, GetExpandSafeArea, SetTransition, SetDragPreview,
-        ResetDragPreview };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUICommonModifier modifier = {
+        .setBackgroundColor = SetBackgroundColor,
+        .resetBackgroundColor = ResetBackgroundColor,
+        .setWidth = SetWidth,
+        .resetWidth = ResetWidth,
+        .setHeight = SetHeight,
+        .resetHeight = ResetHeight,
+        .setBorderRadius = SetBorderRadius,
+        .resetBorderRadius = ResetBorderRadius,
+        .setBorderWidth = SetBorderWidth,
+        .resetBorderWidth = ResetBorderWidth,
+        .setTransform = SetTransform,
+        .resetTransform = ResetTransform,
+        .setBorderColor = SetBorderColor,
+        .resetBorderColor = ResetBorderColor,
+        .setPosition = SetPosition,
+        .resetPosition = ResetPosition,
+        .setPositionEdges = SetPositionEdges,
+        .resetPositionEdges = ResetPositionEdges,
+        .setBorderStyle = SetBorderStyle,
+        .resetBorderStyle = ResetBorderStyle,
+        .setBackShadow = SetBackShadow,
+        .resetBackShadow = ResetBackShadow,
+        .setHitTestBehavior = SetHitTestBehavior,
+        .resetHitTestBehavior = ResetHitTestBehavior,
+        .setZIndex = SetZIndex,
+        .resetZIndex = ResetZIndex,
+        .setOpacity = SetOpacity,
+        .resetOpacity = ResetOpacity,
+        .setAlign = SetAlign,
+        .resetAlign = ResetAlign,
+        .setBackdropBlur = SetBackdropBlur,
+        .resetBackdropBlur = ResetBackdropBlur,
+        .setHueRotate = SetHueRotate,
+        .resetHueRotate = ResetHueRotate,
+        .setInvert = SetInvert,
+        .resetInvert = ResetInvert,
+        .setSepia = SetSepia,
+        .resetSepia = ResetSepia,
+        .setSaturate = SetSaturate,
+        .resetSaturate = ResetSaturate,
+        .setColorBlend = SetColorBlend,
+        .resetColorBlend = ResetColorBlend,
+        .setGrayscale = SetGrayscale,
+        .resetGrayscale = ResetGrayscale,
+        .setContrast = SetContrast,
+        .resetContrast = ResetContrast,
+        .setBrightness = SetBrightness,
+        .resetBrightness = ResetBrightness,
+        .setBlur = SetBlur,
+        .resetBlur = ResetBlur,
+        .setLinearGradient = SetLinearGradient,
+        .resetLinearGradient = ResetLinearGradient,
+        .setSweepGradient = SetSweepGradient,
+        .resetSweepGradient = ResetSweepGradient,
+        .setRadialGradient = SetRadialGradient,
+        .resetRadialGradient = ResetRadialGradient,
+        .setOverlay = SetOverlay,
+        .resetOverlay = ResetOverlay,
+        .setBorderImage = SetBorderImage,
+        .resetBorderImage = ResetBorderImage,
+        .setBorderImageGradient = SetBorderImageGradient,
+        .setForegroundBlurStyle = SetForegroundBlurStyle,
+        .resetForegroundBlurStyle = ResetForegroundBlurStyle,
+        .setLinearGradientBlur = SetLinearGradientBlur,
+        .resetLinearGradientBlur = ResetLinearGradientBlur,
+        .setBackgroundBlurStyle = SetBackgroundBlurStyle,
+        .resetBackgroundBlurStyle = ResetBackgroundBlurStyle,
+        .setBorder = SetBorder,
+        .resetBorder = ResetBorder,
+        .setBackgroundImagePosition = SetBackgroundImagePosition,
+        .resetBackgroundImagePosition = ResetBackgroundImagePosition,
+        .setBackgroundImageSize = SetBackgroundImageSize,
+        .resetBackgroundImageSize = ResetBackgroundImageSize,
+        .setBackgroundImage = SetBackgroundImage,
+        .resetBackgroundImage = ResetBackgroundImage,
+        .setTranslate = SetTranslate,
+        .resetTranslate = ResetTranslate,
+        .setScale = SetScale,
+        .setScaleWithoutTransformCenter = SetScaleWithoutTransformCenter,
+        .resetScale = ResetScale,
+        .setRotate = SetRotate,
+        .setRotateWithoutTransformCenter = SetRotateWithoutTransformCenter,
+        .resetRotate = ResetRotate,
+        .setGeometryTransition = SetGeometryTransition,
+        .resetGeometryTransition = ResetGeometryTransition,
+        .setPixelStretchEffect = SetPixelStretchEffect,
+        .resetPixelStretchEffect = ResetPixelStretchEffect,
+        .setLightUpEffect = SetLightUpEffect,
+        .resetLightUpEffect = ResetLightUpEffect,
+        .setSphericalEffect = SetSphericalEffect,
+        .resetSphericalEffect = ResetSphericalEffect,
+        .setRenderGroup = SetRenderGroup,
+        .resetRenderGroup = ResetRenderGroup,
+        .setRenderFit = SetRenderFit,
+        .resetRenderFit = ResetRenderFit,
+        .setUseEffect = SetUseEffect,
+        .resetUseEffect = ResetUseEffect,
+        .setForegroundColor = SetForegroundColor,
+        .resetForegroundColor = ResetForegroundColor,
+        .setMotionPath = SetMotionPath,
+        .resetMotionPath = ResetMotionPath,
+        .setMotionBlur = SetMotionBlur,
+        .resetMotionBlur = ResetMotionBlur,
+        .setGroupDefaultFocus = SetGroupDefaultFocus,
+        .resetGroupDefaultFocus = ResetGroupDefaultFocus,
+        .setFocusOnTouch = SetFocusOnTouch,
+        .resetFocusOnTouch = ResetFocusOnTouch,
+        .setFocusable = SetFocusable,
+        .resetFocusable = ResetFocusable,
+        .setTouchable = SetTouchable,
+        .resetTouchable = ResetTouchable,
+        .setDefaultFocus = SetDefaultFocus,
+        .resetDefaultFocus = ResetDefaultFocus,
+        .setDisplayPriority = SetDisplayPriority,
+        .resetDisplayPriority = ResetDisplayPriority,
+        .setOffset = SetOffset,
+        .setOffsetEdges = SetOffsetEdges,
+        .resetOffset = ResetOffset,
+        .setPadding = SetPadding,
+        .resetPadding = ResetPadding,
+        .setMargin = SetMargin,
+        .resetMargin = ResetMargin,
+        .setMarkAnchor = SetMarkAnchor,
+        .resetMarkAnchor = ResetMarkAnchor,
+        .setVisibility = SetVisibility,
+        .resetVisibility = ResetVisibility,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAllowDrop = SetAllowDrop,
+        .resetAllowDrop = ResetAllowDrop,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setLayoutWeight = SetLayoutWeight,
+        .resetLayoutWeight = ResetLayoutWeight,
+        .setMinWidth = SetMinWidth,
+        .resetMinWidth = ResetMinWidth,
+        .setMaxWidth = SetMaxWidth,
+        .resetMaxWidth = ResetMaxWidth,
+        .setMinHeight = SetMinHeight,
+        .resetMinHeight = ResetMinHeight,
+        .setMaxHeight = SetMaxHeight,
+        .resetMaxHeight = ResetMaxHeight,
+        .setSize = SetSize,
+        .resetSize = ResetSize,
+        .clearWidthOrHeight = ClearWidthOrHeight,
+        .setAlignSelf = SetAlignSelf,
+        .resetAlignSelf = ResetAlignSelf,
+        .setAspectRatio = SetAspectRatio,
+        .resetAspectRatio = ResetAspectRatio,
+        .setFlexGrow = SetFlexGrow,
+        .resetFlexGrow = ResetFlexGrow,
+        .setFlexShrink = SetFlexShrink,
+        .resetFlexShrink = ResetFlexShrink,
+        .setGridOffset = SetGridOffset,
+        .resetGridOffset = ResetGridOffset,
+        .setGridSpan = SetGridSpan,
+        .resetGridSpan = ResetGridSpan,
+        .setExpandSafeArea = SetExpandSafeArea,
+        .resetExpandSafeArea = ResetExpandSafeArea,
+        .setFlexBasis = SetFlexBasis,
+        .resetFlexBasis = ResetFlexBasis,
+        .setAlignRules = SetAlignRules,
+        .resetAlignRules = ResetAlignRules,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setId = SetId,
+        .resetId = ResetId,
+        .setKey = SetKey,
+        .resetKey = ResetKey,
+        .setRestoreId = SetRestoreId,
+        .resetRestoreId = ResetRestoreId,
+        .setTabIndex = SetTabIndex,
+        .resetTabIndex = ResetTabIndex,
+        .setObscured = SetObscured,
+        .resetObscured = ResetObscured,
+        .setResponseRegion = SetResponseRegion,
+        .resetResponseRegion = ResetResponseRegion,
+        .setForegroundEffect = SetForegroundEffect,
+        .resetForegroundEffect = ResetForegroundEffect,
+        .setBackgroundEffect = SetBackgroundEffect,
+        .resetBackgroundEffect = ResetBackgroundEffect,
+        .setBackgroundBrightness = SetBackgroundBrightness,
+        .resetBackgroundBrightness = ResetBackgroundBrightness,
+        .setBackgroundBrightnessInternal = SetBackgroundBrightnessInternal,
+        .resetBackgroundBrightnessInternal = ResetBackgroundBrightnessInternal,
+        .setForegroundBrightness = SetForegroundBrightness,
+        .resetForegroundBrightness = ResetForegroundBrightness,
+        .setDragPreviewOptions = SetDragPreviewOptions,
+        .resetDragPreviewOptions = ResetDragPreviewOptions,
+        .setMouseResponseRegion = SetMouseResponseRegion,
+        .resetMouseResponseRegion = ResetMouseResponseRegion,
+        .setEnabled = SetEnabled,
+        .resetEnabled = ResetEnabled,
+        .setUseShadowBatching = SetUseShadowBatching,
+        .resetUseShadowBatching = ResetUseShadowBatching,
+        .setDraggable = SetDraggable,
+        .resetDraggable = ResetDraggable,
+        .setAccessibilityGroup = SetAccessibilityGroup,
+        .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setHoverEffect = SetHoverEffect,
+        .resetHoverEffect = ResetHoverEffect,
+        .setClickEffect = SetClickEffect,
+        .resetClickEffect = ResetClickEffect,
+        .setKeyBoardShortCut = SetKeyBoardShortCut,
+        .resetKeyBoardShortCut = ResetKeyBoardShortCut,
+        .setPointLightPosition = SetPointLightPosition,
+        .resetPointLightPosition = ResetPointLightPosition,
+        .setPointLightIntensity = SetPointLightIntensity,
+        .resetPointLightIntensity = ResetPointLightIntensity,
+        .setPointLightColor = SetPointLightColor,
+        .resetPointLightColor = ResetPointLightColor,
+        .setPointLightIlluminated = SetPointLightIlluminated,
+        .resetPointLightIlluminated = ResetPointLightIlluminated,
+        .setPointLightBloom = SetPointLightBloom,
+        .resetPointLightBloom = ResetPointLightBloom,
+        .setClip = SetClip,
+        .setClipShape = SetClipShape,
+        .setClipPath = SetClipPath,
+        .resetClip = ResetClip,
+        .setTransitionCenter = SetTransitionCenter,
+        .setOpacityTransition = SetOpacityTransition,
+        .setRotateTransition = SetRotateTransition,
+        .setScaleTransition = SetScaleTransition,
+        .setTranslateTransition = SetTranslateTransition,
+        .setMaskShape = SetMaskShape,
+        .setMaskPath = SetMaskPath,
+        .setProgressMask = SetProgressMask,
+        .setBlendMode = SetBlendMode,
+        .resetBlendMode = ResetBlendMode,
+        .setMonopolizeEvents = SetMonopolizeEvents,
+        .resetMonopolizeEvents = ResetMonopolizeEvents,
+        .setConstraintSize = SetConstraintSize,
+        .resetConstraintSize = ResetConstraintSize,
+        .setOutlineColor = SetOutlineColor,
+        .resetOutlineColor = ResetOutlineColor,
+        .setOutlineRadius = SetOutlineRadius,
+        .resetOutlineRadius = ResetOutlineRadius,
+        .setOutlineWidth = SetOutlineWidth,
+        .resetOutlineWidth = ResetOutlineWidth,
+        .setOutlineStyle = SetOutlineStyle,
+        .resetOutlineStyle = ResetOutlineStyle,
+        .setOutline = SetOutline,
+        .resetOutline = ResetOutline,
+        .setBindPopup = SetBindPopup,
+        .resetBindPopup = ResetBindPopup,
+        .getFocusable = GetFocusable,
+        .getDefaultFocus = GetDefaultFocus,
+        .getResponseRegion = GetResponseRegion,
+        .getOverlay = GetOverlay,
+        .getAccessibilityGroup = GetAccessibilityGroup,
+        .getAccessibilityText = GetAccessibilityText,
+        .getAccessibilityDescription = GetAccessibilityDescription,
+        .getAccessibilityLevel = GetAccessibilityLevel,
+        .setNeedFocus = SetNeedFocus,
+        .getNeedFocus = GetNeedFocus,
+        .getOpacity = GetOpacity,
+        .getBorderWidth = GetBorderWidth,
+        .getBorderWidthDimension = GetBorderWidthDimension,
+        .getBorderRadius = GetBorderRadius,
+        .getBorderColor = GetBorderColor,
+        .getBorderStyle = GetBorderStyle,
+        .getZIndex = GetZIndex,
+        .getVisibility = GetVisibility,
+        .getClip = GetClip,
+        .getClipShape = GetClipShape,
+        .getTransform = GetTransform,
+        .getHitTestBehavior = GetHitTestBehavior,
+        .getPosition = GetPosition,
+        .getShadow = GetShadow,
+        .getCustomShadow = GetCustomShadow,
+        .getSweepGradient = GetSweepGradient,
+        .getRadialGradient = GetRadialGradient,
+        .getMask = GetMask,
+        .getBlendMode = GetBlendMode,
+        .getDirection = GetDirection,
+        .getAlignSelf = GetAlignSelf,
+        .getTransformCenter = GetTransformCenter,
+        .getOpacityTransition = GetOpacityTransition,
+        .getRotateTransition = GetRotateTransition,
+        .getScaleTransition = GetScaleTransition,
+        .getTranslateTransition = GetTranslateTransition,
+        .getOffset = GetOffset,
+        .getMarkAnchor = GetMarkAnchor,
+        .getAlignRules = GetAlignRules,
+        .getBackgroundBlurStyle = GetBackgroundBlurStyle,
+        .getBackgroundImageSize = GetBackgroundImageSize,
+        .getBackgroundImageSizeWithStyle = GetBackgroundImageSizeWidthStyle,
+        .setOutlineWidthFloat = SetOutlineWidthFloat,
+        .getOutlineWidthFloat = GetOutlineWidthFloat,
+        .getDisplayPriority = GetDisplayPriority,
+        .setAlignRulesWidthType = SetAlignRulesWidthType,
+        .getLayoutWeight = GetLayoutWeight,
+        .getScale = GetScale,
+        .getRotate = GetRotate,
+        .getBrightness = GetBrightness,
+        .getSaturate = GetSaturate,
+        .getBackgroundImagePosition = GetBackgroundImagePosition,
+        .getFlexGrow = GetFlexGrow,
+        .getFlexShrink = GetFlexShrink,
+        .getFlexBasis = GetFlexBasis,
+        .getConstraintSize = GetConstraintSize,
+        .getGrayScale = GetGrayScale,
+        .getInvert = GetInvert,
+        .getSepia = GetSepia,
+        .getContrast = GetContrast,
+        .getForegroundColor = GetForegroundColor,
+        .getBlur = GetBlur,
+        .getLinearGradient = GetLinearGradient,
+        .getAlign = GetAlign,
+        .getWidth = GetWidth,
+        .getHeight = GetHeight,
+        .getBackgroundColor = GetBackgroundColor,
+        .getBackgroundImage = GetBackgroundImage,
+        .getPadding = GetPadding,
+        .getPaddingDimension = GetPaddingDimension,
+        .getConfigSize = GetConfigSize,
+        .getKey = GetKey,
+        .getEnabled = GetEnabled,
+        .getMargin = GetMargin,
+        .getMarginDimension = GetMarginDimension,
+        .getTranslate = GetTranslate,
+        .setMoveTransition = SetMoveTransition,
+        .getMoveTransition = GetMoveTransition,
+        .resetMask = ResetMask,
+        .getAspectRatio = GetAspectRatio,
+        .setBackgroundImageResizable = SetBackgroundImageResizable,
+        .resetBackgroundImageResizable = ResetBackgroundImageResizable,
+        .setBackgroundImageSizeWithUnit = SetBackgroundImageSizeWithUnit,
+        .getRenderFit = GetRenderFit,
+        .getOutlineColor = GetOutlineColor,
+        .getSize = GetSize,
+        .getRenderGroup = GetRenderGroup,
+        .setOnVisibleAreaChange = SetOnVisibleAreaChange,
+        .getGeometryTransition = GetGeometryTransition,
+        .setChainStyle = SetChainStyle,
+        .getChainStyle = GetChainStyle,
+        .resetChainStyle = ResetChainStyle,
+        .setBias = SetBias,
+        .getBias = GetBias,
+        .resetBias = ResetBias,
+        .getColorBlend = GetColorBlend,
+        .getForegroundBlurStyle = GetForegroundBlurStyle,
+        .setBackgroundImagePixelMap = SetBackgroundImagePixelMap,
+        .setBackgroundImagePixelMapByPixelMapPtr = SetBackgroundImagePixelMapByPixelMapPtr,
+        .setLayoutRect = SetLayoutRect,
+        .getLayoutRect = GetLayoutRect,
+        .resetLayoutRect = ResetLayoutRect,
+        .getFocusOnTouch = GetFocusOnTouch,
+        .setSystemBarEffect = SetSystemBarEffect,
+        .getAccessibilityID = GetAccessibilityID,
+        .setAccessibilityState = SetAccessibilityState,
+        .getAccessibilityState = GetAccessibilityState,
+        .resetAccessibilityState = ResetAccessibilityState,
+        .setAccessibilityValue = SetAccessibilityValue,
+        .getAccessibilityValue = GetAccessibilityValue,
+        .resetAccessibilityValue = ResetAccessibilityValue,
+        .setAccessibilityActions = SetAccessibilityActions,
+        .resetAccessibilityActions = ResetAccessibilityActions,
+        .getAccessibilityActions = GetAccessibilityActions,
+        .setAccessibilityRole = SetAccessibilityRole,
+        .resetAccessibilityRole = ResetAccessibilityRole,
+        .getAccessibilityRole = GetAccessibilityRole,
+        .setFocusScopeId = SetFocusScopeId,
+        .resetFocusScopeId = ResetFocusScopeId,
+        .setFocusScopePriority = SetFocusScopePriority,
+        .resetFocusScopePriority = ResetFocusScopePriority,
+        .setPixelRound = SetPixelRound,
+        .resetPixelRound = ResetPixelRound,
+        .setBorderDashParams = SetBorderDashParams,
+        .getExpandSafeArea = GetExpandSafeArea,
+        .setTransition = SetTransition,
+        .setDragPreview = SetDragPreview,
+        .resetDragPreview = ResetDragPreview,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -6674,6 +7548,78 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
 
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, onKeyEvent);
+}
+void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onFocusAxisEvent = [frameNode, nodeId, extraParam](FocusAxisEventInfo& info) {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::FOCUS_AXIS_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.focusAxisEvent.subKind = ArkUIEventSubKind::ON_FOCUS_AXIS;
+        event.focusAxisEvent.absXValue = info.GetAbsXValue();
+        event.focusAxisEvent.absYValue = info.GetAbsYValue();
+        event.focusAxisEvent.absZValue = info.GetAbsZValue();
+        event.focusAxisEvent.absRzValue = info.GetAbsRzValue();
+        event.focusAxisEvent.absGasValue = info.GetAbsGasValue();
+        event.focusAxisEvent.absBrakeValue = info.GetAbsBrakeValue();
+        event.focusAxisEvent.absHat0XValue = info.GetAbsHat0XValue();
+        event.focusAxisEvent.absHat0YValue = info.GetAbsHat0YValue();
+        event.focusAxisEvent.timeStamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+        event.focusAxisEvent.toolType = static_cast<int32_t>(info.GetSourceTool());
+        event.focusAxisEvent.sourceType = static_cast<int32_t>(info.GetSourceDevice());
+        event.focusAxisEvent.deviceId = info.GetDeviceId();
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.focusAxisEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.focusAxisEvent.pressedKeyCodes = pressKeyCodeList.data();
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.focusAxisEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnFocusAxisEvent(frameNode, onFocusAxisEvent);
+}
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6686,6 +7632,13 @@ void ResetOnKeyPreIme(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstractModelNG::DisableOnKeyPreIme(frameNode);
+}
+
+void ResetOnFocusAxisEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstractModelNG::DisableOnFocusAxisEvent(frameNode);
 }
 
 void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkUITouchPoint& touchPoint, bool usePx)

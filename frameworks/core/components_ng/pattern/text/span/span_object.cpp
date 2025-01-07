@@ -15,6 +15,11 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 
 namespace OHOS::Ace {
+namespace {
+static std::atomic<int32_t> gGestureSpanId = 0;
+constexpr int32_t GESTURES_SPAN_DIVIDE_SIZE = 10000000;
+}
+
 // SpanBase
 std::optional<std::pair<int32_t, int32_t>> SpanBase::GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const
 {
@@ -410,6 +415,12 @@ GestureStyle GestureSpan::GetGestureStyle() const
 RefPtr<SpanBase> GestureSpan::GetSubSpan(int32_t start, int32_t end)
 {
     RefPtr<SpanBase> spanBase = MakeRefPtr<GestureSpan>(gestureInfo_, start, end);
+    auto gestureSpan = DynamicCast<GestureSpan>(spanBase);
+    CHECK_NULL_RETURN(gestureSpan, spanBase);
+    if (gestureSpanId_ == -1) {
+        gestureSpanId_ = gGestureSpanId.fetch_add(1) % GESTURES_SPAN_DIVIDE_SIZE;
+    }
+    gestureSpan->SetGestureSpanId(gestureSpanId_);
     return spanBase;
 }
 
@@ -418,6 +429,9 @@ bool GestureSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     auto gestureSpan = DynamicCast<GestureSpan>(other);
     if (!gestureSpan) {
         return false;
+    }
+    if (gestureSpanId_ != -1 && gestureSpanId_ == gestureSpan->GetGestureSpanId()) {
+        return true;
     }
     auto gestureInfo = gestureSpan->GetGestureStyle();
     return gestureInfo_.IsEqual(gestureInfo);
@@ -863,6 +877,67 @@ bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     }
     auto lineHeight = lineHeightSpan->GetLineHeight();
     return lineHeight_ == lineHeight;
+}
+
+// HalfLeadingSpan
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading) : SpanBase(0, 0), halfLeading_(halfLeading) {}
+
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end)
+    : SpanBase(start, end), halfLeading_(halfLeading)
+{}
+
+void HalfLeadingSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddHalfLeadingStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveHalfLeadingStyle(spanItem);
+    }
+}
+
+RefPtr<SpanBase> HalfLeadingSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    return MakeRefPtr<HalfLeadingSpan>(halfLeading_, start, end);
+}
+
+void HalfLeadingSpan::AddHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->UpdateHalfLeading(halfLeading_);
+}
+
+void HalfLeadingSpan::RemoveHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->ResetHalfLeading();
+}
+
+bool HalfLeadingSpan::GetHalfLeading() const
+{
+    return halfLeading_;
+}
+
+SpanType HalfLeadingSpan::GetSpanType() const
+{
+    return SpanType::HalfLeading;
+}
+
+std::string HalfLeadingSpan::ToString() const
+{
+    std::stringstream str;
+    str << "HalfLeadingSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    return str.str();
+}
+
+bool HalfLeadingSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto halfLeadingSpan = DynamicCast<HalfLeadingSpan>(other);
+    CHECK_NULL_RETURN(halfLeadingSpan, false);
+    return halfLeading_ == halfLeadingSpan->GetHalfLeading();
 }
 
 // ExtSpan

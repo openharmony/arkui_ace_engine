@@ -170,7 +170,8 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
     CHECK_NULL_VOID(counterNodeLayoutProperty);
     auto context = textNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    
+    auto textFieldLayoutProperty = decoratedNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
     std::string counterText;
     if (isVisible) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
@@ -179,6 +180,15 @@ void CounterDecorator::UpdateCounterContentAndStyle(uint32_t textLength, uint32_
                                 theme->GetOverCountTextStyle() :
                                 theme->GetCountTextStyle();
     counterNodeLayoutProperty->UpdateContent(counterText);
+    
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        auto maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value();
+        counterNodeLayoutProperty->UpdateMaxFontScale(maxFontScale);
+    }
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        auto minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        counterNodeLayoutProperty->UpdateMinFontScale(minFontScale);
+    }
     counterNodeLayoutProperty->UpdateFontSize(countTextStyle.GetFontSize());
     counterNodeLayoutProperty->UpdateTextColor(countTextStyle.GetTextColor());
     counterNodeLayoutProperty->UpdateFontWeight(countTextStyle.GetFontWeight());
@@ -302,7 +312,7 @@ void CounterDecorator::HandleNonTextArea()
     auto cleanNodeResponseArea = textFieldPattern->GetCleanNodeResponseArea();
     auto updateCountXWithArea = [&countX, isRTL](const std::vector<RefPtr<TextInputResponseArea>>& areas) {
         for (auto area : areas) {
-            if (area) {
+            if (!area) {
                 continue;
             }
             if (isRTL) {
@@ -388,10 +398,7 @@ void ErrorDecorator::UpdateTextFieldMargin()
     }
 }
 
-// The style of showError is basically fixed, just refresh it every time onModifyDone.
-// Unlike showError, showCounter is not marked as dirty after insertValue and will not call onModifyDone,
-// Only measure will be called, so counter’s style need to be refreshed every time it is measured.
-void ErrorDecorator::UpdateErrorStyle()
+void ErrorDecorator::UpdateLayoutProperty()
 {
     auto decoratedNode = decoratedNode_.Upgrade();
     CHECK_NULL_VOID(decoratedNode);
@@ -413,7 +420,16 @@ void ErrorDecorator::UpdateErrorStyle()
     textLayoutProperty->UpdateTextColor(errorTextStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(errorTextStyle.GetFontWeight());
     textLayoutProperty->UpdateFontSize(errorTextStyle.GetFontSize());
-    textLayoutProperty->UpdateMaxFontScale(theme->GetErrorTextMaxFontScale());
+    auto maxFontScale = theme->GetErrorTextMaxFontScale();
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(theme->GetErrorTextMaxFontScale(),
+            textFieldLayoutProperty->GetMaxFontScale().value());
+    }
+    textLayoutProperty->UpdateMaxFontScale(maxFontScale);
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        auto minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        textLayoutProperty->UpdateMinFontScale(minFontScale);
+    }
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -424,6 +440,23 @@ void ErrorDecorator::UpdateErrorStyle()
     } else {
         textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     }
+}
+
+// The style of showError is basically fixed, just refresh it every time onModifyDone.
+// Unlike showError, showCounter is not marked as dirty after insertValue and will not call onModifyDone,
+// Only measure will be called, so counter’s style need to be refreshed every time it is measured.
+void ErrorDecorator::UpdateErrorStyle()
+{
+    auto decoratedNode = decoratedNode_.Upgrade();
+    CHECK_NULL_VOID(decoratedNode);
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_VOID(textNode);
+    RefPtr<TextFieldPattern> textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto theme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(theme);
+    TextStyle errorTextStyle = theme->GetErrorTextStyle();
+    UpdateLayoutProperty();
 
     auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
@@ -532,9 +565,13 @@ void ErrorDecorator::LayoutDecorator()
     auto offset = textFieldGeometryNode->GetContentOffset();
     auto isRTL = textFieldLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     auto offSetX = offset.GetX();
+    auto textFrameWidth = textGeometryNode->GetFrameRect().Width();
     if (isRTL) {
         auto textFieldContentRect = textFieldGeometryNode->GetContentRect();
-        offSetX += textFieldContentRect.Width() - textGeometryNode->GetFrameRect().Width();
+        offSetX += textFieldContentRect.Width() - textFrameWidth;
+    }
+    if (theme->GetErrorTextCenter()) {
+        offSetX = (textFieldGeometryNode->GetFrameRect().Width() - textFrameWidth) / 2;
     }
     textGeometryNode->SetFrameOffset(OffsetF(offSetX, textFrameRect.Bottom() - textFrameRect.Top() + errorMargin));
     textNode->Layout();

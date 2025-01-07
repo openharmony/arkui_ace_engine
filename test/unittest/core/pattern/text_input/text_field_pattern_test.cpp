@@ -15,7 +15,9 @@
 
 #include "text_input_base.h"
 
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -647,6 +649,28 @@ HWTEST_F(TextFieldPatternTest, TextPattern025, TestSize.Level1)
     pattern->GetFocusHub()->focusType_ = FocusType::NODE;
     pattern->hasPreviewText_ = true;
     pattern->HandleLongPress(info);
+
+    info.SetSourceDevice(SourceType::TOUCH);
+    info.SetLocalLocation(Offset(10, 10));
+    pattern->hasPreviewText_ = false;
+    std::list<FingerInfo> fingerList;
+    fingerList.push_back({ .fingerId_ = 0 });
+    info.SetFingerList(fingerList);
+    pattern->HandleLongPress(info);
+
+    TouchEventInfo touchInfo("test");
+    TouchLocationInfo moveLocationInfo(0);
+    moveLocationInfo.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo.SetTouchType(TouchType::MOVE);
+    touchInfo.AddChangedTouchLocationInfo(std::move(moveLocationInfo));
+
+    TouchLocationInfo moveLocationInfo0(0);
+    moveLocationInfo0.SetLocalLocation(Offset(30, 30));
+    moveLocationInfo0.SetTouchType(TouchType::MOVE);
+    touchInfo.AddTouchLocationInfo(std::move(moveLocationInfo0));
+    pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16("Hello"));
+    pattern->HandleTouchEvent(touchInfo);
+    EXPECT_TRUE(pattern->GetMagnifierController()->magnifierNodeExist_);
 }
 
 /**
@@ -1937,7 +1961,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
     ASSERT_NE(controller, nullptr);
     controller->SetLocalOffset(OffsetF(0.f, 0.f));
-    EXPECT_TRUE(controller->GetShowMagnifier());
+    EXPECT_FALSE(controller->GetShowMagnifier());
     touchLocationInfo.touchType_ = TouchType::CANCEL;
     touchEventInfo.touches_.clear();
     touchEventInfo.changedTouches_.clear();
@@ -2165,6 +2189,19 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     Offset offset4(1.0, 1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
     pattern->ChangeMouseState(offset4, frameId, true);
+
+    // test rtl
+    auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
+    pattern->frameRect_ = RectF(0, 0, 0, 0);
+    pattern->ChangeMouseState(offset1, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset2, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 0);
+    pattern->ChangeMouseState(offset3, frameId, true);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+    pattern->ChangeMouseState(offset4, frameId, true);
 }
 
 /**
@@ -2339,6 +2376,42 @@ HWTEST_F(TextFieldPatternTest, TextPattern103, TestSize.Level0)
     pattern->selectController_->secondHandleInfo_.index = 2;
     pattern->HandleSelectionEnd();
     EXPECT_TRUE(pattern->showSelect_);
+}
+
+/**
+ * @tc.name: IsShowSearch001
+ * @tc.desc: test testInput text IsShowSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowSearch();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnSearch001
+ * @tc.desc: test testInput text HandleOnSearch
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnSearch001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
 }
 
 /**
@@ -2656,5 +2729,110 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
     autoFillType = AceAutoFillType::ACE_NEW_PASSWORD;
     pattern->SetAutoFillTriggeredStateByType(autoFillType);
     EXPECT_EQ(stateHolder->IsAutoFillNewPasswordTriggered(), true);
+}
+
+/**
+ * @tc.name: TextFieldShiftMultipleSelection001
+ * @tc.desc: test text_field_pattern.cpp shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Level0)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    auto pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->frameRect_ = RectF(0, 0, 10, 50);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    pattern->HandleKeyEvent(keyEvent);
+    pattern->UpdateShiftFlag(keyEvent);
+
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    Offset offset(5.0, 10.0);
+    info.SetGlobalLocation(offset);
+    pattern->HandleMouseEvent(info);
+    pattern->UpdateCaretByClick(offset);
+
+    EXPECT_EQ(pattern->IsSelected(), false);
+}
+
+/**
+ * @tc.name: HandleOnDeleteCombTest
+ * @tc.desc: test HandleOnDeleteComb function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnDeleteCombTest, TestSize.Level1)
+{
+    CreateTextField("Hello World");
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    pattern_->paragraph_ = paragraph;
+
+    pattern_->SetCaretPosition(5);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+        offset = 0;
+        start = 0;
+        end = 5;
+        return true;
+    });
+    pattern_->HandleOnDeleteComb(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), " World");
+
+    pattern_->SetCaretPosition(0);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+        offset = 1;
+        start = 1;
+        end = 6;
+        return true;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->HandleOnDeleteComb(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: HandleOnPageUpAndPageDownTest
+ * @tc.desc: test handle on page up and page down function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnPageUpAndPageDownTest, TestSize.Level1)
+{
+    CreateTextField("Hello World\n Hello World\n Hello World\n Hello World\n Hello World\n");
+    pattern_->frameRect_ = RectF(0, 0, 10, 10);
+    auto contentRect = pattern_->GetContentRect();
+    contentRect.SetRect(0, 0, 10, 10);
+    pattern_->SetCaretPosition(10);
+
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(
+        [] (Offset offset, bool isSelectionPos) {
+            return 60;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->selectController_->paragraph_ = paragraph;
+    pattern_->HandleOnPageDown();
+    FlushLayoutTask(frameNode_);
+    int32_t downCaret = pattern_->selectController_->GetCaretIndex();
+
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(
+        [] (Offset offset, bool isSelectionPos) {
+            return 10;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->selectController_->paragraph_ = paragraph;
+    pattern_->HandleOnPageUp();
+    int32_t upCaret = pattern_->selectController_->GetCaretIndex();
+    EXPECT_EQ(downCaret, upCaret);
 }
 } // namespace OHOS::Ace::NG

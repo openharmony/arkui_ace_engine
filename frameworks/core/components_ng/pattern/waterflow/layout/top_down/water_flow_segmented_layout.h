@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
-#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 // inherited by SegmentedLayout and SWLayout
@@ -46,6 +45,14 @@ protected:
      * @brief Check if Sections info align with actual children and if internal data structures are consistent.
      */
     static bool IsSectionValid(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t childrenCnt);
+
+    /**
+     * @return true if the item is a cache item outside viewport.
+     */
+    inline bool IsCache(const RefPtr<WaterFlowLayoutInfoBase>& info, int32_t itemIdx) const
+    {
+        return !props_->GetShowCachedItemsValue(false) && (itemIdx < info->startIndex_ || itemIdx > info->endIndex_);
+    }
 
     LayoutWrapper* wrapper_ {};
     RefPtr<WaterFlowLayoutProperty> props_;

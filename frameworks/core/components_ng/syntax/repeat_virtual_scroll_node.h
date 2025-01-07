@@ -73,6 +73,9 @@ public:
      */
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
 
+    void OnRecycle() override;
+    void OnReuse() override;
+
     /**
      * scenario: called by layout informs:
      *   - start: the first visible index
@@ -139,7 +142,7 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {

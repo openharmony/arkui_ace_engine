@@ -15,13 +15,13 @@
 
 #include "text_input_base.h"
 
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -793,7 +793,7 @@ HWTEST_F(TextFieldPatternTestTwo, OnDragDrop001, TestSize.Level0)
     auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
     ASSERT_NE(unifiedData, nullptr);
     std::vector<uint8_t> arr;
-    auto spanString = AceType::MakeRefPtr<SpanString>("Test");
+    auto spanString = AceType::MakeRefPtr<SpanString>(u"Test");
     spanString->EncodeTlv(arr);
     UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
     event->SetData(unifiedData);

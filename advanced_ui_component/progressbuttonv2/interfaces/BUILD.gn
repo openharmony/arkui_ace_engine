@@ -1,0 +1,59 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/adapter/preview/build/config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_progressbuttonv2_abc") {
+  src_js = rebase_path("progressbuttonv2.js")
+  dst_file = rebase_path(target_out_dir + "/progressbuttonv2.abc")
+  in_puts = [ "progressbuttonv2.js" ]
+  out_puts = [ target_out_dir + "/progressbuttonv2.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("progressbuttonv2_abc") {
+  input = get_label_info(":gen_progressbuttonv2_abc", "target_out_dir") +
+          "/progressbuttonv2.abc"
+  output = target_out_dir + "/progressbuttonv2_abc.o"
+  dep = ":gen_progressbuttonv2_abc"
+}
+
+gen_obj("progressbuttonv2_abc_preview") {
+  input = get_label_info(":gen_progressbuttonv2_abc", "target_out_dir") +
+          "/progressbuttonv2.abc"
+  output = target_out_dir + "/progressbuttonv2_abc.c"
+  snapshot_dep = [ ":gen_progressbuttonv2_abc" ]
+}
+
+ohos_shared_library("progressbuttonv2") {
+  sources = [ "progressbuttonv2.cpp" ]
+
+  if (use_mingw_win || use_mac || use_linux) {
+    deps = [ ":gen_obj_src_progressbuttonv2_abc_preview" ]
+  } else {
+    deps = [ ":progressbuttonv2_abc" ]
+  }
+
+  external_deps = [
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  relative_install_dir = "module/arkui/advanced"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

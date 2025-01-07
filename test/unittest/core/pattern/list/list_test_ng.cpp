@@ -71,7 +71,6 @@ void ListTestNg::TearDownTestSuite()
 void ListTestNg::SetUp()
 {
     MockAnimationManager::GetInstance().Reset();
-    MockAnimationManager::GetInstance().SetTicks(TICK);
 }
 
 void ListTestNg::TearDown()
@@ -147,11 +146,12 @@ ListItemModelNG ListTestNg::CreateListItem(V2::ListItemStyle listItemStyle)
     return itemModel;
 }
 
-void ListTestNg::CreateListItemGroups(int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle)
+void ListTestNg::CreateListItemGroups(
+    int32_t groupNumber, V2::ListItemGroupStyle listItemGroupStyle, int32_t itemNumber)
 {
     for (int32_t index = 0; index < groupNumber; index++) {
         CreateListItemGroup(listItemGroupStyle);
-        CreateListItems(GROUP_ITEM_NUMBER, static_cast<V2::ListItemStyle>(listItemGroupStyle));
+        CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
@@ -277,18 +277,6 @@ void ListTestNg::UpdateCurrentOffset(float offset, int32_t source)
     FlushUITasks();
 }
 
-void ListTestNg::ScrollToEdge(ScrollEdgeType scrollEdgeType)
-{
-    pattern_->ScrollToEdge(scrollEdgeType, false);
-    FlushUITasks();
-}
-
-void ListTestNg::ScrollTo(float position)
-{
-    pattern_->ScrollTo(position);
-    FlushUITasks();
-}
-
 void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
 {
     RepeatVirtualScrollModelNG repeatModel;
@@ -341,21 +329,43 @@ void ListTestNg::CreateGroupWithSettingWithComponentContent(
     for (int32_t index = 0; index < groupNumber; index++) {
         ListItemGroupModelNG groupModel = CreateListItemGroup(listItemGroupStyle);
         groupModel.SetSpace(Dimension(SPACE));
-        groupModel.SetDivider(ITEM_DIVIDER);
-        groupModel.SetHeaderComponent(CreateCustomNode("Header"));
-        groupModel.SetFooterComponent(CreateCustomNode("Footer"));
+        groupModel.SetHeaderComponent(CreateCustomNode("Header", LIST_WIDTH, LIST_HEIGHT));
+        groupModel.SetFooterComponent(CreateCustomNode("Footer", LIST_WIDTH, LIST_HEIGHT));
         CreateListItems(itemNumber, static_cast<V2::ListItemStyle>(listItemGroupStyle));
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
 }
 
-RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag)
+void ListTestNg::CreateSwipeItemsWithComponentContent(const RefPtr<NG::UINode>& startBuilderNode,
+    const RefPtr<NG::UINode>& endBuilderNode, V2::SwipeEdgeEffect effect, int32_t itemNumber)
+{
+    for (int32_t index = 0; index < itemNumber; index++) {
+        ListItemModelNG itemModel = CreateListItem();
+        itemModel.SetSwiperAction(nullptr, nullptr, nullptr, effect);
+        if (startBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                startBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), true);
+        }
+        if (endBuilderNode) {
+            itemModel.SetDeleteAreaWithFrameNode(
+                endBuilderNode, nullptr, nullptr, nullptr, nullptr, Dimension(DELETE_AREA_DISTANCE), false);
+        }
+        {
+            GetRowOrColBuilder(FILL_LENGTH, Dimension(ITEM_MAIN_SIZE))();
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+RefPtr<FrameNode> ListTestNg::CreateCustomNode(const std::string& tag, float crossSize, float mainSize)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>(
         tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
     auto layoutProperty = frameNode->GetLayoutProperty();
-    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(LIST_WIDTH), CalcLength(LIST_HEIGHT)));
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(crossSize), CalcLength(mainSize)));
     return frameNode;
 }
 
@@ -374,57 +384,15 @@ AssertionResult ListTestNg::Position(const RefPtr<FrameNode>& frameNode, float e
     return IsEqual(-(pattern->GetTotalOffset()), expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset)
-{
-    MockAnimationManager::GetInstance().Tick();
-    FlushUITasks();
-    return Position(frameNode, expectOffset);
-}
-
-AssertionResult ListTestNg::TickByVelocityPosition(
-    const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset)
-{
-    MockAnimationManager::GetInstance().TickByVelocity(velocity);
-    FlushUITasks();
-    return Position(frameNode, expectOffset);
-}
-
 AssertionResult ListTestNg::Position(float expectOffset)
 {
     return Position(frameNode_, expectOffset);
 }
 
-AssertionResult ListTestNg::TickPosition(float expectOffset)
+void ListTestNg::JumpToItemInGroup(int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
 {
-    return TickPosition(frameNode_, expectOffset);
-}
-
-AssertionResult ListTestNg::TickByVelocityPosition(float velocity, float expectOffset)
-{
-    return TickByVelocityPosition(frameNode_, velocity, expectOffset);
-}
-
-AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
-{
-    return ScrollToIndex(index, smooth, align, std::nullopt, expectOffset);
-}
-
-AssertionResult ListTestNg::ScrollToIndex(
-    int32_t index, bool smooth, ScrollAlign align, std::optional<float> extraOffset, float expectOffset)
-{
-    MockAnimationManager::GetInstance().SetTicks(1);
-    positionController_->ScrollToIndex(index, smooth, align, extraOffset);
-    FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
-}
-
-AssertionResult ListTestNg::JumpToItemInGroup(
-    int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align, float expectOffset)
-{
-    MockAnimationManager::GetInstance().SetTicks(1);
     positionController_->JumpToItemInGroup(index, indexInGroup, smooth, align);
     FlushUITasks();
-    return smooth ? TickPosition(-expectOffset) : Position(-expectOffset);
 }
 
 class ListItemMockLazy : public Framework::MockLazyForEachBuilder {

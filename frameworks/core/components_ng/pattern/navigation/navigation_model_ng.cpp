@@ -225,6 +225,7 @@ void SetNeedResetTitleProperty(const RefPtr<FrameNode>& titleBarNode)
     titleBarPattern->SetNeedResetSubTitleProperty(true);
 }
 } // namespace
+bool NavigationModelNG::navBarWidthDoubleBind_ = false;
 
 void NavigationModelNG::Create()
 {
@@ -245,7 +246,11 @@ void NavigationModelNG::Create()
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
 }
 
 bool NavigationModelNG::CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
@@ -399,6 +404,10 @@ bool NavigationModelNG::ParseCommonTitle(
         }
     }
     navBarNode->UpdatePrevTitleIsCustom(false);
+    if (titleBarPattern->IsFirstTimeSetSystemTitle()) {
+        titleBarPattern->SetIsFirstTimeSetSystemTitle(false);
+        titleBarPattern->MarkIsInitialTitle(true);
+    }
 
     // create or update main title
     do {
@@ -596,13 +605,45 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         return;
     }
     // create back button
+    bool result = CreateBackButtonNode(backButtonNode);
+    CHECK_NULL_VOID(result);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
+        CreateSymbolBackIcon(backButtonNode, navigationGroupNode);
+    } else {
+        CreateImageBackIcon(backButtonNode, navigationGroupNode);
+    }
+
+    //read navigation back button
+    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
+    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
+
+    backButtonNode->MarkModifyDone();
+    titleBarNode->SetBackButton(backButtonNode);
+    titleBarNode->AddChild(backButtonNode, 0);
+}
+
+bool NavigationModelNG::CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode)
+{
+    auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
+    CHECK_NULL_RETURN(buttonPattern, false);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, false);
+    buttonPattern->SetSkipColorConfigurationUpdate();
+    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
+        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
+        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
+    }
     backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
+        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), buttonPattern);
     auto focusHub = backButtonNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
+    CHECK_NULL_RETURN(focusHub, false);
     focusHub->SetFocusDependence(FocusDependence::SELF);
     auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
+    CHECK_NULL_RETURN(gestureEventHub, false);
     auto context = PipelineContext::GetCurrentContext();
     auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
         auto context = weakContext.Upgrade();
@@ -615,26 +656,22 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
         }
     };
     gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
-    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    buttonPattern->SetSkipColorConfigurationUpdate();
-    buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
-        buttonPattern->SetBlendColor(theme->GetBackgroundPressedColor(), theme->GetBackgroundHoverColor());
-        buttonPattern->SetFocusBorderColor(theme->GetBackgroundFocusOutlineColor());
-        buttonPattern->SetFocusBorderWidth(theme->GetBackgroundFocusOutlineWeight());
-    }
+    return UpdateBackButtonProperty(backButtonNode);
+}
+
+bool NavigationModelNG::UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode)
+{
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
+    CHECK_NULL_RETURN(backButtonLayoutProperty, false);
     auto renderContext = backButtonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    CHECK_NULL_RETURN(renderContext, false);
     auto backButtonWidth = BACK_BUTTON_SIZE;
     auto backButtonHeight = BACK_BUTTON_SIZE;
     auto backButtonRadiusSize = BUTTON_RADIUS_SIZE;
     auto backButtonPadding = BUTTON_PADDING;
     auto backButtonColor = Color::TRANSPARENT;
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_RETURN(theme, false);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         backButtonWidth = theme->GetIconBackgroundWidth();
         backButtonHeight = theme->GetIconBackgroundHeight();
@@ -651,24 +688,7 @@ void NavigationModelNG::SetTitleMode(NG::NavigationTitleMode mode)
     backButtonLayoutProperty->UpdatePadding(padding);
     backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
     backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    auto eventHub = backButtonNode->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(eventHub);
-
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE) &&
-        SystemProperties::IsNeedSymbol()) {
-        CreateSymbolBackIcon(backButtonNode, navigationGroupNode);
-    } else {
-        CreateImageBackIcon(backButtonNode, navigationGroupNode);
-    }
-
-    //read navigation back button
-    std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
-    NavigationTitleUtil::SetAccessibility(backButtonNode, message);
-
-    backButtonNode->MarkModifyDone();
-    titleBarNode->SetBackButton(backButtonNode);
-    titleBarNode->AddChild(backButtonNode, 0);
+    return true;
 }
 
 void NavigationModelNG::SetSubtitle(const std::string& subtitle)
@@ -896,6 +916,15 @@ void NavigationModelNG::SetOnTitleModeChange(std::function<void(NG::NavigationTi
     eventHub->SetOnTitleModeChange(std::move(eventInfo));
 }
 
+void NavigationModelNG::SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnNavBarWidthChangeEvent(std::move(event));
+}
+
 void NavigationModelNG::SetUsrNavigationMode(NavigationMode mode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, UsrNavigationMode, mode);
@@ -906,7 +935,7 @@ void NavigationModelNG::SetNavBarPosition(NG::NavBarPosition mode)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarPosition, static_cast<NG::NavBarPosition>(mode));
 }
 
-void NavigationModelNG::SetNavBarWidth(const Dimension& value)
+void NavigationModelNG::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavBarWidth, value);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -914,6 +943,10 @@ void NavigationModelNG::SetNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    navBarWidthDoubleBind_ = isDoubleBind;
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
@@ -928,6 +961,9 @@ void NavigationModelNG::SetMinNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value);
 }
@@ -940,6 +976,9 @@ void NavigationModelNG::SetMaxNavBarWidth(const Dimension& value)
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value);
 }
@@ -1096,6 +1135,9 @@ void NavigationModelNG::SetMinNavBarWidth(FrameNode* frameNode, const Dimension&
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MinNavBarWidth, value, frameNode);
 }
@@ -1106,6 +1148,9 @@ void NavigationModelNG::SetMaxNavBarWidth(FrameNode* frameNode, const Dimension&
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetIfNeedInit(true);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, MaxNavBarWidth, value, frameNode);
 }
@@ -1118,6 +1163,9 @@ void NavigationModelNG::SetNavBarWidth(FrameNode* frameNode, const Dimension& va
     CHECK_NULL_VOID(navigationGroupNode);
     auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
     CHECK_NULL_VOID(navigationPattern);
+    if (IsDoubleBindBlock(navigationPattern)) {
+        return;
+    }
     navigationPattern->SetUserSetNavBarWidthFlag(true);
     if (navigationPattern->GetInitNavBarWidth() != value) {
         navigationPattern->SetInitNavBarWidth(value);
@@ -1300,78 +1348,20 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
         return;
     }
     // create back button
-    backButtonNode = FrameNode::CreateFrameNode(
-        V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
-    auto focusHub = backButtonNode->GetOrCreateFocusHub();
-    CHECK_NULL_VOID(focusHub);
-    focusHub->SetFocusDependence(FocusDependence::SELF);
-    auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureEventHub);
-    auto context = PipelineContext::GetCurrentContext();
-    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
-        auto context = weakContext.Upgrade();
-        CHECK_NULL_VOID(context);
-        bool result = context->OnBackPressed();
-        if (!result) {
-            auto delegate = EngineHelper::GetCurrentDelegate();
-            CHECK_NULL_VOID(delegate);
-            delegate->Back("");
-        }
-    };
-    gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
-    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
-    CHECK_NULL_VOID(buttonPattern);
-    buttonPattern->SetSkipColorConfigurationUpdate();
-    auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_VOID(backButtonLayoutProperty);
-    backButtonLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BACK_BUTTON_SIZE), CalcLength(BACK_BUTTON_SIZE)));
-    backButtonLayoutProperty->UpdateType(ButtonType::NORMAL);
-    backButtonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(BUTTON_RADIUS_SIZE));
-    backButtonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto renderContext = backButtonNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    bool result = CreateBackButtonNode(backButtonNode);
+    CHECK_NULL_VOID(result);
 
-    auto eventHub = backButtonNode->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(eventHub);
-
-    PaddingProperty padding;
-    padding.left = CalcLength(BUTTON_PADDING);
-    padding.right = CalcLength(BUTTON_PADDING);
-    padding.top = CalcLength(BUTTON_PADDING);
-    padding.bottom = CalcLength(BUTTON_PADDING);
-    backButtonLayoutProperty->UpdatePadding(padding);
-
-    auto backButtonImageNode = FrameNode::CreateFrameNode(V2::BACK_BUTTON_IMAGE_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
-    CHECK_NULL_VOID(backButtonImageNode);
-    auto theme = NavigationGetTheme();
-    CHECK_NULL_VOID(theme);
-    ImageSourceInfo imageSourceInfo;
-    imageSourceInfo.SetResourceId(theme->GetBackResourceId());
-    auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(navigationEventHub);
-    if (!navigationEventHub->IsEnabled()) {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) &&
+        SystemProperties::IsNeedSymbol()) {
+        CreateSymbolBackIcon(backButtonNode, navigationGroupNode);
     } else {
-        imageSourceInfo.SetFillColor(theme->GetBackButtonIconColor());
+        CreateImageBackIcon(backButtonNode, navigationGroupNode);
     }
-    backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
-    backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    auto imageRenderProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(imageRenderProperty);
-    imageRenderProperty->UpdateMatchTextDirection(true);
 
     //read navigation back button
     std::string message = Localization::GetInstance()->GetEntryLetters("navigation.back");
     NavigationTitleUtil::SetAccessibility(backButtonNode, message);
 
-    backButtonImageNode->MountToParent(backButtonNode);
-    backButtonImageNode->MarkModifyDone();
     backButtonNode->MarkModifyDone();
     titleBarNode->SetBackButton(backButtonNode);
     titleBarNode->AddChild(backButtonNode, 0);
@@ -1577,8 +1567,11 @@ RefPtr<FrameNode> NavigationModelNG::CreateFrameNode(int32_t nodeId)
     if (!navigationLayoutProperty->HasNavigationMode()) {
         navigationLayoutProperty->UpdateNavigationMode(NavigationMode::AUTO);
     }
-    navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
 
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    if (navigationPattern && !navigationPattern->GetUserSetNavBarWidthFlag()) {
+        navigationLayoutProperty->UpdateNavBarWidth(DEFAULT_NAV_BAR_WIDTH);
+    }
     SetNavigationStack(AceType::RawPtr(navigationGroupNode));
 
     return navigationGroupNode;
@@ -1622,6 +1615,10 @@ void NavigationModelNG::ParseCommonTitle(FrameNode* frameNode, const NG::Navigat
         }
     }
     navBarNode->UpdatePrevTitleIsCustom(false);
+    if (titleBarPattern->IsFirstTimeSetSystemTitle()) {
+        titleBarPattern->SetIsFirstTimeSetSystemTitle(false);
+        titleBarPattern->MarkIsInitialTitle(true);
+    }
 
     // create or update main title
     NavigationTitleUtil::CreateOrUpdateMainTitle(titleBarNode, titleInfo, ignoreMainTitle);
@@ -1702,5 +1699,10 @@ void NavigationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
         menuItems.at(index).iconSymbol = symbol;
         navBarPattern->SetTitleBarMenuItems(menuItems);
     }
+}
+
+bool NavigationModelNG::IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern)
+{
+    return navBarWidthDoubleBind_ && navigationPattern->GetIsInDividerDrag();
 }
 } // namespace OHOS::Ace::NG

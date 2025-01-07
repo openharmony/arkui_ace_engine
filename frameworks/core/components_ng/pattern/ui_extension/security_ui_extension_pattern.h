@@ -18,14 +18,18 @@
 
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
+#include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_hub.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
 namespace OHOS::Ace::NG {
-class SecurityUIExtensionPattern : public PlatformPattern {
-    DECLARE_ACE_TYPE(SecurityUIExtensionPattern, PlatformPattern);
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
+
+class SecurityUIExtensionPattern : public PlatformPattern, public PlatformAccessibilityBase {
+    DECLARE_ACE_TYPE(SecurityUIExtensionPattern, PlatformPattern, PlatformAccessibilityBase);
 
 public:
     SecurityUIExtensionPattern();
@@ -69,6 +73,8 @@ public:
     int32_t GetNodeId();
     int32_t GetInstanceId();
     void SetEventProxyFlag(int32_t flag);
+    void OnExtensionEvent(UIExtCallbackEventId eventId);
+    void OnUeaAccessibilityEventAsync();
     void OnExtensionDetachToDisplay();
 
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
@@ -88,6 +94,8 @@ public:
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void FireOnErrorCallback(
         int32_t code, const std::string& name, const std::string& message) override;
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
     void FireOnRemoteReadyCallback();
     void FireBindModalCallback();
@@ -106,13 +114,32 @@ public:
     void DispatchFollowHostDensity(bool densityDpi);
     void OnDpiConfigurationUpdate() override;
 
+    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) const override;
+    void OnAccessibilityChildTreeDeregister() const override;
+    void OnSetAccessibilityChildTree(int32_t childWindowId, int32_t childTreeId) const override;
+    void OnAccessibilityDumpChildInfo(
+        const std::vector<std::string>& params, std::vector<std::string>& info) const override;
+    
+    int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    void OnUIExtBusinessReceiveReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
+    void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+    void RegisterUIExtBusinessConsumeReplyCallback(
+        UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
+
 private:
+    void InitializeAccessibility();
     bool HandleKeyEvent(const KeyEvent& event) override;
     void HandleFocusEvent() override;
     void HandleBlurEvent() override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;
     void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
+    void ResetAccessibilityChildTreeCallback();
+    void RegisterEventProxyFlagCallback();
 
     enum class AbilityState {
         NONE = 0,
@@ -139,9 +166,12 @@ private:
     SessionType sessionType_ = SessionType::UI_EXTENSION_ABILITY;
     int32_t uiExtensionId_ = 0;
     std::string uiExtensionType_;
+    std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_ = nullptr;
 
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onAsyncOnCallbackList_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SecurityUIExtensionPattern);
 };

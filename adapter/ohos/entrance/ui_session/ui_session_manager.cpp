@@ -19,6 +19,7 @@
 #include "adapter/ohos/entrance/ui_session/include/ui_service_hilog.h"
 namespace OHOS::Ace {
 std::mutex UiSessionManager::mutex_;
+std::shared_mutex UiSessionManager::reportObjectMutex_;
 constexpr int32_t ONCE_IPC_SEND_DATA_MAX_SIZE = 4096;
 UiSessionManager& UiSessionManager::GetInstance()
 {
@@ -28,6 +29,7 @@ UiSessionManager& UiSessionManager::GetInstance()
 
 void UiSessionManager::ReportClickEvent(const std::string& data)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -40,6 +42,7 @@ void UiSessionManager::ReportClickEvent(const std::string& data)
 
 void UiSessionManager::ReportSearchEvent(const std::string& data)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -52,6 +55,7 @@ void UiSessionManager::ReportSearchEvent(const std::string& data)
 
 void UiSessionManager::ReportRouterChangeEvent(const std::string& data)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -64,6 +68,7 @@ void UiSessionManager::ReportRouterChangeEvent(const std::string& data)
 
 void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const std::string& value)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetComponentChangeEventRegistered()) {
@@ -79,6 +84,7 @@ void UiSessionManager::ReportComponentChangeEvent(const std::string& key, const 
 void UiSessionManager::ReportComponentChangeEvent(
     int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr && GetComponentChangeEventRegistered()) {
@@ -98,6 +104,7 @@ void UiSessionManager::ReportWebUnfocusEvent(int64_t accessibilityId, const std:
     jsonValue->Put("id", accessibilityId);
     jsonValue->Put("$type", "web");
     jsonValue->Put("text", data.c_str());
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -112,11 +119,13 @@ void UiSessionManager::SaveReportStub(sptr<IRemoteObject> reportStub, int32_t pr
 {
     // add death callback
     auto uiReportProxyRecipient = new UiReportProxyRecipient([processId, this]() {
+        std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
         LOGW("agent process dead,processId:%{public}d", processId);
         // reportMap remove this processId
         this->reportObjectMap_.erase(processId);
     });
     reportStub->AddDeathRecipient(uiReportProxyRecipient);
+    std::unique_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     reportObjectMap_[processId] = reportStub;
 }
 
@@ -214,6 +223,7 @@ void UiSessionManager::WebTaskNumsChange(int32_t num)
 
 void UiSessionManager::ReportInspectorTreeValue(const std::string& data)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -265,6 +275,7 @@ void UiSessionManager::SaveBaseInfo(const std::string& info)
 
 void UiSessionManager::SendBaseInfo(int32_t processId)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     auto reportService = iface_cast<ReportService>(reportObjectMap_[processId]);
     if (reportService != nullptr) {
         reportService->SendBaseInfo(baseInfo_);

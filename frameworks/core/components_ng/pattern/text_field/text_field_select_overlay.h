@@ -44,8 +44,7 @@ public:
 
     void OnResetTextSelection() override;
     void AfterCloseOverlay() override;
-    RectF GetFirstHandleLocalPaintRect() override;
-    RectF GetSecondHandleLocalPaintRect() override;
+    RectF GetHandleLocalPaintRect(DragHandleIndex dragHandleIndex) override;
     void OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag) override;
     void UpdateAllHandlesOffset() override;
     void UpdateFirstHandleOffset() override;
@@ -58,6 +57,7 @@ public:
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    bool IsStopBackPress() const override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -96,6 +96,9 @@ public:
         return !HasRenderTransform();
     }
     std::optional<Color> GetHandleColor() override;
+
+protected:
+    bool AllowSearch() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

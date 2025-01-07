@@ -55,6 +55,7 @@ constexpr char FORM_RENDERER_DISPATCHER[] = "ohos.extra.param.key.process_on_for
 constexpr char PARAM_FORM_MIGRATE_FORM_KEY[] = "ohos.extra.param.key.migrate_form";
 constexpr int32_t RENDER_DEAD_CODE = 16501006;
 constexpr int32_t FORM_NOT_TRUST_CODE = 16501007;
+constexpr int32_t FORM_STATUS_TIME_OUT = 16501009;
 constexpr char ALLOW_UPDATE[] = "allowUpdate";
 constexpr char IS_DYNAMIC[] = "isDynamic";
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_10S = 10000;
@@ -126,6 +127,7 @@ void FormManagerDelegate::AddForm(const WeakPtr<PipelineBase>& context, const Re
     SetParamForWant(info, formInfo);
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     auto clientInstance = OHOS::AppExecFwk::FormHostClient::GetInstance();
+    TAG_LOGI(AceLogTag::ACE_FORM, "Before FormMgr adding form, info.id: %{public}" PRId64, info.id);
     auto ret = OHOS::AppExecFwk::FormMgr::GetInstance().AddForm(info.id, wantCache_, clientInstance, formJsInfo);
     if (ret != 0) {
         auto errorMsg = OHOS::AppExecFwk::FormMgr::GetInstance().GetErrorMessage(ret);
@@ -436,6 +438,16 @@ void FormManagerDelegate::AddEnableFormCallback(EnableFormCallback&& callback)
     enableFormCallback_ = std::move(callback);
 }
 
+
+void FormManagerDelegate::AddLockFormCallback(LockFormCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "EnableFormCallback is null");
+        return;
+    }
+    lockFormCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::OnActionEventHandle(const std::string& action)
 {
     if (actionEventHandle_) {
@@ -570,12 +582,21 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
     };
     renderDelegate_->SetFormLinkInfoUpdateHandler(std::move(onFormLinkInfoUpdateHandler));
 
-    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](int32_t &top, int32_t &left) {
+    auto &&onGetRectRelativeToWindowHandler = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
         auto formManagerDelegate = weak.Upgrade();
         CHECK_NULL_VOID(formManagerDelegate);
-        formManagerDelegate->OnGetRectRelativeToWindow(top, left);
+        formManagerDelegate->OnGetRectRelativeToWindow(parentRectInfo);
     };
     renderDelegate_->SetGetRectRelativeToWindowHandler(onGetRectRelativeToWindowHandler);
+
+    auto &&onCheckManagerDelegate = [weak = WeakClaim(this)](bool &checkFlag) {
+        auto formManagerDelegate = weak.Upgrade();
+        if (!formManagerDelegate) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "EventHandle - onCheckManagerDelegate formManagerDelegate is null");
+            checkFlag = false;
+        }
+    };
+    renderDelegate_->SetCheckManagerDelegate(onCheckManagerDelegate);
 }
 
 void FormManagerDelegate::OnActionEvent(const std::string& action)
@@ -672,7 +693,9 @@ void FormManagerDelegate::DispatchPointerEvent(const
     }
 
     // pan gesture disabled, not dispatch move event, not concat serialized gesture
-    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE) {
+    auto pointAction = pointerEvent->GetPointerAction();
+    if (pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE ||
+        pointAction == OHOS::MMI::PointerEvent::POINTER_ACTION_AXIS_UPDATE) {
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "form pan gesture disabled, dispatch event action=%{public}d",
@@ -755,10 +778,10 @@ void FormManagerDelegate::OnFormLinkInfoUpdate(const std::vector<std::string>& f
     }
 }
 
-void FormManagerDelegate::OnGetRectRelativeToWindow(int32_t &top, int32_t &left)
+void FormManagerDelegate::OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo)
 {
     if (onGetRectRelativeToWindowCallback_) {
-        onGetRectRelativeToWindowCallback_(top, left);
+        onGetRectRelativeToWindowCallback_(parentRectInfo);
     }
 }
 
@@ -801,6 +824,9 @@ void FormManagerDelegate::OnFormError(const std::string& code, const std::string
         case RENDER_DEAD_CODE:
             ReAddForm();
             break;
+        case FORM_STATUS_TIME_OUT:
+            ReAddForm();
+            break;
         case FORM_NOT_TRUST_CODE:
             HandleUnTrustFormCallback();
             break;
@@ -835,6 +861,15 @@ void FormManagerDelegate::HandleEnableFormCallback(const bool enable)
         return;
     }
     enableFormCallback_(enable);
+}
+
+void FormManagerDelegate::HandleLockFormCallback(bool lock)
+{
+    if (!lockFormCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "lockFormCallback_. is null");
+        return;
+    }
+    lockFormCallback_(lock);
 }
 
 void FormManagerDelegate::ReAddForm()
@@ -891,6 +926,18 @@ void FormManagerDelegate::OnAccessibilityTransferHoverEvent(float pointX, float 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)
 {
     return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleForbidden(bundleName);
+}
+
+bool FormManagerDelegate::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
+{
+    return OHOS::AppExecFwk::FormMgr::GetInstance().IsFormBundleLocked(bundleName, formId);
+}
+
+void FormManagerDelegate::NotifyFormDump(const std::vector<std::string>& params,
+    std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(formRendererDispatcher_);
+    formRendererDispatcher_->OnNotifyDumpInfo(params, info);
 }
 
 #ifdef OHOS_STANDARD_SYSTEM
@@ -956,7 +1003,7 @@ void FormManagerDelegate::ProcessFormUpdate(const AppExecFwk::FormJsInfo& formJs
 
 void FormManagerDelegate::ReleaseRenderer()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseForm. formId: %{public}" PRId64 ", %{public}s",
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormManagerDelegate releaseRenderer. formId: %{public}" PRId64 ", %{public}s",
         runningCardId_, runningCompId_.c_str());
     if (runningCardId_ <= 0) {
         return;
@@ -1031,6 +1078,7 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
 
 void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
 {
+    std::lock_guard<std::mutex> lock(this->recycleMutex_);
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
     if (info.wantWrap) {
@@ -1095,6 +1143,12 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action)
         auto instantId = context->GetInstanceId();
         formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName());
     }
+}
+
+void FormManagerDelegate::ProcessLockForm(bool lock)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "ProcessEnableForm, formId is %{public}" PRId64, runningCardId_);
+    HandleLockFormCallback(lock);
 }
 #endif
 } // namespace OHOS::Ace

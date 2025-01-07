@@ -110,43 +110,84 @@ void ResetVideoOpacity(ArkUINodeHandle node)
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
+void SetVideoSurfaceBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color(color);
+    if (backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
+}
+
+void ResetVideoSurfaceBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, Color::BLACK);
+}
+
+void SetVideoShortcutKeyEnabled(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, static_cast<ArkUI_Bool>(value));
+}
+
+void ResetVideoShortcutKeyEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
+        .setVideoSurfaceBackgroundColor = SetVideoSurfaceBackgroundColor,
+        .resetVideoSurfaceBackgroundColor = ResetVideoSurfaceBackgroundColor,
+        .setVideoShortcutKeyEnabled = SetVideoShortcutKeyEnabled,
+        .resetVideoShortcutKeyEnabled = ResetVideoShortcutKeyEnabled,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIVideoModifier* GetCJUIVideoModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

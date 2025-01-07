@@ -82,11 +82,6 @@ AceTextCategory TextFieldAccessibilityProperty::GetTextInputType() const
     return ret;
 }
 
-bool TextFieldAccessibilityProperty::IsEditable() const
-{
-    return true;
-}
-
 bool TextFieldAccessibilityProperty::IsMultiLine() const
 {
     auto frameNode = host_.Upgrade();
@@ -159,11 +154,6 @@ std::string TextFieldAccessibilityProperty::GetHintText() const
     return UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder());
 }
 
-std::string TextFieldAccessibilityProperty::GetErrorText() const
-{
-    return errorText_;
-}
-
 bool TextFieldAccessibilityProperty::GetContentInvalid() const
 {
     return !errorText_.empty();
@@ -187,14 +177,6 @@ void TextFieldAccessibilityProperty::SetSpecificSupportAction()
     if (textFieldPattern->AllowCopy()) {
         AddSupportAction(AceAction::ACTION_COPY);
         AddSupportAction(AceAction::ACTION_CUT);
-    }
-    if (IsScrollable() && textFieldPattern->IsTextArea()) {
-        if (!textFieldPattern->IsAtTop()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_BACKWARD);
-        }
-        if (!textFieldPattern->IsAtBottom()) {
-            AddSupportAction(AceAction::ACTION_SCROLL_FORWARD);
-        }
     }
 
     AddSupportAction(AceAction::ACTION_PASTE);

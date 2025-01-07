@@ -14,7 +14,6 @@
  */
 
 #include "text_input_base.h"
-#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -231,6 +230,56 @@ HWTEST_F(TextFieldKeyEventTest, KeyEventChar004, TestSize.Level1)
             EXPECT_EQ(pattern_->GetTextValue(), result);
             EXPECT_TRUE(ret);
         }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar005
+ * @tc.desc: Test NumLock + KEY_NUMPAD_0-9/. symbols input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.numLock = true;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_NUMPAD_0, L'0' },
+        { KeyCode::KEY_NUMPAD_1, L'1' },
+        { KeyCode::KEY_NUMPAD_2, L'2' },
+        { KeyCode::KEY_NUMPAD_3, L'3' },
+        { KeyCode::KEY_NUMPAD_4, L'4' },
+        { KeyCode::KEY_NUMPAD_5, L'5' },
+        { KeyCode::KEY_NUMPAD_6, L'6' },
+        { KeyCode::KEY_NUMPAD_7, L'7' },
+        { KeyCode::KEY_NUMPAD_8, L'8' },
+        { KeyCode::KEY_NUMPAD_9, L'9' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        FlushLayoutTask(frameNode_);
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
     }
 }
 
@@ -584,7 +633,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent007, TestSize.Level1)
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
+    EXPECT_TRUE(pattern_->GetCursorVisible());
     pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
 }
@@ -607,9 +656,9 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
         model.SetOnSubmit(onSubmit);
     });
     GetFocus();
-
-    pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_TRUE(pattern_->GetCursorVisible());
+    pattern_->PerformAction(TextInputAction::DONE, true);
+    EXPECT_FALSE(pattern_->GetCursorVisible());
 }
 
 /**

@@ -192,16 +192,41 @@ void ResetOnBreakpointChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridRowModifier* GetGridRowModifier()
 {
-    static const ArkUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter,
-        SetOnBreakpointChange, ResetOnBreakpointChange };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGridRowModifier modifier = {
+        .setAlignItems = SetAlignItems,
+        .resetAlignItems = ResetAlignItems,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setBreakpoints = SetBreakpoints,
+        .resetBreakpoints = ResetBreakpoints,
+        .setColumns = SetColumns,
+        .resetColumns = ResetColumns,
+        .setGutter = SetGutter,
+        .resetGutter = ResetGutter,
+        .setOnBreakpointChange = SetOnBreakpointChange,
+        .resetOnBreakpointChange = ResetOnBreakpointChange,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGridRowModifier* GetCJUIGridRowModifier()
 {
-    static const CJUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIGridRowModifier modifier = {
+        .setAlignItems = SetAlignItems,
+        .resetAlignItems = ResetAlignItems,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setBreakpoints = SetBreakpoints,
+        .resetBreakpoints = ResetBreakpoints,
+        .setColumns = SetColumns,
+        .resetColumns = ResetColumns,
+        .setGutter = SetGutter,
+        .resetGutter = ResetGutter,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

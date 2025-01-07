@@ -67,6 +67,16 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
       this._modifiersWithKeys, TextpickerGradientHeightModifier.identity, TextpickerGradientHeightModifier, value);
     return this;
   }
+  disableTextStyleAnimation(value: boolean): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDisableTextStyleAnimationModifier.identity, TextpickerDisableTextStyleAnimationModifier, value);
+    return this;
+  }
+  defaultTextStyle(value: PickerTextStyle): this {
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDefaultTextStyleModifier.identity, TextpickerDefaultTextStyleModifier, value);
+    return this;
+  }
 }
 
 class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
@@ -143,6 +153,55 @@ class TextpickerGradientHeightModifier extends ModifierWithKey<Dimension> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextpickerDisableTextStyleAnimationModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDisableTextStyleAnimation');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDisableTextStyleAnimation(node);
+    } else {
+      getUINativeModule().textpicker.setDisableTextStyleAnimation(node, this.value);
+    }
+  }
+}
+
+class TextpickerDefaultTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
+  constructor(value: PickerTextStyle) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textpickerDefaultTextStyle');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textpicker.resetDefaultTextStyle(node);
+    } else {
+      getUINativeModule().textpicker.setDefaultTextStyle(node, this.value?.color ?? undefined,
+        this.value?.font?.size ?? undefined,
+        this.value?.font?.weight ?? undefined,
+        this.value?.font?.family ?? undefined,
+        this.value?.font?.style ?? undefined,
+        this.value?.minFontSize ?? undefined,
+        this.value?.maxFontSize ?? undefined,
+        this.value?.overflow ?? undefined);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (!(this.stageValue?.font?.weight === this.value?.font?.weight &&
+      this.stageValue?.font?.style === this.value?.font?.style &&
+      this.stageValue?.overflow === this.value?.overflow)) {
+      return true;
+    } else {
+      return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
+        !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family) ||
+        !isBaseOrResourceEqual(this.stageValue?.minFontSize, this.value?.minFontSize) ||
+        !isBaseOrResourceEqual(this.stageValue?.maxFontSize, this.value?.maxFontSize);
+    }
   }
 }
 

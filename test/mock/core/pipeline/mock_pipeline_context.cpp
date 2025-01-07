@@ -17,6 +17,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
+#include "base/mousestyle/mouse_style.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -181,6 +182,13 @@ void MockPipelineContext::SetCurrentWindowRect(Rect rect)
 // mock_pipeline_context =======================================================
 
 // pipeline_context ============================================================
+PipelineContext::PipelineContext()
+{
+    if (navigationMgr_) {
+        navigationMgr_->SetPipelineContext(WeakClaim(this));
+    }
+}
+
 float PipelineContext::GetCurrentRootWidth()
 {
     return static_cast<float>(MockPipelineContext::GetCurrent()->rootWidth_);
@@ -308,7 +316,9 @@ void PipelineContext::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
 {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+{}
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
 
@@ -318,7 +328,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -340,7 +350,7 @@ void PipelineContext::OnIdle(int64_t deadline)
 {
     const auto tasks(std::move(predictTasks_));
     for (const auto& task : tasks) {
-        task(deadline, false);
+        task(deadline, true);
     }
 }
 
@@ -367,7 +377,15 @@ void PipelineContext::RemoveNodesToNotifyMemoryLevel(int32_t nodeId) {}
 void PipelineContext::WindowFocus(bool isFocus)
 {
     onFocus_ = isFocus;
+    if (!isFocus) {
+        RootLostFocus(BlurReason::WINDOW_BLUR);
+    } else {
+        isWindowHasFocused_ = true;
+    }
+    GetOrCreateFocusManager()->WindowFocus(isFocus);
 }
+
+void PipelineContext::RootLostFocus(BlurReason reason) const {}
 
 void PipelineContext::ContainerModalUnFocus() {}
 
@@ -435,15 +453,65 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount) {}
 
 void PipelineContext::FlushPipelineWithoutAnimation() {}
 
-void PipelineContext::FlushFocus() {}
+void PipelineContext::FlushFocus()
+{
+    FlushRequestFocus();
+
+    auto focusNode = dirtyFocusNode_.Upgrade();
+    if (!focusNode || focusNode->GetFocusType() != FocusType::NODE) {
+        dirtyFocusNode_.Reset();
+    } else {
+        FlushFocusWithNode(focusNode, false);
+        return;
+    }
+    auto focusScope = dirtyFocusScope_.Upgrade();
+    if (!focusScope || focusScope->GetFocusType() != FocusType::SCOPE) {
+        dirtyFocusScope_.Reset();
+    } else {
+        FlushFocusWithNode(focusScope, true);
+        return;
+    }
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
+}
+
+void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope)
+{
+    auto focusNodeHub = focusNode->GetFocusHub();
+    if (focusNodeHub) {
+        focusNodeHub->RequestFocusImmediately();
+    }
+    dirtyFocusNode_.Reset();
+    dirtyFocusScope_.Reset();
+    dirtyRequestFocusNode_.Reset();
+    GetOrCreateFocusManager()->WindowFocusMoveEnd();
+}
 
 void PipelineContext::FlushOnceVsyncTask() {}
+
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
 
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
 
-void PipelineContext::FlushRequestFocus() {}
+void PipelineContext::FlushRequestFocus()
+{
+    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
+    if (!requestFocusNode) {
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyRequestFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = requestFocusNode->GetFocusHub();
+        if (focusNodeHub) {
+            focusNodeHub->RequestFocusImmediately();
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyRequestFocusNode_.Reset();
+        return;
+    }
+}
 
 void PipelineContext::CheckNeedUpdateBackgroundColor(Color& color) {}
 
@@ -567,9 +635,17 @@ bool PipelineContext::OnBackPressed()
 
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty) {}
+void PipelineContext::AddDirtyPropertyNode(const RefPtr<FrameNode>& dirty)
+{
+    dirtyPropertyNodes_.emplace(dirty);
+}
 
-void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
+void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_VOID(node);
+    dirtyRequestFocusNode_ = WeakPtr<FrameNode>(node);
+    RequestFrame();
+}
 
 void PipelineContext::AddDirtyFreezeNode(FrameNode* node) {}
 
@@ -653,7 +729,8 @@ void PipelineContext::RemoveVisibleAreaChangeNode(int32_t nodeId) {}
 
 void PipelineContext::HandleVisibleAreaChangeEvent(uint64_t nanoTimestamp) {}
 
-bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId, bool isBypass)
+bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32_t windowId,
+    bool isBypass, MouseStyleChangeReason reason)
 {
     return true;
 }
@@ -681,29 +758,32 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 void PipelineContext::AddNavigationNode(int32_t pageId, WeakPtr<UINode> navigationNode) {}
 
 void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
+
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea)
-{
-    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
-}
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
-{
-    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
-}
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
+
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow) {}
+
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow) {}
+
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow) {}
+
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {
     return KeyBoardAvoidMode::OFFSET;
 }
+
 void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
+
 bool PipelineContext::UsingCaretAvoidMode()
 {
     return false;
 }
+
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
     return false;
 }
+
 void PipelineContext::RequireSummary() {};
 void PipelineContext::SetIgnoreViewSafeArea(bool value) {};
 void PipelineContext::SetIsLayoutFullScreen(bool value) {};
@@ -716,6 +796,11 @@ SafeAreaInsets PipelineContext::GetSafeArea() const
 }
 
 SafeAreaInsets PipelineContext::GetSafeAreaWithoutProcess() const
+{
+    return SafeAreaInsets({}, { 0, 1 }, {}, {});
+}
+
+PipelineBase::SafeAreaInsets PipelineContext::GetScbSafeArea() const
 {
     return SafeAreaInsets({}, { 0, 1 }, {}, {});
 }
@@ -878,6 +963,16 @@ bool PipelineContext::HasOnAreaChangeNode(int32_t nodeId)
 
 void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& pattern) {}
 
+int32_t PipelineContext::GetContainerModalTitleHeight()
+{
+    return 0;
+}
+
+bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
+{
+    return true;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -919,6 +1014,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, const float safeHeight, const bool supportAvoidance,
     bool forceChange)
 {}
+
 void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea, double positionY, double height,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, bool forceChange)
 {}
@@ -1029,6 +1125,8 @@ double PipelineBase::ConvertPxToVp(const Dimension& dimension) const
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const {}
 
+void PipelineBase::StartAbilityOnQuery(const std::string& queryWord) const {}
+
 void PipelineBase::RequestFrame() {}
 
 Rect PipelineBase::GetCurrentWindowRect() const
@@ -1049,6 +1147,10 @@ bool PipelineBase::HasFloatTitle() const
 void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
 {
     uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
+void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
+{
 }
 
 Dimension NG::PipelineContext::GetCustomTitleHeight()
@@ -1124,6 +1226,8 @@ bool NG::PipelineContext::GetContainerControlButtonVisible()
 {
     return false;
 }
+
+void NG::PipelineContext::SetEnableSwipeBack(bool isEnable) {}
 
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}

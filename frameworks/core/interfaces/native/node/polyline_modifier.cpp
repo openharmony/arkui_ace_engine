@@ -46,14 +46,24 @@ void ResetPoints(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPolylineModifier* GetPolylineModifier()
 {
-    static const ArkUIPolylineModifier modifier = {SetPoints, ResetPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPolylineModifier modifier = {
+        .setPoints = SetPoints,
+        .resetPoints = ResetPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPolylineModifier* GetCJUIPolylineModifier()
 {
-    static const CJUIPolylineModifier modifier = {SetPoints, ResetPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPolylineModifier modifier = {
+        .setPoints = SetPoints,
+        .resetPoints = ResetPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

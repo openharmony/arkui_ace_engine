@@ -23,6 +23,7 @@
 #include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -181,6 +182,8 @@ public:
         isRenderDone_ = true;
     }
 
+    void StopPageTransition();
+
     void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
     {
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
@@ -289,6 +292,11 @@ public:
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
+    void SetIsNeedRemove(bool isNeedRemove)
+    {
+        isNeedRemove_ = isNeedRemove;
+    }
+
 protected:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -329,7 +337,7 @@ protected:
     void UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
         RefPtr<PageTransitionEffect>& effect, AnimationOption& option, PageTransitionType type);
 
-    void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
+    virtual void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
@@ -354,6 +362,7 @@ protected:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+    bool isNeedRemove_ = false;
 
 #if defined(ENABLE_SPLIT_MODE)
     bool needFireObserver_ = true;

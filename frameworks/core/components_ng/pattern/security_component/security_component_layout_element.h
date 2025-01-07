@@ -49,6 +49,8 @@ public:
 
     double width_ = 0.0;
     double height_ = 0.0;
+    double defaultWidth_ = 0.0;
+    double defaultHeight_ = 0.0;
     bool isSetSize_ = false;
 };
 
@@ -79,8 +81,10 @@ public:
         minPadddingSize_ = minSize;
         if (isVertical) {
             height_ = size;
+            defaultHeight_ = size;
         } else {
             width_ = size;
+            defaultWidth_ = size;
         }
     };
 
@@ -148,6 +152,8 @@ public:
 
     double ShrinkHeight(double reduceSize) override;
 
+    bool DidExceedMaxLines(std::optional<SizeF>& currentTextSize);
+
     bool GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize);
 
     void DoMeasure(bool isVertical, float minWidth, float leftSpace);
@@ -167,6 +173,8 @@ private:
     std::optional<SizeF> GetMeasureTextSize(const std::string& data,
         const Dimension& fontSize, FontWeight fontWeight, float constraintWidth);
     void MeasureForWidth(float width);
+    float GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height);
+    void UpdateFontSize();
 
     bool isExist_ = false;
     Dimension minFontSize_;

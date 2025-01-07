@@ -37,10 +37,14 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/pointer_event.h"
@@ -414,6 +418,8 @@ void UIExtensionPattern::OnConnect()
     }
     InitializeAccessibility();
     ReDispatchDisplayArea();
+    RegisterEventProxyFlagCallback();
+    NotifyHostWindowMode();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -432,6 +438,42 @@ void UIExtensionPattern::ReplacePlaceholderByContent()
 void UIExtensionPattern::OnAreaUpdated()
 {
     PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
+}
+
+void UIExtensionPattern::RegisterWindowSceneVisibleChangeCallback(
+    const RefPtr<Pattern>& windowScenePattern)
+{
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(windowScenePattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnWindowSceneVisibleChange(visible);
+        }
+    };
+    systemWindowScene->RegisterVisibleChangeCallback(host->GetId(), callback);
+    weakSystemWindowScene_ = systemWindowScene;
+    UIEXT_LOGI("RegisterWindowSceneVisibleChangeCallback %{public}d.", host->GetId());
+}
+
+void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId)
+{
+    auto pattern = weakSystemWindowScene_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(pattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    systemWindowScene->UnRegisterVisibleChangeCallback(nodeId);
+    UIEXT_LOGI("UnRegisterWindowSceneVisibleChangeCallback %{public}d.", nodeId);
+}
+
+void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
+{
+    UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    if (!visible) {
+        OnWindowHide();
+    }
 }
 
 void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
@@ -458,6 +500,9 @@ void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
             break;
         case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
             OnUeaAccessibilityEventAsync();
+            break;
+        case UIExtCallbackEventId::ON_DRAW_FIRST:
+            FireOnDrawReadyCallback();
             break;
     }
 }
@@ -655,6 +700,7 @@ void UIExtensionPattern::OnAttachToFrameNode()
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
+    UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -682,46 +728,127 @@ void UIExtensionPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitCrownEvent(focusHub);
+#endif
 }
 
-void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
+void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
 {
     focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Focus Internal.");
             pattern->HandleFocusEvent();
         }
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnBlurInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Blur Internal.");
             pattern->HandleBlurEvent();
         }
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnClearFocusStateInternal([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Clear FocusState Internal.");
             pattern->DispatchFocusActiveEvent(false);
         }
     });
+}
+
+void UIExtensionPattern::InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnPaintFocusStateInternal([weak = WeakClaim(this)]() -> bool {
         auto pattern = weak.Upgrade();
         if (pattern) {
+            bool forceProcessKeyEvent = pattern->GetForceProcessOnKeyEventInternal();
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "Paint FocusState Internal will %{public}s Active UIExtension.", forceProcessKeyEvent ? "not" : "");
+            if (forceProcessKeyEvent) {
+                return true;
+            }
             pattern->DispatchFocusActiveEvent(true);
             return true;
         }
         return false;
     });
+}
 
+void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
     focusHub->SetOnKeyEventInternal([wp = WeakClaim(this)](const KeyEvent& event) -> bool {
         auto pattern = wp.Upgrade();
         if (pattern) {
-            return pattern->HandleKeyEvent(event);
+            if (event.IsPreIme()) {
+                TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                    "KeyEvent Internal preIme %{public}s.", event.ToString().c_str());
+                return pattern->HandleKeyEvent(event);
+            }
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, false);
+            auto pipeline = host->GetContextRefPtr();
+            CHECK_NULL_RETURN(pipeline, false);
+            bool isBypassInner =
+                event.IsKey({ KeyCode::KEY_TAB }) && pipeline && pipeline->IsTabJustTriggerOnKeyEvent();
+            bool forceProcessKeyEvent = pattern->GetForceProcessOnKeyEventInternal();
+            bool sendKey = !isBypassInner || forceProcessKeyEvent;
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "KeyEvent Internal will %{public}s send %{public}s, bypass[%{public}d], isForce[%{public}d].",
+                sendKey ? "" : "not", event.ToString().c_str(), isBypassInner, forceProcessKeyEvent);
+            if (sendKey) {
+                pattern->SetForceProcessOnKeyEventInternal(false);
+                return pattern->HandleKeyEvent(event);
+            }
         }
         return false;
     });
+}
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void UIExtensionPattern::InitCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnCrownEventInternal([wp = WeakClaim(this)](const CrownEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->HandleCrownEvent(event);
+        }
+        return false;
+    });
+}
+
+void UIExtensionPattern::HandleCrownEvent(const CrownEvent& event)
+{
+    if (event.action == Ace::CrownAction::UNKNOWN) {
+        UIEXT_LOGE("action is UNKNOWN");
+        return;
+    }
+    auto pointerEvent = event.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    Platform::CalculatePointerEvent(pointerEvent, host);
+    DispatchPointerEvent(pointerEvent);
+}
+#endif
+
+void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetIsNodeNeedKey(true);
+    InitKeyEventOnFocus(focusHub);
+    InitKeyEventOnBlur(focusHub);
+    InitKeyEventOnClearFocusState(focusHub);
+    InitKeyEventOnPaintFocusState(focusHub);
+    InitKeyEventOnKeyEvent(focusHub);
 }
 
 void UIExtensionPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -854,7 +981,7 @@ void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
             HandleFocusEvent();
             needReSendFocusToUIExtension_ = false;
         }
-        focusHub->SetForceProcessOnKeyEventInternal(true);
+        SetForceProcessOnKeyEventInternal(true);
     }
 }
 
@@ -876,7 +1003,7 @@ void UIExtensionPattern::HandleMouseEvent(const MouseInfo& info)
         auto hub = host->GetFocusHub();
         CHECK_NULL_VOID(hub);
         hub->RequestFocusImmediately();
-        hub->SetForceProcessOnKeyEventInternal(true);
+        SetForceProcessOnKeyEventInternal(true);
     }
     DispatchPointerEvent(pointerEvent);
 }
@@ -905,7 +1032,10 @@ bool UIExtensionPattern::DispatchKeyEventSync(const KeyEvent& event)
         sessionWrapper_->NotifyKeyEventAsync(event.rawKeyEvent, false);
         return true;
     }
-
+    bool isTab = event.IsKey({ KeyCode::KEY_TAB });
+    if (!isTab) {
+        SetForceProcessOnKeyEventInternal(true);
+    }
     return sessionWrapper_->NotifyKeyEventSync(event.rawKeyEvent, event.isPreIme);
 }
 
@@ -1061,7 +1191,8 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
-    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE'.", ToString(state_));
+    UIEXT_LOGI("OnError the state is changing from '%{public}s' to 'NONE', errorCode = %{public}d.",
+        ToString(state_), code);
     state_ = AbilityState::NONE;
     SetEventProxyFlag(static_cast<int32_t>(EventProxyFlag::EVENT_NONE));
     // Release the session.
@@ -1401,7 +1532,7 @@ int32_t UIExtensionPattern::GetInstanceId() const
     return instanceId_;
 }
 
-int32_t UIExtensionPattern::GetInstanceIdFromHost()
+int32_t UIExtensionPattern::GetInstanceIdFromHost() const
 {
     auto instanceId = GetHostInstanceId();
     if (instanceId != instanceId_) {
@@ -1458,6 +1589,11 @@ void UIExtensionPattern::DumpInfo()
     DumpLog::GetInstance().AddDesc(std::string("reason: ").append(std::to_string(sessionWrapper_->GetReasonDump())));
     DumpLog::GetInstance().AddDesc(std::string("focusStatus: ").append(std::to_string(focusState_)));
     DumpLog::GetInstance().AddDesc(std::string("abilityState: ").append(ToString(state_)));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    DumpLog::GetInstance().AddDesc(std::string("eventProxy: ").append(eventProxyStr));
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -1489,6 +1625,11 @@ void UIExtensionPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
     json->Put("reason: ", std::to_string(sessionWrapper_->GetReasonDump()).c_str());
     json->Put("focusStatus: ", std::to_string(focusState_).c_str());
     json->Put("abilityState: ", ToString(state_));
+    std::string eventProxyStr = "[]";
+    if (platformEventProxy_) {
+        eventProxyStr = platformEventProxy_->GetCurEventProxyToString();
+    }
+    json->Put("eventProxy: ", eventProxyStr.c_str());
 
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -1540,6 +1681,114 @@ void UIExtensionPattern::DumpOthers()
                 DumpLog::GetInstance().Print(line);
             }
         }
+    }
+}
+
+void UIExtensionPattern::RegisterEventProxyFlagCallback()
+{
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
+        [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            std::string type = "";
+            int32_t eventFlags = 0;
+            if (data.HasParameter("type")) {
+                type = data.GetStringParam("type");
+            }
+            if (type == "OccupyEvents") {
+                if (data.HasParameter("eventFlags")) {
+                    eventFlags = data.GetIntParam("eventFlags", 0);
+                }
+                pattern->SetEventProxyFlag(eventFlags);
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+}
+
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::SetOnDrawReadyCallback(const std::function<void()>&& callback)
+{
+    onDrawReadyCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireOnDrawReadyCallback()
+{
+    if (onDrawReadyCallback_) {
+        onDrawReadyCallback_();
+    }
+}
+
+void UIExtensionPattern::NotifyHostWindowMode()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto mode = container->GetWindowMode();
+    NotifyHostWindowMode(mode);
+}
+
+void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
+{
+    UIEXT_LOGI("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
+        instanceId_, isWindowModeFollowHost_, static_cast<int32_t>(mode));
+    CHECK_NULL_VOID(sessionWrapper_);
+    if (isWindowModeFollowHost_ && mode != Rosen::WindowMode::WINDOW_MODE_UNDEFINED) {
+        int32_t windowMode = static_cast<int32_t>(mode);
+        sessionWrapper_->NotifyHostWindowMode(windowMode);
     }
 }
 } // namespace OHOS::Ace::NG

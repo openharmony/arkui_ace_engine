@@ -120,15 +120,31 @@ void ResetSelectable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
-    static const ArkUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIListItemModifier* GetCJUIListItemModifier()
 {
-    static const CJUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

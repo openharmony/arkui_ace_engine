@@ -45,6 +45,9 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W400,
 };
 constexpr float ROUND_VALUE = 0.5f;
+constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
+constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
+constexpr double MIN_TEXTFADEOUT_DELTA = 1.0;
 
 inline FontWeight ConvertFontWeight(FontWeight fontWeight)
 {
@@ -60,42 +63,16 @@ TextFieldContentModifier::TextFieldContentModifier(const WeakPtr<OHOS::Ace::NG::
 
 void TextFieldContentModifier::onDraw(DrawingContext& context)
 {
-    auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
-    CHECK_NULL_VOID(contentOffset_);
-    auto contentOffset = contentOffset_->Get();
-    auto contentRect = textFieldPattern->GetContentRect();
-    auto clipRectHeight = 0.0f;
-    auto frameNode = textFieldPattern->GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    clipRectHeight = contentRect.GetY() + contentRect.Height();
-    canvas.Save();
-    RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
-        contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
-    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
-    if (paragraph) {
-        auto textField = textFieldPattern->IsTextArea() ? "TextArea" : "TextInput";
-        ACE_LAYOUT_SCOPED_TRACE("[%s][id:%d] [Rect:%s]", textField, frameNode->GetId(), contentRect.ToString().c_str());
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            canvas.Save();
-            RSRect clipRect;
-            std::vector<RSPoint> clipRadius;
-            GetFrameRectClip(clipRect, clipRadius);
-            canvas.ClipRoundRect(clipRect, clipRadius, true);
-            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
-                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
-            canvas.Restore();
-        } else {
-            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
-                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
-        }
+    if (textFieldPattern->IsInlineMode() || TextOverflow::ELLIPSIS == paragraph->GetParagraphStyle().textOverflow ||
+        !textFadeoutEnabled_) {
+        DoNormalDraw(context);
+    } else {
+        DoTextFadeoutDraw(context);
     }
-    canvas.Restore();
 }
 
 void TextFieldContentModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
@@ -204,12 +181,10 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 {
     float fontSizeValue;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     if (pipelineContext) {
-        fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize());
-        if (textStyle.IsAllowScale() && textStyle.GetFontSize().Unit() == DimensionUnit::FP) {
-            fontSizeValue = pipelineContext->NormalizeToPx(textStyle.GetFontSize() * pipelineContext->GetFontScale());
-        }
+        fontSizeValue = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     } else {
         fontSizeValue = textStyle.GetFontSize().ConvertToPx();
     }
@@ -220,14 +195,24 @@ void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
 
 void TextFieldContentModifier::SetDefaultAdaptMinFontSize(const TextStyle& textStyle)
 {
-    float minFontSizeValue = 0.0f;
+    float minFontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipelineContext) {
+        minFontSizeValue = textStyle.GetAdaptMinFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
     adaptMinFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(minFontSizeValue);
     AttachProperty(adaptMinFontSizeFloat_);
 }
 
 void TextFieldContentModifier::SetDefaultAdaptMaxFontSize(const TextStyle& textStyle)
 {
-    float maxFontSizeValue = 0.0f;
+    float maxFontSizeValue = textStyle.GetFontSize().Value();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (pipelineContext) {
+        maxFontSizeValue = textStyle.GetAdaptMaxFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
+    }
     adaptMaxFontSizeFloat_ = AceType::MakeRefPtr<AnimatablePropertyFloat>(maxFontSizeValue);
     AttachProperty(adaptMaxFontSizeFloat_);
 }
@@ -295,31 +280,28 @@ void TextFieldContentModifier::SetFontFamilies(const std::vector<std::string>& v
     fontFamilyString_->Set(V2::ConvertFontFamily(value));
 }
 
-void TextFieldContentModifier::SetFontSize(const Dimension& value)
+void TextFieldContentModifier::SetFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     fontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(fontSizeFloat_);
     fontSizeFloat_->Set(valPx);
 }
 
-void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value)
+void TextFieldContentModifier::SetAdaptMinFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMinFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMinFontSizeFloat_);
     adaptMinFontSizeFloat_->Set(valPx);
 }
 
-void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value)
+void TextFieldContentModifier::SetAdaptMaxFontSize(const Dimension& value, const TextStyle& textStyle)
 {
-    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(textFieldPattern);
-    auto valPx = static_cast<float>(textFieldPattern->FontSizeConvertToPx(value));
+    auto valPx = value.ConvertToPxDistribute(textStyle.GetMinFontScale(),
+        textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     adaptMaxFontSize_ = Dimension(valPx);
     CHECK_NULL_VOID(adaptMaxFontSizeFloat_);
     adaptMaxFontSizeFloat_->Set(valPx);
@@ -550,4 +532,139 @@ void TextFieldContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFla
     }
 }
 
+void TextFieldContentModifier::SetTextFadeoutEnabled(bool enabled)
+{
+    textFadeoutEnabled_ = enabled;
+}
+
+void TextFieldContentModifier::DoNormalDraw(DrawingContext& context)
+{
+    auto& canvas = context.canvas;
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    CHECK_NULL_VOID(contentOffset_);
+    auto contentOffset = contentOffset_->Get();
+    auto contentRect = textFieldPattern->GetContentRect();
+    auto clipRectHeight = 0.0f;
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    clipRectHeight = contentRect.GetY() + contentRect.Height();
+    canvas.Save();
+    RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
+        contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
+    canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
+    if (paragraph) {
+        auto textField = textFieldPattern->IsTextArea() ? "TextArea" : "TextInput";
+        ACE_LAYOUT_SCOPED_TRACE("[%s][id:%d] [Rect:%s]", textField, frameNode->GetId(), contentRect.ToString().c_str());
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            canvas.Save();
+            RSRect clipRect;
+            std::vector<RSPoint> clipRadius;
+            GetFrameRectClip(clipRect, clipRadius);
+            canvas.ClipRoundRect(clipRect, clipRadius, true);
+            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
+                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+            canvas.Restore();
+        } else {
+            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
+                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+        }
+    }
+    canvas.Restore();
+}
+
+void TextFieldContentModifier::DoTextFadeoutDraw(DrawingContext& context)
+{
+    auto& canvas = context.canvas;
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto contentRect = textFieldPattern->GetContentRect();
+    auto clipRectHeight = contentRect.GetY() + contentRect.Height();
+    RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
+        contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
+    RSSaveLayerOps slo(&clipInnerRect, nullptr);
+    canvas.SaveLayer(slo);
+
+    DrawTextFadeout(context);
+
+    canvas.Restore();
+}
+
+void TextFieldContentModifier::DrawTextFadeout(DrawingContext& context)
+{
+    auto& canvas = context.canvas;
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto paragraph = textFieldPattern->GetParagraph();
+    CHECK_NULL_VOID(paragraph);
+    auto contentOffset = contentOffset_->Get();
+    auto contentRect = frameNode->GetGeometryNode()->GetContentRect();
+    auto contentRectX = contentRect.GetX();
+    auto textRect = textFieldPattern->GetTextRect();
+    auto textRectX = textRect.GetX();
+    auto leftFadeOn = false;
+    auto rigthFadeOn = false;
+    auto textFadeoutWidth = DEFAULT_FADEOUT_VP.ConvertToPx();
+    auto gradientPercent = std::min(MAX_TEXTFADEOUT_PERCENT,
+        textFadeoutWidth / std::max(static_cast<double>(contentRect.Width()), textFadeoutWidth));
+    auto textFadeRect = RectF(contentRect.GetX(), contentOffset.GetY(), contentRect.Width(),
+        std::max(textRect.Height(), contentRect.Height()));
+    AdjustTextFadeRect(textFadeRect);
+
+    RSRect clipRect;
+    std::vector<RSPoint> clipRadius;
+    GetFrameRectClip(clipRect, clipRadius);
+    canvas.ClipRoundRect(clipRect, clipRadius, true);
+
+    canvas.Save();
+    RSRect clipTextInnerRect = RSRect(textFadeRect.GetX(), textFadeRect.GetY(),
+        textFadeRect.Width() + textFadeRect.GetX(), textFadeRect.GetY() + textFadeRect.Height());
+    canvas.ClipRect(clipTextInnerRect, RSClipOp::INTERSECT);
+    paragraph->Paint(canvas, textRectX, contentOffset.GetY());
+    canvas.Restore();
+
+    auto textWidth = paragraph->GetTextWidth();
+    auto textIndent = std::max(textFieldPattern->GetTextParagraphIndent(), 0.0f);
+    if (GreatNotEqual(textWidth + textIndent, contentRect.Width())) {
+        leftFadeOn = LessNotEqual(textRectX + MIN_TEXTFADEOUT_DELTA, contentRectX);
+        rigthFadeOn = GreatNotEqual((textRectX + textWidth + textIndent - MIN_TEXTFADEOUT_DELTA), contentRect.Right());
+    }
+    UpdateTextFadeout(canvas, textFadeRect, gradientPercent, leftFadeOn, rigthFadeOn);
+}
+
+void TextFieldContentModifier::AdjustTextFadeRect(RectF& textFadeRect)
+{
+    const float TEXT_FADE_ADJUST_PX = 1;
+
+    textFadeRect -= OffsetF(TEXT_FADE_ADJUST_PX, TEXT_FADE_ADJUST_PX);
+    textFadeRect += SizeF((TEXT_FADE_ADJUST_PX + TEXT_FADE_ADJUST_PX), (TEXT_FADE_ADJUST_PX + TEXT_FADE_ADJUST_PX));
+}
+
+void TextFieldContentModifier::UpdateTextFadeout(
+    RSCanvas& canvas, const RectF& textRect, float gradientPercent, bool leftFade, bool rightFade)
+{
+    RSBrush brush;
+    std::vector<RSPoint> points = { RSPoint(textRect.Left(), textRect.Top()),
+        RSPoint(textRect.Right(), textRect.Top()) };
+    std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
+        Color::TRANSPARENT.GetValue() };
+    float leftEndPercent = leftFade ? gradientPercent : 0;
+    float rightStartPercent = rightFade ? (1.0f - gradientPercent) : 1.0f;
+    std::vector<RSScalar> pos = { 0.0f, leftEndPercent, rightStartPercent, 1.0f };
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    brush.SetBlendMode(RSBlendMode::DST_IN);
+    RSRect textFadeoutRect = RSRect(textRect.Left(), textRect.Top(), textRect.Right(), textRect.Bottom());
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(textFadeoutRect);
+    canvas.DetachBrush();
+}
 } // namespace OHOS::Ace::NG

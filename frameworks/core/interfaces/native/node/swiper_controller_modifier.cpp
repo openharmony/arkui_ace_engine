@@ -43,21 +43,27 @@ void ShowPrevious(ArkUINodeHandle controller)
 namespace NodeModifier {
 const ArkUISwiperControllerModifier* GetSwiperControllerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISwiperControllerModifier modifier = {
-        GetSwiperController,
-        ShowNext,
-        ShowPrevious
+        .getSwiperController = GetSwiperController,
+        .showNext = ShowNext,
+        .showPrevious = ShowPrevious,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUISwiperControllerModifier* GetCJUISwiperControllerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISwiperControllerModifier modifier = {
-        GetSwiperController,
-        ShowNext,
-        ShowPrevious
+        .getSwiperController = GetSwiperController,
+        .showNext = ShowNext,
+        .showPrevious = ShowPrevious,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

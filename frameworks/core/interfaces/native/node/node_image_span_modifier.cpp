@@ -211,6 +211,14 @@ void ResetImageSpanColorFilter(ArkUINodeHandle node)
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
 
+/**
+ * @param values radius values
+ * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
+ * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
+ * @param units radius units
+ * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
+ */
 void SetImageSpanBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
     const ArkUI_Int32* units, ArkUI_Int32 length)
 {
@@ -239,22 +247,54 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
-    static const ArkUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
-        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
-        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
-        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanColorFilter, ResetImageSpanColorFilter,
-        SetImageSpanBorderRadius, ResetImageSpanBorderRadius, GetImageSpanBaselineOffset };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIImageSpanModifier modifier = {
+        .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
+        .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
+        .setImageSpanObjectFit = SetImageSpanObjectFit,
+        .resetImageSpanObjectFit = ResetImageSpanObjectFit,
+        .getImageSpanVerticalAlign = GetImageSpanVerticalAlign,
+        .getImageSpanObjectFit = GetImageSpanObjectFit,
+        .setImageSpanTextBackgroundStyle = SetImageSpanTextBackgroundStyle,
+        .resetImageSpanTextBackgroundStyle = ResetImageSpanTextBackgroundStyle,
+        .getImageSpanTextBackgroundStyle = GetImageSpanTextBackgroundStyle,
+        .setImageSpanBaselineOffset = SetImageSpanBaselineOffset,
+        .resetImageSpanBaselineOffset = ResetImageSpanBaselineOffset,
+        .setImageSpanOnComplete = SetImageSpanOnComplete,
+        .resetImageSpanOnComplete = ResetImageSpanOnComplete,
+        .setImageSpanOnError = SetImageSpanOnError,
+        .resetImageSpanOnError = ResetImageSpanOnError,
+        .setImageSpanColorFilter = SetImageSpanColorFilter,
+        .resetImageSpanColorFilter = ResetImageSpanColorFilter,
+        .setImageSpanBorderRadius = SetImageSpanBorderRadius,
+        .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
+        .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
 {
-    static const CJUIImageSpanModifier modifier = { SetImageSpanVerticalAlign, ResetImageSpanVerticalAlign,
-        SetImageSpanObjectFit, ResetImageSpanObjectFit, GetImageSpanVerticalAlign, GetImageSpanObjectFit,
-        SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
-        SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
-        SetImageSpanOnError, ResetImageSpanOnError };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIImageSpanModifier modifier = {
+        .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
+        .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
+        .setImageSpanObjectFit = SetImageSpanObjectFit,
+        .resetImageSpanObjectFit = ResetImageSpanObjectFit,
+        .getImageSpanVerticalAlign = GetImageSpanVerticalAlign,
+        .getImageSpanObjectFit = GetImageSpanObjectFit,
+        .setImageSpanTextBackgroundStyle = SetImageSpanTextBackgroundStyle,
+        .resetImageSpanTextBackgroundStyle = ResetImageSpanTextBackgroundStyle,
+        .getImageSpanTextBackgroundStyle = GetImageSpanTextBackgroundStyle,
+        .setImageSpanBaselineOffset = SetImageSpanBaselineOffset,
+        .resetImageSpanBaselineOffset = ResetImageSpanBaselineOffset,
+        .setImageSpanOnComplete = SetImageSpanOnComplete,
+        .resetImageSpanOnComplete = ResetImageSpanOnComplete,
+        .setImageSpanOnError = SetImageSpanOnError,
+        .resetImageSpanOnError = ResetImageSpanOnError,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

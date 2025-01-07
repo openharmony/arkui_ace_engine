@@ -151,6 +151,16 @@ public:
         return info_.offsetEnd_;
     }
 
+    bool IsAtTopWithDelta() const override
+    {
+        return info_.reachStart_ || EstimateHeight() < 0;
+    }
+
+    bool IsAtBottomWithDelta() const override
+    {
+        return info_.offsetEnd_ || (EstimateHeight() + info_.lastMainSize_ > GetTotalHeight());
+    }
+
     bool IsFadingBottom() const override;
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
@@ -208,14 +218,14 @@ public:
     Rect GetItemRect(int32_t index) const override;
     int32_t GetItemIndex(double x, double y) const override;
 
-    bool IsNeedInitClickEventRecorder() const override
+    bool HasPreloadItemList() const
     {
-        return true;
+        return !preloadItemList_.empty();
     }
 
-    const std::list<GridPreloadItem>& GetPreloadItemList() const
+    std::list<GridPreloadItem> MovePreloadItemList()
     {
-        return preloadItemList_;
+        return std::move(preloadItemList_);
     }
 
     void SetPreloadItemList(std::list<GridPreloadItem>&& list)
@@ -248,6 +258,8 @@ public:
 
     SizeF GetChildrenExpandedSize() override;
 
+    void HandleOnItemFocus(int32_t index);
+
 private:
     /**
      * @brief calculate where startMainLine_ should be after spring animation.
@@ -264,8 +276,6 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleFocusEvent();
-    void HandleBlurEvent();
     bool OnKeyEvent(const KeyEvent& event);
 
     void ClearMultiSelect() override;
@@ -297,7 +307,7 @@ private:
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
-    bool forceOverScroll_ = false;
+    bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 

@@ -19,6 +19,7 @@
 #include <map>
 
 #include "core/event/ace_events.h"
+#include "core/event/focus_axis_event.h"
 #include "core/event/non_pointer_event.h"
 
 namespace OHOS::MMI {
@@ -553,6 +554,10 @@ struct KeyEvent final : public NonPointerEvent {
     {
         return KeyCode::KEY_ESCAPE == code;
     }
+    bool IsPreIme() const
+    {
+        return isPreIme;
+    }
 
     std::string ConvertInputCodeToString() const;
     std::string ConvertCodeToString() const;
@@ -584,7 +589,8 @@ struct KeyEvent final : public NonPointerEvent {
         ss << "pressedCodes=[";
         std::for_each(pressedCodes.begin(), pressedCodes.end(),
             [&ss](const KeyCode& code) { ss << static_cast<int32_t>(code) << ", "; });
-        ss << "]";
+        ss << "]" << ", ";
+        ss << "isPreIme = " << isPreIme;
         return ss.str();
     }
 };
@@ -672,5 +678,7 @@ using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnKeyEventDispatchFunc = std::function<bool(KeyEventInfo&)>;
+using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

@@ -726,6 +726,59 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern019, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateTextContentSub001
+ * @tc.desc: Test UpdateTextContentSub method of SwiperIndicatorPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, UpdateTextContentSub001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetSwipeByGroup(true);
+    model.SetDisplayCount(3);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto firstTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto lastTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
+    auto lastTextLayoutProperty = lastTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(lastTextLayoutProperty, nullptr);
+    EXPECT_EQ(lastTextLayoutProperty->GetContent().value_or(u""), u"/4");
+}
+
+/**
+ * @tc.name: UpdateTextContentSub002
+ * @tc.desc: Test UpdateTextContentSub method of SwiperIndicatorPattern
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorCommon, UpdateTextContentSub002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DIGIT);
+    model.SetSwipeByGroup(true);
+    model.SetDisplayCount(3);
+    model.SetIndex(2);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
+    auto firstTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto lastTextNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
+    auto firstTextLayoutProperty = firstTextNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(firstTextLayoutProperty, nullptr);
+    EXPECT_EQ(firstTextLayoutProperty->GetContent().value_or(u""), u"1");
+}
+
+/**
  * @tc.name: SwiperIndicatorPattern020
  * @tc.desc: Test HandleLongDragUpdate when SwipeByGroup is true
  * @tc.type: FUNC
@@ -737,7 +790,10 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern020, TestSize.Level1)
     model.SetSwipeByGroup(true);
     CreateSwiperItems();
     CreateSwiperDone();
+
     auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    ASSERT_NE(pattern_, nullptr);
 
     int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN);
     int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();

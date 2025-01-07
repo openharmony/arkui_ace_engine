@@ -85,6 +85,11 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     ACE_SCOPED_TRACE("ViewFunctions::ExecuteMeasureSize");
     auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper);
+    if (!jsParam) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
+        return;
+    }
 
     auto selfLayoutInfo = jsParam->GetSelfLayoutInfo();
     auto childArray = jsParam->GetChildArray();
@@ -93,6 +98,7 @@ void ViewFunctions::ExecuteMeasureSize(NG::LayoutWrapper* layoutWrapper)
     JSRef<JSVal> params[3] = { selfLayoutInfo, childArray, constraint };
     JSRef<JSObject> result = jsMeasureSizeFunc_.Lock()->Call(jsObject_.Lock(), 3, params); /* 3:params number */
     if (result->IsUndefined()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "app return val of onMeasureSize API is empty or undefined");
         return;
     }
@@ -165,14 +171,16 @@ void ViewFunctions::ExecuteRecycle(const std::string& viewName)
     }
 }
 
-void ViewFunctions::ExecuteSetActive(bool active)
+void ViewFunctions::ExecuteSetActive(bool active, bool isReuse)
 {
     JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_)
     auto func = jsSetActive_.Lock();
     if (!func->IsEmpty()) {
         JSFastNativeScope scope(func->GetEcmaVM());
-        auto isActive = JSRef<JSVal>::Make(ToJSValue(active));
-        func->Call(jsObject_.Lock(), 1, &isActive);
+        JSRef<JSVal> params[2]; // 2: the count of parameter
+        params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(active)));
+        params[1] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(isReuse)));
+        func->Call(jsObject_.Lock(), 2, params); // 2: the count of parameter
     } else {
         LOGE("the set active func is null");
     }

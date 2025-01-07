@@ -207,6 +207,10 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>
 
     if (recognizer->GetRefereeState() != RefereeState::PENDING && CheckNeedBlocked(recognizer)) {
         recognizer->OnBlocked();
+        auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(recognizer);
+        if (multiFingerRecognizer) {
+            multiFingerRecognizer->SetTouchPointsForSucceedBlock();
+        }
         return;
     }
     activeRecognizer_ = recognizer;
@@ -391,6 +395,27 @@ void ExclusiveRecognizer::DispatchEventToAllRecognizers(const TouchEvent& point)
                     point.id, node ? node->GetTag().c_str() : "null");
             }
         }
+    }
+}
+
+void ExclusiveRecognizer::CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    if (activeRecognizer_ == recognizer) {
+        SetIsNeedResetRecognizer(true);
+    }
+}
+
+void ExclusiveRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+    if (IsNeedResetRecognizerState()) {
+        activeRecognizer_ = nullptr;
+        refereeState_ = RefereeState::READY;
+        SetIsNeedResetRecognizer(false);
     }
 }
 } // namespace OHOS::Ace::NG

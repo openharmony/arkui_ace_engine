@@ -56,7 +56,7 @@ public:
 
     void OnFlushTouchEventsBegin() override;
     void OnFlushTouchEventsEnd() override;
-    RefereeState CheckStates(size_t touchId);
+    virtual RefereeState CheckStates(size_t touchId);
     void ForceReject();
 
     void RemainChildOnResetStatus()
@@ -195,6 +195,14 @@ public:
     void AddHittedRecognizerType(std::map<std::string, std::list<TouchTestResultInfo>>& hittedRecognizerInfo);
 
     bool IsReady() override;
+
+    virtual bool CheckGroupState()
+    {
+        return false;
+    }
+
+    virtual void CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer) {}
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;
