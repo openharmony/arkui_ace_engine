@@ -2203,10 +2203,12 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         bool isSceneBoardWindow = uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
         pipelineContext_->SetIsAppWindow(isAppWindow);
         auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-        CHECK_NULL_VOID(pipeline);
-        auto safeAreaManager = pipeline->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        safeAreaManager->SetWindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
+        if (pipeline) {
+            auto safeAreaManager = pipeline->GetSafeAreaManager();
+            if (safeAreaManager) {
+                safeAreaManager->SetWindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
+            }
+        }
     }
     if (installationFree_) {
         pipelineContext_->SetInstallationFree(installationFree_);
