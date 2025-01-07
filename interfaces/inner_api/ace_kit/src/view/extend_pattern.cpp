@@ -19,7 +19,8 @@ namespace OHOS::Ace::Kit {
 
 ExtendPattern::ExtendPattern(const RefPtr<Kit::Pattern>& kitPattern) : kitPattern_(kitPattern) {}
 
-bool ExtendPattern::OnDirtyLayoutWrapperSwap(const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig)
+bool ExtendPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig)
 {
     if (kitPattern_) {
         return kitPattern_->OnDirtyLayoutrSwap(changeConfig);
