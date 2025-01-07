@@ -1636,7 +1636,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     }
     sptr<Rosen::DisplayInfo> displayInfo;
     if (defaultDisplay) {
-        displayInfo = defaultDisplay->GetDisplayInfo();
+        displayInfo = defaultDisplay->GetDisplayInfoWithCache();
     }
     if (displayInfo) {
         density = displayInfo->GetVirtualPixelRatio();
