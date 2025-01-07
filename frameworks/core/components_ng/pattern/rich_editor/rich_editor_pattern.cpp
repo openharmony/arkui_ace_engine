@@ -3182,7 +3182,7 @@ bool RichEditorPattern::GetIsMidScene()
     CHECK_NULL_RETURN(windowManager, false);
     bool isMidScene = false;
     int32_t ret = windowManager->GetIsMidScene(isMidScene);
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetIsMidScene ret=%{public}d", ret);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetIsMidScene ret=%{public}d", ret);
     return isMidScene;
 }
 
