@@ -345,7 +345,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "MenuActionId=%{public}d, MenuType=%{public}d", id, type);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    auto usingMouse = pattern->IsUsingMouse();
     switch (id) {
         case OptionMenuActionId::COPY:
             needRefreshMenu_ = !IsShowPaste() && pattern->copyOption_ != CopyOptions::None;
@@ -359,7 +358,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
             break;
         case OptionMenuActionId::SELECT_ALL:
-            pattern->isMousePressed_ = usingMouse;
             pattern->HandleMenuCallbackOnSelectAll();
             break;
         case OptionMenuActionId::SEARCH:
