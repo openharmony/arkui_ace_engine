@@ -1717,9 +1717,6 @@ SheetType SheetPresentationPattern::GetSheetType()
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     TAG_LOGD(AceLogTag::ACE_SHEET, "GetSheetType displayWindowRect info is : %{public}s",
         windowGlobalRect.ToString().c_str());
-    if (sheetStyle.sheetType.has_value()) {
-        sheetType = sheetStyle.sheetType.value();
-    }
     DeviceType deviceType = SystemProperties::GetDeviceType();
     // only bottom when width is less than 600vp
     if ((windowGlobalRect.Width() < SHEET_DEVICE_WIDTH_BREAKPOINT.ConvertToPx()) ||
