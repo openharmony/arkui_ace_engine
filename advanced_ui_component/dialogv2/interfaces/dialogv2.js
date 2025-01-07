@@ -77,8 +77,8 @@ const ALERT_TITLE_ALIGNMENT = getEnumNumberByResourceId(125831126, 1);
 const SCROLL_BAR_OFFSET = 20;
 let AdvancedDialogV2Button = class AdvancedDialogV2Button {
   constructor(a21) {
-    this.value = '';
-    this.value = a21.value;
+    this.content = '';
+    this.content = a21.content;
     this.action = a21.action;
     this.background = a21.background;
     this.fontColor = a21.fontColor;
@@ -90,7 +90,7 @@ let AdvancedDialogV2Button = class AdvancedDialogV2Button {
 };
 __decorate([
   Trace
-], AdvancedDialogV2Button.prototype, "value", void 0);
+], AdvancedDialogV2Button.prototype, "content", void 0);
 __decorate([
   Trace
 ], AdvancedDialogV2Button.prototype, "action", void 0);
@@ -137,6 +137,23 @@ export class TipsDialogV2 extends ViewV2 {
     this.appMaxFontScale = 3.2;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(l22) {
+    this.resetParam("imageRes", (l22 && "imageRes" in l22) ? l22.imageRes : undefined);
+    this.resetParam("imageSize", (l22 && "imageSize" in l22) ? l22.imageSize : { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE });
+    this.resetParam("title", (l22 && "title" in l22) ? l22.title : null);
+    this.resetParam("content", (l22 && "content" in l22) ? l22.content : null);
+    this.resetParam("onCheckedChange", (l22 && "onCheckedChange" in l22) ? l22.onCheckedChange : undefined);
+    this.resetParam("checkTips", (l22 && "checkTips" in l22) ? l22.checkTips : null);
+    this.resetParam("isChecked", (l22 && "isChecked" in l22) ? l22.isChecked : false);
+    this.isCheckedInner = false;
+    this.resetComputed("buttons");
+    this.resetParam("primaryButton", (l22 && "primaryButton" in l22) ? l22.primaryButton : null);
+    this.resetParam("secondaryButton", (l22 && "secondaryButton" in l22) ? l22.secondaryButton : null);
+    this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.fontSizeScale = 1;
+    this.minContentHeight = 160;
+    this.resetMonitorsOnReuse();
+  }
   isCheckedChangeMonitor(t20) {
     this.isCheckedInner = t20.value('isChecked')?.now;
   }
@@ -173,9 +190,9 @@ export class TipsDialogV2 extends ViewV2 {
             minContentHeight: this.minContentHeight,
             $fontSizeScale: o20 => { this.fontSizeScale = o20; },
             $minContentHeight: n20 => { this.minContentHeight = n20; }
-          }, undefined, j20, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 178, col: 5 });
+          }, undefined, j20, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 175, col: 5 });
           ViewV2.create(l20);
-          let m20 = () => {
+          let k22 = () => {
             return {
               contentBuilder: () => {
                 this.contentBuilder();
@@ -185,7 +202,7 @@ export class TipsDialogV2 extends ViewV2 {
               minContentHeight: this.minContentHeight
             };
           };
-          l20.paramsGenerator_ = m20;
+          l20.paramsGenerator_ = k22;
         }
         else {
           this.updateStateVarsOfChildByElmtId(j20, {
@@ -210,7 +227,7 @@ export class TipsDialogV2 extends ViewV2 {
             dialogBuilder: () => {
               this.observeComponentCreation2((a20, b20) => {
                 ForEach.create();
-                const c20 = d20 => {
+                const j22 = d20 => {
                   const e20 = d20;
                   this.observeComponentCreation2((f20, g20) => {
                     If.create();
@@ -237,14 +254,14 @@ export class TipsDialogV2 extends ViewV2 {
                   }, If);
                   If.pop();
                 };
-                this.forEachUpdateFunction(a20, [this.imageIndex, this.textIndex, this.checkBoxIndex], c20);
+                this.forEachUpdateFunction(a20, [this.imageIndex, this.textIndex, this.checkBoxIndex], j22);
               }, ForEach);
               ForEach.pop();
             },
             $minContentHeight: z19 => { this.minContentHeight = z19; }
-          }, undefined, m19, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 190, col: 5 });
+          }, undefined, m19, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 187, col: 5 });
           ViewV2.create(o19);
-          let p19 = () => {
+          let h22 = () => {
             return {
               title: this.title,
               content: this.content,
@@ -253,7 +270,7 @@ export class TipsDialogV2 extends ViewV2 {
               dialogBuilder: () => {
                 this.observeComponentCreation2((q19, r19) => {
                   ForEach.create();
-                  const s19 = t19 => {
+                  const i22 = t19 => {
                     const u19 = t19;
                     this.observeComponentCreation2((v19, w19) => {
                       If.create();
@@ -280,13 +297,13 @@ export class TipsDialogV2 extends ViewV2 {
                     }, If);
                     If.pop();
                   };
-                  this.forEachUpdateFunction(q19, [this.imageIndex, this.textIndex, this.checkBoxIndex], s19);
+                  this.forEachUpdateFunction(q19, [this.imageIndex, this.textIndex, this.checkBoxIndex], i22);
                 }, ForEach);
                 ForEach.pop();
               }
             };
           };
-          o19.paramsGenerator_ = p19;
+          o19.paramsGenerator_ = h22;
         }
         else {
           this.updateStateVarsOfChildByElmtId(m19, {
@@ -554,6 +571,14 @@ class TipsDialogContentLayout extends ViewV2 {
     this.childrenSize = 3;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(g22) {
+    this.resetParam("title", (g22 && "title" in g22) ? g22.title : null);
+    this.resetParam("content", (g22 && "content" in g22) ? g22.content : null);
+    this.resetParam("checkTips", (g22 && "checkTips" in g22) ? g22.checkTips : null);
+    this.resetParam("minContentHeight", (g22 && "minContentHeight" in g22) ? g22.minContentHeight : 0);
+    this.$minContentHeight = "$minContentHeight" in g22 ? g22.$minContentHeight : undefined;
+    this.dialogBuilder = "dialogBuilder" in g22 ? g22.dialogBuilder : this.doNothingBuilder;
+  }
   doNothingBuilder(u17 = null) {
   }
   ;
@@ -670,6 +695,26 @@ export class SelectDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(f22) {
+    this.resetParam("title", (f22 && "title" in f22) ? f22.title : '');
+    this.resetParam("content", (f22 && "content" in f22) ? f22.content : '');
+    this.resetParam("confirm", (f22 && "confirm" in f22) ? f22.confirm : null);
+    this.resetParam("radioContent", (f22 && "radioContent" in f22) ? f22.radioContent : []);
+    this.resetParam("selectedIndex", (f22 && "selectedIndex" in f22) ? f22.selectedIndex : -1);
+    this.selectedIndexInner = -1;
+    this.isFocus = false;
+    this.currentFocusIndex = -1;
+    this.radioHeight = 0;
+    this.itemHeight = 0;
+    this.contentBuilder = "contentBuilder" in f22 ? f22.contentBuilder : this.buildContent;
+    this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.dividerColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.comp_divider'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed("buttons");
+    this.resetComputed("contentPadding");
+    this.resetMonitorsOnReuse();
+  }
   selectedIndexMonitor(n16) {
     this.selectedIndexInner = n16.value('selectedIndex')?.now;
   }
@@ -777,19 +822,19 @@ export class SelectDialogV2 extends ViewV2 {
     }, List);
     this.observeComponentCreation2((q14, r14) => {
       ForEach.create();
-      const s14 = (t14, u14) => {
+      const b22 = (t14, u14) => {
         const v14 = t14;
         {
-          const w14 = (v15, w15) => {
+          const c22 = (v15, w15) => {
             ViewStackProcessor.StartGetAccessRecordingFor(v15);
-            x14(v15, w15);
+            d22(v15, w15);
             if (!w15) {
               ListItem.pop();
             }
             ViewStackProcessor.StopGetAccessRecording();
           };
-          const x14 = (r15, s15) => {
-            ListItem.create(y14, true);
+          const d22 = (r15, s15) => {
+            ListItem.create(e22, true);
             ListItem.padding({
               left: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" },
               right: { "id": -1, "type": 10002, params: ['sys.float.padding_level6'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }
@@ -798,8 +843,8 @@ export class SelectDialogV2 extends ViewV2 {
               this.itemHeight = Number(u15.height);
             });
           };
-          const y14 = (z14, a15) => {
-            w14(z14, a15);
+          const e22 = (z14, a15) => {
+            c22(z14, a15);
             this.observeComponentCreation2((p15, q15) => {
               Column.create();
               Column.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.corner_radius_level8'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -810,6 +855,7 @@ export class SelectDialogV2 extends ViewV2 {
               Column.onClick(() => {
                 this.selectedIndexInner = u14;
                 v14.action && v14.action();
+                this.getDialogController()?.close();
               });
             }, Column);
             this.observeComponentCreation2((n15, o15) => {
@@ -883,11 +929,11 @@ export class SelectDialogV2 extends ViewV2 {
             Column.pop();
             ListItem.pop();
           };
-          this.observeComponentCreation2(x14, ListItem);
+          this.observeComponentCreation2(d22, ListItem);
           ListItem.pop();
         }
       };
-      this.forEachUpdateFunction(q14, this.radioContent, s14, undefined, true, false);
+      this.forEachUpdateFunction(q14, this.radioContent, b22, undefined, true, false);
     }, ForEach);
     ForEach.pop();
     List.pop();
@@ -913,9 +959,9 @@ export class SelectDialogV2 extends ViewV2 {
             minContentHeight: this.minContentHeight,
             $fontSizeScale: m14 => { this.fontSizeScale = m14; },
             $minContentHeight: l14 => { this.minContentHeight = l14; }
-          }, undefined, h14, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 582, col: 5 });
+          }, undefined, h14, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 579, col: 5 });
           ViewV2.create(j14);
-          let k14 = () => {
+          let a22 = () => {
             return {
               primaryTitle: this.title,
               contentBuilder: () => {
@@ -927,7 +973,7 @@ export class SelectDialogV2 extends ViewV2 {
               minContentHeight: this.minContentHeight
             };
           };
-          j14.paramsGenerator_ = k14;
+          j14.paramsGenerator_ = a22;
         }
         else {
           this.updateStateVarsOfChildByElmtId(h14, {
@@ -1034,6 +1080,11 @@ class ConfirmDialogContentLayout extends ViewV2 {
     this.dialogBuilder = "dialogBuilder" in a14 ? a14.dialogBuilder : this.doNothingBuilder;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(z21) {
+    this.resetParam("minContentHeight", (z21 && "minContentHeight" in z21) ? z21.minContentHeight : 0);
+    this.$minContentHeight = "$minContentHeight" in z21 ? z21.$minContentHeight : undefined;
+    this.dialogBuilder = "dialogBuilder" in z21 ? z21.dialogBuilder : this.doNothingBuilder;
+  }
   doNothingBuilder(y13 = null) {
   }
   ;
@@ -1100,9 +1151,9 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.initParam("content", (z12 && "content" in z12) ? z12.content : '');
     this.initParam("checkTips", (z12 && "checkTips" in z12) ? z12.checkTips : '');
     this.initParam("isChecked", (z12 && "isChecked" in z12) ? z12.isChecked : false);
-    this.isCheckedInner = false;
-    this.initParam("primaryButton", (z12 && "primaryButton" in z12) ? z12.primaryButton : new AdvancedDialogV2Button({ value: "" }));
-    this.initParam("secondaryButton", (z12 && "secondaryButton" in z12) ? z12.secondaryButton : new AdvancedDialogV2Button({ value: "" }));
+    this.isCheckedInner = this.isChecked;
+    this.initParam("primaryButton", (z12 && "primaryButton" in z12) ? z12.primaryButton : new AdvancedDialogV2Button({ content: "" }));
+    this.initParam("secondaryButton", (z12 && "secondaryButton" in z12) ? z12.secondaryButton : new AdvancedDialogV2Button({ content: "" }));
     this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     this.initParam("onCheckedChange", (z12 && "onCheckedChange" in z12) ? z12.onCheckedChange : undefined);
     this.contentScroller = new Scroller();
@@ -1113,6 +1164,22 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.textIndex = 0;
     this.checkboxIndex = 1;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(y21) {
+    this.resetParam("title", (y21 && "title" in y21) ? y21.title : '');
+    this.resetParam("content", (y21 && "content" in y21) ? y21.content : '');
+    this.resetParam("checkTips", (y21 && "checkTips" in y21) ? y21.checkTips : '');
+    this.resetParam("isChecked", (y21 && "isChecked" in y21) ? y21.isChecked : false);
+    this.isCheckedInner = this.isChecked;
+    this.resetParam("primaryButton", (y21 && "primaryButton" in y21) ? y21.primaryButton : new AdvancedDialogV2Button({ content: "" }));
+    this.resetParam("secondaryButton", (y21 && "secondaryButton" in y21) ? y21.secondaryButton : new AdvancedDialogV2Button({ content: "" }));
+    this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.resetParam("onCheckedChange", (y21 && "onCheckedChange" in y21) ? y21.onCheckedChange : undefined);
+    this.textAlign = TextAlign.Start;
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed("buttons");
+    this.resetMonitorsOnReuse();
   }
   isCheckedMonitor(x12) {
     this.isCheckedInner = x12.value('isChecked')?.now;
@@ -1146,7 +1213,7 @@ export class ConfirmDialogV2 extends ViewV2 {
     this.observeComponentCreation2((n12, o12) => {
       Text.create(this.content);
       Text.focusable(true);
-      Text.defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value));
+      Text.defaultFocus(!(this.primaryButton?.content || this.secondaryButton?.content));
       Text.focusBox({
         strokeWidth: LengthMetrics.px(0)
       });
@@ -1223,7 +1290,7 @@ export class ConfirmDialogV2 extends ViewV2 {
             dialogBuilder: () => {
               this.observeComponentCreation2((w11, x11) => {
                 ForEach.create();
-                const y11 = z11 => {
+                const x21 = z11 => {
                   const a12 = z11;
                   this.observeComponentCreation2((b12, c12) => {
                     If.create();
@@ -1244,20 +1311,20 @@ export class ConfirmDialogV2 extends ViewV2 {
                   }, If);
                   If.pop();
                 };
-                this.forEachUpdateFunction(w11, [this.textIndex, this.checkboxIndex], y11);
+                this.forEachUpdateFunction(w11, [this.textIndex, this.checkboxIndex], x21);
               }, ForEach);
               ForEach.pop();
             },
             $minContentHeight: v11 => { this.minContentHeight = v11; }
-          }, undefined, k11, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 772, col: 5 });
+          }, undefined, k11, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 769, col: 5 });
           ViewV2.create(m11);
-          let n11 = () => {
+          let v21 = () => {
             return {
               minContentHeight: this.minContentHeight,
               dialogBuilder: () => {
                 this.observeComponentCreation2((o11, p11) => {
                   ForEach.create();
-                  const q11 = r11 => {
+                  const w21 = r11 => {
                     const s11 = r11;
                     this.observeComponentCreation2((t11, u11) => {
                       If.create();
@@ -1278,13 +1345,13 @@ export class ConfirmDialogV2 extends ViewV2 {
                     }, If);
                     If.pop();
                   };
-                  this.forEachUpdateFunction(o11, [this.textIndex, this.checkboxIndex], q11);
+                  this.forEachUpdateFunction(o11, [this.textIndex, this.checkboxIndex], w21);
                 }, ForEach);
                 ForEach.pop();
               }
             };
           };
-          m11.paramsGenerator_ = n11;
+          m11.paramsGenerator_ = v21;
         }
         else {
           this.updateStateVarsOfChildByElmtId(k11, {
@@ -1312,9 +1379,9 @@ export class ConfirmDialogV2 extends ViewV2 {
             fontSizeScale: this.fontSizeScale,
             $minContentHeight: g11 => { this.minContentHeight = g11; },
             $fontSizeScale: f11 => { this.fontSizeScale = f11; }
-          }, undefined, b11, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 784, col: 5 });
+          }, undefined, b11, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 781, col: 5 });
           ViewV2.create(d11);
-          let e11 = () => {
+          let u21 = () => {
             return {
               primaryTitle: this.title,
               contentBuilder: () => {
@@ -1325,7 +1392,7 @@ export class ConfirmDialogV2 extends ViewV2 {
               fontSizeScale: this.fontSizeScale
             };
           };
-          d11.paramsGenerator_ = e11;
+          d11.paramsGenerator_ = u21;
         }
         else {
           this.updateStateVarsOfChildByElmtId(b11, {
@@ -1422,13 +1489,36 @@ export class AlertDialogV2 extends ViewV2 {
     this.initParam("content", (u10 && "content" in u10) ? u10.content : '');
     this.initParam("primaryButton", (u10 && "primaryButton" in u10) ? u10.primaryButton : null);
     this.initParam("secondaryButton", (u10 && "secondaryButton" in u10) ? u10.secondaryButton : null);
-    this.buttons = undefined;
     this.textAlign = TextAlign.Center;
     this.contentScroller = new Scroller();
     this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     this.fontSizeScale = 1;
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(t21) {
+    this.resetParam("primaryTitle", (t21 && "primaryTitle" in t21) ? t21.primaryTitle : undefined);
+    this.resetParam("secondaryTitle", (t21 && "secondaryTitle" in t21) ? t21.secondaryTitle : undefined);
+    this.resetParam("content", (t21 && "content" in t21) ? t21.content : '');
+    this.resetParam("primaryButton", (t21 && "primaryButton" in t21) ? t21.primaryButton : null);
+    this.resetParam("secondaryButton", (t21 && "secondaryButton" in t21) ? t21.secondaryButton : null);
+    this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+    this.resetComputed("buttons");
+  }
+  get buttons() {
+    if (!this.primaryButton && !this.secondaryButton) {
+      return undefined;
+    }
+    let s21 = [];
+    if (this.primaryButton) {
+      s21.push(this.primaryButton);
+    }
+    if (this.secondaryButton) {
+      s21.push(this.secondaryButton);
+    }
+    return s21;
   }
   initialRender() {
     this.observeComponentCreation2((r10, s10) => {
@@ -1449,9 +1539,9 @@ export class AlertDialogV2 extends ViewV2 {
             minContentHeight: this.minContentHeight,
             $fontSizeScale: q10 => { this.fontSizeScale = q10; },
             $minContentHeight: p10 => { this.minContentHeight = p10; }
-          }, undefined, l10, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 816, col: 5 });
+          }, undefined, l10, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 825, col: 5 });
           ViewV2.create(n10);
-          let o10 = () => {
+          let r21 = () => {
             return {
               primaryTitle: this.primaryTitle,
               secondaryTitle: this.secondaryTitle,
@@ -1463,7 +1553,7 @@ export class AlertDialogV2 extends ViewV2 {
               minContentHeight: this.minContentHeight
             };
           };
-          n10.paramsGenerator_ = o10;
+          n10.paramsGenerator_ = r21;
         }
         else {
           this.updateStateVarsOfChildByElmtId(l10, {
@@ -1514,24 +1604,6 @@ export class AlertDialogV2 extends ViewV2 {
   onWillApplyTheme(c10) {
     this.fontColorWithTheme = c10.colors.fontPrimary;
   }
-  aboutToAppear() {
-    this.initButtons();
-  }
-  updateTextAlign(b10) {
-    this.textAlign = getTextAlign(b10, this.content, `${BODY_L * this.fontSizeScale}vp`);
-  }
-  initButtons() {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-  }
   getFontWeight() {
     if (this.primaryTitle || this.secondaryTitle) {
       return FontWeight.Regular;
@@ -1579,9 +1651,6 @@ __decorate([
 ], AlertDialogV2.prototype, "secondaryButton", void 0);
 __decorate([
   Local
-], AlertDialogV2.prototype, "buttons", void 0);
-__decorate([
-  Local
 ], AlertDialogV2.prototype, "fontColorWithTheme", void 0);
 __decorate([
   Local
@@ -1589,6 +1658,9 @@ __decorate([
 __decorate([
   Local
 ], AlertDialogV2.prototype, "minContentHeight", void 0);
+__decorate([
+  Computed
+], AlertDialogV2.prototype, "buttons", null);
 export class CustomContentDialogV2 extends ViewV2 {
   constructor(u9, v9, w9, x9 = -1, y9, z9) {
     super(u9, x9, z9);
@@ -1596,11 +1668,19 @@ export class CustomContentDialogV2 extends ViewV2 {
     this.initParam("secondaryTitle", (v9 && "secondaryTitle" in v9) ? v9.secondaryTitle : undefined);
     this.contentBuilder = "contentBuilder" in v9 ? v9.contentBuilder : undefined;
     this.initParam("contentAreaPadding", (v9 && "contentAreaPadding" in v9) ? v9.contentAreaPadding : undefined);
-    this.initParam("localizedContentAreaPadding", (v9 && "localizedContentAreaPadding" in v9) ? v9.localizedContentAreaPadding : undefined);
-    this.buttons = undefined;
+    this.initParam("buttons", (v9 && "buttons" in v9) ? v9.buttons : undefined);
     this.fontSizeScale = 1;
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(q21) {
+    this.resetParam("primaryTitle", (q21 && "primaryTitle" in q21) ? q21.primaryTitle : undefined);
+    this.resetParam("secondaryTitle", (q21 && "secondaryTitle" in q21) ? q21.secondaryTitle : undefined);
+    this.contentBuilder = "contentBuilder" in q21 ? q21.contentBuilder : undefined;
+    this.resetParam("contentAreaPadding", (q21 && "contentAreaPadding" in q21) ? q21.contentAreaPadding : undefined);
+    this.resetParam("buttons", (q21 && "buttons" in q21) ? q21.buttons : undefined);
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
   }
   initialRender() {
     this.observeComponentCreation2((s9, t9) => {
@@ -1619,15 +1699,14 @@ export class CustomContentDialogV2 extends ViewV2 {
               }
             },
             contentAreaPadding: this.contentAreaPadding,
-            localizedContentAreaPadding: this.localizedContentAreaPadding,
             buttons: this.buttons,
             fontSizeScale: this.fontSizeScale,
             minContentHeight: this.minContentHeight,
             $fontSizeScale: r9 => { this.fontSizeScale = r9; },
             $minContentHeight: q9 => { this.minContentHeight = q9; }
-          }, undefined, m9, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 901, col: 5 });
+          }, undefined, m9, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 888, col: 5 });
           ViewV2.create(o9);
-          let p9 = () => {
+          let p21 = () => {
             return {
               primaryTitle: this.primaryTitle,
               secondaryTitle: this.secondaryTitle,
@@ -1637,20 +1716,18 @@ export class CustomContentDialogV2 extends ViewV2 {
                 }
               },
               contentAreaPadding: this.contentAreaPadding,
-              localizedContentAreaPadding: this.localizedContentAreaPadding,
               buttons: this.buttons,
               fontSizeScale: this.fontSizeScale,
               minContentHeight: this.minContentHeight
             };
           };
-          o9.paramsGenerator_ = p9;
+          o9.paramsGenerator_ = p21;
         }
         else {
           this.updateStateVarsOfChildByElmtId(m9, {
             primaryTitle: this.primaryTitle,
             secondaryTitle: this.secondaryTitle,
             contentAreaPadding: this.contentAreaPadding,
-            localizedContentAreaPadding: this.localizedContentAreaPadding,
             buttons: this.buttons,
             fontSizeScale: this.fontSizeScale,
             minContentHeight: this.minContentHeight
@@ -1673,8 +1750,8 @@ export class CustomContentDialogV2 extends ViewV2 {
     if ("contentAreaPadding" in l9) {
       this.updateParam("contentAreaPadding", l9.contentAreaPadding);
     }
-    if ("localizedContentAreaPadding" in l9) {
-      this.updateParam("localizedContentAreaPadding", l9.localizedContentAreaPadding);
+    if ("buttons" in l9) {
+      this.updateParam("buttons", l9.buttons);
     }
   }
   rerender() {
@@ -1692,9 +1769,6 @@ __decorate([
 ], CustomContentDialogV2.prototype, "contentAreaPadding", void 0);
 __decorate([
   Param
-], CustomContentDialogV2.prototype, "localizedContentAreaPadding", void 0);
-__decorate([
-  Local
 ], CustomContentDialogV2.prototype, "buttons", void 0);
 __decorate([
   Local
@@ -1710,12 +1784,19 @@ class CustomDialogLayout extends ViewV2 {
     this.initParam("buttonHeight", (g9 && "buttonHeight" in g9) ? g9.buttonHeight : 0);
     this.$buttonHeight = "$buttonHeight" in g9 ? g9.$buttonHeight : undefined;
     this.initParam("titleMinHeight", (g9 && "titleMinHeight" in g9) ? g9.titleMinHeight : 0);
-    this.$titleMinHeight = "$titleMinHeight" in g9 ? g9.$titleMinHeight : undefined;
     this.dialogBuilder = "dialogBuilder" in g9 ? g9.dialogBuilder : this.doNothingBuilder;
     this.titleIndex = 0;
     this.contentIndex = 1;
     this.buttonIndex = 2;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(o21) {
+    this.resetParam("titleHeight", (o21 && "titleHeight" in o21) ? o21.titleHeight : 0);
+    this.$titleHeight = "$titleHeight" in o21 ? o21.$titleHeight : undefined;
+    this.resetParam("buttonHeight", (o21 && "buttonHeight" in o21) ? o21.buttonHeight : 0);
+    this.$buttonHeight = "$buttonHeight" in o21 ? o21.$buttonHeight : undefined;
+    this.resetParam("titleMinHeight", (o21 && "titleMinHeight" in o21) ? o21.titleMinHeight : 0);
+    this.dialogBuilder = "dialogBuilder" in o21 ? o21.dialogBuilder : this.doNothingBuilder;
   }
   doNothingBuilder(e9 = null) {
   }
@@ -1744,11 +1825,11 @@ class CustomDialogLayout extends ViewV2 {
     };
     let r8 = p8.measure(q8);
     this.$titleHeight?.(r8.height);
-    o8 += this.titleHeight;
+    o8 += r8.height;
     let s8 = k8[this.buttonIndex];
     let t8 = s8.measure(l8);
     this.$buttonHeight?.(t8.height);
-    o8 += this.buttonHeight;
+    o8 += t8.height;
     let u8 = k8[this.contentIndex];
     let v8 = {
       maxWidth: l8.maxWidth,
@@ -1795,15 +1876,11 @@ __decorate([
 __decorate([
   Param
 ], CustomDialogLayout.prototype, "titleMinHeight", void 0);
-__decorate([
-  Event
-], CustomDialogLayout.prototype, "$titleMinHeight", void 0);
 class CustomDialogContentComponent extends ViewV2 {
   constructor(c8, d8, e8, f8 = -1, g8, h8) {
     super(c8, f8, h8);
     this.initParam("primaryTitle", (d8 && "primaryTitle" in d8) ? d8.primaryTitle : undefined);
     this.initParam("secondaryTitle", (d8 && "secondaryTitle" in d8) ? d8.secondaryTitle : undefined);
-    this.initParam("localizedContentAreaPadding", (d8 && "localizedContentAreaPadding" in d8) ? d8.localizedContentAreaPadding : undefined);
     this.contentBuilder = "contentBuilder" in d8 ? d8.contentBuilder : this.defaultContentBuilder;
     this.initParam("buttons", (d8 && "buttons" in d8) ? d8.buttons : undefined);
     this.initParam("contentAreaPadding", (d8 && "contentAreaPadding" in d8) ? d8.contentAreaPadding : undefined);
@@ -1818,21 +1895,41 @@ class CustomDialogContentComponent extends ViewV2 {
     this.customStyle = undefined;
     this.buttonMaxFontSize = `${BODY_L}fp`;
     this.buttonMinFontSize = 9;
-    this.primaryTitleMaxFontSize = `${TITLE_S}fp`;
-    this.primaryTitleMinFontSize = `${BODY_L}fp`;
-    this.secondaryTitleMaxFontSize = `${SUBTITLE_S}fp`;
-    this.secondaryTitleMinFontSize = `${BODY_S}fp`;
     this.primaryTitleFontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     this.secondaryTitleFontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
     this.titleTextAlign = TextAlign.Center;
     this.isButtonVertical = false;
-    this.titleMinHeight = 0;
     this.isFollowingSystemFontScale = false;
     this.appMaxFontScale = 3.2;
     this.titleIndex = 0;
     this.contentIndex = 1;
     this.buttonIndex = 2;
+    this.primaryTitleMaxFontSize = `${TITLE_S}fp`;
+    this.primaryTitleMinFontSize = `${BODY_L}fp`;
+    this.secondaryTitleMaxFontSize = `${SUBTITLE_S}fp`;
+    this.secondaryTitleMinFontSize = `${BODY_S}fp`;
     this.finalizeConstruction();
+  }
+  resetStateVarsOnReuse(n21) {
+    this.resetParam("primaryTitle", (n21 && "primaryTitle" in n21) ? n21.primaryTitle : undefined);
+    this.resetParam("secondaryTitle", (n21 && "secondaryTitle" in n21) ? n21.secondaryTitle : undefined);
+    this.contentBuilder = "contentBuilder" in n21 ? n21.contentBuilder : this.defaultContentBuilder;
+    this.resetParam("buttons", (n21 && "buttons" in n21) ? n21.buttons : undefined);
+    this.resetParam("contentAreaPadding", (n21 && "contentAreaPadding" in n21) ? n21.contentAreaPadding : undefined);
+    this.resetParam("minContentHeight", (n21 && "minContentHeight" in n21) ? n21.minContentHeight : undefined);
+    this.$minContentHeight = "$minContentHeight" in n21 ? n21.$minContentHeight : undefined;
+    this.titleHeight = 0;
+    this.buttonHeight = 0;
+    this.contentMaxHeight = '100%';
+    this.resetParam("fontSizeScale", (n21 && "fontSizeScale" in n21) ? n21.fontSizeScale : -1);
+    this.$fontSizeScale = "$fontSizeScale" in n21 ? n21.$fontSizeScale : undefined;
+    this.customStyle = undefined;
+    this.buttonMaxFontSize = `${BODY_L}fp`;
+    this.buttonMinFontSize = 9;
+    this.primaryTitleFontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.secondaryTitleFontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.titleTextAlign = TextAlign.Center;
+    this.isButtonVertical = false;
   }
   defaultContentBuilder(b8 = null) {
   }
@@ -1859,11 +1956,11 @@ class CustomDialogContentComponent extends ViewV2 {
           let a7 = new CustomDialogLayout(this, {
             buttonHeight: this.buttonHeight,
             titleHeight: this.titleHeight,
-            titleMinHeight: this.titleMinHeight,
+            titleMinHeight: this.getTitleAreaMinHeight(),
             dialogBuilder: () => {
               this.observeComponentCreation2((o7, p7) => {
                 ForEach.create();
-                const q7 = r7 => {
+                const m21 = r7 => {
                   const s7 = r7;
                   this.observeComponentCreation2((t7, u7) => {
                     If.create();
@@ -1890,24 +1987,23 @@ class CustomDialogContentComponent extends ViewV2 {
                   }, If);
                   If.pop();
                 };
-                this.forEachUpdateFunction(o7, [this.titleIndex, this.contentIndex, this.buttonIndex], q7);
+                this.forEachUpdateFunction(o7, [this.titleIndex, this.contentIndex, this.buttonIndex], m21);
               }, ForEach);
               ForEach.pop();
             },
             $buttonHeight: n7 => { this.buttonHeight = n7; },
-            $titleHeight: m7 => { this.titleHeight = m7; },
-            $titleMinHeight: l7 => { this.titleMinHeight = l7; }
-          }, undefined, y6, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 1044, col: 9 });
+            $titleHeight: m7 => { this.titleHeight = m7; }
+          }, undefined, y6, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 1025, col: 9 });
           ViewV2.create(a7);
-          let b7 = () => {
+          let k21 = () => {
             return {
               buttonHeight: this.buttonHeight,
               titleHeight: this.titleHeight,
-              titleMinHeight: this.titleMinHeight,
+              titleMinHeight: this.getTitleAreaMinHeight(),
               dialogBuilder: () => {
                 this.observeComponentCreation2((c7, d7) => {
                   ForEach.create();
-                  const e7 = f7 => {
+                  const l21 = f7 => {
                     const g7 = f7;
                     this.observeComponentCreation2((h7, i7) => {
                       If.create();
@@ -1934,19 +2030,19 @@ class CustomDialogContentComponent extends ViewV2 {
                     }, If);
                     If.pop();
                   };
-                  this.forEachUpdateFunction(c7, [this.titleIndex, this.contentIndex, this.buttonIndex], e7);
+                  this.forEachUpdateFunction(c7, [this.titleIndex, this.contentIndex, this.buttonIndex], l21);
                 }, ForEach);
                 ForEach.pop();
               }
             };
           };
-          a7.paramsGenerator_ = b7;
+          a7.paramsGenerator_ = k21;
         }
         else {
           this.updateStateVarsOfChildByElmtId(y6, {
             buttonHeight: this.buttonHeight,
             titleHeight: this.titleHeight,
-            titleMinHeight: this.titleMinHeight
+            titleMinHeight: this.getTitleAreaMinHeight()
           });
         }
       }, { name: "CustomDialogLayout" });
@@ -1961,7 +2057,6 @@ class CustomDialogContentComponent extends ViewV2 {
     this.$fontSizeScale?.(this.updateFontScale());
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(t6 - BUTTON_HORIZONTAL_MARGIN * 2);
-    this.titleMinHeight = this.getTitleAreaMinHeight();
     let v6 = 0;
     q6.forEach((w6) => {
       this.contentMaxHeight = '100%';
@@ -2014,9 +2109,6 @@ class CustomDialogContentComponent extends ViewV2 {
     }
   }
   getContentPadding() {
-    if (this.localizedContentAreaPadding) {
-      return this.localizedContentAreaPadding;
-    }
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }
@@ -2218,8 +2310,8 @@ class CustomDialogContentComponent extends ViewV2 {
       if (this.isNewPropertiesHighPriority(z4)) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((j5, k5) => {
-            Button.createWithLabel(z4.value);
-            __Button__setButtonProperties(z4, this.buttons);
+            Button.createWithLabel(z4.content);
+            __Button__setButtonProperties(z4, this.buttons, this.getDialogController());
             Button.role(z4.role ?? ButtonRole.NORMAL);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
             Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
@@ -2230,8 +2322,8 @@ class CustomDialogContentComponent extends ViewV2 {
       else if (z4.background !== undefined && z4.fontColor !== undefined) {
         this.ifElseBranchUpdateFunction(1, () => {
           this.observeComponentCreation2((h5, i5) => {
-            Button.createWithLabel(z4.value);
-            __Button__setButtonProperties(z4, this.buttons);
+            Button.createWithLabel(z4.content);
+            __Button__setButtonProperties(z4, this.buttons, this.getDialogController());
             Button.backgroundColor(z4.background.color);
             Button.fontColor(z4.fontColor.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
@@ -2243,8 +2335,8 @@ class CustomDialogContentComponent extends ViewV2 {
       else if (z4.background !== undefined) {
         this.ifElseBranchUpdateFunction(2, () => {
           this.observeComponentCreation2((f5, g5) => {
-            Button.createWithLabel(z4.value);
-            __Button__setButtonProperties(z4, this.buttons);
+            Button.createWithLabel(z4.content);
+            __Button__setButtonProperties(z4, this.buttons, this.getDialogController());
             Button.backgroundColor(z4.background.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
             Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
@@ -2255,8 +2347,8 @@ class CustomDialogContentComponent extends ViewV2 {
       else {
         this.ifElseBranchUpdateFunction(3, () => {
           this.observeComponentCreation2((d5, e5) => {
-            Button.createWithLabel(z4.value);
-            __Button__setButtonProperties(z4, this.buttons);
+            Button.createWithLabel(z4.content);
+            __Button__setButtonProperties(z4, this.buttons, this.getDialogController());
             Button.fontColor(z4?.fontColor?.color);
             Button.key(`advanced_dialog_button_${this.keyIndex++}`);
             Button.labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize });
@@ -2322,12 +2414,12 @@ class CustomDialogContentComponent extends ViewV2 {
           }, Column);
           this.observeComponentCreation2((f4, g4) => {
             ForEach.create();
-            const h4 = (j4, k4) => {
+            const j21 = (j4, k4) => {
               const l4 = j4;
               this.buildButtonWithDivider.bind(this)(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
                 HORIZON_BUTTON_MAX_COUNT - k4 - 1 : k4);
             };
-            this.forEachUpdateFunction(f4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), h4, (i4) => i4.value.toString(), true, false);
+            this.forEachUpdateFunction(f4, this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), j21, (i4) => i4.content.toString(), true, false);
           }, ForEach);
           ForEach.pop();
           Column.pop();
@@ -2415,7 +2507,7 @@ class CustomDialogContentComponent extends ViewV2 {
         BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((p3) => {
         let q3 = measure.measureTextSize({
-          textContent: p3.value,
+          textContent: p3.content,
           fontSize: this.buttonMaxFontSize
         });
         if (Number(q3.width) > o3) {
@@ -2435,9 +2527,6 @@ class CustomDialogContentComponent extends ViewV2 {
     }
     if ("secondaryTitle" in l3) {
       this.updateParam("secondaryTitle", l3.secondaryTitle);
-    }
-    if ("localizedContentAreaPadding" in l3) {
-      this.updateParam("localizedContentAreaPadding", l3.localizedContentAreaPadding);
     }
     if ("buttons" in l3) {
       this.updateParam("buttons", l3.buttons);
@@ -2462,9 +2551,6 @@ __decorate([
 __decorate([
   Param
 ], CustomDialogContentComponent.prototype, "secondaryTitle", void 0);
-__decorate([
-  Param
-], CustomDialogContentComponent.prototype, "localizedContentAreaPadding", void 0);
 __decorate([
   Param
 ], CustomDialogContentComponent.prototype, "buttons", void 0);
@@ -2503,18 +2589,6 @@ __decorate([
 ], CustomDialogContentComponent.prototype, "buttonMinFontSize", void 0);
 __decorate([
   Local
-], CustomDialogContentComponent.prototype, "primaryTitleMaxFontSize", void 0);
-__decorate([
-  Local
-], CustomDialogContentComponent.prototype, "primaryTitleMinFontSize", void 0);
-__decorate([
-  Local
-], CustomDialogContentComponent.prototype, "secondaryTitleMaxFontSize", void 0);
-__decorate([
-  Local
-], CustomDialogContentComponent.prototype, "secondaryTitleMinFontSize", void 0);
-__decorate([
-  Local
 ], CustomDialogContentComponent.prototype, "primaryTitleFontColorWithTheme", void 0);
 __decorate([
   Local
@@ -2525,10 +2599,7 @@ __decorate([
 __decorate([
   Local
 ], CustomDialogContentComponent.prototype, "isButtonVertical", void 0);
-__decorate([
-  Local
-], CustomDialogContentComponent.prototype, "titleMinHeight", void 0);
-function __Button__setButtonProperties(i3, j3) {
+function __Button__setButtonProperties(i3, j3, m20) {
   Button.onKeyEvent((k3) => {
     if (!k3) {
       return;
@@ -2538,6 +2609,7 @@ function __Button__setButtonProperties(i3, j3) {
       if (i3.action) {
         i3.action();
       }
+      m20?.close();
       k3.stopPropagation();
     }
   });
@@ -2545,6 +2617,7 @@ function __Button__setButtonProperties(i3, j3) {
     if (i3.action) {
       i3.action();
     }
+    m20?.close();
   });
   Button.defaultFocus(i3.defaultFocus ? true : isHasDefaultFocus(j3) ? false : true);
   Button.buttonStyle(i3.buttonStyle ?? ALERT_BUTTON_STYLE);
@@ -2621,21 +2694,6 @@ function getAccessibilityText(i2, j2) {
     return '';
   }
 }
-function getTextAlign(d2, e2, f2) {
-  let g2 = measure.measureTextSize({
-    textContent: e2,
-    fontSize: f2,
-    constraintWidth: d2,
-  });
-  let h2 = measure.measureTextSize({
-    textContent: e2,
-    fontSize: f2,
-  });
-  if (getTextHeight(g2) <= getTextHeight(h2)) {
-    return TextAlign.Center;
-  }
-  return TextAlign.Start;
-}
 function getTextHeight(c2) {
   if (c2 && c2.height !== null && c2.height !== undefined) {
     return Number(c2.height);
@@ -2692,6 +2750,13 @@ export class LoadingDialogV2 extends ViewV2 {
     this.minContentHeight = MIN_CONTENT_HEIGHT;
     this.finalizeConstruction();
   }
+  resetStateVarsOnReuse(c20) {
+    this.resetParam("content", (c20 && "content" in c20) ? c20.content : '');
+    this.fontColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.font_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.loadingProgressIconColorWithTheme = { "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" };
+    this.fontSizeScale = 1;
+    this.minContentHeight = MIN_CONTENT_HEIGHT;
+  }
   initialRender() {
     this.observeComponentCreation2((j1, k1) => {
       Column.create();
@@ -2711,9 +2776,9 @@ export class LoadingDialogV2 extends ViewV2 {
             minContentHeight: this.minContentHeight,
             $fontSizeScale: g1 => { this.fontSizeScale = g1; },
             $minContentHeight: f1 => { this.minContentHeight = f1; }
-          }, undefined, b1, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 1689, col: 7 });
+          }, undefined, b1, () => { }, { page: "library/src/main/ets/components/dialog.ets", line: 1641, col: 7 });
           ViewV2.create(d1);
-          let e1 = () => {
+          let s19 = () => {
             return {
               contentBuilder: () => {
                 this.contentBuilder();
@@ -2722,7 +2787,7 @@ export class LoadingDialogV2 extends ViewV2 {
               minContentHeight: this.minContentHeight
             };
           };
-          d1.paramsGenerator_ = e1;
+          d1.paramsGenerator_ = s19;
         }
         else {
           this.updateStateVarsOfChildByElmtId(b1, {
@@ -2799,19 +2864,28 @@ __decorate([
 __decorate([
   Local
 ], LoadingDialogV2.prototype, "minContentHeight", void 0);
-export class PopoverDialog extends ViewV2 {
-  constructor(k, l, m, n = -1, o, p) {
-    super(k, n, p);
-    this.initParam("visible", (l && "visible" in l) ? l.visible : false);
-    this.$visible = "$visible" in l ? l.$visible : () => { };
-    this.initParam("popover", (l && "popover" in l) ? l.popover : {
+export class PopoverDialogV2 extends ViewV2 {
+  constructor(k14, s14, w14, x14 = -1, y14, p19) {
+    super(k14, x14, p19);
+    this.initParam("visible", (s14 && "visible" in s14) ? s14.visible : false);
+    this.$visible = "$visible" in s14 ? s14.$visible : () => { };
+    this.initParam("popover", (s14 && "popover" in s14) ? s14.popover : {
       builder: undefined
     });
-    this.targetBuilder = "targetBuilder" in l ? l.targetBuilder : undefined;
+    this.targetBuilder = "targetBuilder" in s14 ? s14.targetBuilder : undefined;
     this.dialogWidth = this.popover?.width;
     this.finalizeConstruction();
   }
-  emptyBuilder(j = null) {
+  resetStateVarsOnReuse(y11) {
+    this.resetParam("visible", (y11 && "visible" in y11) ? y11.visible : false);
+    this.$visible = "$visible" in y11 ? y11.$visible : () => { };
+    this.resetParam("popover", (y11 && "popover" in y11) ? y11.popover : {
+      builder: undefined
+    });
+    this.targetBuilder = "targetBuilder" in y11 ? y11.targetBuilder : undefined;
+    this.dialogWidth = this.popover?.width;
+  }
+  emptyBuilder(q11 = null) {
   }
   aboutToAppear() {
     if (this.targetBuilder === undefined || this.targetBuilder === null) {
@@ -2819,13 +2893,13 @@ export class PopoverDialog extends ViewV2 {
     }
   }
   initialRender() {
-    this.observeComponentCreation2((b, c) => {
+    this.observeComponentCreation2((h4, b7) => {
       Column.create();
       Column.onClick(() => {
         try {
-          let h = display.getDefaultDisplaySync();
-          let i = px2vp(h.width);
-          if (i - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
+          let e11 = display.getDefaultDisplaySync();
+          let n11 = px2vp(e11.width);
+          if (n11 - BUTTON_HORIZONTAL_MARGIN - BUTTON_HORIZONTAL_MARGIN > MAX_DIALOG_WIDTH) {
             this.popover.width = this.popover?.width ?? MAX_DIALOG_WIDTH;
           }
           else {
@@ -2833,10 +2907,10 @@ export class PopoverDialog extends ViewV2 {
           }
           this.$visible?.(!this.visible);
         }
-        catch (e) {
-          let f = e.code;
-          let g = e.message;
-          hilog.error(0x3900, 'Ace', `dialog popup error, code: ${f}, message: ${g}`);
+        catch (q7) {
+          let p9 = q7.code;
+          let o10 = q7.message;
+          hilog.error(0x3900, 'Ace', `dialog popup error, code: ${p9}, message: ${o10}`);
         }
       });
       Column.bindPopup(this.visible, {
@@ -2845,8 +2919,8 @@ export class PopoverDialog extends ViewV2 {
         popupColor: this.popover?.popupColor,
         enableArrow: this.popover?.enableArrow ?? true,
         autoCancel: this.popover?.autoCancel,
-        onStateChange: this.popover?.onStateChange ?? ((d) => {
-          if (!d.isVisible) {
+        onStateChange: this.popover?.onStateChange ?? ((e7) => {
+          if (!e7.isVisible) {
             this.$visible?.(false);
           }
         }),
@@ -2870,15 +2944,15 @@ export class PopoverDialog extends ViewV2 {
     this.targetBuilder.bind(this)();
     Column.pop();
   }
-  updateStateVars(a) {
-    if (a === undefined) {
+  updateStateVars(e1) {
+    if (e1 === undefined) {
       return;
     }
-    if ("visible" in a) {
-      this.updateParam("visible", a.visible);
+    if ("visible" in e1) {
+      this.updateParam("visible", e1.visible);
     }
-    if ("popover" in a) {
-      this.updateParam("popover", a.popover);
+    if ("popover" in e1) {
+      this.updateParam("popover", e1.popover);
     }
   }
   rerender() {
@@ -2887,14 +2961,14 @@ export class PopoverDialog extends ViewV2 {
 }
 __decorate([
   Param
-], PopoverDialog.prototype, "visible", void 0);
+], PopoverDialogV2.prototype, "visible", void 0);
 __decorate([
   Event
-], PopoverDialog.prototype, "$visible", void 0);
+], PopoverDialogV2.prototype, "$visible", void 0);
 __decorate([
   Param
-], PopoverDialog.prototype, "popover", void 0);
+], PopoverDialogV2.prototype, "popover", void 0);
 __decorate([
   Local
-], PopoverDialog.prototype, "dialogWidth", void 0);
+], PopoverDialogV2.prototype, "dialogWidth", void 0);
 export default { TipsDialogV2, ConfirmDialogV2, SelectDialogV2, AlertDialogV2, LoadingDialogV2, CustomContentDialogV2, PopoverDialogV2, AdvancedDialogV2Button };

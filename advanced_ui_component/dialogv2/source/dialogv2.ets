@@ -13,13 +13,12 @@
  * limitations under the License.
  */
 
-import { ButtonOptions } from '@ohos.arkui.advanced.Dialog';
 import { BusinessError, Callback } from '@ohos.base';
 import display from '@ohos.display';
 import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
-import { CustomColors, CustomTheme, Theme } from '@ohos.arkui.theme';
+import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import { accessibility } from '@kit.AccessibilityKit';
@@ -88,7 +87,7 @@ export type AdvancedDialogV2ButtonAction = () => void;
 @ObservedV2
 export class AdvancedDialogV2Button {
   @Trace
-  value: ResourceStr = '';
+  content: ResourceStr = '';
   @Trace
   action?: AdvancedDialogV2ButtonAction;
   @Trace
@@ -103,7 +102,7 @@ export class AdvancedDialogV2Button {
   defaultFocus?: boolean;
 
   constructor(options: AdvancedDialogV2ButtonOptions) {
-    this.value = options.value;
+    this.content = options.content;
     this.action = options.action;
     this.background = options.background;
     this.fontColor = options.fontColor;
@@ -114,7 +113,7 @@ export class AdvancedDialogV2Button {
 }
 
 export declare interface AdvancedDialogV2ButtonOptions {
-  value: ResourceStr;
+  content: ResourceStr;
   action?: AdvancedDialogV2ButtonAction;
   background?: ColorMetrics;
   fontColor?: ColorMetrics;
@@ -154,10 +153,8 @@ export struct TipsDialogV2 {
     return buttons;
   }
 
-  @Param
-  primaryButton?: AdvancedDialogV2Button | null = null;
-  @Param
-  secondaryButton?: AdvancedDialogV2Button | null = null;
+  @Param primaryButton?: AdvancedDialogV2Button | null = null;
+  @Param secondaryButton?: AdvancedDialogV2Button | null = null;
   private marginOffset: number = 0 - PADDING_LEVEL_8;
   // the controller of content area scroll
   private contentScroller: Scroller = new Scroller();
@@ -538,7 +535,7 @@ export struct SelectDialogV2 {
               .onClick(() => {
                 this.selectedIndexInner = index;
                 item.action && item.action();
-                // this.controller?.close();
+                this.getDialogController()?.close();
               })
             }
             .paddingStyle()
@@ -663,13 +660,13 @@ export struct ConfirmDialogV2 {
   @Param content?: ResourceStr = '';
   @Param checkTips?: ResourceStr = '';
   @Param isChecked?: boolean = false;
-  @Local isCheckedInner?: boolean = false;
+  @Local isCheckedInner?: boolean = this.isChecked;
   @Monitor('isChecked')
   isCheckedMonitor(monitor: IMonitor) {
     this.isCheckedInner = monitor.value<boolean>('isChecked')?.now;
   }
-  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ value: "" });
-  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ value: "" });
+  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: "" });
+  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: "" });
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
@@ -701,7 +698,7 @@ export struct ConfirmDialogV2 {
         Column() {
           Text(this.content)
             .focusable(true)
-            .defaultFocus(!(this.primaryButton?.value || this.secondaryButton?.value))
+            .defaultFocus(!(this.primaryButton?.content || this.secondaryButton?.content))
             .focusBox({
               strokeWidth: LengthMetrics.px(0)
             })
@@ -799,19 +796,31 @@ export struct ConfirmDialogV2 {
 
 @ComponentV2
 export struct AlertDialogV2 {
-  @Param primaryTitle?: ResourceStr | undefined = undefined;
-  @Param secondaryTitle?: ResourceStr | undefined = undefined;
+  @Param primaryTitle?: ResourceStr = undefined;
+  @Param secondaryTitle?: ResourceStr = undefined;
   @Require @Param content: ResourceStr = '';
   @Param primaryButton?: AdvancedDialogV2Button | null = null;
   @Param secondaryButton?: AdvancedDialogV2Button | null = null;
-  @Local buttons?: AdvancedDialogV2Button[] | undefined = undefined;
   private  textAlign: TextAlign = TextAlign.Center;
   // the controller of content area
   private contentScroller: Scroller = new Scroller();
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
-
+  @Computed
+  get buttons(): AdvancedDialogV2Button[] | undefined {
+    if (!this.primaryButton && !this.secondaryButton) {
+      return undefined;
+    }
+    let buttons: AdvancedDialogV2Button[] = [];
+    if (this.primaryButton) {
+      buttons.push(this.primaryButton);
+    }
+    if (this.secondaryButton) {
+      buttons.push(this.secondaryButton);
+    }
+    return buttons;
+  }
   build() {
     CustomDialogContentComponent({
       primaryTitle: this.primaryTitle,
@@ -857,27 +866,6 @@ export struct AlertDialogV2 {
     this.fontColorWithTheme = theme.colors.fontPrimary;
   }
 
-  aboutToAppear(): void {
-    this.initButtons();
-  }
-
-  private updateTextAlign(maxWidth: number): void {
-    this.textAlign = getTextAlign(maxWidth, this.content, `${BODY_L * this.fontSizeScale}vp`);
-  }
-
-  private initButtons(): void {
-    if (!this.primaryButton && !this.secondaryButton) {
-      return;
-    }
-    this.buttons = [];
-    if (this.primaryButton) {
-      this.buttons.push(this.primaryButton);
-    }
-    if (this.secondaryButton) {
-      this.buttons.push(this.secondaryButton);
-    }
-  }
-
   private getFontWeight(): number {
     if (this.primaryTitle || this.secondaryTitle) {
       return FontWeight.Regular;
@@ -891,9 +879,8 @@ export struct CustomContentDialogV2 {
   @Param primaryTitle?: ResourceStr = undefined;
   @Param secondaryTitle?: ResourceStr = undefined;
   @BuilderParam contentBuilder: CustomBuilder;
-  @Param contentAreaPadding?: Padding = undefined;
-  @Param localizedContentAreaPadding?: LocalizedPadding = undefined;
-  @Local buttons?: AdvancedDialogV2Button[];
+  @Param contentAreaPadding?: LocalizedPadding = undefined;
+  @Param buttons?: AdvancedDialogV2Button[] = undefined;
   @Local fontSizeScale: number = 1;
   @Local minContentHeight: number = MIN_CONTENT_HEIGHT;
 
@@ -907,7 +894,6 @@ export struct CustomContentDialogV2 {
         }
       },
       contentAreaPadding: this.contentAreaPadding,
-      localizedContentAreaPadding: this.localizedContentAreaPadding,
       buttons: this.buttons,
       fontSizeScale: this.fontSizeScale!!,
       minContentHeight: this.minContentHeight!!,
@@ -931,8 +917,6 @@ struct CustomDialogLayout {
   $buttonHeight?: (val: number) => void = undefined;
   @Param
   titleMinHeight: Length = 0;
-  @Event
-  $titleMinHeight?: (val: Length) => void = undefined;
   @BuilderParam
   dialogBuilder: () => void = this.doNothingBuilder;
   private titleIndex: number = 0;
@@ -966,12 +950,12 @@ struct CustomDialogLayout {
     };
     let titleMeasureResult: MeasureResult = titleChild.measure(titleConstraint);
     this.$titleHeight?.(titleMeasureResult.height);
-    height += this.titleHeight;
+    height += titleMeasureResult.height;
 
     let buttonChild: Measurable = children[this.buttonIndex];
     let buttonMeasureResult: MeasureResult = buttonChild.measure(constraint);
     this.$buttonHeight?.(buttonMeasureResult.height);
-    height += this.buttonHeight;
+    height += buttonMeasureResult.height;
 
     let contentChild: Measurable = children[this.contentIndex];
     let contentConstraint: ConstraintSizeOptions = {
@@ -997,14 +981,12 @@ struct CustomDialogContentComponent {
   primaryTitle?: ResourceStr = undefined;
   @Param
   secondaryTitle?: ResourceStr = undefined;
-  @Param
-  localizedContentAreaPadding?: LocalizedPadding = undefined;
   @BuilderParam
   contentBuilder: () => void = this.defaultContentBuilder;
   @Param
   buttons?: AdvancedDialogV2Button[] = undefined;
   @Param
-  contentAreaPadding?: Padding = undefined;
+  contentAreaPadding?: LocalizedPadding | Padding = undefined;
   @Require
   @Param
   minContentHeight: number;
@@ -1023,20 +1005,19 @@ struct CustomDialogContentComponent {
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
-  @Local primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
-  @Local primaryTitleMinFontSize: Length = `${BODY_L}fp`;
-  @Local secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
-  @Local secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
   @Local primaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Local secondaryTitleFontColorWithTheme: ResourceColor = $r('sys.color.font_secondary');
   @Local titleTextAlign: TextAlign = TextAlign.Center;
   @Local isButtonVertical: boolean = false;
-  @Local titleMinHeight: Length = 0;
   private isFollowingSystemFontScale: boolean = false;
   private appMaxFontScale: number = 3.2;
   private titleIndex: number = 0;
   private contentIndex: number = 1;
   private buttonIndex: number = 2;
+  private primaryTitleMaxFontSize: Length = `${TITLE_S}fp`;
+  private primaryTitleMinFontSize: Length = `${BODY_L}fp`;
+  private secondaryTitleMaxFontSize: Length = `${SUBTITLE_S}fp`;
+  private secondaryTitleMinFontSize: Length = `${BODY_S}fp`;
 
   build() {
     Scroll() {
@@ -1044,7 +1025,7 @@ struct CustomDialogContentComponent {
         CustomDialogLayout({
           buttonHeight: this.buttonHeight!!,
           titleHeight: this.titleHeight!!,
-          titleMinHeight: this.titleMinHeight!!
+          titleMinHeight: this.getTitleAreaMinHeight(),
         }) {
           ForEach([this.titleIndex, this.contentIndex, this.buttonIndex], (index: number) => {
             if (index === this.titleIndex) {
@@ -1080,7 +1061,6 @@ struct CustomDialogContentComponent {
     this.$fontSizeScale?.(this.updateFontScale());
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
-    this.titleMinHeight = this.getTitleAreaMinHeight();
     let height: number = 0;
     children.forEach((child) => {
       this.contentMaxHeight = '100%';
@@ -1141,13 +1121,9 @@ struct CustomDialogContentComponent {
    * @returns content padding
    */
   private getContentPadding(): Padding | LocalizedPadding {
-    if (this.localizedContentAreaPadding) {
-      return this.localizedContentAreaPadding;
-    }
     if (this.contentAreaPadding) {
       return this.contentAreaPadding;
     }
-
     if ((this.primaryTitle || this.secondaryTitle) && this.buttons && this.buttons.length > 0) {
       return {
         top: 0,
@@ -1320,27 +1296,27 @@ struct CustomDialogContentComponent {
   @Builder
   buildSingleButton(buttonOptions: AdvancedDialogV2Button): void {
     if (this.isNewPropertiesHighPriority(buttonOptions)) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons)
+      Button(buttonOptions.content)
+        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
         .role(buttonOptions.role ?? ButtonRole.NORMAL)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined && buttonOptions.fontColor !== undefined) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons)
+      Button(buttonOptions.content)
+        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
         .backgroundColor(buttonOptions.background.color)
         .fontColor(buttonOptions.fontColor.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else if (buttonOptions.background !== undefined) {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons)
+      Button(buttonOptions.content)
+        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
         .backgroundColor(buttonOptions.background.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
     } else {
-      Button(buttonOptions.value)
-        .setButtonProperties(buttonOptions, this.buttons)
+      Button(buttonOptions.content)
+        .setButtonProperties(buttonOptions, this.buttons, this.getDialogController())
         .fontColor(buttonOptions?.fontColor?.color)
         .key(`advanced_dialog_button_${this.keyIndex++}`)
         .labelStyle({ maxLines: 1, maxFontSize: this.buttonMaxFontSize, minFontSize: this.buttonMinFontSize })
@@ -1373,10 +1349,10 @@ struct CustomDialogContentComponent {
   buildVerticalAlignButtons(): void {
     if (this.buttons) {
       Column() {
-        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: ButtonOptions, index: number) => {
+        ForEach(this.buttons.slice(0, VERTICAL_BUTTON_MAX_COUNT), (item: AdvancedDialogV2Button, index: number) => {
           this.buildButtonWithDivider(this.buttons?.length === HORIZON_BUTTON_MAX_COUNT ?
             HORIZON_BUTTON_MAX_COUNT - index - 1 : index);
-        }, (item: ButtonOptions) => item.value.toString());
+        }, (item: AdvancedDialogV2Button) => item.content.toString());
       }
     }
   }
@@ -1449,7 +1425,7 @@ struct CustomDialogContentComponent {
         BUTTON_HORIZONTAL_SPACE - 2 * BUTTON_HORIZONTAL_PADDING);
       this.buttons.forEach((button) => {
         let contentSize: SizeOptions = measure.measureTextSize({
-          textContent: button.value,
+          textContent: button.content,
           fontSize: this.buttonMaxFontSize
         });
         if (Number(contentSize.width) > maxButtonTextSize) {
@@ -1463,7 +1439,7 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: AdvancedDialogV2Button, buttonList?: AdvancedDialogV2Button[]) {
+function setButtonProperties(buttonOptions: AdvancedDialogV2Button, buttonList?: AdvancedDialogV2Button[], controller?: PromptActionDialogController) {
   .onKeyEvent((event: KeyEvent) => {
     if (!event) {
       return;
@@ -1473,7 +1449,7 @@ function setButtonProperties(buttonOptions: AdvancedDialogV2Button, buttonList?:
       if (buttonOptions.action) {
         buttonOptions.action();
       }
-      // controller?.close();
+      controller?.close();
       event.stopPropagation();
     }
   })
@@ -1481,7 +1457,7 @@ function setButtonProperties(buttonOptions: AdvancedDialogV2Button, buttonList?:
     if (buttonOptions.action) {
       buttonOptions.action();
     }
-    // controller?.close();
+    controller?.close();
   })
   .defaultFocus(buttonOptions.defaultFocus ? true : isHasDefaultFocus(buttonList) ? false : true)
   .buttonStyle(buttonOptions.buttonStyle ?? ALERT_BUTTON_STYLE)
@@ -1581,30 +1557,6 @@ function getAccessibilityText(resource: ResourceStr, selected: boolean): string 
     hilog.error(0x3900, 'Ace', `getAccessibilityText error, code: ${code}, message: ${message}`);
     return '';
   }
-}
-
-/**
- * get Text Align
- *
- * @param maxWidth maxWidth
- * @param content textContent
- * @param fontSize fontSize
- * @returns textAlign
- */
-function getTextAlign(maxWidth: number, content: ResourceStr, fontSize: number | string | Resource): TextAlign {
-  let contentSize: SizeOptions = measure.measureTextSize({
-    textContent: content,
-    fontSize: fontSize,
-    constraintWidth: maxWidth,
-  });
-  let oneLineSize: SizeOptions = measure.measureTextSize({
-    textContent: content,
-    fontSize: fontSize,
-  });
-  if (getTextHeight(contentSize) <= getTextHeight(oneLineSize)) {
-    return TextAlign.Center;
-  }
-  return TextAlign.Start;
 }
 
 /**
@@ -1731,7 +1683,7 @@ export struct LoadingDialogV2 {
 export type PopoverDialogV2OnVisibleChange = (visible: boolean) => void;
 
 @ComponentV2
-export struct PopoverDialog {
+export struct PopoverDialogV2 {
   @Require @Param
   visible: boolean = false;
   @Event
