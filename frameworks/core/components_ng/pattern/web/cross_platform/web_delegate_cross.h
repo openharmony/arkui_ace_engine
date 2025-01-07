@@ -236,6 +236,10 @@ public:
     {
         return isCapture_;
     }
+    std::vector<std::string> GetMimeType() override
+    {
+        return mimeType_;
+    }
 
 private:
     std::string title_;
@@ -243,6 +247,7 @@ private:
     std::string defaultFileName_;
     std::vector<std::string> acceptType_;
     bool isCapture_;
+    std::vector<std::string> mimeType_;
 };
 
 class Geolocation : public WebGeolocation {
