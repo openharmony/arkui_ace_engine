@@ -2503,7 +2503,8 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
     windowManager->SetWindowGetIsMidSceneCallBack(
         [window = uiWindow_](bool& isMidScene) -> int32_t {
-        return static_cast<int32_t>(window->GetIsMidScene(isMidScene)); });
+            return static_cast<int32_t>(window->GetIsMidScene(isMidScene));
+        });
     windowManager->SetWindowGetTypeCallBack(
         [window = uiWindow_]() -> WindowType { return static_cast<WindowType>(window->GetType()); });
     windowManager->SetWindowSetMaximizeModeCallBack(
