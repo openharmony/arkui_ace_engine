@@ -46,6 +46,7 @@ public:
     void HasUserDefinedSelectedFontFamily(bool isUserDefined) override;
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
     static void SetStartDate(FrameNode* frameNode, const PickerDate& value);
     static void SetEndDate(FrameNode* frameNode, const PickerDate& value);
     static void SetSelectedDate(FrameNode* frameNode, const PickerDate& value);
@@ -72,6 +73,8 @@ public:
     static uint32_t getBackgroundColor(FrameNode* frameNode);
     static void SetDefaultAttributes(RefPtr<FrameNode>& frameNode, const RefPtr<PickerTheme>& pickerTheme);
     static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
 private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();

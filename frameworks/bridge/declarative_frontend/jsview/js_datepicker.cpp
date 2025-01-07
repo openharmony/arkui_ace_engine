@@ -313,6 +313,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
+    JSClass<JSDatePicker>::StaticMethod("enableHapticFeedback", &JSDatePicker::SetEnableHapticFeedback);
     JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -470,6 +471,15 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    DatePickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
@@ -1035,6 +1045,10 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
             UpdateLunarSwitchSettingData(style, settingData);
         }
     }
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        settingData.isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
 
@@ -1260,6 +1274,10 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
     if (selectedDate->IsObject()) {
         settingData.datePickerProperty["selected"] = parseSelectedDate;
         settingData.timePickerProperty["selected"] = ParseTime(selectedDate);
+    }
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        settingData.isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
     }
 
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
