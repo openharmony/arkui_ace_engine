@@ -398,10 +398,7 @@ void ErrorDecorator::UpdateTextFieldMargin()
     }
 }
 
-// The style of showError is basically fixed, just refresh it every time onModifyDone.
-// Unlike showError, showCounter is not marked as dirty after insertValue and will not call onModifyDone,
-// Only measure will be called, so counter’s style need to be refreshed every time it is measured.
-void ErrorDecorator::UpdateErrorStyle()
+void ErrorDecorator::UpdateLayoutProperty()
 {
     auto decoratedNode = decoratedNode_.Upgrade();
     CHECK_NULL_VOID(decoratedNode);
@@ -429,6 +426,10 @@ void ErrorDecorator::UpdateErrorStyle()
             textFieldLayoutProperty->GetMaxFontScale().value());
     }
     textLayoutProperty->UpdateMaxFontScale(maxFontScale);
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        auto minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+        textLayoutProperty->UpdateMinFontScale(minFontScale);
+    }
     textLayoutProperty->UpdateTextAlign(TextAlign::START);
     textLayoutProperty->UpdateMaxLines(theme->GetErrorTextMaxLine());
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -439,6 +440,23 @@ void ErrorDecorator::UpdateErrorStyle()
     } else {
         textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
     }
+}
+
+// The style of showError is basically fixed, just refresh it every time onModifyDone.
+// Unlike showError, showCounter is not marked as dirty after insertValue and will not call onModifyDone,
+// Only measure will be called, so counter’s style need to be refreshed every time it is measured.
+void ErrorDecorator::UpdateErrorStyle()
+{
+    auto decoratedNode = decoratedNode_.Upgrade();
+    CHECK_NULL_VOID(decoratedNode);
+    auto textNode = textNode_.Upgrade();
+    CHECK_NULL_VOID(textNode);
+    RefPtr<TextFieldPattern> textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto theme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(theme);
+    TextStyle errorTextStyle = theme->GetErrorTextStyle();
+    UpdateLayoutProperty();
 
     auto accessibilityProperty = textNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);

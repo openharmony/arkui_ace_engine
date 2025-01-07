@@ -260,6 +260,13 @@ if (defined(global_parts_info.multimedia_audio_framework)) {
   enable_audio_framework = false
 }
 
+if (defined(global_parts_info.thirdparty_qrcodegen)) {
+  qrcodegen_support = true
+  ace_common_defines += [ "QRCODEGEN_SUPPORT" ]
+} else {
+  qrcodegen_support = false
+}
+
 if (!defined(global_parts_info) ||
     defined(global_parts_info.security_security_component_manager)) {
   security_component_enable = true

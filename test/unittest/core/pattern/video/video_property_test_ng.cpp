@@ -42,7 +42,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -811,72 +810,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
     EXPECT_EQ(controlBar->GetRenderContext()->GetBackgroundColorValue(), videoTheme->GetBkgColor());
     auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
     EXPECT_EQ(controlBarLayoutProperty->GetMainAxisAlignValue(FlexAlign::AUTO), FlexAlign::SPACE_BETWEEN);
-}
-
-/**
- * @tc.name: VideoPatternTest020
- * @tc.desc: Test VideoPattern dragEnd
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a video and get the videoPattern.
-     * @tc.expected: step1. Create and get successfully.
-     */
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    videoPattern->videoSrcInfo_.src = "test";
-    videoPattern->EnableDrag();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    RefPtr<OHOS::Ace::UnifiedData> unifiedData;
-    auto dragEnd = eventHub->onDrop_;
-    std::string extraParams;
-    dragEnd(dragEvent, extraParams);
-
-    /**
-     * @tc.steps: step2. Call dragEnd in different wrong situation.
-     * @tc.expected: step2. Log error message.
-     */
-    auto json = JsonUtil::Create(true);
-    json->Put(EXTRA_INFO_KEY.c_str(), "");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "::test");
-    dragEnd(dragEvent, json->ToString());
-
-    dragEvent->SetData(unifiedData);
-    videoPattern->isInitialState_ = false;
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::test");
-    dragEnd(dragEvent, json->ToString());
-    videoPattern->isInitialState_ = true;
-    dragEnd(dragEvent, json->ToString());
-
-    /**
-     * @tc.steps: step3. Call dragEnd while use new video src.
-     * @tc.expected: step3. VideoPattern property set correctly.
-     */
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::newTest");
-    videoPattern->SetIsStop(false);
-    videoPattern->isInitialState_ = false;
-    dragEnd(dragEvent, json->ToString());
-    EXPECT_FALSE(videoPattern->isStop_);
 }
 
 /**

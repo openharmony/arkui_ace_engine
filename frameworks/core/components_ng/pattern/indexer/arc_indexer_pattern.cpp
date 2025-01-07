@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float STR_DOT_ROTATE_ANGLE = 90;
 constexpr int32_t ANIMATION_DURATION_20 = 20;
+constexpr char BUTTON_ROLE[] = "Button";
 }
 void ArcIndexerPattern::OnModifyDone()
 {
@@ -74,6 +75,185 @@ void ArcIndexerPattern::OnModifyDone()
     ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false);
     InitTouchEvent ();
     SetAccessibilityAction();
+    InitializeAccessibility();
+}
+
+void ArcIndexerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+}
+
+class ArcIndexerAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    ArcIndexerAccessibilitySAObserverCallback(
+        const WeakPtr<ArcIndexerPattern>& weakPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakPattern_(weakPattern)
+    {}
+
+    ~ArcIndexerAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto indexerPattern = weakPattern_.Upgrade();
+        CHECK_NULL_RETURN(indexerPattern, false);
+        if (state) {
+            indexerPattern->InitAccessibilityClickEvent();
+            indexerPattern->SetIsScreenReaderOn(true);
+        } else {
+            indexerPattern->RemoveAccessibilityClickEvent();
+            indexerPattern->SetIsScreenReaderOn(false);
+        }
+        return true;
+    }
+private:
+    WeakPtr<ArcIndexerPattern> weakPattern_;
+};
+
+void ArcIndexerPattern::RemoveAccessibilityClickEvent()
+{
+    if (collapsedNode_.Upgrade() != nullptr) {
+        auto collapsedNode = collapsedNode_.Upgrade();
+        CHECK_NULL_VOID(collapsedNode);
+        auto collapsedGesture = collapsedNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(collapsedGesture);
+        if (collapsedClickListener_) {
+            collapsedGesture->RemoveClickEvent(collapsedClickListener_);
+            collapsedClickListener_ = nullptr;
+        }
+    }
+    if (expandedNode_.Upgrade() != nullptr) {
+        auto expandedNode = expandedNode_.Upgrade();
+        CHECK_NULL_VOID(expandedNode);
+        auto expandedNodGesture = expandedNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(expandedNodGesture);
+        if (expandedClickListener_) {
+            expandedNodGesture->RemoveClickEvent(expandedClickListener_);
+            expandedClickListener_ = nullptr;
+        }
+    }
+}
+
+void ArcIndexerPattern::InitAccessibilityClickEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    if (collapsedNode_.Upgrade() != nullptr) {
+        auto collapsedNode = collapsedNode_.Upgrade();
+        CHECK_NULL_VOID(collapsedNode);
+        auto textAccessibilityProperty = collapsedNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
+        textAccessibilityProperty->SetAccessibilityText(indexerTheme->GetAccessibilityCollapse());
+        textAccessibilityProperty->SetAccessibilityRole(BUTTON_ROLE);
+        auto collapsedGesture = collapsedNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(collapsedGesture);
+        auto collapsedclickCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireAccessbilityCollapsed();
+        };
+        collapsedClickListener_ = MakeRefPtr<ClickEvent>(std::move(collapsedclickCallback));
+        collapsedGesture->AddClickEvent(collapsedClickListener_);
+    }
+    if (expandedNode_.Upgrade() != nullptr) {
+        auto expandedNode = expandedNode_.Upgrade();
+        CHECK_NULL_VOID(expandedNode);
+        auto textAccessibilityProperty = expandedNode->GetAccessibilityProperty<TextAccessibilityProperty>();
+        CHECK_NULL_VOID(textAccessibilityProperty);
+        textAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
+        textAccessibilityProperty->SetAccessibilityText(indexerTheme->GetAccessibilityExpand());
+        textAccessibilityProperty->SetAccessibilityRole(BUTTON_ROLE);
+        auto expandedNodGesture = expandedNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(expandedNodGesture);
+        auto expandedCallback = [weak = WeakClaim(this)](GestureEvent& info) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->FireAccessbilityExpanded();
+        };
+        expandedClickListener_ = MakeRefPtr<ClickEvent>(std::move(expandedCallback));
+        expandedNodGesture->AddClickEvent(expandedClickListener_);
+    }
+}
+
+void ArcIndexerPattern::InitializeAccessibility()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilitySAObserverCallback_ = std::make_shared<ArcIndexerAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityGroup(true);
+}
+
+void ArcIndexerPattern::FireAccessbilityExpanded()
+{
+    isClickActionFire_ = true;
+    isNewHeightCalculated_ = true;
+    lastCollapsingMode_ = currectCollapsingMode_;
+    currectCollapsingMode_ = ArcIndexerCollapsingMode::NONE;
+    ArcExpandedAnimation(fullArrayValue_.size() - 1);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkModifyDone();
+    host->MarkDirtyNode();
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
+        indexerTheme->GetAccessibilityExpanded());
+}
+
+void ArcIndexerPattern::FireAccessbilityCollapsed()
+{
+    isClickActionFire_ = true;
+    isNewHeightCalculated_ = true;
+    lastCollapsingMode_ = currectCollapsingMode_;
+    currectCollapsingMode_ = ArcIndexerCollapsingMode::FOUR;
+    ArcCollapedAnimation(ARC_INDEXER_COLLAPSE_ITEM_COUNT);
+    IndexNodeCollapsedAnimation();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
+    host->OnAccessibilityEvent(AccessibilityEventType::ANNOUNCE_FOR_ACCESSIBILITY,
+        indexerTheme->GetAccessibilityCollapsed());
+}
+
+void ArcIndexerPattern::FireAccessibilityIndexChanged(bool selectChanged, bool fromTouchUp)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (fromTouchUp) {
+        AccessibilityEventType type = AccessibilityEventType::SELECTED;
+        host->OnAccessibilityEvent(type);
+    }
+    if (selectChanged) {
+        ShowBubble(selectChanged);
+        if (!fromTouchUp) {
+            accessibilityProperty->SetAccessibilityText(GetChildNodeContent(selected_));
+            host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE);
+        }
+    }
 }
 
 void ArcIndexerPattern::ResetArrayValue(bool isModeChanged)
@@ -438,6 +618,9 @@ void ArcIndexerPattern::IndexNodeCollapsedAnimation()
             host->MarkModifyDone();
             host->MarkDirtyNode();
             pattern->atomicAnimateOp_ = true;
+            auto expandedNode = pattern->expandedNode_.Upgrade();
+            CHECK_NULL_VOID(expandedNode);
+            expandedNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
         });
     lastCollapsingMode_ = currectCollapsingMode_;
 }
@@ -470,6 +653,10 @@ void ArcIndexerPattern::IndexNodeExpandedAnimation()
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             pattern->atomicAnimateOp_ = true;
+            pattern->atomicAnimateOp_ = true;
+            auto collapsedNode = pattern->collapsedNode_.Upgrade();
+            CHECK_NULL_VOID(collapsedNode);
+            collapsedNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS);
         });
     lastCollapsingMode_ = currectCollapsingMode_;
 }
@@ -597,7 +784,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         && currectCollapsingMode_ != lastCollapsingMode_) {
         IndexNodeExpandedAnimation();
     }
-    if (selectChanged) ShowBubble(selectChanged);
+    FireAccessibilityIndexChanged(selectChanged, fromTouchUp);
 }
 
 void ArcIndexerPattern::UpdateIndexerRender()
@@ -680,6 +867,18 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
     auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     if (textAccessibilityProperty) {
         textAccessibilityProperty->SetSelected(false);
+        if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED) == nodeStr) {
+            expandedNode_ = childNode;
+            if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
+                InitAccessibilityClickEvent();
+            }
+        }
+        if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) == nodeStr) {
+            collapsedNode_ = childNode;
+            if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
+                InitAccessibilityClickEvent();
+            }
+        }
     }
     if (!fromTouchUp && currectCollapsingMode_ == ArcIndexerCollapsingMode::NONE &&
         currectCollapsingMode_ != lastCollapsingMode_) {
@@ -725,8 +924,10 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     if (isTextNodeInTree) {
         childNode->MarkDirtyNode();
     }
-    AccessibilityEventType type = AccessibilityEventType::SELECTED;
-    host->OnAccessibilityEvent(type);
+    if (isClickActionFire_ || index == 0) {
+        isClickActionFire_ = false;
+        return;
+    }
     auto textAccessibilityProperty = childNode->GetAccessibilityProperty<TextAccessibilityProperty>();
     if (textAccessibilityProperty) {
         textAccessibilityProperty->SetSelected(true);
@@ -1246,6 +1447,9 @@ float ArcIndexerPattern::GetPositionAngle(const Offset& position)
 
 bool ArcIndexerPattern::AtArcHotArea(const Offset& position)
 {
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled() || isScreenReaderOn_) {
+        return true;
+    }
     float indexAngle = GetPositionAngle(position);
     if (GreatNotEqual(indexAngle, sweepAngle_ + startAngle_ + stepAngle_ * HALF) ||
         LessNotEqual(indexAngle, startAngle_ - stepAngle_ * HALF)) {

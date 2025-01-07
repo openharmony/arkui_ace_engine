@@ -377,7 +377,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackExpandMenu");
+                TaskExecutor::TaskType::UI, "HideStackExpandMenu", PriorityType::VIP);
     });
     auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
     CHECK_NULL_VOID(menuFrameNode);

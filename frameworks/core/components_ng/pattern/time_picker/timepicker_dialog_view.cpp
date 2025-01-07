@@ -155,6 +155,8 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
+    auto enterSelectedAreaEvent = dialogEvent["enterSelectedAreaId"];
+    SetDialogEnterSelectedArea(timePickerNode, std::move(enterSelectedAreaEvent));
     RefPtr<FrameNode> contentRow = nullptr;
     auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
@@ -906,6 +908,15 @@ void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
+}
+
+void TimePickerDialogView::SetDialogEnterSelectedArea(
+    const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void TimePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)

@@ -83,7 +83,7 @@ constexpr int32_t LENGTH_TWO = 2;
 constexpr int32_t LENGTH_THREE = 3;
 constexpr int32_t MAX_FLUSH_COUNT = 2;
 
-std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
+std::unordered_map<int32_t, std::string> UICONTEXT_ERROR_MAP = {
     { ERROR_CODE_BIND_SHEET_CONTENT_ERROR, "The bindSheetContent is incorrect." },
     { ERROR_CODE_BIND_SHEET_CONTENT_ALREADY_EXIST, "The bindSheetContent already exists." },
     { ERROR_CODE_BIND_SHEET_CONTENT_NOT_FOUND, "The bindSheetContent cannot be found." },
@@ -93,7 +93,12 @@ std::unordered_map<int32_t, std::string> BIND_SHEET_ERROR_MAP = {
         "The node of targetId is not a child of the page node or NavDestination node." },
     { ERROR_CODE_INTERNAL_ERROR, "Internal error." },
     { ERROR_CODE_PARAM_INVALID, "Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;"
-        "2. Incorrect parameter types; 3. Parameter verification failed." }
+        "2. Incorrect parameter types; 3. Parameter verification failed." },
+    { ERROR_CODE_DIALOG_CONTENT_ERROR, "Dialog content error. " },
+    { ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST, "Dialog content already exist. " },
+    { ERROR_CODE_DIALOG_CONTENT_NOT_FOUND, "Dialog content not found. " },
+    { ERROR_CODE_TARGET_INFO_NOT_EXIST, "The target does not exist. " },
+    { ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE, "The target node is not in the component tree. " }
 };
 
 void PrintAnimationInfo(const AnimationOption& option, AnimationInterface interface, const std::optional<int32_t>& cnt)
@@ -403,7 +408,7 @@ napi_value CreateErrorValue(napi_env env, int32_t errCode, const std::string& er
     return error;
 }
 
-RefPtr<NG::FrameNode> ParseSheeetContentNode(const JSCallbackInfo& info)
+RefPtr<NG::FrameNode> ParseContentNode(const JSCallbackInfo& info)
 {
     EcmaVM* vm = info.GetVm();
     CHECK_NULL_RETURN(vm, nullptr);
@@ -426,7 +431,7 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
     napi_create_promise(env, &deferred, &promise);
 
     if (errCode != ERROR_CODE_NO_ERROR) {
-        napi_value result = CreateErrorValue(env, errCode, BIND_SHEET_ERROR_MAP[errCode]);
+        napi_value result = CreateErrorValue(env, errCode, UICONTEXT_ERROR_MAP[errCode]);
         napi_reject_deferred(env, deferred, result);
     } else {
         napi_value result = nullptr;
@@ -862,7 +867,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
         return;
     }
 
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -926,7 +931,7 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return;
     }
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -968,7 +973,7 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
         return;
     }
 
-    auto sheetContentNode = ParseSheeetContentNode(info);
+    auto sheetContentNode = ParseContentNode(info);
     if (sheetContentNode == nullptr) {
         ReturnPromise(info, ERROR_CODE_BIND_SHEET_CONTENT_ERROR);
         return;
@@ -980,6 +985,174 @@ void JSViewContext::JSCloseBindSheet(const JSCallbackInfo& info)
     ReturnPromise(info, ret);
     return;
 }
+
+int32_t ParseTargetInfo(const JSRef<JSObject>& obj, int32_t& targetId)
+{
+    CHECK_EQUAL_RETURN(obj->IsEmpty(), true, ERROR_CODE_PARAM_INVALID);
+    auto targetInfoID = obj->GetProperty("id");
+    if (targetInfoID->IsNumber()) {
+        targetId = targetInfoID->ToNumber<int32_t>();
+    } else if (targetInfoID->IsString()) {
+        std::string targetIdString = targetInfoID->ToString();
+        auto targetInfoComponentId = obj->GetProperty("componentId");
+        if (targetInfoComponentId->IsNumber()) {
+            auto componentId = targetInfoComponentId->ToNumber<int32_t>();
+            auto targetComponentIdNode =
+                ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(componentId);
+            CHECK_NULL_RETURN(targetComponentIdNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            auto targetNode = NG::FrameNode::FindChildByName(targetComponentIdNode, targetIdString);
+            CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            targetId = targetNode->GetId();
+        } else {
+            auto targetNode = ElementRegister::GetInstance()->GetAttachedFrameNodeById(targetIdString);
+            CHECK_NULL_RETURN(targetNode, ERROR_CODE_TARGET_INFO_NOT_EXIST);
+            targetId = targetNode->GetId();
+        }
+    }
+    if (targetId < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    return ERROR_CODE_NO_ERROR;
+}
+
+void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_VOID(popupParam);
+    popupParam->SetIsShow(true);
+    popupParam->SetUseCustomComponent(true);
+    if (info[INDEX_ONE]->IsObject()) {
+        auto popupObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+        int32_t targetId = INVALID_ID;
+        auto result = ParseTargetInfo(popupObj, targetId);
+        if (result == ERROR_CODE_NO_ERROR) {
+            popupParam->SetTargetId(std::to_string(targetId));
+        } else {
+            ReturnPromise(info, result);
+            return;
+        }
+    } else {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    if (paramCnt == LENGTH_THREE && info[INDEX_TWO]->IsObject()) {
+        auto popupObj = JSRef<JSObject>::Cast(info[INDEX_TWO]);
+        JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
+    }
+    auto ret = JSViewAbstract::OpenPopup(popupParam, popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+bool ParseContentPopupCommonParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popupParam,
+    const RefPtr<NG::UINode>& customNode, bool isPartialUpdate)
+{
+    if ((!popupParam) || (!customNode)) {
+        return false;
+    }
+    auto paramCnt = info.Length();
+    if (!(paramCnt >= LENGTH_TWO && info[INDEX_ONE]->IsObject())) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return false;
+    }
+    bool isShowInSubWindow = false;
+    if (isPartialUpdate) {
+        auto result = JSViewAbstract::GetPopupParam(popupParam, customNode);
+        if (result == ERROR_CODE_NO_ERROR) {
+            isShowInSubWindow = popupParam->IsShowInSubWindow();
+        } else {
+            if (result != ERROR_CODE_INTERNAL_ERROR) {
+                ReturnPromise(info, result);
+            }
+            return false;
+        }
+    } else {
+        auto param = AceType::MakeRefPtr<PopupParam>();
+        CHECK_NULL_RETURN(param, false);
+        auto result = JSViewAbstract::GetPopupParam(param, customNode);
+        if (result == ERROR_CODE_NO_ERROR) {
+            isShowInSubWindow = param->IsShowInSubWindow();
+            popupParam->SetTargetId(param->GetTargetId());
+        } else {
+            if (result != ERROR_CODE_INTERNAL_ERROR) {
+                ReturnPromise(info, result);
+            }
+            return false;
+        }
+    }
+    popupParam->SetIsShow(true);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetIsPartialUpdate(isPartialUpdate);
+    auto popupObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
+    JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
+    popupParam->SetShowInSubWindow(isShowInSubWindow);
+    return true;
+}
+
+void JSViewContext::JSUpdatePopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_TWO) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_VOID(popupParam);
+    bool isPartialUpdate = false;
+    if (paramCnt == LENGTH_THREE) {
+        if (!info[INDEX_TWO]->IsBoolean()) {
+            ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+            return;
+        }
+        isPartialUpdate = info[INDEX_TWO]->ToBoolean();
+    }
+    auto result = ParseContentPopupCommonParam(info, popupParam, popupContentNode, isPartialUpdate);
+    if (!result) {
+        return;
+    }
+    auto ret = JSViewAbstract::UpdatePopup(popupParam, popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
+void JSViewContext::JSClosePopup(const JSCallbackInfo& info)
+{
+    auto paramCnt = info.Length();
+    if (paramCnt < LENGTH_ONE) {
+        ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
+        return;
+    }
+    auto popupContentNode = ParseContentNode(info);
+    if (popupContentNode == nullptr) {
+        ReturnPromise(info, ERROR_CODE_DIALOG_CONTENT_ERROR);
+        return;
+    }
+    auto ret = JSViewAbstract::ClosePopup(popupContentNode);
+    if (ret != ERROR_CODE_INTERNAL_ERROR) {
+        ReturnPromise(info, ret);
+    }
+    return;
+}
+
 void JSViewContext::IsFollowingSystemFontScale(const JSCallbackInfo& info)
 {
     auto container = Container::CurrentSafely();
@@ -1030,6 +1203,9 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("openBindSheet", JSOpenBindSheet);
     JSClass<JSViewContext>::StaticMethod("updateBindSheet", JSUpdateBindSheet);
     JSClass<JSViewContext>::StaticMethod("closeBindSheet", JSCloseBindSheet);
+    JSClass<JSViewContext>::StaticMethod("openPopup", JSOpenPopup);
+    JSClass<JSViewContext>::StaticMethod("updatePopup", JSUpdatePopup);
+    JSClass<JSViewContext>::StaticMethod("closePopup", JSClosePopup);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
 #ifndef ARKUI_WEARABLE
