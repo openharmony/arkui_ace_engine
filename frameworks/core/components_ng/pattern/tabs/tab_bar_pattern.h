@@ -655,6 +655,7 @@ private:
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
+    SizeF GetContentSize() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
@@ -780,6 +781,7 @@ private:
     std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+    float barGridMargin_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     bool accessibilityScroll_ = false;
