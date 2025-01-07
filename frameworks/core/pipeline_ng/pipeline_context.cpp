@@ -45,6 +45,7 @@
 #include "core/common/font_change_observer.h"
 #include "core/common/ime/input_method_manager.h"
 #include "core/common/layout_inspector.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/common/stylus/stylus_detector_default.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/text_field_manager.h"
@@ -2909,6 +2910,11 @@ void PipelineContext::DumpElement(const std::vector<std::string>& params, bool h
     }
 }
 
+void PipelineContext::DumpResLoadError() const
+{
+    ResourceManager::GetInstance().DumpResLoadError();
+}
+
 bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
 {
     bool hasJson = params.back() == "-json";
@@ -3017,6 +3023,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-simplify") {
         rootNode_->DumpTree(0);
         DumpLog::GetInstance().OutPutByCompress();
+    } else if (params[0] == "-resource") {
+        DumpResLoadError();
     }
     return true;
 }
