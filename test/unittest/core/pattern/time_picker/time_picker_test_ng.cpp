@@ -1737,7 +1737,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
 
     timePickerRowPattern->SetHour24(false);
     frameNode->RemoveChildAtIndex(0);
-    timePickerRowPattern->HandleHourColumnBuilding();
+    auto selectedTime = timePickerRowPattern->GetSelectedTime();
+    timePickerRowPattern->HandleHourColumnBuilding(selectedTime);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(allChildNode["amPm"].Upgrade(), nullptr);
 }

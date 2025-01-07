@@ -1567,9 +1567,17 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
+    auto startTime = paramObj->GetProperty("start");
+    auto endTime = paramObj->GetProperty("end");
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
     auto formatValue = paramObj->GetProperty("format");
     bool showSecond = false;
     if (formatValue->IsNumber()) {
@@ -1579,6 +1587,8 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
     }
     TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
+    TimePickerModel::GetInstance()->SetStartTime(parseStartTime);
+    TimePickerModel::GetInstance()->SetEndTime(parseEndTime);
     if (selectedTime->IsObject()) {
         JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
         JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
@@ -1619,9 +1629,9 @@ void JSTimePicker::SetDefaultAttributes()
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
-PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime::Current();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime::Current();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }
@@ -1793,6 +1803,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             func->Execute();
         };
     }
+    auto startTime = paramObject->GetProperty("start");
+    auto endTime = paramObject->GetProperty("end");
     auto selectedTime = paramObject->GetProperty("selected");
     auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
     auto enableCascade = paramObject->GetProperty("enableCascade");
@@ -1802,6 +1814,17 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     settingData.isEnableCascade = enableCascade->ToBoolean();
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
     pickerDialog.isEnableCascade = enableCascade->ToBoolean();
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
+    pickerDialog.parseStartTime = parseStartTime;
+    pickerDialog.parseEndTime = parseEndTime;
+
     if (selectedTime->IsObject()) {
         PickerDate dialogTitleDate = ParseDate(selectedTime);
         if (dialogTitleDate.GetYear() != 0) {
@@ -1965,9 +1988,9 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     component = timePicker;
 }
 
-PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }
