@@ -359,7 +359,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
             break;
         case OptionMenuActionId::SELECT_ALL:
-            pattern->isMousePressed_ = usingMouse;
             pattern->HandleMenuCallbackOnSelectAll();
             break;
         case OptionMenuActionId::SEARCH:

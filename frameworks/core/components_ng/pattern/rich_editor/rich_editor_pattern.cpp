@@ -8145,8 +8145,6 @@ void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
     if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
         ResetIsMousePressed();
         sourceType_ = SourceType::TOUCH;
-    } else {
-        isMousePressed_ = true;
     }
 }
 
