@@ -6177,7 +6177,7 @@ void RosenRenderContext::MarkNewFrameAvailable(void* nativeWindow)
 void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback)
 {
     CHECK_NULL_VOID(rsNode_);
-#if defined(ANDROID_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSurfaceTextureAttachCallBack(attachCallback);
@@ -6187,10 +6187,20 @@ void RosenRenderContext::AddAttachCallBack(const std::function<void(int64_t, boo
 void RosenRenderContext::AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback)
 {
     CHECK_NULL_VOID(rsNode_);
-#if defined(ANDROID_PLATFORM)
+#if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     CHECK_NULL_VOID(rsSurfaceNode);
     rsSurfaceNode->SetSurfaceTextureUpdateCallBack(updateCallback);
+#endif
+}
+
+void RosenRenderContext::AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback)
+{
+    CHECK_NULL_VOID(rsNode_);
+#if defined(IOS_PLATFORM)
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetSurfaceTextureInitTypeCallBack(initTypeCallback);
 #endif
 }
 

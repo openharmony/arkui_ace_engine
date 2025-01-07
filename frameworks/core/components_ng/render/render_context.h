@@ -190,6 +190,7 @@ public:
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
     virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
     virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+    virtual void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
