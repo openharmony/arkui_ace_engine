@@ -33,16 +33,19 @@
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_image.h"
 #include "frameworks/core/components_ng/svg/parse/svg_line.h"
+#include "frameworks/core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
+#include "frameworks/core/components_ng/svg/parse/svg_radial_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 #include "frameworks/core/components_ng/svg/svg_fit_convertor.h"
 #include "frameworks/core/components_ng/svg/svg_ulils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -69,13 +72,25 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
     { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
-    { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
+    { "linearGradient", []() -> RefPtr<SvgNode> {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+             return SvgGradient::CreateLinearGradient();
+        } else {
+            return SvgLinearGradient::Create();
+        }
+        } },
     { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
     { "path", []() -> RefPtr<SvgNode> { return SvgPath::Create(); } },
     { "pattern", []() -> RefPtr<SvgNode> { return SvgPattern::Create(); } },
     { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
     { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
-    { "radialGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateRadialGradient(); } },
+    { "radialGradient", []() -> RefPtr<SvgNode> {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            return SvgGradient::CreateRadialGradient();
+        } else {
+            return SvgRadialGradient::Create();
+        }
+        } },
     { "rect", []() -> RefPtr<SvgNode> { return SvgRect::Create(); } },
     { "stop", []() -> RefPtr<SvgNode> { return SvgStop::Create(); } },
     { "style", []() -> RefPtr<SvgNode> { return SvgStyle::Create(); } },
@@ -332,7 +347,14 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
+    } else {
+        SvgLengthScaleRule lengthRule(Rect(0, 0, svgContext_->GetViewPort().Width(),
+            svgContext_->GetViewPort().Height()), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+        svgContext_->SetFillColor(fillColor_);
+        root_->Draw(canvas, lengthRule);
+    }
     canvas.Restore();
 }
 

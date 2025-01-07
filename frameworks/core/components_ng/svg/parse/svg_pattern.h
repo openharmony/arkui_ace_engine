@@ -31,7 +31,8 @@ public:
     void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
-
+    void OnPatternEffect(RSCanvas& canvas, RSBrush& brush,
+        const SvgCoordinateSystemContext& svgCoordinateSystemContext);
     void SetBoundingBoxRect(const Rect& boundingBoxRect)
     {
         boundingBoxRect_ = boundingBoxRect;

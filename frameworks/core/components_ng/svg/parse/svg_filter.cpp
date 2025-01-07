@@ -15,6 +15,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_filter.h"
 
+#include "core/components_ng/svg/base/svg_filter_context.h"
 #include "core/common/container.h"
 #include "frameworks/core/components_ng/svg/parse/svg_constants.h"
 #include "frameworks/core/components_ng/svg/parse/svg_fe.h"
@@ -90,12 +91,55 @@ void SvgFilter::OnAsPaint()
     filterBrush_.SetFilter(filter);
 }
 
+void SvgFilter::OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto filterRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.filterUnits);
+    auto measuredX = GetMeasuredPosition(filterAttr_.x, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetMeasuredPosition(filterAttr_.y, filterRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetMeasuredLength(filterAttr_.width, filterRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetMeasuredLength(filterAttr_.height, filterRule, SvgLengthType::VERTICAL);
+    Rect effectFilterArea = {
+        measuredX,
+        measuredY,
+        measuredWidth,
+        measuredHeight
+    };
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>> resultHash;
+    auto primitiveRule = svgCoordinateSystemContext.BuildScaleRule(filterAttr_.primitiveUnits);
+    SvgFilterContext filterContext(effectFilterArea, filterRule, primitiveRule);
+    for (const auto& item : children_) {
+        auto nodeFe = AceType::DynamicCast<SvgFe>(item);
+        if (!nodeFe) {
+            continue;
+        }
+        nodeFe->SetFilterContext(filterContext);
+        nodeFe->GetImageFilter(imageFilter, resultHash);
+    }
+    auto filter = filterBrush_.GetFilter();
+    filter.SetImageFilter(imageFilter);
+    filterBrush_.SetAntiAlias(true);
+    filterBrush_.SetFilter(filter);
+    RSSaveLayerOps slo(nullptr, &filterBrush_);
+    canvas.SaveLayer(slo);
+}
+
 bool SvgFilter::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgFilterAttribute&)> attrs[] = {
+        { SVG_FILTER_UNITS,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.filterUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
+                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
+            } },
         { SVG_HEIGHT,
             [](const std::string& val, SvgFilterAttribute& attr) {
                 attr.height = SvgAttributesParser::ParseDimension(val);
+            } },
+        { SVG_PRIMITIVE_UNITS,
+            [](const std::string& val, SvgFilterAttribute& attr) {
+                attr.primitiveUnits = (val == "userSpaceOnUse") ? SvgLengthScaleUnit::USER_SPACE_ON_USE :
+                    SvgLengthScaleUnit::OBJECT_BOUNDING_BOX;
             } },
         { SVG_WIDTH,
             [](const std::string& val, SvgFilterAttribute& attr) {

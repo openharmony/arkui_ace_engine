@@ -96,6 +96,7 @@ extern const char SVG_OFFSET[];
 extern const char SVG_STOP_COLOR[];
 extern const char SVG_STOP_OPACITY[];
 extern const char SVG_GRADIENT_TRANSFORM[];
+extern const char SVG_GRADIENT_UNITS[];
 extern const char SVG_SPREAD_METHOD[];
 extern const char SVG_FX[];
 extern const char SVG_FY[];
@@ -103,6 +104,8 @@ extern const char SVG_FR[];
 extern const char SVG_HREF[];
 extern const char SVG_XLINK_HREF[];
 extern const char SVG_CLIP_RULE[];
+extern const char SVG_FILTER_UNITS[];
+extern const char SVG_PRIMITIVE_UNITS[];
 extern const char SVG_FE_IN[];
 extern const char SVG_FE_IN2[];
 extern const char SVG_FE_MODE[];
@@ -126,6 +129,7 @@ extern const char SVG_FE_K4[];
 extern const char SVG_FE_OPERATOR_TYPE[];
 extern const char SVG_TRANSFORM[];
 extern const char SVG_CLIP_PATH[];
+extern const char SVG_CLIP_PATH_UNITS[];
 
 } // namespace OHOS::Ace::NG
 

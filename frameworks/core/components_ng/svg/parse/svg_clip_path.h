@@ -18,6 +18,7 @@
 
 #include "frameworks/core/components_ng/svg/parse/svg_quote.h"
 
+#include "frameworks/core/components_ng/svg/base/svg_length_scale_rule.h"
 namespace OHOS::Ace::NG {
 
 class SvgClipPath : public SvgQuote {
@@ -27,6 +28,7 @@ public:
     SvgClipPath() = default;
     ~SvgClipPath() override = default;
     static RefPtr<SvgNode> Create();
+    void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) override;
 };
 
 } // namespace OHOS::Ace::NG
