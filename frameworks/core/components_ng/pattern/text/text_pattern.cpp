@@ -3360,7 +3360,7 @@ void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
     CHECK_NULL_VOID(host);
     auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) != TextOverflow::MARQUEE) {
+    if (!(textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
         return;
     }
     auto geometryNode = host->GetGeometryNode();
