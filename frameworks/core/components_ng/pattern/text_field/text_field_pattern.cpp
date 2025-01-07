@@ -4728,11 +4728,11 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
     if (!paintProperty->GetCaretColorFlagByUserValue(false)) {
         paintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
-        result = true;
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 
     if (result || !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         updateFlag = false;
     }
     // no interface to set password icon color, should update every time

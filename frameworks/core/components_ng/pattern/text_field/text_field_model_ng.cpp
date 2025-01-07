@@ -305,6 +305,13 @@ void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 
 void TextFieldModelNG::ResetPlaceholderColor()
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPlaceholderFontStyle()) {
+        layoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
+    }
     ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser);
 }
 
@@ -1245,7 +1252,13 @@ void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& va
 
 void TextFieldModelNG::ResetPlaceholderColor(FrameNode* frameNode)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, false, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPlaceholderFontStyle()) {
+        layoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
+    }
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
