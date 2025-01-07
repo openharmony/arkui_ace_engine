@@ -364,6 +364,10 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOpt
         []() {});
 };
 
+namespace GeneratedModifier {
+const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
+}
+
 auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
     auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
     if (onAppear) {
@@ -1669,7 +1673,7 @@ template<>
 void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
 {
     if (auto strategy = OptConvert<TouchTestStrategy>(src.strategy); strategy) {
-        dst->strategy = *strategy;
+        dst = { .strategy = *strategy };
         if (auto id = OptConvert<std::string>(src.id); id) {
             dst->id = *id;
         }
@@ -1705,8 +1709,12 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
 {
+    auto accessor = GeneratedModifier::GetGestureRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst.ptr = accessor->ctor();
     if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
         peer->SetRecognizer(src);
     }
@@ -4140,6 +4148,12 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
+        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
+            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
+                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+            });
+        }
         return resultOpt.value_or(defVal);
     };
     ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
@@ -4162,6 +4176,12 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
+            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
+                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+            });
+        }
         return resultOpt.value_or(nullptr);
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));
