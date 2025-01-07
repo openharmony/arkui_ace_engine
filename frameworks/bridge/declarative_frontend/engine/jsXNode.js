@@ -1447,6 +1447,16 @@ const __creatorMap__ = new Map([
                 return new ArkFlowItemComponent(node, type);
             });
         }],
+    ['Marquee', (context) => {
+            return new TypedFrameNode(context, 'Marquee', (node, type) => {
+                return new ArkMarqueeComponent(node, type);
+            });
+        }],
+    ['TextArea', (context) => {
+            return new TypedFrameNode(context, 'TextArea', (node, type) => {
+                return new ArkTextAreaComponent(node, type);
+            });
+        }],
     ['QRCode', (context) => {
             return new TypedFrameNode(context, 'QRCode', (node, type) => {
                 return new ArkQRCodeComponent(node, type);
@@ -1475,16 +1485,6 @@ const __creatorMap__ = new Map([
     ['TextTimer', (context) => {
             return new TypedFrameNode(context, 'TextTimer', (node, type) => {
                 return new ArkTextTimerComponent(node, type);
-            });
-        }],
-    ['Marquee', (context) => {
-            return new TypedFrameNode(context, 'Marquee', (node, type) => {
-                return new ArkMarqueeComponent(node, type);
-            });
-        }],
-    ['TextArea', (context) => {
-            return new TypedFrameNode(context, 'TextArea', (node, type) => {
-                return new ArkTextAreaComponent(node, type);
             });
         }],
 ]);
