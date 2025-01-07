@@ -2198,17 +2198,24 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
     return errorCode;
 }
 
+bool GetIsSystemWindow(const RefPtr<Platform::AceContainer>& container)
+{
+    auto pipeline = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_RETURN(safeAreaManager, false);
+    return safeAreaManager->GetWindowTypeConfig().isSystemWindow;
+}
+
 void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& container)
 {
     constexpr static int32_t PLATFORM_VERSION_TEN = 10;
     auto pipeline = container->GetPipelineContext();
+    bool isSystemWindow = GetIsSystemWindow(container) &&
+        Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
     if (pipeline && pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
-        auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
-        CHECK_NULL_VOID(pipelineContext);
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto isSystemWindow = safeAreaManager->GetWindowTypeConfig().isSystemWindow &&
-            Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
         if (pipeline->GetIsAppWindow() || container->IsUIExtensionWindow() || isSystemWindow) {
             avoidAreaChangedListener_ = new PretendChangedListener(instanceId_);
             window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
