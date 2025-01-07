@@ -3157,7 +3157,7 @@ void RichEditorPattern::HandleFocusEvent()
         needToRequestKeyboardOnFocus_, windowMode, usingMouseRightButton_);
 
     bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_;
-    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING); // do not show kb in floating mode
+    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING || GetIsMidScene());
     needShowSoftKeyboard &= !usingMouseRightButton_; // do not show kb when mouseRightClick
 
     RequestKeyboard(false, true, needShowSoftKeyboard);
@@ -3172,6 +3172,18 @@ WindowMode RichEditorPattern::GetWindowMode()
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, WindowMode::WINDOW_MODE_UNDEFINED);
     return windowManager->GetWindowMode();
+}
+
+bool RichEditorPattern::GetIsMidScene()
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    bool isMidScene = false;
+    int32_t ret = windowManager->GetIsMidScene(isMidScene);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetIsMidScene ret=%{public}d", ret);
+    return isMidScene;
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
