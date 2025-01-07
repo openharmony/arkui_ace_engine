@@ -302,7 +302,7 @@ public:
         executeDropAnimation_ = std::move(executeDropAnimation);
     }
 
-    bool HasDropAnimation() const 
+    bool HasDropAnimation() const
     {
         return (executeDropAnimation_ != nullptr);
     }
