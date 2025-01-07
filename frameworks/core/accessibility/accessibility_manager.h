@@ -88,6 +88,7 @@ enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
     ON_HIDE = 2,
+    ON_SEND_ELEMENT_INFO_CHANGE = 3,
 };
 
 struct AccessibilityCallbackEvent {
@@ -96,7 +97,7 @@ struct AccessibilityCallbackEvent {
     AccessibilityCallbackEvent(AccessibilityCallbackEventId id, int64_t para) : eventId(id), parameter(para) {}
     bool operator < (const AccessibilityCallbackEvent& other) const
     {
-        return eventId < other.eventId;
+        return std::tie(eventId, parameter) < std::tie(other.eventId, other.parameter);
     }
 };
 

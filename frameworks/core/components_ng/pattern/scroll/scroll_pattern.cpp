@@ -556,10 +556,23 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     ValidateOffset(source);
     HandleScrollPosition(userOffset);
     if (IsCrashTop()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashTop();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashTop();
     } else if (IsCrashBottom()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashBottom();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashBottom();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (!IsCrashBottom() && !IsCrashTop()) {
+        SetReachBoundary(false);
+    }
+#endif
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }

@@ -277,7 +277,7 @@ public:
             theme->menuNormalBorderWidth_ = pattern->GetAttr<Dimension>("menu_normal_border_width", 0.0_vp);
             theme->menuNormalBorderColor_ = pattern->GetAttr<Color>("menu_normal_border_color", Color::TRANSPARENT);
             theme->menuNormalBackgroundBlurStyle_ =
-                static_cast<uint32_t>(pattern->GetAttr<double>("menu_normal_back_ground_blur_type", 0));
+                static_cast<int>(pattern->GetAttr<double>("menu_normal_back_ground_blur_type", 0));
             theme->optionNormalTopBottomMargin_ =
                 pattern->GetAttr<Dimension>("option_normal_top_bottom_margin", 0.0_vp);
             theme->optionContentNormalLeftRightPadding_ =

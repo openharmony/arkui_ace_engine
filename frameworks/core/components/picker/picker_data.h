@@ -26,6 +26,12 @@ enum DatePickerType {
     DATE,
 };
 
+enum class DatePickerMode : uint32_t {
+    DATE = 0,
+    YEAR_AND_MONTH = 1,
+    MONTH_AND_DAY = 2,
+};
+
 class ACE_FORCE_EXPORT PickerDate final {
 public:
     PickerDate() = default;
@@ -38,6 +44,10 @@ public:
     static uint32_t GetMaxDay(uint32_t year, uint32_t month);
 
     static bool IsLeapYear(uint32_t year);
+
+    static PickerDate AdjustDateToRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
+
+    static bool IsDateInRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
 
     uint32_t GetYear() const
     {

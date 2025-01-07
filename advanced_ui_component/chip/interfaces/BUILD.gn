@@ -24,11 +24,11 @@ es2abc_gen_abc("gen_chip_abc") {
   extra_args = [ "--module" ]
 }
 
-es2abc_gen_abc("gen_chip_v14_abc") {
-  src_js = rebase_path("chip_v14.js")
-  dst_file = rebase_path(target_out_dir + "/chip_v14.abc")
-  in_puts = [ "chip_v14.js" ]
-  out_puts = [ target_out_dir + "/chip_v14.abc" ]
+es2abc_gen_abc("gen_chip_v16_abc") {
+  src_js = rebase_path("chip_v16.js")
+  dst_file = rebase_path(target_out_dir + "/chip_v16.abc")
+  in_puts = [ "chip_v16.js" ]
+  out_puts = [ target_out_dir + "/chip_v16.abc" ]
   extra_args = [ "--module" ]
 }
 
@@ -38,11 +38,11 @@ gen_js_obj("chip_abc") {
   dep = ":gen_chip_abc"
 }
 
-gen_js_obj("chip_v14_abc") {
+gen_js_obj("chip_v16_abc") {
   input =
-      get_label_info(":gen_chip_v14_abc", "target_out_dir") + "/chip_v14.abc"
-  output = target_out_dir + "/chip_v14_abc.o"
-  dep = ":gen_chip_v14_abc"
+      get_label_info(":gen_chip_v16_abc", "target_out_dir") + "/chip_v16.abc"
+  output = target_out_dir + "/chip_v16_abc.o"
+  dep = ":gen_chip_v16_abc"
 }
 
 gen_obj("chip_abc_preview") {
@@ -51,11 +51,11 @@ gen_obj("chip_abc_preview") {
   snapshot_dep = [ ":gen_chip_abc" ]
 }
 
-gen_obj("chip_v14_abc_preview") {
+gen_obj("chip_v16_abc_preview") {
   input =
-      get_label_info(":gen_chip_v14_abc", "target_out_dir") + "/chip_v14.abc"
-  output = target_out_dir + "/chip_v14_abc.c"
-  snapshot_dep = [ ":gen_chip_v14_abc" ]
+      get_label_info(":gen_chip_v16_abc", "target_out_dir") + "/chip_v16.abc"
+  output = target_out_dir + "/chip_v16_abc.c"
+  snapshot_dep = [ ":gen_chip_v16_abc" ]
 }
 
 template("chip_static") {
@@ -85,12 +85,12 @@ template("chip_static") {
     if (use_mingw_win || use_mac || use_linux) {
       deps += [
         ":gen_obj_src_chip_abc_preview",
-        ":gen_obj_src_chip_v14_abc_preview",
+        ":gen_obj_src_chip_v16_abc_preview",
       ]
     } else {
       deps += [
         ":chip_abc",
-        ":chip_v14_abc",
+        ":chip_v16_abc",
       ]
     }
 

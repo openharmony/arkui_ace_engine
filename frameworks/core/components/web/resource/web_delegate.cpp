@@ -347,6 +347,14 @@ bool FileSelectorParamOhos::IsCapture()
     return false;
 }
 
+std::vector<std::string> FileSelectorParamOhos::GetMimeType()
+{
+    if (param_) {
+        return param_->MimeType();
+    }
+    return std::vector<std::string>();
+}
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {
@@ -3180,6 +3188,11 @@ void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
     return isSmoothDragResizeEnabled_;
+}
+
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
+{
+    isDragResizeStart_ = isDragResizeStart;
 }
 
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
@@ -6226,6 +6239,9 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
 
 void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
+    if (isDragResizeStart_) {
+        return;
+    }
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         return;
     }

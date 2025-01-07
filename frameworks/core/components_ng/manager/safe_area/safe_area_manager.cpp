@@ -132,6 +132,37 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
     return res;
 }
 
+bool SafeAreaManager::UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (scbSystemSafeArea_.has_value() && scbSystemSafeArea_.value() == safeArea) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbSystemSafeArea %s", safeArea.ToString().c_str());
+    scbSystemSafeArea_ = safeArea;
+    return true;
+}
+
+bool SafeAreaManager::UpdateScbCutoutSafeArea(const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize)
+{
+    auto safeAreaWithRoot = GenerateCutOutAreaWithRoot(safeArea, rootSize);
+    if (scbCutoutSafeArea_.has_value() && scbCutoutSafeArea_.value() == safeAreaWithRoot) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbCutoutSafeArea %s", safeAreaWithRoot.ToString().c_str());
+    scbCutoutSafeArea_ = safeAreaWithRoot;
+    return true;
+}
+
+bool SafeAreaManager::UpdateScbNavSafeArea(const SafeAreaInsets& safeArea)
+{
+    if (scbNavSafeArea_.has_value() && scbNavSafeArea_.value() == safeArea) {
+        return false;
+    }
+    ACE_SCOPED_TRACE("SafeAreaManager::UpdateScbNavSafeArea %s", safeArea.ToString().c_str());
+    scbNavSafeArea_ = safeArea;
+    return true;
+}
+
 bool SafeAreaManager::IsSafeAreaValid() const
 {
 #ifdef PREVIEW
@@ -238,6 +269,27 @@ SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutCutout() const
 SafeAreaInsets SafeAreaManager::GetSafeAreaWithoutProcess() const
 {
     return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
+}
+
+// Effective only in API 16 and later versions
+SafeAreaInsets SafeAreaManager::GetScbSafeArea() const
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    if (!windowTypeConfig_.isSceneBoardWindow) {
+        return GetSafeAreaWithoutProcess();
+    }
+    SafeAreaInsets scbSafeArea;
+    if (scbSystemSafeArea_.has_value()) {
+        scbSafeArea = scbSafeArea.Combine(scbSystemSafeArea_.value());
+    }
+    if (scbCutoutSafeArea_.has_value() && pipeline->GetUseCutout()) {
+        scbSafeArea = scbSafeArea.Combine(scbCutoutSafeArea_.value());
+    }
+    if (scbNavSafeArea_.has_value()) {
+        scbSafeArea = scbSafeArea.Combine(scbNavSafeArea_.value());
+    }
+    return scbSafeArea;
 }
 
 PaddingPropertyF SafeAreaManager::SafeAreaToPadding(bool withoutProcess)

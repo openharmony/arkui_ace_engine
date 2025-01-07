@@ -119,6 +119,7 @@ public:
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -488,6 +489,7 @@ public:
     {
         return dismissSheetId_;
     }
+    RefPtr<FrameNode> GetModalStackTop();
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -815,6 +817,8 @@ private:
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
+    void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
+        const RefPtr<FrameNode> dialog, bool showComponentContent);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -836,6 +840,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

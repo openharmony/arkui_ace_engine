@@ -138,9 +138,6 @@ HWTEST_F(ScrollableAxisTestNg, AxisDragTest001, TestSize.Level1)
     EXPECT_FALSE(startEventTrigger);
     EXPECT_FLOAT_EQ(axisScrollMotion->currentPos_, 0.f);
 
-    DragUpdate(scrollable, -100.f);
-    EXPECT_EQ(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);
-
     context->SetVsyncTime(1);
     DragUpdate(scrollable, -100.f);
     ASSERT_NE(scrollable->axisAnimator_->axisScrollAnimator_, nullptr);

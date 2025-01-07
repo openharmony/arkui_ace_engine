@@ -99,6 +99,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
+    GetExpandArea(layoutProperty, layoutInfo_);
+
     int32_t updateIdx = GetUpdateIdx(layoutWrapper, layoutInfo_->footerIndex_);
     if (updateIdx != -1) {
         layoutInfo_->Reset(updateIdx);
@@ -243,28 +245,25 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            const bool isCache =
-                !showCache && (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_);
+            const bool inRange = item.first >= layoutInfo_->startIndex_ && item.first <= layoutInfo_->endIndex_;
+            const bool isCache = !showCache && !inRange;
             auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 
-            if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (CheckNeedLayout(wrapper, isCache)) {
                 wrapper->Layout();
             } else {
                 wrapper->GetHostNode()->ForceSyncGeometryNode();
-            }
-            if (isCache) {
-                continue;
             }
             // recode restore info
             if (item.first == layoutInfo_->startIndex_) {
                 layoutInfo_->storedOffset_ = mainOffset;
             }
 
-            if (NonNegative(mainOffset + item.second.second)) {
+            if (inRange && NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
@@ -332,11 +331,12 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
 
     layoutInfo_->UpdateStartIndex();
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const float expandMainSize = mainSize + layoutInfo_->expandHeight_;
     auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
-    while (
-        LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, mainSize) || layoutInfo_->jumpIndex_ >= 0) {
+    while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
+           layoutInfo_->jumpIndex_ >= 0) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;

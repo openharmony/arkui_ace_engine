@@ -282,7 +282,7 @@ void ButtonModelNG::CreateWithChild(const CreateWithPara& para)
         SetButtonStyle(para.buttonStyleMode);
         SetControlSize(para.controlSize);
         SetRole(para.buttonRole);
-    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
     }
 }
@@ -419,7 +419,7 @@ void ButtonModelNG::SetTypeAndStateEffect(const std::optional<ButtonType>& type,
     if (type.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, type.value());
     } else {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             // undefined use ROUNDED_RECTANGLE type.
             ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Type, ButtonType::ROUNDED_RECTANGLE);
         } else {
@@ -623,7 +623,7 @@ void ButtonModelNG::ResetBorderRadius()
 ButtonType ButtonModelNG::GetType(FrameNode* frameNode)
 {
     ButtonType value = ButtonType::CAPSULE;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         value = ButtonType::ROUNDED_RECTANGLE;
         ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, Type, value,
                                                         frameNode, ButtonType::ROUNDED_RECTANGLE);
@@ -667,6 +667,16 @@ void ButtonModelNG::SetCreateWithLabel(bool createWithLabel)
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, CreateWithLabel, createWithLabel);
 }
 
+void ButtonModelNG::SetMinFontScale(float minFontScale)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, minFontScale);
+}
+
+void ButtonModelNG::SetMaxFontScale(float maxFontScale)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, maxFontScale);
+}
+
 void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel)
 {
     auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -675,5 +685,32 @@ void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabe
         return;
     }
     property->UpdateCreateWithLabel(createWithLabel);
+}
+
+void ButtonModelNG::SetMinFontScale(FrameNode* frameNode, float minFontScale)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, minFontScale, frameNode);
+}
+
+void ButtonModelNG::SetMaxFontScale(FrameNode* frameNode, float maxFontScale)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode);
+}
+
+float ButtonModelNG::GetMinFontScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    float minFontScale = 0.0f;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, MinFontScale, minFontScale, frameNode, 0.0f);
+    return minFontScale;
+}
+
+float ButtonModelNG::GetMaxFontScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    float maxFontScale = 0.0f;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode,
+        static_cast<float>(INT32_MAX));
+    return maxFontScale;
 }
 } // namespace OHOS::Ace::NG

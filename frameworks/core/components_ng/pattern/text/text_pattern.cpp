@@ -174,15 +174,13 @@ void TextPattern::ResetSelection()
 
 void TextPattern::InitSelection(const Offset& pos)
 {
+    CHECK_NULL_VOID(pManager_);
     auto selectionOffset = pos;
     if (GreatNotEqual(selectionOffset.GetY(), pManager_->GetHeight())) {
         selectionOffset.SetX(contentRect_.Width());
         selectionOffset.SetY(pManager_->GetHeight());
     }
     int32_t extend = pManager_->GetGlyphIndexByCoordinate(selectionOffset, true);
-    if (IsLineBreakOrEndOfParagraph(extend)) {
-        extend--;
-    }
     int32_t start = 0;
     int32_t end = 0;
     if (!pManager_->GetWordBoundary(extend, start, end)) {
@@ -191,13 +189,6 @@ void TextPattern::InitSelection(const Offset& pos)
             extend + GetGraphemeClusterLength(textForDisplay_, extend));
     }
     HandleSelectionChange(start, end);
-}
-
-bool TextPattern::IsLineBreakOrEndOfParagraph(int32_t pos) const
-{
-    CHECK_NULL_RETURN(pos < static_cast<int32_t>(textForDisplay_.length() + placeholderCount_), true);
-    CHECK_NULL_RETURN(textForDisplay_[pos] == WIDE_NEWLINE[0], false);
-    return true;
 }
 
 void TextPattern::CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity)
@@ -2586,6 +2577,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
         textStyle.letterSpacing = node->GetLetterSpacingValue(Dimension()).ConvertToVp();
         textStyle.lineSpacing = node->GetLineSpacingValue(Dimension()).ConvertToVp();
     }
+    textStyle.halfLeading = node->GetHalfLeadingValue(false);
     textStyle.fontFeature = node->GetFontFeatureValue(ParseFontFeatureSettings("\"pnum\" 1"));
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = lm.size.Width().ToString();
     textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = lm.size.Height().ToString();
@@ -3150,7 +3142,7 @@ bool TextPattern::IsShowHandle()
     CHECK_NULL_RETURN(host, false);
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
-    auto theme = pipeline->GetTheme<TextTheme>();
+    auto theme = pipeline->GetTheme<TextTheme>(GetThemeScopeId());
     CHECK_NULL_RETURN(theme, false);
     return !theme->IsShowHandle();
 }
@@ -3958,18 +3950,42 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    CHECK_NULL_VOID(!textLayoutProperty->GetTextColorFlagByUserValue(false));
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    OnThemeScopeUpdate(host->GetThemeScopeId());
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
     ACE_TEXT_SCOPED_TRACE("OnColorConfigurationUpdate[Text][self:%d]", host->GetId());
+}
+
+bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto contex = host->GetRenderContext();
+    CHECK_NULL_RETURN(contex, false);
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(textLayoutProperty, false);
+
+    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);
+        CHECK_NULL_RETURN(textTheme, false);
+        UpdateFontColor(textTheme->GetTextStyle().GetTextColor());
+    }
+    return false;
+}
+
+void TextPattern::ResetCustomFontColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textTheme = pipeline->GetTheme<TextTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(textTheme);
+    auto color = textTheme->GetTextStyle().GetTextColor();
+    UpdateFontColor(color);
 }
 
 OffsetF TextPattern::GetDragUpperLeftCoordinates()
@@ -4457,15 +4473,14 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     auto options = imageItem->options;
-    auto imageInfo = CreateImageSourceInfo(options);
-    imageLayoutProperty->UpdateImageSourceInfo(imageInfo);
-    auto index = host->GetChildren().size();
-    imageNode->MountToParent(host, index);
-    auto gesture = imageNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->SetHitTestMode(HitTestMode::HTMNONE);
+    imageLayoutProperty->UpdateImageSourceInfo(CreateImageSourceInfo(options));
+    imageNode->MountToParent(host, host->GetChildren().size());
+    SetImageNodeGesture(imageNode);
     if (options.imageAttribute.has_value()) {
         auto imgAttr = options.imageAttribute.value();
+        auto imagePattern = imageNode->GetPattern<ImagePattern>();
+        CHECK_NULL_VOID(imagePattern);
+        imagePattern->SetSyncLoad(imgAttr.syncLoad);
         if (imgAttr.size.has_value()) {
             imageLayoutProperty->UpdateUserDefinedIdealSize(imgAttr.size->GetSize());
         }
@@ -4486,12 +4501,27 @@ void TextPattern::MountImageNode(const RefPtr<ImageSpanItem>& imageItem)
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
         }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
     imageItem->imageNodeId = imageNode->GetId();
     imageNode->SetImageItem(imageItem);
     childNodes_.emplace_back(imageNode);
+}
+
+void TextPattern::SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode)
+{
+    auto gesture = imageNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gesture);
+    gesture->SetHitTestMode(HitTestMode::HTMNONE);
 }
 
 ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& options)
@@ -4512,14 +4542,18 @@ ImageSourceInfo TextPattern::CreateImageSourceInfo(const ImageSpanOptions& optio
     if (options.moduleName.has_value()) {
         moduleName = options.moduleName.value();
     }
+    ImageSourceInfo info;
 #if defined(PIXEL_MAP_SUPPORTED)
     if (!options.imagePixelMap.has_value()) {
-        return { src, bundleName, moduleName };
+        info = ImageSourceInfo{ src, bundleName, moduleName };
+    } else {
+        info = ImageSourceInfo(pixMap);
     }
-    return ImageSourceInfo(pixMap);
 #else
-    return { src, bundleName, moduleName };
+    info = ImageSourceInfo{ src, bundleName, moduleName };
 #endif
+    info.SetIsUriPureNumber(options.isUriPureNumber.value_or(false));
+    return info;
 }
 
 void TextPattern::ProcessSpanString()
@@ -4783,6 +4817,9 @@ void TextPattern::UpdateFontColor(const Color& value)
     } else {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->OnPropertyChangeMeasure();
 }
 
 void TextPattern::MarkDirtyNodeRender()
@@ -4841,7 +4878,7 @@ void TextPattern::OnTextGestureSelectionUpdate(int32_t start, int32_t end, const
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextPattern::OnTextGenstureSelectionEnd()
+void TextPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo)
 {
     selectOverlay_->TriggerScrollableParentToScroll(scrollableParent_.Upgrade(), Offset(), true);
     if (magnifierController_) {

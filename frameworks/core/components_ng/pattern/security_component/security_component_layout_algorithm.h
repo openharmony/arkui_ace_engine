@@ -62,7 +62,10 @@ private:
     bool IsOutOfRangeInHoriCapsule(SizeF& leftCirclePoint, SizeF& rightCirclePoint, float maxDistance);
     bool IsOutOfRangeInVertiCapsule(SizeF& topCirclePoint, SizeF& bottomCirclePoint, float maxDistance);
     bool IsTextOutOfRangeInNormal();
-    bool GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper);
+    void UpdateTextFlags(LayoutWrapper* layoutWrapper);
+    bool GetMaxLineLimitExceededFlag(std::optional<SizeF>& currentTextSize);
+    bool GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property, LayoutWrapper* layoutWrapper,
+        std::optional<SizeF>& currentTextSize);
     bool CompareDistance(SizeF& point, SizeF& circlePoint, float maxDistance);
     bool TopLeftCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool TopRightCompDistance(float obtainedRadius, float maxRadius, float threshold);

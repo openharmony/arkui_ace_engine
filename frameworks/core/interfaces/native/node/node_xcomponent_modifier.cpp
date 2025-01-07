@@ -191,6 +191,20 @@ void ResetXComponentHdrBrightness(ArkUINodeHandle node)
     XComponentModelNG::HdrBrightness(frameNode, 1.0f);
 }
 
+void SetXComponentEnableTransparentLayer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, enable);
+}
+
+void ResetXComponentEnableTransparentLayer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, false);
+}
+
 void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -224,7 +238,7 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIXComponentModifier modifier = {
         .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzer,
         .resetXComponentEnableAnalyzer = ResetXComponentEnableAnalyzer,
@@ -247,24 +261,19 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .resetXComponentEnableSecure = ResetXComponentEnableSecure,
         .setXComponentHdrBrightness = SetXComponentHdrBrightness,
         .resetXComponentHdrBrightness = ResetXComponentHdrBrightness,
+        .setXComponentEnableTransparentLayer = SetXComponentEnableTransparentLayer,
+        .resetXComponentEnableTransparentLayer = ResetXComponentEnableTransparentLayer,
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIXComponentModifier* GetCJUIXComponentModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIXComponentModifier modifier = {
         .loadXComponent = nullptr, // loadXComponent
         .setXComponentOptions = nullptr, // setXComponentOptions
@@ -285,14 +294,7 @@ const CJUIXComponentModifier* GetCJUIXComponentModifier()
         .setXComponentLibraryname = SetXComponentLibraryname,
         .setImageAIOptions = SetImageAIOptions,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

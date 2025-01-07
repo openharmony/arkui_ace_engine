@@ -138,7 +138,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_polygon_ffi.cpp",
       "interfaces/cj_ffi/cj_polyline_ffi.cpp",
       "interfaces/cj_ffi/cj_progress_ffi.cpp",
-      "interfaces/cj_ffi/cj_qrcode_ffi.cpp",
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
@@ -150,14 +149,10 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
-      "interfaces/cj_ffi/cj_select_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
-      "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
       "interfaces/cj_ffi/cj_slider_ffi.cpp",
       "interfaces/cj_ffi/cj_span_ffi.cpp",
       "interfaces/cj_ffi/cj_stack_ffi.cpp",
-      "interfaces/cj_ffi/cj_stepper_ffi.cpp",
-      "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       "interfaces/cj_ffi/cj_swiper_ffi.cpp",
       "interfaces/cj_ffi/cj_tab_ffi.cpp",
       "interfaces/cj_ffi/cj_text_clock_ffi.cpp",
@@ -190,6 +185,10 @@ template("cj_frontend") {
       sources += [
         "interfaces/cj_ffi/cj_column_split_ffi.cpp",
         "interfaces/cj_ffi/cj_row_split_ffi.cpp",
+        "interfaces/cj_ffi/cj_select_ffi.cpp",
+        "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
+        "interfaces/cj_ffi/cj_stepper_ffi.cpp",
+        "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       ]
     }
 
@@ -204,6 +203,10 @@ template("cj_frontend") {
       "$ace_root/frameworks/core:ace_container_scope",
       "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     ]
+
+    if (qrcodegen_support) {
+      sources += [ "interfaces/cj_ffi/cj_qrcode_ffi.cpp" ]
+    }
 
     if (platform_config.is_ohos) {
       external_deps += [

@@ -122,8 +122,14 @@ bool TextEmojiProcessor::IsIndexInEmoji(int32_t index,
 int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
 {
     CHECK_NULL_RETURN(!content.empty(), 0);
-    int32_t charNum = 0;
     std::u16string u16Content = StringUtils::Str8ToStr16(content);
+    return GetCharacterNum(u16Content);
+}
+
+int32_t TextEmojiProcessor::GetCharacterNum(const std::u16string& u16Content)
+{
+    CHECK_NULL_RETURN(!u16Content.empty(), 0);
+    int32_t charNum = 0;
     int32_t pos = 0;
     while (pos < static_cast<int32_t>(u16Content.length())) {
         std::u32string u32Content;
@@ -137,8 +143,8 @@ int32_t TextEmojiProcessor::GetCharacterNum(const std::string& content)
         }
         charNum++;
     }
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ByteNumToCharNum contentLength=%{public}zu pos=%{public}d charNum=%{public}d",
-        content.length(), pos, charNum);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ByteNumToCharNum u16contentLen=%{public}zu pos=%{public}d charNum=%{public}d",
+        u16Content.length(), pos, charNum);
     return charNum;
 }
 

@@ -20,13 +20,19 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    return CreateDialogNode(nodeId, param, customNode);
+}
+
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+{
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
 
     std::string tag = GetDialogTag(param);
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));

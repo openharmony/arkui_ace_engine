@@ -264,6 +264,16 @@ void GestureScope::CleanGestureScopeState()
     }
 }
 
+void GestureScope::CleanGestureScopeStateVoluntarily()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->CleanRecognizerStateVoluntarily();
+        }
+    }
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -293,6 +303,16 @@ void GestureReferee::CleanGestureScope(size_t touchId)
         }
         scope->Close();
         gestureScopes_.erase(iter);
+    }
+}
+
+void GestureReferee::CleanGestureStateVoluntarily(size_t touchId)
+{
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        CHECK_NULL_VOID(scope);
+        scope->CleanGestureScopeStateVoluntarily();
     }
 }
 

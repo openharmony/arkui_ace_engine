@@ -488,14 +488,23 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         RectF visibleRect;
         RectF frameRect;
         clipNode->GetVisibleRect(visibleRect, frameRect);
+        if (GreatNotEqual(rect.Top(), visibleRect.Bottom()) || GreatNotEqual(rect.Left(), visibleRect.Right())) {
+            return;
+        }
         rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        rect.SetWidth(visibleRect.Right() - rect.Left());
         return;
     }
     // root node.
     if (prevNode) {
         auto geoNode = prevNode->GetGeometryNode();
         CHECK_NULL_VOID(geoNode);
-        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+        RectF visibleRect = geoNode->GetFrameRect();
+        if (GreatNotEqual(rect.Top(), visibleRect.Height()) || GreatNotEqual(rect.Left(), visibleRect.Width())) {
+            return;
+        }
+        rect.SetHeight(visibleRect.Height() - rect.Top());
+        rect.SetWidth(visibleRect.Width() - rect.Left());
     }
 }
 
@@ -560,5 +569,12 @@ std::optional<Color> TextSelectOverlay::GetHandleColor()
     auto layoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, std::nullopt);
     return layoutProperty->GetCursorColor();
+}
+
+bool TextSelectOverlay::AllowSearch()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return !textPattern->GetTextSelector().SelectNothing();
 }
 } // namespace OHOS::Ace::NG

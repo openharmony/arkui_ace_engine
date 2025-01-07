@@ -253,8 +253,29 @@ float ScrollBarProxy::CalcPatternOffset(float controlDistance, float barScrollab
 void ScrollBarProxy::ScrollPage(bool reverse, bool smooth)
 {
     auto node = scorllableNode_;
-    CHECK_NULL_VOID(node.scrollPageCallback);
-    node.scrollPageCallback(reverse, smooth);
+    if (!IsNestScroller() || nestScrollableNodes_.empty()) {
+        CHECK_NULL_VOID(node.scrollPageCallback);
+        node.scrollPageCallback(reverse, smooth);
+    } else {
+        auto nodePattern = scorllableNode_.scrollableNode.Upgrade();
+        CHECK_NULL_VOID(nodePattern);
+        auto nodeInfo = nestScrollableNodes_.back();
+        auto pattern = nodeInfo.scrollableNode.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto patternNode = pattern->GetHost();
+        CHECK_NULL_VOID(patternNode);
+        auto geometryNode = patternNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto size = geometryNode->GetFrameSize();
+        auto axis = nodePattern->GetAxis();
+        auto distance = GetMainAxisSize(size, axis);
+        int32_t source = SCROLL_FROM_BAR;
+        float offset = reverse ? distance : -distance;
+        CHECK_NULL_VOID(scorllableNode_.onPositionChanged);
+        NotifyScrollStart();
+        scorllableNode_.onPositionChanged(offset, source, true);
+        NotifyScrollStop();
+    }
 }
 
 void ScrollBarProxy::SetScrollEnabled(bool scrollEnabled, const WeakPtr<ScrollablePattern>& weakScrollableNode) const

@@ -63,6 +63,7 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
+constexpr int32_t STOP_WHEN_TOUCHED = 2;
 } // namespace
 
 ArkUINativeModuleValue SwiperBridge::SetSwiperInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -605,7 +606,15 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperAutoPlay(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getSwiperModifier()->setSwiperAutoPlay(nativeNode, autoPlay);
     } else {
         GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperAutoPlay(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
+
+    Local<JSValueRef> jsStopWhenTouchedArg = runtimeCallInfo->GetCallArgRef(STOP_WHEN_TOUCHED);
+    bool neddStopWhenTouched = true;
+    if (!jsStopWhenTouchedArg->IsNull() && !jsStopWhenTouchedArg->IsUndefined() && jsStopWhenTouchedArg->IsBoolean()) {
+        neddStopWhenTouched = jsStopWhenTouchedArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getSwiperModifier()->setSwiperStopWhenTouched(nativeNode, neddStopWhenTouched);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::ResetSwiperAutoPlay(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -616,6 +625,7 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperAutoPlay(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperAutoPlay(nativeNode);
+    GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperStopWhenTouched(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue SwiperBridge::SetSwiperIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)

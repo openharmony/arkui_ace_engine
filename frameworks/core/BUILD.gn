@@ -73,6 +73,18 @@ template("ace_core_source_set") {
           vendor_configs.ace_engine_advanced_navigation_split_mode_dirs
     }
 
+    if (ace_engine_enable_circle_feature &&
+        defined(
+            vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs)) {
+      include_dirs +=
+          vendor_configs.ace_engine_advanced_navigation_circle_mode_dirs
+    }
+
+    if (ace_engine_enable_circle_feature &&
+        defined(vendor_configs.ace_engine_advanced_router_circle_mode_dirs)) {
+      include_dirs += vendor_configs.ace_engine_advanced_router_circle_mode_dirs
+    }
+
     # add common source file needed by all product platform here
     sources = [
       # accessibility
@@ -283,6 +295,14 @@ template("ace_core_source_set") {
       "text/text_emoji_processor.cpp",
     ]
 
+    if (ace_engine_feature_enable_event_extra_handling &&
+        defined(
+            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
+    } else {
+      sources += [ "event/event_info_convertor.cpp" ]
+    }
+
     if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
     }
@@ -383,7 +403,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/positioned:ace_core_components_positioned_$platform",
       "$ace_root/frameworks/core/components/progress:ace_core_components_progress_$platform",
       "$ace_root/frameworks/core/components/proxy:ace_core_components_proxy_$platform",
-      "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
       "$ace_root/frameworks/core/components/refresh:ace_core_components_refresh_$platform",
       "$ace_root/frameworks/core/components/relative_container:ace_core_components_relative_container_$platform",
       "$ace_root/frameworks/core/components/root:ace_core_components_root_$platform",
@@ -460,11 +479,17 @@ template("ace_core_source_set") {
 
     deps += [
       "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
-      "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/rich_editor:ace_core_components_rich_editor_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/security_component:ace_core_components_security_component_pattern_ng_$platform",
       "$ace_root/frameworks/core/components_ng/pattern/text_field:ace_core_components_text_field_pattern_ng_$platform",
     ]
+
+    if (qrcodegen_support) {
+      deps += [
+        "$ace_root/frameworks/core/components/qrcode:ace_core_components_qrcode_$platform",
+        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
+      ]
+    }
 
     if (defined(config.model_component_support) &&
         config.model_component_support) {
@@ -965,15 +990,18 @@ template("ace_core_ng_source_set") {
     if (defined(config.use_components_lib) && config.use_components_lib) {
       deps += [ "$ace_root/frameworks/core/components_ng/common_napi_utils:ace_core_components_common_napi_utils_$platform" ]
     } else {
-      deps += [
-        "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform",
-        "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform",
-      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/patternlock:ace_core_components_patternlock_pattern_ng_$platform" ]
+      if (qrcodegen_support) {
+        deps += [ "$ace_root/frameworks/core/components_ng/pattern/qrcode:ace_core_components_qrcode_pattern_ng_$platform" ]
+      }
     }
 
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/ability_component:ace_core_components_ability_component_pattern_ng_$platform" ]
+    }
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform" ]
     }
     if (defined(config.web_components_support) &&
         config.web_components_support) {
@@ -1004,6 +1032,9 @@ template("ace_core_ng_source_set") {
       } else {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
       }
+    }
+    if (defined(config.window_scene_support) && config.window_scene_support) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/ui_extension:ace_core_components_ui_extension_pattern_ng_$platform" ]
     }
 
     if (defined(config.form_components_support) &&

@@ -176,6 +176,7 @@ private:
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;
+    static DatePickerMode datePickerMode_;
 };
 } // namespace OHOS::Ace::NG
 

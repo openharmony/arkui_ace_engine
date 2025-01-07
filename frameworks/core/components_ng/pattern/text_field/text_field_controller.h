@@ -21,6 +21,7 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace::NG {
@@ -48,6 +49,10 @@ public:
     void StopEditing() override;
 
     void SetPasswordState(bool flag) override;
+
+    int32_t AddText(std::u16string text, int32_t offset) override;
+    void DeleteText(int32_t start, int32_t end) override;
+    SelectionInfo GetSelection() override;
 private:
     WeakPtr<Pattern> pattern_;
 };

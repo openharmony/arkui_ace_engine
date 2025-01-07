@@ -107,7 +107,9 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
@@ -473,7 +475,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
     { "Radio", JSRadio::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
     { "Piece", JSPiece::JSBind },
     { "Rating", JSRating::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
@@ -567,8 +571,11 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollBar", JSScrollBar::JSBind },
     { "GridRow", JSGridRow::JSBind },
     { "GridCol", JSGridCol::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Stepper", JSStepper::JSBind },
+    { "SideBarContainer", JSSideBar::JSBind },
     { "StepperItem", JSStepperItem::JSBind },
+#endif
     { "Toggle", JSToggle::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
@@ -622,8 +629,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-    { "SideBarContainer", JSSideBar::JSBind },
+#ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
+#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },
@@ -703,7 +711,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
 #endif
 #endif
     { "Search", JSSearch::JSBind },
+#ifndef ARKUI_WEARABLE
     { "Select", JSSelect::JSBind },
+#endif
     { "SearchController", JSSearchController::JSBind },
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
@@ -1031,6 +1041,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {

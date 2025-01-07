@@ -336,7 +336,7 @@ private:
     RefPtr<PixelMap> preScaledPixelMap_;
     std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
-    std::function<void()> actionCancel_;
+    std::function<void(GestureEvent&)> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;

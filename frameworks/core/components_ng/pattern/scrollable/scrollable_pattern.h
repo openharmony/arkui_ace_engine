@@ -54,8 +54,11 @@ constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
 constexpr double MAX_VELOCITY = 9000.0;
+constexpr double VELOCITY_SCALE = 1.0;
+constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
 constexpr float SPRING_ACCURACY = 0.1f;
@@ -224,8 +227,10 @@ public:
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
+    virtual RefPtr<ScrollBar> CreateScrollBar();
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
@@ -335,12 +340,14 @@ public:
         }
     }
 
-    void SetFriction(double friction);
+    virtual void SetFriction(double friction);
 
     double GetFriction() const
     {
         return friction_;
     }
+
+    void SetVelocityScale(double scale);
 
     void SetMaxFlingVelocity(double max);
 
@@ -729,6 +736,35 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetScrollBarShape(const ScrollBarShape &shape)
+    {
+        if (shape == ScrollBarShape::ARC) {
+            isRoundScroll_ = true;
+        } else {
+            isRoundScroll_ = false;
+        }
+    }
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool GetCrownEventDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetCrownEventDragging();
+    }
+
+    void SetReachBoundary(bool flag)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->SetReachBoundary(flag);
+    }
+#endif
+
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -1034,6 +1070,7 @@ private:
     float scrollBarOutBoundaryExtent_ = 0.f;
     std::optional<float> ratio_;
     double friction_ = -1.0;
+    double velocityScale_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
@@ -1104,6 +1141,8 @@ private:
     uint64_t nestedScrollTimestamp_ = 0;
     bool prevHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
+
+    bool isRoundScroll_ = false;
 
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;

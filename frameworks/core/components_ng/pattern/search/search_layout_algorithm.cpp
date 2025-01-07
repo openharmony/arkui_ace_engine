@@ -302,16 +302,17 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
 }
 
 CalcSize SearchLayoutAlgorithm::searchButtonCalcSize(const RefPtr<SearchTheme>& searchTheme,
-    RefPtr<SearchLayoutProperty> layoutProperty, LayoutWrapper* layoutWrapper)
+    RefPtr<SearchLayoutProperty> layoutProperty, LayoutWrapper* layoutWrapper, float maxFontScale, float minFontScale)
 {
     // calculate theme space from search button to font
     auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-                       searchTheme->GetFontSize().ConvertToPx();
+                       searchTheme->GetFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
     // calculate search button height
     auto defaultButtonHeight =
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight);
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPxDistribute(
+            minFontScale, maxFontScale) + spaceHeight);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     searchButtonHeight = std::min(searchButtonHeight, searchHeight - 0.0f);
@@ -338,7 +339,8 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(searchTheme);
     auto maxFontScale = CalculateMaxFontScale(layoutWrapper);
     auto minFontScale = CalculateMinFontScale(layoutWrapper);
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize(searchTheme, layoutProperty, layoutWrapper));
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize(searchTheme, layoutProperty, layoutWrapper,
+        maxFontScale, minFontScale));
     auto textWrapper = buttonWrapper->GetChildByIndex(0);
     if (textWrapper) {
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
@@ -796,8 +798,11 @@ void SearchLayoutAlgorithm::LayoutDivider(const LayoutSearchParams& params)
 
 void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
 {
-    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
-    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto searchTheme = params.searchTheme;
+    CHECK_NULL_VOID(searchTheme);
+    auto dividerSideSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
+    auto dividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto borderWidth = searchTheme->GetBorderWidth().ConvertToPx();
 
     auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_VOID(cancelButtonWrapper);
@@ -835,7 +840,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
         } else {
-            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - buttonSpace;
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - buttonSpace - borderWidth;
         }
     }
     auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
