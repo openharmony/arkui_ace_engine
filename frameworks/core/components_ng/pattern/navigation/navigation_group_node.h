@@ -154,14 +154,14 @@ public:
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
     void ConfigureNavigationWithAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
-    void UnconfigureNavigationAndDisableAnimation(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
+    void ResetTransitionAnimationNodeState(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode);
     RefPtr<NavigationManager> FetchNavigationManager();
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback);
     virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback, bool isNavBar = false);
+        const AnimationFinishCallback finishCallback);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);

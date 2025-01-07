@@ -93,6 +93,7 @@ public:
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
@@ -127,7 +128,7 @@ public:
     virtual void ClearOnClick() = 0;
     virtual void SetRemoteMessage(std::function<void()>&& click) = 0;
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
-    virtual void SetOnCopy(std::function<void(const std::string&)>&& func) = 0;
+    virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
 
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
@@ -149,6 +150,8 @@ public:
     };
     virtual void SetClipEdge(bool clip) = 0;
     virtual void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) = 0;
+    virtual void SetMarqueeOptions(const NG::TextMarqueeOptions& options) = 0;
+    virtual void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) = 0;
     virtual void SetSelectionMenuOptions(
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetResponseRegion(bool isUserSetResponseRegion) {};

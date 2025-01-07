@@ -20,7 +20,7 @@
 #include <iterator>
 #include <list>
 
-#include "core/components_ng/pattern/time_picker/timepicker_haptic_factory.h"
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
@@ -55,6 +55,7 @@ constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
 constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
+const int32_t HALF_NUMBER = 2;
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -156,7 +157,7 @@ void TimePickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host
             context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                pattern->hapticController_ = TimepickerAudioHapticFactory::GetInstance();
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
             });
         }
     } else {
@@ -203,6 +204,9 @@ void TimePickerColumnPattern::ParseTouchListener()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             pattern->OnTouchDown();
             pattern->SetLocalDownDistance(info.GetTouches().front().GetLocalLocation().GetDistance());
@@ -290,6 +294,9 @@ RefPtr<TouchEventImpl> TimePickerColumnPattern::CreateItemTouchEventListener()
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto isToss = pattern->GetTossStatus();
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
             if (isToss == true) {
                 pattern->touchBreak_ = true;
@@ -451,8 +458,13 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     CHECK_NULL_VOID(parentNode);
     auto dataPickerLayoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(dataPickerLayoutProperty);
-    dataPickerLayoutProperty->UpdatePadding(
-        PaddingProperty { CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX) });
+    dataPickerLayoutProperty->UpdatePadding(PaddingProperty {
+            .left = CalcLength(static_cast<float>(PADDING_WEIGHT.ConvertToPx()), DimensionUnit::PX),
+            .right = CalcLength(),
+            .top = CalcLength(),
+            .bottom = CalcLength(),
+            .start = CalcLength(),
+            .end = CalcLength()});
     dataPickerLayoutProperty->UpdateAlignSelf(FlexAlign::CENTER);
     auto timePickerRowPattern = parentNode->GetPattern<TimePickerRowPattern>();
     CHECK_NULL_VOID(timePickerRowPattern);
@@ -471,7 +483,8 @@ void TimePickerColumnPattern::FlushCurrentOptions(bool isDown, bool isUpateTextC
     if (!isUpateTextContentOnly) {
         animationProperties_.clear();
     }
-    for (uint32_t index = 0; index < showOptionCount; index++) {
+    auto actualOptionCount = showOptionCount < child.size() ? showOptionCount : child.size();
+    for (uint32_t index = 0; index < actualOptionCount; index++) {
         uint32_t optionIndex = (totalOptionCount + currentIndex + index - selectedIndex) % totalOptionCount;
         auto textNode = DynamicCast<FrameNode>(*iter);
         CHECK_NULL_VOID(textNode);
@@ -870,7 +883,6 @@ void TimePickerColumnPattern::HandleDragEnd()
 {
     if (hapticController_) {
         hapticController_->Stop();
-        hapticController_->ClearVelocityInfo();
     }
     pressed_ = false;
     CHECK_NULL_VOID(GetHost());
@@ -947,13 +959,39 @@ void TimePickerColumnPattern::CreateAnimation(double from, double to)
     });
 }
 
+void TimePickerColumnPattern::HandleEnterSelectedArea(
+    double scrollDelta, float shiftDistance, TimePickerScrollDirection dir)
+{
+    auto shiftThreshold = shiftDistance / HALF_NUMBER;
+    uint32_t currentEnterIndex = GetCurrentIndex();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto options = GetOptions();
+    auto totalOptionCount = options[host];
+    if (totalOptionCount == 0) {
+        return;
+    }
+    if (dir == TimePickerScrollDirection::UP) {
+        currentEnterIndex = (totalOptionCount + currentEnterIndex + 1) % totalOptionCount;
+    } else {
+        auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
+        currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
+    }
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+        SetEnterIndex(currentEnterIndex);
+        HandleEnterSelectedAreaEventCallback(true);
+    }
+}
+
 void TimePickerColumnPattern::ScrollOption(double delta, bool isJump)
 {
     scrollDelta_ = delta;
     auto midIndex = GetShowCount() / 2;
-    TimePickerScrollDirection dir = delta > 0.0 ? TimePickerScrollDirection::DOWN : TimePickerScrollDirection::UP;
+    TimePickerScrollDirection dir = GreatNotEqual(delta, 0.0) ? TimePickerScrollDirection::DOWN
+                                                              : TimePickerScrollDirection::UP;
     auto shiftDistance = (dir == TimePickerScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
                                                                 : optionProperties_[midIndex].nextDistance;
+    HandleEnterSelectedArea(scrollDelta_, shiftDistance, dir);
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);

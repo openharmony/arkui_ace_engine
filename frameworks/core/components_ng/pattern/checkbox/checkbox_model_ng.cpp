@@ -51,7 +51,9 @@ RefPtr<FrameNode> CheckBoxModelNG::CreateFrameNode(int32_t nodeId)
 
 void CheckBoxModelNG::SetSelect(bool isSelected)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    const auto& frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -72,7 +74,9 @@ void CheckBoxModelNG::SetUnSelectedColor(const Color& color)
 
 void CheckBoxModelNG::SetBuilder(std::optional<std::function<void(void)>>& buildFunc)
 {
-    const auto& frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    const auto& frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto checkBoxPattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(checkBoxPattern);
@@ -191,7 +195,7 @@ void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 
 void CheckBoxModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding)
 {
-    NG::ViewAbstract::SetPadding(padding);
+    NG::ViewAbstract::SetPadding(frameNode, padding);
 }
 
 void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
@@ -212,6 +216,7 @@ void CheckBoxModelNG::SetCheckboxName(FrameNode* frameNode, const std::optional<
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (name.has_value()) {
         eventHub->SetName(name.value());
     }
@@ -221,6 +226,7 @@ void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
@@ -229,6 +235,7 @@ void CheckBoxModelNG::SetCheckboxGroup(FrameNode* frameNode, const std::optional
 bool CheckBoxModelNG::GetSelect(FrameNode* frameNode)
 {
     bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
     return value;
 }
@@ -278,6 +285,7 @@ Color CheckBoxModelNG::GetCheckMarkColor(FrameNode* frameNode)
 Dimension CheckBoxModelNG::GetCheckMarkSize(FrameNode* frameNode)
 {
     Dimension value = Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE);
+    CHECK_NULL_RETURN(frameNode, value);
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
         CheckBoxPaintProperty, CheckBoxCheckMarkSize, value, frameNode, value);
     return value;
@@ -316,6 +324,7 @@ void CheckBoxModelNG::SetBuilderFunc(FrameNode* frameNode, NG::CheckBoxMakeCallb
 
 void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 {
+    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetCheckBoxSelect(value);
@@ -323,9 +332,26 @@ void CheckBoxModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 
 void CheckBoxModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
+    CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+std::string CheckBoxModelNG::GetCheckboxName(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetName();
+}
+
+std::string CheckBoxModelNG::GetCheckboxGroup(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetGroupName();
 }
 
 } // namespace OHOS::Ace::NG

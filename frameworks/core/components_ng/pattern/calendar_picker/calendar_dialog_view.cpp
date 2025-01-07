@@ -118,7 +118,7 @@ void CalendarDialogView::SetWeekTextDirection(const TextDirection& dialogDirecti
     const TextDirection& calendarDirection, const RefPtr<FrameNode>& weekNode)
 {
     std::vector<std::string> weekNumbers = Localization::GetInstance()->GetWeekdays(true);
-    for (uint32_t column = 0; column < DAYS_OF_WEEK; column++) {
+    for (int32_t column = 0; column < DAYS_OF_WEEK; column++) {
         auto textWeekNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
         CHECK_NULL_VOID(textWeekNode);
@@ -164,13 +164,13 @@ void CalendarDialogView::CreateChildNode(const RefPtr<FrameNode>& contentColumn,
         BorderRadiusProperty radius;
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
+        auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+        if (shadowTheme) {
+            auto colorMode = SystemProperties::GetColorMode();
+            renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
+        }
     }
-    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
-    if (shadowTheme) {
-        auto colorMode = SystemProperties::GetColorMode();
-        renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultSM, colorMode));
-    }
-    UpdateBackgroundStyle(renderContext, dialogProperties);
+    UpdateBackgroundStyle(renderContext, dialogProperties, theme);
 }
 
 void CalendarDialogView::OperationsToPattern(
@@ -232,25 +232,26 @@ void CalendarDialogView::SetTitleIdealSize(
     }
 }
 
-void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode,
-    RefPtr<FrameNode>& leftDayArrowNode, RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode)
+void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode, RefPtr<FrameNode>& leftDayArrowNode,
+    RefPtr<FrameNode>& rightDayArrowNode, RefPtr<FrameNode>& rightYearArrowNode, RefPtr<CalendarTheme> theme)
 {
+    CHECK_NULL_VOID(theme);
     CHECK_NULL_VOID(leftYearArrowNode);
     auto leftYearProperty = leftYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftYearProperty);
-    leftYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_year"));
+    leftYearProperty->SetAccessibilityText(theme->GetCalendarTheme().preYear);
     CHECK_NULL_VOID(leftDayArrowNode);
     auto leftDayProperty = leftDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(leftDayProperty);
-    leftDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.pre_month"));
+    leftDayProperty->SetAccessibilityText(theme->GetCalendarTheme().preMonth);
     CHECK_NULL_VOID(rightDayArrowNode);
     auto rightDayProperty = rightDayArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightDayProperty);
-    rightDayProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_month"));
+    rightDayProperty->SetAccessibilityText(theme->GetCalendarTheme().nextMonth);
     CHECK_NULL_VOID(rightYearArrowNode);
     auto rightYearProperty = rightYearArrowNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(rightYearProperty);
-    rightYearProperty->SetAccessibilityText(Localization::GetInstance()->GetEntryLetters("calendar.next_year"));
+    rightYearProperty->SetAccessibilityText(theme->GetCalendarTheme().nextYear);
 }
 
 RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
@@ -313,7 +314,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     auto rightYearArrowNode =
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
-    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode);
+    AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode, theme);
     return titleRow;
 }
 
@@ -443,6 +444,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     calendarPattern->SetSelectedDay(date);
     CalendarMonth currentMonth { .year = date.GetYear(), .month = date.GetMonth() };
     UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
+    calendarPattern->SetStartDate(settingData.startDate);
+    calendarPattern->SetEndDate(settingData.endDate);
 
     CalendarDay calendarDay;
     PickerDate today = PickerDate::Current();
@@ -670,7 +673,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1004,13 +1007,14 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
     eventHub->UpdateOnChangeEvent(callbackInfo);
 }
 
-void CalendarDialogView::UpdateBackgroundStyle(
-    const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties)
+void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
+    const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        CHECK_NULL_VOID(calendarTheme);
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
-            dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+            dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
         renderContext->UpdateBackBlurStyle(styleOption);
         renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
     }

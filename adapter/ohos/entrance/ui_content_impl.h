@@ -51,6 +51,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
         ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
@@ -64,6 +65,8 @@ public:
         napi_value storage, const std::string& contentName) override;
     UIContentErrorCode InitializeByName(
         OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
+    void InitializeByName(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage, uint32_t focusWindowId) override;
     void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) override;
     void Initialize(
@@ -102,6 +105,7 @@ public:
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
@@ -240,6 +244,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) override;
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
@@ -290,6 +296,7 @@ public:
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow) override;
     void SetContainerModalTitleHeight(int32_t height) override;
+    void SetContainerButtonStyle(const Rosen::DecorButtonStyle& buttonStyle) override;
     int32_t GetContainerModalTitleHeight() override;
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(
@@ -370,6 +377,15 @@ public:
 
     bool GetContainerControlButtonVisible() override;
 
+    void OnContainerModalEvent(const std::string& name, const std::string& value) override;
+    void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+
+    int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback) override;
+    void RemoveFocusActiveChangeCallback(int32_t handler) override;
+
+    bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+        const std::function<void(bool)>& callback) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -394,7 +410,10 @@ private:
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void UnregisterDisplayManagerCallback();
-
+    void RegisterLinkJumpCallback();
+    void ExecuteUITask(std::function<void()> task, const std::string& name);
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -445,6 +464,7 @@ private:
     std::mutex updateDecorVisibleMutex_;
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
     std::mutex setAppWindowIconMutex_;
+    uint64_t listenedDisplayId_ = 0;
 };
 
 } // namespace OHOS::Ace

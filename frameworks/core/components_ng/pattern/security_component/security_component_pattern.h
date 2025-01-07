@@ -87,6 +87,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     std::timed_mutex regMutex_;
     int32_t scId_ = -1;
@@ -117,6 +119,7 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+    void HandleEnabled();
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
+#include <cstdlib>
 
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
@@ -172,6 +173,7 @@ ArkUINodeHandle GetPreviousSibling(ArkUINodeHandle node, ArkUI_Bool isExpanded)
     auto* currentNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(currentNode, nullptr);
     auto parent = GetParentNode(currentNode);
+    CHECK_NULL_RETURN(parent, nullptr);
     auto index = -1;
     if (isExpanded) {
         parent->GetAllChildrenWithBuild(false);
@@ -387,7 +389,13 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    if (!pipeline || !pipeline->CheckThreadSafe()) {
+        LOGF("GetFrameNodeByKey doesn't run on UI thread");
+        abort();
+    }
     auto node = NG::Inspector::GetFrameNodeByKey(key, true);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -466,6 +474,54 @@ void ResetSystemColorModeChangeEvent(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemColorModeChangeEvent(frameNode, nullptr);
+}
+
+ArkUI_Int32 SetDrawCompleteEvent(ArkUINodeHandle node, void* userData, void* onDraw)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto onDrawCallBack = [userData, onDraw]() {
+        using FuncType = void (*)(void*);
+        FuncType func = reinterpret_cast<FuncType>(onDraw);
+        if (!func) {
+            return;
+        }
+        func(userData);
+    };
+    ViewAbstract::SetDrawCompleteEvent(frameNode, std::move(onDrawCallBack));
+    return 0;
+}
+
+ArkUI_Int32 ResetDrawCompleteEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    ViewAbstract::SetDrawCompleteEvent(frameNode, nullptr);
+    return 0;
+}
+
+ArkUI_Int32 SetLayoutEvent(ArkUINodeHandle node, void* userData, void* onLayout)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    auto onLayoutCallBack = [userData, onLayout]() {
+        using FuncType = void (*)(void*);
+        FuncType func = reinterpret_cast<FuncType>(onLayout);
+        if (!func) {
+            return;
+        }
+        func(userData);
+    };
+    ViewAbstract::SetLayoutEvent(frameNode, std::move(onLayoutCallBack));
+    return 0;
+}
+
+ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, -1);
+    ViewAbstract::SetLayoutEvent(frameNode, nullptr);
+    return 0;
 }
 
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
@@ -591,33 +647,198 @@ void GetCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, char** value)
     (*value)[size] = '\0';
 }
 
+void AddExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, void* extraData)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddExtraCustomProperty doesn't run on UI thread");
+        return;
+    }
+    frameNode->AddExtraCustomProperty(key, extraData);
+}
+
+void* GetExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("GetExtraCustomProperty doesn't run on UI thread");
+        return nullptr;
+    }
+    return frameNode->GetExtraCustomProperty(key);
+}
+
+void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveExtraCustomProperty doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveExtraCustomProperty(key);
+}
+
+void GetCustomPropertyByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("GetCustomPropertyByKey doesn't run on UI thread");
+        return;
+    }
+    std::string customProperty;
+    if (!frameNode->GetCustomPropertyByKey(key, customProperty)) {
+        return;
+    }
+    *size = customProperty.size();
+    *value = new char[*size + 1];
+    customProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+}
+
+void AddNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    auto onDestroyCallback = [node, onDestroy]() {
+        onDestroy(node);
+    };
+    frameNode->AddNodeDestroyCallback(std::string(callbackKey), std::move(onDestroyCallback));
+}
+
+void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    static const ArkUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
-        AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
-        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
-        GetPositionToParent, GetPositionToScreen, GetPositionToWindow, GetPositionToParentWithTransform,
-        GetPositionToScreenWithTransform, GetPositionToWindowWithTransform, GetMeasuredSize, GetLayoutPosition,
-        GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo, GetFrameNodeById, GetFrameNodeByUniqueId,
-        GetFrameNodeByKey, GetAttachedFrameNodeById, PropertyUpdate, GetLast, GetFirstUINode, GetLayoutSize,
-        GetLayoutPositionWithoutMargin, SetSystemColorModeChangeEvent, ResetSystemColorModeChangeEvent,
-        SetSystemFontStyleChangeEvent, ResetSystemFontStyleChangeEvent, GetCustomPropertyCapiByKey,
-        SetCustomPropertyModiferByKey, AddCustomProperty, RemoveCustomProperty, FreeCustomPropertyCharPtr,
-        GetCurrentPageRootNode, GetNodeTag, GetActiveChildrenInfo, GetCustomProperty };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIFrameNodeModifier modifier = {
+        .isModifiable = IsModifiable,
+        .createFrameNode = CreateFrameNode,
+        .invalidate = InvalidateInFrameNode,
+        .appendChild = AppendChildInFrameNode,
+        .insertChildAfter = InsertChildAfterInFrameNode,
+        .removeChild = RemoveChildInFrameNode,
+        .clearChildren = ClearChildrenInFrameNode,
+        .getChildrenCount = GetChildrenCount,
+        .getChild = GetChild,
+        .getFirst = GetFirst,
+        .getNextSibling = GetNextSibling,
+        .getPreviousSibling = GetPreviousSibling,
+        .getParent = GetParent,
+        .getIdByNodePtr = GetIdByNodePtr,
+        .getPositionToParent = GetPositionToParent,
+        .getPositionToScreen = GetPositionToScreen,
+        .getPositionToWindow = GetPositionToWindow,
+        .getPositionToParentWithTransform = GetPositionToParentWithTransform,
+        .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
+        .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
+        .getMeasuredSize = GetMeasuredSize,
+        .getLayoutPosition = GetLayoutPosition,
+        .getInspectorId = GetInspectorId,
+        .getNodeType = GetNodeType,
+        .isVisible = IsVisible,
+        .isAttached = IsAttached,
+        .getInspectorInfo = GetInspectorInfo,
+        .getFrameNodeById = GetFrameNodeById,
+        .getFrameNodeByUniqueId = GetFrameNodeByUniqueId,
+        .getFrameNodeByKey = GetFrameNodeByKey,
+        .getAttachedFrameNodeById = GetAttachedFrameNodeById,
+        .propertyUpdate = PropertyUpdate,
+        .getLast = GetLast,
+        .getFirstUINode = GetFirstUINode,
+        .getLayoutSize = GetLayoutSize,
+        .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
+        .setSystemColorModeChangeEvent = SetSystemColorModeChangeEvent,
+        .resetSystemColorModeChangeEvent = ResetSystemColorModeChangeEvent,
+        .setSystemFontStyleChangeEvent = SetSystemFontStyleChangeEvent,
+        .resetSystemFontStyleChangeEvent = ResetSystemFontStyleChangeEvent,
+        .getCustomPropertyCapiByKey = GetCustomPropertyCapiByKey,
+        .setCustomPropertyModiferByKey = SetCustomPropertyModiferByKey,
+        .addCustomProperty = AddCustomProperty,
+        .removeCustomProperty = RemoveCustomProperty,
+        .freeCustomPropertyCharPtr = FreeCustomPropertyCharPtr,
+        .getCurrentPageRootNode = GetCurrentPageRootNode,
+        .getNodeTag = GetNodeTag,
+        .getActiveChildrenInfo = GetActiveChildrenInfo,
+        .getCustomProperty = GetCustomProperty,
+        .addExtraCustomProperty = AddExtraCustomProperty,
+        .getExtraCustomProperty = GetExtraCustomProperty,
+        .removeExtraCustomProperty = RemoveExtraCustomProperty,
+        .getCustomPropertyByKey = GetCustomPropertyByKey,
+        .addNodeDestroyCallback = AddNodeDestroyCallback,
+        .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
+        .setDrawCompleteEvent = SetDrawCompleteEvent,
+        .resetDrawCompleteEvent = ResetDrawCompleteEvent,
+        .setLayoutEvent = SetLayoutEvent,
+        .resetLayoutEvent = ResetLayoutEvent,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
 {
-    static const CJUIFrameNodeModifier modifier = { IsModifiable, CreateFrameNode, InvalidateInFrameNode,
-        AppendChildInFrameNode, InsertChildAfterInFrameNode, RemoveChildInFrameNode, ClearChildrenInFrameNode,
-        GetChildrenCount, GetChild, GetFirst, GetNextSibling, GetPreviousSibling, GetParent, GetIdByNodePtr,
-        PropertyUpdate, GetLast, GetPositionToParent, GetPositionToScreen, GetPositionToWindow,
-        GetPositionToParentWithTransform, GetPositionToScreenWithTransform, GetPositionToWindowWithTransform,
-        GetMeasuredSize, GetLayoutPosition, GetInspectorId, GetNodeType, IsVisible, IsAttached, GetInspectorInfo,
-        GetFrameNodeById, GetFrameNodeByUniqueId, GetFrameNodeByKey, GetFirstUINode, GetLayoutSize,
-        GetLayoutPositionWithoutMargin };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIFrameNodeModifier modifier = {
+        .isModifiable = IsModifiable,
+        .createFrameNode = CreateFrameNode,
+        .invalidate = InvalidateInFrameNode,
+        .appendChild = AppendChildInFrameNode,
+        .insertChildAfter = InsertChildAfterInFrameNode,
+        .removeChild = RemoveChildInFrameNode,
+        .clearChildren = ClearChildrenInFrameNode,
+        .getChildrenCount = GetChildrenCount,
+        .getChild = GetChild,
+        .getFirst = GetFirst,
+        .getNextSibling = GetNextSibling,
+        .getPreviousSibling = GetPreviousSibling,
+        .getParent = GetParent,
+        .getIdByNodePtr = GetIdByNodePtr,
+        .propertyUpdate = PropertyUpdate,
+        .getLast = GetLast,
+        .getPositionToParent = GetPositionToParent,
+        .getPositionToScreen = GetPositionToScreen,
+        .getPositionToWindow = GetPositionToWindow,
+        .getPositionToParentWithTransform = GetPositionToParentWithTransform,
+        .getPositionToScreenWithTransform = GetPositionToScreenWithTransform,
+        .getPositionToWindowWithTransform = GetPositionToWindowWithTransform,
+        .getMeasuredSize = GetMeasuredSize,
+        .getLayoutPosition = GetLayoutPosition,
+        .getInspectorId = GetInspectorId,
+        .getNodeType = GetNodeType,
+        .isVisible = IsVisible,
+        .isAttached = IsAttached,
+        .getInspectorInfo = GetInspectorInfo,
+        .getFrameNodeById = GetFrameNodeById,
+        .getFrameNodeByUniqueId = GetFrameNodeByUniqueId,
+        .getFrameNodeByKey = GetFrameNodeByKey,
+        .getFirstUINode = GetFirstUINode,
+        .getLayoutSize = GetLayoutSize,
+        .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

@@ -53,11 +53,21 @@ public:
     static void SetBackgroundBorderColor(const Color& value);
     static void SetBackgroundBorderStyle(const BorderStyle& value);
     static void SetBackgroundBorderRadius(const Dimension& value);
+    static void SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
+        const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+        const std::optional<Dimension>& bottomRight);
     static void SetBackgroundPadding(const std::optional<Dimension>& left, const std::optional<Dimension>& right,
         const std::optional<Dimension>& top, const std::optional<Dimension>& bottom);
     static void SetBackgroundPadding(const std::optional<Dimension>& padding);
     static void SetTextIconSpace(const Dimension& value);
     static void SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value);
+    static void SetAlign(const Alignment alignment);
+    static void SetMaxFontScale(const float value);
+    static void SetMinFontScale(const float value);
+    static void SetMaxLines(const int32_t value);
+    static void SetAdaptMaxFontSize(const Dimension& value);
+    static void SetAdaptMinFontSize(const Dimension& value);
+    static void SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value);
 
     virtual bool GetIconResource(int32_t iconStyle, InternalResource::ResourceId& id)
     {

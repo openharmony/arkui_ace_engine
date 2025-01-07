@@ -175,7 +175,7 @@ void JSButton::SetTextColor(const JSCallbackInfo& info)
 void JSButton::SetType(const JSCallbackInfo& info)
 {
     int32_t value = static_cast<int32_t>(ButtonType::CAPSULE);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         value = static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE);
     }
     if (info[0]->IsNumber()) {
@@ -450,14 +450,14 @@ Edge JSButton::GetOldPadding(const JSCallbackInfo& info)
 
 NG::PaddingProperty JSButton::GetNewPadding(const JSCallbackInfo& info)
 {
-    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
-        NG::CalcLength(0.0) };
+    NG::PaddingProperty padding = { NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0), NG::CalcLength(0.0),
+        std::nullopt, std::nullopt };
     if (isLabelButton_) {
         auto buttonTheme = GetTheme<ButtonTheme>();
         CHECK_NULL_RETURN(buttonTheme, padding);
         auto defaultPadding = buttonTheme->GetPadding();
         padding = { NG::CalcLength(defaultPadding.Left()), NG::CalcLength(defaultPadding.Right()),
-            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()) };
+            NG::CalcLength(defaultPadding.Top()), NG::CalcLength(defaultPadding.Bottom()), std::nullopt, std::nullopt };
     }
     if (info[0]->IsObject()) {
         CommonCalcDimension commonCalcDimension;

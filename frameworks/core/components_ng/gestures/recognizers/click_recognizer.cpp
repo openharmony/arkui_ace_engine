@@ -16,6 +16,8 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 #include "base/ressched/ressched_report.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -53,6 +55,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         if (offset.GetDistance() > distanceThreshold_) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
             "distanceThreshold_ is %{public}f", distanceThreshold_);
+            extraInfo_ += "move distance out of distanceThreshold.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         } else {
@@ -73,6 +76,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
             TAG_LOGI(AceLogTag::ACE_GESTURE,
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
                 event.touchEventId);
+            extraInfo_ += "move/up event out of region.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         }
@@ -160,8 +164,13 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
+    if (backupTouchPointsForSucceedBlock_.has_value()) {
+        touchPoints_ = backupTouchPointsForSucceedBlock_.value();
+        backupTouchPointsForSucceedBlock_.reset();
+    }
     TouchEvent touchPoint = {};
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
@@ -195,6 +204,9 @@ void ClickRecognizer::OnAccepted()
     if (onAccessibilityEventFunc_ && !onClick_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
     }
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
+    }
 }
 
 void ClickRecognizer::OnRejected()
@@ -202,6 +214,7 @@ void ClickRecognizer::OnRejected()
     SendRejectMsg();
     refereeState_ = RefereeState::FAIL;
     firstInputTime_.reset();
+    backupTouchPointsForSucceedBlock_.reset();
 }
 
 void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
@@ -222,9 +235,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         auto node = GetAttachedNode().Upgrade();
         TAG_LOGI(AceLogTag::ACE_GESTURE,
             "Click recognizer handle touch down event refereeState is %{public}d, node tag = %{public}s, id = "
-            "%{public}s",
+            SEC_PLD(%{public}s) ".",
             refereeState_, node ? node->GetTag().c_str() : "null",
-            node ? std::to_string(node->GetId()).c_str() : "invalid");
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
         return;
     }
     InitGlobalValue(event.sourceType);
@@ -306,7 +319,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
-    extraInfo_ = "";
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -345,6 +357,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
         } else {
+            extraInfo_ += "finger number not satisfied.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
@@ -355,7 +368,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 {
-    extraInfo_ = "";
     if (currentFingers_ < fingers_) {
         return;
     }
@@ -370,6 +382,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
+            extraInfo_ += "offset is out of region.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
@@ -380,7 +393,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
-    extraInfo_ = "";
+    extraInfo_ += "receive cancel event.";
     if (IsRefereeFinished()) {
         return;
     }
@@ -496,6 +509,30 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         // onAction may be overwritten in its invoke so we copy it first
         auto onActionFunction = *onAction;
         onActionFunction(info);
+        RecordClickEventIfNeed(info);
+    }
+}
+
+void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const
+{
+    if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
+        auto host = GetAttachedNode().Upgrade();
+        CHECK_NULL_VOID(host);
+        Recorder::EventParamsBuilder builder;
+        builder.SetId(host->GetInspectorId().value_or(""))
+            .SetType(host->GetTag())
+            .SetText(host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText(true))
+            .SetDescription(host->GetAutoEventParamValue(""))
+            .SetHost(host);
+        auto rectSwitch = Recorder::EventRecorder::Get().IsRecordEnable(Recorder::EventCategory::CATEGORY_RECT);
+        if (rectSwitch) {
+            static const int32_t precision = 2;
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(precision) << info.GetGlobalPoint().GetX() << ","
+               << info.GetGlobalPoint().GetY();
+            builder.SetExtra(Recorder::KEY_POINT, ss.str());
+        }
+        Recorder::EventRecorder::Get().OnClick(std::move(builder));
     }
 }
 

@@ -189,11 +189,11 @@ void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& 
     if (!name_.empty()) {
         return;
     }
-
+    CHECK_NULL_VOID(hostNode);
     if (hostNode->GetInspectorId().has_value()) {
         name_ = hostNode->GetInspectorIdValue();
     } else {
-        name_ = std::to_string(GetHost()->GetId());
+        name_ = std::to_string(hostNode->GetId());
     }
     auto pathInfo = GetNavPathInfo();
     if (pathInfo) {
@@ -352,8 +352,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto id = host->GetId();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -364,6 +366,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
 }
 
 void NavDestinationPattern::DumpInfo()

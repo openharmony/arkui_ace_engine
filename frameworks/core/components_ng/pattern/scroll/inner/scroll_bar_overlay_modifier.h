@@ -89,8 +89,13 @@ public:
 
     void SetOpacity(uint8_t opacity)
     {
-        CHECK_NULL_VOID(opacity_);
-        opacity_->Set(opacity);
+        AnimationUtils::ExecuteWithoutAnimation([weak = AceType::WeakClaim(this), opacity]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            auto modifierOpacity = modifier->opacity_;
+            CHECK_NULL_VOID(modifierOpacity);
+            modifierOpacity->Set(opacity);
+        });
     }
 
     uint8_t GetOpacity() const
@@ -124,6 +129,10 @@ public:
 
     void SetBarColor(Color barColor);
 
+    RefPtr<PropertyColor> GetBarColor()
+    {
+        return barColor_;
+    }
     void SetPositionMode(const PositionMode& positionMode)
     {
         positionMode_ = positionMode;
@@ -133,6 +142,21 @@ public:
     {
         isScrollable_ = isScrollable;
     }
+
+    void SetNavDestinationShow(bool isNavDestinationShow)
+    {
+        isNavDestinationShow_ = isNavDestinationShow;
+    }
+
+protected:
+    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool GetScrollable()
+    {
+        return isScrollable_;
+    }
+#endif
 
 private:
     Offset GetHoverOffset(const Size& size) const;
@@ -151,7 +175,6 @@ private:
     float lastMainModeOffset_ = 0.f;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);
 
-    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
     std::shared_ptr<AnimationUtils::Animation> opacityAnimation_;
     std::shared_ptr<AnimationUtils::Animation> adaptAnimation_;
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
@@ -159,6 +182,7 @@ private:
     PositionMode positionMode_ = PositionMode::RIGHT;
 
     bool isScrollable_ = true;
+    bool isNavDestinationShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 

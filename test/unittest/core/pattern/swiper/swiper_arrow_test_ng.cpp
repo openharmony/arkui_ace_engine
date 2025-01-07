@@ -152,7 +152,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow001, TestSize.Level1)
      * @tc.expected: Swipe to pre item
      */
     leftArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
 }
 
@@ -202,7 +202,7 @@ HWTEST_F(SwiperArrowTestNg, ClickArrow002, TestSize.Level1)
      * @tc.expected: Swipe to next item
      */
     rightArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 }
 
@@ -852,13 +852,13 @@ HWTEST_F(SwiperArrowTestNg, ClickArrowRTL001, TestSize.Level1)
      * @tc.steps: step1. Click the left arrow in RTL layout.
      */
     leftArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 1);
     /**
      * @tc.steps: step2. Click the right arrow in RTL layout.
      */
     rightArrowPattern->ButtonClickEvent();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
 }
 
@@ -936,7 +936,7 @@ HWTEST_F(SwiperArrowTestNg, InitButtonEventCallBack002, TestSize.Level1)
     auto callback = event->GetGestureEventFunc();
     ASSERT_NE(callback, nullptr);
     callback(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentIndex(), 1);
 }
 
@@ -973,11 +973,11 @@ HWTEST_F(SwiperArrowTestNg, ChangeLoop001, TestSize.Level1)
     EXPECT_TRUE(VerifyArrowVisible(true, true));
 
     controller_->ChangeIndex(5, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(true, false));
 }
 
@@ -1000,22 +1000,22 @@ HWTEST_F(SwiperArrowTestNg, ArrowVisiblity001, TestSize.Level1)
 
     layoutProperty_->UpdateDisplayCount(3);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     layoutProperty_->UpdateDisplayCount(5);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 
     layoutProperty_->UpdateDisplayCount(1);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(true, true));
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
     frameNode_->RemoveChildAtIndex(0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(VerifyArrowVisible(false, false));
 }
 

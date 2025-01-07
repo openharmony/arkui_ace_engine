@@ -68,7 +68,11 @@ std::optional<SizeF> SliderLayoutAlgorithm::MeasureContent(
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        frameNode->GetGeometryNode()->Reset();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            frameNode->GetGeometryNode()->ResetContent();
+        } else {
+            frameNode->GetGeometryNode()->Reset();
+        }
         return std::nullopt;
     }
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -117,9 +121,13 @@ float SliderLayoutAlgorithm::CalculateSliderWidth(
     float width, float height, Axis direction, const Dimension& hotBlockShadowWidth, SliderModel::SliderMode mode)
 {
     auto theme = GetTheme();
+    CHECK_NULL_RETURN(theme, 0.0f);
     auto blockWidth = direction == Axis::HORIZONTAL ? blockSize_.Height() : blockSize_.Width();
     auto blockHotWidth = direction == Axis::HORIZONTAL ? blockHotSize_.Height() : blockHotSize_.Width();
     auto sliderWidth = static_cast<float>(theme->GetMeasureContentDefaultWidth().ConvertToPx());
+    if (mode == SliderModel::SliderMode::NONE || mode == SliderModel::SliderMode::OUTSET) {
+        sliderWidth = static_cast<float>(theme->GetMeasureContentOutsetWidth().ConvertToPx());
+    }
     sliderWidth = std::max(sliderWidth, trackThickness_);
     if (mode == SliderModel::SliderMode::OUTSET) {
         sliderWidth = std::max(sliderWidth, blockHotWidth);
@@ -136,7 +144,7 @@ void SliderLayoutAlgorithm::GetStyleThemeValue(LayoutWrapper* layoutWrapper, Dim
     CHECK_NULL_VOID(frameNode);
     auto sliderLayoutProperty = DynamicCast<SliderLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
@@ -194,7 +202,7 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto sliderLayoutProperty = host->GetLayoutProperty<SliderLayoutProperty>();
     CHECK_NULL_VOID(sliderLayoutProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);

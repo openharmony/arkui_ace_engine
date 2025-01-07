@@ -111,10 +111,12 @@ void PanRecognizer::OnAccepted()
     }
 
     auto node = GetAttachedNode().Upgrade();
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Pan accepted, tag = %{public}s",
-        node ? node->GetTag().c_str() : "null");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
+        "Pan accepted, tag = %{public}s, averageDistance is x %{public}f, y %{public}f",
+        node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
     // only report the pan gesture starting for touch event
     DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
@@ -185,6 +187,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -198,13 +201,17 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     if (direction_.type == PanDirection::NONE) {
         auto node = GetAttachedNode().Upgrade();
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, node tag = %{public}s, id = %{public}s",
-            node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan recognizer direction is none, "
+            "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
+            node ? node->GetTag().c_str() : "null",
+            SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+        extraInfo_ += "direction is NONE.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
+        extraInfo_ += "mouse event is not allowed.";
         return;
     }
     if (!IsInAttachedNode(event)) {
@@ -236,6 +243,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -250,11 +258,13 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     direction_ = newDirection_;
 
     if (fingers_ != AXIS_PAN_FINGERS) {
+        extraInfo_ += "fingers does not meet the requirements of the axis event.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
+        extraInfo_ += "direction is NONE in axis case.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -285,6 +295,10 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         fingersId_.erase(event.id);
     }
     if (currentFingers_ < fingers_) {
+        if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+            ResetStateVoluntarily();
+            isNeedResetVoluntarily_ = false;
+        }
         return;
     }
 
@@ -318,6 +332,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             averageDistance_.Reset();
             AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
+            if (currentFingers_ > 1) {
+                isNeedResetVoluntarily_ = true;
+            } else {
+                ResetStateVoluntarily();
+            }
         }
     }
 
@@ -512,9 +531,9 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         return;
     }
 
-    if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == fingers_) {
+    if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -532,7 +551,7 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -633,8 +652,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    // when version >= 14, if distance_ = 0, panGesture will accept when receive Down event
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+    // when version >= 16, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
         NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
@@ -674,7 +693,7 @@ void PanRecognizer::OnResetStatus()
 
 void PanRecognizer::OnSucceedCancel()
 {
-    SendCancelMsg();
+    SendCallbackMsg(onActionCancel_);
 }
 
 GestureEvent PanRecognizer::GetGestureEventInfo()
@@ -698,7 +717,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
     NGGestureRecognizer::Transform(
         localPoint, GetAttachedNode(), false, isPostEventResult_, touchPoint.postEventNodeId);
     info.SetRawGlobalLocation(GetRawGlobalLocation(touchPoint.postEventNodeId));
-    info.SetPointerId(touchPoint.id);
+    info.SetPointerId(inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.id : lastTouchEvent_.id);
     info.SetTargetDisplayId(touchPoint.targetDisplayId);
     info.SetIsInterpolated(touchPoint.isInterpolated);
     info.SetInputXDeltaSlope(touchPoint.inputXDeltaSlope);
@@ -710,10 +729,12 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
         info.SetVerticalAxis(lastAxisEvent_.verticalAxis);
         info.SetHorizontalAxis(lastAxisEvent_.horizontalAxis);
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
+        info.SetPointerEventId(lastAxisEvent_.touchEventId);
     } else {
         info.SetScreenLocation(lastTouchEvent_.GetScreenOffset());
         info.SetSourceTool(lastTouchEvent_.sourceTool);
         info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
+        info.SetPointerEventId(lastTouchEvent_.touchEventId);
     }
     info.SetGlobalPoint(globalPoint_).SetLocalLocation(Offset(localPoint.GetX(), localPoint.GetY()));
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
@@ -803,7 +824,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_);
         }
         ResetStatus();
         return false;

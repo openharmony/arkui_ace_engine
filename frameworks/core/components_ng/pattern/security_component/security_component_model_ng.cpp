@@ -118,6 +118,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
+    property->UpdateTextStyle(style.text);
     auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
@@ -202,6 +203,9 @@ void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode
     style.SetBorderStyle(BorderStyle::NONE);
     renderContext->UpdateBorderStyle(style);
     auto buttonRadius = secCompTheme->GetBorderRadius();
+    if (type == static_cast<int32_t>(ButtonType::ROUNDED_RECTANGLE)) {
+        buttonRadius = secCompTheme->GetDefaultBorderRadius();
+    }
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(buttonRadius));
     renderContext->UpdateBackgroundColor(secCompTheme->GetBackgroundColor());
     buttonLayoutProperty->UpdateType(static_cast<ButtonType>(type));
@@ -355,7 +359,24 @@ void SecurityComponentModelNG::SetBackgroundBorderRadius(const Dimension& value)
         return;
     }
 
-    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, value);
+    NG::BorderRadiusProperty borderRadius = BorderRadiusProperty(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
+}
+
+void SecurityComponentModelNG::SetBackgroundBorderRadius(const std::optional<Dimension>& topLeft,
+    const std::optional<Dimension>& topRight, const std::optional<Dimension>& bottomLeft,
+    const std::optional<Dimension>& bottomRight)
+{
+    if (!IsBackgroundVisible()) {
+        SC_LOG_WARN("Can not set background padding without background");
+        return;
+    }
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = topLeft;
+    borderRadius.radiusTopRight = topRight;
+    borderRadius.radiusBottomLeft = bottomLeft;
+    borderRadius.radiusBottomRight = bottomRight;
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, BackgroundBorderRadius, borderRadius);
 }
 
 void SecurityComponentModelNG::SetBackgroundPadding(const std::optional<Dimension>& left,
@@ -407,5 +428,40 @@ void SecurityComponentModelNG::SetTextIconSpace(const Dimension& value)
 void SecurityComponentModelNG::SetTextIconLayoutDirection(const SecurityComponentLayoutDirection& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, TextIconLayoutDirection, value);
+}
+
+void SecurityComponentModelNG::SetAlign(const Alignment alignment)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, Alignment, alignment);
+}
+
+void SecurityComponentModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxFontScale, value);
+}
+
+void SecurityComponentModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MinFontScale, value);
+}
+
+void SecurityComponentModelNG::SetMaxLines(const int32_t value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, MaxLines, value);
+}
+
+void SecurityComponentModelNG::SetAdaptMaxFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMaxFontSize, value);
+}
+
+void SecurityComponentModelNG::SetAdaptMinFontSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, AdaptMinFontSize, value);
+}
+
+void SecurityComponentModelNG::SetHeightAdaptivePolicy(TextHeightAdaptivePolicy value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, HeightAdaptivePolicy, value);
 }
 } // namespace OHOS::Ace::NG

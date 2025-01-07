@@ -52,7 +52,7 @@ void ListContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(dividerlist);
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
     CHECK_NULL_VOID(lda);
-    const auto& dividerMap = lda->GetDividerMap();
+    const auto& dividerMap = isNeedDividerAnimation_ ? lda->GetDividerMap() : refDivider_->GetMap();
     if (!dividerMap.empty()) {
         DividerPainter dividerPainter(
             width_, 0, isVertical_, color_->Get().ToColor(), LineCap::SQUARE);

@@ -101,7 +101,7 @@ RefPtr<FrameNode> NavigationTitleUtil::CreateMenuItems(const int32_t menuNodeId,
     auto theme = NavigationGetTheme();
     CHECK_NULL_RETURN(theme, nullptr);
     auto mostMenuItemCount = GetOrInitMaxMenuNums(theme, navDestinationNodeBase);
-    bool needMoreButton = menuItems.size() > mostMenuItemCount ? true : false;
+    bool needMoreButton = menuItems.size() > mostMenuItemCount;
 
     int32_t count = 0;
     std::vector<OptionParam> params;
@@ -416,6 +416,7 @@ void BuildImageMoreItemNode(const RefPtr<BarItemNode>& barItemNode, bool isButto
 {
     int32_t imageNodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto imageNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, imageNodeId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_VOID(imageNode);
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
     auto theme = NavigationGetTheme();
@@ -876,5 +877,10 @@ void NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(const RefPtr<
 bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBarNode)
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
+}
+
+bool NavigationTitleUtil::NeedAvoidContainerModal(PipelineContext* pipeline)
+{
+    return pipeline && !pipeline->GetContainerCustomTitleVisible() && pipeline->GetContainerControlButtonVisible();
 }
 } // namespace OHOS::Ace::NG

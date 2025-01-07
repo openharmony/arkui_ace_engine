@@ -43,6 +43,7 @@ private:
     static void AddButtonPointLightAnim(const JSCallbackInfo& info);
     static void CallButtonsRectChange(const JSCallbackInfo& info);
     static void CallMenuWidthChange(const JSCallbackInfo& info);
+    static void CallWindowNative(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

@@ -65,6 +65,37 @@ void SecurityComponentPattern::SetNodeHitTestMode(RefPtr<FrameNode>& node, HitTe
     gestureHub->SetHitTestMode(mode);
 }
 
+void SecurityComponentPattern::OnLanguageConfigurationUpdate()
+{
+    auto node = GetHost();
+    CHECK_NULL_VOID(node);
+    auto textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
+    CHECK_NULL_VOID(textNode);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetTextStyle().has_value()) {
+        auto textStyle = layoutProperty->GetTextStyle().value();
+        if (textStyle != static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) {
+            auto pipeline = textNode->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+            CHECK_NULL_VOID(theme);
+
+            std::string text;
+            if (node->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
+                text = theme->GetPasteDescriptions(textStyle);
+            } else if (node->GetTag() == V2::LOCATION_BUTTON_ETS_TAG) {
+                text = theme->GetLocationDescriptions(textStyle);
+            } else if (node->GetTag() == V2::SAVE_BUTTON_ETS_TAG) {
+                text = theme->GetSaveDescriptions(textStyle);
+            }
+
+            textLayoutProperty->UpdateContent(text);
+        }
+    }
+}
+
 bool SecurityComponentPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
@@ -413,6 +444,42 @@ void SecurityComponentPattern::UpdateTextProperty(RefPtr<FrameNode>& scNode, Ref
     if (scPaintProp->GetFontColor().has_value()) {
         textLayoutProp->UpdateTextColor(scPaintProp->GetFontColor().value());
     }
+    if (scLayoutProp->GetMaxFontScale().has_value()) {
+        textLayoutProp->UpdateMaxFontScale(scLayoutProp->GetMaxFontScale().value());
+    }
+    if (scLayoutProp->GetMinFontScale().has_value()) {
+        textLayoutProp->UpdateMinFontScale(scLayoutProp->GetMinFontScale().value());
+    }
+    if (scLayoutProp->GetMaxLines().has_value()) {
+        textLayoutProp->UpdateMaxLines(scLayoutProp->GetMaxLines().value());
+    }
+    if (scLayoutProp->GetAdaptMaxFontSize().has_value()) {
+        textLayoutProp->UpdateAdaptMaxFontSize(scLayoutProp->GetAdaptMaxFontSize().value());
+    }
+    if (scLayoutProp->GetAdaptMinFontSize().has_value()) {
+        textLayoutProp->UpdateAdaptMinFontSize(scLayoutProp->GetAdaptMinFontSize().value());
+    }
+    if (scLayoutProp->GetHeightAdaptivePolicy().has_value()) {
+        textLayoutProp->UpdateHeightAdaptivePolicy(scLayoutProp->GetHeightAdaptivePolicy().value());
+    }
+}
+
+void SecurityComponentPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto* pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_VOID(theme);
+    auto alpha = theme->GetBgDisabledAlpha();
+    auto originalOpacity = renderContext->GetOpacityValue(1.0);
+    renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
 void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode)
@@ -456,6 +523,7 @@ void SecurityComponentPattern::UpdateButtonProperty(RefPtr<FrameNode>& scNode, R
         CHECK_NULL_VOID(inputHub);
         inputHub->SetHoverEffect(scLayoutProp->GetHoverEffect().value());
     }
+    HandleEnabled();
 }
 
 void SecurityComponentPattern::OnModifyDone()

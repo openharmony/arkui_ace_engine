@@ -92,8 +92,6 @@ class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
-using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
-    SerializedGesture& serializedGesture)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -177,20 +175,18 @@ public:
     virtual void RemoveScheduleTask(uint32_t id) = 0;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
+        bool isEventsPassThrough = false)
+    {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
     virtual void OnPenHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
     virtual void HandlePenHoverOut(const TouchEvent& point) {}
-
-    // Called by container when key event received.
-    // if return false, then this event needs platform to handle it.
-    virtual bool OnKeyEvent(const KeyEvent& event) = 0;
 
     // Called by container when key event received.
     // if return false, then this event needs platform to handle it.
@@ -464,6 +460,13 @@ public:
     }
     void HyperlinkStartAbility(const std::string& address) const;
 
+    using StartAbilityOnQueryHandler = std::function<void(const std::string& queryWord)>;
+    void SetStartAbilityOnQueryHandler(StartAbilityOnQueryHandler&& listener)
+    {
+        startAbilityOnQueryHandler_ = std::move(listener);
+    }
+    void StartAbilityOnQuery(const std::string& queryWord) const;
+
     using ActionEventHandler = std::function<void(const std::string& action)>;
     void SetActionEventHandler(ActionEventHandler&& listener)
     {
@@ -684,6 +687,16 @@ public:
         std::shared_lock<std::shared_mutex> lock(themeMtx_);
         if (themeManager_) {
             return themeManager_->GetTheme<T>();
+        }
+        return {};
+    }
+
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId) const
+    {
+        std::shared_lock<std::shared_mutex> lock(themeMtx_);
+        if (themeManager_) {
+            return themeManager_->GetTheme<T>(themeScopeId);
         }
         return {};
     }
@@ -1027,11 +1040,12 @@ public:
     Rect GetCurrentWindowRect() const;
 
     using SafeAreaInsets = NG::SafeAreaInsets;
-    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {}
 
-    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
+    virtual void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow = false) {}
 
-    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+    virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow = false) {}
+
+    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow = false) {}
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
@@ -1142,12 +1156,6 @@ public:
     }
 
     virtual void SetupSubRootElement() = 0;
-
-    void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
-
-    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
-
-    void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
     void SetSubWindowVsyncCallback(AceVsyncCallback&& callback, int32_t subWindowId);
 
@@ -1421,10 +1429,16 @@ public:
         return true;
     }
 
+    virtual bool IsDirtyPropertyNodesEmpty() const
+    {
+        return true;
+    }
+
     void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
     void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
     void FireAllUIExtensionEvents();
     void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+    void FireUIExtensionEventInner(uint32_t eventId);
 
     void SetOpenInvisibleFreeze(bool isOpenInvisibleFreeze)
     {
@@ -1454,6 +1468,9 @@ public:
     void AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter);
 
     void FireAccessibilityEvents();
+    void FireAccessibilityEventInner(uint32_t event, int64_t parameter);
+
+    virtual void SetEnableSwipeBack(bool isEnable) {}
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1564,6 +1581,7 @@ protected:
     ProfilerCallback onVsyncProfiler_;
     FinishEventHandler finishEventHandler_;
     StartAbilityHandler startAbilityHandler_;
+    StartAbilityOnQueryHandler startAbilityOnQueryHandler_;
     ActionEventHandler actionEventHandler_;
     FormLinkInfoUpdateHandler formLinkInfoUpdateHandler_;
     RefPtr<PlatformResRegister> platformResRegister_;
@@ -1571,8 +1589,6 @@ protected:
     WeakPtr<PipelineBase> parentPipeline_;
 
     std::vector<WeakPtr<PipelineBase>> touchPluginPipelineContext_;
-    std::unordered_map<int32_t, EtsCardTouchEventCallback> etsCardTouchEventCallback_;
-
     RefPtr<Clipboard> clipboard_;
     std::function<void(const std::string&)> clipboardCallback_ = nullptr;
     Rect displayWindowRectInfo_;

@@ -286,6 +286,37 @@ void NativeCanvasRenderer::Ellipse(const EllipseParam& param)
     renderingContext2DModel_->Ellipse(param);
 }
 
+void NativeCanvasRenderer::SaveLayer()
+{
+    renderingContext2DModel_->SaveLayer();
+}
+
+void NativeCanvasRenderer::RestoreLayer()
+{
+    renderingContext2DModel_->RestoreLayer();
+}
+
+void NativeCanvasRenderer::SetFilter(const std::string& value)
+{
+    renderingContext2DModel_->SetFilterParam(value);
+}
+
+double NativeCanvasRenderer::GetHeight()
+{
+    double width = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    canvasRenderingContext2DModel->GetWidth(width);
+    return width;
+}
+
+double NativeCanvasRenderer::GetWidth()
+{
+    double height = 0.0;
+    auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
+    canvasRenderingContext2DModel->GetHeight(height);
+    return height;
+}
+
 void NativeCanvasRenderer::NormalRect(const Rect& rect)
 {
     renderingContext2DModel_->AddRect(rect);

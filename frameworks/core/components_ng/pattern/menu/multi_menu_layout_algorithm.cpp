@@ -19,8 +19,113 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+struct SelectOverlayRightClickMenuLayoutHelper {
+    static void AdjustLayoutConstraints(
+        LayoutConstraintF& constrainMinWidth, const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
+    {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto scrollNode = host->GetParentFrameNode();
+        CHECK_NULL_VOID(scrollNode);
+        auto outterMenuNode = scrollNode->GetParentFrameNode();
+        CHECK_NULL_VOID(outterMenuNode);
+        auto outterMenuPattern = outterMenuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(outterMenuPattern);
+        auto menuWrapperNode = outterMenuNode->GetParentFrameNode();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_VOID(childLayoutProperty);
+        if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
+            !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
+            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+            return;
+        }
+        childLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(0.0, DimensionUnit::AUTO) });
+        constrainMinWidth.percentReference.SetWidth(constrainMinWidth.selfIdealSize.Width().value());
+        auto row = child->GetChildByIndex(0);
+        CHECK_NULL_VOID(row);
+        auto layoutProperty = row->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::AUTO) });
+        auto pasteButtonRow = child->GetChildByIndex(1);
+        CHECK_NULL_VOID(pasteButtonRow);
+        auto pasteButton = pasteButtonRow->GetChildByIndex(0);
+        CHECK_NULL_VOID(pasteButton);
+        auto pasteButtonLayoutProperty = pasteButton->GetLayoutProperty();
+        CHECK_NULL_VOID(pasteButtonLayoutProperty);
+        pasteButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT) });
+    }
+
+    static void AdjustLayoutConstraintsAutoWidth(const RefPtr<LayoutWrapper>& child, LayoutWrapper* layoutWrapper)
+    {
+        auto host = layoutWrapper->GetHostNode();
+        CHECK_NULL_VOID(host);
+        auto scrollNode = host->GetParentFrameNode();
+        CHECK_NULL_VOID(scrollNode);
+        auto outterMenuNode = scrollNode->GetParentFrameNode();
+        CHECK_NULL_VOID(outterMenuNode);
+        auto outterMenuPattern = outterMenuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(outterMenuPattern);
+        auto menuWrapperNode = outterMenuNode->GetParentFrameNode();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_VOID(childLayoutProperty);
+        if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
+            !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
+            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+            return;
+        }
+        childLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+        auto row = child->GetChildByIndex(0);
+        CHECK_NULL_VOID(row);
+        auto layoutProperty = row->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        layoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+        auto pasteButtonRow = child->GetChildByIndex(1);
+        CHECK_NULL_VOID(pasteButtonRow);
+        auto pasteButton = pasteButtonRow->GetChildByIndex(0);
+        CHECK_NULL_VOID(pasteButton);
+        auto pasteButtonLayoutProperty = pasteButton->GetLayoutProperty();
+        CHECK_NULL_VOID(pasteButtonLayoutProperty);
+        pasteButtonLayoutProperty->UpdateUserDefinedIdealSize(
+            { CalcLength(0.0, DimensionUnit::AUTO), CalcLength(0.0, DimensionUnit::AUTO) });
+    }
+};
+} // namespace
+
+bool UpdateColumnWidth(const RefPtr<FrameNode>& frameNode, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(frameNode && columnInfo, false);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (Positive(pipeline->GetRootWidth())) {
+        return false;
+    }
+
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_RETURN(currentId >= MIN_SUBCONTAINER_ID, false);
+    auto subwindowManager = SubwindowManager::GetInstance();
+    CHECK_NULL_RETURN(subwindowManager, false);
+    auto parentContainerId = subwindowManager->GetParentContainerId(currentId);
+    auto subwindow = subwindowManager->GetSubwindow(parentContainerId);
+    CHECK_NULL_RETURN(subwindow, false);
+    auto width = subwindow->GetRect().Width();
+    CHECK_NULL_RETURN(Positive(width), false);
+    auto parent = columnInfo->GetParent();
+    CHECK_NULL_RETURN(parent, false);
+    parent->BuildColumnWidth(width);
+    return true;
+}
+
 void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
@@ -47,7 +152,10 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             if (LessNotEqual(layoutConstraint->selfIdealSize.Width().value(), MIN_MENU_WIDTH.ConvertToPx())) {
                 RefPtr<GridColumnInfo> columnInfo;
                 columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-                columnInfo->GetParent()->BuildColumnWidth();
+                CHECK_NULL_VOID(columnInfo);
+                auto columnParent = columnInfo->GetParent();
+                CHECK_NULL_VOID(columnParent);
+                columnParent->BuildColumnWidth();
                 auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
                 layoutConstraint->selfIdealSize.SetWidth(minWidth);
 
@@ -63,8 +171,11 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         // constraint min width base on grid column
         auto columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
         CHECK_NULL_VOID(columnInfo);
-        CHECK_NULL_VOID(columnInfo->GetParent());
-        columnInfo->GetParent()->BuildColumnWidth();
+        auto columnParent = columnInfo->GetParent();
+        CHECK_NULL_VOID(columnParent);
+        if (!UpdateColumnWidth(node, columnInfo)) {
+            columnParent->BuildColumnWidth();
+        }
         auto minWidth = static_cast<float>(columnInfo->GetWidth()) - padding.Width();
         childConstraint.minSize.SetWidth(minWidth);
 
@@ -92,7 +203,8 @@ void MultiMenuLayoutAlgorithm::UpdateMenuDefaultConstraintByDevice(const RefPtr<
 
     auto mainMenuPattern = pattern->GetMainMenuPattern();
     CHECK_NULL_VOID(mainMenuPattern);
-    if (!mainMenuPattern->IsContextMenu() && !mainMenuPattern->IsMenu()) {
+    if (!mainMenuPattern->IsContextMenu() && !mainMenuPattern->IsMenu() &&
+        !mainMenuPattern->IsSelectOverlayRightClickMenu()) {
         return;
     }
 
@@ -174,21 +286,34 @@ void MultiMenuLayoutAlgorithm::UpdateEmbeddedPercentReference(LayoutWrapper* lay
 void MultiMenuLayoutAlgorithm::UpdateSelfSize(LayoutWrapper* layoutWrapper,
     LayoutConstraintF& childConstraint, std::optional<LayoutConstraintF>& layoutConstraint)
 {
-    float contentHeight = 0.0f;
-    float contentWidth = childConstraint.selfIdealSize.Width().value();
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(ResetLayoutConstraintMinWidth(child, childConstraint));
-        auto childHight = std::max(child->GetGeometryNode()->GetMarginFrameSize().Height(),
-            child->GetGeometryNode()->GetContentSize().Height());
-        contentHeight += childHight;
-    }
-    layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
-    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
-
     auto node = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(node);
     auto pattern = node->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(pattern);
+
+    float contentHeight = 0.0f;
+    float contentWidth = childConstraint.selfIdealSize.Width().value();
+    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+        if (!child) {
+            TAG_LOGW(AceLogTag::ACE_MENU, "child is null in MultiMenu");
+            continue;
+        }
+        auto resetLayoutConstraint = ResetLayoutConstraintMinWidth(child, childConstraint);
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraints(
+            resetLayoutConstraint, child, layoutWrapper);
+        if (pattern->IsEmbedded() && (resetLayoutConstraint.minSize.Width() > resetLayoutConstraint.maxSize.Width())) {
+            resetLayoutConstraint.minSize.SetWidth(resetLayoutConstraint.maxSize.Width());
+        }
+        child->Measure(resetLayoutConstraint);
+        auto childGeometryNode = child->GetGeometryNode();
+        CHECK_NULL_VOID(childGeometryNode);
+        auto childHeight = std::max(childGeometryNode->GetMarginFrameSize().Height(),
+            childGeometryNode->GetContentSize().Height());
+        contentHeight += childHeight;
+    }
+    layoutWrapper->GetGeometryNode()->SetContentSize(SizeF(contentWidth, contentHeight));
+    BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
+    
     // Stack or Embedded submenu must follow parent width
     if (pattern->IsStackSubmenu() || pattern->IsEmbedded()) {
         auto idealSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
@@ -220,8 +345,16 @@ float MultiMenuLayoutAlgorithm::GetChildrenMaxWidth(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint)
 {
     float maxWidth = 0.0f;
+    auto node = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(node, maxWidth);
+    auto pattern = node->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(pattern, maxWidth);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto childConstraint = ResetLayoutConstraintMinWidth(child, layoutConstraint);
+        if (pattern->IsEmbedded() && (childConstraint.minSize.Width() > childConstraint.maxSize.Width())) {
+            childConstraint.minSize.SetWidth(childConstraint.maxSize.Width());
+        }
+        SelectOverlayRightClickMenuLayoutHelper::AdjustLayoutConstraintsAutoWidth(child, layoutWrapper);
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         maxWidth = std::max(maxWidth, childSize.Width());

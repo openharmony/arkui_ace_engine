@@ -40,6 +40,7 @@
 namespace OHOS::Ace {
 struct DragNotifyMsg;
 class UnifiedData;
+class Subwindow;
 }
 
 namespace OHOS::Ace::NG {
@@ -77,6 +78,21 @@ struct BindMenuStatus {
     {
         return (isBindCustomMenu && isShow) || isBindLongPressMenu;
     }
+};
+
+struct PreparedInfoForDrag {
+    bool isMenuShow = false;
+    int32_t badgeNumber = 0;
+    float previewScale = 1.0f;
+    OffsetF dragPreviewOffsetToScreen = { 0.0f, 0.0f };
+    OffsetF dragMovePosition = { 0.0f, 0.0f };
+    RefPtr<PixelMap> pixelMap;
+    RefPtr<FrameNode> imageNode;
+};
+
+struct DragframeNodeInfo {
+    WeakPtr<FrameNode> frameNode;
+    std::vector<RefPtr<FrameNode>> gatherFrameNode;
 };
 
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -171,10 +187,8 @@ public:
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
         int32_t duration = 500);
     // Set by user define, which will replace old one.
-    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
-        bool isOverrideDistance = false);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance,
-        bool isOverrideDistance = false);
+    void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
@@ -236,23 +250,34 @@ public:
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
+    OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
+    int32_t GetBadgeNumber(const RefPtr<UnifiedData>& unifiedData);
+    bool TryDoDragStartAnimation(const RefPtr<PipelineBase>& context, const RefPtr<Subwindow>& subwindow,
+        const GestureEvent& info, PreparedInfoForDrag& data);
     float GetDefaultPixelMapScale(const GestureEvent& info, bool isMenuShow, RefPtr<PixelMap> pixelMap);
     RefPtr<PixelMap> GetPreScaledPixelMapIfExist(float targetScale, RefPtr<PixelMap> defaultPixelMap);
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
+    bool CheckAllowDrag(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
+    RefPtr<OHOS::Ace::DragEvent> CreateDragEvent(const GestureEvent& info, const RefPtr<PipelineBase>& context,
+        const RefPtr<FrameNode>& frameNode);
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
+    void HandleDragThroughMouse(const RefPtr<FrameNode> frameNode);
+    void HandleDragThroughTouch(const RefPtr<FrameNode> frameNode);
+    void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
-    void StartLongPressActionForWeb(bool isFloatImage = true);
+    void StartLongPressActionForWeb();
     void CancelDragForWeb();
     void StartDragTaskForWeb();
     void ResetDragActionForWeb();
     void OnModifyDone();
     bool KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr<NG::FrameNode>& node);
     bool IsAllowedDrag(RefPtr<EventHub> eventHub);
-    void HandleNotallowDrag(const GestureEvent& info);
+    void HandleNotAllowDrag(const GestureEvent& info);
     RefPtr<DragEventActuator> GetDragEventActuator();
     bool GetMonopolizeEvents() const;
     void SetMonopolizeEvents(bool monopolizeEvents);
@@ -300,6 +325,8 @@ public:
     bool IsGestureEmpty() const;
 
     bool IsPanEventEmpty() const;
+
+    void SetExcludedAxisForPanEvent(bool isExcludedAxis);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -319,6 +346,8 @@ private:
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
+    void ProcessMenuPreviewScale(
+        const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale);
 
     template<typename T>
     const RefPtr<T> GetAccessibilityRecognizer();
@@ -396,6 +425,7 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
+    DragframeNodeInfo dragframeNodeInfo_;
     // disable drag for the node itself and its all children
     bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;

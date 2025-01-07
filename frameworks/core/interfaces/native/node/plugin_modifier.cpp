@@ -74,16 +74,32 @@ void ResetPluginSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPluginModifier* GetPluginModifier()
 {
-    static const ArkUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
-        ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPluginModifier modifier = {
+        .setPluginWidth = SetPluginWidth,
+        .setPluginHeight = SetPluginHeight,
+        .setPluginSize = SetPluginSize,
+        .resetPluginWidth = ResetPluginWidth,
+        .resetPluginHeight = ResetPluginHeight,
+        .resetPluginSize = ResetPluginSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPluginModifier* GetCJUIPluginModifier()
 {
-    static const CJUIPluginModifier modifier = {SetPluginWidth, SetPluginHeight, SetPluginSize,
-        ResetPluginWidth, ResetPluginHeight, ResetPluginSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPluginModifier modifier = {
+        .setPluginWidth = SetPluginWidth,
+        .setPluginHeight = SetPluginHeight,
+        .setPluginSize = SetPluginSize,
+        .resetPluginWidth = ResetPluginWidth,
+        .resetPluginHeight = ResetPluginHeight,
+        .resetPluginSize = ResetPluginSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

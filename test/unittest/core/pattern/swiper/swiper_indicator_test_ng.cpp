@@ -51,7 +51,7 @@ void SwiperIndicatorTestNg::MouseClickIndicator(SourceType sourceType, Offset ho
     gestureEvent.SetSourceDevice(sourceType);
     indicatorPattern->isRepeatClicked_ = false;
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset touchPoint)
@@ -64,7 +64,7 @@ void SwiperIndicatorTestNg::TouchClickIndicator(SourceType sourceType, Offset to
     gestureEvent.SetSourceDevice(sourceType);
     gestureEvent.SetLocalLocation(touchPoint);
     indicatorPattern->HandleClick(gestureEvent);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoint)
@@ -77,7 +77,7 @@ void SwiperIndicatorTestNg::LongPressIndicator(Offset startPoint, Offset endPoin
 
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::MOVE, endPoint));
     indicatorPattern->HandleTouchEvent(CreateTouchEventInfo(TouchType::UP, endPoint));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**
@@ -100,29 +100,28 @@ HWTEST_F(SwiperIndicatorTestNg, OnIndicatorChangeEvent001, TestSize.Level1)
      * @tc.steps: step1. Default
      * @tc.expected: text is "1/4"
      */
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
-    EXPECT_EQ(lastTextLayoutProperty->GetContentValue(), u"/4");
+    EXPECT_TRUE(DigitText(u"1/4"));
 
     /**
      * @tc.steps: step2. Call ShowNext
      * @tc.expected: Change firstText
      */
     ShowNext();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"2");
+    EXPECT_TRUE(DigitText(u"2/4"));
 
     /**
      * @tc.steps: step3. Call ShowPrevious
      * @tc.expected: Change firstText
      */
     ShowPrevious();
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"1");
+    EXPECT_TRUE(DigitText(u"1/4"));
 
     /**
      * @tc.steps: step4. Call ChangeIndex
      * @tc.expected: Change firstText
      */
     ChangeIndex(3);
-    EXPECT_EQ(firstTextLayoutProperty->GetContentValue(), u"4");
+    EXPECT_TRUE(DigitText(u"4/4"));
 }
 
 /**
@@ -183,14 +182,7 @@ HWTEST_F(SwiperIndicatorTestNg, HandleMouseClick002, TestSize.Level1)
     EXPECT_EQ(pattern_->DisplayIndicatorTotalCount(), 2);
 
     /**
-     * @tc.steps: step1. Click item(index:1)
-     * @tc.expected: Swipe to item(index:3)
-     */
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->GetCurrentIndex(), 3);
-
-    /**
-     * @tc.steps: step2. Click item(index:0)
+     * @tc.steps: step1. Click item(index:0)
      * @tc.expected: Swipe to item(index:0)
      */
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
@@ -286,32 +278,6 @@ HWTEST_F(SwiperIndicatorTestNg, SetDigitIndicatorStyle001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation001
- * @tc.desc: PlayIndicatorTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->indicatorId_.reset();
-    float translate = 0.1f;
-
-    /**
-     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PlayIndicatorTranslateAnimation(translate);
-            if (i == 1) {
-                break;
-            }
-            pattern_->indicatorId_ = 1;
-        }
-    }
-}
-
-/**
  * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation002
  * @tc.desc: PlayIndicatorTranslateAnimation
  * @tc.type: FUNC
@@ -369,27 +335,6 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg005, TestSize.Level1
     EXPECT_TRUE(eventHub->IsEnabled());
     indicatorPattern->SetIndicatorInteractive(false);
     EXPECT_FALSE(eventHub->IsEnabled());
-}
-
-/**
- * @tc.name: SwiperPatternCheckMarkDirtyNodeForRenderIndicator001
- * @tc.desc: Test CheckMarkDirtyNodeForRenderIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicator001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-
-    /**
-     * @tc.steps: step2. test CheckMarkDirtyNodeForRenderIndicator.
-     * @tc.expected: Related function runs ok.
-     */
-    indicatorPattern->indicatorId_.reset();
-    float additionalOffset = 0.1f;
-    indicatorPattern->CheckMarkDirtyNodeForRenderIndicator(additionalOffset);
-    indicatorPattern->indicatorId_ = 1;
-    indicatorPattern->CheckMarkDirtyNodeForRenderIndicator(additionalOffset);
 }
 
 /**
@@ -454,28 +399,6 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternCheckIsTouchBottom002, Tes
 }
 
 /**
- * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation003
- * @tc.desc: PlayIndicatorTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation003, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->stopIndicatorAnimation_ = false;
-    pattern_->itemPosition_.clear();
-    float translate = 0.1f;
-
-    /**
-     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->PlayIndicatorTranslateAnimation(translate);
-    pattern_->stopIndicatorAnimation_ = true;
-    pattern_->indicatorId_ = 1;
-    pattern_->PlayIndicatorTranslateAnimation(translate);
-}
-
-/**
  * @tc.name: SwiperIndicatorPatternTouchBottom001
  * @tc.desc: CheckIsTouchBottom
  * @tc.type: FUNC
@@ -513,6 +436,7 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTouchBottom001, TestSize.L
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.Level1)
 {
     SwiperModelNG model = CreateSwiper();
+    model.SetIndicatorType(SwiperIndicatorType::DOT);
     model.SetDirection(Axis::VERTICAL);
     CreateSwiperItems();
     CreateSwiperDone();
@@ -531,24 +455,27 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex001, TestSize.L
  */
 HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex002, TestSize.Level1)
 {
-    SwiperModelNG model = CreateSwiper();
+    CreateSwiper();
     CreateSwiperItems();
     CreateSwiperDone();
-    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty = indicatorNode_->GetPaintProperty<DotIndicatorPaintProperty>();
+
     /**
      * @tc.steps: step1. call no mirror func.
      */
+    RefPtr<SwiperIndicatorPattern> indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
     layoutProperty_->UpdateLayoutDirection(TextDirection::LTR);
-    MouseClickIndicator(SourceType::MOUSE, Offset(72.f, 16.f));
+    indicatorPattern->hoverPoint_ = PointF(72.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
     EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
+
     /**
      * @tc.steps: step2. call mirror func.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    FlushUITasks();
+    indicatorPattern->hoverPoint_ = PointF(16.f, 16.f);
     indicatorPattern->GetMouseClickIndex();
-    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 0);
+    EXPECT_EQ(indicatorPattern->mouseClickIndex_, 3);
 }
 
 /**
@@ -564,26 +491,21 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
     EXPECT_EQ(pattern_->currentIndex_, 3);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 5);
 
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, 7);
-    MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
-    EXPECT_EQ(pattern_->currentIndex_, 5);
+    MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
+    EXPECT_EQ(pattern_->currentIndex_, 4);
 
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 7);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 11);
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, SECOND_POINT);
     EXPECT_EQ(pattern_->currentIndex_, 13);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
@@ -593,156 +515,21 @@ HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorGetMouseClickIndex003, TestSize.L
     EXPECT_EQ(pattern_->currentIndex_, 12);
 
     pattern_->ChangeIndex(0, false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentIndex_, 0);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -1);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -4);
 
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -9);
     MouseClickIndicator(SourceType::MOUSE, FIRST_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -12);
     MouseClickIndicator(SourceType::MOUSE, FOURTH_POINT);
     EXPECT_EQ(pattern_->currentIndex_, -9);
-}
-
-/**
- * @tc.name: SwiperIndicatorPatternTestNg0014
- * @tc.desc: HandleMouseClick
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0014, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(paintProperty_);
-    indicatorPattern->isRepeatClicked_ = true;
-    auto info = GestureEvent();
-    indicatorPattern->HandleMouseClick(info);
-}
-
-/**
- * @tc.name: SwiperIndicatorPatternTestNg0017
- * @tc.desc: InitTouchEvent
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0017, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(paintProperty_);
-    TouchEventInfo touchEventInfo("down");
-    indicatorPattern->touchEvent_ = nullptr;
-    auto gestureHub = frameNode_->GetOrCreateGestureEventHub();
-    indicatorPattern->InitTouchEvent(gestureHub);
-    indicatorPattern->touchEvent_->callback_(touchEventInfo);
-}
-
-/**
- * @tc.name: SwiperPatternCheckMarkDirtyNodeForRenderIndicator002
- * @tc.desc: Test CheckMarkDirtyNodeForRenderIndicator
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternCheckMarkDirtyNodeForRenderIndicator002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    RefPtr<SwiperPattern> indicatorPattern = frameNode_->GetPattern<SwiperPattern>();
-    float additionalOffset = -1.0f;
-    indicatorPattern->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 0.0f, 0.0f }));
-    indicatorPattern->itemPosition_.emplace(std::make_pair(3, SwiperItemInfo { 1.0f, 0.0f }));
-    indicatorPattern->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 0.0f, 2.0f }));
-    indicatorPattern->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1.0f, 2.0f }));
-
-    /**
-     * @tc.steps: step2. test CheckMarkDirtyNodeForRenderIndicator.
-     * @tc.expected: Related function runs ok.
-     */
-    indicatorPattern->indicatorId_ = 1;
-    indicatorPattern->CheckMarkDirtyNodeForRenderIndicator(additionalOffset);
-}
-
-/**
- * @tc.name: SwiperPatternPlayIndicatorTranslateAnimation004
- * @tc.desc: PlayIndicatorTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperPatternPlayIndicatorTranslateAnimation004, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->stopIndicatorAnimation_ = false;
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 0.0f, 0.0f }));
-    float translate = 0.1f;
-    pattern_->swiperController_->SetTurnPageRateCallback(nullptr);
-
-    /**
-     * @tc.steps: step2. call PlayIndicatorTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->stopIndicatorAnimation_ = true;
-    pattern_->indicatorId_ = 1;
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->PlayIndicatorTranslateAnimation(translate);
-            if (i == 1) {
-                pattern_->swiperController_->SetTurnPageRateCallback(nullptr);
-                continue;
-            }
-            pattern_->swiperController_->SetTurnPageRateCallback([](int32_t, float) {});
-        }
-        pattern_->itemPosition_.clear();
-        pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
-    }
-}
-
-/**
- * @tc.name: SwiperIndicatorPatternTestNg0018
- * @tc.desc: HandleTouchClick
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0018, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(paintProperty_);
-    auto info = GestureEvent();
-    layoutProperty_->UpdateDirection(Axis::NONE);
-    info.localLocation_.SetX(5.0f);
-    indicatorPattern->HandleTouchClick(info);
-    layoutProperty_->UpdateDirection(Axis::NONE);
-    info.localLocation_.SetX(500.0f);
-    indicatorPattern->HandleTouchClick(info);
-}
-
-/**
- * @tc.name: SwiperIndicatorPatternTestNg0019
- * @tc.desc: UpdateTextContentSub
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperIndicatorTestNg, SwiperIndicatorPatternTestNg0019, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto indicatorPattern = indicatorNode_->GetPattern<SwiperIndicatorPattern>();
-    auto layoutProperty = indicatorNode_->GetLayoutProperty<SwiperIndicatorLayoutProperty>();
-    auto paintProperty_ = pattern_->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(paintProperty_);
-
-    auto firstTextNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    auto lastTextNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern_->currentFirstIndex_ = -2;
-    layoutProperty_->UpdateIndex(1);
-    indicatorPattern->UpdateTextContentSub(layoutProperty, firstTextNode, lastTextNode);
 }
 
 /**
@@ -827,10 +614,12 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
     SwiperModelNG model = CreateSwiper();
     model.SetDisplayCount(2);
     model.SetSwipeByGroup(true);
-    CreateSwiperItems();
+    model.SetLoop(true);
+    CreateSwiperItems(6);
     CreateSwiperDone();
+
     auto totalCount = pattern_->TotalCount();
-    EXPECT_EQ(totalCount, 4);
+    EXPECT_EQ(totalCount, 6);
 
     float additionalOffset = 0.0f;
     pattern_->contentMainSize_ = SWIPER_WIDTH;
@@ -840,5 +629,88 @@ HWTEST_F(SwiperIndicatorTestNg, CalculateGroupTurnPageRate001, TestSize.Level1)
 
     auto groupTurnPageRate = pattern_->CalculateGroupTurnPageRate(additionalOffset);
     EXPECT_EQ(groupTurnPageRate, -0.25f);
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternCheckIsTouchBottom001
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    GestureEvent info;
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoSwiper;
+    infoSwiper.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoSwiper;
+    indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
+
+    /**
+     * @tc.steps: step2. call CheckIsTouchBottom.
+     */
+    EXPECT_FALSE(indicatorPattern->CheckIsTouchBottom(info));
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchEventInfo.GetTouches().front()));
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternCheckIsTouchBottom002
+ * @tc.desc: CheckIsTouchBottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternCheckIsTouchBottom002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    model.SetDirection(Axis::VERTICAL);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+    TouchLocationInfo touchLocationInfo("down", 2);
+    indicatorPattern->HandleLongDragUpdate(touchLocationInfo);
+
+    /**
+     * @tc.steps: step2. call CheckIsTouchBottom.
+     */
+    EXPECT_TRUE(indicatorPattern->CheckIsTouchBottom(touchLocationInfo));
+}
+
+/**
+ * @tc.name: CircleSwiperIndicatorPatternConvertAngleWithArcDirection001
+ * @tc.desc: ConvertAngleWithArcDirection
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperIndicatorTestNg, CircleSwiperIndicatorPatternConvertAngleWithArcDirection001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create swiper and set parameters.
+     */
+    SwiperModelNG model = CreateArcSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    auto indicatorPattern = indicatorNode_->GetPattern<ArcSwiperIndicatorPattern>();
+
+    /**
+     * @tc.steps: step2. call ConvertAngleWithArcDirection.
+     */
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 91.0f),
+        179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::THREE_CLOCK_DIRECTION, 89.0f),
+        -179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, -91.0f),
+        179.0f);
+    EXPECT_EQ(indicatorPattern->ConvertAngleWithArcDirection(SwiperArcDirection::NINE_CLOCK_DIRECTION, 1.0f),
+        -89.0f);
 }
 } // namespace OHOS::Ace::NG

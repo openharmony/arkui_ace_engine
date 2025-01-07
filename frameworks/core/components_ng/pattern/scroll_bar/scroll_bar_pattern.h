@@ -111,7 +111,7 @@ public:
 
     void SetControlDistance(float controlDistance)
     {
-        if (Positive(controlDistance_)) {
+        if (Positive(controlDistance_) ? !Positive(controlDistance) : Positive(controlDistance)) {
             controlDistanceChanged_ = true;
         }
         controlDistance_ = controlDistance;
@@ -205,10 +205,12 @@ public:
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
-    void UpdateScrollBarOffset();
+    void UpdateScrollBarOffset(int32_t scrollSource);
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
-    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+    void UpdateScrollBarRegion(
+        float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource);
     void RegisterScrollBarEventTask();
+    void InitScrollBarGestureEvent();
     bool UpdateScrollBarDisplay();
     bool IsReverse() const;
     void SetReverse(bool reverse);
@@ -235,7 +237,7 @@ public:
     {
         CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
         CHECK_NULL_VOID(!scrollBarOverlayModifier_);
-        scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+        scrollBarOverlayModifier_ = CreateOverlayModifier();
         scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
         scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
     }
@@ -334,8 +336,35 @@ public:
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
-private:
+
+    RefPtr<ScrollBar> GetScrollBar() const
+    {
+        return scrollBar_;
+    }
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
+
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier() const
+    {
+        return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    }
+
+    virtual RefPtr<ScrollBar> CreateScrollBar() const
+    {
+        return AceType::MakeRefPtr<ScrollBar>();
+    }
+
+    virtual bool UseInnerScrollBar() const
+    {
+        return !hasChild_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    }
+
     void OnModifyDone() override;
+
+private:
     void InitScrollPositionCallback();
     void InitScrollEndCallback();
     void AddScrollableEvent();

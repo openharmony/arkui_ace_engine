@@ -52,11 +52,9 @@ constexpr float LOADING_ANIMATION_DURATION = 350.0f;
 constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
-constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
-constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
 constexpr float DEFAULT_FRICTION = 62.0f;
 const RefPtr<Curve> DEFAULT_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.0f, 0.1f, 1.0f);
 const std::string REFRESH_DRAG_SCENE = "refresh_drag_scene";
@@ -124,12 +122,12 @@ void RefreshPattern::OnModifyDone()
     InitPanEvent(gestureHub);
     InitOnKeyEvent();
     InitChildNode();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         InitOffsetProperty();
     } else {
         triggerLoadingDistance_ = static_cast<float>(
-            std::clamp(layoutProperty->GetIndicatorOffset().value_or(TRIGGER_LOADING_DISTANCE).ConvertToPx(),
-                -1.0f * TRIGGER_LOADING_DISTANCE.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
+            std::clamp(layoutProperty->GetIndicatorOffset().value_or(triggerLoadingDistanceTheme_).ConvertToPx(),
+                -1.0f * triggerLoadingDistanceTheme_.ConvertToPx(), GetTriggerRefreshDisTance().ConvertToPx()));
         InitLowVersionOffset();
     }
     RefreshStatusChangeEffect();
@@ -141,7 +139,7 @@ RefPtr<LayoutAlgorithm> RefreshPattern::CreateLayoutAlgorithm()
     auto refreshLayoutAlgorithm = MakeRefPtr<RefreshLayoutAlgorithm>();
     if (isCustomBuilderExist_) {
         refreshLayoutAlgorithm->SetCustomBuilderIndex(0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
             refreshLayoutAlgorithm->SetBuilderMeasureBaseHeight(builderMeasureBaseHeight_);
         } else {
             refreshLayoutAlgorithm->SetCustomBuilderOffset(customBuilderOffset_);
@@ -222,24 +220,27 @@ void RefreshPattern::InitProgressNode()
     progressChild_ = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
     CHECK_NULL_VOID(progressChild_);
+    host->AddChild(progressChild_, 0);
     auto gestureHub = progressChild_->GetEventHub<EventHub>();
     if (gestureHub) {
         gestureHub->SetEnabled(false);
     }
-    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
-    CHECK_NULL_VOID(progressLayoutProperty);
-    progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
     auto progressPaintProperty = progressChild_->GetPaintProperty<LoadingProgressPaintProperty>();
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
-    host->AddChild(progressChild_, 0);
-    progressChild_->MarkDirtyNode();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<RefreshTheme>();
     CHECK_NULL_VOID(theme);
+    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
     progressPaintProperty->UpdateColor(theme->GetProgressColor());
+    auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
+    CHECK_NULL_VOID(progressLayoutProperty);
+    progressLayoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(loadingProgressSizeTheme_.ConvertToPx()),
+            CalcLength(loadingProgressSizeTheme_.ConvertToPx())));
+    progressChild_->MarkDirtyNode();
 }
 
 void RefreshPattern::UpdateLoadingTextOpacity(float opacity)
@@ -281,7 +282,7 @@ void RefreshPattern::InitProgressColumn()
     loadingTextLayoutProperty->UpdateFontSize(theme->GetTextStyle().GetFontSize());
 
     PaddingProperty textpadding;
-    textpadding.top = CalcLength(TRIGGER_LOADING_DISTANCE.ConvertToPx() + LOADING_TEXT_TOP_MARGIN.ConvertToPx());
+    textpadding.top = CalcLength(loadingProgressSizeTheme_.ConvertToPx());
     auto prop = columnNode_->GetLayoutProperty<LinearLayoutProperty>();
     prop->UpdatePadding(textpadding);
     UpdateLoadingTextOpacity(0.0f);
@@ -326,7 +327,7 @@ void RefreshPattern::InitChildNode()
     auto accessibilityLevel = accessibilityProperty->GetAccessibilityLevel();
     if (!progressChild_) {
         InitProgressNode();
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
             CHECK_NULL_VOID(progressChild_);
             auto progressContext = progressChild_->GetRenderContext();
             CHECK_NULL_VOID(progressContext);
@@ -381,7 +382,7 @@ void RefreshPattern::RefreshStatusChangeEffect()
 void RefreshPattern::QuickStartFresh()
 {
     UpdateRefreshStatus(RefreshStatus::REFRESH);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         QuickFirstChildAppear();
         return;
     }
@@ -396,7 +397,7 @@ void RefreshPattern::QuickStartFresh()
 void RefreshPattern::QuickEndFresh()
 {
     SwitchToFinish();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         QuickFirstChildDisappear();
         return;
     }
@@ -421,7 +422,7 @@ bool RefreshPattern::OnKeyEvent(const KeyEvent& event)
 
 void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         isSourceFromAnimation_ = !isDrag;
         ResetAnimation();
     } else {
@@ -433,7 +434,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
 ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         // If dragging does not expand the refresh, there is no need to continue executing the code
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return { delta, true };
@@ -462,7 +463,7 @@ ScrollResult RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 
 void RefreshPattern::HandleDragEnd(float speed)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         SpeedTriggerAnimation(speed);
     } else {
         HandleDragEndLowVersion();
@@ -527,6 +528,7 @@ void RefreshPattern::FireStateChange(int32_t value)
         builder.SetId(inspectorId)
             .SetType(host->GetTag())
             .SetEventType(Recorder::EventType::REFRESH)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));
     }
@@ -614,7 +616,7 @@ void RefreshPattern::SetAccessibilityAction()
         }
         pattern->HandleDragStart(true, 0.0f);
         for (float delta = 0.0f; LessNotEqual(delta, static_cast<float>(MAX_SCROLL_DISTANCE.ConvertToPx()));
-             delta += TRIGGER_LOADING_DISTANCE.ConvertToPx()) {
+             delta += pattern->triggerLoadingDistanceTheme_.ConvertToPx()) {
             pattern->HandleDragUpdate(delta, 0.0f);
         }
         pattern->HandleDragEnd(0.0f);
@@ -785,7 +787,7 @@ void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
             auto loadingTextRenderContext = loadingTextNode_->GetRenderContext();
             CHECK_NULL_VOID(loadingTextRenderContext);
             loadingTextRenderContext->UpdateTransformTranslate({ 0.0f,
-                scrollOffset_ - TRIGGER_LOADING_DISTANCE.ConvertToPx() - LOADING_PROGRESS_SIZE.ConvertToPx() -
+                scrollOffset_ - triggerLoadingDistanceTheme_.ConvertToPx() - loadingProgressSizeTheme_.ConvertToPx() -
                     LOADING_TEXT_TOP_MARGIN.ConvertToPx(),
                 0.0f });
         }
@@ -926,7 +928,7 @@ void RefreshPattern::ResetAnimation()
 {
     float currentOffset = scrollOffset_;
     AnimationUtils::StopAnimation(animation_);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::GreatOrEqualAPIVersionWithCheck(PlatformVersion::VERSION_ELEVEN)) {
         CHECK_NULL_VOID(offsetProperty_);
         offsetProperty_->Set(currentOffset);
     } else {

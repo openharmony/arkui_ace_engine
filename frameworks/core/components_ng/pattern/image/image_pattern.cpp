@@ -533,6 +533,22 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
     imageEventHub->FireErrorEvent(event);
 }
 
+void ImagePattern::SetExternalDecodeFormat(PixelFormat externalDecodeFormat)
+{
+    isImageReloadNeeded_ = isImageReloadNeeded_ | (externalDecodeFormat_ != externalDecodeFormat);
+    switch (externalDecodeFormat) {
+        case PixelFormat::NV21:
+        case PixelFormat::RGBA_8888:
+        case PixelFormat::RGBA_1010102:
+        case PixelFormat::YCBCR_P010:
+        case PixelFormat::YCRCB_P010:
+            externalDecodeFormat_ = externalDecodeFormat;
+            break;
+        default:
+            externalDecodeFormat_ = PixelFormat::UNKNOWN;
+    }
+}
+
 void ImagePattern::StartDecoding(const SizeF& dstSize)
 {
     // if layout size has not decided yet, resize target can not be calculated
@@ -559,14 +575,14 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
 
     if (loadingCtx_) {
         loadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        loadingCtx_->SetDynamicRangeMode(dynamicMode);
         loadingCtx_->SetImageQuality(GetImageQuality());
+        loadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         loadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     if (altLoadingCtx_) {
         altLoadingCtx_->SetIsHdrDecoderNeed(isHdrDecoderNeed);
-        altLoadingCtx_->SetDynamicRangeMode(dynamicMode);
         altLoadingCtx_->SetImageQuality(GetImageQuality());
+        altLoadingCtx_->SetPhotoDecodeFormat(GetExternalDecodeFormat());
         altLoadingCtx_->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
 }
@@ -724,12 +740,13 @@ void ImagePattern::LoadImage(
         .nodeId_ = host->GetId(),
         .accessibilityId_ = host->GetAccessibilityId(),
         .imageSrc_ = src.ToString().substr(0, MAX_SRC_LENGTH),
+        .isTrimMemRecycle_ = host->IsTrimMemRecycle(),
     };
 
     loadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(loadNotifier), syncLoad_, imageDfxConfig_);
 
     if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{public}s", imageDfxConfig_.ToStringWithSrc().c_str());
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "load image, %{private}s", imageDfxConfig_.ToStringWithSrc().c_str());
     }
 
     if (onProgressCallback_) {
@@ -741,6 +758,8 @@ void ImagePattern::LoadImage(
     }
     // Before loading new image data, reset the render success status to `false`.
     renderedImageInfo_.renderSuccess = false;
+    // Reset the reload flag before loading the image to ensure a fresh state.
+    isImageReloadNeeded_ = false;
     loadingCtx_->LoadImageData();
 }
 
@@ -771,7 +790,7 @@ void ImagePattern::LoadImageDataIfNeed()
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
-    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageQualityChange_ || isOrientationChange_) {
+    if (!loadingCtx_ || loadingCtx_->GetSourceInfo() != src || isImageReloadNeeded_ || isOrientationChange_) {
         LoadImage(src, imageLayoutProperty->GetPropertyChangeFlag(),
             imageLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE));
     } else if (IsSupportImageAnalyzerFeature()) {
@@ -1081,13 +1100,52 @@ void ImagePattern::UpdateInternalResource(ImageSourceInfo& sourceInfo)
     }
 }
 
+bool ImagePattern::RecycleImageData()
+{
+    //when image component is [onShow] , [no cache], do not clean image data
+    bool dataValid = false;
+    bool isCheckDataCache =
+        (!loadingCtx_ ||
+        (loadingCtx_->GetSourceInfo().GetSrcType() == SrcType::NETWORK &&
+        SystemProperties::GetDownloadByNetworkEnabled() &&
+        ImageLoadingContext::QueryDataFromCache(loadingCtx_->GetSourceInfo(), dataValid) == nullptr));
+    if (isShow_ || isCheckDataCache) {
+        return false;
+    }
+    auto frameNode = GetHost();
+    if (!frameNode) {
+        return false;
+    }
+    frameNode->SetTrimMemRecycle(true);
+    loadingCtx_ = nullptr;
+    auto rsRenderContext = frameNode->GetRenderContext();
+    if (!rsRenderContext) {
+        return false;
+    }
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
+    image_ = nullptr;
+    altLoadingCtx_ = nullptr;
+    altImage_ = nullptr;
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "OnRecycleImageData imageInfo: %{public}s",
+        imageDfxConfig_.ToStringWithSrc().c_str());
+    ACE_SCOPED_TRACE("OnRecycleImageData imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
+    return true;
+}
+
 void ImagePattern::OnNotifyMemoryLevel(int32_t level)
 {
     // when image component is [onShow], do not clean image data
     if (isShow_ || level < MEMORY_LEVEL_CRITICAL_STATUS) {
         return;
     }
-    // clean image data
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetTrimMemRecycle(false);
+    auto rsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(rsRenderContext);
+    rsRenderContext->RemoveContentModifier(contentMod_);
+    contentMod_ = nullptr;
     loadingCtx_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
@@ -1109,6 +1167,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     UnregisterWindowStateChangedCallback();
+    frameNode->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::OnReuse()
@@ -1147,10 +1206,14 @@ void ImagePattern::OnWindowHide()
 
 void ImagePattern::OnWindowShow()
 {
-    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageQualityChange_ = %{public}d",
-        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageQualityChange_);
+    TAG_LOGW(AceLogTag::ACE_IMAGE, "OnWindowShow. %{public}s, isImageReloadNeeded_ = %{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), isImageReloadNeeded_);
     isShow_ = true;
-    LoadImageDataIfNeed();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!host->IsTrimMemRecycle()) {
+        LoadImageDataIfNeed();
+    }
 }
 
 void ImagePattern::OnVisibleChange(bool visible)
@@ -1417,6 +1480,14 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         dynamicMode = renderProp->GetDynamicMode().value_or(DynamicRangeMode::STANDARD);
     }
     json->PutExtAttr("dynamicRangeMode", GetDynamicModeString(dynamicMode).c_str(), filter);
+    json->PutExtAttr("orientation", std::to_string(static_cast<int>(userOrientation_)).c_str(), filter);
+    Matrix4 defaultMatrixValue = Matrix4(
+        1.0f, 0, 0, 0,
+        0, 1.0f, 0, 0,
+        0, 0, 1.0f, 0,
+        0, 0, 0, 1.0f);
+    Matrix4 matrixValue = renderProp->HasImageMatrix() ? renderProp->GetImageMatrixValue() : defaultMatrixValue;
+    json->PutExtAttr("imageMatrix", matrixValue.ToString().c_str(), filter);
 }
 
 void ImagePattern::DumpLayoutInfo()
@@ -1702,6 +1773,8 @@ void ImagePattern::OnIconConfigurationUpdate()
 
 void ImagePattern::OnConfigurationUpdate()
 {
+    TAG_LOGD(AceLogTag::ACE_IMAGE, "OnConfigurationUpdate, %{public}s-%{public}d",
+        imageDfxConfig_.ToStringWithoutSrc().c_str(), loadingCtx_ ? 1 : 0);
     CHECK_NULL_VOID(loadingCtx_);
     auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
@@ -2292,7 +2365,7 @@ void ImagePattern::ResetImage()
 {
     image_ = nullptr;
     imageQuality_ = AIImageQuality::NONE;
-    isImageQualityChange_ = false;
+    isImageReloadNeeded_ = false;
     loadingCtx_.Reset();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2302,6 +2375,7 @@ void ImagePattern::ResetImage()
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
     }
+    host->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::ResetAltImage()
@@ -2337,6 +2411,7 @@ void ImagePattern::ResetImageAndAlt()
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    frameNode->SetTrimMemRecycle(false);
 }
 
 void ImagePattern::ResetPictureSize()

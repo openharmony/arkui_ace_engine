@@ -58,6 +58,7 @@ void PinchRecognizer::OnAccepted()
     refereeState_ = RefereeState::SUCCEED;
     isLastPinchFinished_ = false;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
 }
 
 void PinchRecognizer::OnRejected()
@@ -80,6 +81,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
         refereeState_ = RefereeState::READY;
     }
@@ -140,6 +142,12 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (fingersId_.empty()) {
         isLastPinchFinished_ = true;
     }
+    if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+        ResetStateVoluntarily();
+        isNeedResetVoluntarily_ = false;
+        activeFingers_.remove(event.id);
+        return;
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -149,6 +157,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         event.touchEventId, event.id, refereeState_, static_cast<int32_t>(activeFingers_.size()), fingers_);
     extraInfo_ = "activeSize: " + std::to_string(static_cast<int32_t>(activeFingers_.size()));
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -156,6 +165,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState not satisfy.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -173,6 +183,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
         firstInputTime_.reset();
+        isNeedResetVoluntarily_ = true;
     }
     activeFingers_.remove(event.id);
 }
@@ -312,7 +323,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -329,7 +340,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -475,7 +486,7 @@ bool PinchRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
 
     if (curr->fingers_ != fingers_ || curr->distance_ != distance_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_);
         }
         ResetStatus();
         return false;

@@ -56,6 +56,12 @@ public:
     void ReportComponentChangeEvent(const std::string& key, const std::string& value);
 
     /**
+     * @description: execute click callback when page some component change occurs
+     */
+    void ReportComponentChangeEvent(
+        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value);
+
+    /**
      * @description: save report communication stub side
      * @param reportStub report communication stub side
      */
@@ -87,6 +93,7 @@ public:
 
 private:
     static std::mutex mutex_;
+    static std::shared_mutex reportObjectMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     int32_t clickEventRegisterProcesses_ = 0;
     int32_t searchEventRegisterProcesses_ = 0;

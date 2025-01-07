@@ -40,6 +40,11 @@ enum class LayoutStyle {
     SPACE_BETWEEN_OR_CENTER,
 };
 
+enum class TabsCacheMode {
+    CACHE_BOTH_SIDE = 0,
+    CACHE_LATEST_SWITCHED
+};
+
 struct TabsItemDivider final {
     Dimension strokeWidth = 0.0_vp;
     Dimension startMargin = 0.0_vp;
@@ -95,11 +100,14 @@ struct BarGridColumnOptions final {
 
 struct ScrollableBarModeOptions final {
     Dimension margin = 0.0_vp;
-    LayoutStyle nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    std::optional<LayoutStyle> nonScrollableLayoutStyle = std::nullopt;
 
     bool operator==(const ScrollableBarModeOptions& option) const
     {
-        return (margin == option.margin) && (nonScrollableLayoutStyle == option.nonScrollableLayoutStyle);
+        return (margin == option.margin) &&
+               (nonScrollableLayoutStyle.has_value() == option.nonScrollableLayoutStyle.has_value()) &&
+               (nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) ==
+                   option.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER));
     }
 };
 
@@ -137,6 +145,7 @@ public:
     virtual void SetBarBackgroundColor(const Color& backgroundColor) = 0;
     virtual void SetClipEdge(bool clipEdge) = 0;
     virtual void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) = 0;
+    virtual void ResetScrollableBarModeOptions() = 0;
     virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
     virtual void SetIsCustomAnimation(bool isCustom) {}
     virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) {}
@@ -144,6 +153,9 @@ public:
     virtual void SetAnimateMode(TabAnimateMode mode) {}
     virtual void SetEdgeEffect(EdgeEffect edgeEffect) {}
     virtual void SetBarBackgroundEffect(const EffectOption& effectOption) {}
+    virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
+    virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

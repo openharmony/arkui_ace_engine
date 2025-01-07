@@ -189,6 +189,7 @@ DECLARE_PROP_TYPED_CLASS(PropertyOffsetF, NormalProperty, OffsetF);
 DECLARE_PROP_TYPED_CLASS(PropertyInt, NormalProperty, int32_t);
 DECLARE_PROP_TYPED_CLASS(PropertyFloat, NormalProperty, float);
 DECLARE_PROP_TYPED_CLASS(PropertyString, NormalProperty, std::string);
+DECLARE_PROP_TYPED_CLASS(PropertyU16String, NormalProperty, std::u16string);
 DECLARE_PROP_TYPED_CLASS(PropertyColor, NormalProperty, Color);
 DECLARE_PROP_TYPED_CLASS(PropertyRectF, NormalProperty, RectF);
 DECLARE_PROP_TYPED_CLASS(PropertyVectorFloat, NormalProperty, LinearVector<float>);

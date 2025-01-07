@@ -103,10 +103,11 @@ private:
     OffsetF GetOffsetWithBottomRight(const SizeF&, const OffsetF&);
 
     float GetWidthByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
-    float GetHeightByScreenSizeType(const SizeF& maxSize) const;
-    float GetHeightBySheetStyle() const;
+    float GetHeightByScreenSizeType(const SizeF& maxSize, LayoutWrapper* layoutWrapper) const;
+    float GetHeightBySheetStyle(LayoutWrapper* layoutWrapper) const;
     bool SheetInSplitWindow() const;
-    LayoutConstraintF CreateSheetChildConstraint(RefPtr<SheetPresentationProperty> layoutprop);
+    LayoutConstraintF CreateSheetChildConstraint(
+        RefPtr<SheetPresentationProperty> layoutprop, LayoutWrapper* layoutWrapper);
     float arrowOffsetX_ = 0.0f; // reletive to SheetOffsetX
     float sheetHeight_ = 0.0f;
     float sheetWidth_ = 0.0f;

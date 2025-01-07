@@ -260,6 +260,7 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
     isHover_ = isHover;
     auto hoverColor = theme->GetButtonHoverColor();
     auto backgroundColor = theme->GetButtonBackgroundColor();
@@ -314,6 +315,9 @@ void BubblePattern::RegisterButtonOnTouch()
 
 void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -410,15 +414,6 @@ void BubblePattern::Animation(
     option.SetFillMode(FillMode::FORWARDS);
     AnimationUtils::Animate(
         option, [buttonContext = renderContext, color = endColor]() { buttonContext->UpdateBackgroundColor(color); });
-}
-
-bool BubblePattern::PostTask(const TaskExecutor::Task& task, const std::string& name)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    return taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
 }
 
 void BubblePattern::StartEnteringTransitionEffects(

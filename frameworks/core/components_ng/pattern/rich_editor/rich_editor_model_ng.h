@@ -52,8 +52,12 @@ public:
         const OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
     void SetEnableHapticFeedback(bool isEnabled) override;
-    void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam) override;
+    void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
+        const SelectMenuParam& menuParam) override;
     void SetBarState(DisplayMode mode) override;
+    void SetMaxLength(std::optional<int32_t> value) override;
+    void ResetMaxLength() override;
+    void SetMaxLines(uint32_t value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -84,9 +88,11 @@ public:
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick);
-    static void SetImagePreviewMenuParam(FrameNode* frameNode,
-        std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+    static void SetPreviewMenuParam(FrameNode* frameNode,
+        TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
+    static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
+    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
 
 private:
     void SetDraggable(bool draggable);

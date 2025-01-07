@@ -111,7 +111,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     model.SetAnimationDuration(AceType::RawPtr(frameNode_), -1);
     model.SetIsVertical(AceType::RawPtr(frameNode_), false);
     model.SetBarOverlap(AceType::RawPtr(frameNode_), false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     auto dividerRenderContext = dividerNode_->GetRenderContext();
     BlurStyleOption option;
@@ -120,7 +120,8 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     EXPECT_EQ(tabBarPattern_->animationDuration_, -1);
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::HORIZONTAL);
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -133,7 +134,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     model.SetTabBarHeight(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetTabBarWidth(AceType::RawPtr(frameNode_), Dimension(60.f));
     model.SetBarOverlap(AceType::RawPtr(frameNode_), true);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(dividerRenderContext->GetOpacityValue(), 1.0);
     EXPECT_EQ(layoutProperty_->GetDividerValue(), divider);
@@ -143,7 +144,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest003, TestSize.Leve
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
 
     /**
      * @tc.steps: step4. check the frameNode.
@@ -192,7 +193,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest004, TestSize.Leve
     indicator.borderRadius = 2.0_vp;
     indicator.marginTop = 3.0_vp;
     tabContentPattern->SetIndicatorStyle(indicator);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);
@@ -234,7 +235,7 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest005, TestSize.Leve
     indicator.borderRadius = 2.0_vp;
     indicator.marginTop = 3.0_vp;
     tabContentPattern->SetIndicatorStyle(indicator);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().color, Color::BLACK);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().height, 10.0_vp);
     EXPECT_EQ(tabContentPattern->GetIndicatorStyle().width, 20.0_vp);

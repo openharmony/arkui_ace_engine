@@ -195,34 +195,102 @@ void ResetPatternLockEnableWaveEffect(ArkUINodeHandle node)
     PatternLockModelNG::SetEnableWaveEffect(frameNode, true);
 }
 
+void SetPatternLockEnableForeground(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableForeground(frameNode, static_cast<bool>(value));
+}
+
+void ResetPatternLockEnableForeground(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetEnableForeground(frameNode, false);
+}
+
+void SetPatternLockSkipUnselectedPoint(ArkUINodeHandle node, uint32_t value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, static_cast<bool>(value));
+}
+
+void ResetPatternLockSkipUnselectedPoint(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PatternLockModelNG::SetSkipUnselectedPoint(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIPatternLockModifier* GetPatternLockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIPatternLockModifier modifier = {
-        SetPatternLockActiveColor, ResetPatternLockActiveColor, SetPatternLockCircleRadius,
-        ResetPatternLockCircleRadius, SetPatternLockSelectedColor, ResetPatternLockSelectedColor,
-        SetPatternLockSideLength, ResetPatternLockSideLength, SetPatternLockAutoReset,
-        ResetPatternLockAutoReset, SetPatternLockPathStrokeWidth, ResetPatternLockPathStrokeWidth,
-        SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
-        ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
-        SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
-        ResetPatternLockEnableWaveEffect
+        .setPatternLockActiveColor = SetPatternLockActiveColor,
+        .resetPatternLockActiveColor = ResetPatternLockActiveColor,
+        .setPatternLockCircleRadius = SetPatternLockCircleRadius,
+        .resetPatternLockCircleRadius = ResetPatternLockCircleRadius,
+        .setPatternLockSelectedColor = SetPatternLockSelectedColor,
+        .resetPatternLockSelectedColor = ResetPatternLockSelectedColor,
+        .setPatternLockSideLength = SetPatternLockSideLength,
+        .resetPatternLockSideLength = ResetPatternLockSideLength,
+        .setPatternLockAutoReset = SetPatternLockAutoReset,
+        .resetPatternLockAutoReset = ResetPatternLockAutoReset,
+        .setPatternLockPathStrokeWidth = SetPatternLockPathStrokeWidth,
+        .resetPatternLockPathStrokeWidth = ResetPatternLockPathStrokeWidth,
+        .setPatternLockRegularColor = SetPatternLockRegularColor,
+        .resetPatternLockRegularColor = ResetPatternLockRegularColor,
+        .setPatternLockPathColor = SetPatternLockPathColor,
+        .resetPatternLockPathColor = ResetPatternLockPathColor,
+        .setPatternLockActiveCircleColor = SetPatternLockActiveCircleColor,
+        .resetPatternLockActiveCircleColor = ResetPatternLockActiveCircleColor,
+        .setPatternLockActiveCircleRadius = SetPatternLockActiveCircleRadius,
+        .resetPatternLockActiveCircleRadius = ResetPatternLockActiveCircleRadius,
+        .setPatternLockEnableWaveEffect = SetPatternLockEnableWaveEffect,
+        .resetPatternLockEnableWaveEffect = ResetPatternLockEnableWaveEffect,
+        .setPatternLockEnableForeground = SetPatternLockEnableForeground,
+        .resetPatternLockEnableForeground = ResetPatternLockEnableForeground,
+        .setPatternLockSkipUnselectedPoint = SetPatternLockSkipUnselectedPoint,
+        .resetPatternLockSkipUnselectedPoint = ResetPatternLockSkipUnselectedPoint,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIPatternLockModifier* GetCJUIPatternLockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIPatternLockModifier modifier = {
-        SetPatternLockActiveColor, ResetPatternLockActiveColor, SetPatternLockCircleRadius,
-        ResetPatternLockCircleRadius, SetPatternLockSelectedColor, ResetPatternLockSelectedColor,
-        SetPatternLockSideLength, ResetPatternLockSideLength, SetPatternLockAutoReset,
-        ResetPatternLockAutoReset, SetPatternLockPathStrokeWidth, ResetPatternLockPathStrokeWidth,
-        SetPatternLockRegularColor, ResetPatternLockRegularColor, SetPatternLockPathColor,
-        ResetPatternLockPathColor, SetPatternLockActiveCircleColor, ResetPatternLockActiveCircleColor,
-        SetPatternLockActiveCircleRadius, ResetPatternLockActiveCircleRadius, SetPatternLockEnableWaveEffect,
-        ResetPatternLockEnableWaveEffect
+        .setPatternLockActiveColor = SetPatternLockActiveColor,
+        .resetPatternLockActiveColor = ResetPatternLockActiveColor,
+        .setPatternLockCircleRadius = SetPatternLockCircleRadius,
+        .resetPatternLockCircleRadius = ResetPatternLockCircleRadius,
+        .setPatternLockSelectedColor = SetPatternLockSelectedColor,
+        .resetPatternLockSelectedColor = ResetPatternLockSelectedColor,
+        .setPatternLockSideLength = SetPatternLockSideLength,
+        .resetPatternLockSideLength = ResetPatternLockSideLength,
+        .setPatternLockAutoReset = SetPatternLockAutoReset,
+        .resetPatternLockAutoReset = ResetPatternLockAutoReset,
+        .setPatternLockPathStrokeWidth = SetPatternLockPathStrokeWidth,
+        .resetPatternLockPathStrokeWidth = ResetPatternLockPathStrokeWidth,
+        .setPatternLockRegularColor = SetPatternLockRegularColor,
+        .resetPatternLockRegularColor = ResetPatternLockRegularColor,
+        .setPatternLockPathColor = SetPatternLockPathColor,
+        .resetPatternLockPathColor = ResetPatternLockPathColor,
+        .setPatternLockActiveCircleColor = SetPatternLockActiveCircleColor,
+        .resetPatternLockActiveCircleColor = ResetPatternLockActiveCircleColor,
+        .setPatternLockActiveCircleRadius = SetPatternLockActiveCircleRadius,
+        .resetPatternLockActiveCircleRadius = ResetPatternLockActiveCircleRadius,
+        .setPatternLockEnableWaveEffect = SetPatternLockEnableWaveEffect,
+        .resetPatternLockEnableWaveEffect = ResetPatternLockEnableWaveEffect,
+        .setPatternLockEnableForeground = SetPatternLockEnableForeground,
+        .resetPatternLockEnableForeground = ResetPatternLockEnableForeground,
+        .setPatternLockSkipUnselectedPoint = SetPatternLockSkipUnselectedPoint,
+        .resetPatternLockSkipUnselectedPoint = ResetPatternLockSkipUnselectedPoint,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

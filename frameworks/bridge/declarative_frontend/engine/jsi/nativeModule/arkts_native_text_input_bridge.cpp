@@ -1061,7 +1061,33 @@ ArkUINativeModuleValue TextInputBridge::ResetLineHeight(ArkUIRuntimeCallInfo* ru
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputLineHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-    
+
+ArkUINativeModuleValue TextInputBridge::SetHalfLeading(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        uint32_t halfLeading = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputHalfLeading(nativeNode, halfLeading);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputHalfLeading(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetHalfLeading(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputHalfLeading(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue TextInputBridge::SetUnderlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -1180,6 +1206,66 @@ ArkUINativeModuleValue TextInputBridge::SetMaxFontSize(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputAdaptMaxFontSize(
             nativeNode, value.Value(), static_cast<int32_t>(value.Unit()));
     }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    double minFontScale;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        minFontScale = 0.0f;
+    } else if (GreatOrEqual(minFontScale, 1.0f)) {
+        minFontScale = 1.0f;
+    }
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMinFontScale(
+        nativeNode, static_cast<float>(minFontScale));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMinFontScale(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    double maxFontScale;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        maxFontScale = 1.0f;
+    }
+    GetArkUINodeModifiers()->getTextInputModifier()->setTextInputMaxFontScale(
+        nativeNode, static_cast<float>(maxFontScale));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputMaxFontScale(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1573,13 +1659,13 @@ ArkUINativeModuleValue TextInputBridge::SetInputFilter(ArkUIRuntimeCallInfo* run
         GetArkUINodeModifiers()->getTextInputModifier()->setTextInputFilter(nativeNode, inputFilter.c_str(), nullptr);
     } else {
         panda::Local<panda::FunctionRef> func = errorCallbackArg->ToObject(vm);
-        std::function<void(const std::string&)> callback = [vm, frameNode,
-            func = panda::CopyableGlobal(vm, func)](const std::string& info) {
+        std::function<void(const std::u16string&)> callback = [vm, frameNode,
+            func = panda::CopyableGlobal(vm, func)](const std::u16string& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
             panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-                panda::StringRef::NewFromUtf8(vm, info.c_str()) };
+                panda::StringRef::NewFromUtf16(vm, info.c_str()) };
             func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
         };
         GetArkUINodeModifiers()->getTextInputModifier()->
@@ -1618,7 +1704,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnSubmit(ArkUIRuntimeCallInfo* runtim
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "text", "keepEditableState" };
-        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf8(vm, event.GetText().c_str()),
+        Local<JSValueRef> values[] = { panda::StringRef::NewFromUtf16(vm, event.GetText().c_str()),
             panda::FunctionRef::New(vm, Framework::JSTextField::JsKeepEditableState) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         eventObject->SetNativePointerFieldCount(vm, 1);
@@ -1656,17 +1742,17 @@ ArkUINativeModuleValue TextInputBridge::SetOnChange(ArkUIRuntimeCallInfo* runtim
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, PreviewText&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& changeValue, PreviewText& previewText) {
+    std::function<void(const std::u16string&, PreviewText&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& changeValue, PreviewText& previewText) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         const char* keys[] = { "offset", "value" };
         Local<JSValueRef> values[] = { panda::NumberRef::New(vm, previewText.offset),
-            panda::StringRef::NewFromUtf8(vm, previewText.value.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, previewText.value.c_str()) };
         auto eventObject = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf8(vm, changeValue.c_str()), eventObject };
+            panda::StringRef::NewFromUtf16(vm, changeValue.c_str()), eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnChange(
@@ -1775,13 +1861,13 @@ ArkUINativeModuleValue TextInputBridge::SetOnCopy(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& copyStr) {
+    std::function<void(const std::u16string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& copyStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-            panda::StringRef::NewFromUtf8(vm, copyStr.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, copyStr.c_str()) };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnCopy(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1812,13 +1898,13 @@ ArkUINativeModuleValue TextInputBridge::SetOnCut(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& cutStr) {
+    std::function<void(const std::u16string&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& cutStr) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_1] = {
-            panda::StringRef::NewFromUtf8(vm, cutStr.c_str()) };
+            panda::StringRef::NewFromUtf16(vm, cutStr.c_str()) };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnCut(nativeNode, reinterpret_cast<void*>(&callback));
@@ -1849,8 +1935,8 @@ ArkUINativeModuleValue TextInputBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtime
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void(const std::string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
-        func = panda::CopyableGlobal(vm, func)](const std::string& val, NG::TextCommonEvent& info) {
+    std::function<void(const std::u16string&, NG::TextCommonEvent&)> callback = [vm, frameNode,
+        func = panda::CopyableGlobal(vm, func)](const std::u16string& val, NG::TextCommonEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
@@ -1860,7 +1946,7 @@ ArkUINativeModuleValue TextInputBridge::SetOnPaste(ArkUIRuntimeCallInfo* runtime
             panda::FunctionRef::New(vm, Framework::JsPreventDefault));
         eventObject->SetNativePointerField(vm, 0, static_cast<void*>(&info));
         panda::Local<panda::JSValueRef> params[PARAM_ARR_LENGTH_2] = {
-            panda::StringRef::NewFromUtf8(vm, val.c_str()), eventObject };
+            panda::StringRef::NewFromUtf16(vm, val.c_str()), eventObject };
         func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_2);
     };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputOnPaste(
@@ -2233,6 +2319,59 @@ ArkUINativeModuleValue TextInputBridge::ResetEnableHapticFeedback(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> ellipsisModeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (ellipsisModeArg->IsNull() || ellipsisModeArg->IsUndefined() || !ellipsisModeArg->IsNumber()) {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetEllipsisMode(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    uint32_t ellipsisMode = ellipsisModeArg->Uint32Value(vm);
+    GetArkUINodeModifiers()->getTextModifier()->setEllipsisMode(nativeNode, ellipsisMode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetEllipsisMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetEllipsisMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::SetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    if (secondArg->IsBoolean()) {
+        uint32_t value = static_cast<uint32_t>(secondArg->ToBoolean(vm)->Value());
+        GetArkUINodeModifiers()->getTextInputModifier()->setStopBackPress(nativeNode, value);
+    } else {
+        GetArkUINodeModifiers()->getTextInputModifier()->resetStopBackPress(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextInputBridge::ResetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTextInputModifier()->resetStopBackPress(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

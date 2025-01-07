@@ -192,51 +192,55 @@ void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffs
 namespace NodeModifier {
 const ArkUITextClockModifier* GetTextClockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature,
-        TextClockModifier::SetDateTimeOptions,
-        TextClockModifier::ResetDateTimeOptions,
-        TextClockModifier::SetTextClockTimeZoneOffset
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
+        .setDateTimeOptions = TextClockModifier::SetDateTimeOptions,
+        .resetDateTimeOptions = TextClockModifier::ResetDateTimeOptions,
+        .setTextClockTimeZoneOffset = TextClockModifier::SetTextClockTimeZoneOffset,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextClockModifier* GetCJUITextClockModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

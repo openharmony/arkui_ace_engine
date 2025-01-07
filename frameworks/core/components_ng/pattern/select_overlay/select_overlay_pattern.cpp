@@ -695,7 +695,8 @@ void SelectOverlayPattern::StartHiddenHandleTask(bool isDelay)
         taskExecutor->PostDelayedTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, HIDDEN_HANDLE_TIMER_MS,
             "ArkUISelectOverlayHiddenHandle");
     } else {
-        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle");
+        taskExecutor->PostTask(hiddenHandleTask_, TaskExecutor::TaskType::UI, "ArkUISelectOverlayHiddenHandle",
+                               PriorityType::VIP);
     }
 }
 
@@ -708,11 +709,13 @@ void SelectOverlayPattern::HiddenHandle()
     }
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
-    firstHandleRegion_.Reset();
-    secondHandleRegion_.Reset();
-    std::vector<DimensionRect> responseRegion;
-    host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
-    host->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMNONE);
+    if (overlayMode_ == SelectOverlayMode::HANDLE_ONLY) {
+        firstHandleRegion_.Reset();
+        secondHandleRegion_.Reset();
+        std::vector<DimensionRect> responseRegion;
+        host->GetOrCreateGestureEventHub()->SetResponseRegion(responseRegion);
+        host->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMNONE);
+    }
     host->GetOrCreateGestureEventHub()->RemoveClickEvent(clickEvent_);
     host->GetOrCreateGestureEventHub()->RemovePanEvent(panEvent_);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);

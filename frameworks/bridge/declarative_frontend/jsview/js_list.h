@@ -62,7 +62,7 @@ public:
     static void SetEdgeEffect(const JSCallbackInfo& info);
     static void SetEditMode(bool editMode);
     static void SetCachedCount(const JSCallbackInfo& info);
-    static void SetChainAnimation(bool enableChainAnimation);
+    static void SetChainAnimation(const JSCallbackInfo& args);
     static void SetChainAnimationOptions(const JSCallbackInfo& info);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);

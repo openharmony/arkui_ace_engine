@@ -51,6 +51,7 @@ private:
     void SetUniqueAttributes(
         JSRef<JSObject>& obj, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info);
     JSRef<JSObject> CreateGestureEventObject(const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName typeName);
+    void ParsePanGestureEvent(JSRef<JSObject>& obj, const std::shared_ptr<BaseGestureEvent>& info);
 };
 } // namespace OHOS::Ace::Framework
 

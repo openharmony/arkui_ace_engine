@@ -33,8 +33,10 @@ class GridIrregularLayoutAlgorithm : public GridLayoutBaseAlgorithm {
     DECLARE_ACE_TYPE(GridIrregularLayoutAlgorithm, GridLayoutBaseAlgorithm);
 
 public:
-    explicit GridIrregularLayoutAlgorithm(GridLayoutInfo info, bool overScroll = false)
-        : GridLayoutBaseAlgorithm(std::move(info)), overScroll_(overScroll) {};
+    explicit GridIrregularLayoutAlgorithm(
+        GridLayoutInfo info, bool canOverScrollStart = false, bool canOverScrollEnd = false)
+        : GridLayoutBaseAlgorithm(std::move(info)), canOverScrollStart_(canOverScrollStart),
+          canOverScrollEnd_(canOverScrollEnd) {};
 
     ~GridIrregularLayoutAlgorithm() override = default;
 
@@ -63,7 +65,7 @@ private:
 
     void MeasureOnOffset(float mainSize);
     void MeasureForward(float mainSize);
-    void MeasureBackward(float mainSize);
+    void MeasureBackward(float mainSize, bool toAdjust = false);
 
     /**
      * @brief Check if offset is larger than the entire viewport. If so, skip measuring intermediate items and jump
@@ -154,6 +156,8 @@ private:
      */
     void SyncPreloadItems(int32_t cacheCnt);
 
+    void AdaptToChildMainSize(RefPtr<GridLayoutProperty>& gridLayoutProperty, float mainSize, SizeF idealSize);
+
     LayoutWrapper* wrapper_ = nullptr;
 
     std::vector<float> crossLens_; /**< The column widths of the GridItems. */
@@ -163,7 +167,10 @@ private:
     float postJumpOffset_ = 0.0f; /**< The offset to be applied after performing a jump. */
 
     bool enableSkip_ = true;
-    bool overScroll_ = false;
+    bool canOverScrollStart_ = false;
+    bool canOverScrollEnd_ = false;
+
+    SizeF frameSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularLayoutAlgorithm);
 };

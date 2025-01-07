@@ -262,60 +262,64 @@ int32_t GetImagesSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageAnimatorModifier* GetImageAnimatorModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIImageAnimatorModifier modifier = {
-        ImageAnimatorModifier::SetState,
-        ImageAnimatorModifier::ResetState,
-        ImageAnimatorModifier::SetDuration,
-        ImageAnimatorModifier::SetFixedSize,
-        ImageAnimatorModifier::ResetFixedSize,
-        ImageAnimatorModifier::SetFillMode,
-        ImageAnimatorModifier::ResetFillMode,
-        ImageAnimatorModifier::SetReverse,
-        ImageAnimatorModifier::ResetReverse,
-        ImageAnimatorModifier::SetImages,
-        ImageAnimatorModifier::ResetImages,
-        ImageAnimatorModifier::SetImageAnimatorIteration,
-        ImageAnimatorModifier::ResetImageAnimatorIteration,
-        ImageAnimatorModifier::SetImageAnimatorSrc,
-        ImageAnimatorModifier::ResetDuration,
-        ImageAnimatorModifier::GetIsReverse,
-        ImageAnimatorModifier::GetDuration,
-        ImageAnimatorModifier::GetState,
-        ImageAnimatorModifier::GetIsFixedSize,
-        ImageAnimatorModifier::GetFillMode,
-        ImageAnimatorModifier::GetIteration,
-        ImageAnimatorModifier::GetImagesSize
+        .setState = ImageAnimatorModifier::SetState,
+        .resetState = ImageAnimatorModifier::ResetState,
+        .setDuration = ImageAnimatorModifier::SetDuration,
+        .setFixedSize = ImageAnimatorModifier::SetFixedSize,
+        .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
+        .setFillMode = ImageAnimatorModifier::SetFillMode,
+        .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setReverse = ImageAnimatorModifier::SetReverse,
+        .resetReverse = ImageAnimatorModifier::ResetReverse,
+        .setImages = ImageAnimatorModifier::SetImages,
+        .resetImages = ImageAnimatorModifier::ResetImages,
+        .setImageAnimatorIteration = ImageAnimatorModifier::SetImageAnimatorIteration,
+        .resetImageAnimatorIteration = ImageAnimatorModifier::ResetImageAnimatorIteration,
+        .setImageAnimatorSrc = ImageAnimatorModifier::SetImageAnimatorSrc,
+        .resetDuration = ImageAnimatorModifier::ResetDuration,
+        .getIsReverse = ImageAnimatorModifier::GetIsReverse,
+        .getDuration = ImageAnimatorModifier::GetDuration,
+        .getState = ImageAnimatorModifier::GetState,
+        .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
+        .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getIteration = ImageAnimatorModifier::GetIteration,
+        .getImagesSize = ImageAnimatorModifier::GetImagesSize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIImageAnimatorModifier* GetCJUIImageAnimatorModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIImageAnimatorModifier modifier = {
-        ImageAnimatorModifier::SetState,
-        ImageAnimatorModifier::ResetState,
-        ImageAnimatorModifier::SetDuration,
-        ImageAnimatorModifier::SetFixedSize,
-        ImageAnimatorModifier::ResetFixedSize,
-        ImageAnimatorModifier::SetFillMode,
-        ImageAnimatorModifier::ResetFillMode,
-        ImageAnimatorModifier::SetReverse,
-        ImageAnimatorModifier::ResetReverse,
-        ImageAnimatorModifier::SetImages,
-        ImageAnimatorModifier::ResetImages,
-        ImageAnimatorModifier::SetImageAnimatorIteration,
-        ImageAnimatorModifier::ResetImageAnimatorIteration,
-        ImageAnimatorModifier::SetImageAnimatorSrc,
-        ImageAnimatorModifier::ResetDuration,
-        ImageAnimatorModifier::GetIsReverse,
-        ImageAnimatorModifier::GetDuration,
-        ImageAnimatorModifier::GetState,
-        ImageAnimatorModifier::GetIsFixedSize,
-        ImageAnimatorModifier::GetFillMode,
-        ImageAnimatorModifier::GetIteration,
-        ImageAnimatorModifier::GetImagesSize
+        .setState = ImageAnimatorModifier::SetState,
+        .resetState = ImageAnimatorModifier::ResetState,
+        .setDuration = ImageAnimatorModifier::SetDuration,
+        .setFixedSize = ImageAnimatorModifier::SetFixedSize,
+        .resetFixedSize = ImageAnimatorModifier::ResetFixedSize,
+        .setFillMode = ImageAnimatorModifier::SetFillMode,
+        .resetFillMode = ImageAnimatorModifier::ResetFillMode,
+        .setReverse = ImageAnimatorModifier::SetReverse,
+        .resetReverse = ImageAnimatorModifier::ResetReverse,
+        .setImages = ImageAnimatorModifier::SetImages,
+        .resetImages = ImageAnimatorModifier::ResetImages,
+        .setImageAnimatorIteration = ImageAnimatorModifier::SetImageAnimatorIteration,
+        .resetImageAnimatorIteration = ImageAnimatorModifier::ResetImageAnimatorIteration,
+        .setImageAnimatorSrc = ImageAnimatorModifier::SetImageAnimatorSrc,
+        .resetDuration = ImageAnimatorModifier::ResetDuration,
+        .getIsReverse = ImageAnimatorModifier::GetIsReverse,
+        .getDuration = ImageAnimatorModifier::GetDuration,
+        .getState = ImageAnimatorModifier::GetState,
+        .getFixedSize = ImageAnimatorModifier::GetIsFixedSize,
+        .getFillMode = ImageAnimatorModifier::GetFillMode,
+        .getIteration = ImageAnimatorModifier::GetIteration,
+        .getImagesSize = ImageAnimatorModifier::GetImagesSize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -329,7 +333,7 @@ void SetImageAnimatorOnStart(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_START;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageAnimatorModelNG::SetOnStart(frameNode, std::move(onEvent));
 }
@@ -343,7 +347,7 @@ void SetImageAnimatorOnPause(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_PAUSE;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageAnimatorModelNG::SetOnPause(frameNode, std::move(onEvent));
 }
@@ -357,7 +361,7 @@ void SetImageAnimatorOnRepeat(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_REPEAT;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageAnimatorModelNG::SetOnRepeat(frameNode, std::move(onEvent));
 }
@@ -371,7 +375,7 @@ void SetImageAnimatorOnCancel(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_CANCEL;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageAnimatorModelNG::SetOnCancel(frameNode, std::move(onEvent));
 }
@@ -385,7 +389,7 @@ void SetImageAnimatorOnFinish(ArkUINodeHandle node, void* extraParam)
         event.kind = COMPONENT_ASYNC_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_IMAGE_ANIMATOR_ON_FINISH;
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ImageAnimatorModelNG::SetOnFinish(frameNode, std::move(onEvent));
 }

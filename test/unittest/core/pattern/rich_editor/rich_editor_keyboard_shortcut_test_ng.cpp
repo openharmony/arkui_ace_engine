@@ -12,7 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "gtest/gtest.h"
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -24,6 +34,7 @@ int32_t testAboutToIMEInput = 0;
 int32_t testOnIMEInputComplete = 0;
 int32_t testAboutToDelete = 0;
 int32_t testOnDeleteComplete = 0;
+const Ace::TextDecoration TEXT_DECORATION_VALUE_2 = Ace::TextDecoration::UNDERLINE;
 } // namespace
 
 class RichEditorKeyboardShortcutTestNg : public RichEditorCommonTestNg {
@@ -726,29 +737,6 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetPlaceHolderInJson001, TestSize.Lev
 }
 
 /**
- * @tc.name: HandleOnDragDropStyledString001
- * @tc.desc: test HandleOnDragDropStyledString
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleOnDragDropStyledString001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    RefPtr<UnifiedData> unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::string selectedStr = "test123";
-    OHOS::Ace::UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, selectedStr);
-    event->SetData(unifiedData);
-    richEditorPattern->HandleOnDragDropStyledString(event);
-    EXPECT_NE(event->GetData(), nullptr);
-}
-/**
  * @tc.name: CheckTripClickEvent001
  * @tc.desc: test CheckTripClickEvent
  * @tc.type: FUNC
@@ -827,7 +815,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleSelectParagraghPos001, TestSize
     richEditorPattern->spans_.clear();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test\n123";
+    it->content = u"test\n123";
     it->position = 4;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->isSpanStringMode_ = true;
@@ -935,7 +923,8 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleMouseEvent001, TestSize.Level1)
     scrollBar->isPressed_ = true;
     MouseInfo info;
     richEditorPattern->HandleMouseEvent(info);
-    EXPECT_TRUE(pipeline->mouseStyleNodeId_.has_value());
+    auto mouseStyleManager = pipeline->eventManager_->GetMouseStyleManager();
+    EXPECT_TRUE(mouseStyleManager->mouseStyleNodeId_.has_value());
 }
 
 /**
@@ -1081,13 +1070,13 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetDelPartiallySpanItem002, TestSize.
     RichEditorAbstractSpanResult span2;
     changeValue.originalSpans_.emplace_back(span2);
     RichEditorAbstractSpanResult& firstInfo = changeValue.originalSpans_.front();
-    firstInfo.SetValue("test123\n");
+    firstInfo.SetValue(u"test123\n");
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    std::string originalStr;
+    std::u16string originalStr;
     int32_t originalPos = 0;
-    int32_t firstLength = static_cast<int32_t>(StringUtils::ToWstring(firstInfo.GetValue()).length());
+    int32_t firstLength = static_cast<int32_t>(firstInfo.GetValue().length());
     firstInfo.SetEraseLength(firstLength);
     auto ret = richEditorPattern->GetDelPartiallySpanItem(changeValue, originalStr, originalPos);
     EXPECT_NE(ret, nullptr);
@@ -1280,37 +1269,36 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    TouchLocationInfo touchLocationInfo(0);
+    touchLocationInfo.touchType_ = TouchType::MOVE;
+    touchLocationInfo.localLocation_ = Offset(10.0f, 20.0f);
     /**
      * @tc.steps: step2. change parameter and call function.
      */
     richEditorPattern->textSelector_.baseOffset = richEditorPattern->caretPosition_ - 1;
-    Offset offset1(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = true;
-    richEditorPattern->HandleTouchMove(offset1);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step3. change parameter and call function.
      */
-    Offset offset2(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->isMoveCaretAnywhere_ = true;
-    richEditorPattern->HandleTouchMove(offset2);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step4. change parameter and call function.
      */
-    Offset offset3(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->previewLongPress_ = false;
     richEditorPattern->isMoveCaretAnywhere_ = false;
-    richEditorPattern->HandleTouchMove(offset3);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
     /**
      * @tc.steps: step5. change parameter and call function.
      */
-    Offset offset4(10.0f, 20.0f);
     richEditorPattern->isLongPress_ = false;
     richEditorPattern->selectOverlay_->ProcessOverlay({ .animation = false });
     auto manager = richEditorPattern->selectOverlay_->GetManager<SelectContentOverlayManager>();
@@ -1319,7 +1307,7 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove001, TestSize.Level1)
     manager->CreateSelectOverlay(info);
     ASSERT_NE(manager->shareOverlayInfo_, nullptr);
     manager->shareOverlayInfo_->isSingleHandle = true;
-    richEditorPattern->HandleTouchMove(offset4);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, richEditorPattern->caretPosition_);
 }
 
@@ -1359,5 +1347,229 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, SetCustomKeyboard001, TestSize.Level1
     bool result =
         ViewStackProcessor::GetInstance()->GetMainFrameNode()->GetPattern<RichEditorPattern>()->keyboardAvoidance_;
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: HandleTouchMove002
+ * @tc.desc: test HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->editingLongPress_ = false;
+    richEditorPattern->moveCaretState_.isTouchCaret = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = false;
+    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
+    richEditorPattern->caretTwinkling_ = true;
+    Offset offset(5.0f, 5.0f);
+    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
+    ASSERT_GT(richEditorPattern->moveCaretState_.minDistance.ConvertToPx(), moveDistance);
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetGlobalLocation(offset);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
+    EXPECT_EQ(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
+}
+
+/**
+ * @tc.name: HandleTouchMove003
+ * @tc.desc: test HandleTouchMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, HandleTouchMove003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->previewLongPress_ = false;
+    richEditorPattern->editingLongPress_ = false;
+    richEditorPattern->moveCaretState_.isTouchCaret = true;
+    richEditorPattern->moveCaretState_.isMoveCaret = true;
+    richEditorPattern->moveCaretState_.touchDownOffset = Offset(5.0f, 5.0f);
+    Offset offset(5.01f, 5.01f);
+    auto moveDistance = (offset - richEditorPattern->moveCaretState_.touchDownOffset).GetDistance();
+    ASSERT_LE(moveDistance, richEditorPattern->moveCaretState_.minDistance.ConvertToPx() + 0.001f);
+    TouchLocationInfo touchLocationInfo(1);
+    touchLocationInfo.SetGlobalLocation(offset);
+    richEditorPattern->HandleTouchMove(touchLocationInfo);
+    EXPECT_NE(richEditorPattern->moveCaretState_.touchFingerId, touchLocationInfo.fingerId_);
+}
+
+/**
+ * @tc.name: SetEnterKeyType
+ * @tc.desc: test SetEnterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, SetEnterKeyType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetEnterKeyType(TextInputAction::NEW_LINE);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    richEditorModel.SetEnterKeyType(TextInputAction::UNSPECIFIED);
+    richEditorNode_->MarkModifyDone();
+    EXPECT_EQ(richEditorPattern->GetTextInputActionValue(richEditorPattern->GetDefaultTextInputAction()),
+        TextInputAction::NEW_LINE);
+    ClearSpan();
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts205
+ * @tc.desc: test HandleSelectFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts205, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. initialize style and add text span
+     */
+    TextStyle style;
+    style.SetFontWeight(FONT_WEIGHT_BOLD);
+    style.SetFontStyle(ITALIC_FONT_STYLE_VALUE);
+    style.SetTextDecoration(TEXT_DECORATION_VALUE_2);
+
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_1;
+    textOptions.style = style;
+    richEditorController->AddTextSpan(textOptions);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 1);
+
+    /**
+     * @tc.steps: step3. test HandleSelectFontStyle when select nothing
+     */
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    EXPECT_EQ(newSpan1->GetFontWeight(), Ace::FontWeight::BOLD);
+
+    /**
+     * @tc.steps: step4. test HandleSelectFontStyle again when select text
+     */
+    richEditorPattern->textSelector_.Update(0, 6);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(0));
+    ASSERT_NE(newSpan2, nullptr);
+    EXPECT_EQ(newSpan2->GetTextDecoration(), TextDecoration::NONE);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(newSpan2->GetItalicFontStyle(), OHOS::Ace::FontStyle::NORMAL);
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::NORMAL);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts206
+ * @tc.desc: test HandleSelectFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts206, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add text span without setting style
+     */
+    AddSpan(INIT_VALUE_2);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 6);
+    richEditorPattern->textSelector_.Update(0, 6);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 6);
+
+    /**
+     * @tc.steps: step3. test HandleSelectFontStyle
+     */
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateTextDecoration, TextDecoration::UNDERLINE);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateItalicFontStyle, OHOS::Ace::FontStyle::ITALIC);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    EXPECT_EQ(richEditorPattern->GetUpdateSpanStyle().updateFontWeight, Ace::FontWeight::BOLD);
+}
+
+/**
+ * @tc.name: RichEditorKeyBoardShortCuts207 about Handle Select FontStyle
+ * @tc.desc: test the text font style
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts207, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add different type span and select
+     */
+    AddSpan(INIT_VALUE_1);
+    AddImageSpan();
+    AddSpan(INIT_VALUE_2);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 3);
+
+    richEditorPattern->textSelector_.Update(4, 10);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+
+    /**
+     * @tc.steps: step3. test HandleSelectFontStyle
+     */
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_U);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    auto newSpan1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(1));
+    ASSERT_NE(newSpan1, nullptr);
+    EXPECT_EQ(newSpan1->GetTextDecoration(), TextDecoration::UNDERLINE);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_I);
+    EXPECT_EQ(richEditorNode_->GetChildren().size(), 5);
+    EXPECT_EQ(newSpan1->GetItalicFontStyle(), OHOS::Ace::FontStyle::ITALIC);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_B);
+    auto newSpan2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(3));
+    ASSERT_NE(newSpan2, nullptr);
+    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
+
+    richEditorPattern->HandleSelectFontStyle(KeyCode::KEY_R);
+    EXPECT_EQ(newSpan2->GetFontWeight(), Ace::FontWeight::BOLD);
 }
 } // namespace OHOS::Ace::NG

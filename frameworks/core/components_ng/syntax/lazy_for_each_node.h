@@ -125,7 +125,7 @@ public:
             builder_->SetCacheCount(cacheCount);
         }
     }
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         if (builder_) {
             builder_->SetJSViewActive(active);
@@ -202,10 +202,11 @@ private:
     {
         UINode::OnDetachFromMainTree(recursive, context);
         if (builder_) {
-            for (const auto& item : builder_->GetCachedUINodeMap()) {
-                if (item.second.second != nullptr) {
-                    item.second.second->DetachFromMainTree(recursive);
-                    builder_->ProcessOffscreenNode(item.second.second, true);
+            auto tempExpiringItem = builder_->GetCachedUINodeMap();
+            for (const auto& [key, child] : tempExpiringItem) {
+                if (child.second != nullptr) {
+                    child.second->DetachFromMainTree(recursive);
+                    builder_->ProcessOffscreenNode(child.second, true);
                 }
             }
         }

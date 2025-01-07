@@ -40,8 +40,9 @@
 #include "test/mock/core/common/mock_container.h"
 #include "third_party/cJSON/cJSON.h"
 
-#include "base/web/webview/ohos_nweb/include/nweb.h"
-#include "base/web/webview/ohos_nweb/include/nweb_handler.h"
+#include "nweb.h"
+#include "nweb_handler.h"
+#include "nweb_autofill.h"
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -1098,6 +1099,7 @@ HWTEST_F(WebPatternBranchTestUT, ShowMagnifierAndOnColor, TestSize.Level1)
     OffsetT offset(20.0f, 20.0f);
     EXPECT_EQ(webPattern->magnifierController_->GetLocalOffset(), offset);
     EXPECT_TRUE(webPattern->magnifierController_->colorModeChange_);
+    webPattern->magnifierController_.Reset();
 #endif
 }
 } // namespace OHOS::Ace::NG

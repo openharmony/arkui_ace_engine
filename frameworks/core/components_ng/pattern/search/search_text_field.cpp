@@ -42,15 +42,12 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     CHECK_NULL_VOID(eventHub);
     // Enter key type callback
     TextFieldCommonEvent event;
-    eventHub->FireOnSubmit(GetTextValue(), event);
+    eventHub->FireOnSubmit(GetTextUtf16Value(), event);
     // If the developer wants to keep editing, editing will not stop
-    if (event.IsKeepEditable() || action == TextInputAction::NEW_LINE) {
+    if (event.IsKeepEditable()) {
         return;
     }
-    CloseKeyboard(forceCloseKeyboard);
-    if (HasFocus()) {
-        FocusHub::LostFocusToViewRoot();
-    }
+    HandleCloseKeyboard(forceCloseKeyboard);
 }
 
 TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
@@ -103,7 +100,7 @@ bool SearchTextFieldPattern::IsTextEditableForStylus() const
 
 void SearchTextFieldPattern::ProcessSelection()
 {
-    auto textWidth = static_cast<int32_t>(contentController_->GetWideText().length());
+    auto textWidth = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     if (SelectOverlayIsOn()) {
         needToRefreshSelectOverlay_ = textWidth > 0;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),

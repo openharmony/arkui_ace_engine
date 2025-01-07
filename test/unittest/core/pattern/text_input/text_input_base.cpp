@@ -15,6 +15,12 @@
 
 #include "text_input_base.h"
 
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
 namespace OHOS::Ace::NG {
 void TextInputBases::SetUpTestSuite()
 {
@@ -69,6 +75,8 @@ void TextInputBases::ExpectCallParagraphMethods(ExpectParagraphParams params)
     EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
     EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
+    ParagraphStyle paragraphStyle;
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
 }
 
 void TextInputBases::CreateTextField(
@@ -77,7 +85,7 @@ void TextInputBases::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }

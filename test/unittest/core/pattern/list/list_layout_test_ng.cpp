@@ -22,9 +22,6 @@
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
 class ListLayoutTestNg : public ListTestNg {
 public:
     void UpdateContentModifier();
@@ -100,7 +97,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
      */
     CreateList();
     CreateListItemGroups(2);
-    CreateDone(frameNode_);
+    CreateDone();
     OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
     OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -122,7 +119,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     ClearOldNodes();
     CreateList();
     CreateListItemGroups(1);
-    CreateDone(frameNode_);
+    CreateDone();
     offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 5);
     expectOffset = { 500, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -143,9 +140,9 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
      */
     ClearOldNodes();
     ListModelNG model = CreateList();
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     CreateListItemGroups(2);
-    CreateDone(frameNode_);
+    CreateDone();
     offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
     expectOffset = { ITEM_MAIN_SIZE, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -167,7 +164,7 @@ HWTEST_F(ListLayoutTestNg, GetOverScrollOffset001, TestSize.Level1)
     ClearOldNodes();
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
     expectOffset = { ITEM_MAIN_SIZE, 0 };
     EXPECT_TRUE(IsEqual(offset, expectOffset));
@@ -189,23 +186,23 @@ HWTEST_F(ListLayoutTestNg, ContentEndOffset001, TestSize.Level1)
     model.SetContentEndOffset(100);
     // total height = 1600
     CreateListItems(16);
-    CreateDone(frameNode_);
+    CreateDone();
     std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
         SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
         SCROLL_FROM_BAR_FLING };
 
     // ~ -1200 to reach bottom if no contentEndOffset
     EXPECT_TRUE(pattern_->UpdateCurrentOffset(-1195, SCROLL_FROM_UPDATE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
 
     // contentEndOffset_ takes 100 extra offset to reach bottom
     EXPECT_TRUE(pattern_->UpdateCurrentOffset(-50, SCROLL_FROM_UPDATE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(pattern_->IsAtBottom());
 
     EXPECT_TRUE(pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->IsAtBottom());
 }
 
@@ -227,7 +224,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset001, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     CreateListItems(itemNumber);
-    CreateDone(frameNode_);
+    CreateDone();
     for (int32_t index = 0; index < 3; index++) {
         EXPECT_EQ(GetChildRect(frameNode_, index).GetY(), contentStartOffset + index * ITEM_MAIN_SIZE);
     }
@@ -239,7 +236,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset001, TestSize.Level1)
      * @tc.steps: step2. scroll to bottom
      * @tc.expected: Bottom content offset equal to contentEndOffset.
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     offset = pattern_->GetTotalOffset();
     EXPECT_FLOAT_EQ(offset, itemNumber * ITEM_MAIN_SIZE - LIST_HEIGHT + contentEndOffset);
 
@@ -247,7 +244,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset001, TestSize.Level1)
      * @tc.steps: step3. scroll to top
      * @tc.expected: Bottom content offset equal to contentEndOffset.
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
+    ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     offset = pattern_->GetTotalOffset();
     EXPECT_FLOAT_EQ(offset, -contentStartOffset);
 }
@@ -269,36 +266,42 @@ HWTEST_F(ListLayoutTestNg, ContentOffset002, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     CreateListItems(itemNumber);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. scroll to target item align start.
      * @tc.expected: check whether the offset is correct.
      */
-    EXPECT_TRUE(ScrollToIndex(0, false, ScrollAlign::START, -contentStartOffset));
-    EXPECT_TRUE(ScrollToIndex(1, false, ScrollAlign::START, ITEM_MAIN_SIZE - contentStartOffset));
-    EXPECT_TRUE(ScrollToIndex(2, false, ScrollAlign::START, ITEM_MAIN_SIZE * 2 - contentStartOffset));
+    ScrollToIndex(0, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(contentStartOffset));
+    ScrollToIndex(1, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(ITEM_MAIN_SIZE - contentStartOffset));
+    ScrollToIndex(2, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-(ITEM_MAIN_SIZE * 2 - contentStartOffset)));
     ScrollToIndex(0, true, ScrollAlign::START);
-    EXPECT_EQ(pattern_->GetTotalOffset(), -contentStartOffset);
+    EXPECT_TRUE(TickPosition(contentStartOffset));
     ScrollToIndex(1, true, ScrollAlign::START);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE - contentStartOffset);
+    EXPECT_TRUE(TickPosition(ITEM_MAIN_SIZE - contentStartOffset));
     ScrollToIndex(2, true, ScrollAlign::START);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_MAIN_SIZE * 2 - contentStartOffset);
+    EXPECT_TRUE(TickPosition(-(ITEM_MAIN_SIZE * 2 - contentStartOffset)));
 
     /**
      * @tc.steps: step3. scroll to target item align end.
      * @tc.expected: check whether the offset is correct.
      */
     const float MAX_OFFSET = itemNumber * ITEM_MAIN_SIZE - LIST_HEIGHT + contentEndOffset;
-    EXPECT_TRUE(ScrollToIndex(itemNumber - 1, false, ScrollAlign::END, MAX_OFFSET));
-    EXPECT_TRUE(ScrollToIndex(itemNumber - 2, false, ScrollAlign::END, MAX_OFFSET - ITEM_MAIN_SIZE));
-    EXPECT_TRUE(ScrollToIndex(itemNumber - 3, false, ScrollAlign::END, MAX_OFFSET - ITEM_MAIN_SIZE * 2));
+    ScrollToIndex(itemNumber - 1, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-MAX_OFFSET));
+    ScrollToIndex(itemNumber - 2, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-(MAX_OFFSET - ITEM_MAIN_SIZE)));
+    ScrollToIndex(itemNumber - 3, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-(MAX_OFFSET - ITEM_MAIN_SIZE * 2)));
     ScrollToIndex(itemNumber - 1, true, ScrollAlign::END);
-    EXPECT_EQ(pattern_->GetTotalOffset(), MAX_OFFSET);
+    EXPECT_TRUE(TickPosition(-MAX_OFFSET));
     ScrollToIndex(itemNumber - 2, true, ScrollAlign::END);
-    EXPECT_EQ(pattern_->GetTotalOffset(), MAX_OFFSET - ITEM_MAIN_SIZE);
+    EXPECT_TRUE(TickPosition(-(MAX_OFFSET - ITEM_MAIN_SIZE)));
     ScrollToIndex(itemNumber - 3, true, ScrollAlign::END);
-    EXPECT_EQ(pattern_->GetTotalOffset(), MAX_OFFSET - ITEM_MAIN_SIZE * 2);
+    EXPECT_TRUE(TickPosition(-(MAX_OFFSET - ITEM_MAIN_SIZE * 2)));
 }
 
 /**
@@ -318,7 +321,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset003, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     CreateListItemGroups(GroupNumber);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. scroll to target group align start.
@@ -330,6 +333,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset003, TestSize.Level1)
     }
     for (int32_t i = 0; i < 3; i++) {
         ScrollToIndex(i, true, ScrollAlign::START);
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
         EXPECT_EQ(GetChildRect(frameNode_, i).GetY(), contentStartOffset);
     }
 
@@ -346,6 +351,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset003, TestSize.Level1)
     for (int32_t i = 0; i < 3; i++) {
         int32_t index = GroupNumber - i - 1;
         ScrollToIndex(index, true, ScrollAlign::END);
+        MockAnimationManager::GetInstance().Tick();
+        FlushUITasks();
         auto rect = GetChildRect(frameNode_, index);
         EXPECT_EQ(rect.Bottom(), LIST_HEIGHT - contentEndOffset);
     }
@@ -368,7 +375,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Scroll To ListItem in group.
@@ -388,6 +395,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     EXPECT_EQ(item2Rect.Bottom(), LIST_HEIGHT - contentEndOffset - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupRect = group1->GetGeometryNode()->GetFrameRect();
     groupPos = groupRect.Top();
@@ -395,6 +404,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset004, TestSize.Level1)
     EXPECT_EQ(item1Rect.Top(), contentStartOffset - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
     item2Rect = GetChildRect(group1, 3);
@@ -419,14 +430,14 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     model.SetContentEndOffset(contentEndOffset);
     model.SetSticky(V2::StickyStyle::BOTH);
     CreateGroupWithSetting(groupNumber, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. scroll by 100.
      * @tc.expected: header stick postion and footer sticky postion is correct.
      */
     pattern_->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto group0 = GetChildFrameNode(frameNode_, 0);
     auto groupPos = group0->GetGeometryNode()->GetFrameRect().Top();
     auto header0Rect = GetChildRect(group0, 0);
@@ -454,12 +465,16 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
     EXPECT_EQ(item2Rect.Bottom(), LIST_HEIGHT - contentEndOffset - GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(1, 0, true, ScrollAlign::START);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group1 = GetChildFrameNode(frameNode_, 1);
     groupPos = group1->GetGeometryNode()->GetFrameRect().Top();
     item1Rect = GetChildRect(group1, 2);
     EXPECT_EQ(item1Rect.Top(), contentStartOffset + GROUP_HEADER_LEN - groupPos);
 
     JumpToItemInGroup(2, 1, true, ScrollAlign::END);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
     group2 = GetChildFrameNode(frameNode_, 2);
     groupPos = group2->GetGeometryNode()->GetFrameRect().Top();
     item2Rect = GetChildRect(group2, 3);
@@ -483,9 +498,9 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
     CreateListItems(itemNumber);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. scroll snap
@@ -495,14 +510,12 @@ HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
     float velocity = 0;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     DragAction(frameNode_, startOffset, -120, velocity);
-    EXPECT_TRUE(Position(-20));
-    EXPECT_TRUE(TickPosition(-10));
+    EXPECT_TRUE(TickPosition(-10.0f));
     EXPECT_TRUE(TickPosition(0));
 
     DragAction(frameNode_, startOffset, -80, velocity);
-    EXPECT_TRUE(Position(-80));
-    EXPECT_TRUE(TickPosition(-90));
-    EXPECT_TRUE(TickPosition(-100));
+    EXPECT_TRUE(TickPosition(-90.0f));
+    EXPECT_TRUE(TickPosition(-100.0f));
 }
 
 /**
@@ -521,8 +534,8 @@ HWTEST_F(ListLayoutTestNg, ContentOffset007, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::START);
-    CreateDone(frameNode_);
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateDone();
 
     EXPECT_FALSE(pattern_->IsOutOfBoundary());
 }
@@ -544,7 +557,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset008, TestSize.Level1)
     model.SetContentStartOffset(contentStartOffset);
     model.SetContentEndOffset(contentEndOffset);
     CreateListItems(0);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), 0.0f);
 
     /**
@@ -553,7 +566,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset008, TestSize.Level1)
      */
     AddItems(1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(pattern_->GetTotalOffset(), -50.0f);
 }
 
@@ -571,7 +584,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
     CreateListItemGroup(V2::ListItemGroupStyle::NONE); // no ListItem in ListItemGroup
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
 
     /**
      * @tc.steps: step2. UnScrollable List
@@ -589,7 +603,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod001, TestSize.Level1)
      * @tc.expected: Not DrawLine
      */
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     GroupPaintDivider(groupPaintWrapper, 0);
 }
 
@@ -607,7 +621,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetScrollBar(DisplayMode::ON);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     RefPtr<ListPaintMethod> paintMethod = UpdateOverlayModifier(paintWrapper);
     auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     auto scrollBar = paintMethod->scrollBar_.Upgrade();
@@ -622,7 +637,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     model.SetListDirection(Axis::HORIZONTAL);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    paintWrapper = frameNode_->CreatePaintWrapper();
     paintMethod = UpdateOverlayModifier(paintWrapper);
     scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
     scrollBar = paintMethod->scrollBar_.Upgrade();
@@ -636,7 +652,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod002, TestSize.Level1)
     model = CreateList();
     model.SetScrollBar(DisplayMode::OFF);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    paintWrapper = frameNode_->CreatePaintWrapper();
     paintMethod = UpdateOverlayModifier(paintWrapper);
     scrollBar = paintMethod->scrollBar_.Upgrade();
     EXPECT_EQ(scrollBar, nullptr);
@@ -661,9 +678,10 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     // ListItems
     CreateListItems(2);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
     GroupPaintDivider(groupPaintWrapper, 0);
 
@@ -673,8 +691,9 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
      */
     model.SetDivider(AceType::RawPtr(frameNode_), ITEM_DIVIDER);
     groupModel.SetDivider(AceType::RawPtr(groupFrameNode), ITEM_DIVIDER);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    FlushUITasks();
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 2);
     GroupPaintDivider(groupPaintWrapper, 1);
 
@@ -683,8 +702,9 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
      * @tc.expected: DrawLine, call times depends on the divider number in view
      */
     model.SetLanes(AceType::RawPtr(frameNode_), 2);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    FlushUITasks();
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 2);
     GroupPaintDivider(groupPaintWrapper, 0);
 
@@ -693,8 +713,9 @@ HWTEST_F(ListLayoutTestNg, PaintMethod003, TestSize.Level1)
      * @tc.expected: Trigger ClipRect
      */
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(10.f));
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    FlushUITasks();
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 2, true);
     GroupPaintDivider(groupPaintWrapper, 0);
 }
@@ -717,9 +738,10 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     // ListItems
     CreateListItems(2);
-    auto paintWrapper = CreateDone(frameNode_);
+    CreateDone();
+    auto paintWrapper = frameNode_->CreatePaintWrapper();
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
-    auto groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    auto groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     auto groupPaint = AceType::DynamicCast<ListItemGroupPaintMethod>(groupPaintWrapper->nodePaintImpl_);
 
     /**
@@ -736,8 +758,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
     model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
     groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
     GroupPaintDivider(groupPaintWrapper, 0);
 
@@ -748,8 +770,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(-1);
     model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
     groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
     GroupPaintDivider(groupPaintWrapper, 0);
 
@@ -762,8 +784,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2);
     model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
     groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 0);
     GroupPaintDivider(groupPaintWrapper, 0);
 
@@ -776,8 +798,8 @@ HWTEST_F(ListLayoutTestNg, PaintMethod004, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
     model.SetDivider(AceType::RawPtr(frameNode_), itemDivider);
     groupModel.SetDivider(AceType::RawPtr(groupFrameNode), itemDivider);
-    paintWrapper = FlushLayoutTask(frameNode_);
-    groupPaintWrapper = FlushLayoutTask(groupFrameNode);
+    paintWrapper = frameNode_->CreatePaintWrapper();
+    groupPaintWrapper = groupFrameNode->CreatePaintWrapper();
     PaintDivider(paintWrapper, 2);
     GroupPaintDivider(groupPaintWrapper, 1);
 }
@@ -797,7 +819,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetDivider(itemDivider);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     auto renderContext = frameNode_->GetRenderContext();
     renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
     UpdateDividerMap();
@@ -820,7 +842,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
         { Dimension(10), Dimension(10, DimensionUnit::PERCENT), Dimension(10, DimensionUnit::PERCENT) } };
     for (auto itemDivider : dividerArray) {
         layoutProperty_->UpdateDivider(itemDivider);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
         auto renderContext = frameNode_->GetRenderContext();
         renderContext->UpdatePaintRect(frameNode_->GetGeometryNode()->GetFrameRect());
         UpdateDividerMap();
@@ -829,7 +851,7 @@ HWTEST_F(ListLayoutTestNg, PaintMethod005, TestSize.Level1)
         EXPECT_EQ(dividerMap.size(), 4);
         EXPECT_EQ(pattern_->listContentModifier_->width_, itemDivider.strokeWidth.ConvertToPx());
         for (auto child : dividerMap) {
-            EXPECT_EQ(child.second.offset.GetX(), 0.f);
+            EXPECT_EQ(child.second.offset.GetX(), 0);
             EXPECT_EQ(child.second.length, LIST_WIDTH);
         }
     }
@@ -850,8 +872,7 @@ HWTEST_F(ListLayoutTestNg, OnModifyDone001, TestSize.Level1)
     model.SetScrollBar(DisplayMode::ON);
     model.SetMultiSelectable(true);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    ViewStackProcessor::GetInstance()->Finish();
-    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateDone();
     EXPECT_NE(pattern_->GetScrollableEvent(), nullptr);
     ASSERT_NE(pattern_->GetScrollBar(), nullptr);
     EXPECT_EQ(pattern_->GetScrollBar()->GetDisplayMode(), DisplayMode::ON);
@@ -861,8 +882,7 @@ HWTEST_F(ListLayoutTestNg, OnModifyDone001, TestSize.Level1)
      * @tc.steps: step2. Call OnDirtyLayoutWrapperSwap()
      * @tc.expected: isInitialized_ would be true
      */
-    EXPECT_FALSE(pattern_->isInitialized_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->isInitialized_);
 
     /**
@@ -891,7 +911,7 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
 {
     CreateList();
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     auto scrollable = pattern_->scrollableEvent_->GetScrollable();
     EXPECT_NE(scrollable, nullptr);
@@ -907,7 +927,7 @@ HWTEST_F(ListLayoutTestNg, Pattern003, TestSize.Level1)
     model.SetChainAnimation(true);
     model.SetChainAnimationOptions({ Dimension(0), Dimension(10), 0, 0, 0, DEFAULT_STIFFNESS, DEFAULT_DAMPING });
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_NE(pattern_->scrollableEvent_, nullptr);
     scrollable = pattern_->scrollableEvent_->GetScrollable();
     EXPECT_NE(scrollable, nullptr);
@@ -929,7 +949,7 @@ HWTEST_F(ListLayoutTestNg, Pattern006, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetLanes(lanes);
     CreateListItems();
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. When lanes > 1, call GetItemIndexByPosition
@@ -953,7 +973,7 @@ HWTEST_F(ListLayoutTestNg, Pattern007, TestSize.Level1)
      */
     CreateList();
     CreateListItems(2);
-    CreateDone(frameNode_);
+    CreateDone();
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 2);
@@ -971,7 +991,7 @@ HWTEST_F(ListLayoutTestNg, Pattern008, TestSize.Level1)
      * @tc.expected: Would return 0
      */
     CreateList();
-    CreateDone(frameNode_);
+    CreateDone();
     const Point point = Point(0, 1000.f);
     int32_t itemIndex = pattern_->GetItemIndexByPosition(point.GetX(), point.GetY());
     EXPECT_EQ(itemIndex, 0);
@@ -992,7 +1012,7 @@ HWTEST_F(ListLayoutTestNg, ListSize001, TestSize.Level1)
     ListModelNG model;
     model.Create();
     GetList();
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), rootWidth);
 
     /**
@@ -1002,7 +1022,7 @@ HWTEST_F(ListLayoutTestNg, ListSize001, TestSize.Level1)
     model.Create();
     CreateListItems(TOTAL_ITEM_NUMBER);
     GetList();
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), rootWidth);
 
     /**
@@ -1012,7 +1032,7 @@ HWTEST_F(ListLayoutTestNg, ListSize001, TestSize.Level1)
     CreateList();
     ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), Infinity<float>());
 
     /**
@@ -1022,8 +1042,8 @@ HWTEST_F(ListLayoutTestNg, ListSize001, TestSize.Level1)
     ClearOldNodes();
     CreateList();
     ViewAbstract::SetWidth(CalcLength(Infinity<float>()));
-    CreateDone(frameNode_);
-    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 0.f);
+    CreateDone();
+    EXPECT_EQ(frameNode_->GetGeometryNode()->GetFrameSize().Width(), 0);
 }
 
 /**
@@ -1041,28 +1061,28 @@ HWTEST_F(ListLayoutTestNg, Pattern011, TestSize.Level1)
     model.SetContentStartOffset(10.f);
     model.SetContentEndOffset(10.f);
     CreateListItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(layoutProperty_->GetContentStartOffsetValue(), 10.f);
     EXPECT_EQ(layoutProperty_->GetContentEndOffsetValue(), 10.f);
     EXPECT_EQ(pattern_->contentStartOffset_, 10.f);
     EXPECT_EQ(pattern_->contentEndOffset_, 10.f);
-    EXPECT_EQ(pattern_->GetOffsetWithLimit(5.f), 0.f);
-    EXPECT_EQ(pattern_->GetOffsetWithLimit(0.f), 0.f);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(5.f), 0);
+    EXPECT_EQ(pattern_->GetOffsetWithLimit(0), 0);
     EXPECT_EQ(pattern_->GetOffsetWithLimit(-5.f), -5.f);
 
     /**
      * @tc.cases: contentStartOffset_ + contentEndOffset_ >= contentMainSize
-     * @tc.expected: contentStartOffset_ = 0.f and contentEndOffset_ = 0.f
+     * @tc.expected: contentStartOffset_ = 0 and contentEndOffset_ = 0
      */
     model = CreateList();
     model.SetContentStartOffset(0.5f * LIST_HEIGHT);
     model.SetContentEndOffset(0.5f * LIST_HEIGHT);
     CreateListItems(20);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(layoutProperty_->GetContentStartOffsetValue(), 0.5f * LIST_HEIGHT);
     EXPECT_EQ(layoutProperty_->GetContentEndOffsetValue(), 0.5f * LIST_HEIGHT);
-    EXPECT_EQ(pattern_->contentStartOffset_, 0.f);
-    EXPECT_EQ(pattern_->contentEndOffset_, 0.f);
+    EXPECT_EQ(pattern_->contentStartOffset_, 0);
+    EXPECT_EQ(pattern_->contentEndOffset_, 0);
 }
 
 /**
@@ -1076,7 +1096,7 @@ HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
      * @tc.steps: step1. create an empty list
      */
     ListModelNG model = CreateList();
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. add a listItem and scroll to the added listItem within the same frame.
@@ -1102,6 +1122,100 @@ HWTEST_F(ListLayoutTestNg, Pattern014, TestSize.Level1)
     layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
     EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
     ViewStackProcessor::GetInstance()->Pop();
+}
+
+/**
+ * @tc.name: LayoutDirectionTest01
+ * @tc.desc: Test LayoutDirection
+ */
+HWTEST_F(ListLayoutTestNg, LayoutDirectionTest01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create an List with the ListItemGroup
+     */
+    ListModelNG model = CreateList();
+    CreateListItemGroups(4, V2::ListItemGroupStyle::NONE, 7);
+    CreateDone();
+    auto layoutWrapper = LayoutWrapperNode(frameNode_, frameNode_->GetGeometryNode(), layoutProperty_);
+    for (int32_t index = 0; index < frameNode_->GetChildren().size(); index++) {
+        auto child = GetChildFrameNode(frameNode_, index);
+        auto childWrapper =
+            AceType::MakeRefPtr<LayoutWrapperNode>(child, child->GetGeometryNode(), child->GetLayoutProperty());
+        layoutWrapper.AppendChild(childWrapper);
+    }
+    ViewStackProcessor::GetInstance()->Push(frameNode_);
+
+    /**
+     * @tc.steps: step2. scroll to the first item.
+     * @tc.expected: The start index of List is 1 and the start index of the ListItemGroup is 0.
+     */
+    ScrollToIndex(1, false, ScrollAlign::START);
+    auto startIndex = pattern_->GetStartIndex();
+    EXPECT_EQ(startIndex, 1);
+    auto groupWrapper = layoutWrapper.GetOrCreateChildByIndex(1);
+    ASSERT_NE(groupWrapper, nullptr);
+    auto groupHost = groupWrapper->GetHostNode();
+    ASSERT_NE(groupHost, nullptr);
+    auto groupPattern = groupHost->GetPattern<ListItemGroupPattern>();
+    ASSERT_NE(groupPattern, nullptr);
+    auto startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 0);
+
+    /**
+     * @tc.steps: step3. Set the different target index and target index in group to test the
+     * LayoutDirectionForTargetIndex.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
+     */
+    auto layoutAlgorithm = AceType::DynamicCast<ListLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
+    layoutWrapper.SetLayoutAlgorithm(AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    layoutAlgorithm->preStartIndex_ = 1;
+    auto layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndex(1);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndexInGroup(6);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::FORWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    layoutAlgorithm->SetTargetIndexInGroup(2);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::NONE);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_TRUE(layoutAlgorithm->forwardFeature_);
+    EXPECT_FALSE(layoutAlgorithm->backwardFeature_);
+    /**
+     * @tc.steps: step4. test the LayoutDirectionForTargetIndex after executing the ScrollToItemInGroup.
+     * @tc.expected: The result of LayoutDirection and Feature_ is correct.
+     */
+    JumpToItemInGroup(1, 1, false, ScrollAlign::START);
+    startIndexInGroup = groupPattern->GetDisplayStartIndexInGroup();
+    EXPECT_EQ(startIndexInGroup, 1);
+    layoutAlgorithm->SetTargetIndexInGroup(0);
+    layoutDirection = layoutAlgorithm->LayoutDirectionForTargetIndex(&layoutWrapper, startIndex);
+    EXPECT_EQ(layoutDirection, LayoutDirection::BACKWARD);
+    layoutAlgorithm->OffScreenLayoutDirection(&layoutWrapper);
+    EXPECT_FALSE(layoutAlgorithm->forwardFeature_);
+    EXPECT_TRUE(layoutAlgorithm->backwardFeature_);
 }
 
 /**
@@ -1200,7 +1314,7 @@ HWTEST_F(ListLayoutTestNg, ListItemPressEventForCardModeTest001, TestSize.Level1
 {
     CreateList();
     CreateListItem(V2::ListItemStyle::CARD);
-    CreateDone(frameNode_);
+    CreateDone();
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
     auto handleHoverEvent = itemPattern->hoverEvent_->GetOnHoverEventFunc();
     auto itemNode = GetChildFrameNode(frameNode_, 0);
@@ -1258,7 +1372,7 @@ HWTEST_F(ListLayoutTestNg, ListItemDisableEventForCardModeTest001, TestSize.Leve
      */
     CreateList();
     CreateListItem(V2::ListItemStyle::CARD);
-    CreateDone(frameNode_);
+    CreateDone();
     auto itemNode = GetChildFrameNode(frameNode_, 0);
     auto itemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
     auto itemEventHub = GetChildEventHub<ListItemEventHub>(frameNode_, 0);
@@ -1296,9 +1410,9 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRect001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollBy(ITEM_MAIN_SIZE / 2.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Get invalid ListItem Rect.
@@ -1328,7 +1442,7 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRect001, TestSize.Level1)
      * @tc.steps: step5. Slide List by Scroller.
      */
     pattern_->ScrollToIndex(8);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     /**
      * @tc.steps: step6. Get invalid ListItem Rect.
      * @tc.expected: Return 0 when input invalid index.
@@ -1356,9 +1470,9 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndex001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
-    CreateDone(frameNode_);
+    CreateDone();
     pattern_->ScrollBy(ITEM_MAIN_SIZE / 2.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Get invalid ListItem index.
@@ -1386,9 +1500,8 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemIndexInGroup001, TestSize.Level1)
     ListModelNG model = CreateList();
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 2);
-    FlushLayoutTask(frameNode_);
+    CreateDone();
+    ScrollTo(ITEM_MAIN_SIZE * 2);
 
     /**
      * @tc.steps: step2. Get invalid group item index.
@@ -1417,9 +1530,8 @@ HWTEST_F(ListLayoutTestNg, ListPattern_GetItemRectInGroup001, TestSize.Level1)
     ListModelNG model = CreateList();
     CreateListItemGroup(V2::ListItemGroupStyle::NONE);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
-    pattern_->ScrollTo(ITEM_MAIN_SIZE * 2);
-    FlushLayoutTask(frameNode_);
+    CreateDone();
+    ScrollTo(ITEM_MAIN_SIZE * 2);
 
     /**
      * @tc.steps: step2. Get invalid group item Rect.
@@ -1458,12 +1570,12 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
         .Times(1)
         .WillOnce(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 100);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
@@ -1481,10 +1593,10 @@ HWTEST_F(ListLayoutTestNg, ListLayout_SafeArea002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetInitialIndex(1);
     CreateListItems(TOTAL_ITEM_NUMBER * 2);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea).Times(0);
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->contentEndOffset_, 0);
     EXPECT_TRUE(IsEqual(frameNode_->geometryNode_->GetFrameSize(), SizeF(LIST_WIDTH, LIST_HEIGHT)));
 }
@@ -1502,7 +1614,7 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask001, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetDivider(ITEM_DIVIDER);
     CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     int cur = 0;
     for (auto& child : pattern_->itemPosition_) {
         child.second.id += cur;
@@ -1548,7 +1660,7 @@ HWTEST_F(ListLayoutTestNg, PostListItemPressStyleTask002, TestSize.Level1)
     ListModelNG model = CreateList();
     model.SetDivider(ITEM_DIVIDER);
     CreateListItemGroups(TOTAL_ITEM_NUMBER);
-    CreateDone(frameNode_);
+    CreateDone();
     auto groupFrameNode = GetChildFrameNode(frameNode_, 0);
     auto groupPattern = groupFrameNode->GetPattern<ListItemGroupPattern>();
     int cur = 0;
@@ -1588,14 +1700,18 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize005, TestSize.Level1)
     childrenSize->ChangeData(4, 1, { 200.f });
     childrenSize->ChangeData(5, 8, { 100.f, 100.f, 100.f, 100.f, 100.f, 100.f, 100.f, 100.f });
     CreateListItems(2);
-    CreateItemWithSize(2, SizeT<Dimension>(FILL_LENGTH, Dimension(0.f)));
+    CreateItemWithSize(2, SizeT<Dimension>(FILL_LENGTH, Dimension(0)));
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
     CreateListItems(8);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(ScrollToIndex(1, false, ScrollAlign::START, 100.f));
-    EXPECT_TRUE(ScrollToIndex(2, false, ScrollAlign::START, 200.f));
-    EXPECT_TRUE(ScrollToIndex(3, false, ScrollAlign::START, 200.f));
-    EXPECT_TRUE(ScrollToIndex(4, false, ScrollAlign::START, 200.f));
+    CreateDone();
+    ScrollToIndex(1, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-100.f));
+    ScrollToIndex(2, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-200.f));
+    ScrollToIndex(3, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-200.f));
+    ScrollToIndex(4, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-200.f));
 }
 
 /**
@@ -1617,9 +1733,11 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(-100.f)));
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
     CreateListItems(8);
-    CreateDone(frameNode_);
-    EXPECT_TRUE(ScrollToIndex(3, false, ScrollAlign::START, ITEM_MAIN_SIZE));
-    EXPECT_TRUE(ScrollToIndex(4, false, ScrollAlign::START, 300.f));
+    CreateDone();
+    ScrollToIndex(3, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-ITEM_MAIN_SIZE));
+    ScrollToIndex(4, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-300.f));
 
     /**
      * @tc.steps: step2. insert data
@@ -1633,10 +1751,12 @@ HWTEST_F(ListLayoutTestNg, ChildrenMainSize006, TestSize.Level1)
     CreateListItems(8);
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->childrenSize_->childrenSize_.size(), 10);
-    EXPECT_TRUE(ScrollToIndex(8, false, ScrollAlign::END, 450.f));
-    EXPECT_TRUE(ScrollToIndex(9, false, ScrollAlign::END, 650.f));
+    ScrollToIndex(8, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-450.f));
+    ScrollToIndex(9, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-650.f));
 }
 
 /**
@@ -1653,7 +1773,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount001, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     });
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Check Repeat frameCount
@@ -1706,7 +1826,7 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
         ViewStackProcessor::GetInstance()->Pop();
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     });
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step1. Check Repeat frameCount
@@ -1760,6 +1880,62 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount003
+ * @tc.desc: List update size, cacheCount item update size
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    int32_t frameCount = repeat->FrameCount();
+    EXPECT_EQ(frameCount, 10);
+
+    /**
+     * @tc.steps: step2. Flush Idle Task
+     * @tc.expected: ListItem 4 and 5 is cached
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem4 = frameNode_->GetChildByIndex(4)->GetHostNode();
+    EXPECT_EQ(cachedItem4->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), LIST_WIDTH);
+    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
+    EXPECT_EQ(cachedItem5->IsActive(), false);
+    EXPECT_EQ(GetChildY(frameNode_, 5), LIST_HEIGHT + 100);
+    EXPECT_EQ(GetChildWidth(frameNode_, 5), LIST_WIDTH);
+
+    /**
+     * @tc.steps: step3. Update List width
+     * @tc.expected: cached item width update
+     */
+    const float newListWidth = 300;
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(newListWidth));
+    FlushUITasks();
+    FlushIdleTask(listPattern);
+    EXPECT_EQ(GetChildY(frameNode_, 4), LIST_HEIGHT);
+    EXPECT_EQ(GetChildWidth(frameNode_, 4), newListWidth);
+    EXPECT_EQ(GetChildY(frameNode_, 5), LIST_HEIGHT + 100);
+    EXPECT_EQ(GetChildWidth(frameNode_, 5), newListWidth);
+}
+
+/**
  * @tc.name: SetHeaderFooterComponent01
  * @tc.desc: Test HeaderComponent/FooterComponent of ListItemGroup
  * @tc.type: FUNC
@@ -1777,7 +1953,7 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
     model.SetContentEndOffset(contentEndOffset);
     model.SetSticky(V2::StickyStyle::BOTH);
     CreateGroupWithSettingWithComponentContent(groupNumber, V2::ListItemGroupStyle::NONE);
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. Get the count of group
@@ -1797,8 +1973,8 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
      */
     bool headerResult = false;
     bool footerResult = false;
-    group0Pattern->AddHeader(CreateCustomNode("NewHeader"));
-    group0Pattern->AddFooter(CreateCustomNode("NewFooter"));
+    group0Pattern->AddHeader(CreateCustomNode("NewHeader", LIST_WIDTH, LIST_HEIGHT));
+    group0Pattern->AddFooter(CreateCustomNode("NewFooter", LIST_WIDTH, LIST_HEIGHT));
     const char newFooter[] = "NewFooter";
     const char newHeader[] = "NewHeader";
     auto children = group0->GetChildren();
@@ -1825,6 +2001,50 @@ HWTEST_F(ListLayoutTestNg, SetHeaderFooterComponent01, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetEffectEdge001
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetEffectEdge001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::START);
+    CreateListItems(1);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::START);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(-100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(200);
+    ASSERT_TRUE(Positive(GetChildY(frameNode_, 0)));
+}
+
+/**
+ * @tc.name: SetEffectEdge002
+ * @tc.desc: Test SetEffectEdge
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, SetEffectEdge002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true, EffectEdge::END);
+    CreateListItems(1);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetEffectEdge(), EffectEdge::END);
+
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    UpdateCurrentOffset(100);
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), 0);
+
+    UpdateCurrentOffset(-200);
+    ASSERT_TRUE(Negative(GetChildY(frameNode_, 0)));
+}
+
+/**
  * @tc.name: ListScrollOffsetTest001
  * @tc.desc: list scroll offset test
  * @tc.type: FUNC
@@ -1837,12 +2057,12 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest001, TestSize.Level1)
      */
     ListModelNG model = CreateList();
     model.SetInitialIndex(4);
-    model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER);
+    model.SetScrollSnapAlign(ScrollSnapAlign::CENTER);
     for (int32_t i = 0; i < 9; i++) {
         CreateListItem();
         ViewStackProcessor::GetInstance()->Pop();
     }
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->currentOffset_, 250);
 
     /**
@@ -1851,7 +2071,7 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest001, TestSize.Level1)
      */
     auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(4));
     ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(120));
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 260);
 
     /**
@@ -1862,7 +2082,7 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest001, TestSize.Level1)
         auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(i));
         ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(50));
     }
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 175);
 }
 
@@ -1881,14 +2101,14 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest002, TestSize.Level1)
         CreateListItem();
         ViewStackProcessor::GetInstance()->Pop();
     }
-    CreateDone(frameNode_);
+    CreateDone();
 
     /**
      * @tc.steps: step2. ScrollTo item2
      * @tc.expected: current offset is 250
      */
     UpdateCurrentOffset(-250);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 250);
 
     /**
@@ -1898,7 +2118,7 @@ HWTEST_F(ListLayoutTestNg, ListScrollOffsetTest002, TestSize.Level1)
     auto centerNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(1));
     ViewAbstract::SetHeight(AceType::RawPtr(centerNode), CalcLength(120));
     UpdateCurrentOffset(100);
-    FlushLayoutTask(frameNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 170);
 }
 
@@ -1911,7 +2131,7 @@ HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
 {
     ListModelNG model = CreateList();
     CreateListItems(3);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 3));
 
     auto padding = 2 * 5.f;
@@ -1921,21 +2141,21 @@ HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
     ClearOldNodes();
     model = CreateList();
     CreateListItems(13);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 13));
 
     ClearOldNodes();
     model = CreateList();
     model.SetSpace(Dimension(SPACE));
     CreateListItems(13);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, ITEM_MAIN_SIZE * 13 + SPACE * 12));
 
     ClearOldNodes();
     model = CreateList();
     model.SetListDirection(Axis::HORIZONTAL);
     CreateListItems(13);
-    CreateDone(frameNode_);
+    CreateDone();
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 13, LIST_HEIGHT - padding));
 
@@ -1945,7 +2165,7 @@ HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
     model.SetSpace(Dimension(SPACE));
     model.SetListDirection(Axis::HORIZONTAL);
     CreateListItems(13);
-    CreateDone(frameNode_);
+    CreateDone();
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(ITEM_MAIN_SIZE * 7 + SPACE * 6, LIST_HEIGHT - padding));
 
@@ -1957,27 +2177,227 @@ HWTEST_F(ListLayoutTestNg, ListGetChildrenExpandedSize001, TestSize.Level1)
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(101.f)));
     CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(102.f)));
     CreateListItems(8);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, 1003.f));
 
     ClearOldNodes();
     CreateList();
     CreateListItemGroups(2);
-    CreateDone(frameNode_);
+    CreateDone();
     EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(LIST_WIDTH, 400.f));
 
     ClearOldNodes();
     model = CreateList();
     model.SetListDirection(Axis::NONE);
     CreateListItems(13);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+    CreateDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0, 0));
 
     ClearOldNodes();
     model = CreateList();
     model.SetListDirection(Axis::FREE);
     CreateListItems(13);
-    CreateDone(frameNode_);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0.f, 0.f));
+    CreateDone();
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(0, 0));
+}
+
+/**
+ * @tc.name: Cache001
+ * @tc.desc: Test List cache, will preload cache number items
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(10, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 6));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom items that out of view
+     */
+    ScrollTo(300.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 5));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 9));
+}
+
+/**
+ * @tc.name: Cache002
+ * @tc.desc: Test List cache with lanes, will preload cache number row
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache002, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetLanes(2);
+    model.SetCachedCount(2, false);
+    CreateItemsInLazyForEach(20, 100.0f);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 7));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 11));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 12));
+    EXPECT_FALSE(IsExist(frameNode_, 13));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom items that out of view
+     */
+    ScrollTo(300.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_FALSE(IsExist(frameNode_, 1));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 8));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 9));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 10));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 11));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 14));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 15));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 16));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 17));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 18));
+    EXPECT_FALSE(IsExist(frameNode_, 19));
+}
+
+/**
+ * @tc.name: Cache003
+ * @tc.desc: Test List cache with ListItemGroup, will preload cache number group
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, Cache003, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2, false);
+    CreateItemGroupsInLazyForEach(10);
+    CreateDone();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // in view
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 4));
+
+    /**
+     * @tc.steps: step1. Scroll the List
+     * @tc.expected: Preload top/bottom groups that out of view
+     */
+    ScrollTo(600.0f);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    // above cache
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    // above view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    // in view, change to active
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    // below view
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
+    // below cache
+    EXPECT_FALSE(IsExist(frameNode_, 7));
+}
+
+/**
+ * @tc.name: ListAddDelChildTest001
+ * @tc.desc: Test list del child in snap end mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::END);
+    CreateListItems(6);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to last item.
+     * @tc.expected: current offset is 200
+     */
+    ScrollToIndex(5, false, ScrollAlign::END);
+    EXPECT_TRUE(Position(-200.0f));
+
+    /**
+     * @tc.steps: step3. Delete last item.
+     * @tc.expected: current offset is 100
+     */
+    frameNode_->RemoveChildAtIndex(5);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 100.f);
+}
+
+/**
+ * @tc.name: ListAddDelChildTest002
+ * @tc.desc: Test list del child in snap end mode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListAddDelChildTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List
+     */
+    ListModelNG model = CreateList();
+    model.SetScrollSnapAlign(ScrollSnapAlign::START);
+    CreateListItems(9);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Scroll to last item.
+     * @tc.expected: current offset is 500
+     */
+    ScrollToIndex(5, false, ScrollAlign::START);
+    EXPECT_TRUE(Position(-500.0f));
+
+    /**
+     * @tc.steps: step3. Delete last 4 item.
+     * @tc.expected: current offset is 100
+     */
+    for (int32_t i = 0; i < 4; i++) {
+        frameNode_->RemoveChildAtIndex(8 - i);
+    }
+    FlushUITasks();
+    EXPECT_EQ(pattern_->currentOffset_, 100.f);
 }
 } // namespace OHOS::Ace::NG

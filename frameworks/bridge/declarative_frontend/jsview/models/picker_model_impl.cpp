@@ -58,6 +58,11 @@ void DatePickerModelImpl::SetSelectedDate(const PickerDate& value)
     JSViewSetProperty(&PickerDateComponent::SetSelectedDate, value);
 }
 
+void DatePickerModelImpl::SetMode(const DatePickerMode& value)
+{
+    JSViewSetProperty(&PickerDateComponent::SetMode, value);
+}
+
 void DatePickerModelImpl::SetSelectedTime(const PickerTime& selectedTime)
 {
     JSViewSetProperty(&PickerTimeComponent::SetSelectedTime, selectedTime);

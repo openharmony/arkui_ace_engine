@@ -52,6 +52,10 @@ public:
         }
     };
 
+    const Color& GetIndexerBackgroundColor() const
+    {
+        return indexerBackgroundColor_;
+    }
     const Color& GetDefaultTextColor() const
     {
         return defaultTextColor_;
@@ -152,6 +156,22 @@ public:
     {
         return popupTitleBackground_;
     }
+    const std::string& GetAccessibilityExpand() const
+    {
+        return accessibilityExpand_;
+    }
+    const std::string& GetAccessibilityExpanded() const
+    {
+        return accessibilityExpanded_;
+    }
+    const std::string& GetAccessibilityCollapse() const
+    {
+        return accessibilityCollapse_;
+    }
+    const std::string& GetAccessibilityCollapsed() const
+    {
+        return accessibilityCollapsed_;
+    }
     const Color& GetPopupUnclickedBgAreaColor() const
     {
         return popupUnclickedBgAreaColor_;
@@ -164,6 +184,7 @@ public:
 protected:
     IndexerTheme() = default;
 
+    Color indexerBackgroundColor_;
     Color defaultTextColor_;
     Color selectedTextColor_;
     Color popupTextColor_;
@@ -190,10 +211,15 @@ protected:
     Color popupClickedBgAreaColor_;
     Color popupTitleBackground_;
     Color popupUnclickedBgAreaColor_;
+    std::string accessibilityExpand_;
+    std::string accessibilityExpanded_;
+    std::string accessibilityCollapse_;
+    std::string accessibilityCollapsed_;
 
 private:
     static void ParseColorAttributes(const RefPtr<ThemeStyle>& indexerPattern, const RefPtr<IndexerTheme>& theme)
     {
+        theme->indexerBackgroundColor_ = indexerPattern->GetAttr<Color>("indexer_bar_color", Color(0xff262626));
         theme->defaultTextColor_ = indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR));
         theme->selectedTextColor_ = indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR));
         theme->popupTextColor_ = indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR));
@@ -243,24 +269,18 @@ private:
     static void ParseTextStyleAttributes(const RefPtr<ThemeStyle>& indexerPattern,
         const RefPtr<IndexerTheme>& theme)
     {
-        std::vector<std::string> fontFamilies;
-        std::string defaultFamily = "HarmonyOS Sans";
-        fontFamilies.emplace_back(defaultFamily);
         theme->seletctTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("selected_text_color", Color(SELECT_TEXT_COLOR)));
         theme->seletctTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->seletctTextStyle_.SetFontFamilies(fontFamilies);
         theme->defaultTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("default_text_color", Color(DEFAULT_TEXT_COLOR)));
         theme->defaultTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->defaultTextStyle_.SetFontFamilies(fontFamilies);
         theme->popupTextStyle_.SetFontSize(
             indexerPattern->GetAttr<Dimension>("popup_text_size", Dimension(POPUP_TEXT_SIZE, DimensionUnit::VP)));
         theme->popupTextStyle_.SetTextColor(
             indexerPattern->GetAttr<Color>("popup_text_color", Color(POPUP_TEXT_COLOR)));
         theme->popupTextStyle_.SetFontWeight(FontWeight::MEDIUM);
         theme->popupTextStyle_.SetFontStyle(FontStyle::NORMAL);
-        theme->popupTextStyle_.SetFontFamilies(fontFamilies);
     }
 
     static void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<IndexerTheme>& theme)
@@ -273,6 +293,10 @@ private:
         ParseColorAttributes(indexerPattern, theme);
         ParseDimensionAttributes(indexerPattern, theme);
         ParseTextStyleAttributes(indexerPattern, theme);
+        theme->accessibilityExpand_ = indexerPattern->GetAttr<std::string>("filter_accessibility_expand", "");
+        theme->accessibilityExpanded_ = indexerPattern->GetAttr<std::string>("filter_accessibility_collapse", "");
+        theme->accessibilityCollapse_ = indexerPattern->GetAttr<std::string>("filter_accessibility_collapsed", "");
+        theme->accessibilityCollapsed_ = indexerPattern->GetAttr<std::string>("filter_accessibility_expanded", "");
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
             theme->popupBackgroundColor_ = indexerPattern->GetAttr<Color>(
                 "popup_background_color_api_twelve", Color(POPUP_BACKGROUND_COLOR_API_TWELVE));

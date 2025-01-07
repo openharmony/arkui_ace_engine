@@ -35,6 +35,7 @@ constexpr float NORMAL_WIDTH = 4.f;
 void ScrollBarTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto themeConstants = CreateThemeConstants(THEME_PATTERN_SCROLL_BAR);
@@ -238,7 +239,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
     scrollBarProxy->NotifyScrollBarNode(0, 1);
     scrollBarProxy->NotifyScrollStart();
     scrollBarProxy->NotifyScrollStop();
-    scrollBarProxy->NotifyScrollBar();
+    scrollBarProxy->NotifyScrollBar(SCROLL_FROM_NONE);
     scrollBarProxy->StartScrollBarAnimator();
     scrollBarProxy->StopScrollBarAnimator();
     scrollBarProxy->NotifySnapScroll(0, 0, 0, 0);

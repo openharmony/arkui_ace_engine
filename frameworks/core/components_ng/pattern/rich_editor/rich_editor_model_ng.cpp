@@ -527,21 +527,21 @@ void RichEditorModelNG::SetSelectionMenuOptions(FrameNode* frameNode, const OnCr
     richEditorPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
-
-void RichEditorModelNG::SetImagePreviewMenuParam(std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
+void RichEditorModelNG::SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
+    const SelectMenuParam& menuParam)
 {
     auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
-void RichEditorModelNG::SetImagePreviewMenuParam(FrameNode* frameNode,
+void RichEditorModelNG::SetPreviewMenuParam(FrameNode* frameNode, TextSpanType spanType,
     std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(richEditorPattern);
-    richEditorPattern->SetImagePreviewMenuParam(buildFunc, menuParam);
+    richEditorPattern->SetPreviewMenuParam(spanType, buildFunc, menuParam);
 }
 
 void RichEditorModelNG::SetBarState(DisplayMode mode)
@@ -552,5 +552,48 @@ void RichEditorModelNG::SetBarState(DisplayMode mode)
 void RichEditorModelNG::SetBarState(FrameNode* frameNode, DisplayMode mode)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, DisplayMode, mode, frameNode);
+}
+
+void RichEditorModelNG::SetMaxLength(std::optional<int32_t> value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLength(value);
+}
+
+void RichEditorModelNG::ResetMaxLength()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLength(INT_MAX);
+}
+
+void RichEditorModelNG::SetMaxLines(uint32_t value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLinesHeight(FLT_MAX);
+    pattern->SetMaxLines(value);
+    ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
+}
+
+void RichEditorModelNG::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxLength(value);
+}
+
+void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

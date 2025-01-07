@@ -15,14 +15,15 @@
  
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_PACKAGE_EVENT_PROXY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_PACKAGE_EVENT_PROXY_H
- 
+
+#include <memory>
 #include <mutex>
 #include <set>
- 
+
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "core/event/package/package_change_listener.h"
- 
+
 namespace OHOS::Ace {
 /**
  * @class PackageEventProxy

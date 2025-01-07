@@ -55,15 +55,27 @@ void ResetColumnSplitDivider(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
-    static const ArkUIColumnSplitModifier modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,
-                                                       SetColumnSplitResizable, ResetColumnSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIColumnSplitModifier modifier = {
+        .setColumnSplitDivider = SetColumnSplitDivider,
+        .resetColumnSplitDivider = ResetColumnSplitDivider,
+        .setColumnSplitResizable = SetColumnSplitResizable,
+        .resetColumnSplitResizable = ResetColumnSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIColumnSplitModifier* GetCJUIColumnSplitModifier()
 {
-    static const CJUIColumnSplitModifier modifier = { SetColumnSplitDivider, ResetColumnSplitDivider,
-        SetColumnSplitResizable, ResetColumnSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIColumnSplitModifier modifier = {
+        .setColumnSplitDivider = SetColumnSplitDivider,
+        .resetColumnSplitDivider = ResetColumnSplitDivider,
+        .setColumnSplitResizable = SetColumnSplitResizable,
+        .resetColumnSplitResizable = ResetColumnSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

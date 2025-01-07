@@ -17,6 +17,7 @@
 
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/offset.h"
+#include "base/input_manager/input_manager.h"
 #include "core/common/ace_application_info.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/pipeline/pipeline_base.h"
@@ -34,7 +35,9 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetSourceTool(event.sourceTool);
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
-    onHoverEventCallback_(isHovered, hoverInfo);
+    // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onHoverEventCallback = onHoverEventCallback_;
+    onHoverEventCallback(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 
@@ -55,7 +58,9 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
-    onPenHoverEventCallback_(isHovered, hoverInfo);
+    // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onPenHoverEventCallback = onPenHoverEventCallback_;
+    onPenHoverEventCallback(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 
@@ -80,7 +85,9 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetActionType(ConvertAccessibilityHoverAction(event.type));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
-    onAccessibilityHoverCallback_(isHovered, hoverInfo);
+    // onAccessibilityHoverCallback_ may be overwritten in its invoke so we copy it first
+    auto onAccessibilityHoverCallback = onAccessibilityHoverCallback_;
+    onAccessibilityHoverCallback(isHovered, hoverInfo);
 }
 
 AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(TouchType type)
@@ -116,12 +123,12 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
         return false;
     }
     MouseInfo info;
-    info.SetPointerEvent(event.pointerEvent);
+    info.SetPointerEvent(event.GetMouseEventPointerEvent());
     info.SetButton(event.button);
     info.SetAction(event.action);
     info.SetPullAction(event.pullAction);
     info.SetGlobalLocation(event.GetOffset());
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         NG::PointF localPoint(event.x, event.y);
         NG::NGGestureRecognizer::Transform(localPoint, GetAttachedNode(), false, isPostEventResult_);
         auto localX = static_cast<float>(localPoint.GetX());
@@ -140,7 +147,13 @@ bool MouseEventTarget::HandleMouseEvent(const MouseEvent& event)
     info.SetSourceTool(event.sourceTool);
     info.SetTarget(GetEventTarget().value_or(EventTarget()));
     info.SetPressedKeyCodes(event.pressedKeyCodes_);
-    onMouseCallback_(info);
+    // onMouseCallback_ may be overwritten in its invoke so we copy it first
+    auto onMouseCallback = onMouseCallback_;
+    onMouseCallback(info);
     return info.IsStopPropagation();
+}
+std::shared_ptr<MMI::PointerEvent> MouseEvent::GetMouseEventPointerEvent() const
+{
+    return InputManager::CreatePointerEvent(pointerEvent);
 }
 } // namespace OHOS::Ace

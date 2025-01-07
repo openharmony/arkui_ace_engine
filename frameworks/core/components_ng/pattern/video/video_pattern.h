@@ -66,11 +66,6 @@ public:
         return MakeRefPtr<VideoAccessibilityProperty>();
     }
 
-    bool DefaultSupportDrag() override
-    {
-        return true;
-    }
-
     bool IsSupportDrawModifier() const override
     {
         return false;
@@ -106,9 +101,17 @@ public:
         return loop_;
     }
 
+    void SetSurfaceBackgroundColor(Color color);
+
     virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
+
+    void UpdateShowFirstFrame(bool showFirstFrame)
+    {
+        showFirstFrame_ = showFirstFrame;
+    }
+
     void UpdateProgressRate(double progressRate)
     {
         progressRate_ = progressRate;
@@ -159,8 +162,8 @@ public:
     // It is used to init mediaplayer on background.
     void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
+    void ResetMediaPlayerOnBg();
 
-    void EnableDrag();
     void SetIsStop(bool isStop)
     {
         isStop_ = isStop;
@@ -171,19 +174,9 @@ public:
         return isStop_;
     }
 
-    void SetIsDrag(bool isDrag)
-    {
-        isDrag_ = isDrag;
-    }
-
     bool IsInitialState() const
     {
         return isInitialState_;
-    }
-
-    void SetIsDragEndAutoPlay(bool isDragEndAutoPlay)
-    {
-        dragEndAutoPlay_ = isDragEndAutoPlay;
     }
 
     const std::string& GetSrc() const
@@ -241,6 +234,7 @@ public:
     RefPtr<VideoPattern> GetTargetVideoPattern();
     void EnableAnalyzer(bool enable);
     void SetImageAnalyzerConfig(void* config);
+    void StartUpdateImageAnalyzer();
     void SetImageAIOptions(void* options);
     bool GetAnalyzerState();
     void UpdateAnalyzerState(bool isCreated)
@@ -265,13 +259,21 @@ public:
         return isPrepared_;
     }
 
+    static void RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
+        const std::string& videoSrc, int32_t instanceId);
+
+    void SetShortcutKeyEnabled(bool isEnableShortcutKey);
+    bool GetShortcutKeyEnabled() const;
+
+    void SetCurrentVolume(float currentVolume);
+    float GetCurrentVolume() const;
+
 #ifdef RENDER_EXTRACT_SUPPORTED
     void OnTextureRefresh(void* surface);
 #endif
 
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
-    void RegisterMediaPlayerEvent();
 
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -292,6 +294,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;
     void OnWindowHide() override;
+    void InitKeyEvent();
+    bool OnKeyEvent(const KeyEvent& event);
+    bool HandleSliderKeyEvent(const KeyEventInfo& event);
 
     // Set properties for media player.
     void PrepareMediaPlayer();
@@ -374,12 +379,15 @@ private:
     bool IsSupportImageAnalyzer();
     bool ShouldUpdateImageAnalyzer();
     void StartImageAnalyzer();
-    void StartUpdateImageAnalyzer();
     void CreateAnalyzerOverlay();
     void DestroyAnalyzerOverlay();
     void UpdateAnalyzerOverlay();
     void UpdateAnalyzerUIConfig(const RefPtr<NG::GeometryNode>& geometryNode);
     void UpdateOverlayVisibility(VisibleType type);
+
+    void OnKeySpaceEvent();
+    void MoveByStep(int32_t step);
+    void AdjustVolume(int32_t step);
 
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
@@ -390,12 +398,12 @@ private:
 
     // Video src.
     VideoSourceInfo videoSrcInfo_;
+    bool showFirstFrame_ = false;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
     bool isPrepared_ = false;
 
     bool isStop_ = false;
-    bool isDrag_ = false;
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -403,15 +411,16 @@ private:
 
     bool pastPlayingStatus_ = false;
 
-    bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;
     bool isContentSizeChanged_ = false;
     bool isSeeking_ = false;
+    bool isEnableShortcutKey_ = false;
 
     uint32_t currentPos_ = 0;
     uint32_t duration_ = 0;
+    float currentVolume_ = 1.0f;
 
     // full screen node id
     std::optional<int32_t> fullScreenNodeId_;

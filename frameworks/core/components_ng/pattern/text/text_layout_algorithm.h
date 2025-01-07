@@ -84,10 +84,11 @@ protected:
     virtual void UpdateParagraphForAISpan(
         const TextStyle& textStyle, LayoutWrapper* layoutWrapper, const RefPtr<Paragraph>& paragraph);
 
-    void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::wstring textForAI,
+    void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::u16string textForAI,
         const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph);
+    bool DidExceedMaxLines(const SizeF& maxSize) override;
 
-    std::string StringOutBoundProtection(int32_t position, int32_t length, std::wstring wTextForAI);
+    std::u16string StringOutBoundProtection(int32_t position, int32_t length, std::u16string wTextForAI);
 
 private:
     OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) override;
@@ -96,7 +97,7 @@ private:
     bool UpdateSymbolTextStyle(const TextStyle& textStyle, const ParagraphStyle& paraStyle,
         LayoutWrapper* layoutWrapper, RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(
-        const TextStyle& textStyle, const std::vector<std::string>& contents, const RefPtr<Paragraph>& paragraph);
+        const TextStyle& textStyle, const std::vector<std::u16string>& contents, const RefPtr<Paragraph>& paragraph);
     void ConstructParagraphSpanGroup(std::list<RefPtr<SpanItem>>& spans);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
@@ -124,7 +125,7 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
-        
+    bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

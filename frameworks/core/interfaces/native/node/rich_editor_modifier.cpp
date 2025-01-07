@@ -468,7 +468,8 @@ void SetRichEditorPlaceholder(ArkUINodeHandle node, ArkUI_CharPtr* stringParamet
     PlaceholderOptions options;
     CHECK_NULL_VOID(stringParameters);
     if (0 < stringParametersCount && stringParameters[0] != nullptr) { // 0: value
-        options.value = stringParameters[0];
+        std::string value = stringParameters[0];
+        options.value = UtfUtils::Str8ToStr16(value);
     }
     for (ArkUI_Uint32 index = 1; index < stringParametersCount; index++) { // 1: value
         options.fontFamilies.push_back(stringParameters[index]);
@@ -513,7 +514,7 @@ void ResetRichEditorPlaceholder(ArkUINodeHandle node)
     auto textTheme = pipeline->GetTheme<TextTheme>();
     CHECK_NULL_VOID(textTheme);
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
-    options.value = "";
+    options.value = u"";
     options.fontSize = textStyle.GetFontSize();
     options.fontFamilies = textStyle.GetFontFamilies();
     options.fontWeight = textStyle.GetFontWeight();
@@ -554,38 +555,126 @@ void ResetRichEditorBarState(ArkUINodeHandle node)
     RichEditorModelNG::SetBarState(frameNode, DEFAULT_BAR_STATE_VALUE);
 }
 
+void SetRichEditorMaxLength(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLength(frameNode, value);
+}
+
+void ResetRichEditorMaxLength(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLength(frameNode, INT_MAX);
+}
+
+void SetRichEditorMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (maxLine <= 0) {
+        RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
+        return;
+    }
+    RichEditorModelNG::SetMaxLines(frameNode, maxLine);
+}
+
+void ResetRichEditorMaxLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetMaxLines(frameNode, INT_MAX);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
-    static const ArkUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorDataDetectorConfigWithEvent, ResetRichEditorDataDetectorConfigWithEvent,
-        SetRichEditorOnIMEInputComplete, ResetRichEditorOnIMEInputComplete,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorOnSelectionChange,
-        ResetRichEditorOnSelectionChange, SetRichEditorCaretColor, ResetRichEditorCaretColor,
-        SetRichEditorOnSelect, ResetRichEditorOnSelect,
-        SetRichEditorOnSubmit, ResetRichEditorOnSubmit, SetRichEditorAboutToIMEInput, ResetRichEditorAboutToIMEInput,
-        SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
-        SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorOnPaste,
-        ResetRichEditorOnPaste, SetRichEditorOnCut, ResetRichEditorOnCut, SetRichEditorOnCopy, ResetRichEditorOnCopy,
-        SetRichEditorEnterKeyType, ResetRichEditorEnterKeyType,
-        SetRichEditorEnableKeyboardOnFocus, ResetRichEditorEnableKeyboardOnFocus,
-        SetRichEditorEnablePreviewText, ResetRichEditorEnablePreviewText,
-        SetRichEditorEditMenuOptions, ResetRichEditorEditMenuOptions,
-        SetRichEditorOnWillChange, ResetRichEditorOnWillChange, SetRichEditorOnDidChange, ResetRichEditorOnDidChange,
-        SetRichEditorPlaceholder, ResetRichEditorPlaceholder,
-        SetRichEditorAboutToDelete, ResetRichEditorAboutToDelete, SetRichEditorBarState, ResetRichEditorBarState };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRichEditorModifier modifier = {
+        .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
+        .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .setRichEditorDataDetectorConfigWithEvent = SetRichEditorDataDetectorConfigWithEvent,
+        .resetRichEditorDataDetectorConfigWithEvent = ResetRichEditorDataDetectorConfigWithEvent,
+        .setRichEditorOnIMEInputComplete = SetRichEditorOnIMEInputComplete,
+        .resetRichEditorOnIMEInputComplete = ResetRichEditorOnIMEInputComplete,
+        .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
+        .setRichEditorOnSelectionChange = SetRichEditorOnSelectionChange,
+        .resetRichEditorOnSelectionChange = ResetRichEditorOnSelectionChange,
+        .setRichEditorCaretColor = SetRichEditorCaretColor,
+        .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .setRichEditorOnSelect = SetRichEditorOnSelect,
+        .resetRichEditorOnSelect = ResetRichEditorOnSelect,
+        .setRichEditorOnSubmit = SetRichEditorOnSubmit,
+        .resetRichEditorOnSubmit = ResetRichEditorOnSubmit,
+        .setRichEditorAboutToIMEInput = SetRichEditorAboutToIMEInput,
+        .resetRichEditorAboutToIMEInput = ResetRichEditorAboutToIMEInput,
+        .setOnReady = SetRichEditorOnReady,
+        .resetOnReady = ResetRichEditorOnReady,
+        .setOnDeleteComplete = SetRichEditorOnDeleteComplete,
+        .resetOnDeleteComplete = ResetRichEditorOnDeleteComplete,
+        .setOnEditingChange = SetRichEditorOnEditingChange,
+        .resetOnEditingChange = ResetRichEditorOnEditingChange,
+        .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
+        .setRichEditorOnPaste = SetRichEditorOnPaste,
+        .resetRichEditorOnPaste = ResetRichEditorOnPaste,
+        .setRichEditorOnCut = SetRichEditorOnCut,
+        .resetRichEditorOnCut = ResetRichEditorOnCut,
+        .setRichEditorOnCopy = SetRichEditorOnCopy,
+        .resetRichEditorOnCopy = ResetRichEditorOnCopy,
+        .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
+        .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .setRichEditorEnableKeyboardOnFocus = SetRichEditorEnableKeyboardOnFocus,
+        .resetRichEditorEnableKeyboardOnFocus = ResetRichEditorEnableKeyboardOnFocus,
+        .setRichEditorEnablePreviewText = SetRichEditorEnablePreviewText,
+        .resetRichEditorEnablePreviewText = ResetRichEditorEnablePreviewText,
+        .setRichEditorEditMenuOptions = SetRichEditorEditMenuOptions,
+        .resetRichEditorEditMenuOptions = ResetRichEditorEditMenuOptions,
+        .setRichEditorOnWillChange = SetRichEditorOnWillChange,
+        .resetRichEditorOnWillChange = ResetRichEditorOnWillChange,
+        .setRichEditorOnDidChange = SetRichEditorOnDidChange,
+        .resetRichEditorOnDidChange = ResetRichEditorOnDidChange,
+        .setRichEditorPlaceholder = SetRichEditorPlaceholder,
+        .resetRichEditorPlaceholder = ResetRichEditorPlaceholder,
+        .setRichEditorAboutToDelete = SetRichEditorAboutToDelete,
+        .resetRichEditorAboutToDelete = ResetRichEditorAboutToDelete,
+        .setRichEditorBarState = SetRichEditorBarState,
+        .resetRichEditorBarState = ResetRichEditorBarState,
+        .setRichEditorMaxLength = SetRichEditorMaxLength,
+        .resetRichEditorMaxLength = ResetRichEditorMaxLength,
+        .setRichEditorMaxLines = SetRichEditorMaxLines,
+        .resetRichEditorMaxLines = ResetRichEditorMaxLines,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
 {
-    static const CJUIRichEditorModifier modifier = { SetRichEditorDetectEnable, ResetRichEditorDetectEnable,
-        SetRichEditorCopyOptions, ResetRichEditorCopyOptions, SetRichEditorCaretColor, ResetRichEditorCaretColor,
-        SetRichEditorOnReady, ResetRichEditorOnReady, SetRichEditorOnDeleteComplete, ResetRichEditorOnDeleteComplete,
-        SetRichEditorOnEditingChange, ResetRichEditorOnEditingChange,
-        SetRichEditorSelectedBackgroundColor, ResetRichEditorSelectedBackgroundColor, SetRichEditorEnterKeyType,
-        ResetRichEditorEnterKeyType, SetRichEditorBarState, ResetRichEditorBarState };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRichEditorModifier modifier = {
+        .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
+        .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
+        .setRichEditorCaretColor = SetRichEditorCaretColor,
+        .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .setOnReady = SetRichEditorOnReady,
+        .resetOnReady = ResetRichEditorOnReady,
+        .setOnDeleteComplete = SetRichEditorOnDeleteComplete,
+        .resetOnDeleteComplete = ResetRichEditorOnDeleteComplete,
+        .setOnEditingChange = SetRichEditorOnEditingChange,
+        .resetOnEditingChange = ResetRichEditorOnEditingChange,
+        .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
+        .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
+        .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .setRichEditorBarState = SetRichEditorBarState,
+        .resetRichEditorBarState = ResetRichEditorBarState,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

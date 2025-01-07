@@ -74,7 +74,7 @@ void TextFieldController::SetTextSelection(
     }
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto wideText = textFieldPattern->GetWideText();
+    auto wideText = textFieldPattern->GetTextUtf16Value();
     int32_t length = static_cast<int32_t>(wideText.length());
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
@@ -93,7 +93,7 @@ Rect TextFieldController::GetTextContentRect()
         if (textFieldPattern->IsTextArea()) {
             textFieldPattern->UpdateRectByTextAlign(rect);
         }
-        if (textFieldPattern->IsOperation()) {
+        if (textFieldPattern->HasText()) {
             return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
         auto controller = textFieldPattern->GetTextSelectController();
@@ -107,7 +107,7 @@ int32_t TextFieldController::GetTextContentLinesNum()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     int32_t lines = 0;
     if (textFieldPattern) {
-        if (!textFieldPattern->IsOperation()) {
+        if (!textFieldPattern->HasText()) {
             return lines;
         }
         lines = static_cast<int32_t>(textFieldPattern->GetLineCount());
@@ -138,5 +138,43 @@ void TextFieldController::SetPasswordState(bool flag)
 }
 
 void TextFieldController::Insert(const std::string& args) {}
+
+int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, 0);
+    int32_t length = textFieldPattern->GetTextUtf16Value().length();
+    if (offset == -1) {
+        offset = length;
+    }
+    return textFieldPattern->InsertValueByController(text, offset);
+}
+
+void TextFieldController::DeleteText(int32_t start, int32_t end)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    int32_t length = textFieldPattern->GetTextUtf16Value().length();
+    if (start == -1 && end == -1) {
+        // delete all
+        textFieldPattern->DeleteRange(0, length, false);
+    }
+    if (start == -1) {
+        start = 0;
+    }
+    if (end == -1) {
+        end = length;
+    }
+    start = std::clamp(start, 0, length);
+    end = std::clamp(end, 0, length);
+    textFieldPattern->DeleteRange(start, end, false);
+}
+
+SelectionInfo TextFieldController::GetSelection()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, {});
+    return textFieldPattern->GetSelection();
+}
 
 } // namespace OHOS::Ace::NG

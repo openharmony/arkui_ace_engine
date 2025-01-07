@@ -53,6 +53,11 @@ public:
     virtual float CalibrateOffset() = 0;
 
     /**
+     * @return estimated total content height.
+     */
+    virtual float EstimateTotalHeight() const = 0;
+
+    /**
      * @brief Get which cross-axis lane the item is in.
      *
      * @param itemIndex
@@ -89,6 +94,9 @@ public:
      */
     virtual bool ReachEnd(float prevPos, bool firstLayout) const = 0;
 
+    /**
+     * @note should take unconsumed delta into account.
+     */
     virtual bool OutOfBounds() const = 0;
 
     /**
@@ -128,6 +136,9 @@ public:
 
     virtual void Reset() = 0;
     virtual void ResetFooter() = 0;
+
+    virtual bool OverScrollTop() = 0;
+    virtual bool OverScrollBottom() = 0;
 
     // for compatibility
     virtual void UpdateStartIndex() {};
@@ -212,6 +223,8 @@ public:
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
+
+    float expandHeight_ = 0.0f;
 
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;

@@ -93,15 +93,35 @@ void ResetDividerVertical(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDividerModifier* GetDividerModifier()
 {
-    static const ArkUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
-        ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDividerModifier modifier = {
+        .setDividerStrokeWidth = SetDividerStrokeWidth,
+        .resetDividerStrokeWidth = ResetDividerStrokeWidth,
+        .setDividerLineCap = SetDividerLineCap,
+        .resetDividerLineCap = ResetDividerLineCap,
+        .setDividerColor = SetDividerColor,
+        .resetDividerColor = ResetDividerColor,
+        .setDividerVertical = SetDividerVertical,
+        .resetDividerVertical = ResetDividerVertical,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIDividerModifier* GetCJUIDividerModifier()
 {
-    static const CJUIDividerModifier modifier = { SetDividerStrokeWidth, ResetDividerStrokeWidth, SetDividerLineCap,
-        ResetDividerLineCap, SetDividerColor, ResetDividerColor, SetDividerVertical, ResetDividerVertical };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIDividerModifier modifier = {
+        .setDividerStrokeWidth = SetDividerStrokeWidth,
+        .resetDividerStrokeWidth = ResetDividerStrokeWidth,
+        .setDividerLineCap = SetDividerLineCap,
+        .resetDividerLineCap = ResetDividerLineCap,
+        .setDividerColor = SetDividerColor,
+        .resetDividerColor = ResetDividerColor,
+        .setDividerVertical = SetDividerVertical,
+        .resetDividerVertical = ResetDividerVertical,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

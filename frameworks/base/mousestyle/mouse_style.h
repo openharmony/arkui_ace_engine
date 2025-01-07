@@ -16,6 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H
 
+#include <list>
+
 #include "base/memory/ace_type.h"
 #include "base/image/pixel_map.h"
 
@@ -79,7 +81,6 @@ public:
 
     virtual bool SetPointerStyle(int32_t windowId, MouseFormat pointerStyle) const = 0;
     virtual int32_t GetPointerStyle(int32_t windowId, int32_t& pointerStyle) const = 0;
-    virtual bool ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const = 0;
     virtual void SetMouseIcon(
         int32_t windowId, MouseFormat pointerStyle, std::shared_ptr<Media::PixelMap> pixelMap) const {};
     virtual void SetCustomCursor(
@@ -87,6 +88,72 @@ public:
     virtual void SetPointerVisible(MouseFormat pointerStyle) const {};
 };
 
+enum class MouseStyleChangeReason {
+    INNER_SET_MOUSESTYLE = 0, // inner frameNode call mouseStyle change
+    USER_SET_MOUSESTYLE = 1, // user call setCursor change mouseStyle
+    WINDOW_DESTROY_RESET_MOUSESTYLE = 2, // window is destroyed, reset mouse style
+};
+
+struct MouseStyleChangeLog {
+    int32_t windowId; // the id of window which change mouseStyle
+    int32_t changeNodeId; // the id of node which change mouseStyle
+    MouseFormat beforeMouseStyle; // before this change, the mouseFormat of mouseStyle
+    MouseFormat afterMouseStyle; // after this change, the mouseFormat of mouseStyle
+    MouseStyleChangeReason reason; // the reason of this mouseStyle change
+};
+
+class ACE_EXPORT MouseStyleManager : public AceType {
+    DECLARE_ACE_TYPE(MouseStyleManager, AceType)
+
+public:
+    MouseStyleManager() = default;
+
+    bool SetMouseFormat(int32_t windowId, int32_t nodeId, MouseFormat mouseFormat,
+        bool isByPass, MouseStyleChangeReason reason);
+    
+    void VsyncMouseFormat();
+    void DumpMouseStyleChangeLog();
+
+    bool SetMouseStyleHoldNode(int32_t id)
+    {
+        if (!mouseStyleNodeId_.has_value()) {
+            mouseStyleNodeId_ = id;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool FreeMouseStyleHoldNode(int32_t id)
+    {
+        if (mouseStyleNodeId_.has_value() && mouseStyleNodeId_.value() == id) {
+            mouseStyleNodeId_.reset();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    bool FreeMouseStyleHoldNode()
+    {
+        CHECK_NULL_RETURN(mouseStyleNodeId_.has_value(), false);
+        mouseStyleNodeId_.reset();
+        return true;
+    }
+
+    void SetUserSetCursor(bool userSetCursor)
+    {
+        userSetCursor_ = userSetCursor;
+    }
+
+private:
+    bool userSetCursor_ = false;
+    std::optional<int32_t> mouseStyleNodeId_;
+    MouseFormat lastVsyncMouseFormat_ = MouseFormat::DEFAULT;
+    MouseFormat mouseFormat_ = MouseFormat::DEFAULT;
+    std::list<MouseStyleChangeLog> vsyncMouseStyleChanges_;
+    std::list<MouseStyleChangeLog> mouseStyleChangeLogs_;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MOUSESTYLE_MOUSE_STYLE_MANAGER_H

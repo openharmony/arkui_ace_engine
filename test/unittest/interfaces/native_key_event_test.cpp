@@ -38,7 +38,6 @@ namespace {
 constexpr uint32_t ARKUI_UNICODE = 98;
 constexpr int32_t ARKUI_DEVICE_ID = 1;
 constexpr uint64_t ARKUI_TIME = 20;
-constexpr int32_t ARKUI_MATEKEY = 6;
 const char* ARKUI_KEY_TEXT = "k";
 } // namespace
 class NativeKeyEventTest : public testing::Test {
@@ -137,9 +136,9 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     event.keyEvent.unicode = ARKUI_UNICODE;
     event.keyEvent.deviceId = ARKUI_DEVICE_ID;
     event.keyEvent.timestamp = ARKUI_TIME;
-    event.keyEvent.metaKey = ARKUI_MATEKEY;
     event.keyEvent.keyText = ARKUI_KEY_TEXT;
     uiInputEvent.inputEvent = &event.keyEvent;
+    uiInputEvent.eventTypeId = C_KEY_EVENT_ID;
     nodeEvent.origin = &uiInputEvent;
     nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
     auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
@@ -152,9 +151,8 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     auto keySource = OH_ArkUI_KeyEvent_GetKeySource(inputEvent);
     auto intensionCode = OH_ArkUI_KeyEvent_GetKeyIntensionCode(inputEvent);
     auto unicode = OH_ArkUI_KeyEvent_GetUnicode(inputEvent);
-    auto diviceId = OH_ArkUI_KeyEvent_GetDeviceId(inputEvent);
-    auto time = OH_ArkUI_KeyEvent_GetTimestamp(inputEvent);
-    auto mateKey = OH_ArkUI_KeyEvent_GetMetaKey(inputEvent);
+    auto diviceId = OH_ArkUI_UIInputEvent_GetDeviceId(inputEvent);
+    auto time = OH_ArkUI_UIInputEvent_GetEventTime(inputEvent);
     auto keyText = OH_ArkUI_KeyEvent_GetKeyText(inputEvent);
 
     /**
@@ -167,7 +165,31 @@ HWTEST_F(NativeKeyEventTest, NativeKeyEventTest004, TestSize.Level1)
     EXPECT_EQ(unicode, ARKUI_UNICODE);
     EXPECT_EQ(diviceId, ARKUI_DEVICE_ID);
     EXPECT_EQ(time, ARKUI_TIME);
-    EXPECT_EQ(mateKey, ARKUI_MATEKEY);
     EXPECT_NE(keyText, nullptr);
+}
+
+/**
+ * @tc.name: NativeKeyEventTest005
+ * @tc.desc: test NODE_DISPATCH_KEY_EVENT;
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeKeyEventTest, NativeKeyEventTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    EXPECT_EQ(nodeAPI->registerNodeEvent(nullptr, NODE_ON_KEY_EVENT, 0, nullptr), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->registerNodeEvent(node, static_cast<ArkUI_NodeEventType>(-1), 0, nullptr),
+        ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED);
+    nodeAPI->unregisterNodeEvent(nullptr, NODE_DISPATCH_KEY_EVENT);
+    nodeAPI->unregisterNodeEvent(node, NODE_DISPATCH_KEY_EVENT);
+    nodeAPI->disposeNode(node);
 }
 } // namespace OHOS::Ace

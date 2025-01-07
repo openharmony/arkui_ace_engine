@@ -37,11 +37,9 @@ public:
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-        bool transferringCaller = false, bool densityDpi = true) override;
+        bool transferringCaller = false, bool densityDpi = true, bool isWindowModeFollowHost = false) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;
-    // for dynamic component
-    void Create() override;
     void Create(const UIExtensionConfig& config) override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
@@ -58,6 +56,7 @@ public:
     void SetOnResult(std::function<void(int32_t, const AAFwk::Want&)>&& onResult) override;
     void SetOnTerminated(std::function<void(int32_t, const RefPtr<WantWrap>&)>&& onTerminated,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
+    void SetOnDrawReady(std::function<void()>&& onDrawReady) override;
     void SetOnReceive(std::function<void(const AAFwk::WantParams&)>&& onReceive,
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY) override;
     void SetSecurityOnRemoteReady(
@@ -68,6 +67,8 @@ public:
 
 private:
     void CreateSecurityUIExtension(const UIExtensionConfig& config);
+    void CreateDynamicComponent(const UIExtensionConfig& config);
+    void CreateIsolatedComponent(const UIExtensionConfig& config);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_NG_H

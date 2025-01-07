@@ -17,6 +17,7 @@
 
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint64_t ACTIONS = std::numeric_limits<uint64_t>::max();
@@ -63,9 +64,14 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
 {
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(eventType);
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto frameNode = host_.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                frameNode->GetAccessibilityId());
+    }
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -242,6 +248,101 @@ bool AccessibilityProperty::ProcessHoverTestRecursive(const PointF& noOffsetPoin
     return recursiveParam.hitTarget;
 }
 
+bool AccessibilityProperty::IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect)
+{
+    auto rectLeft = rect.Left();
+    auto rectTop = rect.Top();
+    auto rectRight = rect.Right();
+    auto rectBottom = rect.Bottom();
+
+    auto origLeft = origRect.Left();
+    auto origTop = origRect.Top();
+    auto origRight = origRect.Right();
+    auto origBottom = origRect.Bottom();
+    if (LessNotEqual(origLeft, rectLeft) || LessNotEqual(origTop, rectTop) || LessNotEqual(rectRight, origRight) ||
+        LessNotEqual(rectBottom, origBottom)) {
+        return false;
+    }
+    return true;
+}
+
+bool AccessibilityProperty::IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode)
+{
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, false);
+    NG::RectF origRect;
+    if (isAccessibilityVirtualNode) {
+        origRect = host->GetTransformRectRelativeToWindow();
+    } else {
+        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        origRect = renderContext->GetPaintRectWithoutTransform();
+    }
+    auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+    if (responseRegionList.size() != 1) {
+        return false;
+    }
+    auto& rect = responseRegionList.back();
+    if (rect == origRect) {
+        return false;
+    }
+    if (!IsAccessibilityCompInResponseRegion(rect, origRect)) {
+        return false;
+    }
+    return true;
+}
+
+NG::RectT<int32_t> AccessibilityProperty::GetAccessibilityResponseRegionRect(bool isAccessibilityVirtualNode)
+{
+    NG::RectF origRect;
+    NG::RectT<int32_t> rectInt;
+    auto host = host_.Upgrade();
+    CHECK_NULL_RETURN(host, rectInt);
+    if (isAccessibilityVirtualNode) {
+        origRect = host->GetTransformRectRelativeToWindow();
+        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
+        auto& rect = responseRegionList.back();
+        rectInt = { static_cast<int32_t>(rect.Left()), static_cast<int32_t>(rect.Top()),
+            static_cast<int32_t>(rect.Width()), static_cast<int32_t>(rect.Height()) };
+    } else {
+        RefPtr<NG::RenderContext> renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, rectInt);
+        origRect = renderContext->GetPaintRectWithoutTransform();
+        auto responseRegionList = host->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, rectInt);
+        auto& rect = responseRegionList.back();
+        rectInt = { static_cast<int32_t>(rect.GetX() - origRect.GetX()),
+            static_cast<int32_t>(rect.GetY() - origRect.GetY()),
+            static_cast<int32_t>(rect.Width()),
+            static_cast<int32_t>(rect.Height()) };
+    }
+    return  rectInt;
+}
+
+NG::RectF AccessibilityProperty::UpdateHoverTestRect(const RefPtr<FrameNode>& node)
+{
+    NG::RectF origRect;
+    CHECK_NULL_RETURN(node, origRect);
+    bool IsAccessibilityVirtualNode = node->IsAccessibilityVirtualNode();
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, origRect);
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, origRect);
+    if (IsAccessibilityVirtualNode) {
+        origRect = node->GetTransformRectRelativeToWindow();
+    } else {
+        origRect = renderContext->GetPaintRectWithoutTransform();
+    }
+    if (accessibilityProperty->IsMatchAccessibilityResponseRegion(IsAccessibilityVirtualNode)) {
+        auto responseRegionList = node->GetResponseRegionList(origRect, static_cast<int32_t>(SourceType::TOUCH));
+        CHECK_EQUAL_RETURN(responseRegionList.size(), 0, origRect);
+        return responseRegionList.back();
+    } else {
+        return origRect;
+    }
+}
+
 bool AccessibilityProperty::HoverTestRecursive(
     const PointF& parentPoint,
     const RefPtr<FrameNode>& node,
@@ -267,11 +368,13 @@ bool AccessibilityProperty::HoverTestRecursive(
         = AccessibilityProperty::GetSearchStrategy(node, ancestorGroupFlag);
 
     auto renderContext = node->GetRenderContext();
-    auto rect = renderContext->GetPaintRectWithoutTransform();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto rect = UpdateHoverTestRect(node);
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
+    if (hitSelf && shouldSearchSelf
+        && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -312,12 +415,12 @@ static const std::set<std::string> TAGS_SUBTREE_COMPONENT = {
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
     V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::WEB_ETS_TAG,
 };
 
 static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::MENU_WRAPPER_ETS_TAG,
-    V2::POPUP_ETS_TAG,
     V2::SELECT_ETS_TAG,
     V2::DIALOG_ETS_TAG,
     V2::SHEET_PAGE_TAG,
@@ -336,6 +439,14 @@ bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
+}
+
+bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->IsAccessibilityHoverPriority();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -418,6 +529,7 @@ static const std::set<std::string> TAGS_FOCUSABLE = {
     V2::XCOMPONENT_ETS_TAG,
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
+    V2::DYNAMIC_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG
 };
 
@@ -569,6 +681,26 @@ std::string AccessibilityProperty::GetAccessibilityRole() const
     return accessibilityRole_.value_or("");
 }
 
+void AccessibilityProperty::SetAccessibilityCustomRole(const std::string& role)
+{
+    accessibilityCustomRole_ = role;
+}
+
+void AccessibilityProperty::ResetAccessibilityCustomRole()
+{
+    accessibilityCustomRole_ = "";
+}
+
+bool AccessibilityProperty::HasAccessibilityCustomRole()
+{
+    return accessibilityCustomRole_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilityCustomRole() const
+{
+    return accessibilityCustomRole_.value_or("");
+}
+
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
 {
     actionsImpl_ = actionsImpl;
@@ -706,6 +838,51 @@ int32_t AccessibilityProperty::GetUserCurrentValue()
     return currentValue_.value_or(-1);
 }
 
+void AccessibilityProperty::SetUserRangeMinValue(const int32_t rangeMinValue)
+{
+    rangeMinValue_ = rangeMinValue;
+}
+
+bool AccessibilityProperty::HasUserRangeMinValue() const
+{
+    return rangeMinValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserRangeMinValue() const
+{
+    return rangeMinValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserRangeMaxValue(const int32_t rangeMaxValue)
+{
+    rangeMaxValue_ = rangeMaxValue;
+}
+
+bool AccessibilityProperty::HasUserRangeMaxValue() const
+{
+    return rangeMaxValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserRangeMaxValue() const
+{
+    return rangeMaxValue_.value_or(-1);
+}
+
+void AccessibilityProperty::SetUserRangeCurrentValue(const int32_t rangeCurrentValue)
+{
+    rangeCurrentValue_ = rangeCurrentValue;
+}
+
+bool AccessibilityProperty::HasUserRangeCurrentValue() const
+{
+    return rangeCurrentValue_.has_value();
+}
+
+int32_t AccessibilityProperty::GetUserRangeCurrentValue() const
+{
+    return rangeCurrentValue_.value_or(-1);
+}
+
 void AccessibilityProperty::SetUserTextValue(const std::string& textValue)
 {
     textValue_ = textValue;
@@ -762,6 +939,15 @@ void AccessibilityProperty::SetAccessibilityText(const std::string& text)
     }
     accessibilityText_ = text;
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
+}
+
+void AccessibilityProperty::SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey)
+{
+    if (accessibilityNextFocusInspectorKey == accessibilityNextFocusInspectorKey_.value_or("")) {
+        return;
+    }
+    accessibilityNextFocusInspectorKey_ = accessibilityNextFocusInspectorKey;
+    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
 void AccessibilityProperty::SetAccessibilityTextWithEvent(const std::string& text)
@@ -881,6 +1067,9 @@ void AccessibilityProperty::OnAccessibilityFocusCallback(bool isFocus)
     if (onAccessibilityFocusCallbackImpl_) {
         onAccessibilityFocusCallbackImpl_(isFocus);
     }
+    if (onUserAccessibilityFocusCallbackImpl_) {
+        onUserAccessibilityFocusCallbackImpl_(isFocus);
+    }
 }
 
 void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositionImpl& getWindowScenePositionImpl)
@@ -888,22 +1077,29 @@ void AccessibilityProperty::SetGetWindowScenePosition(const GetWindowScenePositi
         getWindowScenePositionImpl_ = getWindowScenePositionImpl;
     }
 
-void AccessibilityProperty::GetWindowScenePosition(int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY)
+void AccessibilityProperty::GetWindowScenePosition(WindowSceneInfo& windowSceneInfo)
 {
     if (getWindowScenePositionImpl_ == nullptr) {
-        left = 0;
-        top = 0;
-        scaleX = 1.0f;
-        scaleY = 1.0f;
         return;
     }
-    getWindowScenePositionImpl_(left, top, scaleX, scaleY);
+    getWindowScenePositionImpl_(windowSceneInfo);
 }
 
 void AccessibilityProperty::SetOnAccessibilityFocusCallback(
     const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl)
 {
     onAccessibilityFocusCallbackImpl_ = onAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::SetUserOnAccessibilityFocusCallback(
+    const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl)
+{
+    onUserAccessibilityFocusCallbackImpl_ = onUserAccessibilityFocusCallbackImpl;
+}
+
+void AccessibilityProperty::ResetUserOnAccessibilityFocusCallback()
+{
+    onUserAccessibilityFocusCallbackImpl_ = nullptr;
 }
 
 bool AccessibilityProperty::ActActionClearSelection()
@@ -1018,4 +1214,16 @@ bool AccessibilityProperty::ActActionCopy()
     }
     return false;
 }
+
+bool AccessibilityProperty::IsAccessibilityHoverPriority() const
+{
+    return accessibilityHoverPriority_;
+}
+
+void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
+{
+    // true means node consume barrierfree hover event prior to brothers
+    accessibilityHoverPriority_ = hoverPriority;
+}
+
 } // namespace OHOS::Ace::NG

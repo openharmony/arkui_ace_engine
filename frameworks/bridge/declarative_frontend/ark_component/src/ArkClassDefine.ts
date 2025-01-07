@@ -373,14 +373,14 @@ class ArkChainMode {
   }
 }
 
-class ArkListEdgeEffect {
+class ArkEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
   constructor() {
     this.value = undefined;
     this.options = undefined;
   }
-  isEqual(another: ArkListEdgeEffect): boolean {
+  isEqual(another: ArkEdgeEffect): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
   }
@@ -394,19 +394,6 @@ class ArkFadingEdge {
     this.options = undefined;
   }
   isEqual(another: ArkFadingEdge): boolean {
-    return (this.value === another.value) &&
-      (this.options === another.options);
-  }
-}
-
-class ArkScrollEdgeEffect {
-  value: EdgeEffect;
-  options?: EdgeEffectOptions | undefined;
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another: ArkScrollEdgeEffect): boolean {
     return (this.value === another.value) &&
       (this.options === another.options);
   }
@@ -1234,16 +1221,17 @@ class ArkDisplayCount {
   }
 }
 
-class ArkGridEdgeEffect {
-  value: EdgeEffect;
-  options?: EdgeEffectOptions | undefined;
+class ArkSwiperCachedCount {
+  value: number;
+  isShown: boolean;
+
   constructor() {
     this.value = undefined;
-    this.options = undefined;
+    this.isShown = undefined;
   }
-  isEqual(another: ArkGridEdgeEffect): boolean {
-    return (this.value === another.value) &&
-      (this.options === another.options);
+
+  isEqual(another: ArkSwiperCachedCount): boolean {
+    return this.value === another.value && this.isShown === another.isShown;
   }
 }
 
@@ -1394,19 +1382,6 @@ class ArkScrollOffsetOptions {
   }
   isEqual(another: ArkScrollOffsetOptions): boolean {
     return this.xOffset === another.xOffset && this.yOffset === another.yOffset;
-  }
-}
-
-class ArkWaterFlowEdgeEffect {
-  value: EdgeEffect;
-  options?: EdgeEffectOptions | undefined;
-  constructor() {
-    this.value = undefined;
-    this.options = undefined;
-  }
-  isEqual(another: ArkWaterFlowEdgeEffect): boolean {
-    return (this.value === another.value) &&
-      (this.options === another.options);
   }
 }
 
@@ -1609,5 +1584,19 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkAutoPlay {
+  autoPlay: boolean;
+  needStopWhenTouched: boolean;
+
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+
+  isEqual(another: ArkAutoPlay): boolean {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
   }
 }

@@ -12,19 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-int32_t testOnReadyEvent = 0;
-int32_t testAboutToIMEInput = 0;
-int32_t testOnIMEInputComplete = 0;
-int32_t testAboutToDelete = 0;
-int32_t testOnDeleteComplete = 0;
 int32_t testOnSelect = 0;
+bool isOnWillChangeCalled = false;
+bool isOnDidChangeCalled = false;
+RichEditorChangeValue onWillChangeValue;
+RichEditorChangeValue onDidChangeValue;
+auto& onWillRangeBefore = onWillChangeValue.rangeBefore_;
+auto& onWillReplacedSpans = onWillChangeValue.replacedSpans_;
+auto& onWillReplacedImageSpans = onWillChangeValue.replacedImageSpans_;
+auto& onWillReplacedSymbolSpans = onWillChangeValue.replacedSymbolSpans_;
+auto& onDidRangeBefore = onDidChangeValue.rangeBefore_;
+auto& onDidRangeAfter = onDidChangeValue.rangeAfter_;
+RichEditorDeleteValue aboutToDeleteValue;
 } // namespace
 
 class RichEditorChangeCallbackTestNg : public RichEditorCommonTestNg {
@@ -32,6 +44,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     static void TearDownTestSuite();
+private:
     void ResetContentChangeCallbackState();
     void InitContentChangeCallback(RichEditorModelNG& richEditorModel);
     void InitDeleteCallback(RichEditorModelNG& richEditorModel);
@@ -58,11 +71,6 @@ void RichEditorChangeCallbackTestNg::SetUp()
 void RichEditorChangeCallbackTestNg::TearDown()
 {
     richEditorNode_ = nullptr;
-    testOnReadyEvent = 0;
-    testAboutToIMEInput = 0;
-    testOnIMEInputComplete = 0;
-    testAboutToDelete = 0;
-    testOnDeleteComplete = 0;
     MockParagraph::TearDown();
 }
 
@@ -74,8 +82,8 @@ void RichEditorChangeCallbackTestNg::TearDownTestSuite()
 
 void RichEditorChangeCallbackTestNg::ResetContentChangeCallbackState()
 {
-    g_isOnWillChangeCalled = false;
-    g_isOnDidChangeCalled = false;
+    isOnWillChangeCalled = false;
+    isOnDidChangeCalled = false;
     onWillChangeValue.reset();
     onDidChangeValue.reset();
 }
@@ -84,14 +92,14 @@ void RichEditorChangeCallbackTestNg::InitContentChangeCallback(RichEditorModelNG
 {
     ResetContentChangeCallbackState();
     auto onWillChange = [](const RichEditorChangeValue& changeValue) {
-        g_isOnWillChangeCalled = true;
+        isOnWillChangeCalled = true;
         onWillChangeValue = changeValue;
         return true;
     };
     richEditorModel.SetOnWillChange(std::move(onWillChange));
 
     auto onDidChange = [](const RichEditorChangeValue& changeValue) {
-        g_isOnDidChangeCalled = true;
+        isOnDidChangeCalled = true;
         onDidChangeValue = changeValue;
     };
     richEditorModel.SetOnDidChange(std::move(onDidChange));
@@ -345,7 +353,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest004, TestSize.Lev
     originalCount = 0;
     replacedCount = 0;
     afterCount = 0;
-    richEditorPattern->InsertValue("test\nvalue");
+    richEditorPattern->InsertValue(u"test\nvalue");
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 0);
@@ -454,7 +462,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest006, TestSize.Lev
     richEditorPattern->dragRange_.first = 0;
     richEditorPattern->dragRange_.second = 2;
     richEditorPattern->isDragSponsor_ = true;
-    richEditorPattern->HandleOnDragDropTextOperation("he", true);
+    richEditorPattern->HandleOnDragDropTextOperation(u"he", true);
     EXPECT_EQ(isWillCalled, true);
     EXPECT_EQ(isDidCalled, true);
     EXPECT_EQ(originalCount, 1);
@@ -606,8 +614,8 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest009, TestSize.Lev
     InitContentChangeCallback(richEditorModel);
 
     richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
-    EXPECT_EQ(g_isOnWillChangeCalled, true);
-    EXPECT_EQ(g_isOnDidChangeCalled, true);
+    EXPECT_EQ(isOnWillChangeCalled, true);
+    EXPECT_EQ(isOnDidChangeCalled, true);
 
     // check onWill rangeBefore
     EXPECT_EQ(onWillRangeBefore.start, 0);
@@ -659,7 +667,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest010, TestSize.Lev
 
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
-    EXPECT_EQ(spanResult.value_, "hhello11");
+    EXPECT_EQ(spanResult.value_, u"hhello11");
     EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
@@ -709,7 +717,7 @@ HWTEST_F(RichEditorChangeCallbackTestNg, ChangeTextCallbackTest011, TestSize.Lev
 
     auto& spanResult = onWillReplacedSpans[0];
     EXPECT_EQ(spanResult.spanIndex_, 0);
-    EXPECT_EQ(spanResult.value_, "hhello1");
+    EXPECT_EQ(spanResult.value_, u"hhello1");
     EXPECT_EQ(spanResult.fontSize_, TEXT_STYLE_1.fontSize_.ConvertToPx());
     EXPECT_EQ(spanResult.offsetInSpan_, 1);
     EXPECT_EQ(spanResult.eraseLength_, 6);
@@ -1140,43 +1148,6 @@ HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged002, TestSize.Level1
     ASSERT_NE(richEditorController, nullptr);
 
     richEditorPattern->HandleBlurEvent();
-    EXPECT_FALSE(richEditorController->IsEditing());
-}
-
-/**
- * @tc.name: HandleOnEditChanged003
- * @tc.desc: test Long press edit status is keep false
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorChangeCallbackTestNg, HandleOnEditChanged003, TestSize.Level1)
-{
-    /* *
-     * @tc.steps: step1. get richEditor richEditorPattern
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /* *
-     * @tc.steps: step2. Setting Callback Function
-     */
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    GestureEvent info;
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
-    EXPECT_FALSE(richEditorController->IsEditing());
-
-    RichEditorModelNG richEditorModel;
-    richEditorModel.Create();
-    richEditorModel.SetOnEditingChange([](bool value) {});
-
-    /* *
-     * @tc.steps: step3. Long press to trigger the callback function and keep preview state
-     */
-
-    richEditorPattern->HandleDoubleClickOrLongPress(info);
     EXPECT_FALSE(richEditorController->IsEditing());
 }
 

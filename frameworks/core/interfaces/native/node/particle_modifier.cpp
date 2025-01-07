@@ -84,16 +84,27 @@ void resetEmitter(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIParticleModifier* GetParticleModifier()
 {
-    static const ArkUIParticleModifier modifier = { SetDisturbanceField, ResetDisturbanceField, setEmitter,
-        resetEmitter };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIParticleModifier modifier = {
+        .SetDisturbanceField = SetDisturbanceField,
+        .ResetDisturbanceField = ResetDisturbanceField,
+        .SetEmitter = setEmitter,
+        .ResetEmitter = resetEmitter,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIParticleModifier* GetCJUIParticleModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIParticleModifier modifier = {
-        SetDisturbanceField, ResetDisturbanceField, setEmitter, resetEmitter
+        .SetDisturbanceField = SetDisturbanceField,
+        .ResetDisturbanceField = ResetDisturbanceField,
+        .SetEmitter = setEmitter,
+        .ResetEmitter = resetEmitter,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

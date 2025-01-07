@@ -165,10 +165,15 @@ public:
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
-    static void ParseSheetIsShow(
-        const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
+    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
+    static bool ParseSheetIsShow(
+        const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
+    static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle);
+    static bool ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
+    static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object, const char* prop);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
     static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
@@ -318,6 +323,7 @@ public:
         const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
     static bool ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent = true);
+    static bool ParseJsLengthMetricsVp(const JSRef<JSObject>& jsObj, CalcDimension& result);
     static bool ParseJsonDimension(const std::unique_ptr<JsonValue>& jsonValue, CalcDimension& result,
         DimensionUnit defaultUnit, bool checkIllegal = false);
     static bool ParseJsonDimensionVp(
@@ -335,6 +341,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
@@ -419,6 +426,7 @@ public:
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
+    static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
@@ -429,6 +437,8 @@ public:
     static void JsOpacityPassThrough(const JSCallbackInfo& info);
     static void JsTransitionPassThrough(const JSCallbackInfo& info);
     static void JsKeyboardShortcut(const JSCallbackInfo& info);
+    static void JsOnFocusAxisEvent(const JSCallbackInfo& args);
+    static void JsOnCrownEvent(const JSCallbackInfo& args);
 
     static void JsObscured(const JSCallbackInfo& info);
     static void JsPrivacySensitive(const JSCallbackInfo& info);
@@ -436,11 +446,14 @@ public:
     static void JsAccessibilityGroup(const JSCallbackInfo& info);
     static void JsAccessibilityText(const JSCallbackInfo& info);
     static void JsAccessibilityTextHint(const std::string& text);
+    static void JsAccessibilityNextFocusId(const JSCallbackInfo& info);
     static void JsAccessibilityDescription(const JSCallbackInfo& info);
     static void JsAccessibilityImportance(const std::string& importance);
     static void JsAccessibilityLevel(const std::string& level);
     static void JsAccessibilitySelected(const JSCallbackInfo& info);
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
+    static void JsAccessibilityRole(const JSCallbackInfo& info);
+    static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -470,6 +483,12 @@ public:
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static panda::Local<panda::JSValueRef> JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseContentPopupCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<NG::UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
 #endif
 
     /**
@@ -494,7 +513,18 @@ public:
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto themeManager = pipelineContext->GetThemeManager();
         CHECK_NULL_RETURN(themeManager, nullptr);
-        return themeManager->GetTheme<T>();
+        auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        return node ? themeManager->GetTheme<T>(node->GetThemeScopeId()) : themeManager->GetTheme<T>();
+    }
+
+    template<typename T>
+    static RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        auto pipelineContext = GetPipelineContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        auto themeManager = pipelineContext->GetThemeManager();
+        CHECK_NULL_RETURN(themeManager, nullptr);
+        return themeManager->GetTheme<T>(themeScopeId);
     }
 
     /**
@@ -648,6 +678,7 @@ private:
     static bool ParseResourceToDoubleById(
         int32_t resId, int32_t resType, const RefPtr<ResourceWrapper>& resourceWrapper, double& result);
 
+    static std::vector<NG::MenuOptionsParam> ParseMenuItems(const JSRef<JSArray>& menuItemsArray);
     static void ParseOnCreateMenu(
         const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, NG::OnCreateMenuCallback& onCreateMenuCallback);
     static JSRef<JSVal> CreateJsTextMenuItem(const NG::MenuItemParam& menuItemParam);

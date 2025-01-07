@@ -68,6 +68,7 @@ struct GatherNodeChildInfo {
     float height = 0.0f;
     float halfWidth = 0.0f;
     float halfHeight = 0.0f;
+    WeakPtr<FrameNode> preImageNode;
 };
 
 struct DismissTarget {
@@ -93,6 +94,9 @@ struct CustomKeyboardOffsetInfo {
     float inAniStartOffset = 0.0f;
     float outAniEndOffset = 0.0f;
 };
+struct OverlayManagerInfo {
+    bool renderRootOverlay = true;
+};
 
 // StageManager is the base class for root render node to perform page switch.
 class ACE_FORCE_EXPORT OverlayManager : public virtual AceType {
@@ -115,6 +119,7 @@ public:
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -223,6 +228,13 @@ public:
     {
         maskNodeIdMap_[dialogId] = maskId;
     }
+
+    void SetModalDialogDisplayId(uint64_t displayId)
+    {
+        if (displayId != -1ULL) {
+            dialogDisplayId_ = displayId;
+        }
+    }
     bool isMaskNode(int32_t maskId);
     int32_t GetMaskNodeIdWithDialogId(int32_t dialogId);
 
@@ -243,7 +255,9 @@ public:
     void AfterRemoveAllModalInOverlayByList();
     bool IsModalUiextensionNode(const RefPtr<FrameNode>& topModalNode);
     bool IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModalNode);
+    bool IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode);
     bool RemoveOverlayInSubwindow();
+    bool RemoveMenuInSubWindow(const RefPtr<FrameNode>& menuWrapper, int32_t instanceId);
 
     void RegisterOnHideDialog(std::function<void()> callback)
     {
@@ -475,6 +489,7 @@ public:
     {
         return dismissSheetId_;
     }
+    RefPtr<FrameNode> GetModalStackTop();
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -506,6 +521,10 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const ModalUIExtensionConfig& config);
     void CloseModalUIExtension(int32_t sessionId);
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config);
+    static ModalStyle SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+        bool isAllowAddChildBelowModalUec, bool prohibitedRemoveByNavigation);
 
     RefPtr<FrameNode> BuildAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions);
     RefPtr<FrameNode> CreateAIEntityMenu(const std::vector<std::pair<std::string, std::function<void()>>>& menuOptions,
@@ -624,6 +643,18 @@ public:
     bool AddCurSessionId(int32_t curSessionId);
     void ResetRootNode(int32_t sessionId);
     void OnUIExtensionWindowSizeChange();
+    bool SetOverlayManagerOptions(const OverlayManagerInfo& overlayInfo)
+    {
+        if (overlayInfo_.has_value()) {
+            return false;
+        }
+        overlayInfo_ = overlayInfo;
+        return true;
+    }
+    std::optional<OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return overlayInfo_;
+    }
 
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
@@ -689,7 +720,7 @@ private:
      *   @return     true if process is successful
      */
     bool ShowMenuHelper(RefPtr<FrameNode>& menu, int32_t targetId, const NG::OffsetF& offset);
-
+    void ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper);
     // The focus logic of overlay node (menu and dialog):
     // 1. before start show animation: lower level node set unfocusabel and lost focus;
     // 2. end show animation: overlay node get focus;
@@ -786,6 +817,8 @@ private:
     void RegisterDialogLifeCycleCallback(const RefPtr<FrameNode>& dialog, const DialogProperties& dialogProps);
     void CustomDialogRecordEvent(const DialogProperties& dialogProps);
     RefPtr<UINode> RebuildCustomBuilder(RefPtr<UINode>& contentNode);
+    void OpenCustomDialogInner(const DialogProperties& dialogProps, std::function<void(int32_t)> &&callback,
+        const RefPtr<FrameNode> dialog, bool showComponentContent);
 
     void DumpPopupMapInfo() const;
     void DumpMapInfo(
@@ -807,6 +840,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
@@ -832,6 +866,7 @@ private:
     int32_t dismissDialogId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_ = -1;
+    uint64_t dialogDisplayId_ = 0;
     bool hasPixelMap_ { false };
     bool hasDragPixelMap_ { false };
     bool hasFilter_ { false };
@@ -877,6 +912,7 @@ private:
     bool isAllowedBeCovered_ = true;
     // Only hasValue when isAllowedBeCovered is false
     std::set<int32_t> curSessionIds_;
+    std::optional<OverlayManagerInfo> overlayInfo_;
 };
 } // namespace OHOS::Ace::NG
 

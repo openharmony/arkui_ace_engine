@@ -35,7 +35,7 @@ public:
     static SpanModel* GetInstance();
     virtual ~SpanModel() = default;
 
-    virtual void Create(const std::string& content) = 0;
+    virtual void Create(const std::u16string& content) = 0;
     virtual void SetFont(const Font& value) = 0;
     virtual void ResetFont() = 0;
     virtual void SetFontSize(const Dimension& value) = 0;

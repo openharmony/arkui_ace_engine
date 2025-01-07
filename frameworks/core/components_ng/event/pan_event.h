@@ -70,7 +70,7 @@ class ACE_FORCE_EXPORT PanEventActuator : public GestureEventActuator {
     DECLARE_ACE_TYPE(PanEventActuator, GestureEventActuator)
 public:
     PanEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers,
-        float distance, bool isOverrideDistance = false);
+        float distance);
     ~PanEventActuator() override = default;
 
     void ReplacePanEvent(const RefPtr<PanEvent>& panEvent)
@@ -119,11 +119,17 @@ public:
         return panEvents_.empty();
     }
 
+    void SetExcludedAxis(bool isExcludedAxis)
+    {
+        isExcludedAxis_ = isExcludedAxis;
+    }
+
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<PanEvent>> panEvents_;
     RefPtr<PanEvent> userCallback_;
     RefPtr<PanRecognizer> panRecognizer_;
+    bool isExcludedAxis_ = false;
 
     PanDirection direction_;
     int32_t fingers_ = 1;

@@ -236,44 +236,48 @@ void ResetNavDestinationRecoverable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUINavDestinationModifier modifier = {
-        SetHideTitleBar,
-        ResetHideTitleBar,
-        SetNavDestinationHideToolBar,
-        ResetNavDestinationHideToolBar,
-        SetNavDestinationMode,
-        ResetNavDestinationMode,
-        SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea,
-        SetTitle,
-        ResetTitle,
-        SetMenus,
-        ResetMenus,
-        SetMenuItemAction,
-        SetMenuItemSymbol,
-        SetNavDestinationRecoverable,
-        ResetNavDestinationRecoverable,
-        SetNavDestinationSystemTransition,
-        ResetNavDestinationSystemTransition
+        .setHideTitleBar = SetHideTitleBar,
+        .resetHideTitleBar = ResetHideTitleBar,
+        .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
+        .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationMode = SetNavDestinationMode,
+        .resetNavDestinationMode = ResetNavDestinationMode,
+        .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
+        .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
+        .setTitle = SetTitle,
+        .resetTitle = ResetTitle,
+        .setMenus = SetMenus,
+        .resetMenus = ResetMenus,
+        .setMenuItemAction = SetMenuItemAction,
+        .setMenuItemSymbol = SetMenuItemSymbol,
+        .setRecoverable = SetNavDestinationRecoverable,
+        .resetRecoverable = ResetNavDestinationRecoverable,
+        .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
+        .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUINavDestinationModifier modifier = {
-        SetHideTitleBar,
-        ResetHideTitleBar,
-        SetNavDestinationHideToolBar,
-        ResetNavDestinationHideToolBar,
-        SetNavDestinationMode,
-        ResetNavDestinationMode,
-        SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea,
-        SetNavDestinationSystemTransition,
-        ResetNavDestinationSystemTransition
+        .setHideTitleBar = SetHideTitleBar,
+        .resetHideTitleBar = ResetHideTitleBar,
+        .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
+        .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationMode = SetNavDestinationMode,
+        .resetNavDestinationMode = ResetNavDestinationMode,
+        .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
+        .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
+        .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
+        .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

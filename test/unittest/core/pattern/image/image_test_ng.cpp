@@ -1808,6 +1808,43 @@ HWTEST_F(ImageTestNg, TestImageFit001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TestImageMatrix001
+ * @tc.desc: Test image matrix.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestImageMatrix001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageInfoConfig.isImageSpan = true;
+    image.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image matrix
+     */
+    Matrix4 matrix4Value = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    image.SetImageMatrix(matrix4Value);
+
+    /**
+     * @tc.steps: step3. get imageRenderProperty image matrix
+     */
+
+    EXPECT_EQ(imageRenderProperty->GetImageMatrixValue(), matrix4Value);
+}
+
+/**
  * @tc.name: TestImageResizable001
  * @tc.desc: Test image resizable.
  * @tc.type: FUNC
@@ -1913,5 +1950,170 @@ HWTEST_F(ImageTestNg, ImageReset001, TestSize.Level1)
     imagePattern->SetNeedLoadAlt(true);
     image.ResetImage();
     EXPECT_EQ(imagePattern->needLoadAlt_, true);
+}
+
+ /* @tc.name: TestSetBorderRadius001
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSetBorderRadius001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModel.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto dm = Dimension(RADIUS_DEFAULT);
+    imageModel.SetBorderRadius(dm);
+
+    /**
+     * @tc.steps: step3. get and check config value
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), Dimension(RADIUS_DEFAULT));
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), Dimension(RADIUS_DEFAULT));
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), Dimension(RADIUS_DEFAULT));
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), Dimension(RADIUS_DEFAULT));
+}
+
+/**
+ * @tc.name: TestSetBorderRadius002
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSetBorderRadius002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModel.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto topLeft = Dimension(RADIUS_DEFAULT);
+    auto topRight = Dimension(RADIUS_DEFAULT);
+    auto bottomLeft = Dimension(30.0);
+    auto bottomRight = Dimension(30.0);
+    imageModel.SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+
+    /**
+     * @tc.steps: step3. get and check config value
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+
+/**
+ * @tc.name: TestSetBorderRadius003
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSetBorderRadius003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModel.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto topLeft = Dimension(40.0);
+    auto topRight = Dimension(40.0);
+    auto bottomLeft = Dimension(RADIUS_DEFAULT);
+    auto bottomRight = Dimension(RADIUS_DEFAULT);
+    imageModel.SetBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+
+    /**
+     * @tc.steps: step3. get and check config value
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
+}
+/**
+ * @tc.name: TestSetBorderRadius003
+ * @tc.desc: Test SetBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, TestSetBorderRadius004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create Image frameNode.
+     */
+    ImageModelNG imageModel;
+    RefPtr<PixelMap> pixMap = nullptr;
+    ImageInfoConfig imageInfoConfig;
+    imageInfoConfig.bundleName = BUNDLE_NAME;
+    imageInfoConfig.moduleName = MODULE_NAME;
+    imageModel.Create(imageInfoConfig, pixMap);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto imageLayoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+    auto imageRenderProperty = frameNode->GetPaintProperty<ImageRenderProperty>();
+    ASSERT_NE(imageRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. set image border radius
+     */
+    auto topLeft = Dimension(RADIUS_DEFAULT);
+    auto topRight = Dimension(RADIUS_DEFAULT);
+    auto bottomLeft = Dimension(30.0);
+    auto bottomRight = Dimension(30.0);
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = topLeft;
+    borderRadius.radiusTopRight = topRight;
+    borderRadius.radiusBottomLeft = bottomLeft;
+    borderRadius.radiusBottomRight = bottomRight;
+    borderRadius.multiValued = true;
+    imageModel.SetBorderRadius(borderRadius);
+
+    /**
+     * @tc.steps: step3. get and check config value.
+     */
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopLeft.value(), topLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusTopRight.value(), topRight);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomLeft.value(), bottomLeft);
+    EXPECT_EQ(imageRenderProperty->GetBorderRadiusValue().radiusBottomRight.value(), bottomRight);
 }
 } // namespace OHOS::Ace::NG

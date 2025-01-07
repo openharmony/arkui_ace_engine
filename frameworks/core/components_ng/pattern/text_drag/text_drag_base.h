@@ -47,6 +47,7 @@ public:
 
     virtual const RefPtr<Paragraph>& GetDragParagraph() const = 0;
 
+    virtual void OnDragNodeFloating() {};
     virtual void CloseSelectOverlay() = 0;
     virtual void CloseHandleAndSelect()
     {

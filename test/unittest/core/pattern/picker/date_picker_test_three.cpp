@@ -564,14 +564,9 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
         auto index = columnPattern->GetCurrentIndex();
         auto options = columnPattern->GetOptions();
         auto it = options.find(monthDaysColumnNode);
-        if (it != options.end()) {
-            if (it->second.size() <= index) {
-                allColumnsText.append("");
-            }
+        if (it != options.end() && index >= 0 && index < it->second.size()) {
             auto date = it->second.at(index);
             allColumnsText.append(DatePickerPattern::GetFormatString(date));
-        } else {
-            allColumnsText.append("");
         }
     }
 
@@ -580,7 +575,7 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     auto accessibilityProperty = pickerFrameNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 

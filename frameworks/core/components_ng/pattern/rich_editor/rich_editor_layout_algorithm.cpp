@@ -31,7 +31,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     while (it != spans.end()) {
         auto span = *it;
         // only checking the last char
-        if (StringUtils::ToWstring(span->content).back() == L'\n') {
+        if (span->content.back() == u'\n') {
             span->SetNeedRemoveNewLine(true);
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
@@ -53,7 +53,7 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
         spans_.push_back(std::move(spans));
     }
     AppendNewLineSpan();
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{private}s", SpansToString().c_str());
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "spans=%{public}s", SpansToString().c_str());
 }
 
 void RichEditorLayoutAlgorithm::AppendNewLineSpan()
@@ -61,10 +61,10 @@ void RichEditorLayoutAlgorithm::AppendNewLineSpan()
     CHECK_NULL_VOID(!allSpans_.empty());
     auto lastSpan = allSpans_.back();
     CHECK_NULL_VOID(lastSpan);
-    if (StringUtils::ToWstring(lastSpan->content).back() == L'\n') {
+    if (lastSpan->content.back() == u'\n') {
         std::list<RefPtr<SpanItem>> newGroup;
         auto tailNewLineSpan = AceType::MakeRefPtr<SpanItem>();
-        tailNewLineSpan->content = "\n";
+        tailNewLineSpan->content = u"\n";
         tailNewLineSpan->SetNeedRemoveNewLine(true);
         CopySpanStyle(lastSpan, tailNewLineSpan);
         newGroup.push_back(tailNewLineSpan);
@@ -78,14 +78,23 @@ void RichEditorLayoutAlgorithm::CopySpanStyle(RefPtr<SpanItem> source, RefPtr<Sp
         auto typingTextStyle = typingTextStyle_.value();
         target->fontStyle->UpdateFontSize(typingTextStyle.GetFontSize());
         target->textLineStyle->UpdateLineHeight(typingTextStyle.GetLineHeight());
-        return;
-    }
-    if (source->fontStyle->HasFontSize()) {
-        target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
+    } else {
+        if (source->fontStyle->HasFontSize()) {
+            target->fontStyle->UpdateFontSize(source->fontStyle->GetFontSizeValue());
+        }
+        if (source->textLineStyle->HasLineHeight()) {
+            target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
+        }
     }
 
-    if (source->textLineStyle->HasLineHeight()) {
-        target->textLineStyle->UpdateLineHeight(source->textLineStyle->GetLineHeightValue());
+    if (source->textLineStyle->HasLeadingMargin()) {
+        auto leadingMargin = source->textLineStyle->GetLeadingMarginValue();
+        leadingMargin.pixmap.Reset();
+        target->textLineStyle->UpdateLeadingMargin(leadingMargin);
+    }
+
+    if (source->textLineStyle->HasTextAlign()) {
+        target->textLineStyle->UpdateTextAlign(source->textLineStyle->GetTextAlignValue());
     }
 }
 
@@ -126,6 +135,32 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     return SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
 }
 
+LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
+    SizeF& textSize, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto newContentConstraint = contentConstraint;
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, newContentConstraint);
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, newContentConstraint);
+    if (pattern->GetMaxLinesHeight() != FLT_MAX && layoutProperty->GetMaxLinesValue(INT32_MAX) == INT32_MAX) {
+        newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+        return newContentConstraint;
+    }
+    if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
+        return newContentConstraint;
+    }
+    pattern->SetMaxLinesHeight(pManager_->GetHeight());
+    newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+    layoutProperty->UpdateMaxLines(INT32_MAX);
+    TextStyle textStyle;
+    ConstructTextStyles(newContentConstraint, layoutWrapper, textStyle);
+    CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, newContentConstraint, layoutWrapper), {});
+    pManager_->SetParagraphs(GetParagraphs());
+    textSize = SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
+    return newContentConstraint;
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -136,11 +171,12 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         ? MeasureEmptyContentSize(contentConstraint, layoutWrapper)
         : MeasureContentSize(contentConstraint, layoutWrapper);
     CHECK_NULL_RETURN(optionalTextSize, {});
+    auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
     CHECK_NULL_RETURN(res.IsNonNegative(), {});
     UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
-    auto maxHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto maxHeight = newContentConstraint.selfIdealSize.Height().value_or(newContentConstraint.maxSize.Height());
     auto contentHeight = std::min(res.Height(), maxHeight);
     return SizeF(res.Width(), contentHeight);
 }
@@ -148,6 +184,9 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, {});
+    layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
@@ -265,6 +304,7 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
 {
     auto style = MultipleParagraphLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
+    style.maxLines = textStyle.GetMaxLines();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
@@ -296,5 +336,22 @@ RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std:
     }
     return *spanGroup.begin();
 }
+
+std::string RichEditorLayoutAlgorithm::SpansToString()
+{
+    std::stringstream ss;
+    for (const auto& list : spans_) {
+        ss << "[";
+        for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
+#ifndef IS_RELEASE_VERSION
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+#endif
+            ss << "[" << item->rangeStart << ":" << item->position << "],";
+        });
+        ss << "], ";
+    }
+    return ss.str();
+}
+
 
 } // namespace OHOS::Ace::NG

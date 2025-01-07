@@ -956,7 +956,7 @@ void FrontendDelegateImpl::ShowToast(const NG::ToastInfo& toastInfo, std::functi
             ToastComponent::GetInstance().Show(weak.Upgrade(), updatedToastInfo.message, updatedToastInfo.duration,
                 updatedToastInfo.bottom, updatedToastInfo.isRightToLeft);
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowToast");
+        TaskExecutor::TaskType::UI, "ArkUIShowToast", PriorityType::VIP);
 }
 
 Rect FrontendDelegateImpl::GetBoundingRectData(NodeId nodeId)
@@ -996,7 +996,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void(int32_t)>::GetInstance().BindBackendEvent(
             successEventMarker, [callback, taskExecutor = taskExecutor_](int32_t successType) {
                 taskExecutor->PostTask([callback, successType]() { callback(0, successType); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback");
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogSuccessCallback", PriorityType::VIP);
             });
         callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
     }
@@ -1005,7 +1005,10 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask(
-                    [callback]() { callback(1, 0); }, TaskExecutor::TaskType::JS, "ArkUIShowDialogCancelCallback");
+                    [callback]() { callback(1, 0); },
+                    TaskExecutor::TaskType::JS,
+                    "ArkUIShowDialogCancelCallback",
+                    PriorityType::VIP);
             });
         callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
     }
@@ -1014,7 +1017,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
         BackEndEventManager<void()>::GetInstance().BindBackendEvent(
             completeEventMarker, [callback, taskExecutor = taskExecutor_] {
                 taskExecutor->PostTask([callback]() { callback(CALLBACK_ERRORCODE_COMPLETE, 0); },
-                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback");
+                    TaskExecutor::TaskType::JS, "ArkUIShowDialogCompleteCallback", PriorityType::VIP);
             });
         callbackMarkers.emplace(COMMON_COMPLETE, completeEventMarker);
     }
@@ -1033,7 +1036,7 @@ void FrontendDelegateImpl::ShowDialog(const std::string& title, const std::strin
                 context->ShowDialog(dialogProperties, isRightToLeft);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowDialog");
+        TaskExecutor::TaskType::UI, "ArkUIShowDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
@@ -1057,7 +1060,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
                         callback(0, successType);
                     }
                 },
-                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuSuccess");
+                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuSuccess", PriorityType::VIP);
         });
     callbackMarkers.emplace(COMMON_SUCCESS, successEventMarker);
 
@@ -1065,7 +1068,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
     BackEndEventManager<void()>::GetInstance().BindBackendEvent(
         cancelEventMarker, [callback, taskExecutor = taskExecutor_] {
             taskExecutor->PostTask([callback]() { callback(1, 0); },
-                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel");
+                TaskExecutor::TaskType::JS, "ArkUIShowActionMenuCancel", PriorityType::VIP);
         });
     callbackMarkers.emplace(COMMON_CANCEL, cancelEventMarker);
 
@@ -1089,7 +1092,7 @@ void FrontendDelegateImpl::ShowActionMenu(const std::string& title,
                 context->ShowDialog(dialogProperties, isRightToLeft);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIShowActionMenu");
+        TaskExecutor::TaskType::UI, "ArkUIShowActionMenu", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::EnableAlertBeforeBackPage(
@@ -1321,7 +1324,7 @@ void FrontendDelegateImpl::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateImpl::OnPageReady(const RefPtr<JsAcePage>& page, const std::string& url, bool isMainPage)
@@ -1431,7 +1434,10 @@ void FrontendDelegateImpl::OnPushPageSuccess(const RefPtr<JsAcePage>& page, cons
 {
     std::lock_guard<std::mutex> lock(mutex_);
     AddPageLocked(page);
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = url;
+    pageRouteStack_.emplace_back(pageInfo);
     if (pageRouteStack_.size() >= MAX_ROUTER_STACK) {
         isRouteStackFull_ = true;
         EventReport::SendPageRouterException(PageRouterExcepType::PAGE_STACK_OVERFLOW_ERR, page->GetUrl());
@@ -1649,7 +1655,10 @@ void FrontendDelegateImpl::OnReplacePageSuccess(const RefPtr<JsAcePage>& page, c
         ClearAlertCallback(pageRouteStack_.back());
         pageRouteStack_.pop_back();
     }
-    pageRouteStack_.emplace_back(PageInfo { page->GetPageId(), url });
+    PageInfo pageInfo;
+    pageInfo.pageId = page->GetPageId();
+    pageInfo.url = url;
+    pageRouteStack_.emplace_back(pageInfo);
     auto pipelineContext = pipelineContextHolder_.Get();
     if (pipelineContext) {
         pipelineContext->onRouterChange(url);

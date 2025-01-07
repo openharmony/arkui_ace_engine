@@ -177,6 +177,34 @@ void ResetXComponentEnableSecure(ArkUINodeHandle node)
     XComponentModelNG::EnableSecure(frameNode, false);
 }
 
+void SetXComponentHdrBrightness(ArkUINodeHandle node, ArkUI_Float32 hdrBrightness)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::HdrBrightness(frameNode, hdrBrightness);
+}
+
+void ResetXComponentHdrBrightness(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::HdrBrightness(frameNode, 1.0f);
+}
+
+void SetXComponentEnableTransparentLayer(ArkUINodeHandle node, ArkUI_Bool enable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, enable);
+}
+
+void ResetXComponentEnableTransparentLayer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::EnableTransparentLayer(frameNode, false);
+}
+
 void SetXComponentRenderFit(ArkUINodeHandle node, ArkUI_Int32 renderFitNumber)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -210,59 +238,63 @@ void ResetXComponentRenderFit(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIXComponentModifier modifier = {
-        nullptr, // loadXComponent
-        nullptr, // setXComponentOptions
-        nullptr, // getXComponentSurfaceId
-        nullptr, // getXComponentController
-        SetXComponentEnableAnalyzer,
-        ResetXComponentEnableAnalyzer,
-        SetXComponentBackgroundColor,
-        ResetXComponentBackgroundColor,
-        SetXComponentOpacity,
-        ResetXComponentOpacity,
-        SetXComponentId,
-        SetXComponentType,
-        SetXComponentSurfaceSize,
-        GetXComponentId,
-        GetXComponentType,
-        GetXComponentSurfaceWidth,
-        GetXComponentSurfaceHeight,
-        GetNativeXComponent,
-        SetXComponentLibraryname,
-        SetImageAIOptions,
-        InitXComponent,
-        SetXComponentEnableSecure,
-        ResetXComponentEnableSecure,
-        SetXComponentRenderFit,
-        ResetXComponentRenderFit,
+        .setXComponentEnableAnalyzer = SetXComponentEnableAnalyzer,
+        .resetXComponentEnableAnalyzer = ResetXComponentEnableAnalyzer,
+        .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
+        .setXComponentOpacity = SetXComponentOpacity,
+        .resetXComponentOpacity = ResetXComponentOpacity,
+        .setXComponentId = SetXComponentId,
+        .setXComponentType = SetXComponentType,
+        .setXComponentSurfaceSize = SetXComponentSurfaceSize,
+        .getXComponentId = GetXComponentId,
+        .getXComponentType = GetXComponentType,
+        .getXComponentSurfaceWidth = GetXComponentSurfaceWidth,
+        .getXComponentSurfaceHeight = GetXComponentSurfaceHeight,
+        .getNativeXComponent = GetNativeXComponent,
+        .setXComponentLibraryname = SetXComponentLibraryname,
+        .setImageAIOptions = SetImageAIOptions,
+        .initXComponent = InitXComponent,
+        .setXComponentEnableSecure = SetXComponentEnableSecure,
+        .resetXComponentEnableSecure = ResetXComponentEnableSecure,
+        .setXComponentHdrBrightness = SetXComponentHdrBrightness,
+        .resetXComponentHdrBrightness = ResetXComponentHdrBrightness,
+        .setXComponentEnableTransparentLayer = SetXComponentEnableTransparentLayer,
+        .resetXComponentEnableTransparentLayer = ResetXComponentEnableTransparentLayer,
+        .setXComponentRenderFit = SetXComponentRenderFit,
+        .resetXComponentRenderFit = ResetXComponentRenderFit,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIXComponentModifier* GetCJUIXComponentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIXComponentModifier modifier = {
-        nullptr, // loadXComponent
-        nullptr, // setXComponentOptions
-        nullptr, // getXComponentSurfaceId
-        nullptr, // getXComponentController
-        SetXComponentBackgroundColor,
-        ResetXComponentBackgroundColor,
-        SetXComponentOpacity,
-        ResetXComponentOpacity,
-        SetXComponentId,
-        SetXComponentType,
-        SetXComponentSurfaceSize,
-        GetXComponentId,
-        GetXComponentType,
-        GetXComponentSurfaceWidth,
-        GetXComponentSurfaceHeight,
-        GetNativeXComponent,
-        SetXComponentLibraryname,
-        SetImageAIOptions,
+        .loadXComponent = nullptr, // loadXComponent
+        .setXComponentOptions = nullptr, // setXComponentOptions
+        .getXComponentSurfaceId = nullptr, // getXComponentSurfaceId
+        .getXComponentController = nullptr, // getXComponentController
+        .setXComponentBackgroundColor = SetXComponentBackgroundColor,
+        .resetXComponentBackgroundColor = ResetXComponentBackgroundColor,
+        .setXComponentOpacity = SetXComponentOpacity,
+        .resetXComponentOpacity = ResetXComponentOpacity,
+        .setXComponentId = SetXComponentId,
+        .setXComponentType = SetXComponentType,
+        .setXComponentSurfaceSize = SetXComponentSurfaceSize,
+        .getXComponentId = GetXComponentId,
+        .getXComponentType = GetXComponentType,
+        .getXComponentSurfaceWidth = GetXComponentSurfaceWidth,
+        .getXComponentSurfaceHeight = GetXComponentSurfaceHeight,
+        .getNativeXComponent = GetNativeXComponent,
+        .setXComponentLibraryname = SetXComponentLibraryname,
+        .setImageAIOptions = SetImageAIOptions,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

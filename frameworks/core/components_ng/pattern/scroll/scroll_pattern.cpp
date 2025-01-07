@@ -45,6 +45,9 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -59,6 +62,14 @@ void ScrollPattern::OnModifyDone()
     }
 }
 
+RefPtr<PaintProperty> ScrollPattern::CreatePaintProperty()
+{
+    auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
+    auto property = MakeRefPtr<ScrollPaintProperty>();
+    property->UpdateScrollBarMode(defaultDisplayMode);
+    return property;
+}
+
 RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
 {
     auto host = GetHost();
@@ -69,7 +80,6 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -164,17 +174,12 @@ bool ScrollPattern::SetScrollProperties(const RefPtr<LayoutWrapper>& dirty)
 
 bool ScrollPattern::ScrollSnapTrigger()
 {
-    auto scrollBar = GetScrollBar();
-    auto scrollBarProxy = GetScrollBarProxy();
-    if (scrollBar && scrollBar->IsDriving()) {
-        return false;
-    }
-    if (scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
-        return false;
-    }
     if (ScrollableIdle() && !AnimateRunning()) {
-        if (StartSnapAnimation(0.f, 0.f, 0.f, 0.f)) {
-            FireOnScrollStart();
+        SnapAnimationOptions snapAnimationOptions;
+        if (StartSnapAnimation(snapAnimationOptions)) {
+            if (!IsScrolling()) {
+                FireOnScrollStart();
+            }
             return true;
         }
     }
@@ -207,6 +212,9 @@ bool ScrollPattern::OnScrollCallback(float offset, int32_t source)
         AdjustOffset(adjustOffset, source);
         return UpdateCurrentOffset(adjustOffset, source);
     } else {
+        if (GetSnapType() == SnapType::SCROLL_SNAP) {
+            SetScrollableCurrentPos(currentOffset_);
+        }
         FireOnScrollStart();
     }
     return true;
@@ -548,10 +556,23 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     ValidateOffset(source);
     HandleScrollPosition(userOffset);
     if (IsCrashTop()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashTop();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashTop();
     } else if (IsCrashBottom()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashBottom();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashBottom();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (!IsCrashBottom() && !IsCrashTop()) {
+        SetReachBoundary(false);
+    }
+#endif
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -813,32 +834,34 @@ ScrollOffsetAbility ScrollPattern::GetScrollOffsetAbility()
         GetAxis() };
 }
 
-std::optional<float> ScrollPattern::CalcPredictSnapOffset(float delta, float dragDistance, float velocity)
+std::optional<float> ScrollPattern::CalcPredictSnapOffset(
+    float delta, float dragDistance, float velocity, SnapDirection snapDirection)
 {
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(IsScrollSnap(), predictSnapOffset);
+    if (snapDirection != SnapDirection::NONE) {
+        return CalcPredictNextSnapOffset(delta, snapDirection);
+    }
     float finalPosition = currentOffset_ + delta;
     if (IsEnablePagingValid()) {
         finalPosition = GetPagingOffset(delta, dragDistance, velocity);
     }
     if (!IsSnapToInterval()) {
         if (!enableSnapToSide_.first) {
-            if (GreatNotEqual(finalPosition, *(snapOffsets_.begin() + 1)) ||
-                GreatNotEqual(currentOffset_, *(snapOffsets_.begin() + 1))) {
-                return predictSnapOffset;
-            }
+            CHECK_NULL_RETURN(!(GreatNotEqual(finalPosition, *(snapOffsets_.begin() + 1)) ||
+                                  GreatNotEqual(currentOffset_, *(snapOffsets_.begin() + 1))),
+                predictSnapOffset);
         }
         if (!enableSnapToSide_.second) {
-            if (LessNotEqual(finalPosition, *(snapOffsets_.rbegin() + 1)) ||
-                LessNotEqual(currentOffset_, *(snapOffsets_.rbegin() + 1))) {
-                return predictSnapOffset;
-            }
+            CHECK_NULL_RETURN(!(LessNotEqual(finalPosition, *(snapOffsets_.rbegin() + 1)) ||
+                                  LessNotEqual(currentOffset_, *(snapOffsets_.rbegin() + 1))),
+                predictSnapOffset);
         }
     }
     float head = 0.0f;
     float tail = -scrollableDistance_;
     if (GreatOrEqual(finalPosition, head) || LessOrEqual(finalPosition, tail)) {
-        return predictSnapOffset;
+        predictSnapOffset = finalPosition;
     } else if (LessNotEqual(finalPosition, head) && GreatOrEqual(finalPosition, *(snapOffsets_.begin()))) {
         predictSnapOffset = *(snapOffsets_.begin());
     } else if (GreatNotEqual(finalPosition, tail) && LessOrEqual(finalPosition, *(snapOffsets_.rbegin()))) {
@@ -858,6 +881,44 @@ std::optional<float> ScrollPattern::CalcPredictSnapOffset(float delta, float dra
     }
     if (predictSnapOffset.has_value()) {
         predictSnapOffset = predictSnapOffset.value() - currentOffset_;
+    }
+    return predictSnapOffset;
+}
+
+std::optional<float> ScrollPattern::CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection)
+{
+    std::optional<float> predictSnapOffset;
+    int32_t start = 0;
+    int32_t end = static_cast<int32_t>(snapOffsets_.size()) - 1;
+    int32_t mid = 0;
+    auto targetOffset = currentOffset_ + delta;
+    if (LessOrEqual(targetOffset, snapOffsets_[end]) && snapDirection == SnapDirection::BACKWARD) {
+        predictSnapOffset = -scrollableDistance_ - currentOffset_;
+        return predictSnapOffset;
+    } else if (GreatOrEqual(targetOffset, snapOffsets_[start]) && snapDirection == SnapDirection::FORWARD) {
+        predictSnapOffset = -currentOffset_;
+        return predictSnapOffset;
+    }
+    while (start < end) {
+        mid = (start + end) / 2;
+        if (LessNotEqual(snapOffsets_[mid], targetOffset)) {
+            end = mid;
+        } else if (GreatNotEqual(snapOffsets_[mid], targetOffset)) {
+            start = mid + 1;
+        } else {
+            if (snapDirection == SnapDirection::FORWARD && mid > 0) {
+                predictSnapOffset = snapOffsets_[mid - 1] - currentOffset_;
+            } else if (snapDirection == SnapDirection::BACKWARD &&
+                       (mid + 1) < static_cast<int32_t>(snapOffsets_.size())) {
+                predictSnapOffset = snapOffsets_[mid + 1] - currentOffset_;
+            }
+            return predictSnapOffset;
+        }
+    }
+    if (snapDirection == SnapDirection::FORWARD) {
+        predictSnapOffset = snapOffsets_[std::max(start - 1, 0)] - currentOffset_;
+    } else if (snapDirection == SnapDirection::BACKWARD) {
+        predictSnapOffset = snapOffsets_[start] - currentOffset_;
     }
     return predictSnapOffset;
 }
@@ -982,9 +1043,12 @@ void ScrollPattern::CaleSnapOffsetsByPaginations(ScrollSnapAlign scrollSnapAlign
 
 bool ScrollPattern::NeedScrollSnapToSide(float delta)
 {
-    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, false);
-    CHECK_NULL_RETURN(!IsSnapToInterval(), false);
+    CHECK_NULL_RETURN(IsScrollSnap(), false);
     auto finalPosition = currentOffset_ + delta;
+    if (IsEnablePagingValid() && GetEdgeEffect() != EdgeEffect::SPRING) {
+        return Positive(finalPosition) || LessNotEqual(finalPosition, -scrollableDistance_);
+    }
+    CHECK_NULL_RETURN(!IsSnapToInterval(), false);
     CHECK_NULL_RETURN(static_cast<int32_t>(snapOffsets_.size()) > 2, false);
     if (!enableSnapToSide_.first) {
         if (GreatOrEqual(currentOffset_, *(snapOffsets_.begin() + 1)) &&
@@ -1266,24 +1330,41 @@ std::string ScrollPattern::GetScrollSnapPagination() const
     return snapPaginationStr;
 }
 
-bool ScrollPattern::StartSnapAnimation(
-    float snapDelta, float animationVelocity, float predictVelocity, float dragDistance)
+bool ScrollPattern::StartSnapAnimation(SnapAnimationOptions snapAnimationOptions)
 {
-    auto predictSnapOffset = CalcPredictSnapOffset(snapDelta, dragDistance, predictVelocity);
+    auto scrollBar = GetScrollBar();
+    auto scrollBarProxy = GetScrollBarProxy();
+    auto fromScrollBar = snapAnimationOptions.fromScrollBar;
+    if (!fromScrollBar && scrollBar && scrollBar->IsDriving()) {
+        return false;
+    }
+    if (!fromScrollBar && scrollBarProxy && scrollBarProxy->IsScrollSnapTrigger()) {
+        return false;
+    }
+    auto predictSnapOffset = CalcPredictSnapOffset(snapAnimationOptions.snapDelta, snapAnimationOptions.dragDistance,
+        snapAnimationOptions.animationVelocity, snapAnimationOptions.snapDirection);
     if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value(), SPRING_ACCURACY)) {
-        StartScrollSnapAnimation(predictSnapOffset.value(), animationVelocity);
+        StartScrollSnapAnimation(predictSnapOffset.value(), snapAnimationOptions.animationVelocity, fromScrollBar);
         return true;
     }
     return false;
 }
 
-void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity)
+void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar)
 {
     auto scrollableEvent = GetScrollableEvent();
     CHECK_NULL_VOID(scrollableEvent);
     auto scrollable = scrollableEvent->GetScrollable();
     CHECK_NULL_VOID(scrollable);
-    scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity);
+    if (scrollable->IsSnapAnimationRunning()) {
+        scrollable->UpdateScrollSnapEndWithOffset(
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
+    } else {
+        scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
+        if (!IsScrolling()) {
+            FireOnScrollStart();
+        }
+    }
 }
 
 void ScrollPattern::GetScrollPagingStatusDumpInfo(std::unique_ptr<JsonValue>& json)

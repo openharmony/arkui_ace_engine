@@ -35,13 +35,23 @@ void ResetRowSplitResizable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRowSplitModifier* GetRowSplitModifier()
 {
-    static const ArkUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRowSplitModifier modifier = {
+        .setRowSplitResizable = SetRowSplitResizable,
+        .resetRowSplitResizable = ResetRowSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRowSplitModifier* GetCJUIRowSplitModifier()
 {
-    static const CJUIRowSplitModifier modifier = { SetRowSplitResizable, ResetRowSplitResizable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRowSplitModifier modifier = {
+        .setRowSplitResizable = SetRowSplitResizable,
+        .resetRowSplitResizable = ResetRowSplitResizable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

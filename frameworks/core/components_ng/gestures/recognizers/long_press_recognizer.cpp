@@ -105,17 +105,20 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, LongPress %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
 
     if (isDisableMouseLeft_ && event.sourceType == SourceType::MOUSE) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Mouse left button is disabled for long press recognizer");
+        extraInfo_ += "Reject: mouse left button disabled.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (!IsInAttachedNode(event)) {
+        extraInfo_ += "Reject: not in attached node.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -136,6 +139,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         curDuration = 0;
     }
     if ((touchRestrict_.forbiddenType & TouchRestrict::LONG_PRESS) == TouchRestrict::LONG_PRESS) {
+        extraInfo_ += "Reject: long press forbidden.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -188,8 +192,10 @@ void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                     static_cast<long long>(inputTime), static_cast<long long>(overTime));
             }
             firstInputTime_.reset();
+            ResetStateVoluntarily();
         }
     } else {
+        extraInfo_ += "Reject: received up but not succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -205,6 +211,8 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
     }
     Offset offset = event.GetOffset() - touchPoints_[event.id].GetOffset();
     if (offset.GetDistance() > MAX_THRESHOLD) {
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "LongPress move over max threshold");
+        extraInfo_ += "Reject: move over max threshold.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -225,13 +233,15 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
         touchPoints_.erase(event.id);
     }
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) == 0) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_, false);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "LongPressRecognizer touchPoints size not equal 0, not send cancel callback.");
+        extraInfo_ += "Reject: received cancel and succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     } else {
+        extraInfo_ += "Reject: received cancel but not succeed.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
 }
@@ -250,6 +260,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
         CHECK_NULL_VOID(dragEventActuator);
         if (dragEventActuator->IsDragUserReject()) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Drag long press reject because of user's reject");
+            extraInfo_ += "Reject: user reject.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
@@ -257,6 +268,7 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
+        extraInfo_ += "Reject: judge reject.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
             auto dragEventActuator = GetDragEventActuator();
@@ -389,7 +401,7 @@ bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recog
     if (curr->duration_ != duration_ || curr->fingers_ != fingers_ || curr->repeat_ != repeat_ ||
         curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) > 0) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_, false);
         }
         ResetStatus();
         return false;

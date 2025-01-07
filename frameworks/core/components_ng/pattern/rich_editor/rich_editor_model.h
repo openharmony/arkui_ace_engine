@@ -79,8 +79,10 @@ struct UpdateSpanStyle {
         updateTextDecorationStyle.reset();
         updateTextShadows.reset();
         updateFontFeature.reset();
+        updateTextBackgroundStyle.reset();
 
         updateLineHeight.reset();
+        updateHalfLeading.reset();
         updateLetterSpacing.reset();
 
         updateImageWidth.reset();
@@ -108,8 +110,10 @@ struct UpdateSpanStyle {
     std::optional<TextDecorationStyle> updateTextDecorationStyle = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
     std::optional<NG::FONT_FEATURES_LIST> updateFontFeature = std::nullopt;
+    std::optional<TextBackgroundStyle> updateTextBackgroundStyle = std::nullopt;
 
     std::optional<CalcDimension> updateLineHeight = std::nullopt;
+    std::optional<bool> updateHalfLeading = std::nullopt;
     std::optional<CalcDimension> updateLetterSpacing = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
@@ -143,6 +147,9 @@ struct UpdateSpanStyle {
         if (updateSymbolColor) {
             auto& colors = updateSymbolColor.value();
             std::for_each(colors.begin(), colors.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
+        }
+        if (updateTextBackgroundStyle) {
+            updateTextBackgroundStyle->UpdateColorByResourceId();
         }
     }
 
@@ -210,7 +217,7 @@ struct RangeOptions {
 
 struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
-    std::string value;
+    std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
@@ -247,7 +254,7 @@ struct SymbolSpanOptions : SpanOptionBase {
 };
 
 struct PlaceholderOptions {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
     std::optional<Dimension> fontSize;
     std::optional<Color> fontColor;
@@ -267,7 +274,7 @@ struct PlaceholderOptions {
 };
 
 struct PreviewTextInfo {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<int32_t> offset;
 
     std::string ToString() const
@@ -284,6 +291,7 @@ class ACE_EXPORT RichEditorBaseControllerBase : public AceType {
 
 public:
     virtual int32_t GetCaretOffset() = 0;
+    virtual NG::RectF GetCaretRect() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
     virtual void SetTypingStyle(std::optional<struct UpdateSpanStyle> typingStyle,
         std::optional<TextStyle> textStyle) = 0;
@@ -364,8 +372,12 @@ public:
         const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick) {}
     virtual void SetRequestKeyboardOnFocus(bool needToRequest) {}
     virtual void SetEnableHapticFeedback(bool isEnabled) {}
-    virtual void SetImagePreviewMenuParam(std::function<void()>& buildFunc, const NG::SelectMenuParam& menuParam) {}
     virtual void SetBarState(DisplayMode mode) {}
+    virtual void SetPreviewMenuParam(NG::TextSpanType spanType, std::function<void()>& buildFunc,
+        const NG::SelectMenuParam& menuParam) {}
+    virtual void SetMaxLength(std::optional<int32_t> value) {}
+    virtual void ResetMaxLength() {}
+    virtual void SetMaxLines(uint32_t value) {};
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

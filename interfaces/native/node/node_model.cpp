@@ -138,7 +138,8 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
     static const ArkUINodeType nodes[] = { ARKUI_CUSTOM, ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE,
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
-        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_STACK, ARKUI_SWIPER,
+        ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
+        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER,
         ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
         ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM,
         ARKUI_CUSTOM_SPAN };
@@ -456,7 +457,14 @@ void HandleMouseEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 
 void HandleKeyEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
 {
+    uiEvent.eventTypeId = C_KEY_EVENT_ID;
     uiEvent.inputEvent = &(innerEvent->keyEvent);
+}
+
+void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_FOCUS_AXIS_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
 }
 
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
@@ -495,7 +503,9 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_TOUCH_INTERCEPT, HandleTouchEvent},
             {NODE_ON_MOUSE, HandleMouseEvent},
             {NODE_ON_KEY_EVENT, HandleKeyEvent},
-            {NODE_ON_KEY_PRE_IME, HandleKeyEvent}
+            {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
+            {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent}
         };
 
         auto it = eventHandlers.find(eventType);
@@ -551,6 +561,12 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent)
             break;
         case KEY_INPUT_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->keyEvent.subKind);
+            break;
+        case FOCUS_AXIS_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->focusAxisEvent.subKind);
+            break;
+        case TEXT_INPUT_CHANGE:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->textChangeEvent.subKind);
             break;
         default:
             break; /* Empty */

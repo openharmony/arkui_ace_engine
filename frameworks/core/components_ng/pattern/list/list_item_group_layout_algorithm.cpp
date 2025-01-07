@@ -103,7 +103,13 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         MeasureListItem(layoutWrapper, childLayoutConstraint_);
         UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     }
-    childrenSize_ ? AdjustByPosMap() : AdjustItemPosition();
+
+    if (childrenSize_) {
+        AdjustByPosMap();
+    } else {
+        AdjustItemPosition();
+        UpdateLayoutedItemInfo();
+    }
 
     auto crossSize = contentIdealSize.CrossSize(axis_);
     if (crossSize.has_value() && GreaterOrEqualToInfinity(crossSize.value())) {
@@ -195,7 +201,7 @@ void ListItemGroupLayoutAlgorithm::CheckUpdateGroupAndItemPos(LayoutWrapper* lay
         offset += OffsetF(0.0f, adjustReferenceDelta_);
     } else {
         if (layoutDirection_ == TextDirection::RTL) {
-            offset -= OffsetF(adjustTotalSize_, 0.0f);
+            offset -= OffsetF(adjustTotalSize_ + adjustReferenceDelta_, 0.0f);
         } else {
             offset += OffsetF(adjustReferenceDelta_, 0.0f);
         }
@@ -1024,28 +1030,44 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
         float endPos = GetCacheEndIndex() > GetEndIndex() ? GetCacheEndPosition() : GetEndPosition();
         totalMainSize_ = std::max(totalMainSize_, endPos + footerMainSize_);
     }
-    UpdateLayoutedItemInfo();
 }
 
 void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 {
-    const auto& start = *itemPosition_.begin();
-    const auto& end = *itemPosition_.rbegin();
+    if (itemPosition_.empty() && cachedItemPosition_.empty()) {
+        return;
+    }
+    int32_t startIndex = INT_MAX;
+    int32_t endIndex = -1;
+    float startPos = FLT_MAX;
+    float endPos = -1.0f;
+    if (!itemPosition_.empty()) {
+        startIndex = itemPosition_.begin()->first;
+        endIndex = itemPosition_.rbegin()->first;
+        startPos = itemPosition_.begin()->second.startPos;
+        endPos = itemPosition_.rbegin()->second.endPos;
+    }
+    if (!cachedItemPosition_.empty()) {
+        startIndex = std::min(startIndex, cachedItemPosition_.begin()->first);
+        endIndex = std::max(endIndex, cachedItemPosition_.rbegin()->first);
+        startPos = std::min(startPos, cachedItemPosition_.begin()->second.startPos);
+        endPos = std::max(endPos, cachedItemPosition_.rbegin()->second.endPos);
+    }
     if (layoutedItemInfo_.has_value()) {
         auto& itemInfo = layoutedItemInfo_.value();
         auto prevStartIndex = itemInfo.startIndex;
-        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.startPos, itemInfo.startPos) ||
-            start.first > itemInfo.endIndex) {
-            itemInfo.startIndex = start.first;
-            itemInfo.startPos = start.second.startPos;
+        if (startIndex <= itemInfo.startIndex || LessNotEqual(startPos, itemInfo.startPos) ||
+            startIndex > itemInfo.endIndex) {
+            itemInfo.startIndex = startIndex;
+            itemInfo.startPos = startPos;
         }
-        if (end.first >= itemInfo.endIndex || GreatNotEqual(end.second.endPos, itemInfo.endPos) ||
-            itemInfo.endIndex > totalItemCount_ - 1 || end.first < prevStartIndex) {
-            itemInfo.endIndex = end.first;
-            itemInfo.endPos = end.second.endPos;
+        if (endIndex >= itemInfo.endIndex || GreatNotEqual(endPos, itemInfo.endPos) ||
+            itemInfo.endIndex > totalItemCount_ - 1 || endIndex < prevStartIndex) {
+            itemInfo.endIndex = endIndex;
+            itemInfo.endPos = endPos;
         }
     } else {
-        layoutedItemInfo_ = { start.first, start.second.startPos, end.first, end.second.endPos };
+        layoutedItemInfo_ = { startIndex, startPos, endIndex, endPos };
     }
 }
 

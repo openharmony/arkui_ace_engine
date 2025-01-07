@@ -20,6 +20,7 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/string_utils.h"
+#include "base/utils/utf_helper.h"
 #include "core/common/ime/text_editing_value.h"
 #include "core/common/ime/text_input_action.h"
 #include "core/event/key_event.h"
@@ -76,6 +77,11 @@ struct KeyComb final {
     {
         return code == other.code ? modKeyFlags < other.modKeyFlags : code < other.code;
     }
+
+    bool operator==(const KeyComb& other) const
+    {
+        return code == other.code && modKeyFlags == other.modKeyFlags;
+    }
 };
 
 class TextInputClient : public virtual AceType {
@@ -90,6 +96,10 @@ public:
     virtual void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) = 0;
 
     virtual void InsertValue(const std::string& insertValue, bool isIME = false) {};
+    virtual void InsertValue(const std::u16string& insertValue, bool isIME = false)
+    {
+        InsertValue(UtfUtils::Str16ToStr8(insertValue), isIME);
+    };
     virtual void DeleteBackward(int32_t length) {};
     virtual void DeleteForward(int32_t length) {};
     virtual void SetInputMethodStatus(bool keyboardShown) {}
@@ -121,6 +131,10 @@ public:
     };
 #endif
     virtual void UpdateInputFilterErrorText(const std::string& errorText) {};
+    virtual void UpdateInputFilterErrorText(const std::u16string& errorText)
+    {
+        UpdateInputFilterErrorText(UtfUtils::Str16ToStr8(errorText));
+    };
     virtual void ResetTouchAtLeftOffsetFlag() {}
 
     // Requests that this client Y point.
@@ -148,6 +162,7 @@ public:
     }
 
     bool HandleKeyEvent(const KeyEvent& keyEvent);
+    virtual void UpdateShiftFlag(const KeyEvent& keyEvent) {}
 
     virtual bool HandleOnEscape()
     {
@@ -188,6 +203,11 @@ public:
         return false;
     }
 
+    virtual int32_t SetPreviewText(const std::u16string& previewValue, const PreviewRange range)
+    {
+        return SetPreviewText(UtfUtils::Str16ToStr8(previewValue), range);
+    }
+
     virtual int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range)
     {
         return 0;
@@ -199,6 +219,11 @@ public:
     virtual int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range)
     {
         return 0;
+    }
+
+    virtual int32_t CheckPreviewTextValidate(const std::u16string& previewValue, const PreviewRange range)
+    {
+        return CheckPreviewTextValidate(UtfUtils::Str16ToStr8(previewValue), range);
     }
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
@@ -217,9 +242,14 @@ public:
     {
         return false;
     }
-    virtual void DeleteRange(int32_t start, int32_t end) {}
+    virtual void DeleteRange(int32_t start, int32_t end, bool isIME = true) {}
+    virtual void HandleOnPageUp() {};
+    virtual void HandleOnPageDown() {};
+    virtual void ResetOriginCaretPosition() {};
+    virtual bool RecordOriginCaretPosition() { return false; };
 protected:
     int32_t instanceId_ = -1;
+    bool shiftFlag_ = false;
 };
 
 } // namespace OHOS::Ace

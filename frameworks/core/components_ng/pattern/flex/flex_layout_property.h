@@ -26,6 +26,18 @@ struct FlexMeasureResult {
     float allocatedSize = 0.0f;
     int32_t validSizeCount = 0;
 };
+
+struct FlexLayoutResult {
+    float frontSpace = 0.0f;
+    float betweenSpace = 0.0f;
+};
+
+enum class FlexOperatorType {
+    RESTORE_MEASURE_RESULT,
+    UPDATE_MEASURE_RESULT,
+    UPDATE_LAYOUT_RESULT,
+};
+
 class ACE_EXPORT FlexLayoutProperty : public LayoutProperty {
     DECLARE_ACE_TYPE(FlexLayoutProperty, LayoutProperty);
 

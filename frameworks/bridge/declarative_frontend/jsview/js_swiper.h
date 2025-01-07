@@ -28,7 +28,7 @@ public:
 
 protected:
     static void SetIndicatorInteractive(const JSCallbackInfo& info);
-    static void SetAutoPlay(bool autoPlay);
+    static void SetAutoPlay(const JSCallbackInfo& info);
     static void SetDuration(const JSCallbackInfo& info);
     static void SetIndex(const JSCallbackInfo& info);
     static void SetInterval(const JSCallbackInfo& info);
@@ -69,7 +69,9 @@ protected:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentDidScroll(const JSCallbackInfo& info);
+    static void SetPageFlipMode(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
+    static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
 };
 
 class JSSwiperController final : public Referenced {
@@ -112,6 +114,8 @@ public:
     void ChangeIndex(const JSCallbackInfo& args);
 
     void FinishAnimation(const JSCallbackInfo& args);
+    void OldPreloadItems(const JSCallbackInfo& args);
+    void NewPreloadItems(const JSCallbackInfo& args);
     void PreloadItems(const JSCallbackInfo& args);
 
     void SetController(const RefPtr<SwiperController>& controller)

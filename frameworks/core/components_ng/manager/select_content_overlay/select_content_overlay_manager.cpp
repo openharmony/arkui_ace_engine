@@ -143,6 +143,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onPaste = MakeMenuCallback(OptionMenuActionId::PASTE, overlayInfo);
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
+    overlayInfo.menuCallback.onSearch = MakeMenuCallback(OptionMenuActionId::SEARCH, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
     overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
@@ -320,8 +321,9 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
     shareOverlayInfo_->handleLevelMode = mode;
     auto handleNode = handleNode_.Upgrade();
     CHECK_NULL_VOID(handleNode);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     if (mode == HandleLevelMode::OVERLAY) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -334,11 +336,8 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToRoot(node, false, NodeType::HANDLE);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask");
-        return;
-    }
-    if (mode == HandleLevelMode::EMBED) {
-        auto taskExecutor = Container::CurrentTaskExecutor();
+            TaskExecutor::TaskType::UI, "SwitchToOverlayModeTask", PriorityType::VIP);
+    } else if (mode == HandleLevelMode::EMBED) {
         taskExecutor->PostTask(
             [weak = WeakClaim(this), node = handleNode] {
                 auto manager = weak.Upgrade();
@@ -351,7 +350,7 @@ void SelectContentOverlayManager::SwitchToHandleMode(HandleLevelMode mode, bool 
                 manager->MountNodeToCaller(node, false);
                 node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             },
-            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask");
+            TaskExecutor::TaskType::UI, "SwitchToEmbedModeTask", PriorityType::VIP);
     }
 }
 
@@ -452,6 +451,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
     auto overlayNode = SelectOverlayNode::CreateSelectOverlayNode(shareOverlayInfo_);
     selectOverlayNode_ = overlayNode;
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
         [animation, weak = WeakClaim(this), node = overlayNode] {
             auto manager = weak.Upgrade();
@@ -464,7 +464,7 @@ void SelectContentOverlayManager::CreateNormalSelectOverlay(SelectOverlayInfo& i
                 manager->NotifySelectOverlayShow(true);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate");
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayCreate", PriorityType::VIP);
 }
 
 void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
@@ -498,7 +498,7 @@ void SelectContentOverlayManager::CreateHandleLevelSelectOverlay(
             }
             manager->NotifySelectOverlayShow(true);
         },
-        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay");
+        TaskExecutor::TaskType::UI, "CreateHandleLevelSelectOverlay", PriorityType::VIP);
 }
 
 void SelectContentOverlayManager::MountNodeToRoot(
@@ -531,7 +531,7 @@ void SelectContentOverlayManager::MountNodeToRoot(
         index++;
     }
     if (nodeType == NodeType::TOUCH_MENU || nodeType == NodeType::RIGHT_CLICK_MENU) {
-        slot = isMeetSpecialNode ? slot : index;
+        slot = index;
     }
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "MountNodeToRoot:%{public}s, id:%{public}d", rootNode->GetTag().c_str(),
         rootNode->GetId());
@@ -1155,5 +1155,11 @@ RefPtr<FrameNode> SelectContentOverlayManager::GetContainerModalRoot()
         }
     }
     return nullptr;
+}
+
+bool SelectContentOverlayManager::IsStopBackPress() const
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, true);
+    return selectOverlayHolder_->IsStopBackPress();
 }
 } // namespace OHOS::Ace::NG

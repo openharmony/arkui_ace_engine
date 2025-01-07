@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#endif
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -405,7 +408,7 @@ void SideBarContainerPattern::OnModifyDone()
     OnUpdateShowDivider(layoutProperty, host);
     UpdateControlButtonIcon();
 
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         OnUpdateSideBarAndContent(host);
@@ -444,7 +447,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
         auto renderContext = sideBarFrameNode->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         if (!renderContext->HasBackgroundColor()) {
-            auto context = PipelineBase::GetCurrentContext();
+            auto context = host->GetContextRefPtr();
             CHECK_NULL_VOID(context);
             auto sideBarTheme = context->GetTheme<SideBarTheme>();
             CHECK_NULL_VOID(sideBarTheme);
@@ -467,12 +470,12 @@ void SideBarContainerPattern::CreateAndMountNodes()
 
 void SideBarContainerPattern::UpdateDividerShadow() const
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sidebarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sidebarTheme);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!sidebarTheme->GetDividerShadowEnable()) {
@@ -548,7 +551,9 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     CHECK_NULL_VOID(dividerLayoutProperty);
     dividerLayoutProperty->UpdateVertical(true);
     dividerLayoutProperty->UpdateStrokeWidth(dividerStrokeWidth);
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -564,7 +569,9 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
 
 void SideBarContainerPattern::CreateAndMountControlButton(const RefPtr<NG::FrameNode>& parentNode)
 {
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -790,7 +797,8 @@ void SideBarContainerPattern::DoAnimation()
     FireChangeEvent(sideBarStatus == SideBarStatus::HIDDEN);
 
     auto weak = AceType::WeakClaim(this);
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
     inAnimation_ = true;
     context->OpenImplicitAnimation(option, option.GetCurve(), [weak, sideBarStatus]() {
         auto pattern = weak.Upgrade();
@@ -867,6 +875,7 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
         builder.SetId(inspectorId)
             .SetType(host->GetTag())
             .SetChecked(isShow)
+            .SetHost(host)
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
@@ -885,7 +894,9 @@ void SideBarContainerPattern::UpdateControlButtonIcon()
     CHECK_NULL_VOID(imageLayoutProperty);
     std::optional<ImageSourceInfo> imgSourceInfo = std::nullopt;
 
-    auto context = PipelineBase::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
     CHECK_NULL_VOID(context);
     auto sideBarTheme = context->GetTheme<SideBarTheme>();
     CHECK_NULL_VOID(sideBarTheme);
@@ -1013,11 +1024,7 @@ void SideBarContainerPattern::HandleDragStart()
         return;
     }
     isInDividerDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+    SetMouseStyle(MouseFormat::RESIZE_LEFT_RIGHT);
     preSidebarWidth_ = realSideBarWidth_;
 }
 
@@ -1032,7 +1039,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
         auto geometryNode = host->GetGeometryNode();
@@ -1052,10 +1059,13 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
     bool isPercent = realSideBarWidth_.Unit() == DimensionUnit::PERCENT;
     auto preSidebarWidthPx = DimensionConvertToPx(preSidebarWidth_).value_or(0.0);
     auto sideBarLine = preSidebarWidthPx + (isSideBarStart ? xOffset : -xOffset);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
 
     if (sideBarLine > minSideBarWidth_ && sideBarLine < maxSideBarWidth_) {
         realSideBarWidth_ = isPercent ? ConvertPxToPercent(sideBarLine) : Dimension(sideBarLine, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
 
@@ -1063,6 +1073,7 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         realSideBarWidth_ =
             isPercent ? ConvertPxToPercent(maxSideBarWidth_) : Dimension(maxSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
 
@@ -1071,10 +1082,12 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
         realSideBarWidth_ =
             isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        FireSideBarWidthChangeEvent();
         return;
     }
     realSideBarWidth_ =
         isPercent ? ConvertPxToPercent(minSideBarWidth_) : Dimension(minSideBarWidth_, DimensionUnit::PX);
+    FireSideBarWidthChangeEvent();
 
     auto autoHideProperty = layoutProperty->GetAutoHide().value_or(true);
     if (autoHideProperty) {
@@ -1085,15 +1098,27 @@ void SideBarContainerPattern::HandleDragUpdate(float xOffset)
 void SideBarContainerPattern::HandleDragEnd()
 {
     isInDividerDrag_ = false;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
+    SetMouseStyle(MouseFormat::DEFAULT);
     if (!isDividerDraggable_ || sideBarStatus_ != SideBarStatus::SHOW) {
         return;
     }
     preSidebarWidth_ = realSideBarWidth_;
+}
+
+void SideBarContainerPattern::FireSideBarWidthChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto userSetDimensionUnit = layoutProperty->GetSideBarWidthValue(DEFAULT_SIDE_BAR_WIDTH).Unit();
+    auto realSideBarWidthPx = DimensionConvertToPx(realSideBarWidth_).value_or(0.0);
+    Dimension usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
+        ConvertPxToPercent(realSideBarWidthPx) :
+        Dimension(realSideBarWidth_.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
+    eventHub->FireSideBarWidthChangeEvent(usrSetUnitWidth);
 }
 
 void SideBarContainerPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& inputHub)
@@ -1129,8 +1154,6 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
     if (info.GetAction() != MouseAction::RELEASE) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto dividerFrameNode = GetDividerNode();
     CHECK_NULL_VOID(dividerFrameNode);
     auto defaultRect = RectF();
@@ -1143,14 +1166,7 @@ void SideBarContainerPattern::OnDividerMouseEvent(MouseInfo& info)
         return;
     }
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "sideBarContainer Divider is out of region.");
-    MouseFormat format = MouseFormat::DEFAULT;
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
-    }
+    SetMouseStyle(MouseFormat::DEFAULT);
 }
 
 void SideBarContainerPattern::OnHover(bool isHover)
@@ -1171,14 +1187,8 @@ void SideBarContainerPattern::OnHover(bool isHover)
     isDividerDraggable_ = true;
 
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
-    if (currentPointerStyle != static_cast<int32_t>(format) && sideBarStatus_ == SideBarStatus::SHOW) {
-        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
+    if (sideBarStatus_ == SideBarStatus::SHOW) {
+        SetMouseStyle(format);
     }
 }
 
@@ -1281,7 +1291,9 @@ void SideBarContainerPattern::InitLongPressEvent(const RefPtr<FrameNode>& button
 
 void SideBarContainerPattern::HandleLongPressEvent()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     float scale = pipeline->GetFontScale();
     if (LessNotEqual(scale, AgingAdapationDialogUtil::GetDialogBigFontSizeScale())) {
@@ -1295,7 +1307,9 @@ void SideBarContainerPattern::HandleLongPressActionEnd()
     if (!isDialogShow_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
@@ -1326,6 +1340,11 @@ void SideBarContainerPattern::OnWindowSizeChanged(int32_t width, int32_t height,
 {
     TAG_LOGI(AceLogTag::ACE_SIDEBAR, "mark need retrieve sidebar property because of window rotation or resize");
     MarkNeedInitRealSideBarWidth(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<SideBarContainerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    FireSideBarWidthChangeEvent();
 }
 
 void SideBarContainerPattern::RegisterElementInfoCallBack(const RefPtr<FrameNode>& buttonNode)
@@ -1381,5 +1400,21 @@ void SideBarContainerPattern::InitImageErrorCallback(const RefPtr<SideBarTheme>&
         imgNode->MarkModifyDone();
     };
     eventHub->SetOnError(errorCallback);
+}
+
+void SideBarContainerPattern::SetMouseStyle(MouseFormat format)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNodeId = host->GetId();
+    int32_t windowId = static_cast<int32_t>(pipeline->GetFocusWindowId());
+#ifdef WINDOW_SCENE_SUPPORTED
+    windowId = static_cast<int32_t>(WindowSceneHelper::GetFocusSystemWindowId(host));
+#endif
+    pipeline->SetMouseStyleHoldNode(frameNodeId);
+    pipeline->ChangeMouseStyle(frameNodeId, format, windowId);
+    pipeline->FreeMouseStyleHoldNode(frameNodeId);
 }
 } // namespace OHOS::Ace::NG
