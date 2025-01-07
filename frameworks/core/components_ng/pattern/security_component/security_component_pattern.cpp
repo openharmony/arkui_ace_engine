@@ -33,6 +33,7 @@ static std::unordered_map<uint64_t, RefPtr<FrameNode>> g_scNodeMap;
 static std::vector<uint64_t> g_omittedNodeIndex;
 static uint64_t g_scIndex = 0;
 static std::mutex g_scMutex;
+const std::string SYSTEM_INTERNAL_ERROR_MESSAGE = "system internal error";
 #endif
 }
 SecurityComponentPattern::SecurityComponentPattern()
@@ -180,7 +181,8 @@ void SecurityComponentPattern::HandleClickEventFromTouch(const TouchEventInfo& i
     gestureInfo.SetDisplayX(item.GetDisplayX());
     gestureInfo.SetDisplayY(item.GetDisplayY());
     gestureInfo.SetPointerEvent(info.GetPointerEvent());
-    int res = ReportSecurityComponentClickEvent(gestureInfo);
+    std::string message;
+    int res = ReportSecurityComponentClickEvent(gestureInfo, message);
     if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
         return;
     }
@@ -254,12 +256,15 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
         CHECK_NULL_VOID(jsonNode);
         std::shared_ptr<JsonValue> jsonShrd(jsonNode.release());
         int32_t res;
+        int32_t code = SecurityComponentErrorCode::SUCCESS;
+        std::string message;
         // if info.GetPointerEvent() is null, device may in screen read mode
         // otherwise, this event should be dropped in menu
         if (buttonPattern->IsParentMenu(frameNode) && info.GetPointerEvent() != nullptr) {
             res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
         } else {
-            res = buttonPattern->ReportSecurityComponentClickEvent(info);
+            res = buttonPattern->ReportSecurityComponentClickEvent(info, message);
+            code = res;
             if (res == Security::SecurityComponent::SC_SERVICE_ERROR_WAIT_FOR_DIALOG_CLOSE) {
                 res = static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK);
             } else if (res != 0) {
@@ -267,7 +272,10 @@ void SecurityComponentPattern::InitOnClick(RefPtr<FrameNode>& secCompNode, RefPt
                 res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
             }
         }
+        buttonPattern->HandleReportSecCompClickEventResult(code, message);
         jsonShrd->Put("handleRes", res);
+        jsonShrd->Put("code", code);
+        jsonShrd->Put("message", message.c_str());
         info.SetSecCompHandleEvent(jsonShrd);
 #endif
     };
@@ -766,7 +774,7 @@ std::function<int32_t(int32_t)> SecurityComponentPattern::CreateFirstUseDialogCl
     };
 }
 
-int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event)
+int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message)
 {
     if (regStatus_ == SecurityComponentRegisterStatus::UNREGISTERED) {
         SC_LOG_WARN("ClickEventHandler: security component has not registered.");
@@ -788,14 +796,14 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(GestureEvent
     if (frameNode->GetTag() == V2::PASTE_BUTTON_ETS_TAG) {
         OnClickAfterFirstUseDialog = [] (int32_t) {};
         return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-            frameNode, event, std::move(OnClickAfterFirstUseDialog));
+            frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
     }
 
     OnClickAfterFirstUseDialog = CreateFirstUseDialogCloseFunc(
         frameNode, pipeline, "ArkUISecurityComponentGestureTriggerOnClick");
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
-        frameNode, event, std::move(OnClickAfterFirstUseDialog));
+        frameNode, event, std::move(OnClickAfterFirstUseDialog), message);
 }
 
 int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEvent& event)
@@ -828,6 +836,18 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
 
     return SecurityComponentHandler::ReportSecurityComponentClickEvent(scId_,
         frameNode, event, std::move(OnClickAfterFirstUseDialog));
+}
+
+void SecurityComponentPattern::HandleReportSecCompClickEventResult(int32_t& code, std::string& message)
+{
+    if (!message.empty()) {
+        code = code = SecurityComponentErrorCode::PROPERTY_SETING_ERROR;
+    }
+
+    if (code != SecurityComponentErrorCode::SUCCESS && message.empty()) {
+        message = SYSTEM_INTERNAL_ERROR_MESSAGE;
+        code = SecurityComponentErrorCode::SYSTEM_INTERNAL_ERROR;
+    }
 }
 #endif
 } // namespace OHOS::Ace::NG

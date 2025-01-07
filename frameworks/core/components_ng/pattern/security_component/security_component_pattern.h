@@ -123,12 +123,13 @@ private:
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
     void UnregisterSecurityComponent();
-    int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
+    int32_t ReportSecurityComponentClickEvent(GestureEvent& event, std::string& message);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
     void DoTriggerOnclick(int32_t result);
     void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
         RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName);
+    void HandleReportSecCompClickEventResult(int32_t& code, std::string& message);
 #endif
     std::unique_ptr<Offset> lastTouchOffset_;
     RefPtr<ClickEvent> clickListener_;
