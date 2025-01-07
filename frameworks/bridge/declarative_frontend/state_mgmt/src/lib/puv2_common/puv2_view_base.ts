@@ -89,6 +89,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
 
+  static readonly doRecycle: boolean = true;
+  static readonly doReuse: boolean = false;
+
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU/V2 object's subscribable id.
@@ -800,5 +803,19 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
     }
     return resInfo;
+  }
+
+  public traverseChildDoRecycleOrReuse(recyleOrReuse: boolean): void {
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (
+        child &&
+        (child instanceof ViewPU || child instanceof ViewV2) &&
+        !child.hasBeenRecycled_ &&
+        !child.__isBlockRecycleOrReuse__
+      ) {
+        recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
+      } // if child
+    });
   }
 } // class PUV2ViewBase

@@ -54,6 +54,7 @@ void RotationRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null");
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
 }
 
 void RotationRecognizer::OnRejected()
@@ -121,6 +122,12 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
+    if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+        ResetStateVoluntarily();
+        isNeedResetVoluntarily_ = false;
+        activeFingers_.remove(event.id);
+        return;
+    }
     if (!IsActiveFinger(event.id)) {
         return;
     }
@@ -153,6 +160,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                 static_cast<long long>(inputTime), static_cast<long long>(overTime));
         }
         firstInputTime_.reset();
+        isNeedResetVoluntarily_ = true;
     }
     activeFingers_.remove(event.id);
 }

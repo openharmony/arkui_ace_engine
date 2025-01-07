@@ -347,6 +347,14 @@ bool FileSelectorParamOhos::IsCapture()
     return false;
 }
 
+std::vector<std::string> FileSelectorParamOhos::GetMimeType()
+{
+    if (param_) {
+        return param_->MimeType();
+    }
+    return std::vector<std::string>();
+}
+
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
 {
     if (callback_) {

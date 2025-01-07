@@ -204,7 +204,7 @@ template("cj_frontend") {
       "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     ]
 
-    if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+    if (qrcodegen_support) {
       sources += [ "interfaces/cj_ffi/cj_qrcode_ffi.cpp" ]
     }
 

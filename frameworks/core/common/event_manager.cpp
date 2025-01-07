@@ -777,6 +777,7 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
         if (ft != nullptr) {
             ft->SetFrameTraceLimit();
         }
+        refereeNG_->CleanGestureStateVoluntarily(point.id);
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         if (sendOnTouch) {

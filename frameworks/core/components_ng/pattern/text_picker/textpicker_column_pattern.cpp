@@ -1389,12 +1389,8 @@ void TextPickerColumnPattern::CreateReboundAnimation(double from, double to)
     });
 }
 
-void TextPickerColumnPattern::ScrollOption(double delta)
+void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float shiftDistance)
 {
-    scrollDelta_ = delta;
-    auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
-                                       : optionProperties_[midIndex].prevDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     uint32_t totalOptionCount = GetOptionCount();
     uint32_t currentEnterIndex = GetCurrentIndex();
@@ -1407,10 +1403,19 @@ void TextPickerColumnPattern::ScrollOption(double delta)
         auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
         currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
     }
-    if (GreatOrEqual(std::abs(scrollDelta_), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
         SetEnterIndex(currentEnterIndex);
         HandleEnterSelectedAreaEventCallback(true);
     }
+}
+
+void TextPickerColumnPattern::ScrollOption(double delta)
+{
+    scrollDelta_ = delta;
+    auto midIndex = GetShowOptionCount() / HALF_NUMBER;
+    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
+                                       : optionProperties_[midIndex].prevDistance;
+    HandleEnterSelectedArea(scrollDelta_, shiftDistance);
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);

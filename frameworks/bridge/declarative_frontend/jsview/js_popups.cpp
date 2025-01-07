@@ -405,6 +405,14 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetTransitionEffects(effects);
         }
     }
+    auto keyboardAvoidMode = popupObj->GetProperty("keyboardAvoidMode");
+    if (keyboardAvoidMode->IsNumber()) {
+        auto popupKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (popupKeyboardAvoidMode >= static_cast<int>(PopupKeyboardAvoidMode::DEFAULT) &&
+            popupKeyboardAvoidMode <= static_cast<int>(PopupKeyboardAvoidMode::NONE)) {
+            popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
+        }
+    }
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
