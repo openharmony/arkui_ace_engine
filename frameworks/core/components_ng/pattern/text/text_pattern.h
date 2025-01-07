@@ -352,7 +352,6 @@ public:
         onClick_ = std::move(onClick);
         distanceThreshold_ = distanceThreshold;
     }
-    virtual void OnColorConfigurationUpdate() override;
 
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
@@ -765,6 +764,10 @@ public:
 
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
+
+    void ResetCustomFontColor();
+    void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
 protected:
     int32_t GetClickedSpanPosition()

@@ -442,12 +442,11 @@ HWTEST_F(TextTestThreeNg, OnColorConfigurationUpdate001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     context->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
-    auto theme = context->GetTheme<TextTheme>();
-    ASSERT_NE(theme, nullptr);
-    theme->textStyle_.textColor_ = Color::BLACK;
-    textPattern->OnColorConfigurationUpdate();
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateTextColorByRender(Color::BLACK);
+    textLayoutProperty->UpdateTextColorFlagByUser(true);
+    textPattern->OnColorConfigurationUpdate();
     EXPECT_EQ(textLayoutProperty->GetTextColor(), Color::BLACK);
 }
 
