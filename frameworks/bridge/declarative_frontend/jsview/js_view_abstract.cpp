@@ -6470,6 +6470,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         if (dragPreview->IsBoolean()) {
             previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
         }
+        auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
+        if (enableEdgeAutoScroll->IsBoolean()) {
+            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
+        }
     }
 
     JSViewAbstract::SetDragPreviewOptionApply(info, previewOption);

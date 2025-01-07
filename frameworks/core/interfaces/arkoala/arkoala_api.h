@@ -1515,6 +1515,7 @@ struct ArkUIDragPreview {
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
+    ArkUI_Bool enableEdgeAutoScroll;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
@@ -1524,6 +1525,7 @@ struct ArkUIDragPreViewAndInteractionOptions {
     bool isNumberBadgeEnabled = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
+    bool enableEdgeAutoScroll = true;
     ArkUI_Int32 badgeNumber = 0;
     bool isShowBadge = true;
 };
