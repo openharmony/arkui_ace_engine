@@ -110,6 +110,7 @@ float SystemProperties::dragStartDampingRatio_ = 0.2f;
 float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 uint32_t SystemProperties::canvasDebugMode_ = 0;
 double SystemProperties::scrollableDistance_ = 0.0;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 
 bool SystemProperties::IsOpIncEnable()
 {

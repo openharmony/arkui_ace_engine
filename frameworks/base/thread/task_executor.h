@@ -23,6 +23,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -281,6 +282,13 @@ public:
     virtual uint32_t GetTotalTaskNum(TaskType type)
     {
         return 0;
+    }
+
+    static PriorityType GetPriorityTypeWithCheck(
+        PriorityType priorityType, PriorityType defaultPriority = PriorityType::LOW)
+    {
+        // Temporary interface, used to control whether priority adjustment takes effect.
+        return SystemProperties::GetTaskPriorityAdjustmentEnable() ? priorityType : defaultPriority;
     }
 
 protected:
