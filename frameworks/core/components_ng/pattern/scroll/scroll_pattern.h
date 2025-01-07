@@ -84,6 +84,7 @@ public:
         UpdateFadingEdge(paint);
         return paint;
     }
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
     OPINC_TYPE_E OpIncType() override
     {
