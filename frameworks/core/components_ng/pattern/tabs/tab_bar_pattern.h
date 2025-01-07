@@ -666,6 +666,7 @@ private:
     int32_t GetLoopIndex(int32_t originalIndex) const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
     void UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme);
+    void UpdateChildrenClipEdge();
 
     void StartShowTabBar(int32_t delay = 0);
     void StartShowTabBarImmediately();
@@ -732,6 +733,7 @@ private:
     bool translateAnimationIsRunning_ = false;
 
     bool isRTL_ = false;
+    bool clipEdge_ = true;
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
