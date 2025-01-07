@@ -401,6 +401,11 @@ int32_t GetPageCountProp()
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 
+bool IsTaskPriorityAdjustmentEnable()
+{
+    return system::GetBoolParameter("persist.sys.arkui.task_priority.enable", false);
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -478,6 +483,7 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
+bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -629,6 +635,7 @@ void SystemProperties::InitDeviceInfo(
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
