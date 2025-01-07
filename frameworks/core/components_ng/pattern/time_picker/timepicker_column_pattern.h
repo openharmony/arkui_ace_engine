@@ -305,6 +305,35 @@ public:
 
     void InitHapticController(const RefPtr<FrameNode>& host);
 
+    uint32_t GetEnterIndex() const
+    {
+        return currentEnterIndex_;
+    }
+
+    void SetEnterIndex(uint32_t value)
+    {
+        if (value != currentEnterIndex_) {
+            currentEnterIndex_ = value;
+        }
+    }
+
+    void HandleEnterSelectedAreaEventCallback(bool refresh)
+    {
+        if (enterSelectedAreaEventCallback_) {
+            enterSelectedAreaEventCallback_(refresh);
+        }
+    }
+
+    const EventCallback& GetEnterSelectedAreaEventCallback() const
+    {
+        return enterSelectedAreaEventCallback_;
+    }
+
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value)
+    {
+        enterSelectedAreaEventCallback_ = value;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -372,6 +401,9 @@ private:
     void UnregisterWindowStateChangedCallback();
     void OnWindowHide() override;
     void OnWindowShow() override;
+
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, TimePickerScrollDirection dir);
+
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;
@@ -385,7 +417,9 @@ private:
     std::map<WeakPtr<FrameNode>, uint32_t> optionsTotalCount_;
     ColumnChangeCallback changeCallback_;
     EventCallback EventCallback_;
+    EventCallback enterSelectedAreaEventCallback_;
     uint32_t currentIndex_ = 0;
+    uint32_t currentEnterIndex_ = 0;
     double yLast_ = 0.0;
     double yOffset_ = 0.0;
     double jumpInterval_ = 0.0;

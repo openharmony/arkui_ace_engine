@@ -23,6 +23,7 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+std::string g_strValue;
 } // namespace
 void SetHintRadius(ArkUINodeHandle node, float radius, int32_t unit)
 {
@@ -65,6 +66,66 @@ void ResetSelectedDate(ArkUINodeHandle node)
     auto currentDate = PickerDate::Current();
     CalendarPickerModelNG::SetSelectDateWithNode(
         frameNode, currentDate.GetYear(), currentDate.GetMonth(), currentDate.GetDay());
+}
+
+void SetStartDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalendarPickerModelNG::SetStartDateWithNode(frameNode, year, month, day);
+}
+
+ArkUI_CharPtr GetStartDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pickDate = CalendarPickerModelNG::GetStartDateWithNode(frameNode);
+    if (pickDate.ToDays() <= 0) {
+        return "";
+    }
+    g_strValue = std::to_string(static_cast<uint32_t>(pickDate.GetYear())) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickDate.GetMonth())) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickDate.GetDay()));
+    return g_strValue.c_str();
+}
+
+void ResetStartDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerDate defaultDate;
+    CalendarPickerModelNG::SetStartDateWithNode(
+        frameNode, defaultDate.GetYear(), defaultDate.GetMonth(), defaultDate.GetDay());
+}
+
+void SetEndDate(ArkUINodeHandle node, uint32_t year, uint32_t month, uint32_t day)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalendarPickerModelNG::SetEndDateWithNode(frameNode, year, month, day);
+}
+
+ArkUI_CharPtr GetEndDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pickDate = CalendarPickerModelNG::GetEndDateWithNode(frameNode);
+    if (pickDate.ToDays() <= 0) {
+        return "";
+    }
+    g_strValue = std::to_string(static_cast<uint32_t>(pickDate.GetYear())) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickDate.GetMonth())) + "-";
+    g_strValue = g_strValue + std::to_string(static_cast<uint32_t>(pickDate.GetDay()));
+    return g_strValue.c_str();
+}
+
+void ResetEndDate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    PickerDate defaultDate;
+    CalendarPickerModelNG::SetEndDateWithNode(
+        frameNode, defaultDate.GetYear(), defaultDate.GetMonth(), defaultDate.GetDay());
 }
 
 void SetTextStyleWithWeightEnum(
@@ -318,80 +379,78 @@ void ResetCalendarPickerBorder(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICalendarPickerModifier* GetCalendarPickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICalendarPickerModifier modifier = {
-        SetHintRadius,
-        SetSelectedDate,
-        ResetSelectedDate,
-        SetTextStyleWithWeightEnum,
-        SetTextStyle,
-        ResetTextStyle,
-        SetEdgeAlign,
-        ResetEdgeAlign,
-        SetCalendarPickerPadding,
-        ResetCalendarPickerPadding,
-        SetCalendarPickerBorder,
-        ResetCalendarPickerBorder,
-        GetHintRadius,
-        GetSelectedDate,
-        GetTextStyle,
-        GetEdgeAlign,
-        SetCalendarPickerHeight,
-        ResetCalendarPickerHeight,
-        SetCalendarPickerBorderColor,
-        ResetCalendarPickerBorderColor,
-        SetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderWidth,
+        .setHintRadius = SetHintRadius,
+        .setSelectDate = SetSelectedDate,
+        .resetSelectDate = ResetSelectedDate,
+        .setTextStyleWithWeightEnum = SetTextStyleWithWeightEnum,
+        .setTextStyle = SetTextStyle,
+        .resetTextStyle = ResetTextStyle,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .setEdgeAlign = SetEdgeAlign,
+        .resetEdgeAlign = ResetEdgeAlign,
+        .setCalendarPickerPadding = SetCalendarPickerPadding,
+        .resetCalendarPickerPadding = ResetCalendarPickerPadding,
+        .setCalendarPickerBorder = SetCalendarPickerBorder,
+        .resetCalendarPickerBorder = ResetCalendarPickerBorder,
+        .getHintRadius = GetHintRadius,
+        .getSelectedDate = GetSelectedDate,
+        .getCalendarPickerTextStyle = GetTextStyle,
+        .getStartDate = GetStartDate,
+        .getEndDate = GetEndDate,
+        .getEdgeAlign = GetEdgeAlign,
+        .setCalendarPickerHeight = SetCalendarPickerHeight,
+        .resetCalendarPickerHeight = ResetCalendarPickerHeight,
+        .setCalendarPickerBorderColor = SetCalendarPickerBorderColor,
+        .resetCalendarPickerBorderColor = ResetCalendarPickerBorderColor,
+        .setCalendarPickerBorderRadius = SetCalendarPickerBorderRadius,
+        .resetCalendarPickerBorderRadius = ResetCalendarPickerBorderRadius,
+        .resetCalendarPickerBorderWidth = ResetCalendarPickerBorderWidth,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICalendarPickerModifier* GetCJUICalendarPickerModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICalendarPickerModifier modifier = {
-        SetHintRadius,
-        SetSelectedDate,
-        ResetSelectedDate,
-        SetTextStyleWithWeightEnum,
-        SetTextStyle,
-        ResetTextStyle,
-        SetEdgeAlign,
-        ResetEdgeAlign,
-        SetCalendarPickerPadding,
-        ResetCalendarPickerPadding,
-        SetCalendarPickerBorder,
-        ResetCalendarPickerBorder,
-        GetHintRadius,
-        GetSelectedDate,
-        GetTextStyle,
-        GetEdgeAlign,
-        SetCalendarPickerHeight,
-        ResetCalendarPickerHeight,
-        SetCalendarPickerBorderColor,
-        ResetCalendarPickerBorderColor,
-        SetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderRadius,
-        ResetCalendarPickerBorderWidth,
+        .setHintRadius = SetHintRadius,
+        .setSelectDate = SetSelectedDate,
+        .resetSelectDate = ResetSelectedDate,
+        .setTextStyleWithWeightEnum = SetTextStyleWithWeightEnum,
+        .setTextStyle = SetTextStyle,
+        .resetTextStyle = ResetTextStyle,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .setEdgeAlign = SetEdgeAlign,
+        .resetEdgeAlign = ResetEdgeAlign,
+        .setCalendarPickerPadding = SetCalendarPickerPadding,
+        .resetCalendarPickerPadding = ResetCalendarPickerPadding,
+        .setCalendarPickerBorder = SetCalendarPickerBorder,
+        .resetCalendarPickerBorder = ResetCalendarPickerBorder,
+        .getHintRadius = GetHintRadius,
+        .getSelectedDate = GetSelectedDate,
+        .getCalendarPickerTextStyle = GetTextStyle,
+        .getStartDate = GetStartDate,
+        .getEndDate = GetEndDate,
+        .getEdgeAlign = GetEdgeAlign,
+        .setCalendarPickerHeight = SetCalendarPickerHeight,
+        .resetCalendarPickerHeight = ResetCalendarPickerHeight,
+        .setCalendarPickerBorderColor = SetCalendarPickerBorderColor,
+        .resetCalendarPickerBorderColor = ResetCalendarPickerBorderColor,
+        .setCalendarPickerBorderRadius = SetCalendarPickerBorderRadius,
+        .resetCalendarPickerBorderRadius = ResetCalendarPickerBorderRadius,
+        .resetCalendarPickerBorderWidth = ResetCalendarPickerBorderWidth,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -51,8 +51,8 @@ constexpr float ARC_LIST_DRAG_OVER_FRICTION = 0.5f;
 constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.crown.strength1";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.crown.strength5";
+constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
+constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.feedback.crown.impact";
 #endif
 } // namespace
 
@@ -151,6 +151,7 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
     }
     if (predictSnapOffset_.has_value()) {
         listLayoutAlgorithm->SetPredictSnapOffset(predictSnapOffset_.value());
+        listLayoutAlgorithm->SetScrollSnapVelocity(scrollSnapVelocity_);
     }
     listLayoutAlgorithm->SetTotalOffset(GetTotalOffset());
     listLayoutAlgorithm->SetCurrentDelta(currentDelta_);

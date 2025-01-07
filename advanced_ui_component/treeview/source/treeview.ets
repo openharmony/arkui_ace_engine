@@ -62,10 +62,12 @@ const LOG_CODE: number = 0x3900;
 const ENTER_EXIT_DURATION: number = 2000;
 const ACCESSIBILITY_REFOCUS_DELAY_TIME: number = 300;
 const RESOURCE_TYPE_SYMBOL: number = 40000;
+const MAX_SYMBOL_FONT_SCALE: number = 1.3;
+const MIN_SYMBOL_FONT_SCALE: number = 1;
 const ARROW_DOWN: Resource = $r('sys.symbol.chevron_down');
 const ARROW_DOWN_WITHE: Resource = $r('sys.symbol.chevron_down');
-const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_forward');
-const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_forward');
+const ARROW_RIGHT: Resource = $r('sys.symbol.chevron_right');
+const ARROW_RIGHT_WITHE: Resource = $r('sys.symbol.chevron_right');
 
 enum Event {
   TOUCH_DOWN = 0,
@@ -1044,13 +1046,23 @@ export struct TreeView {
     })
   }
 
-  decideFontScale() {
+  decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
-    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
   }
 
   @Builder
@@ -1086,14 +1098,14 @@ export struct TreeView {
           if (item.getNodeItem().imageNode?.symbolNormalSource) {
             SymbolGlyph()
               .attributeModifier(item.getNodeItem().imageNode?.symbolNormalSource)
-              .fontSize(item.getNodeItem().imageNode?.itemHeight)
+              .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
               .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
           } else {
             if (Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)) {
               SymbolGlyph(item.getNodeItem().imageNode?.normalSource as Resource)
-                .fontSize(item.getNodeItem().imageNode?.itemHeight)
+                .fontSize(`${item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(true)}vp`)
                 .opacity(this.listNodeDataSource.getDragPopupPara().imageOpacity)
             } else {
               Image(item.getNodeItem().imageNode?.normalSource)
@@ -1108,8 +1120,12 @@ export struct TreeView {
         }
         .backgroundColor(COLOR_IMAGE_ROW)
         .margin({ end: getLengthMetricsByResourceOrNumber(item.getNodeItem().imageNode?.itemRightMargin) })
-        .height(item.getNodeItem().imageNode?.itemHeight)
-        .width(item.getNodeItem().imageNode?.itemWidth)
+        .height(item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
+        .width(item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+          item.getNodeItem().imageNode?.symbolNormalSource !== undefined ||
+          Util.isSymbolResource(item.getNodeItem().imageNode?.normalSource)))
       }
 
       Row() {
@@ -2006,9 +2022,9 @@ export class TreeController {
           'The directory name cannot contain the following characters\ /: *? "< > | or exceeds the maximum length.');
         return this;
       }
-      if (nodeParam.primaryTitle === null && nodeParam.icon === null) {
+      if (nodeParam.primaryTitle === null && nodeParam.icon === null && nodeParam.symbolIconStyle === null) {
         throw new Error('ListTreeNode[addNode]: ' +
-          'The icon and directory name cannot be empty at the same time.');
+          'The icon|symbolIconStyle and directory name cannot be empty at the same time.');
         return this;
       }
       if (nodeParam.currentNodeId === this.ROOT_NODE_ID || nodeParam.currentNodeId === null) {
@@ -3176,7 +3192,7 @@ class ListNodeDataSource extends BasicDataSource {
   public delayHighLightAndExpandNode(currentIndex: number, currentNodeId: number, showIndex: number): void {
     let isChangIndex: boolean = currentIndex !== this.lastDelayExpandIndex ? true : false;
     let isOverBorder: boolean | undefined = this.getData(showIndex)?.getIsOverBorder();
-    let insertNodeId: number = this.listNode[currentIndex + 1].getNodeCurrentNodeId();
+    let insertNodeId: number = this.listNode[currentIndex + 1]?.getNodeCurrentNodeId();
     let insertNodeParentNodeId: number = this.findParentNodeId(currentNodeId);
     if (isOverBorder) {
       this.lastDelayExpandIndex = this.INITIAL_INVALID_VALUE;
@@ -3881,6 +3897,9 @@ class ListNodeDataSource extends BasicDataSource {
       currentNode.indexOfParent = parent.children.length;
       data.parentNodeId = parentNodeId;
       data.currentNodeId = currentNodeId;
+      if (data.symbolIconStyle && !data.icon) {
+        data.icon = 'symbolUsed';
+      }
       parent.children.push(currentNode);
       parent.getChildNodeInfo().isHasChildNode = true;
       parent.getChildNodeInfo().childNum = parent.children.length;
@@ -4251,13 +4270,23 @@ export struct TreeViewInner {
     this.maxAppFontScale = uiContent.getMaxFontScale();
   }
 
-  decideFontScale() {
+  decideFontScale(): number {
     let uiContent: UIContext = this.getUIContext();
-    let systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
     if (!this.followingSystemFontScale) {
       return 1;
     }
-    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE)
+    return Math.min(systemFontScale, this.maxAppFontScale, MAX_FONT_SCALE);
+  }
+
+  decideSymbolFontScale(isSymbol: boolean): number {
+    if (!isSymbol || !this.followingSystemFontScale) {
+      return 1;
+    }
+    let uiContent: UIContext = this.getUIContext();
+    let systemFontScale: number = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    let symbolFontSizeScale: number = Math.min(systemFontScale, this.maxAppFontScale, MAX_SYMBOL_FONT_SCALE);
+    return Math.max(symbolFontSizeScale, MIN_SYMBOL_FONT_SCALE);
   }
 
   getInputTextMaxFontSize() {
@@ -4515,8 +4544,10 @@ export struct TreeViewInner {
                   Row() {
                     if (this.item.symbolSource) {
                       SymbolGlyph()
+                        .fontColor([this.getLeftIconColor()])
                         .attributeModifier(this.item.symbolSource)
-                        .fontSize(this.item.getNodeItem().imageNode?.itemHeight)
+                        .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                        this.decideSymbolFontScale(true)}vp`)
                         .effectStrategy(SymbolEffectStrategy.NONE)
                         .symbolEffect(new SymbolEffect(), false)
                         .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
@@ -4525,7 +4556,8 @@ export struct TreeViewInner {
                     } else {
                       if (Util.isSymbolResource(this.item.imageSource)) {
                         SymbolGlyph(this.item.imageSource as Resource)
-                          .fontSize(this.item.getNodeItem().imageNode?.itemHeight)
+                          .fontSize(`${this.item.getNodeItem().imageNode?.itemHeight as number *
+                          this.decideSymbolFontScale(true)}vp`)
                           .fontColor([this.getLeftIconColor()])
                           .opacity(!this.item.getIsSelected() && !this.item.getIsHighLight() ?
                             this.item.getNodeItem().imageNode?.opacity : this.item.getNodeItem().imageNode?.noOpacity)
@@ -4550,8 +4582,10 @@ export struct TreeViewInner {
                   .margin({
                     end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem().imageNode?.itemRightMargin)
                   })
-                  .height(this.item.getNodeItem().imageNode?.itemHeight)
-                  .width(this.item.getNodeItem().imageNode?.itemWidth)
+                  .height(this.item.getNodeItem().imageNode?.itemHeight as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
+                  .width(this.item.getNodeItem().imageNode?.itemWidth as number * this.decideSymbolFontScale(
+                    this.item.symbolSource !== undefined || Util.isSymbolResource(this.item.imageSource)))
                 }
                 Row() {
                   if (this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle()) {
@@ -4675,7 +4709,8 @@ export struct TreeViewInner {
               if (this.item.getNodeItem().imageCollapse) {
                 Row() {
                   SymbolGlyph(this.item.getNodeItem().imageCollapse?.collapseSource as Resource)
-                    .fontSize(this.item.getNodeItem().imageCollapse?.itemHeight)
+                    .fontSize(`${this.item.getNodeItem().imageCollapse?.itemHeight as number *
+                    this.decideSymbolFontScale(true)}vp`)
                     .fontColor([this.item.getNodeItem().imageCollapse?.isCollapse ?
                     this.treeViewTheme.arrowIconColor : COLOR_IMAGE_EDIT])
                     .opacity(!this.item.getIsHighLight() ?
@@ -4684,8 +4719,8 @@ export struct TreeViewInner {
                 }
                 .focusable(true)
                 .justifyContent(FlexAlign.Center)
-                .height(this.item.getNodeItem().imageCollapse?.itemHeight)
-                .width(this.item.getNodeItem().imageCollapse?.itemWidth)
+                .height(this.item.getNodeItem().imageCollapse?.itemHeight as number * this.decideSymbolFontScale(true))
+                .width(this.item.getNodeItem().imageCollapse?.itemWidth as number * this.decideSymbolFontScale(true))
                 .onClick(() => {
                   this.listNodeDataSource.expandAndCollapseNode(
                     this.listNodeDataSource.findIndex(this.item.getNodeCurrentNodeId()));

@@ -454,7 +454,7 @@ void EventHub::FireOnAppear()
                     onJSFrameNodeAppear();
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIFrameNodeAppearEvent");
     }
 }
 

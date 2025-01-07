@@ -289,6 +289,15 @@ void TimePickerModelNG::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onCh
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void TimePickerModelNG::SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelectedArea)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
+}
+
 void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
 {
     CHECK_NULL_VOID(theme);
@@ -398,7 +407,8 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TimePickerDialogEvent& timePickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -418,6 +428,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(theme);
     std::map<std::string, NG::DialogEvent> dialogEvent;
     dialogEvent["changeId"] = onChange;
+    dialogEvent["enterSelectedAreaId"] = onEnterSelectedArea;
     dialogEvent["acceptId"] = onAccept;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     auto func = [onCancel](const GestureEvent& /* info */) {

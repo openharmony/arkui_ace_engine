@@ -166,7 +166,7 @@ public:
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
     static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
-        const JSRef<JSObject>& object, const JSExecutionContext& context);
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
     static bool ParseSheetIsShow(
         const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
@@ -341,6 +341,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
@@ -482,6 +483,12 @@ public:
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static panda::Local<panda::JSValueRef> JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseContentPopupCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<NG::UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
 #endif
 
     /**

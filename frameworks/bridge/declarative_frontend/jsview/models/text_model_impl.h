@@ -32,6 +32,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override {};
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
     void SetTextSelectableMode(TextSelectableMode value) override {};

@@ -26,7 +26,9 @@ var __decorate = (this && this.__decorate) || function (k1, l1, m1, n1) {
 if (!("finalizeConstruction" in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
 }
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+const arkuiNode = requireNapi('arkui.node');
+const LengthMetrics = arkuiNode.LengthMetrics;
+const LengthUnit = arkuiNode.LengthUnit;
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
 const MAX_PERCENTAGE = '100%';
@@ -48,7 +50,7 @@ export class ProgressButtonV2 extends ViewV2 {
     this.initParam("progressButtonWidth", (d1 && "progressButtonWidth" in d1) ? d1.progressButtonWidth : LengthMetrics.vp(BUTTON_NORMARL_WIDTH));
     this.initParam("onClicked", (d1 && "onClicked" in d1) ? d1.onClicked : () => {
     });
-    this.initParam("enable", (d1 && "enable" in d1) ? d1.enable : true);
+    this.initParam("isEnabled", (d1 && "isEnabled" in d1) ? d1.isEnabled : true);
     this.initParam("colorOptions", (d1 && "colorOptions" in d1) ? d1.colorOptions : undefined);
     this.textProgress = EMPTY_STRING;
     this.isLoading = false;
@@ -113,9 +115,9 @@ export class ProgressButtonV2 extends ViewV2 {
       Button.padding({ top: 0, bottom: 0 });
       Button.width(this.toLengthString(this.progressButtonWidth));
       Button.constraintSize({ minWidth: BUTTON_NORMARL_WIDTH });
-      Button.stateEffect(this.enable);
+      Button.stateEffect(this.isEnabled);
       Button.onClick(() => {
-        if (!this.enable) {
+        if (!this.isEnabled) {
           return;
         }
         if (this.progress < MAX_PROGRESS) {
@@ -138,7 +140,7 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
       Progress.clip(false);
-      Progress.enabled(this.enable);
+      Progress.enabled(this.isEnabled);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
       Progress.color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor);
     }, Progress);
@@ -160,7 +162,7 @@ export class ProgressButtonV2 extends ViewV2 {
         right: 8,
         bottom: 4
       });
-      Text.opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY);
+      Text.opacity(this.isEnabled ? TEXT_ENABLE : TEXT_OPACITY);
       Text.onSizeChange((q, r) => {
         if (!r.height || r.height === this.textHeight) {
           return;
@@ -225,8 +227,8 @@ export class ProgressButtonV2 extends ViewV2 {
     if ("onClicked" in b) {
       this.updateParam("onClicked", b.onClicked);
     }
-    if ("enable" in b) {
-      this.updateParam("enable", b.enable);
+    if ("isEnabled" in b) {
+      this.updateParam("isEnabled", b.isEnabled);
     }
     if ("colorOptions" in b) {
       this.updateParam("colorOptions", b.colorOptions);
@@ -251,7 +253,7 @@ __decorate([
 ], ProgressButtonV2.prototype, "onClicked", void 0);
 __decorate([
   Param
-], ProgressButtonV2.prototype, "enable", void 0);
+], ProgressButtonV2.prototype, "isEnabled", void 0);
 __decorate([
   Param
 ], ProgressButtonV2.prototype, "colorOptions", void 0);

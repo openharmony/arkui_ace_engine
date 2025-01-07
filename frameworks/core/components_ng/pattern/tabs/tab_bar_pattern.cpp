@@ -1210,6 +1210,7 @@ void TabBarPattern::OnModifyDone()
 
     RemoveTabBarEventCallback();
     AddTabBarEventCallback();
+    UpdateChildrenClipEdge();
 
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -1327,6 +1328,26 @@ void TabBarPattern::AddTabBarEventCallback()
         tabBarPattern->InitLongPressAndDragEvent();
     };
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
+}
+
+void TabBarPattern::UpdateChildrenClipEdge()
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    bool clipEdge = tabBarRenderContext->GetClipEdgeValue(true);
+    if (clipEdge != clipEdge_) {
+        int32_t totalCount = tabBarNode->TotalChildCount() - MASK_COUNT;
+        for (int32_t index = 0; index < totalCount; index++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+            CHECK_NULL_VOID(childNode);
+            auto renderContext = childNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateClipEdge(clipEdge);
+        }
+        clipEdge_ = clipEdge;
+    }
 }
 
 void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)

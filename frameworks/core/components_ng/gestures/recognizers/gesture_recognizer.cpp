@@ -559,4 +559,26 @@ bool NGGestureRecognizer::AboutToMinusCurrentFingers(int32_t touchId)
         SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
     return false;
 }
+
+void NGGestureRecognizer::ResetStateVoluntarily()
+{
+    auto group = gestureGroup_.Upgrade();
+    if (!group) {
+        return;
+    }
+    group->ResetStateVoluntarily();
+    auto recognizerGroup = AceType::DynamicCast<RecognizerGroup>(group);
+    recognizerGroup->CheckAndSetRecognizerCleanFlag(Claim(this));
+}
+
+void NGGestureRecognizer::SetIsNeedResetRecognizer(bool isNeedResetRecognizerState)
+{
+    isNeedResetRecognizerState_ = isNeedResetRecognizerState;
+}
+
+bool NGGestureRecognizer::IsNeedResetRecognizerState()
+{
+    return isNeedResetRecognizerState_;
+}
+
 } // namespace OHOS::Ace::NG

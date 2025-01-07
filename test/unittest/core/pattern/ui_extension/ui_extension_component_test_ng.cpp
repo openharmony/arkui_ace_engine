@@ -146,6 +146,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -158,6 +159,7 @@ RefPtr<FrameNode> UIExtensionComponentTestNg::CreateUecNode()
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     OHOS::AAFwk::Want want;
@@ -178,6 +180,7 @@ void UIExtensionComponentTestNg::ClearCallbacks(RefPtr<UIExtensionPattern> patte
     pattern->onModalDestroy_ = nullptr;
     pattern->onTerminatedCallback_ = nullptr;
     pattern->bindModalCallback_ = nullptr;
+    pattern->onDrawReadyCallback_ = nullptr;
 }
 void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern)
 {
@@ -191,6 +194,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -202,6 +206,7 @@ void UIExtensionComponentTestNg::SetCallbacks(RefPtr<UIExtensionPattern> pattern
     pattern->SetOnErrorCallback(onError);
     pattern->SetOnResultCallback(onResult);
     pattern->SetOnTerminatedCallback(onTerminated);
+    pattern->SetOnDrawReadyCallback(onDrawReady);
     pattern->SetOnReceiveCallback(onReceive);
     pattern->SetSyncCallbacks(std::move(onSyncOnCallbackList));
     pattern->SetAsyncCallbacks(std::move(onSyncOnCallbackList));
@@ -224,6 +229,7 @@ void UIExtensionComponentTestNg::FireCallbacks(RefPtr<UIExtensionPattern> patter
     pattern->FireSyncCallbacks();
     pattern->FireAsyncCallbacks();
     pattern->FireBindModalCallback();
+    pattern->FireOnDrawReadyCallback();
 }
 
 void UIExtensionComponentTestNg::SetPlaceholder(RefPtr<UIExtensionPattern> pattern)
@@ -263,6 +269,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     auto onRemoteReady = [](const RefPtr<NG::UIExtensionProxy>&) {};
     auto onModalDestroy = []() {};
     auto onTerminated = [](int32_t code, const RefPtr<WantWrap>&) {};
+    auto onDrawReady = []() {};
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList;
     auto onSyncOnCallback = [](const RefPtr<UIExtensionProxy>&) {};
     onSyncOnCallbackList.emplace_back(onSyncOnCallback);
@@ -275,6 +282,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
         .onError = onError,
         .onRemoteReady = onModalRemoteReady,
         .onDestroy = onDestroy,
+        .onDrawReady = onDrawReady,
     };
 
     RefPtr<WantWrap> want = AceType::MakeRefPtr<WantWrapOhos>("123", "123");
@@ -289,6 +297,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     uecNG.SetOnReceive(onReceive, NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
     uecNG.SetOnTerminated(std::move(onTerminated));
     uecNG.SetOnTerminated(std::move(onTerminated), NG::SessionType::SECURITY_UI_EXTENSION_ABILITY);
+    uecNG.SetOnDrawReady(std::move(onDrawReady));
 
     UIExtensionConfig config;
     config.sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
@@ -326,7 +335,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     EXPECT_NE(pattern->onReceiveCallback_, nullptr);
     EXPECT_NE(pattern->onErrorCallback_, nullptr);
     EXPECT_NE(pattern->onModalDestroy_, nullptr);
-
+    EXPECT_NE(pattern->onDrawReadyCallback_, nullptr);
     // Fire CallBack
     pattern->state_ = OHOS::Ace::NG::UIExtensionPattern::AbilityState::DESTRUCTION;
     OHOS::AAFwk::Want want;
@@ -819,10 +828,10 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionHandleTouchEventValidSession, Te
     pattern->HandleTouchEvent(touchEventInfo);
     focusHub->currentFocus_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pattern->needReSendFocusToUIExtension_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN);
     pattern->HandleTouchEvent(touchEventInfo);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
@@ -1467,7 +1476,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest009, TestSize.Level
      */
     OHOS::AAFwk::Want want;
     want.SetElementName("123", "456", "");
-    
+
     /**
      * @tc.steps: step3. test UpdateWant
      */
@@ -1617,7 +1626,7 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. test OnExtensionEvent
      */
@@ -1758,5 +1767,41 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest013, TestSize.Level
      * @tc.steps: step4. test RegisterVisibleAreaChange
      */
     pattern->RegisterVisibleAreaChange();
+}
+
+/**
+ * @tc.name: UIExtensionComponentTestNotifyWindowMode
+ * @tc.desc: Test pattern SetIsWindowModeFollowHost/GetIsWindowModeFollowHost function
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTestNotifyWindowMode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
+        UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. default false
+     */
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step3. SetIsWindowModeFollowHost false
+     */
+    pattern->SetIsWindowModeFollowHost(false);
+    EXPECT_FALSE(pattern->GetIsWindowModeFollowHost());
+
+    /**
+     * @tc.steps: step4. SetIsWindowModeFollowHost true
+     */
+    pattern->SetIsWindowModeFollowHost(true);
+    EXPECT_TRUE(pattern->GetIsWindowModeFollowHost());
 }
 } // namespace OHOS::Ace::NG

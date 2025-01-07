@@ -716,7 +716,7 @@ void MenuPattern::HideStackMenu() const
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackMenu");
+                TaskExecutor::TaskType::UI, "HideStackMenu", PriorityType::VIP);
     });
     auto menuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
     if (menuPattern) {

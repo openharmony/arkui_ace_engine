@@ -686,6 +686,7 @@ struct PromptAsyncContext {
     napi_ref onWillAppearRef = nullptr;
     napi_ref onWillDisappearRef = nullptr;
     napi_value keyboardAvoidModeApi = nullptr;
+    napi_value keyboardAvoidDistanceApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1191,6 +1192,44 @@ std::optional<CalcDimension> GetNapiDialogWidthProps(
     return widthProperty;
 }
 
+std::optional<CalcDimension> GetKeyboardAvoidDistanceProps(
+    napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
+{
+    std::optional<CalcDimension> keyboardAvoidDistanceProperty;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, asyncContext->keyboardAvoidDistanceApi, &valueType);
+    if (valueType != napi_object) {
+        return keyboardAvoidDistanceProperty;
+    }
+    if (valueType == napi_object) {
+        napi_value avoidDistance = nullptr;
+        napi_value avoidDistanceUnit = nullptr;
+        napi_get_named_property(env, asyncContext->keyboardAvoidDistanceApi, "value", &avoidDistance);
+        napi_get_named_property(env, asyncContext->keyboardAvoidDistanceApi, "unit", &avoidDistanceUnit);
+        napi_valuetype distanceType = napi_undefined;
+        napi_valuetype distanceUnitType = napi_undefined;
+        napi_typeof(env, avoidDistance, &distanceType);
+        napi_typeof(env, avoidDistanceUnit, &distanceUnitType);
+        double avoidDistanceValue = 0.0;
+        int32_t avoidDistanceUnitValue = 0;
+        if (distanceType == napi_number && distanceUnitType == napi_number) {
+            napi_get_value_double(env, avoidDistance, &avoidDistanceValue);
+            napi_get_value_int32(env, avoidDistanceUnit, &avoidDistanceUnitValue);
+            auto avoidDistanceUnitValueType = static_cast<DimensionUnit>(avoidDistanceUnitValue);
+            if (avoidDistanceValue >= 0.0 && avoidDistanceUnitValueType >= DimensionUnit::PX &&
+                avoidDistanceUnitValueType <= DimensionUnit::CALC &&
+                avoidDistanceUnitValueType != DimensionUnit::PERCENT) {
+                Dimension dimension(avoidDistanceValue, avoidDistanceUnitValueType);
+                keyboardAvoidDistanceProperty = dimension;
+            } else {
+                Dimension dimension(16.0f, DimensionUnit::VP);
+                keyboardAvoidDistanceProperty = dimension;
+            }
+        }
+    }
+    return keyboardAvoidDistanceProperty;
+}
+
 std::optional<CalcDimension> GetNapiDialogHeightProps(
     napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext)
 {
@@ -1275,6 +1314,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
     napi_get_named_property(env, argv[index], "onWillAppear", &asyncContext->onWillAppear);
     napi_get_named_property(env, argv[index], "onWillDisappear", &asyncContext->onWillDisappear);
     napi_get_named_property(env, argv[index], "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
+    napi_get_named_property(env, argv[index], "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);
 
     GetNapiNamedBoolProperties(env, asyncContext);
 }
@@ -1564,7 +1604,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseDialogCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 
@@ -1782,7 +1822,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseActionMenuCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 
@@ -2049,7 +2089,8 @@ PromptDialogAttr GetPromptActionDialog(napi_env env, const std::shared_ptr<Promp
         .onDidDisappear = lifeCycleAttr.onDidDisappear,
         .onWillAppear = lifeCycleAttr.onWillAppear,
         .onWillDisappear = lifeCycleAttr.onWillDisappear,
-        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode] };
+        .keyboardAvoidMode = KEYBOARD_AVOID_MODE[mode],
+        .keyboardAvoidDistance = GetKeyboardAvoidDistanceProps(env, asyncContext) };
     return promptDialogAttr;
 }
 
@@ -2129,7 +2170,7 @@ void ParseCustomDialogContentCallback(std::shared_ptr<PromptAsyncContext>& async
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogContentCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 }
@@ -2181,7 +2222,7 @@ void ParseCustomDialogIdCallback(std::shared_ptr<PromptAsyncContext>& asyncConte
                 }
                 napi_close_handle_scope(asyncContext->env, scope);
             },
-            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback");
+            TaskExecutor::TaskType::JS, "ArkUIDialogParseCustomDialogIdCallback", PriorityType::VIP);
         asyncContext = nullptr;
     };
 }

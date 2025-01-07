@@ -335,7 +335,6 @@ struct ContentItemStruct {
       Text(this.primaryText)
         .fontSize(this.primaryTextSize)
         .fontColor(this.primaryTextColors)
-        .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
         .textOverflow({
           overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
           TextOverflow.Ellipsis
@@ -344,37 +343,41 @@ struct ContentItemStruct {
         .focusable(true)
         .draggable(false)
         .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-          this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
-            newValue.height as number);
+          if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+            this.isWrapFirstText = this.judgeIsWrap(this.primaryText, this.primaryTextSize,
+              newValue.height as number);
+          }
         })
       if (this.secondaryText != null) {
         Text(this.secondaryText)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.secondaryTextColors)
-          .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
             TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
-              newValue.height as number);
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapSecondText = this.judgeIsWrap(this.secondaryText, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
           })
       }
       if (this.description != null) {
         Text(this.description)
           .fontSize(this.secondaryThirdTextSize)
           .fontColor(this.descriptionColors)
-          .maxLines(LengthMetrics.resource($r('sys.float.composeListItem_maxLines_right')).value)
           .textOverflow({
             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
             TextOverflow.Ellipsis
           })
           .draggable(false)
           .onSizeChange((oldValue: SizeOptions, newValue: SizeOptions) => {
-            this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
-              newValue.height as number);
+            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+              this.isWrapThirdText = this.judgeIsWrap(this.description, this.secondaryThirdTextSize,
+                newValue.height as number);
+            }
           })
       }
     }
@@ -737,8 +740,8 @@ struct OperateItemStruct {
       .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
-        this.radioState = isCheck;
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+		  this.radioState = isCheck;
           this.isChecked = isCheck;
         }
         if (this.radio?.onChange) {
@@ -780,8 +783,8 @@ struct OperateItemStruct {
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
-        this.checkBoxState = isCheck;
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+          this.checkBoxState = isCheck;
           this.isChecked = isCheck;
         }
         if (this.checkBox?.onChange) {
@@ -1321,10 +1324,10 @@ export struct ComposeListItem {
   }
 
   getPadding(): Padding {
-    let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
-    let compareSize = paddingNum > LISTITEM_PADDING;
-    let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
     if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+      let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
+      let compareSize = paddingNum > LISTITEM_PADDING;
+      let horizontalPadding = compareSize ? paddingNum - LISTITEM_PADDING : 0;
       return {
         top: paddingNum,
         bottom: paddingNum,
@@ -1332,7 +1335,7 @@ export struct ComposeListItem {
         right: horizontalPadding
       };
     } else {
-      return { left: horizontalPadding, right: horizontalPadding };
+      return undefined;
     }
   }
 
@@ -1452,7 +1455,7 @@ export struct ComposeListItem {
       this.isFocus = false;
       this.frontColor = NORMAL_BG_COLOR;
     })
-    .borderRadius($r('sys.float.composeListItem_radius'))
+    .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : $r('sys.float.composeListItem_radius'))
     .onClick(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : () => {
       this.isChecked = this.operateItem?.radio ? true : !this.isChecked;
       if (this.operateItem?.icon && this.operateItem.icon?.action) {
@@ -1466,13 +1469,17 @@ export struct ComposeListItem {
       }
     })
     .scale({
-      x: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE,
-      y: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE
+      x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE),
+      y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE)
     })
-    .shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW)
+    .shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW))
     .margin({
-      left: STACK_PADDING,
-      right: STACK_PADDING
+      left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
+      right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
+    })
+   .padding({
+      left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
+      right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
     })
   }
 }

@@ -344,7 +344,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(flexNode);
     auto flexContext = flexNode->GetRenderContext();
     CHECK_NULL_VOID(flexContext);
-    
+
     auto menuChild = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuChild);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
@@ -390,7 +390,7 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     auto previewChild = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(previewChild);
     ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
-    
+
     CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
     auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
     CHECK_NULL_VOID(hoverImagePreview);
@@ -448,7 +448,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     CHECK_NULL_VOID(previewPattern->GetIsShowHoverImage());
-    
+
     CHECK_NULL_VOID(dragPreviewContext);
     auto width = dragPreviewContext->GetPaintRectWithTransform().Width();
     auto height = dragPreviewContext->GetPaintRectWithTransform().Height();
@@ -456,7 +456,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     CHECK_NULL_VOID(previewRenderContext);
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
     auto previewHeight = previewPattern->GetCustomPreviewHeight();
-    
+
     // reverse scale
     float scaleTo = 1.0f;
     if (previewWidth - width < previewHeight - height) {
@@ -756,7 +756,7 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
             node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
             overlayManager->OnDialogCloseEvent(node);
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent", PriorityType::VIP);
 }
 
 void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
@@ -1303,7 +1303,7 @@ void OverlayManager::ShowMenuDisappearTransition(const RefPtr<FrameNode>& menu)
                 overlayManager->SendToAccessibility(menuWK, false);
                 overlayManager->OnPopMenuAnimationFinished(menuWK, rootWeak, weak, id);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayPopMenuAnimation", PriorityType::VIP);
     }
 }
 
@@ -1647,7 +1647,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
                 CHECK_NULL_VOID(overlayManager);
                 overlayManager->MountPopup(targetId, popupInfo, std::move(callback), interactiveDismiss);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayShowPopup");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayShowPopup", PriorityType::VIP);
     } else {
         MountPopup(targetId, popupInfo, std::move(onWillDismiss), interactiveDismiss);
     }
@@ -2012,6 +2012,26 @@ void OverlayManager::DismissPopup()
     auto popupInfo = iter->second;
     popupInfo.markNeedUpdate = true;
     HidePopup(dismissPopupId_, popupInfo);
+}
+
+PopupInfo OverlayManager::GetPopupInfoWithExistContent(const RefPtr<UINode>& node)
+{
+    PopupInfo popupInfoError;
+    popupInfoError.popupNode = nullptr;
+    CHECK_NULL_RETURN(node, popupInfoError);
+    auto iter = popupMap_.begin();
+
+    while (iter != popupMap_.end()) {
+        auto popupInfo = (*iter).second;
+        CHECK_NULL_RETURN(popupInfo.popupNode, popupInfoError);
+        auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+        CHECK_NULL_RETURN(popupPattern, popupInfoError);
+        if (popupPattern->GetCustomNode() == node) {
+            return popupInfo;
+        }
+        iter++;
+    }
+    return popupInfoError;
 }
 
 void OverlayManager::ResetMenuWrapperVisibility(const RefPtr<FrameNode>& menuWrapper)
@@ -3312,7 +3332,7 @@ void OverlayManager::FindWebNode(const RefPtr<NG::UINode>& node, RefPtr<NG::Fram
     bool& isNavDestination)
 {
     CHECK_NULL_VOID(node);
-    
+
     if (webNode) {
         return;
     }
@@ -4562,6 +4582,7 @@ void OverlayManager::PlaySheetTransition(
             });
         ACE_SCOPED_TRACE("Sheet start admission");
         sheetPattern->SetUIFirstSwitch(isFirstTransition, false);
+        sheetPattern->UpdateAccessibilityDetents(sheetHeight_);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -5062,7 +5083,7 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         overlayManager->RemoveChildWithService(root, sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
-                    TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
+                    TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation", PriorityType::VIP);
             });
     }
 }
@@ -6090,7 +6111,7 @@ int32_t OverlayManager::CreateModalUIExtension(
 {
     isProhibitBack_ = config.isProhibitBack;
     NG::InnerModalUIExtensionConfig innerModalUIExtensionConfig = { .isAsyncModalBinding = config.isAsyncModalBinding,
-        .isDensityFollowHost = config.isDensityFollowHost };
+        .isDensityFollowHost = config.isDensityFollowHost, .isWindowModeFollowHost = config.isWindowModeFollowHost };
     auto uiExtNode = ModalUIExtension::Create(want, callbacks, innerModalUIExtensionConfig);
     if (!HandleUIExtNodeTransform(want, uiExtNode)) {
         return 0;
@@ -6669,7 +6690,7 @@ void OverlayManager::RemoveGatherNodeWithAnimation()
                 rootNode->RemoveChild(frameNode);
                 rootNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
             },
-            TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent");
+            TaskExecutor::TaskType::UI, "ArkUIOverlayRemoveGatherNodeEvent", PriorityType::VIP);
     });
     gatherNodeWeak_ = nullptr;
     hasGatherNode_ = false;

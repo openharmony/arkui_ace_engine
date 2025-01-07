@@ -403,7 +403,7 @@ void DatePickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& p
     if (useButtonFocusArea_) {
         auto padding = pickerTheme->GetSelectorItemSpace();
         PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
-            CalcLength(0.0_vp), CalcLength(0.0_vp) };
+            CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) };
         textLayoutProperty->UpdatePadding(defaultPadding);
     }
 }

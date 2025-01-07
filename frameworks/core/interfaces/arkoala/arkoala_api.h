@@ -2096,6 +2096,11 @@ struct ArkUICommonModifier {
     void (*setTabStop)(ArkUINodeHandle node, ArkUI_Bool tabstop);
     void (*resetTabStop)(ArkUINodeHandle node);
     ArkUI_Bool (*getTabStop)(ArkUINodeHandle node);
+    void (*setOnFocus)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
+    void (*setOnBlur)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
+    void (*setOnTouch)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
+    void (*setOnHover)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover));
+    void (*setOnChange)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn));
     void (*setOnClick)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event));
     void (*setOnAppear)(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node));
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
@@ -4245,6 +4250,10 @@ struct ArkUICalendarPickerModifier {
         ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Float32 fontSize, ArkUI_Int32 unit, ArkUI_Int32 fontWeight);
     void (*setTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontSize, ArkUI_CharPtr fontWeight);
     void (*resetTextStyle)(ArkUINodeHandle node);
+    void (*setStartDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetStartDate)(ArkUINodeHandle node);
+    void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
+    void (*resetEndDate)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
@@ -4256,6 +4265,8 @@ struct ArkUICalendarPickerModifier {
     ArkUI_Float32 (*getHintRadius)(ArkUINodeHandle node);
     ArkUISelectedDateType (*getSelectedDate)(ArkUINodeHandle node);
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
     void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetCalendarPickerHeight)(ArkUINodeHandle node);
@@ -4450,6 +4461,10 @@ struct ArkUITextPickerModifier {
         ArkUI_Int32 rangeType);
     ArkUI_CharPtr (*getTextPickerValue)(ArkUINodeHandle node);
     void (*setTextPickerValue)(ArkUINodeHandle node, ArkUI_CharPtr valueStr);
+    void (*setTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size);
+    void (*resetTextPickerColumnWidths)(ArkUINodeHandle node);
+    void (*getTextPickerColumnWidths)(ArkUINodeHandle node, ArkUI_Float32* values);
+    ArkUI_Int32 (*getTextPickerColumnWidthsSize)(ArkUINodeHandle node);
     void (*setTextPickerDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTextPickerDivider)(ArkUINodeHandle node);
@@ -4583,6 +4598,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Uint32 (*getDatePickerBackgroundColor)(ArkUINodeHandle node);
     void (*setDatePickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetDatePickerBackgroundColor)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
+    void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDatePickerMode)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
@@ -5143,6 +5161,9 @@ struct ArkUIFrameNodeModifier {
     void (*addExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key, void* extraData);
     void* (*getExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
     void (*removeExtraCustomProperty)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*getCustomPropertyByKey)(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size);
+    void (*addNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key, void (*onDestroy)(ArkUINodeHandle node));
+    void (*removeNodeDestroyCallback)(ArkUINodeHandle node, ArkUI_CharPtr key);
     ArkUI_Int32 (*setDrawCompleteEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
@@ -5520,6 +5541,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
     ArkUI_Int32 (*registerOnWillDismissWithUserData)(
         ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+    ArkUI_Int32 (*setKeyboardAvoidDistance)(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
 };
 
 struct ArkUIBasicNodeAPI {

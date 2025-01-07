@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -61,6 +62,9 @@ namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
+using SubSystemId = OHOS::Rosen::SubSystemId;
+using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -590,13 +594,20 @@ public:
         return webHapPath_;
     }
 
-    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+        std::optional<NG::RectF> windowRect = std::nullopt);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     uint32_t GetStatusBarHeight();
+
+    Rosen::WindowMode GetWindowMode() const
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+        return uiWindow_->GetMode();
+    }
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -733,6 +744,7 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+    void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
     {
@@ -752,6 +764,11 @@ public:
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
 private:
@@ -778,6 +795,15 @@ private:
     DeviceOrientation ProcessDirectionUpdate(
         const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void InitDragEventCallback();
+
+    void RegisterUIExtDataConsumer();
+    void UnRegisterUIExtDataConsumer();
+    void DispatchUIExtDataConsume(
+        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void RegisterUIExtDataSendToHost();
+    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -852,6 +878,7 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
 };
 
 } // namespace OHOS::Ace::Platform
