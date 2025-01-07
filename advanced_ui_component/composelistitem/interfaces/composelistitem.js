@@ -881,13 +881,6 @@ class ContentItemStruct extends ViewPU {
             Text.create(this.primaryText);
             Text.fontSize(ObservedObject.GetRawObject(this.primaryTextSize));
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColors));
-            Text.maxLines(LengthMetrics.resource({
-                "id": -1,
-                "type": 10002,
-                params: ['sys.float.composeListItem_maxLines_right'],
-                "bundleName": "__harDefaultBundleName__",
-                "moduleName": "__harDefaultModuleName__"
-            }).value);
             Text.textOverflow({
                 overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
                 TextOverflow.Ellipsis
@@ -896,8 +889,10 @@ class ContentItemStruct extends ViewPU {
             Text.focusable(true);
             Text.draggable(false);
             Text.onSizeChange((l14, m14) => {
-                this.isWrapFirstText = this.judgeIsWrap(ObservedObject.GetRawObject(this.primaryText),
-                    ObservedObject.GetRawObject(this.primaryTextSize), m14.height);
+                if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                    this.isWrapFirstText = this.judgeIsWrap(ObservedObject.GetRawObject(this.primaryText),
+                        ObservedObject.GetRawObject(this.primaryTextSize), m14.height);
+                }
             });
         }, Text);
         Text.pop();
@@ -909,21 +904,16 @@ class ContentItemStruct extends ViewPU {
                         Text.create(this.secondaryText);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColors));
-                        Text.maxLines(LengthMetrics.resource({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.composeListItem_maxLines_right'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        }).value);
                         Text.textOverflow({
                             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
                         Text.onSizeChange((g14, h14) => {
-                            this.isWrapSecondText = this.judgeIsWrap(ObservedObject.GetRawObject(this.secondaryText),
-                                ObservedObject.GetRawObject(this.secondaryThirdTextSize), h14.height);
+                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                                this.isWrapSecondText = this.judgeIsWrap(ObservedObject.GetRawObject(this.secondaryText),
+                                    ObservedObject.GetRawObject(this.secondaryThirdTextSize), h14.height);
+                            }
                         });
                     }, Text);
                     Text.pop();
@@ -942,22 +932,17 @@ class ContentItemStruct extends ViewPU {
                         Text.create(this.description);
                         Text.fontSize(ObservedObject.GetRawObject(this.secondaryThirdTextSize));
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColors));
-                        Text.maxLines(LengthMetrics.resource({
-                            "id": -1,
-                            "type": 10002,
-                            params: ['sys.float.composeListItem_maxLines_right'],
-                            "bundleName": "__harDefaultBundleName__",
-                            "moduleName": "__harDefaultModuleName__"
-                        }).value);
                         Text.textOverflow({
                             overflow: IS_MARQUEE_OR_ELLIPSIS === TEXT_SUPPORT_MARQUEE ? TextOverflow.None :
                             TextOverflow.Ellipsis
                         });
                         Text.draggable(false);
                         Text.onSizeChange((w13, x13) => {
-                            this.isWrapThirdText = this.judgeIsWrap(ObservedObject.GetRawObject(this.description),
-                                ObservedObject.GetRawObject(this.secondaryThirdTextSize), x13.height);
-                        });
+                            if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                                this.isWrapThirdText = this.judgeIsWrap(ObservedObject.GetRawObject(this.description),
+                                    ObservedObject.GetRawObject(this.secondaryThirdTextSize), x13.height);
+                                }
+                            });
                     }, Text);
                     Text.pop();
                 });
@@ -1889,8 +1874,8 @@ class OperateItemStruct extends ViewPU {
             Color.Transparent);
             Radio.borderRadius(OPERATE_ITEM_RADIUS);
             Radio.onChange((j8) => {
-                this.radioState = j8;
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                    this.radioState = j8;
                     this.isChecked = j8;
                 }
                 if (this.radio?.onChange) {
@@ -1934,8 +1919,8 @@ class OperateItemStruct extends ViewPU {
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
             Checkbox.onChange((a8) => {
-                this.checkBoxState = a8;
                 if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
+                    this.checkBoxState = a8;
                     this.isChecked = a8;
                 }
                 if (this.checkBox?.onChange) {
@@ -3019,10 +3004,10 @@ export class ComposeListItem extends ViewPU {
     }
 
     getPadding() {
-        let c2 = LengthMetrics.resource(ITEM_PADDING).value;
-        let d2 = c2 > LISTITEM_PADDING;
-        let e2 = d2 ? c2 - LISTITEM_PADDING : 0;
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
+            let c2 = LengthMetrics.resource(ITEM_PADDING).value;
+            let d2 = c2 > LISTITEM_PADDING;
+            let e2 = d2 ? c2 - LISTITEM_PADDING : 0;
             return {
                 top: c2,
                 bottom: c2,
@@ -3030,7 +3015,7 @@ export class ComposeListItem extends ViewPU {
                 right: e2
             };
         } else {
-            return { left: e2, right: e2 };
+            return undefined;
         }
     }
 
@@ -3048,7 +3033,7 @@ export class ComposeListItem extends ViewPU {
                 this.isFocus = false;
                 this.frontColor = NORMAL_BG_COLOR;
             });
-            Stack.borderRadius({
+            Stack.borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : {
                 "id": -1,
                 "type": 10002,
                 params: ['sys.float.composeListItem_radius'],
@@ -3068,13 +3053,17 @@ export class ComposeListItem extends ViewPU {
                 }
             });
             Stack.scale({
-                x: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE,
-                y: this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE
+                x: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE),
+                y: IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_ITEM_SCALE : RECOVER_ITEM_SCALE)
             });
-            Stack.shadow(this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW);
+            Stack.shadow(IS_SUPPORT_SUBCOMPONENT_EVENT ? undefined : (this.isFocus ? FOCUSED_SHADOW : NORMAL_SHADOW));
             Stack.margin({
-                left: STACK_PADDING,
-                right: STACK_PADDING
+                left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
+                right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
+            });
+            Stack.padding({
+                left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
+                right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
             });
         }, Stack);
         this.observeComponentCreation2((r1, s1) => {

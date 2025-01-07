@@ -341,6 +341,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);

@@ -1619,6 +1619,9 @@ public:
         hoverAndPressBgColorEnabled_ = enabled;
     }
 
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition() override;
+    bool RecordOriginCaretPosition() override;
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1935,6 +1938,9 @@ private:
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     TextDirection textDirection_ = TextDirection::LTR;
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;

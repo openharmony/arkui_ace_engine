@@ -41,28 +41,29 @@ class stateMgmtDFX {
     let stateInfo: DumpInfo = new DumpInfo();
     let decoratorInfo: string = target instanceof ViewV2 ? ObserveV2.getObserve().getDecoratorInfo(target, attrName) : '@Trace';
 
-    const dependentElementIds: Array<ElementType|string> = Array<ElementType|string>();
+    const dependentElementIds: Array<ElementType | string> = Array<ElementType | string>();
     changeIdSet.forEach((id: number) => {
       if (id < ComputedV2.MIN_COMPUTED_ID) {
         dependentElementIds.push(ObserveV2.getObserve().getElementInfoById(id, true));
       }
-    })
+    });
 
     let ownedTarget: TargetInfo;
     if (target instanceof ViewV2) {
-      ownedTarget = {componentName: target.constructor.name, id: target.id__()};
+      ownedTarget = { componentName: target.constructor.name, id: target.id__() };
     } else {
-      ownedTarget = {className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target)}
+      ownedTarget = { className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target) };
     }
     stateInfo.observedPropertiesInfo.push({
-      decorator: decoratorInfo, propertyName: attrName, idV2: Utils.getArkTsUtil().getHash(target).toString() + attrName, 
+      decorator: decoratorInfo, propertyName: attrName,
+      idV2: target instanceof ViewV2 ? target.id__().toString() + attrName : Utils.getArkTsUtil().getHash(target)?.toString() + attrName,
       value: stateMgmtDFX.getRawValue(Reflect.get(target, attrName)), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
-      dependentElementIds: {mode: 'v2', propertyDependencies: dependentElementIds}, owningView: ownedTarget
-    })
+      dependentElementIds: { mode: 'v2', propertyDependencies: dependentElementIds }, owningView: ownedTarget
+    });
     try {
       ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
-    } catch(error) {
-      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`)
+    } catch (error) {
+      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`);
     }
   }
 
@@ -164,7 +165,7 @@ class stateMgmtDFX {
   private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
     let dumpKey = this.dumpItems(Array.from(map.keys()));
     let dumpValue = this.dumpItems(Array.from(map.values()));
-    return dumpKey.map((item: any, index: number) => [item, dumpValue[index]])
+    return dumpKey.map((item: any, index: number) => [item, dumpValue[index]]);
   }
 
   private static dumpObjectProperty(value: any): DumpObjectType | string {
@@ -182,7 +183,7 @@ class stateMgmtDFX {
       }
     } catch (e) {
       stateMgmtConsole.warn(`can not dump Obj, error msg ${e.message}`);
-      return "unknown type";
+      return 'unknown type';
     }
     return tempObj;
   }

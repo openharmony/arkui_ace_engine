@@ -62,7 +62,6 @@ public:
                 LOGW("find pattern of scroll_bar fail");
                 return;
             }
-            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->shapeMode_ = static_cast<ShapeMode>(pattern->GetAttr<double>("scroll_bar_shape_mode", 0.0));
             theme->normalWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_width", 0.0_vp);
             theme->activeWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_width", 0.0_vp);
@@ -70,9 +69,6 @@ public:
             theme->minDynamicHeight_ = pattern->GetAttr<Dimension>("scroll_bar_min_dynamic_height", 0.0_vp);
             theme->reservedHeight_ = pattern->GetAttr<Dimension>("scroll_bar_reserved_height", 0.0_vp);
             theme->touchWidth_ = pattern->GetAttr<Dimension>("scroll_bar_touch_width", 0.0_vp);
-            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
-            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(blendOpacity);
             auto padding = pattern->GetAttr<Dimension>("scroll_bar_margin", Dimension(4.0, DimensionUnit::VP));
             theme->padding_ = Edge(padding.Value(), 0.0, padding.Value(), padding.Value(), padding.Unit());
             theme->scrollBarMargin_ = padding;
@@ -89,6 +85,14 @@ public:
                 ACTIVE_MAX_OFFSET_ANGLE);
             theme->normalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
             theme->activeScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width", 22.0_vp);
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+                Color::TRANSPARENT).BlendOpacity(0.66f);
+            theme->backgroundColor_ = Color(0x7F7F7F7F);
+#else
+            auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
+            theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
+                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("scroll_bar_background_color", Color());
 #endif // ARKUI_CIRCLE_FEATURE
         }
     };

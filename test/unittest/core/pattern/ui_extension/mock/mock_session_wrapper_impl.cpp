@@ -277,4 +277,6 @@ bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Wan
 {
     return false;
 }
+
+void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 } // namespace OHOS::Ace::NG

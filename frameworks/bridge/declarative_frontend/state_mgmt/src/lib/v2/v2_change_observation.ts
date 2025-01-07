@@ -758,9 +758,9 @@ class ObserveV2 {
    *                   The default value is false. 
    */
   public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
-    let weak = this.id2cmp_[elmtId];
+    let weak: WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
-    return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId, isProfiler) : '';
+    return (weak && (view = weak.deref())) ? view.debugInfoElmtId(elmtId, isProfiler) : '';
   }
 
   /**

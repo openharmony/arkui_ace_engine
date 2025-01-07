@@ -348,101 +348,55 @@ RSPath SvgNode::AsRSPath(const Size& viewPort) const
     return {};
 }
 
-void SvgNode::ProcessSvgStyle(RefPtr<SvgNode> svgNode, const SvgBaseAttribute& attr)
+void SvgNode::InitStyle(const SvgBaseAttribute& attr)
 {
-    svgNode->InheritAttr(attr);
-    auto& svgAttributes = svgNode->attributes_;
-    if (svgNode->hrefFill_) {
-        auto href = svgAttributes.fillState.GetHref();
+    InheritAttr(attr);
+    if (hrefFill_) {
+        auto href = attributes_.fillState.GetHref();
         if (!href.empty()) {
-            auto gradient = svgNode->GetGradient(href);
+            auto gradient = GetGradient(href);
             if (gradient) {
-                svgAttributes.fillState.SetGradient(gradient.value());
+                attributes_.fillState.SetGradient(gradient.value());
             }
         }
-        href = svgAttributes.strokeState.GetHref();
+        href = attributes_.strokeState.GetHref();
         if (!href.empty()) {
-            auto gradient = svgNode->GetGradient(href);
+            auto gradient = GetGradient(href);
             if (gradient) {
-                svgAttributes.strokeState.SetGradient(gradient.value());
+                attributes_.strokeState.SetGradient(gradient.value());
             }
         }
     }
-    if (svgNode->hrefRender_) {
-        svgNode->hrefClipPath_ = svgAttributes.clipState.GetHref();
-        svgNode->opacity_ = OpacityDoubleToUint8(svgAttributes.opacity);
-        svgNode->transform_ = svgAttributes.transform;
-        svgNode->hrefMaskId_ = ParseIdFromUrl(svgAttributes.maskId);
-        svgNode->hrefFilterId_ = ParseIdFromUrl(svgAttributes.filterId);
+    if (hrefRender_) {
+        hrefClipPath_ = attributes_.clipState.GetHref();
+        opacity_ = OpacityDoubleToUint8(attributes_.opacity);
+        transform_ = attributes_.transform;
+        hrefMaskId_ = ParseIdFromUrl(attributes_.maskId);
+        hrefFilterId_ = ParseIdFromUrl(attributes_.filterId);
     }
-    svgNode->OnInitStyle();
-}
-
-void SvgNode::ProcessChildAnimations(const RefPtr<SvgNode>& currentSvgNode)
-{
-    for (auto& child : currentSvgNode->children_) {
+    OnInitStyle();
+    if (passStyle_) {
+        for (auto& node : children_) {
+            CHECK_NULL_VOID(node);
+            // pass down style only if child inheritStyle_ is true
+            node->InitStyle((node->inheritStyle_) ? attributes_ : SvgBaseAttribute());
+        }
+    }
+    for (auto& child : children_) {
         auto svgAnimate = DynamicCast<SvgAnimation>(child);
         if (svgAnimate) {
             svgAnimate->UpdateAttr();
-            currentSvgNode->PrepareAnimation(svgAnimate);
+            PrepareAnimation(svgAnimate);
         }
     }
-}
-
-bool SvgNode::ProcessChildStyle(SvgInitStyleProcessInfo& currentSvgNodeInfo,
-    std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute&>>& initStyleTaskSt)
-{
-    auto currentSvgNode = currentSvgNodeInfo.svgNode;
-    if (currentSvgNode->passStyle_ && currentSvgNodeInfo.childIndex < currentSvgNode->children_.size()) {
-        auto child = currentSvgNode->children_[currentSvgNodeInfo.childIndex];
-        if (child) {
-            // pass down style only if child inheritStyle_ is true
-            initStyleTaskSt.emplace(
-                child, (child->inheritStyle_) ? currentSvgNode->attributes_ : SvgBaseAttribute());
-        }
-        ++currentSvgNodeInfo.childIndex;
-        return false;
-    }
-    return true;
-}
-
-void SvgNode::InitStyleDfs(const WeakPtr<SvgNode>& root, const SvgBaseAttribute& attr)
-{
-    auto parentNode = root.Upgrade();
-    if (!parentNode) {
-        return;
-    }
-    std::stack<std::pair<SvgInitStyleProcessInfo, const SvgBaseAttribute&>> initStyleTaskSt;
-    initStyleTaskSt.emplace(parentNode, attr);
-    while (!initStyleTaskSt.empty()) {
-        auto& [currentSvgNodeInfo, currentAttr] = initStyleTaskSt.top();
-        if (currentSvgNodeInfo.childIndex == 0) {
-            currentSvgNodeInfo.svgNode->ProcessSvgStyle(currentSvgNodeInfo.svgNode, currentAttr);
-        }
-        if (currentSvgNodeInfo.svgNode->ProcessChildStyle(currentSvgNodeInfo, initStyleTaskSt)) {
-            currentSvgNodeInfo.svgNode->ProcessChildAnimations(currentSvgNodeInfo.svgNode);
-            initStyleTaskSt.pop();
-        }
-    }
-}
-
-void SvgNode::InitStyle(const SvgBaseAttribute& attr)
-{
-    InitStyleDfs(WeakClaim(this), attr);
 }
 
 void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)
 {
-    if (isDrawing_) {
-        TAG_LOGW(AceLogTag::ACE_IMAGE,
-            "The current node is already in the process of being drawn in the SVG rendering flow.");
-        return;
-    }
     if (!OnCanvas(canvas)) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Svg Draw failed(Reason: Canvas is null).");
         return;
     }
-    isDrawing_ = true;
     // mask and filter create extra layers, need to record initial layer count
     auto count = rsCanvas_->GetSaveCount();
     rsCanvas_->Save();
@@ -464,7 +418,6 @@ void SvgNode::Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<C
     OnDraw(canvas, viewPort, color);
     OnDrawTraversed(canvas, viewPort, color);
     rsCanvas_->RestoreToCount(count);
-    isDrawing_ = false; // end the drawing process.
 }
 
 void SvgNode::OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color)

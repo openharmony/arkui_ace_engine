@@ -71,6 +71,7 @@ foreach(module, advanced_ui_component_libs) {
 group("advanced_ui_component") {
   deps = []
   deps += [
+    "arcbutton/interfaces:arcbutton",
     "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
