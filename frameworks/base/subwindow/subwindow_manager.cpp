@@ -21,7 +21,6 @@ namespace OHOS::Ace {
 
 std::mutex SubwindowManager::instanceMutex_;
 std::shared_ptr<SubwindowManager> SubwindowManager::instance_;
-thread_local RefPtr<Subwindow> SubwindowManager::currentSubwindow_;
 
 std::shared_ptr<SubwindowManager> SubwindowManager::GetInstance()
 {
@@ -214,18 +213,33 @@ int32_t SubwindowManager::GetDialogSubwindowInstanceId(int32_t SubwindowId)
     return 0;
 }
 
+void SubwindowManager::SetCurrentSubwindowName(const std::string& currentSubwindowName)
+{
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
+    currentSubwindowName_ = currentSubwindowName;
+}
+
+std::string SubwindowManager::GetCurrentSubWindowName()
+{
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
+    return currentSubwindowName_;
+}
+
 void SubwindowManager::SetCurrentSubwindow(const RefPtr<Subwindow>& subwindow)
 {
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     currentSubwindow_ = subwindow;
 }
 
 const RefPtr<Subwindow>& SubwindowManager::GetCurrentWindow()
 {
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     return currentSubwindow_;
 }
 
 Rect SubwindowManager::GetParentWindowRect()
 {
+    std::lock_guard<std::mutex> lock(currentSubwindowMutex_);
     Rect rect;
     CHECK_NULL_RETURN(currentSubwindow_, rect);
     return currentSubwindow_->GetParentWindowRect();

@@ -538,6 +538,7 @@ std::optional<DimensionRect> DialogLayoutAlgorithm::GetMaskRect(const RefPtr<Fra
 
 void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
+    subWindowId_ = SubwindowManager::GetInstance()->GetDialogSubWindowId();
     CHECK_NULL_VOID(layoutWrapper);
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
@@ -547,7 +548,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    ParseSubwindowId(dialogProp);
     auto selfSize = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     if (children.empty()) {
@@ -584,20 +584,6 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     AdjustHeightForKeyboard(layoutWrapper, child);
     child->Layout();
     SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
-}
-
-void DialogLayoutAlgorithm::ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp)
-{
-    auto container = Container::Current();
-    CHECK_NULL_VOID(container);
-    auto currentId = Container::CurrentId();
-    if (dialogProp->GetShowInSubWindowValue(false)) {
-        if (!container->IsSubContainer()) {
-            subWindowId_ = SubwindowManager::GetInstance()->GetSubContainerId(currentId);
-        } else {
-            subWindowId_ = currentId;
-        }
-    }
 }
 
 void DialogLayoutAlgorithm::AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child)

@@ -41,15 +41,7 @@ Animator::Animator(const WeakPtr<PipelineBase>& context, const char* name)
 
 Animator::~Animator() {}
 
-void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context)
-{
-    auto&& callback = [weak = AceType::WeakClaim(this)](uint64_t duration) {
-        auto controller = weak.Upgrade();
-        CHECK_NULL_VOID(controller);
-        controller->OnFrame(duration);
-    };
-    scheduler_ = SchedulerBuilder::Build(callback, context);
-}
+void Animator::AttachScheduler(const WeakPtr<PipelineBase>& context) {}
 
 bool Animator::HasScheduler() const
 {

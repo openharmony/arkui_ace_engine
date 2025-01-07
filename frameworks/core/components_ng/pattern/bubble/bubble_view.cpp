@@ -471,7 +471,7 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
     if ((primaryButton.showButton || secondaryButton.showButton) &&
-        !Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        !(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         float popupMaxWidth = 0.0f;

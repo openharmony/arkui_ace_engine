@@ -94,7 +94,6 @@ private:
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
     void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
-    void ParseSubwindowId(const RefPtr<DialogLayoutProperty>& dialogProp);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;

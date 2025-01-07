@@ -189,7 +189,7 @@ private:
         std::function<void(int32_t, int32_t)>&& callback);
 
     RefPtr<PipelineBase> GetChildPipelineContext() const;
-    std::function<void()> GetInitToastDelayTask(const NG::ToastInfo& toastInfo) const;
+    std::function<void()> GetInitToastDelayTask(const NG::ToastInfo& toastInfo);
     void ContainerModalUnFocus();
 
     void HideFilter(bool isInSubWindow);
