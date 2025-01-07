@@ -702,6 +702,10 @@ public:
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
     static bool GetNeedFocus(FrameNode* frameNode);
+    static int RequestFocus(FrameNode* frameNode);
+    static void ClearFocus(int32_t instanceId);
+    static void FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive);
+    static void SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
     static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
