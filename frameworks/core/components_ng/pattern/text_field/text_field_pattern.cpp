@@ -282,10 +282,10 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
             textFieldOverlayModifier_->SetRect(scrollBar->GetActiveRect());
-        } else if (IsNormalInlineState() && !HasFocus()) {
-            auto inlineScrollRect = scrollBar->GetActiveRect();
-            CalcInlineScrollRect(inlineScrollRect);
-            textFieldOverlayModifier_->SetRect(inlineScrollRect);
+        } else if (!HasFocus()) {
+            auto scrollRect = scrollBar->GetActiveRect();
+            CalcScrollRect(scrollRect);
+            textFieldOverlayModifier_->SetRect(scrollRect);
             textFieldOverlayModifier_->SetOpacity(0);
         }
     }
@@ -338,8 +338,12 @@ void TextFieldPattern::CalculateBoundsRect()
     }
 }
 
-void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
+void TextFieldPattern::CalcScrollRect(Rect& inlineScrollRect)
 {
+    if (!IsNormalInlineState()) {
+        // if textfield is not inline, no need to calc rect
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
