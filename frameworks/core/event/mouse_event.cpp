@@ -29,7 +29,9 @@ bool HoverEventTarget::HandleHoverEvent(bool isHovered, const MouseEvent& event)
     hoverInfo.SetSourceDevice(event.sourceType);
     hoverInfo.SetSourceTool(event.sourceTool);
     hoverInfo.SetPressedKeyCodes(event.pressedKeyCodes_);
-    onHoverEventCallback_(isHovered, hoverInfo);
+    // onHoverEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onHoverEventCallback = onHoverEventCallback_;
+    onHoverEventCallback(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 
@@ -50,7 +52,9 @@ bool HoverEventTarget::HandlePenHoverEvent(bool isHovered, const TouchEvent& eve
         hoverInfo.SetTiltY(event.tiltY.value_or(0.0f));
     }
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
-    onPenHoverEventCallback_(isHovered, hoverInfo);
+    // onPenHoverEventCallback_ may be overwritten in its invoke so we copy it first
+    auto onPenHoverEventCallback = onPenHoverEventCallback_;
+    onPenHoverEventCallback(isHovered, hoverInfo);
     return !hoverInfo.IsStopPropagation();
 }
 
@@ -74,7 +78,9 @@ void HoverEventTarget::HandleAccessibilityHoverEvent(bool isHovered, const Touch
     hoverInfo.SetScreenLocation(Offset(event.screenX, event.screenY));
     hoverInfo.SetActionType(ConvertAccessibilityHoverAction(event.type));
     hoverInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
-    onAccessibilityHoverCallback_(isHovered, hoverInfo);
+    // onAccessibilityHoverCallback_ may be overwritten in its invoke so we copy it first
+    auto onAccessibilityHoverCallback = onAccessibilityHoverCallback_;
+    onAccessibilityHoverCallback(isHovered, hoverInfo);
 }
 
 AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(TouchType type)
@@ -103,4 +109,5 @@ AccessibilityHoverAction HoverEventTarget::ConvertAccessibilityHoverAction(Touch
             return AccessibilityHoverAction::UNKNOWN;
     }
 }
+
 } // namespace OHOS::Ace
