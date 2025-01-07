@@ -2103,6 +2103,12 @@ export struct TextBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onCopy((value:string)=>{
+          this.compEventTriggeredLog('复制文本内容onCopy触发')
+        })
+        .onTextSelectionChange((selectionStart:number, selectionEnd:number)=>{
+          this.compEventTriggeredLog('文本选择的位置发生变化时onTextSelectionChange触发')
+        })
     }.justifyContent(FlexAlign.Start)
   }
 
