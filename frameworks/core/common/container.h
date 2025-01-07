@@ -687,6 +687,11 @@ public:
 
     virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
+    virtual bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+    {
+        return false;
+    }
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);
