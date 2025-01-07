@@ -461,9 +461,6 @@ const CJUITimepickerModifier* GetCJUITimepickerModifier()
         .resetTimepickerLoop = ResetTimepickerLoop,
         .setTimepickerDateTimeOptions = SetTimepickerDateTimeOptions,
         .resetTimepickerDateTimeOptions = ResetTimepickerDateTimeOptions,
-        .getTimepickerEnableCascade = GetTimepickerEnableCascade,
-        .setTimepickerEnableCascade = SetTimepickerEnableCascade,
-        .resetTimepickerEnableCascade = ResetTimepickerEnableCascade,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
