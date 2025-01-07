@@ -32,7 +32,7 @@ void DialogEventHub::FireSuccessEvent(int32_t buttonIdx)
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->GetTaskExecutor()->PostTask(
         [onSuccess = onSuccess_, buttonIdx] { onSuccess(0, buttonIdx); },
-        TaskExecutor::TaskType::JS, "ArkUIDialogSuccessEvent");
+        TaskExecutor::TaskType::JS, "ArkUIDialogSuccessEvent", PriorityType::VIP);
 }
 
 } // namespace OHOS::Ace::NG

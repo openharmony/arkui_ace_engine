@@ -156,10 +156,6 @@ public:
     void ProcessLockForm(bool lock);
 #endif
     void HandleCachedClickEvents();
-    std::mutex& GetRecycleMutex()
-    {
-        return this->recycleMutex_;
-    }
 
 private:
     void CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestFormInfo& info);

@@ -105,6 +105,8 @@ public:
     bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply) override;
     bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type) override;
 
+    void NotifyHostWindowMode(int32_t mode) override;
+
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();

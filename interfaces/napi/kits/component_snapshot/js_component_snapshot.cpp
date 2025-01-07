@@ -429,6 +429,7 @@ static napi_value JSSnapshotGetWithUniqueId(napi_env env, napi_callback_info inf
             uniqueId);
         auto callback = helper.CreateCallback(&result);
         callback(nullptr, ERROR_CODE_INTERNAL_ERROR, nullptr);
+        napi_close_escapable_handle_scope(env, scope);
         return result;
     }
 

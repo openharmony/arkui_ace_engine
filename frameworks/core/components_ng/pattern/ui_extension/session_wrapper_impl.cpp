@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "extension/extension_business_info.h"
 #include "interfaces/include/ws_common.h"
 #include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
@@ -1159,4 +1160,16 @@ bool SessionWrapperImpl::RegisterDataConsumer()
     return true;
 }
 /************************************************ End: The interface for UEC dump **********************************/
+
+void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode)
+{
+    UIEXT_LOGI("SendWindowModeToProvider: mode = %{public}d", mode);
+    CHECK_NULL_VOID(session_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    AAFwk::Want dataToSend;
+    dataToSend.SetParam(OHOS::Rosen::Extension::WINDOW_MODE_FIELD, mode);
+    dataHandler->SendDataAsync(Rosen::SubSystemId::WM_UIEXT,
+        static_cast<uint32_t>(OHOS::Rosen::Extension::Businesscode::SYNC_HOST_WINDOW_MODE), dataToSend);
+}
 } // namespace OHOS::Ace::NG

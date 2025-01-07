@@ -797,7 +797,6 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 #if OHOS_STANDARD_SYSTEM
         AppExecFwk::FormInfo formInfo;
         FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
-        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
         formManagerBridge_->SetParamForWant(info, formInfo);
 #endif
     }

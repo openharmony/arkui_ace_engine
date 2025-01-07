@@ -41,6 +41,11 @@ public:
         realNavBarWidth_ = realNavBarWidth;
     }
 
+    float GetRealNavBarWidth() const
+    {
+        return realNavBarWidth_;
+    }
+
     void SetIfNeedInit(bool ifNeedInit)
     {
         ifNeedInit_ = ifNeedInit;

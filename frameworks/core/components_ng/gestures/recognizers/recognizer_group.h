@@ -201,6 +201,8 @@ public:
         return false;
     }
 
+    virtual void CheckAndSetRecognizerCleanFlag(const RefPtr<NGGestureRecognizer>& recognizer) {}
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

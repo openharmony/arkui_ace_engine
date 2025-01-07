@@ -42,7 +42,12 @@ void SetScrollableBarModeOptions(ArkUINodeHandle node, const ArkUI_Float32 value
     ScrollableBarModeOptions option;
     CalcDimension margin = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     option.margin = margin;
-    option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
+    if (layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
+    } else {
+        option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
+    }
     TabsModelNG::SetScrollableBarModeOptions(frameNode, option);
 }
 void SetBarGridAlign(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesLength,
@@ -217,7 +222,7 @@ void ResetScrollableBarModeOptions(ArkUINodeHandle node)
     ScrollableBarModeOptions defaultOption;
     CalcDimension margin = Dimension(0.0, DimensionUnit::VP);
     defaultOption.margin = margin;
-    defaultOption.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    defaultOption.nonScrollableLayoutStyle = std::nullopt;
     TabsModelNG::SetScrollableBarModeOptions(frameNode, defaultOption);
 }
 void ResetBarGridAlign(ArkUINodeHandle node)
@@ -453,7 +458,7 @@ void ResetBarBackgroundEffect(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITabsModifier* GetTabsModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITabsModifier modifier = {
         .setTabBarMode = SetTabBarMode,
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
@@ -503,21 +508,14 @@ const ArkUITabsModifier* GetTabsModifier()
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITabsModifier* GetCJUITabsModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITabsModifier modifier = {
         .setTabBarMode = SetTabBarMode,
         .setScrollableBarModeOptions = SetScrollableBarModeOptions,
@@ -565,14 +563,7 @@ const CJUITabsModifier* GetCJUITabsModifier()
         .setBarBackgroundEffect = SetBarBackgroundEffect,
         .resetBarBackgroundEffect = ResetBarBackgroundEffect,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

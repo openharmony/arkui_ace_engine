@@ -80,8 +80,15 @@ public:
         return selected_;
     }
 
+    void SetIsScreenReaderOn(bool isScreenReaderOn)
+    {
+        isScreenReaderOn_ = isScreenReaderOn;
+    }
+
     bool IsMeasureBoundary() const override;
     void UpdateChildBoundary(RefPtr<FrameNode>& frameNode);
+    void RemoveAccessibilityClickEvent();
+    void InitAccessibilityClickEvent();
 
 private:
     void OnModifyDone() override;
@@ -140,6 +147,11 @@ private:
     float CalcArcItemAngle(int32_t index);
     float GetPositionAngle(const Offset& position);
     bool AtArcHotArea(const Offset& position);
+    void FireAccessbilityExpanded();
+    void FireAccessbilityCollapsed();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void InitializeAccessibility();
+    void FireAccessibilityIndexChanged(bool selectChanged, bool fromTouchUp);
     void InitExpandedProperty();
     void InitCollapsedProperty();
 
@@ -163,6 +175,13 @@ private:
     RefPtr<ArcIndexerContentModifier> contentModifier_;
     int32_t startIndex_ = 0;
     int32_t endIndex_ = ARC_INDEXER_COLLAPSE_ITEM_COUNT;
+    RefPtr<ClickEvent> expandedClickListener_;
+    RefPtr<ClickEvent> collapsedClickListener_;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
+    WeakPtr<FrameNode> expandedNode_ = nullptr;
+    WeakPtr<FrameNode> collapsedNode_ = nullptr;
+    bool isScreenReaderOn_ = false;
+    bool isClickActionFire_ = false;
     int32_t focusIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG

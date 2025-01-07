@@ -444,6 +444,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     calendarPattern->SetSelectedDay(date);
     CalendarMonth currentMonth { .year = date.GetYear(), .month = date.GetMonth() };
     UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
+    calendarPattern->SetStartDate(settingData.startDate);
+    calendarPattern->SetEndDate(settingData.endDate);
 
     CalendarDay calendarDay;
     PickerDate today = PickerDate::Current();

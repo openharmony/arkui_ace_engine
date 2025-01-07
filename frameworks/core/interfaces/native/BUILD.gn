@@ -145,7 +145,7 @@ template("ace_core_interfaces_native_node") {
       "${ace_root}/interfaces/native/node",
     ]
 
-    if (defined(config.qrcodegen_support) && config.qrcodegen_support) {
+    if (qrcodegen_support) {
       sources += [ "node/qrcode_modifier.cpp" ]
     }
 

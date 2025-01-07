@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -593,13 +594,20 @@ public:
         return webHapPath_;
     }
 
-    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+        std::optional<NG::RectF> windowRect = std::nullopt);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     uint32_t GetStatusBarHeight();
+
+    Rosen::WindowMode GetWindowMode() const
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+        return uiWindow_->GetMode();
+    }
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -736,6 +744,7 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+    void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
     {
@@ -755,6 +764,11 @@ public:
     {
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
 private:
@@ -864,6 +878,7 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
 };
 
 } // namespace OHOS::Ace::Platform
