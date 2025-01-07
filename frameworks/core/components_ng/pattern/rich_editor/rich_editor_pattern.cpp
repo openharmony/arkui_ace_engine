@@ -3176,9 +3176,9 @@ WindowMode RichEditorPattern::GetWindowMode()
 
 bool RichEditorPattern::GetIsMidScene()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    auto windowManager = pipelineContext->GetWindowManager();
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto windowManager = context->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, false);
     bool isMidScene = false;
     int32_t ret = windowManager->GetIsMidScene(isMidScene);
