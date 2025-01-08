@@ -679,8 +679,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {
