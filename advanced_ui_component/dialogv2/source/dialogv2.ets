@@ -21,8 +21,8 @@ import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
-import { accessibility } from '@kit.AccessibilityKit';
-import { KeyCode } from '@kit.InputKit';
+import accessibility from '@ohos.accessibility';
+import { KeyCode } from '@ohos.multimodalInput.keyCode';
 
 const TITLE_MAX_LINES: number = 2;
 const HORIZON_BUTTON_MAX_COUNT: number = 2;
@@ -87,19 +87,19 @@ export type AdvancedDialogV2ButtonAction = () => void;
 @ObservedV2
 export class AdvancedDialogV2Button {
   @Trace
-  content: ResourceStr = '';
+  public content: ResourceStr = '';
   @Trace
-  action?: AdvancedDialogV2ButtonAction;
+  public action?: AdvancedDialogV2ButtonAction;
   @Trace
-  background?: ColorMetrics;
+  public background?: ColorMetrics;
   @Trace
-  fontColor?: ColorMetrics;
+  public fontColor?: ColorMetrics;
   @Trace
-  buttonStyle?: ButtonStyleMode;
+  public buttonStyle?: ButtonStyleMode;
   @Trace
-  role?: ButtonRole;
+  public role?: ButtonRole;
   @Trace
-  defaultFocus?: boolean;
+  public defaultFocus?: boolean;
 
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
@@ -672,8 +672,8 @@ export struct ConfirmDialogV2 {
   isCheckedMonitor(monitor: IMonitor) {
     this.isCheckedInner = monitor.value<boolean>('isChecked')?.now;
   }
-  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: "" });
-  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: "" });
+  @Param primaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
+  @Param secondaryButton?: AdvancedDialogV2Button = new AdvancedDialogV2Button({ content: '' });
   @Local fontColorWithTheme: ResourceColor = $r('sys.color.font_primary');
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
   private contentScroller: Scroller = new Scroller();
@@ -1452,7 +1452,10 @@ struct CustomDialogContentComponent {
 }
 
 @Extend(Button)
-function setButtonProperties(buttonOptions: AdvancedDialogV2Button, buttonList?: AdvancedDialogV2Button[], controller?: PromptActionDialogController) {
+function setButtonProperties(
+  buttonOptions: AdvancedDialogV2Button,
+  buttonList?: AdvancedDialogV2Button[],
+  controller?: PromptActionDialogController) {
   .onKeyEvent((event: KeyEvent) => {
     if (!event) {
       return;
