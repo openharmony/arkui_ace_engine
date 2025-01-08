@@ -30,6 +30,7 @@
 #include "locale_config.h"
 #include "native_reference.h"
 #include "ohos/init_data.h"
+#include "core/common/dynamic_module_helper.h"
 #ifdef RESOURCE_SCHEDULE_SERVICE_ENABLE
 #include "res_sched_client.h"
 #include "res_type.h"
@@ -1671,6 +1672,7 @@ UIContentErrorCode UIContentImpl::CommonInitialize(
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
         XcollieInterface::GetInstance().SetTimerCount("HIT_EMPTY_WARNING", TIMEOUT_LIMIT, COUNT_LIMIT);
+        DynamicModuleHelper::GetInstance().LoadVendorConfig();
     });
     AceNewPipeJudgement::InitAceNewPipeConfig();
     auto apiCompatibleVersion = context->GetApplicationInfo()->apiCompatibleVersion;

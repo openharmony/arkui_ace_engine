@@ -15,7 +15,13 @@
 
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
 
+#include "interfaces/inner_api/ace_kit/src/view/extend/badge/badge_extend_pattern.h"
+#include "interfaces/inner_api/ace_kit/src/view/frame_node_impl.h"
+#include "ui/view/extend/badge/badge_pattern.h"
+
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/badge/badge_theme.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/badge/badge_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
@@ -25,8 +31,20 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::BADGE_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+    CreatorFunc customFunc = DynamicModuleHelper::GetInstance().GetCreatorByFeatureName("customBadge");
+    RefPtr<FrameNode> frameNode;
+    if (customFunc != nullptr) {
+        auto kitPattern = AceType::Claim(reinterpret_cast<Kit::BadgePattern*>(customFunc()));
+        frameNode = FrameNode::GetOrCreateFrameNode(V2::BADGE_ETS_TAG, nodeId,
+            [kitPattern]() { return AceType::MakeRefPtr<Kit::BadgeExtendPattern>(kitPattern); });
+        auto kitFrameNode = AceType::MakeRefPtr<Kit::FrameNodeImpl>(frameNode, kitPattern);
+        frameNode->SetKitNode(kitFrameNode);
+        kitPattern->SetHost(kitFrameNode);
+    } else {
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::BADGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<BadgePattern>(); });
+    }
+
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -35,7 +53,7 @@ void BadgeModelNG::Create(BadgeParameters& badgeParameters)
 
     auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     layoutProperty->SetIsDefault(isDefaultFontSize_, isDefaultBadgeSize_);
-    
+
     if (badgeParameters.badgeValue.has_value()) {
         layoutProperty->UpdateBadgeValue(badgeParameters.badgeValue.value());
     }

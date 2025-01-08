@@ -17,16 +17,24 @@
 
 #include <dlfcn.h>
 #include <memory>
+#include <string>
 
+#include "ui/base/utils/utils.h"
+
+#include "adapter/ohos/entrance/utils.h"
+#include "base/json/json_util.h"
 #include "base/utils/utils.h"
 #include "compatible/components/component_loader.h"
 
 namespace OHOS::Ace {
 namespace {
-const std::string COMPATIABLE_LIB = "libace_compatible_components.z.so";
-const std::string COMPATIABLE_COMPONENT_LOADER = "OHOS_ACE_Compatible_GetLoader";
-const std::string COMPATIABLE_CANVAS_RENDERING_CONTEXT = "OHOS_ACE_Compatible_GetCanvasRenderingContext";
-const std::string COMPATIABLE_CANVAS_BRIDGE = "OHOS_ACE_Compatible_CreateCanvasBridge";
+const char COMPATIABLE_LIB[] = "libace_compatible_components.z.so";
+const char COMPATIABLE_COMPONENT_LOADER[] = "OHOS_ACE_Compatible_GetLoader";
+const char COMPATIABLE_CANVAS_RENDERING_CONTEXT[] = "OHOS_ACE_Compatible_GetCanvasRenderingContext";
+const char COMPATIABLE_CANVAS_BRIDGE[] = "OHOS_ACE_Compatible_CreateCanvasBridge";
+const char VENDOR_CONFIG_PATH[] = "/etc/abc/arkui/";
+const char VENDOR_CONFIG_FILE[] = "vendor_config.json";
+const char SO_POSTFIX[] = ".z.so";
 } // namespace
 DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 {
@@ -37,7 +45,7 @@ DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char* name)
 {
     if (!componentLoaderFunc_) {
-        componentLoaderFunc_ = reinterpret_cast<ComponentLoaderFunc>(LoadSymbol(COMPATIABLE_COMPONENT_LOADER.c_str()));
+        componentLoaderFunc_ = reinterpret_cast<ComponentLoaderFunc>(LoadSymbol(COMPATIABLE_COMPONENT_LOADER));
     }
 
     CHECK_NULL_RETURN(componentLoaderFunc_, nullptr);
@@ -48,7 +56,7 @@ void* DynamicModuleHelper::CreateCanvasRenderingContextModel(bool isOffscreen)
 {
     if (!canvasRenderingContextLoaderFunc_) {
         canvasRenderingContextLoaderFunc_ =
-            reinterpret_cast<CanvasLoaderFunc>(LoadSymbol(COMPATIABLE_CANVAS_RENDERING_CONTEXT.c_str()));
+            reinterpret_cast<CanvasLoaderFunc>(LoadSymbol(COMPATIABLE_CANVAS_RENDERING_CONTEXT));
     }
 
     CHECK_NULL_RETURN(canvasRenderingContextLoaderFunc_, nullptr);
@@ -58,7 +66,7 @@ void* DynamicModuleHelper::CreateCanvasRenderingContextModel(bool isOffscreen)
 void* DynamicModuleHelper::CreateCanvasBridge(CanvasBridgeParams& params)
 {
     if (!canvasBridgeLoaderFunc_) {
-        canvasBridgeLoaderFunc_ = reinterpret_cast<CanvasBridgeFunc>(LoadSymbol(COMPATIABLE_CANVAS_BRIDGE.c_str()));
+        canvasBridgeLoaderFunc_ = reinterpret_cast<CanvasBridgeFunc>(LoadSymbol(COMPATIABLE_CANVAS_BRIDGE));
     }
 
     CHECK_NULL_RETURN(canvasBridgeLoaderFunc_, nullptr);
@@ -78,7 +86,7 @@ DynamicModuleHelper::~DynamicModuleHelper()
 bool DynamicModuleHelper::LoadLibrary()
 {
     if (!compatibleLibLoaded_) {
-        compatibleLibHandle_ = dlopen(COMPATIABLE_LIB.c_str(), RTLD_LAZY);
+        compatibleLibHandle_ = dlopen(COMPATIABLE_LIB, RTLD_LAZY);
         CHECK_NULL_RETURN(compatibleLibHandle_, false);
 
         compatibleLibLoaded_ = true;
@@ -99,6 +107,51 @@ void* DynamicModuleHelper::LoadSymbol(const char* symName)
 {
     CHECK_NULL_RETURN(compatibleLibHandle_, nullptr);
     return dlsym(compatibleLibHandle_, symName);
+}
+
+void DynamicModuleHelper::LoadVendorConfig()
+{
+    std::string path(VENDOR_CONFIG_PATH);
+    std::string config(VENDOR_CONFIG_FILE);
+    std::string jsonStr = GetStringFromFile(path, config);
+    LOGE("DynamicModuleHelper::LoadVendorConfig getVendorConfig: %{public}s", jsonStr.c_str());
+    vendorConfig_ = JsonUtil::ParseJsonString(jsonStr);
+}
+
+std::unique_ptr<JsonValue> DynamicModuleHelper::GetVendorFeatures()
+{
+    if (vendorConfig_) {
+        return vendorConfig_->GetObject("features");
+    }
+    return nullptr;
+}
+
+CreatorFunc DynamicModuleHelper::GetCreatorByFeatureName(const std::string& feature)
+{
+    auto iter = vendorSymbolMap_.find(feature);
+    if (iter != vendorSymbolMap_.end()) {
+        return iter->second;
+    } else {
+        auto features = GetVendorFeatures();
+        CHECK_NULL_RETURN(features, nullptr);
+        auto featureObj = features->GetObject(feature);
+        CHECK_NULL_RETURN(featureObj, nullptr);
+        auto library = featureObj->GetString("library");
+        library.append(SO_POSTFIX);
+        auto symbol = featureObj->GetString("symbol");
+        LOGI("DynamicModuleHelper::GetCreatorByFeatureName feature:%{public}s library:%{public}s symbol:%{public}s",
+            feature.c_str(), library.c_str(), symbol.c_str());
+        CHECK_NULL_RETURN(!library.empty() && !symbol.empty(), nullptr);
+        auto libHandle = dlopen(library.c_str(), RTLD_LAZY);
+        CHECK_NULL_RETURN(libHandle, nullptr);
+        vendorHandleMap_.emplace(feature, libHandle);
+        void* libSymbol = dlsym(libHandle, symbol.c_str());
+        CHECK_NULL_RETURN(libSymbol, nullptr);
+        CreatorFunc result = reinterpret_cast<CreatorFunc>(libSymbol);
+        vendorSymbolMap_.emplace(feature, result);
+        return result;
+    }
+    return nullptr;
 }
 
 } // namespace OHOS::Ace

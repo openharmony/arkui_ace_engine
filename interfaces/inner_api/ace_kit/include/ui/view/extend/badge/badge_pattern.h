@@ -28,6 +28,7 @@ class ACE_FORCE_EXPORT BadgePattern : public Ace::Kit::Pattern {
 public:
     virtual RefPtr<BadgeExtension> CreateExtension();
 
+    bool IsAtomicNode() const override;
     void OnModifyDone() override;
 };
 
