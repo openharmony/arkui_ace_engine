@@ -434,13 +434,39 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
     }
 }
 
+void TextPickerPattern::ColumnPatternInitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    auto frameNodes = GetColumnNodes();
+    for (auto iter : frameNodes) {
+        auto columnNode = iter.second;
+        if (!columnNode) {
+            continue;
+        }
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        if (!columnPattern) {
+            continue;
+        }
+        columnPattern->InitHapticController(columnNode);
+    }
+}
+
 void TextPickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
     if (isFiredSelectsChange_) {
         isFiredSelectsChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
+    isHapticChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
@@ -1309,6 +1335,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
             }
         }
     }
+    json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
 
 std::string TextPickerPattern::GetRangeStr() const

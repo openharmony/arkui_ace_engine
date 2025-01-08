@@ -36,6 +36,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float PICKER_MAXFONTSCALE = 1.0f;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 const int32_t BUFFER_NODE_NUMBER = 2;
 
 void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPickerDialog,
@@ -1382,4 +1383,25 @@ void TextPickerModelNG::HasUserDefinedOpacity()
     textPickerPattern->SetUserDefinedOpacity(renderContext->GetOpacityValue(1.0));
 }
 
+void TextPickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void TextPickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    textPickerPattern->SetIsEnableHaptic(isEnableHapticFeedback);
+}
+
+bool TextPickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_RETURN(textPickerPattern, DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+    return textPickerPattern->GetIsEnableHaptic();
+}
 } // namespace OHOS::Ace::NG
