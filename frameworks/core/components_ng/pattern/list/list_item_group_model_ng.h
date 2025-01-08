@@ -50,6 +50,10 @@ public:
     static V2::ItemDivider GetDivider(FrameNode* frameNode);
     static void SetSpace(FrameNode* frameNode, const Dimension& space);
     static void SetStyle(FrameNode* frameNode, V2::ListItemGroupStyle style);
+    static void RemoveHeader(FrameNode* frameNode);
+    static void RemoveFooter(FrameNode* frameNode);
+    static bool HasFooter(FrameNode* frameNode);
+    static bool HasHeader(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG
