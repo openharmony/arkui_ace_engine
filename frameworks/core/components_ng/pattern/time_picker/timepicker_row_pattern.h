@@ -21,6 +21,7 @@
 #include "base/i18n/date_time_sequence.h"
 #include "base/i18n/localization.h"
 #include "base/i18n/time_format.h"
+#include "base/utils/macros.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -670,7 +671,22 @@ private:
     void HandleMinColumnBuilding();
     void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
-    const PickerTime& AdjustTime(const PickerTime& time);
+    PickerTime AdjustTime(const PickerTime& time);
+
+    bool IsStartEndTimeDefined();
+    void HourChangeBuildTimeRange();
+    void MinuteChangeBuildTimeRange(const std::string& hourStr);
+    void RecordHourAndMinuteOptions();
+    void RecordHourMinuteValues();
+    int32_t GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value);
+    std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
+    std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
+    void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
+    void UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange = false);
+    void Hour24ChangeBuildTimeRange();
+    void Hour12ChangeBuildTimeRange();
+    int32_t GetOldHourIndex(const std::vector<std::string>& hourVector);
+    void RecordHourOptions();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
@@ -736,6 +752,12 @@ private:
     PickerTextProperties textProperties_;
     bool isShowInDatePickerDialog_ = false;
     bool isEnableCascade_ = false;
+
+    std::vector<std::string> definedAMHours_;
+    std::vector<std::string> definedPMHours_;
+    std::vector<std::string> defined24Hours_;
+    std::string oldHourValue_;
+    std::string oldMinuteValue_;
 };
 } // namespace OHOS::Ace::NG
 
