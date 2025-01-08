@@ -842,4 +842,9 @@ void SystemProperties::InitFoldScreenTypeBySystemProperty()
         foldScreenType_ = static_cast<FoldScreenType>(type);
     }
 }
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
 } // namespace OHOS::Ace
