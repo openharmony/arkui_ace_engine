@@ -1091,6 +1091,11 @@ public:
         return isStopBackPress_;
     }
 
+    bool IsDragging() const override
+    {
+        return status_ == Status::DRAGGING || status_ == Status::FLOATING;
+    }
+
 protected:
     bool CanStartAITask() override;
 
@@ -1452,7 +1457,6 @@ private:
     bool isFirstMouseSelect_ = true;
     bool leftMousePress_ = false;
     bool isLongPress_ = false;
-    bool isDragging_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;
