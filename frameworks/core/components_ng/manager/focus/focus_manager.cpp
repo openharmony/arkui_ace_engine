@@ -372,10 +372,10 @@ void FocusManager::FocusSwitchingStart(const RefPtr<FocusHub>& focusHub,
     startReason_ = reason;
 }
 
-void FocusManager::ReportFocusSwitching()
+void FocusManager::ReportFocusSwitching(FocusReason focusReason)
 {
     for (auto& [_, cb] : listeners_) {
-        cb(currentFocus_, switchingFocus_);
+        cb(currentFocus_, switchingFocus_, focusReason);
     }
     currentFocus_ = switchingFocus_;
     isSwitchingFocus_.reset();
@@ -406,7 +406,7 @@ void FocusManager::FocusSwitchingEnd(SwitchingEndReason reason)
             startReason_.value_or(SwitchingStartReason::DEFAULT) != SwitchingStartReason::LOST_FOCUS_TO_VIEW_ROOT) {
             switchingFocus_->ClearLastFocusNode();
         }
-        ReportFocusSwitching();
+        ReportFocusSwitching(FocusReason::DEFAULT);
         PaintFocusState();
     } else {
         isSwitchingFocus_ = false;
@@ -434,7 +434,7 @@ void FocusManager::WindowFocusMoveEnd()
             startReason_.value_or(SwitchingStartReason::DEFAULT),
             endReason_.value_or(SwitchingEndReason::DEFAULT),
             updateReason_.value_or(SwitchingUpdateReason::DEFAULT));
-        ReportFocusSwitching();
+        ReportFocusSwitching(FocusReason::WINDOW_FOCUS);
         PaintFocusState();
     }
 }
