@@ -1517,7 +1517,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     }
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap");
+            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
