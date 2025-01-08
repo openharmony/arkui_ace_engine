@@ -398,7 +398,7 @@ private:
     void RegisterOnClick();
     void RegisterOnHover();
     void CleanParentMenuItemBgColor();
-    void SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
+    void SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type);
     virtual void OnTouch(const TouchEventInfo& info);
     virtual bool OnKeyEvent(const KeyEvent& event);
     virtual bool IsCustomMenuItem()
