@@ -226,7 +226,7 @@ export class NavWidthRangeAttrModifier implements AttributeModifier<NavigationAt
 export struct SubNavigation {
   @Link isPortrait: boolean;
   @State displayMode: number = 0;
-  @ObjectLink multiStack: MultiNavPathStack
+  @ObjectLink multiStack: MultiNavPathStack;
   @BuilderParam navDestination: NavDestinationBuildFunction;
   primaryStack: MyNavPathStack = new MyNavPathStack();
   @State secondaryStack: MyNavPathStack = new MyNavPathStack();
@@ -474,7 +474,7 @@ export class MultiNavPathStack extends NavPathStack {
       } else if (optionParam.animated !== undefined) {
         animated = optionParam.animated;
       } else {
-
+ 
       }
     }
     policy = (policy === undefined) ? SplitPolicy.DETAIL_PAGE : policy;
@@ -593,7 +593,7 @@ export class MultiNavPathStack extends NavPathStack {
       } else if (optionParam.animated !== undefined) {
         animated = optionParam.animated;
       } else {
-
+ 
       }
     }
 
