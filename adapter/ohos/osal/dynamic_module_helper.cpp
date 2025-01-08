@@ -114,7 +114,6 @@ void DynamicModuleHelper::LoadVendorConfig()
     std::string path(VENDOR_CONFIG_PATH);
     std::string config(VENDOR_CONFIG_FILE);
     std::string jsonStr = GetStringFromFile(path, config);
-    LOGE("DynamicModuleHelper::LoadVendorConfig getVendorConfig: %{public}s", jsonStr.c_str());
     vendorConfig_ = JsonUtil::ParseJsonString(jsonStr);
 }
 
