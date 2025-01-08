@@ -71,6 +71,28 @@ private:
     RefPtr<LayoutWrapper> iconWrap_;
 };
 
+class SymbolIconLayoutElement : public SecurityComponentLayoutElement {
+public:
+    SymbolIconLayoutElement() {};
+    void Init(RefPtr<SecurityComponentLayoutProperty>& property, RefPtr<LayoutWrapper>& symbolIconWrap);
+    ~SymbolIconLayoutElement() = default;
+
+    double ShrinkWidth(double reduceSize) override;
+    double ShrinkHeight(double reduceSize) override;
+    void DoMeasure();
+
+    bool GetIsExist() const
+    {
+        return isExist_;
+    }
+
+private:
+    bool isExist_ = false;
+    double minSymbolIconSize_;
+    RefPtr<SecurityComponentLayoutProperty> secCompProperty_;
+    RefPtr<LayoutWrapper> symbolIconWrap_;
+}
+
 class PaddingLayoutElement : public SecurityComponentLayoutElement {
 public:
     PaddingLayoutElement() {};

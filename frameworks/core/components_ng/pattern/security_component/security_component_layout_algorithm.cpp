@@ -160,6 +160,9 @@ double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
     }
 
     double iconWidth = icon_.width_;
+    if (symbolIcon_.GetIsExist()) {
+        iconWidth = symbolIcon_.width_;
+    }
     double textWidth = text_.width_;
     if (isVertical_) {
         // Shrink max width, then shrink another proportionally if vertical
@@ -171,6 +174,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
             double iconRemain = icon_.ShrinkWidth(remain);
             double textRemain = (remain - iconRemain) * textWidth / iconWidth;
             text_.ShrinkWidth(textRemain);
+            symbolIcon_.ShrinkWidth(iconRemain);
         }
     } else {
         // Shrink proportional text and icon if horizontal
@@ -182,6 +186,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkWidth(double diff)
             text_.ShrinkWidth(resIcon);
         } else if (!NearEqual(resText, 0.0)) {
             icon_.ShrinkWidth(resText);
+            symbolIcon_.ShrinkWidth(resText);
         }
     }
     UpdateTextSize();
@@ -220,6 +225,9 @@ double SecurityComponentLayoutAlgorithm::ShrinkHeight(double diff)
     }
 
     double iconHeight = icon_.height_;
+    if (symbolIcon_.GetIsExist()) {
+        iconHeight = symbolIcon_.height_;
+    }
     double textHeight = text_.height_;
     if (!isVertical_) {
          // Shrink max width, then shrink another proportionally if horizontal
@@ -227,6 +235,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkHeight(double diff)
             double textRemain = text_.ShrinkHeight(remain);
             double iconRemain = (remain - textRemain) * iconHeight / textHeight;
             icon_.ShrinkHeight(iconRemain);
+            symbolIcon_.ShrinkHeight(iconRemain);
         } else {
             double iconRemain = icon_.ShrinkHeight(remain);
             double textRemain = (remain - iconRemain) * textHeight / iconHeight;
@@ -241,6 +250,7 @@ double SecurityComponentLayoutAlgorithm::ShrinkHeight(double diff)
             text_.ShrinkHeight(resIcon);
         } else if (!NearEqual(resText, 0.0)) {
             icon_.ShrinkHeight(resText);
+            symbolIcon_.ShrinkHeight(resText);
         }
     }
     isNeedReadaptWidth_ = true;
@@ -297,15 +307,17 @@ void SecurityComponentLayoutAlgorithm::AdaptHeight()
 
 void SecurityComponentLayoutAlgorithm::MeasureIntegralSize()
 {
+    auto iconWidth = symbolIcon_.GetIsExist() ? symbolIcon_.width_ : icon_.width_;
+    auto iconHeight = symbolIcon_.GetIsExist() ? symbolIcon_.height_ : icon_.height_;
     if (isVertical_) {
-        double contextWidth = std::max(text_.width_, icon_.width_);
+        double contextWidth = std::max(text_.width_, iconWidth);
         componentHeight_ = top_.height_ + text_.height_ +
-            middle_.height_ + icon_.height_ + bottom_.height_;
+            middle_.height_ + iconHeight + bottom_.height_;
         componentWidth_ = left_.width_ + contextWidth + right_.width_;
     } else {
-        double contextHeight = std::max(text_.height_, icon_.height_);
+        double contextHeight = std::max(text_.height_, iconHeight);
         componentHeight_ = top_.height_ + contextHeight + bottom_.height_;
-        componentWidth_ = left_.width_ + icon_.width_ +
+        componentWidth_ = left_.width_ + iconWidth +
             middle_.width_ + text_.width_ + right_.width_;
     }
 }
@@ -313,37 +325,41 @@ void SecurityComponentLayoutAlgorithm::MeasureIntegralSize()
 void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
     OffsetF& offsetText, SizeF& childSize)
 {
+    auto iconWidth = symbolIcon_.GetIsExist() ? symbolIcon_.width_ : icon_.width_;
+    auto iconHeight = symbolIcon_.GetIsExist() ? symbolIcon_.height_ : icon_.height_;
     offsetText = offsetIcon + OffsetF(0.0, icon_.height_ + middle_.height_);
-    if (icon_.width_ > text_.width_) {
-        offsetText += OffsetF((icon_.width_ - text_.width_) / HALF, 0.0);
-        childSize += SizeF(icon_.width_, 0.0);
+    if (iconWidth > text_.width_) {
+        offsetText += OffsetF((iconWidth - text_.width_) / HALF, 0.0);
+        childSize += SizeF(iconWidth, 0.0);
     } else {
-        offsetIcon += OffsetF((text_.width_ - icon_.width_) / HALF, 0.0);
+        offsetIcon += OffsetF((text_.width_ - iconWidth) / HALF, 0.0);
         childSize += SizeF(text_.width_, 0.0);
     }
-    childSize += SizeF(0.0, icon_.height_ + middle_.height_ + text_.height_);
+    childSize += SizeF(0.0, iconHeight + middle_.height_ + text_.height_);
 }
 
 void SecurityComponentLayoutAlgorithm::UpdateHorizontalOffset(LayoutWrapper* layoutWrapper,
     OffsetF& offsetIcon, OffsetF& offsetText, SizeF& childSize)
 {
+    auto iconWidth = symbolIcon_.GetIsExist() ? symbolIcon_.width_ : icon_.width_;
+    auto iconHeight = symbolIcon_.GetIsExist() ? symbolIcon_.height_ : icon_.height_;
     if (GetTextDirection(layoutWrapper) == TextDirection::RTL) {
         offsetIcon = offsetText +
             OffsetF(text_.width_ + middle_.width_, 0.0);
     } else {
         offsetText = offsetIcon +
-            OffsetF(icon_.width_ + middle_.width_, 0.0);
+            OffsetF(iconWidth + middle_.width_, 0.0);
     }
-    if (icon_.height_ > text_.height_) {
+    if (iconHeight > text_.height_) {
         offsetText +=
-            OffsetF(0.0, (icon_.height_ - text_.height_) / HALF);
-        childSize += SizeF(0.0, icon_.height_);
+            OffsetF(0.0, (iconHeight - text_.height_) / HALF);
+        childSize += SizeF(0.0, iconHeight);
     } else {
         offsetIcon +=
-            OffsetF(0.0, (text_.height_ - icon_.height_) / HALF);
+            OffsetF(0.0, (text_.height_ - iconHeight) / HALF);
         childSize += SizeF(0.0, text_.height_);
     }
-    childSize += SizeF(icon_.width_ + middle_.width_ + text_.width_, 0.0);
+    childSize += SizeF(iconWidth + middle_.width_ + text_.width_, 0.0);
 }
 
 Alignment SecurityComponentLayoutAlgorithm::ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align)
@@ -406,6 +422,7 @@ void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
+    UpdateChildPosition(layoutWrapper, V2::SYMBOL_ETS_TAG, offsetIcon);
     UpdateChildPosition(layoutWrapper, V2::TEXT_ETS_TAG, offsetText);
 
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -821,6 +838,9 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
     icon_.Init(securityComponentLayoutProperty, iconWrapper);
 
+    auto symbolIconWrapper = GetChildWrapper(layoutWrapper, V2::SYMBOL_ETS_TAG);
+    symbolIcon_.Init(securityComponentLayoutProperty, symbolIconWrapper);
+
     auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
     text_.Init(securityComponentLayoutProperty, textWrapper);
 
@@ -864,6 +884,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     FillBlank();
 
     icon_.DoMeasure();
+    symbolIcon_.DoMeasuer();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);

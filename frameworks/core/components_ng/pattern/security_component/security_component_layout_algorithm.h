@@ -84,6 +84,7 @@ private:
     double componentWidth_ = 0.0;
     double componentHeight_ = 0.0;
     IconLayoutElement icon_;
+    SymbolIconLayoutElement symbolIcon_;
     TextLayoutElement text_;
     PaddingLayoutElement left_;
     PaddingLayoutElement top_;

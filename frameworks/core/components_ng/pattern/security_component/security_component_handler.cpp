@@ -696,6 +696,13 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
         return false;
     }
 
+    RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
+    if(symbolIconNode != nullptr) {
+        CHECK_NULL_RETURN(symbolIconNode->GetGeometryNode(), false);
+        auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_RETURN(iconProp, false);
+    }
+
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
     if (!InitSCTextInfo(buttonInfo, textNode)) {
         return false;

@@ -44,7 +44,7 @@ RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 }
 
 void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon,
-    int32_t backgroundType)
+    uint32_t symbolIcon, int32_t backgroundType)
 {
     auto property = node->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_VOID(property);
@@ -52,10 +52,12 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     CHECK_NULL_VOID(secCompTheme);
     property->UpdateSecurityComponentDescription(text);
     property->UpdateIconStyle(icon);
+    property->UpdateSymbolIconStyle(symbolIcon);
     property->UpdateBackgroundType(backgroundType);
 
     if ((text == static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) ||
-        (icon == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL))) {
+        ((icon == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) &&
+        (symbolIcon == static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)))) {
         property->UpdateTextIconSpace(Dimension(0.0));
     }
 
@@ -91,7 +93,12 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
         }
         frameNode->AddChild(buttonNode);
 
-        if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        if (style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+            auto symbolIcon = FrameNode::CreateFrameNode(
+                V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType:MakeRefPtr<TextPattern>());
+            SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
+            frameNode->AddChild(symbolIcon);
+        } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
             auto imageIcon = FrameNode::CreateFrameNode(
                 V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
             imageIcon->SetInternal();
@@ -112,7 +119,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
             SetDefaultTextStyle(textNode, textStr, isButtonVisible);
             frameNode->AddChild(textNode);
         }
-        InitLayoutProperty(frameNode, style.text, style.icon, style.backgroundType);
+        InitLayoutProperty(frameNode, style.text, style.icon, style.symbolIcon, style.backgroundType);
     }
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_RETURN(property, nullptr);
@@ -183,6 +190,24 @@ void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imag
     ImageModelNG::SetMatchTextDirection(Referenced::RawPtr(imageNode), true);
 }
 
+void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
+    const RefPtr<FrameNode> &symbolNode, uint32_t symbolId, bool isButtonVisible)
+{
+    auto secCompTheme = GetTheme();
+    CHECK_NULL_VOID(secCompTheme);
+    auto iconProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(iconProp);
+    SymbolSourceInfo symbolSourceInfo(symbolId);
+    if (isButtonVisible) {
+        iconProp->UpdateSymbolColorList({Color::BLACK});
+    } else {
+        iconProp->UpdateSymbolColorList({secCompTheme->GetIconColorNoBg()});
+    }
+    iconProp->UpdateSymbolSourceInfo(symbolSourceInfo);
+    iconProp->UpdateFontSize(Dimension(24, DimensionUnit::VP));
+    symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    symbolNode->MarkModifyDone();
+}
 void SecurityComponentModelNG::SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
     int32_t type)
 {
@@ -278,6 +303,16 @@ void SecurityComponentModelNG::SetIconSize(const Dimension& value)
 void SecurityComponentModelNG::SetIconColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, IconColor, value);
+}
+
+void SecurityComponentModelNG::SetSymbolIconSize(const Dimension& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SecurityComponentLayoutProperty, SymbolIconSize, value);
+}
+
+void SecurityComponentModelNG::SetSymbolIconColor(const std::vector<Color>& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SecurityComponentPaintProperty, SymbolIconColor, value);
 }
 
 void SecurityComponentModelNG::SetFontSize(const Dimension& value)
