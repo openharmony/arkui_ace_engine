@@ -263,7 +263,7 @@ void ArcIndexerPattern::ResetArrayValue(bool isModeChanged)
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto itemCountChanged = false;
-    fullCount_ = fullArrayValue_.size();
+    fullCount_ = static_cast<int32_t>(fullArrayValue_.size());
     if (fullCount_ > 0) {
         if (autoCollapse_) {
             sharpItemCount_ = fullArrayValue_.at(0) == StringUtils::Str16ToStr8(ARC_INDEXER_STR_SHARP) ? 1 : 0;
@@ -387,8 +387,8 @@ void ArcIndexerPattern::BuildArrayValueItems()
 void ArcIndexerPattern::BuildFullArrayValue()
 {
     arcArrayValue_.clear();
-    size_t startIndex = (fullCount_ > 29) ? (fullCount_ - 29) : 0;
-    for (size_t i = startIndex; i < fullCount_; ++i) {
+    int32_t startIndex = (fullCount_ > 29) ? (fullCount_ - 29) : 0;
+    for (int32_t i = startIndex; i < fullCount_; ++i) {
         arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
     }
 
@@ -601,7 +601,7 @@ void ArcIndexerPattern::IndexNodeCollapsedAnimation()
     option.SetIteration(1);
     auto total = fullArrayValue_.size();
     float from = stepAngle_ * total;
-    collapsedAnimateIndex_ = total;
+    collapsedAnimateIndex_ = static_cast<int32_t>(total);
     collapsedProperty_->Set(from);
     float to = stepAngle_ * (ARC_INDEXER_COLLAPSE_ITEM_COUNT + 1);
     AnimationUtils::Animate(
@@ -665,7 +665,7 @@ void ArcIndexerPattern::StartIndexerNodeDisappearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
     auto total = fullArrayValue_.size();
-    if (nodeIndex > total) {
+    if (nodeIndex > static_cast<int32_t>(total)) {
         return;
     }
     auto child = host->GetChildByIndex(nodeIndex);
@@ -997,7 +997,7 @@ void ArcIndexerPattern::StartIndexerNodeAppearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
     auto total = fullArrayValue_.size();
-    if (nodeIndex > total) {
+    if (nodeIndex > static_cast<int32_t>(total)) {
         return;
     }
     auto child = host->GetChildByIndex(nodeIndex);
