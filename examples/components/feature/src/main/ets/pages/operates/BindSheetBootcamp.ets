@@ -58,9 +58,32 @@ export struct BindSheetBootcamp {
   @State compBindSheetOptionMode: SheetMode = SheetMode.OVERLAY
   @State enableCompBindSheetOptionScrollSizeMode: boolean = false
   @State compBindSheetOptionScrollSizeMode: ScrollSizeMode = ScrollSizeMode.FOLLOW_DETENT
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
-
-
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time, value)
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200)
+  }
 
   build() {
     NavDestination() {
@@ -96,6 +119,7 @@ export struct BindSheetBootcamp {
           {
             shouldDismiss: () => {
               this.compBindSheetIsShow = false
+              this.compEventTriggeredLog('BindSheet:shouldDismiss()')
             },
             height: useEnabled(this.enableCompBindSheetOptionsHeight, this.compBindSheetOptionsHeight),
             detents: useEnabled(this.enableCompBindSheetOptionsDetents, this.compBindSheetOptionsDetents),
@@ -122,7 +146,25 @@ export struct BindSheetBootcamp {
             shadow: useEnabled(this.enableCompBindSheetOptionShadow, this.compBindSheetOptionShadow),
             mode: useEnabled(this.enableCompBindSheetOptionMode, this.compBindSheetOptionMode),
             scrollSizeMode: useEnabled(this.enableCompBindSheetOptionScrollSizeMode,
-              this.compBindSheetOptionScrollSizeMode)
+              this.compBindSheetOptionScrollSizeMode),
+            onWillDismiss: () => {
+              this.compEventTriggeredLog('BindSheet:onWillDismiss()')
+            },
+            onWillSpringBackWhenDismiss: () => {
+              this.compEventTriggeredLog('BindSheet:onWillSpringBackWhenDismiss()')
+            },
+            onHeightDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onHeightDidChange()')
+            },
+            onDetentsDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onDetentsDidChange()')
+            },
+            onWidthDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onWidthDidChange()')
+            },
+            onTypeDidChange: () => {
+              this.compEventTriggeredLog('BindSheet:onTypeDidChange()')
+            }
           }
         )
     }
