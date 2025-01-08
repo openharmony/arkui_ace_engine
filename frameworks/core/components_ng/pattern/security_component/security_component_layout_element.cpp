@@ -101,7 +101,8 @@ double IconLayoutElement::ShrinkHeight(double reduceSize)
     return 0.0;
 }
 
-void SymbolIconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty> &property, RefPtr<LayoutWrapper> &symbolIconWrap) 
+void SymbolIconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty> &property,
+    RefPtr<LayoutWrapper> &symbolIconWrap)
 {
     CHECK_NULL_VOID(property);
     CHECK_NULL_VOID(symbolIconWrap);
@@ -158,7 +159,7 @@ double SymbolIconLayoutElement::ShrinkHeight(double reduceSize)
         return reduceSize;
     }
     if (GreatNotEqual(minSymbolIconSize_, (height_ - reduceSize))) {
-        double remain = reduceSize - (height_ - minSymbolIcnoSize_);
+        double remain = reduceSize - (height_ - minSymbolIconSize_);
         width_ = height_ = minSymbolIconSize_;
         return remain;
     }

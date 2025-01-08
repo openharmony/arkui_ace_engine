@@ -95,7 +95,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
 
         if (style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
             auto symbolIcon = FrameNode::CreateFrameNode(
-                V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType:MakeRefPtr<TextPattern>());
+                V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             SetDefaultSymbolIconStyle(symbolIcon, style.symbolIcon, isButtonVisible);
             frameNode->AddChild(symbolIcon);
         } else if (style.icon != static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {

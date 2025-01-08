@@ -111,7 +111,7 @@ public:
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
                 theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
                 theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
-                theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0vp);
+                theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0_vp);
                 theme->symbolColor_ = pattern->GetAttr<Color>("more_or_back_symbol_color", Color());
             } else {
                 LOGW("find pattern of textoverlay fail");

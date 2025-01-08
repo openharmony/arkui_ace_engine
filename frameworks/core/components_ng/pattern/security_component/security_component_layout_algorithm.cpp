@@ -327,7 +327,7 @@ void SecurityComponentLayoutAlgorithm::UpdateVerticalOffset(OffsetF& offsetIcon,
 {
     auto iconWidth = symbolIcon_.GetIsExist() ? symbolIcon_.width_ : icon_.width_;
     auto iconHeight = symbolIcon_.GetIsExist() ? symbolIcon_.height_ : icon_.height_;
-    offsetText = offsetIcon + OffsetF(0.0, icon_.height_ + middle_.height_);
+    offsetText = offsetIcon + OffsetF(0.0, iconHeight + middle_.height_);
     if (iconWidth > text_.width_) {
         offsetText += OffsetF((iconWidth - text_.width_) / HALF, 0.0);
         childSize += SizeF(iconWidth, 0.0);

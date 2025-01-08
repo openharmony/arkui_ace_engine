@@ -91,7 +91,7 @@ private:
     double minSymbolIconSize_;
     RefPtr<SecurityComponentLayoutProperty> secCompProperty_;
     RefPtr<LayoutWrapper> symbolIconWrap_;
-}
+};
 
 class PaddingLayoutElement : public SecurityComponentLayoutElement {
 public:

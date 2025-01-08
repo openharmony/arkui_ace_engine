@@ -154,6 +154,8 @@ private:
     void SetBackButtonOpacity(float value);
     void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
+    void UpdateMoreOrBackSymbolOptions(bool isMoreButton, bool isReplaceEffectEnable);
+    void UPdataMoreOrBackSymbolOptionsWithDelay();
     void MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation);
     void HideMenuOnlyImmediately();
     void InitSelectMenuStatus(
@@ -162,6 +164,11 @@ private:
     void SetAnimationStatus(bool toDoAnimation)
     {
         isDoingAnimation_ = toDoAnimation;
+    }
+
+    void SetIsMoreOrBackSymbolIcon(bool isMoreOrBackSymbol)
+    {
+        isMoreOrBackSymbolIcon_ = isMoreOrBackSymbol;
     }
 
     static RefPtr<FrameNode> CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info);
@@ -194,6 +201,8 @@ private:
     RefPtr<FrameNode> selectMenuInner_;
     RefPtr<FrameNode> extensionMenu_;
     RefPtr<FrameNode> backButton_;
+    RefPtr<FrameNode> moreOrBackSymbol_;
+    RefPtr<FrameNode> moreButton_;
 
     FrameNodeStatus selectMenuStatus_ = FrameNodeStatus::VISIBLE;
     FrameNodeStatus extensionMenuStatus_ = FrameNodeStatus::GONE;
@@ -215,6 +224,8 @@ private:
     bool isShowInDefaultMenu_[9] = { false };
 
     bool isDefaultBtnOverMaxWidth_ = false;
+
+    bool isMoreOrBackSymbolIcon_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

@@ -697,7 +697,7 @@ bool SecurityComponentHandler::InitChildInfo(OHOS::Security::SecurityComponent::
     }
 
     RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
-    if(symbolIconNode != nullptr) {
+    if (symbolIconNode != nullptr) {
         CHECK_NULL_RETURN(symbolIconNode->GetGeometryNode(), false);
         auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_RETURN(iconProp, false);
