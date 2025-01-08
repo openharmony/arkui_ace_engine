@@ -1821,6 +1821,8 @@ struct ArkUICommonModifier {
     void (*resetAllowDrop)(ArkUINodeHandle node);
     void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityLevel)(ArkUINodeHandle node);
+    void (*setAccessibilityCustomRole)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityCustomRole)(ArkUINodeHandle node);
     void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetDirection)(ArkUINodeHandle node);
     void (*setLayoutWeight)(ArkUINodeHandle node, ArkUI_Int32 layoutWeight);

@@ -2398,6 +2398,34 @@ class AccessibilityTextModifier extends ModifierWithKey<string> {
   }
 }
 
+class AccessibilityRoleModifier extends ModifierWithKey<AccessibilityRoleType> {
+  constructor(value: AccessibilityRoleType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityRole');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityRoleType(node);
+    } else {
+      getUINativeModule().common.setAccessibilityRoleType(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFocusCallback> {
+  constructor(value: AccessibilityFocusCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusCallback(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusCallback(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -4685,6 +4713,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, value);
     }
+    return this;
+  }
+  
+  accessibilityRole(value: AccessibilityRoleType): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityRoleModifier.identity, AccessibilityRoleModifier, value);
+    return this;
+  }
+  
+  onAccessibilityFocus(value: AccessibilityFocusCallback): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
     return this;
   }
 
