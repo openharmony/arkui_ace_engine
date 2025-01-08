@@ -26953,51 +26953,6 @@ class ArkXComponentComponent extends ArkComponent {
       this._modifiersWithKeys.delete(key);
     });
   }
-  outline(value) {
-    throw new Error('Method not implemented.');
-  }
-  outlineColor(value) {
-    throw new Error('Method not implemented.');
-  }
-  outlineRadius(value) {
-    throw new Error('Method not implemented.');
-  }
-  outlineStyle(value) {
-    throw new Error('Method not implemented.');
-  }
-  outlineWidth(value) {
-    throw new Error('Method not implemented.');
-  }
-  expandSafeArea(types, edges) {
-    throw new Error('Method not implemented.');
-  }
-  responseRegion(value) {
-    throw new Error('Method not implemented.');
-  }
-  mouseResponseRegion(value) {
-    throw new Error('Method not implemented.');
-  }
-  size(value) {
-    throw new Error('Method not implemented.');
-  }
-  constraintSize(value) {
-    throw new Error('Method not implemented.');
-  }
-  touchable(value) {
-    throw new Error('Method not implemented.');
-  }
-  hitTestBehavior(value) {
-    throw new Error('Method not implemented.');
-  }
-  layoutWeight(value) {
-    throw new Error('Method not implemented.');
-  }
-  padding(value) {
-    throw new Error('Method not implemented.');
-  }
-  margin(value) {
-    throw new Error('Method not implemented.');
-  }
   background(builder, options) {
     throw new Error('Method not implemented.');
   }
@@ -27029,33 +26984,9 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, BackgroundImagePositionModifier.identity, BackgroundImagePositionModifier, value);
     return this;
   }
-  backgroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
-  }
-  foregroundBlurStyle(value, options) {
-    throw new Error('Method not implemented.');
-  }
   opacity(value) {
     modifierWithKey(this._modifiersWithKeys, XComponentOpacityModifier.identity, XComponentOpacityModifier, value);
     return this;
-  }
-  border(value) {
-    throw new Error('Method not implemented.');
-  }
-  borderStyle(value) {
-    throw new Error('Method not implemented.');
-  }
-  borderWidth(value) {
-    throw new Error('Method not implemented.');
-  }
-  borderColor(value) {
-    throw new Error('Method not implemented.');
-  }
-  borderRadius(value) {
-    throw new Error('Method not implemented.');
-  }
-  borderImage(value) {
-    throw new Error('Method not implemented.');
   }
   foregroundColor(value) {
     throw new Error('Method not implemented.');
@@ -27071,9 +27002,6 @@ class ArkXComponentComponent extends ArkComponent {
       modifierWithKey(this._modifiersWithKeys, OnHoverModifier.identity, OnHoverModifier, event);
     }
     return this;
-  }
-  hoverEffect(value) {
-    throw new Error('Method not implemented.');
   }
   onMouse(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
@@ -27105,16 +27033,7 @@ class ArkXComponentComponent extends ArkComponent {
     }
     return this;
   }
-  tabIndex(index) {
-    throw new Error('Method not implemented.');
-  }
-  groupDefaultFocus(value) {
-    throw new Error('Method not implemented.');
-  }
   animation(value) {
-    throw new Error('Method not implemented.');
-  }
-  transition(value) {
     throw new Error('Method not implemented.');
   }
   gesture(gesture, mask) {
@@ -27250,24 +27169,6 @@ class ArkXComponentComponent extends ArkComponent {
   renderGroup(value) {
     throw new Error('Method not implemented.');
   }
-  translate(value) {
-    throw new Error('Method not implemented.');
-  }
-  scale(value) {
-    throw new Error('Method not implemented.');
-  }
-  gridSpan(value) {
-    throw new Error('Method not implemented.');
-  }
-  gridOffset(value) {
-    throw new Error('Method not implemented.');
-  }
-  rotate(value) {
-    throw new Error('Method not implemented.');
-  }
-  transform(value) {
-    throw new Error('Method not implemented.');
-  }
   onAppear(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
       modifierWithKey(this._modifiersWithKeys, OnAppearModifier.identity, OnAppearModifier, event);
@@ -27292,31 +27193,7 @@ class ArkXComponentComponent extends ArkComponent {
     }
     return this;
   }
-  onAreaChange(event) {
-    throw new Error('Method not implemented.');
-  }
-  visibility(value) {
-    throw new Error('Method not implemented.');
-  }
   flexGrow(value) {
-    throw new Error('Method not implemented.');
-  }
-  flexShrink(value) {
-    throw new Error('Method not implemented.');
-  }
-  flexBasis(value) {
-    throw new Error('Method not implemented.');
-  }
-  alignSelf(value) {
-    throw new Error('Method not implemented.');
-  }
-  displayPriority(value) {
-    throw new Error('Method not implemented.');
-  }
-  zIndex(value) {
-    throw new Error('Method not implemented.');
-  }
-  sharedTransition(id, options) {
     throw new Error('Method not implemented.');
   }
   direction(value) {
@@ -27325,71 +27202,13 @@ class ArkXComponentComponent extends ArkComponent {
   align(value) {
     throw new Error('Method not implemented.');
   }
-  position(value) {
-    throw new Error('Method not implemented.');
-  }
-  markAnchor(value) {
-    throw new Error('Method not implemented.');
-  }
-  offset(value) {
-    throw new Error('Method not implemented.');
-  }
-  enabled(value) {
-    throw new Error('Method not implemented.');
-  }
   useSizeType(value) {
-    throw new Error('Method not implemented.');
-  }
-  alignRules(value) {
-    throw new Error('Method not implemented.');
-  }
-  aspectRatio(value) {
-    throw new Error('Method not implemented.');
-  }
-  clickEffect(value) {
-    throw new Error('Method not implemented.');
-  }
-  allowDrop(value) {
     throw new Error('Method not implemented.');
   }
   privacySensitive(value) {
     throw new Error('Method not implemented.');
   }
-  overlay(value, options) {
-    throw new Error('Method not implemented.');
-  }
-  linearGradient(value) {
-    throw new Error('Method not implemented.');
-  }
-  sweepGradient(value) {
-    throw new Error('Method not implemented.');
-  }
-  radialGradient(value) {
-    throw new Error('Method not implemented.');
-  }
-  motionPath(value) {
-    throw new Error('Method not implemented.');
-  }
-  motionBlur(value) {
-    throw new Error('Method not implemented.');
-  }
-  shadow(value) {
-    modifierWithKey(this._modifiersWithKeys, ShadowModifier.identity, ShadowModifier, value);
-    return this;
-  }
-  blendMode(value) {
-    throw new Error('Method not implemented.');
-  }
   clip(value) {
-    throw new Error('Method not implemented.');
-  }
-  mask(value) {
-    throw new Error('Method not implemented.');
-  }
-  key(value) {
-    throw new Error('Method not implemented.');
-  }
-  id(value) {
     throw new Error('Method not implemented.');
   }
   geometryTransition(id) {
@@ -27440,19 +27259,7 @@ class ArkXComponentComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, PixelStretchEffectModifier.identity, PixelStretchEffectModifier, options);
     return this;
   }
-  keyboardShortcut(value, keys, action) {
-    throw new Error('Method not implemented.');
-  }
   accessibilityGroup(value) {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityText(value) {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityDescription(value) {
-    throw new Error('Method not implemented.');
-  }
-  accessibilityLevel(value) {
     throw new Error('Method not implemented.');
   }
   obscured(reasons) {
@@ -27467,9 +27274,6 @@ class ArkXComponentComponent extends ArkComponent {
   }
   attributeModifier(modifier) {
     return this;
-  }
-  onGestureJudgeBegin(callback) {
-    throw new Error('Method not implemented.');
   }
   onLoad(callback) {
     modifierWithKey(this._modifiersWithKeys, XComponentOnLoadModifier.identity, XComponentOnLoadModifier, callback);
