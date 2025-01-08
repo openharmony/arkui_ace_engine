@@ -1,4 +1,4 @@
-# ArkUI UX送检APP
+# ArkUI exmaples app
 
 ## 背景
 ArkUI是OpenHarmony的UI框架，方便使用者查看组件的效果，以保证原生组件的规范性与一致性。但是目前OpenHarmony社区缺少一个可以让使用者看到UI组件真机预览效果的应用软件。为此，需要设计开发一款ArkUI组件预览应用软件，该应用软件提供直观界面和强大功能，允许调整组件属性并即时预览效果。
