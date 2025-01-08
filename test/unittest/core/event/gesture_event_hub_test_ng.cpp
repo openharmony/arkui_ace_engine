@@ -1973,4 +1973,34 @@ HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
     guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
     EXPECT_NE(guestureEventHub->touchEventActuator_, nullptr);
 }
+
+/**
+ * @tc.name: SetDropAnimationTest
+ * @tc.desc: Test SetDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetDropAnimation, TestSize.Level1)
+{
+    auto dropAnimationFun = []() {};
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(dragEvent->HasDropAnimation());
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    EXPECT_TRUE(dragEvent->HasDropAnimation());
+}
+
+/**
+ * @tc.name: ExecuteDropAnimation
+ * @tc.desc: Test ExecuteDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ExecuteDropAnimation, TestSize.Level1)
+{
+    bool isExecuted = false;
+    auto dropAnimationFun = [&isExecuted]() { isExecuted = true; };
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(isExecuted);
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    dragEvent->ExecuteDropAnimation();
+    EXPECT_TRUE(isExecuted);
+}
 } // namespace OHOS::Ace::NG
