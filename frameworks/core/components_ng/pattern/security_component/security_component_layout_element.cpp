@@ -332,7 +332,7 @@ bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize
 bool TextLayoutElement::TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
     float threshold)
 {
-#ifdef ENABLE_ROSEN_BACKEND 
+#ifdef ENABLE_ROSEN_BACKEND
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_RETURN(textProp, false);
 
