@@ -27,7 +27,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string NEWLINE = "\n";
-const std::u16string WIDE_NEWLINE = UtfUtils::Str8ToStr16(NEWLINE);
+const std::u16string WIDE_NEWLINE = UtfUtils::Str8DebugToStr16(NEWLINE);
 } // namespace
 void TextSelectController::UpdateHandleIndex(int32_t firstHandleIndex, int32_t secondHandleIndex)
 {

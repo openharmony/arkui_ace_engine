@@ -367,7 +367,7 @@ std::string TextFieldSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textSelectController, "");
     auto start = textSelectController->GetStartIndex();
     auto end = textSelectController->GetEndIndex();
-    return UtfUtils::Str16ToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
+    return UtfUtils::Str16DebugToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
 }
 
 void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)

@@ -37,6 +37,7 @@
 #include "core/components_ng/render/paragraph.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/text/text_emoji_processor.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -84,7 +85,7 @@ std::string SpanItem::GetFont() const
 
 void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
+    json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(content).c_str(), filter, FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         TextBackgroundStyle::ToJsonValue(json, backgroundStyle, filter);
@@ -226,7 +227,7 @@ void SpanNode::DumpInfo()
 {
     auto& dumpLog = DumpLog::GetInstance();
     dumpLog.AddDesc(
-        std::string("Content: ").append("\"").append(UtfUtils::Str16ToStr8(spanItem_->content)).append("\""));
+        std::string("Content: ").append("\"").append(UtfUtils::Str16DebugToStr8(spanItem_->content)).append("\""));
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;
@@ -456,7 +457,7 @@ void SpanItem::UpdateTextStyleForAISpan(const std::u16string& spanContent, const
                 builder, textStyle, selectedStart - contentStart, selectedEnd - contentStart);
             contentStart = contentStart + aiSpanStartInSpan - preEnd;
         }
-        auto displayContent = StringUtils::Str8ToStr16(aiSpan.content)
+        auto displayContent = UtfUtils::Str8DebugToStr16(aiSpan.content)
             .substr(aiSpanStartInSpan - aiSpan.start, aiSpanEndInSpan - aiSpanStartInSpan);
         UpdateTextStyle(displayContent, builder, aiSpanStyle, selectedStart - contentStart, selectedEnd - contentStart);
         preEnd = aiSpanEndInSpan;
@@ -520,7 +521,8 @@ void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Parag
         }
         auto contentLength = static_cast<int32_t>(content.length());
         if (selStart > 0) {
-            UpdateContentTextStyle(content.substr(0, selStart), builder, textStyle);
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(0, selStart, content, false, true), builder, textStyle);
         }
         auto finalSelStart = selStart;
         if (finalSelStart < 0) {
@@ -540,12 +542,15 @@ void SpanItem::UpdateTextStyle(const std::u16string& content, const RefPtr<Parag
             selectedTextStyle.SetTextColor(color);
             Color textDecorationColor = selectedTextStyle.GetTextDecorationColor().ChangeAlpha(DRAGGED_TEXT_OPACITY);
             selectedTextStyle.SetTextDecorationColor(textDecorationColor);
-            UpdateContentTextStyle(content.substr(finalSelStart, finalSelEnd - finalSelStart), builder,
-                selectedTextStyle);
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(finalSelStart, finalSelEnd - finalSelStart, content, false, true),
+                builder, selectedTextStyle);
         }
 
         if (finalSelEnd < contentLength) {
-            UpdateContentTextStyle(content.substr(finalSelEnd), builder, textStyle);
+            UpdateContentTextStyle(
+                TextEmojiProcessor::SubU16string(finalSelEnd, content.length() - finalSelEnd, content, false, true),
+                builder, textStyle);
         }
     }
 }
@@ -722,7 +727,7 @@ bool SpanItem::EncodeTlv(std::vector<uint8_t>& buff)
     TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
     EncodeFontStyleTlv(buff);
     EncodeTextLineStyleTlv(buff);
     if (backgroundStyle.has_value()) {
@@ -792,7 +797,7 @@ RefPtr<SpanItem> SpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32_t& cursor
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
+    sameSpan->content = UtfUtils::Str8DebugToStr16(TLVUtil::ReadString(buff, cursor));
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -889,14 +894,14 @@ bool ImageSpanItem::EncodeTlv(std::vector<uint8_t>& buff)
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_TAG);
         TLVUtil::WriteInt32(buff, interval.first);
         TLVUtil::WriteInt32(buff, interval.second);
-        TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+        TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
         TLVUtil::WriteUint8(buff, TLV_SPANITEM_END_TAG);
         return true;
     }
     TLVUtil::WriteUint8(buff, TLV_IMAGESPANITEM_TAG);
     TLVUtil::WriteInt32(buff, interval.first);
     TLVUtil::WriteInt32(buff, interval.second);
-    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(content));
+    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(content));
     if (options.offset.has_value()) {
         TLVUtil::WriteUint8(buff, TLV_IMAGESPANOPTION_OFFSET_TAG);
         TLVUtil::WriteInt32(buff, options.offset.value());
@@ -936,7 +941,7 @@ RefPtr<ImageSpanItem> ImageSpanItem::DecodeTlv(std::vector<uint8_t>& buff, int32
     int32_t start = TLVUtil::ReadInt32(buff, cursor);
     int32_t end = TLVUtil::ReadInt32(buff, cursor);
     sameSpan->interval = {start, end};
-    sameSpan->content = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
+    sameSpan->content = UtfUtils::Str8DebugToStr16(TLVUtil::ReadString(buff, cursor));
 
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor);
         tag != TLV_SPANITEM_END_TAG; tag = TLVUtil::ReadUint8(buff, cursor)) {
@@ -1128,7 +1133,7 @@ ResultObject ImageSpanItem::GetSpanResultObject(int32_t start, int32_t end)
         resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
         if (options.image.has_value()) {
-            resultObject.valueString = UtfUtils::Str8ToStr16(options.image.value());
+            resultObject.valueString = UtfUtils::Str8DebugToStr16(options.image.value());
         }
         if (options.imagePixelMap.has_value()) {
             resultObject.valuePixelMap = options.imagePixelMap.value();
@@ -1271,7 +1276,7 @@ void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
 
 void SpanNode::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    json->Put("Content", UtfUtils::Str16ToStr8(spanItem_->content).c_str());
+    json->Put("Content", UtfUtils::Str16DebugToStr8(spanItem_->content).c_str());
     auto textStyle = spanItem_->GetTextStyle();
     if (!textStyle) {
         return;

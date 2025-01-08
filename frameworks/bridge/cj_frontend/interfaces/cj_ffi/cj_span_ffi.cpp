@@ -44,7 +44,7 @@ const std::vector<TextDecoration> TEXT_DECRATIONS = {
 extern "C" {
 void FfiOHOSAceFrameworkSpanCreate(const char* content)
 {
-    SpanModel::GetInstance()->Create(UtfUtils::Str8ToStr16(content));
+    SpanModel::GetInstance()->Create(UtfUtils::Str8DebugToStr16(content));
 }
 
 void FfiOHOSAceFrameworkSpanSetDecoration(int32_t type, uint32_t color)

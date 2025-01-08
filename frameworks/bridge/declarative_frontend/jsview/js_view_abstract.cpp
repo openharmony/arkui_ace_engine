@@ -5096,7 +5096,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& 
     }
     bool ret = ParseJsStringObj(jsValue, u8Result);
     if (ret) {
-        result = UtfUtils::Str8ToStr16(u8Result);
+        result = UtfUtils::Str8DebugToStr16(u8Result);
         return true;
     }
     return false;
