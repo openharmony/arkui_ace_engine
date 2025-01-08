@@ -239,9 +239,7 @@ export struct TipsDialogV2 {
           textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
-        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-          console.info(`Accessibility send event`)
-        });
+        accessibility.sendAccessibilityEvent(eventInfo);
       } catch (exception) {
         let code: number = (exception as BusinessError).code;
         let message: string = (exception as BusinessError).message;
@@ -764,9 +762,7 @@ export struct ConfirmDialogV2 {
           textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
-        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
-          console.info(`Accessibility send event`)
-        });
+        accessibility.sendAccessibilityEvent(eventInfo);
       } catch (exception) {
         let code: number = (exception as BusinessError).code;
         let message: string = (exception as BusinessError).message;

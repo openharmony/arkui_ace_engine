@@ -332,9 +332,7 @@ export class TipsDialogV2 extends ViewV2 {
             textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
             getContext().resourceManager.getStringSync(125833935)
           });
-          accessibility.sendAccessibilityEvent(s19).then(() => {
-            console.info(`Accessibility send event`);
-          });
+          accessibility.sendAccessibilityEvent(s19);
         }
         catch (h2) {
           let l7 = h2.code;
@@ -1257,9 +1255,7 @@ export class ConfirmDialogV2 extends ViewV2 {
             textAnnouncedForAccessibility: this.isChecked ? getContext().resourceManager.getStringSync(125833934) :
             getContext().resourceManager.getStringSync(125833935)
           });
-          accessibility.sendAccessibilityEvent(o).then(() => {
-            console.info(`Accessibility send event`);
-          });
+          accessibility.sendAccessibilityEvent(o);
         }
         catch (l) {
           let m = l.code;
