@@ -59,7 +59,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-enum class Status { DRAGGING, ON_DROP, NONE };
+enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 struct SpanNodeInfo {
@@ -118,7 +118,7 @@ public:
         return MakeRefPtr<TextEventHub>();
     }
 
-    bool IsDragging() const
+    virtual bool IsDragging() const
     {
         return status_ == Status::DRAGGING;
     }
