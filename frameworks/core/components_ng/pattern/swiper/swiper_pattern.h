@@ -49,6 +49,12 @@ enum class PageFlipMode {
     SINGLE,
 };
 
+using SwiperHoverFlag = uint32_t;
+constexpr SwiperHoverFlag HOVER_NONE = 0;
+constexpr SwiperHoverFlag HOVER_SWIPER = 1;
+constexpr SwiperHoverFlag HOVER_INDICATOR = 1 << 1;
+constexpr SwiperHoverFlag HOVER_ARROW = 1 << 2;
+
 class SwiperPattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(SwiperPattern, NestableScrollContainer);
 
@@ -419,7 +425,11 @@ public:
     std::shared_ptr<SwiperParameters> GetSwiperParameters() const;
     std::shared_ptr<SwiperDigitalParameters> GetSwiperDigitalParameters() const;
 
-    void ArrowHover(bool hoverFlag);
+    void ArrowHover(bool isHover, SwiperHoverFlag flag);
+    bool IsHoverNone()
+    {
+        return hoverFlag_ == HOVER_NONE;
+    }
     bool IsLoop() const;
     bool IsEnabled() const;
     void OnWindowShow() override;
@@ -1201,6 +1211,7 @@ private:
     bool jumpOnChange_ = false;
     TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
+    SwiperHoverFlag hoverFlag_ = HOVER_NONE;
 };
 } // namespace OHOS::Ace::NG
 
