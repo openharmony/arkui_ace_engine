@@ -2906,8 +2906,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     taskExecutor->PostTask(std::move(changeBrightnessTask), TaskExecutor::TaskType::UI, "ArkUIUpdateBrightness");
     AceViewportConfig aceViewportConfig(modifyConfig, reason, rsTransaction);
     bool isReasonRotationOrDPI = (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC ||
-        reason == OHOS::Rosen::WindowSizeChangeReason::RESIZE_WITH_ANIMATION);
+        reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
         if (container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
