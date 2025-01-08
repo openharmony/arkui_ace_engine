@@ -196,7 +196,8 @@ void GridEventHub::HandleOnItemDragStart(const GestureEvent& info)
                     eventHub->HandleOnItemDragEnd(info);
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart", PriorityType::VIP);
+            TaskExecutor::TaskType::UI, "ArkUIGridItemDragStart",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     SnapshotParam param;
     if (auto pixmap = ComponentSnapshot::CreateSync(customNode, param); pixmap) {
