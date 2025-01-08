@@ -24426,6 +24426,10 @@ class ArkDatePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
@@ -24585,6 +24589,21 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey {
   }
 }
 DatePickerBackgroundColorModifier.identity = Symbol('datePickerBackgroundColor');
+class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+DatePickerEnableHapticFeedbackModifier.identity = Symbol('datePickerEnableHapticFeedback');
+
 //@ts-ignore
 if (globalThis.DatePicker !== undefined) {
   globalThis.DatePicker.attributeModifier = function (modifier) {
