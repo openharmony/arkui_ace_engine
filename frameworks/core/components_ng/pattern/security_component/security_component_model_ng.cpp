@@ -36,6 +36,7 @@ const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
+constexpr uint32_t colorAlphaOffset = 24;
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -92,7 +93,6 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
             SetInvisibleBackgroundButton(buttonNode);
         }
         frameNode->AddChild(buttonNode);
-
         if (style.symbolIcon != static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL)) {
             auto symbolIcon = FrameNode::CreateFrameNode(
                 V2::SYMBOL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());

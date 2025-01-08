@@ -299,7 +299,7 @@ public:
 
     const uint32_t& GetMoreSymbolId() const
     {
-        return moreSymbolId_; 
+        return moreSymbolId_;
     }
 
     const uint32_t& GetBackSymbolId() const

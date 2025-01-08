@@ -106,23 +106,23 @@ const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>
 };
 
 const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>> getSymbolIdMap = {
-    { 
-        OH_DEFAULT_CUT, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
+    { OH_DEFAULT_CUT,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
     },
-    {
-        OH_DEFAULT_COPY, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
+    { OH_DEFAULT_COPY,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
     },
-    {
-        OH_DEFAULT_SELECT_ALL, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopyAllSymbolId();}
+    { OH_DEFAULT_SELECT_ALL,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopyAllSymbolId();}
     },
-    {
-        OH_DEFAULT_PASTE, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
+    { OH_DEFAULT_PASTE,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
     },
-    {
-        OH_DEFAULT_CAMERA_INPUT, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCameraInputSymbolId();}
+    { OH_DEFAULT_CAMERA_INPUT,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCameraInputSymbolId();}
     },
-    {
-        OH_DEFAULT_AI_WRITE, [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetAIWriteSymbolId();}
+    { OH_DEFAULT_AI_WRITE,
+        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetAIWriteSymbolId();}
     }
 }
 
@@ -169,12 +169,9 @@ RefPtr<FrameNode> BuildPasteButton(
 {
     auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(descriptionId,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
-        static_cast<int32_t>(ButtonType::CAPSULE),
-        true,
-        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::CAPSULE),
+        true, static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_RETURN(pasteButton, nullptr);
-
     auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, pasteButton);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -559,7 +556,7 @@ RefPtr<FrameNode> BuildMoreOrBackSymbol()
 {
     auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
-        [](){ return AceType::MakeRefPtr<TextPattern>(); });
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, symbol);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
@@ -1478,9 +1475,9 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
         moreOrBackSymbol_ = BuildMoreOrBackSymbol();
     }
     if (isAttachToMoreButton) {
-        backButton_ = RemoveChild(moreOrBackSymbol_);
+        backButton_->RemoveChild(moreOrBackSymbol_);
     } else {
-        moreButton_ = RemoveChild(moreOrBackSymbol_);
+        moreButton_->RemoveChild(moreOrBackSymbol_);
     }
     moreOrBackSymbol_->MountToParent(isAttachToMoreButton ? moreButton_ : backButton_);
     auto layoutProperty = moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
@@ -1521,8 +1518,7 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptionsWithDelay()
         selectOverlay->moreOrBackSymbol_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     });
     taskExecutor->PostDelayedTask(
-        symbolReplaceTask_, TaskExecutor::TaskType::UI, SYMBOL_ANIMATION_DELAY, "ArkUISelectOverlaySymbolReplace";
-    )
+        symbolReplaceTask_, TaskExecutor::TaskType::UI, SYMBOL_ANIMATION_DELAY, "ArkUISelectOverlaySymbolReplace");
 }
 
 std::function<void()> SelectOverlayNode::GetDefaultOptionCallback()
@@ -2380,7 +2376,6 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
             moreOrBackSymbol_ = BuildMoreOrBackSymbol();
             moreOrBackSymbol_->MountToParent(moreButton_);
         }
-        // add back button
         if (!backButton_) {
             backButton_ = BuildMoreOrBackButton(GetId(), false);
             CHECK_NULL_VOID(backButton_);

@@ -32,6 +32,9 @@
 #endif
 
 namespace OHOS::Ace::NG {
+
+constexpr double DEFAULT_SIZE_24 = 24;
+
 void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
@@ -123,7 +126,7 @@ void SymbolIconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty> &prop
         isSetSize_ = true;
         width_ = height_ = property->GetSymbolIconSize().value().ConvertToPx();
     } else {
-        width_ = height_ = Dimension(24, DimensionUnit::VP).ConvertToPx();
+        width_ = height_ = Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx();
     }
 }
 
@@ -138,7 +141,7 @@ void SymbolIconLayoutElement::DoMeasure()
     symbolIconWrap_->Measure(iconConstraint);
 }
 
-double SymbolIconLayoutElement::ShrinkWidth(double reduceSize) 
+double SymbolIconLayoutElement::ShrinkWidth(double reduceSize)
 {
     if (!isExist_ || isSetSize_) {
         return reduceSize;
@@ -153,7 +156,7 @@ double SymbolIconLayoutElement::ShrinkWidth(double reduceSize)
     return 0.0;
 }
 
-double SymbolIconLayoutElement::ShrinkHeight(double reduceSize) 
+double SymbolIconLayoutElement::ShrinkHeight(double reduceSize)
 {
     if (!isExist_ || isSetSize_) {
         return reduceSize;

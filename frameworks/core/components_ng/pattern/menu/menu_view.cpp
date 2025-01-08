@@ -39,7 +39,6 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1481,17 +1480,12 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
-    if (optionsHasIcon) {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true,
-                overlayTheme->GetPasteSymbolId());
-    } else {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true,
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
-    }
+    pasteNode =
+        PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+            optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+            static_cast<int32_t>(ButtonType::NORMAL),
+            true,
+            optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
