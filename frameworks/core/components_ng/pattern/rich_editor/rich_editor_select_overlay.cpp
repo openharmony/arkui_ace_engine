@@ -400,12 +400,17 @@ void RichEditorSelectOverlay::ToggleMenu()
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
+    bool isSingleHandle = info && info->isSingleHandle;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d, isSingleHandle=%{public}d",
+        menuType, reason, isSingleHandle);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
-    bool isSingleHandle = info && info->isSingleHandle;
+    if (isSingleHandle) {
+        pattern->floatingCaretState_.Reset();
+        ResumeTwinkling();
+    }
     IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
