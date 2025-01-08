@@ -905,6 +905,43 @@ const ArkUI_AttributeItem* GetBackgroundColor(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetBackdropBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool sizeIllegal = item->size < NUM_1 || item->size > NUM_3;
+    if (sizeIllegal) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    float grayScaleStart = item->size > NUM_1 ? item->value[NUM_1].f32 : 0.0f;
+    float grayScaleEnd = item->size > NUM_2 ? item->value[NUM_2].f32 : 0.0f;
+    bool valueIllegal = LessNotEqual(item->value[NUM_0].f32, 0.0f)
+        || LessNotEqual(grayScaleStart, 0.0f) || GreatNotEqual(grayScaleStart, MAX_GRAYSCALE)
+        || LessNotEqual(grayScaleEnd, 0.0f) || GreatNotEqual(grayScaleEnd, MAX_GRAYSCALE);
+    if (valueIllegal) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    BlurOption blurOption = {{grayScaleStart, grayScaleEnd}};
+    fullImpl->getNodeModifiers()->getCommonModifier()->setNodeBackdropBlur(
+        node->uiNodeHandle, item->value[NUM_0].f32, blurOption.grayscale.data(), blurOption.grayscale.size());
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetBackdropBlur(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetBackdropBlur(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetBackdropBlur(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getNodeBackdropBlur(node->uiNodeHandle);
+    g_numberValues[NUM_0].f32 = resultValue.dimensionRadius;
+    g_numberValues[NUM_1].f32 = resultValue.brighteningBlur;
+    g_numberValues[NUM_2].f32 = resultValue.darkeningBlur;
+    g_attributeItem.size = NUM_3;
+    return &g_attributeItem;
+}
+
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if ((!item->string && !item->object) || (item->string && item->object)) {
@@ -13650,6 +13687,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetFocusBox,
         SetClickDistance,
         SetTabStop,
+        SetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13760,6 +13798,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         nullptr,
         GetTabStop,
+        GetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13874,6 +13913,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetFocusBox,
         ResetClickDistance,
         ResetTabStop,
+        ResetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

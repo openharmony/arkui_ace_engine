@@ -6479,6 +6479,36 @@ void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
+
+void SetNodeBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+{
+    ArkUI_Float32 blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blur = value > 0 ? value : blur;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
+}
+
+ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
+{
+    ArkUIBackdropBlur backdropBlur;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, backdropBlur);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, backdropBlur);
+    auto blur = renderContext->GetBackBlurRadius();
+    backdropBlur.dimensionRadius = blur.has_value() ? blur.value().Value() : 0.0f;
+    auto propBackdropBlurOption = renderContext->GetBackdropBlurOption();
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() >= NUM_2) {
+        backdropBlur.brighteningBlur = propBackdropBlurOption->grayscale[NUM_0];
+        backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
+    }
+    return backdropBlur;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6887,6 +6917,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .dispatchKeyEvent = DispatchKeyEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
+        .setNodeBackdropBlur = SetNodeBackdropBlur,
+        .getNodeBackdropBlur = GetNodeBackdropBlur,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
