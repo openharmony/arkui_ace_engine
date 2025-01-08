@@ -3043,6 +3043,8 @@ struct ArkUITimepickerModifier {
     void (*resetTimepickerEnableCascade)(ArkUINodeHandle node);
     void (*setTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*setTimepickerOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTimepickerOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIVideoModifier {
@@ -3547,6 +3549,8 @@ struct ArkUISliderModifier {
     void (*resetInteractionMode)(ArkUINodeHandle node);
     void (*setMinResponsiveDistance)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*resetMinResponsiveDistance)(ArkUINodeHandle node);
+    void (*setOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnChange)(ArkUINodeHandle node);
 
     ArkUI_Uint32 (*getBlockColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTrackBackgroundColor)(ArkUINodeHandle node);
@@ -4079,6 +4083,7 @@ struct ArkUICheckboxModifier {
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
     void (*setCheckboxResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Uint32 length);
+    void (*setCheckboxOnChange)(ArkUINodeHandle node, void* callback);
 
     void (*resetSelect)(ArkUINodeHandle node);
     void (*resetSelectedColor)(ArkUINodeHandle node);
@@ -4090,6 +4095,7 @@ struct ArkUICheckboxModifier {
     void (*resetCheckboxShape)(ArkUINodeHandle node);
     void (*resetCheckboxPadding)(ArkUINodeHandle node);
     void (*resetCheckboxResponseRegion)(ArkUINodeHandle node);
+    void (*resetCheckboxOnChange)(ArkUINodeHandle node);
 
     ArkUI_Bool (*getSelect)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getSelectedColor)(ArkUINodeHandle node);
@@ -4123,6 +4129,8 @@ struct ArkUICheckboxGroupModifier {
     void (*setCheckboxGroupStyle)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetCheckboxGroupStyle)(ArkUINodeHandle node);
     void (*setCheckboxGroupName)(ArkUINodeHandle node, ArkUI_CharPtr groupValue);
+    void (*setCheckboxGroupOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetCheckboxGroupOnChange)(ArkUINodeHandle node);
 
     ArkUI_CharPtr (*getCheckboxGroupName)(ArkUINodeHandle node);
     ArkUI_Bool (*getCheckboxGroupSelectAll)(ArkUINodeHandle node);
@@ -4174,6 +4182,8 @@ struct ArkUIMenuModifier {
     void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
     void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
     void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
+    void (*setMenuFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*resetMenuFontSize)(ArkUINodeHandle node);
 };
 
 struct ArkUIWaterFlowModifier {
@@ -4271,6 +4281,8 @@ struct ArkUIMenuItemModifier {
     void (*resetSelectIconSrc)(ArkUINodeHandle node);
     void (*setSelectIconSymbol)(ArkUINodeHandle node, void* symbolFunction);
     void (*resetSelectIconSymbol)(ArkUINodeHandle node);
+    void (*setOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIMenuItemGroupModifier {
@@ -4307,6 +4319,8 @@ struct ArkUIToggleModifier {
     void (*resetToggleTrackBorderRadius)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getToggleUnselectedColor)(ArkUINodeHandle node);
     void (*setToggleState)(ArkUINodeHandle node, ArkUI_Bool isOn);
+    void (*setToggleOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetToggleOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {
@@ -4589,6 +4603,9 @@ struct ArkUICalendarPickerModifier {
     void (*setCalendarPickerBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
     void (*resetCalendarPickerBorderRadius)(ArkUINodeHandle node);
     void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
+    void (*setCalendarPickerOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetCalendarPickerOnChange)(ArkUINodeHandle node);
+
 };
 
 struct ArkUIRatingModifier {
@@ -4596,10 +4613,12 @@ struct ArkUIRatingModifier {
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setStarStyle)(
         ArkUINodeHandle node, ArkUI_CharPtr backgroundUri, ArkUI_CharPtr foregroundUri, ArkUI_CharPtr secondaryUri);
+    void (*setOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetStars)(ArkUINodeHandle node);
     void (*resetRatingStepSize)(ArkUINodeHandle node);
     void (*resetStarStyle)(ArkUINodeHandle node);
     void (*setRatingOptions)(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool indicator);
+    void (*resetOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIRowSplitModifier {
@@ -4802,6 +4821,10 @@ struct ArkUITextPickerModifier {
     void (*resetTextPickerEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextPickerDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*setTextPickerOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetTextPickerOnChange)(ArkUINodeHandle node);
+    void (*setTextPickerOnScrollStop)(ArkUINodeHandle node, void* callback);
+    void (*resetTextPickerOnScrollStop)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -4929,6 +4952,10 @@ struct ArkUIDatePickerModifier {
     void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetDatePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
+    void (*setDatePickerOnDateChange)(ArkUINodeHandle node, void* callback);
+    void (*resetDatePickerOnDateChange)(ArkUINodeHandle node);
+    void (*setDatePickerOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetDatePickerOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
@@ -5126,6 +5153,8 @@ struct ArkUIRadioModifier {
     void (*resetRadioGroup)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getRadioGroup)(ArkUINodeHandle node);
     void (*setRadioOptions)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr group, ArkUI_Uint32 indicatorType);
+    void (*setRadioOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetRadioOnChange)(ArkUINodeHandle node);
 };
 
 struct ArkUIPatternLockControllerModifier {

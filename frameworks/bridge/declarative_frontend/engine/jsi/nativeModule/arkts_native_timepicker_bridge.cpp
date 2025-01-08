@@ -16,6 +16,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/base/i18n/time_format.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
+#include "core/components/picker/picker_base_component.h"
+
 namespace OHOS::Ace::NG {
 const std::string DEFAULT_ERR_CODE = "-1";
 const std::string FORMAT_FONT = "%s|%s|%s";
@@ -27,6 +29,7 @@ constexpr int NUM_4 = 4;
 constexpr int NUM_5 = 5;
 constexpr uint32_t DEFAULT_TIME_PICKER_TEXT_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_TIME_PICKER_SELECTED_TEXT_COLOR = 0xFF0A59F7;
+constexpr int PARAM_ARR_LENGTH_1 = 1;
 
 ArkUINativeModuleValue TimepickerBridge::SetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -411,6 +414,57 @@ ArkUINativeModuleValue TimepickerBridge::ResetDigitalCrownSensitivity(ArkUIRunti
     auto modifier = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(modifier, panda::NativePointerRef::New(vm, nullptr));
     modifier->getTimepickerModifier()->resetTimePickerDigitalCrownSensitivity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+panda::Local<panda::ObjectRef> CreateTimePickerOnChange(EcmaVM* vm, const BaseEventInfo* info)
+{
+    const auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(info);
+    Local<JSValueRef> jsonValue =
+        panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, eventInfo->GetSelectedStr().c_str()));
+    if (jsonValue->IsUndefined()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto timePickerResultObj = jsonValue->ToObject(vm);
+    return timePickerResultObj;
+}
+ArkUINativeModuleValue TimepickerBridge::SetTimepickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    int32_t argsNumber = runtimeCallInfo->GetArgsNumber();
+    if (argsNumber != NUM_2) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
+    auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    if (callbackArg->IsUndefined() || callbackArg->IsNull() || !callbackArg->IsFunction(vm)) {
+        GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerOnChange(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
+    std::function<void(const BaseEventInfo*)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                             const BaseEventInfo* info) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        auto dateObj = CreateTimePickerOnChange(vm, info);
+        panda::Local<panda::JSValueRef> params[] = { dateObj };
+        func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+    };
+    GetArkUINodeModifiers()->getTimepickerModifier()->setTimepickerOnChange(
+        nativeNode, reinterpret_cast<void*>(&callback));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue TimepickerBridge::ResetTimepickerOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerOnChange(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
