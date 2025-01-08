@@ -621,6 +621,12 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (type == ShowSubMenuType::LONG_PRESS && expandingMode_ == SubMenuExpandingMode::STACK) {
         CleanParentMenuItemBgColor();
     }
+    SendSubMenuOpenToAccessibility(subMenu, type);
+}
+
+void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
+{
+    CHECK_NULL_VOID(subMenu);
     auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
