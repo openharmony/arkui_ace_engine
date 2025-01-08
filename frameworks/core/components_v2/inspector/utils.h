@@ -653,6 +653,20 @@ inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrateg
     return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
 }
 
+inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
+{
+    if (colors.size() <= 0) {
+        return "";
+    }
+    auto colorStr = std::string("[");
+    for (auto color : colors) {
+        colorStr.append(color.ColorToString());
+        colorStr.append(",");
+    }
+    colorStr.append("]");
+    return colorStr;
+}
+
 } // namespace OHOS::Ace::V2
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_UTILS_H
