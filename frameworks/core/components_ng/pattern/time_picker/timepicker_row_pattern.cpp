@@ -54,6 +54,10 @@ const PickerTime END_DEFAULT_TIME = PickerTime(23, 59, 59);
 const int32_t WRONG_INDEX = -1;
 const uint32_t INDEX_HOUR_STRAT = 0;
 const uint32_t INDEX_MINUTE_STRAT = 0;
+const uint32_t INDEX_MINUTE_END = 59;
+const uint32_t INDEX_SECOND_STRAT = 0;
+const uint32_t INDEX_SECOND_ADD_ZERO = 10;
+const uint32_t INDEX_SECOND_END = 59;
 const uint32_t SIZE_OF_AMPM_COLUMN_OPTION = 2;
 } // namespace
 
@@ -578,32 +582,40 @@ void TimePickerRowPattern::HandleColumnsChangeTimeRange(const RefPtr<FrameNode>&
         CHECK_NULL_VOID(minuteColumn);
         auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
         CHECK_NULL_VOID(minuteColumnPattern);
-
-        options_[hourColumn].clear();
-        options_[minuteColumn].clear();
-
         auto amPmColumn = allChildNode_["amPm"].Upgrade();
+        auto secondColumn = allChildNode_["second"].Upgrade();
         if (amPmColumn && tag == amPmColumn) {
-            UpdateHourAndMinuteTimeRange(true);
+            options_[hourColumn].clear();
+            options_[minuteColumn].clear();
+            UpdateHourAndMinuteTimeRange(tag);
+            UpdateSecondTimeRange();
             hourColumnPattern->FlushCurrentOptions();
             minuteColumnPattern->FlushCurrentOptions();
             auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
             CHECK_NULL_VOID(amPmColumnPattern);
             amPmColumnPattern->FlushCurrentOptions();
-        } else if (tag == hourColumn) {
-            UpdateHourAndMinuteTimeRange(false);
+            HandleSecondsChangeTimeRange(secondColumn);
+        } else if (tag == hourColumn || tag == minuteColumn) {
+            options_[hourColumn].clear();
+            options_[minuteColumn].clear();
+            UpdateHourAndMinuteTimeRange(tag);
             hourColumnPattern->FlushCurrentOptions();
             minuteColumnPattern->FlushCurrentOptions();
-            if (amPmColumn) {
-                auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
-                CHECK_NULL_VOID(amPmColumnPattern);
-                amPmColumnPattern->FlushCurrentOptions();
-            }
-        } else if (tag == minuteColumn) {
-            minuteColumnPattern->SetOptions(GetOptionsCount());
-            minuteColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
-            minuteColumnPattern->FlushCurrentOptions();
+            HandleSecondsChangeTimeRange(secondColumn);
+        } else if (hasSecond_ && tag == secondColumn) {
+            HandleSecondsChangeTimeRange(secondColumn);
         }
+    }
+}
+
+void TimePickerRowPattern::HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn)
+{
+    if (hasSecond_ && secondColumn) {
+        options_[secondColumn].clear();
+        UpdateSecondTimeRange();
+        auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(secondColumnPattern);
+        secondColumnPattern->FlushCurrentOptions();
     }
 }
 
@@ -619,7 +631,7 @@ int32_t TimePickerRowPattern::GetOldHourIndex(const std::vector<std::string>& ho
     return oldIndex;
 }
 
-void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange)
+void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>& tag)
 {
     auto hourColumn = allChildNode_["hour"].Upgrade();
     CHECK_NULL_VOID(hourColumn);
@@ -629,10 +641,11 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange)
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
+    auto amPmColumn = allChildNode_["amPm"].Upgrade();
 
     // update hour column's options
     HourChangeBuildTimeRange();
-    if (isAmPmColumnChange) {
+    if (amPmColumn && tag == amPmColumn) {
         // update Hour column option after changing ampm column
         // and set corresponding new index based on old value
         auto newIndex = GetOptionsIndex(hourColumn, oldHourValue_);
@@ -648,17 +661,49 @@ void TimePickerRowPattern::UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange)
     oldHourValue_ = GetOptionsCurrentValue(hourColumn);
 
     // update minute column's options
-    MinuteChangeBuildTimeRange(oldHourValue_);
-    auto newIndex = GetOptionsIndex(minuteColumn, oldMinuteValue_);
-    if (newIndex == WRONG_INDEX) {
-        if (StringUtils::StringToUint(oldMinuteValue_) < startTime_.GetMinute()) {
-            newIndex = INDEX_MINUTE_STRAT;
-        } else {
-            newIndex = options_[minuteColumn].size() - 1;
-        }
+    auto currentHourOf24 = StringUtils::StringToUint(oldHourValue_);
+    if (!GetHour24() && amPmColumn) {
+        auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
+        CHECK_NULL_VOID(amPmColumnPattern);
+        currentHourOf24 =
+            GetHourFromAmPm(amPmColumnPattern->GetCurrentIndex() == 0, StringUtils::StringToUint(oldHourValue_));
     }
-    minuteColumnPattern->SetCurrentIndex(newIndex);
+    MinuteChangeBuildTimeRange(currentHourOf24);
+    if (tag != minuteColumn) {
+        auto newIndex = GetOptionsIndex(minuteColumn, oldMinuteValue_);
+        if (newIndex == WRONG_INDEX) {
+            if (StringUtils::StringToUint(oldMinuteValue_) < startTime_.GetMinute()) {
+                newIndex = INDEX_MINUTE_STRAT;
+            } else {
+                newIndex = options_[minuteColumn].size() - 1;
+            }
+        }
+        minuteColumnPattern->SetCurrentIndex(newIndex);
+    }
     oldMinuteValue_ = GetOptionsCurrentValue(minuteColumn);
+}
+
+void TimePickerRowPattern::UpdateSecondTimeRange()
+{
+    auto secondColumn = allChildNode_["second"].Upgrade();
+    CHECK_NULL_VOID(secondColumn);
+    auto secondColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
+    CHECK_NULL_VOID(secondColumnPattern);
+    optionsTotalCount_[secondColumn] = 0;
+
+    for (uint32_t second = INDEX_SECOND_STRAT; second <= INDEX_SECOND_END; second++) { // time's second from 0 to 59
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) &&
+            GetPrefixSecond() == ZeroPrefixType::HIDE) {
+            options_[secondColumn][second] = std::to_string(second);
+        } else {
+            if (second < INDEX_SECOND_ADD_ZERO) { // time's second less than 10
+                options_[secondColumn][second] = std::string("0") + std::to_string(second);
+            }
+        }
+        optionsTotalCount_[secondColumn]++;
+    }
+    secondColumnPattern->SetOptions(GetOptionsCount());
+    secondColumnPattern->SetWheelModeEnabled(wheelModeEnabled_);
 }
 
 void TimePickerRowPattern::HourChangeBuildTimeRange()
@@ -715,25 +760,16 @@ void TimePickerRowPattern::Hour12ChangeBuildTimeRange()
     }
 }
 
-void TimePickerRowPattern::MinuteChangeBuildTimeRange(const std::string& hourStr)
+void TimePickerRowPattern::MinuteChangeBuildTimeRange(uint32_t hourOf24)
 {
-    uint32_t hour = StringUtils::StringToUint(hourStr);
-
-    uint32_t startTimeMinute = (startTime_.GetHour() == hour) ? startTime_.GetMinute() : 0;
-    uint32_t endTimeMinute = (endTime_.GetHour() == hour) ? endTime_.GetMinute() : 59;
+    uint32_t startTimeMinute = (startTime_.GetHour() == hourOf24) ? startTime_.GetMinute() : INDEX_MINUTE_STRAT;
+    uint32_t endTimeMinute = (endTime_.GetHour() == hourOf24) ? endTime_.GetMinute() : INDEX_MINUTE_END;
 
     auto minuteColumn = allChildNode_["minute"].Upgrade();
     CHECK_NULL_VOID(minuteColumn);
     auto minuteColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
     CHECK_NULL_VOID(minuteColumnPattern);
     optionsTotalCount_[minuteColumn] = 0;
-    auto hourOf24 = hour;
-    auto amPmColumn = allChildNode_["amPm"].Upgrade();
-    if (!GetHour24() && amPmColumn) {
-        auto amPmColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
-        CHECK_NULL_VOID(amPmColumnPattern);
-        hourOf24 = GetHourFromAmPm(amPmColumnPattern->GetCurrentIndex() == 0, hour);
-    }
     uint32_t startMinute = 0;
     uint32_t endMinute = 59;
     if (hourOf24 == startTime_.GetHour()) {
@@ -1080,29 +1116,35 @@ void TimePickerRowPattern::RecordHourOptions()
         bool isAmStart = IsAmHour(startHour);
         bool isAmEnd = IsAmHour(endHour);
         if (isAmStart && !isAmEnd) {
-            // 跨中午时间
-            for (uint32_t hour = startHour; hour <= AM_PM_HOUR_11; ++hour) {
-                definedAMHours_.emplace_back(GetHourFormatString(hour));
+            // start time is in the morning and end time is in the afternoon
+            definedAMHours_.clear();
+            definedAMHours_.shrink_to_fit();
+            definedPMHours_.clear();
+            definedPMHours_.shrink_to_fit();
+            for (uint32_t hour = startHour; hour <= AM_PM_HOUR_11; hour++) {
+                definedAMHours_.emplace_back(GetHourFormatString(GetAmPmHour(hour)));
             }
-            definedPMHours_.emplace_back(GetHourFormatString(AM_PM_HOUR_12));
-            for (uint32_t hour = 1; hour <= ParseHourOf24(endHour); ++hour) {
-                definedPMHours_.emplace_back(GetHourFormatString(hour));
+            for (uint32_t hour = AM_PM_HOUR_12; hour <= endHour; hour++) {
+                definedPMHours_.emplace_back(GetHourFormatString(GetAmPmHour(hour)));
             }
         } else if (isAmStart) {
-            // 同为上午时间
-            for (uint32_t hour = startHour; hour <= AM_PM_HOUR_11; ++hour) {
-                definedAMHours_.emplace_back(GetHourFormatString(hour));
+            // both start time and end time are in the morning
+            definedAMHours_.clear();
+            definedAMHours_.shrink_to_fit();
+            for (uint32_t hour = startHour; hour <= endHour; hour++) {
+                definedAMHours_.emplace_back(GetHourFormatString(GetAmPmHour(hour)));
             }
             definedPMHours_.clear();
             definedPMHours_.shrink_to_fit();
         } else {
-            // 同为下午时间
-            definedPMHours_.emplace_back(GetHourFormatString(AM_PM_HOUR_12));
-            for (uint32_t hour = 1; hour <= ParseHourOf24(endHour); ++hour) {
-                definedPMHours_.emplace_back(GetHourFormatString(hour));
+            // both start time and end time are in the afternoon
+            definedPMHours_.clear();
+            definedPMHours_.shrink_to_fit();
+            for (uint32_t hour = startHour; hour <= endHour; hour++) {
+                definedPMHours_.emplace_back(GetHourFormatString(GetAmPmHour(hour)));
             }
             definedAMHours_.clear();
-            definedPMHours_.shrink_to_fit();
+            definedAMHours_.shrink_to_fit();
         }
     }
 }
