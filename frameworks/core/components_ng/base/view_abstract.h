@@ -144,6 +144,7 @@ public:
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
+    static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
@@ -551,6 +552,7 @@ public:
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);

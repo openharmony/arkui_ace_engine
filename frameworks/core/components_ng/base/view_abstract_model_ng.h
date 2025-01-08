@@ -130,6 +130,11 @@ public:
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
     }
 
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
+    }
+
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
     {
         ViewAbstract::SetBackgroundImageSize(bgImgSize);

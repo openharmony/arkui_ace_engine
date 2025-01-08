@@ -247,6 +247,16 @@ void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRep
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
 }
 
+void ViewAbstract::SetBackgroundImageSyncMode(bool syncMode)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode);
+}
+
+void ViewAbstract::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
+}
+
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

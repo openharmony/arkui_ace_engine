@@ -3176,6 +3176,24 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+bool ParseJsBackgroundImageOptions(
+    const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = value->ToObject(vm);
+    auto repeat = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "repeat"));
+    if (repeat->IsNumber()) {
+        repeatIndex = repeat->ToNumber(vm)->Value();
+    }
+    auto syncLoad = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "syncLoad"));
+    if (syncLoad->IsBoolean()) {
+        syncMode = syncLoad->ToBoolean(vm)->Value();
+    }
+    return true;
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -3188,9 +3206,15 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     std::string bundle;
     std::string module;
     int32_t repeatIndex = 0;
+    bool syncMode = false;
     RefPtr<PixelMap> pixmap = nullptr;
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
+    }
+    if (ParseJsBackgroundImageOptions(vm, repeatArg, repeatIndex, syncMode)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageSyncMode(nativeNode, syncMode);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     }
     if (srcArg->IsString(vm)) {
         src = srcArg->ToString(vm)->ToString(vm);
@@ -3225,6 +3249,7 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImage(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -430,6 +430,8 @@ public:
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
+    void OnBackgroundImageSyncModeUpdate(bool imageRepeat) override;
+
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
     void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) override;

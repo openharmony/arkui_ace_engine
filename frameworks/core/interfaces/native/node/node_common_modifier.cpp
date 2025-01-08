@@ -2018,6 +2018,20 @@ void SetBackgroundImage(
     }
 }
 
+void SetBackgroundImageSyncMode(ArkUINodeHandle node, ArkUI_Bool syncMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, syncMode);
+}
+
+void ResetBackgroundImageSyncMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, false);
+}
+
 void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
 {
 #ifndef ACE_UNITTEST
@@ -6474,6 +6488,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBackgroundImageSize = ResetBackgroundImageSize,
         .setBackgroundImage = SetBackgroundImage,
         .resetBackgroundImage = ResetBackgroundImage,
+        .setBackgroundImageSyncMode = SetBackgroundImageSyncMode,
+        .resetBackgroundImageSyncMode = ResetBackgroundImageSyncMode,
         .setTranslate = SetTranslate,
         .resetTranslate = ResetTranslate,
         .setScale = SetScale,
