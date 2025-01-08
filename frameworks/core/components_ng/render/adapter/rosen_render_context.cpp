@@ -4094,8 +4094,13 @@ void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto rsBlendApplyType = static_cast<Rosen::RSColorBlendApplyType>(blendApplyType);
-    rsNode_->SetColorBlendApplyType(rsBlendApplyType);
+    if (blendApplyType == BlendApplyType::FAST) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::FAST);
+    } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER_ALPHA);
+    } else {
+        rsNode_->SetColorBlendApplyType(Rosen::RSColorBlendApplyType::SAVE_LAYER);
+    }
     RequestNextFrame();
 }
 
