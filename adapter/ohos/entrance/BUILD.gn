@@ -38,6 +38,7 @@ template("ace_ohos_standard_source_set") {
       "$ace_root/adapter/ohos/entrance/capability_registry.cpp",
       "$ace_root/adapter/ohos/entrance/data_ability_helper_standard.cpp",
       "$ace_root/adapter/ohos/entrance/dialog_container.cpp",
+      "$ace_root/adapter/ohos/entrance/event_pass_through_subscriber.cpp",
       "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
       "$ace_root/adapter/ohos/entrance/form_utils_impl.cpp",
       "$ace_root/adapter/ohos/entrance/hap_asset_provider_impl.cpp",

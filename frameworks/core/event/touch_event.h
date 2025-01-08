@@ -92,6 +92,7 @@ struct TouchEvent final : public PointerEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
+    bool isPassThroughMode = false;
 
     TouchEvent()
     {
@@ -123,6 +124,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetInputXDeltaSlope(float inputXDeltaSlope);
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
+    TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;

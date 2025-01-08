@@ -181,7 +181,9 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
         }
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        context->Animate(option, option.GetCurve(), func);
+        auto subContext = host->GetContextRefPtr();
+        CHECK_NULL_RETURN(subContext, false);
+        subContext->Animate(option, option.GetCurve(), func);
     } else {
         // animation effect of the toast position change
         AnimationOption option;

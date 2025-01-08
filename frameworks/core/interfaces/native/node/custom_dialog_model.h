@@ -17,6 +17,7 @@
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_CUSTOM_DIALOG_MODEL_H
 
 #include "core/interfaces/arkoala/arkoala_api.h"
+#include "base/geometry/dimension.h"
 
 struct _ArkUIDialog {
     void* dialogHandle;
@@ -37,6 +38,8 @@ struct _ArkUIDialog {
     bool (*onWillDismissCall)(ArkUI_Int32);
     void (*onWillDismissCallByNDK)(ArkUI_DialogDismissEvent*);
     void* userData;
+    std::optional<ArkUI_Float32> keyboardAvoidDistanceValue;
+    OHOS::Ace::DimensionUnit keyboardAvoidDistanceUnit;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -61,6 +64,7 @@ ArkUI_Int32 CloseDialog(ArkUIDialogHandle handle);
 ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventHandler)(ArkUI_Int32));
 ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

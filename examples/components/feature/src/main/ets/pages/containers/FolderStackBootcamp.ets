@@ -14,45 +14,23 @@
  */
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
-import { LengthUnit } from '@kit.ArkUI';
-import {
-  matrix4,
-  LengthMetrics,
-  SelectionMenu,
-  ExpandedMenuOptions,
-  SelectionMenuOptions,
-  ColorMetrics,
-  promptAction
-} from '@kit.ArkUI';
-
-import { common2D, uiEffect } from '@kit.ArkGraphics2D';
-import { pointer } from '@kit.InputKit';
-import { CompSizeBlocks } from './../../components/CompSizeBlocks'
-import { CompLocationBlocks } from './../../components/CompLocationBlocks'
-import { CompLayoutConstraintsBlocks } from './../../components/CompLayoutConstraintsBlocks'
-import { CompBorderBlocks } from './../../components/CompBorderBlocks'
-import { CompBorderImageBlocks } from './../../components/CompBorderImageBlocks'
-import { CompBackgroundBlocks } from './../../components/CompBackgroundBlocks'
-import { CompOpacityBlocks } from './../../components/CompOpacityBlocks'
-import { CompVisibilityBlocks } from './../../components/CompVisibilityBlocks'
-import { CompEnabledBlocks } from './../../components/CompEnabledBlocks'
-import { CompOverlayBlocks } from './../../components/CompOverlayBlocks'
-import { CompZOrderControlBlocks } from './../../components/CompZOrderControlBlocks'
-import { CompTransformationBlocks } from './../../components/CompTransformationBlocks'
-import { CompShapeClippingBlocks } from './../../components/CompShapeClippingBlocks'
-import { CompImageEffectsBlocks } from './../../components/CompImageEffectsBlocks'
-import { CompGestureModifierBlocks } from '../../components/CompGestureModifierBlocks'
-import { CompOutlineBlocks } from '../../components/CompOutlineBlocks'
-import { CompVisualEffectBlocks } from '../../components/CompVisualEffectBlocks'
-import { CompTouchTargetBlocks } from '../../components/CompTouchTargetBlocks'
-import { CompHitTestControlBlocks } from '../../components/CompHitTestControlBlocks'
-import { CompModalTransitionBlocks } from '../../components/CompModalTransitionBlocks'
-import { CompSheetTransitionBlocks } from '../../components/CompSheetTransitionBlocks'
-import { CompObscuringBlocks } from '../../components/CompObscuringBlocks'
-import { CompRenderFitBlocks } from '../../components/CompRenderFitBlocks'
-import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopolizationBlocks'
-import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks'
+import { RadioBlock, ColorBlock, SliderBlock, useEnabled } from 'common';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { CompSizeBlocks } from '../../components/CompSizeBlocks';
+import { CompLocationBlocks } from '../../components/CompLocationBlocks';
+import { CompLayoutConstraintsBlocks } from '../../components/CompLayoutConstraintsBlocks';
+import { CompBorderBlocks } from '../../components/CompBorderBlocks';
+import { CompBorderImageBlocks } from '../../components/CompBorderImageBlocks';
+import { CompBackgroundBlocks } from '../../components/CompBackgroundBlocks';
+import { CompOpacityBlocks } from '../../components/CompOpacityBlocks';
+import { CompVisibilityBlocks } from '../../components/CompVisibilityBlocks';
+import { CompEnabledBlocks } from '../../components/CompEnabledBlocks';
+import { CompOverlayBlocks } from '../../components/CompOverlayBlocks';
+import { CompZOrderControlBlocks } from '../../components/CompZOrderControlBlocks';
+import { CompTransformationBlocks } from '../../components/CompTransformationBlocks';
+import { CompShapeClippingBlocks } from '../../components/CompShapeClippingBlocks';
+import { CompImageEffectsBlocks } from '../../components/CompImageEffectsBlocks';
 import { CompGradientColorBlocks } from '../../components/CompGradientColorBlocks';
 import { CompPopupControlBlocks } from '../../components/CompBindPopupBlocks';
 import { CompMenuControlBlocks } from '../../components/CompMenuControlBlocks';
@@ -67,27 +45,35 @@ import { CompMotionBlurBlocks } from '../../components/CompMotionBlurBlocks';
 import { CompClickEffectBlocks } from '../../components/CompClickEffectBlocks';
 import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlocks';
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
-import { formatDate } from 'common/src/main/ets/utils/timeUtil';
-import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { CompGestureModifierBlocks } from '../../components/CompGestureModifierBlocks';
+import { CompOutlineBlocks } from '../../components/CompOutlineBlocks';
+import { CompVisualEffectBlocks } from '../../components/CompVisualEffectBlocks';
+import { CompTouchTargetBlocks } from '../../components/CompTouchTargetBlocks';
+import { CompHitTestControlBlocks } from '../../components/CompHitTestControlBlocks';
+import { CompModalTransitionBlocks } from '../../components/CompModalTransitionBlocks';
+import { CompSheetTransitionBlocks } from '../../components/CompSheetTransitionBlocks';
+import { CompObscuringBlocks } from '../../components/CompObscuringBlocks';
+import { CompRenderFitBlocks } from '../../components/CompRenderFitBlocks';
+import { CompEventMonopolizationBlocks } from '../../components/CompEventMonopolizationBlocks';
+import { CompCursorControlBlocks } from '../../components/CompCursorControlBlocks';
+import { ColorMetrics, LengthMetrics, matrix4, promptAction } from '@kit.ArkUI';
+import { common2D, uiEffect } from '@kit.ArkGraphics2D';
+import { pointer } from '@kit.InputKit';
 
-class MyModifier implements AttributeModifier<TextAttribute> {
-  applyNormalAttribute(instance: TextAttribute) {
+class MyModifier implements AttributeModifier<FolderStackAttribute> {
+  applyNormalAttribute(instance: FolderStackAttribute) {
     instance.backgroundColor('#0A59F7')
   }
-
-  applyPressedAttribute(instance: TextAttribute) {
+  applyPressedAttribute(instance: FolderStackAttribute) {
     instance.backgroundColor('#ED6F21')
   }
-
-  applyFocusedAttribute(instance: TextAttribute) {
+  applyFocusedAttribute(instance: FolderStackAttribute) {
     instance.backgroundColor(Color.Gray)
   }
-
-  applyDisabledAttribute(instance: TextAttribute) {
+  applyDisabledAttribute(instance: FolderStackAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
-
-  applySelectedAttribute(instance: TextAttribute) {
+  applySelectedAttribute(instance: FolderStackAttribute) {
     instance.backgroundColor('#ffedea21')
   }
 }
@@ -114,37 +100,37 @@ class MyGestureModifier2 implements GestureModifier {
 }
 
 @Component
-export struct GaugeBootcamp {
+export struct FolderStackBootcamp {
+  eventTriggeredLog(value: string){
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(new BlockTag(time, value))
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(this.listEventTriggeredTagsTemp);
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(this.listEventTriggeredTagsTemp);
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTags = [];
+        }
+      }
+    }, 200)
+  }
+
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
-  @State enableGaugeValue: boolean = false;
-  @State gaugeValue: number = 0;
-  @State enableGaugeChildComponent: boolean = false;
-  @State gaugeChildComponent: boolean = false;
-  @State enableGaugeMin: boolean = false;
-  @State gaugeMin: number = 0;
-  @State enableGaugeMax: boolean = false;
-  @State gaugeMax: number = 100;
-  @State enableStartAngle: boolean = false;
-  @State startAngle: number = 0;
-  @State enableEndAngle: boolean = false;
-  @State endAngle: number = 360;
-  @State enableColors: boolean = false;
-  @State colors: ResourceStr = '#ff000000';
-  @State enableStrokeWidth: boolean = false;
-  @State strokeWidth: number = 4;
-  @State enableDescription: boolean = false;
-  @State description: boolean = false;
-  @State enableTrackShadowRadius: boolean = false;
-  @State trackShadowRadius: number = 20;
-  @State enableTrackShadowOffsetX: boolean = false;
-  @State trackShadowOffsetX: number = 5;
-  @State enableTrackShadowOffsetY: boolean = false;
-  @State trackShadowOffsetY: number = 5;
-  @State enableIndicatorIcon: boolean = false;
-  @State indicatorIcon: ResourceStr = $r('sys.media.ohos_ic_public_device_phone')
-  @State enableIndicatorSpace: boolean = false;
-  @State indicatorSpace: number = 8;
+  @State enableAlignContent: boolean = false;
+  @State alignContent: Alignment = Alignment.Center;
+  @State enableEnableAnimation: boolean = false;
+  @State enableAnimation: boolean = true;
+  @State enableAutoHalfFold: boolean = false;
+  @State autoHalfFold: boolean = true;
+  @State enableCompFlexBasis: boolean = false;
+  @State compFlexBasis: number | string = 'auto';
+  @State enableCompDirection: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
   // size
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
@@ -493,44 +479,6 @@ export struct GaugeBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
-  //sweepGradient
-  @State enableCompSweepGradientCenterValue1: boolean = false;
-  @State compSweepGradientCenterValue1: number = 0;
-  @State enableCompSweepGradientCenterValue2: boolean = false;
-  @State compSweepGradientCenterValue2: number = 0;
-  @State enableCompSweepGradientStart: boolean = false;
-  @State compSweepGradientStart: number = 0;
-  @State enableCompSweepGradientEnd: boolean = false;
-  @State compSweepGradientEnd: number = 0;
-  @State enableCompSweepGradientRotation: boolean = false;
-  @State compSweepGradientRotation: number = 0;
-  @State enableCompSweepGradientColors1: boolean = false;
-  @State compSweepGradientColors1: ResourceStr = '#ff000000';
-  @State enableCompSweepGradientColorsNumber1: boolean = false;
-  @State compSweepGradientColorsNumber1: number = 0;
-  @State enableCompSweepGradientColors2: boolean = false;
-  @State compSweepGradientColors2: ResourceStr = '#ff000000';
-  @State enableCompSweepGradientColorsNumber2: boolean = false;
-  @State compSweepGradientColorsNumber2: number = 0;
-  @State enableCompSweepGradientRepeating: boolean = false;
-  @State compSweepGradientRepeating: boolean = false;
-  //RadialGradient
-  @State enableCompRadialGradientCenterValue1: boolean = false;
-  @State compRadialGradientCenterValue1: number = 0;
-  @State enableCompRadialGradientCenterValue2: boolean = false;
-  @State compRadialGradientCenterValue2: number = 0;
-  @State enableCompRadialGradientRadius: boolean = false;
-  @State compRadialGradientRadius: number = 0;
-  @State enableCompRadialGradientColors1: boolean = false;
-  @State compRadialGradientColors1: ResourceStr = '#ff000000';
-  @State enableCompRadialGradientColorsNumber1: boolean = false;
-  @State compRadialGradientColorsNumber1: number = 0;
-  @State enableCompRadialGradientColors2: boolean = false;
-  @State compRadialGradientColors2: ResourceStr = '#ff000000';
-  @State enableCompRadialGradientColorsNumber2: boolean = false;
-  @State compRadialGradientColorsNumber2: number = 0;
-  @State enableCompRadialGradientRepeating: boolean = false;
-  @State compRadialGradientRepeating: boolean = false;
   //Popup Control
   //bindPopup
   @State enableCompBindPopupType: boolean = true;
@@ -671,8 +619,6 @@ export struct GaugeBootcamp {
   @State compReuseId: string = '1';
   @State enableCompRestoreId: boolean = false;
   @State compRestoreId: number = 1;
-  @State enableCompForegroundColor: boolean = false;
-  @State compForegroundColor: ResourceColor = '#ff000000';
   @State enableCompForegroundEffectRadius: boolean = false;
   @State compForegroundEffectRadius: number = 0;
   @State enableCompForegroundBlurStyleValue: boolean = false;
@@ -914,28 +860,6 @@ export struct GaugeBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
-  // Universal Text Attributes
-  @State enableCompLineHeight: boolean = false
-  @State compLineHeight: number = 16
-  // Drag and Drop Control
-  @State compDraggable: boolean = false
-  @State enableCompDragPreview: boolean = false
-  @State compDragPreview: string = '默认'
-  @State enableCompDragPreviewOptionsValueMode: boolean = false
-  @State compDragPreviewOptionsValueMode: DragPreviewMode = DragPreviewMode.AUTO
-  @State enableCompDragPreviewOptionsValueNumberBadge: boolean = false
-  @State compDragPreviewOptionsValueNumberBadge: number = 1
-  @State enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
-  @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
-  // Safe Area
-  @State enableCompExpandSafeAreaTypes: boolean = false
-  @State compExpandSafeAreaTypes: Array<SafeAreaType> =
-    [SafeAreaType.SYSTEM, SafeAreaType.CUTOUT, SafeAreaType.KEYBOARD]
-  @State enableCompExpandSafeAreaEdges: boolean = false
-  @State compExpandSafeAreaEdges: Array<SafeAreaEdge> =
-    [SafeAreaEdge.TOP, SafeAreaEdge.BOTTOM, SafeAreaEdge.START, SafeAreaEdge.END]
   // Render Fit
   @State enableCompRenderFit: boolean = false
   @State compRenderFit: RenderFit = RenderFit.TOP_LEFT
@@ -948,6 +872,7 @@ export struct GaugeBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
+
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -964,7 +889,7 @@ export struct GaugeBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time, value)
+      new BlockTag(time,value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -985,6 +910,24 @@ export struct GaugeBootcamp {
     }, 200)
   }
 
+  build() {
+    NavDestination() {
+      Drawer({
+        title: this.title,
+        showParameters: $showParameters,
+        content: () => {
+          this.Content()
+        },
+        parameters: () => {
+          this.Parameters()
+        }
+      })
+    }
+    .backgroundColor('#f1f3f5')
+    .hideTitleBar(true)
+  }
+
+  // builder
   @Builder
   SubMenu() {
     Menu() {
@@ -1109,90 +1052,42 @@ export struct GaugeBootcamp {
     .justifyContent(FlexAlign.Center)
   }
 
-  build() {
-    NavDestination() {
-      Drawer({
-        title: this.title,
-        showParameters: $showParameters,
-        content: () => {
-          this.Content()
-        },
-        parameters: () => {
-          this.Parameters()
-        }
-      })
-    }
-    .backgroundColor($r('sys.color.ohos_id_color_sub_background'))
-    .hideTitleBar(true)
-  }
-
-  @Builder
-  descriptionBuilder() {
-    Text('说明文本')
-      .maxFontSize('30sp')
-      .minFontSize('10.0vp')
-      .fontColor('#fffa2a2d')
-      .fontWeight(FontWeight.Medium)
-      .width('100%')
-      .height('100%')
-      .textAlign(TextAlign.Center)
-  }
-
   @Builder
   Content() {
     Column() {
+      // upperItems将所需要的悬停到上半屏的id放入upperItems传入，其余组件会堆叠在下半屏区域
+      FolderStack({ upperItems: ['upperItemsId'] }) {
 
-      Gauge({
-        value: useEnabled(this.enableGaugeValue, this.gaugeValue),
-        min: useEnabled(this.enableGaugeMin, this.gaugeMin),
-        max: useEnabled(this.enableGaugeMax, this.gaugeMax),
-      }) {
+        // 此Column会自动上移到上半屏
         Column() {
-          if (this.gaugeChildComponent) {
+          Text('video zone').height('100%').width('100%').textAlign(TextAlign.Center).fontSize(25)
+        }.backgroundColor(Color.Pink).width('90%').height('100%').id('upperItemsId')
 
-            Text(useEnabled(this.enableGaugeValue, this.gaugeValue)?.toString())
-              .fontWeight(FontWeight.Medium)
-              .width('62%')
-              .fontColor('#ff182431')
-              .maxFontSize('60.0vp')
-              .minFontSize('30.0vp')
-              .textAlign(TextAlign.Center)
-              .margin({ top: '35%' })
-              .textOverflow({ overflow: TextOverflow.Ellipsis })
-              .maxLines(1)
+        // 下列两个Column堆叠在下半屏区域
+        Column() {
+          Text('video title')
+            .width('100%')
+            .height(50)
+            .textAlign(TextAlign.Center)
+            .backgroundColor(Color.Red)
+            .fontSize(25)
+        }.width('90%').height('90%').justifyContent(FlexAlign.Start)
 
-            Text('辅助文本')
-              .maxFontSize('16.0fp')
-              .minFontSize('10.0vp')
-              .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-              .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-              .fontWeight(FontWeight.Regular)
-              .width('67.4%')
-              .height('9.5%')
-              .textAlign(TextAlign.Center)
-
-          }
-
-        }.width('100%').height('100%')
-
+        Column() {
+          Text('video bar')
+            .width('90%')
+            .height(50)
+            .textAlign(TextAlign.Center)
+            .backgroundColor(Color.Red)
+            .fontSize(25)
+        }.width('90%').height('100%').justifyContent(FlexAlign.End).alignItems(HorizontalAlign.Start)
       }
-      .value(useEnabled(this.enableGaugeValue, this.gaugeValue))
-      .startAngle(useEnabled(this.enableStartAngle, this.startAngle))
-      .endAngle(useEnabled(this.enableEndAngle, this.endAngle))
-      .colors(useEnabled(this.enableColors, this.colors))
-      .strokeWidth(useEnabled(this.enableStrokeWidth, this.strokeWidth))
-      .description(useEnabled(this.enableDescription, this.description) ? this.descriptionBuilder() : null)
-      .trackShadow({
-        radius: useEnabled(this.enableTrackShadowRadius, this.trackShadowRadius),
-        offsetX: useEnabled(this.enableTrackShadowOffsetX, this.trackShadowOffsetX),
-        offsetY: useEnabled(this.enableTrackShadowOffsetY, this.trackShadowOffsetY),
-      })
-      .indicator({
-        icon: useEnabled(this.enableIndicatorIcon, this.indicatorIcon),
-        space: useEnabled(this.enableIndicatorSpace, this.indicatorSpace),
-      })
-      .width(this.enableCompWidth ? useEnabled(this.enableCompWidth, this.compWidth) : 168)
-      .height(this.enableCompHeight ? useEnabled(this.enableCompHeight, this.compHeight) : 168)
+      .alignContent(useEnabled(this.enableAlignContent, this.alignContent))
+      .enableAnimation(useEnabled(this.enableEnableAnimation, this.enableAnimation))
+      .autoHalfFold(useEnabled(this.enableAutoHalfFold, this.autoHalfFold))
+      .direction(useEnabled(this.enableCompDirection, this.compDirection))
+      .width(useEnabled(this.enableCompWidth, this.compWidth))
+      .height(useEnabled(this.enableCompHeight, this.compHeight))
       .padding(useEnabled(this.enableCompPadding, this.compPadding))
       .margin(useEnabled(this.enableCompMargin, this.compMargin))
       .constraintSize({
@@ -1206,11 +1101,11 @@ export struct GaugeBootcamp {
         bottom: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
         left: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
         right: useEnabled(this.enableCompPositionBottom, this.compPositionBottom)
-      } : null)
+      } : {})
       .markAnchor(this.enableCompMarkAnchor ? {
         x: useEnabled(this.enableCompMarkAnchorX, this.compMarkAnchorX),
         y: useEnabled(this.enableCompMarkAnchorY, this.compMarkAnchorY)
-      } : null)
+      } : {})
       .offset({
         x: useEnabled(this.enableCompOffsetX, this.compOffsetX),
         y: useEnabled(this.enableCompOffsetY, this.compOffsetY)
@@ -1221,7 +1116,7 @@ export struct GaugeBootcamp {
         end: useEnabled(this.enableCompPixelRoundEnd, this.compPixelRoundEnd),
         bottom: useEnabled(this.enableCompPixelRoundBottom, this.compPixelRoundBottom),
         top: useEnabled(this.enableCompPixelRoundTop, this.compPixelRoundTop)
-      } : null)
+      } : {})
       .border({
         width: useEnabled(this.enableCompBorderWidth, this.compBorderWidth),
         color: useEnabled(this.enableCompBorderColor, this.compBorderColor),
@@ -1258,7 +1153,6 @@ export struct GaugeBootcamp {
           left: useEnabled(this.enableCompBorderImageWidthLeft, this.compBorderImageWidthLeft),
           right: useEnabled(this.enableCompBorderImageWidthRight, this.compBorderImageWidthRight)
         } : 0,
-
         outset: this.enableCompBorderImageOutset ? {
           top: useEnabled(this.enableCompBorderImageOutsetTop, this.compBorderImageOutsetTop),
           bottom: useEnabled(this.enableCompBorderImageOutsetBottom, this.compBorderImageOutsetBottom),
@@ -1267,12 +1161,12 @@ export struct GaugeBootcamp {
         } : 0,
         repeat: useEnabled(this.enableCompBorderImageRepeat, this.compBorderImageRepeat),
         fill: useEnabled(this.enableCompBorderImageFill, this.compBorderImageFill)
-      } : null)
+      } : {})
       .background(this.enableCompBackgroundAlign ? this.compBackground() : null,
         this.enableCompBackgroundAlign ? {
           align: useEnabled(this.enableCompBackgroundAlign, this.compBackgroundAlign)
         }
-          : null
+          : {}
       )
       .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
       .backgroundImage(this.enableCompBackgroundImageSrc ? $r('app.media.app_icon') : '',
@@ -1309,7 +1203,10 @@ export struct GaugeBootcamp {
             ]
           }
         } : null)
-      .backdropBlur(1, {
+      .backdropBlur(useEnabled(
+        this.enableCompBackdropBlur,
+        this.compBackdropBlur
+      ), {
         grayscale:
         this.enableCompBackdropBlurGrayscale ? [
           useEnabled(
@@ -1456,7 +1353,7 @@ export struct GaugeBootcamp {
               this.compOverlayOptionsOffsetY
             ),
           }
-        } : null)
+        } : {})
       .zIndex(useEnabled(this.enableCompZIndex, this.compZIndex))
       .rotate(this.enableCompRotate ? {
         x: useEnabled(
@@ -1510,7 +1407,7 @@ export struct GaugeBootcamp {
           this.enableCompTranslateZ,
           this.compTranslateZ
         )
-      } : null)
+      } : {})
       .scale(this.enableCompScale ? {
         x: useEnabled(
           this.enableCompScaleX,
@@ -1532,7 +1429,7 @@ export struct GaugeBootcamp {
           this.enableCompScaleCenterY,
           this.compScaleCenterY
         )
-      } : null)
+      } : {})
       .transform(this.enableCompTransform ?
       matrix4.identity().rotate({ z: 1, angle: 90 }) :
       matrix4.identity()
@@ -1541,7 +1438,6 @@ export struct GaugeBootcamp {
         this.enableCompClip,
         this.compClip
       ))
-
       .clipShape(this.enableCompClipShape ?
         new Circle({
           width: useEnabled(
@@ -1554,29 +1450,18 @@ export struct GaugeBootcamp {
           ) + '%'
         }) : null
       )
-      .mask(new ProgressMask(
-        useEnabled(
-          this.enableCompMaskValue,
-          this.compMaskValue
-        ),
-        100,
-        useEnabled(
-          this.enableCompMaskColor,
-          this.compMaskColor
-        )
-      ))
+      .mask(this.progress)
       .maskShape(this.enableCompMaskShape ? new Circle({
         width: useEnabled(
           this.enableCompMaskShapeWidth,
           this.compMaskShapeWidth
-        ) + '%',
+        ) + 'px',
         height: useEnabled(
           this.enableCompMaskShapeHeight,
           this.compMaskShapeHeight
-        ) + '%'
+        ) + 'px'
       }).fill(Color.Gray) : null
       )
-
       .blur(useEnabled(this.enableCompBlurValue, this.compBlurValue), {
         grayscale: [
           useEnabled(this.enableCompBlurOptionsNumber1, this.compBlurOptionsNumber1),
@@ -1619,57 +1504,7 @@ export struct GaugeBootcamp {
           this.compPixelStretchEffectOptionsBottom)
       })
       .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-      .sweepGradient(!this.enableCompLinearGradientColors1 && !this.enableCompRadialGradientColors1 ? {
-        center: [
-          useEnabled(this.enableCompSweepGradientCenterValue1, this.compSweepGradientCenterValue1),
-          useEnabled(this.enableCompSweepGradientCenterValue2, this.compSweepGradientCenterValue2)
-        ],
-        start: useEnabled(this.enableCompSweepGradientStart, this.compSweepGradientStart),
-        end: useEnabled(this.enableCompSweepGradientEnd, this.compSweepGradientEnd),
-        rotation: useEnabled(this.enableCompSweepGradientRotation, this.compSweepGradientRotation),
-        colors: [
-          [
-            useEnabled(this.enableCompSweepGradientColors1, this.compSweepGradientColors1),
-            useEnabled(this.enableCompSweepGradientColorsNumber1, this.compSweepGradientColorsNumber1),
-          ],
-          [
-            useEnabled(this.enableCompSweepGradientColors2, this.compSweepGradientColors2),
-            useEnabled(this.enableCompSweepGradientColorsNumber2, this.compSweepGradientColorsNumber2),
-          ]
-        ],
-        repeating: useEnabled(this.enableCompSweepGradientRepeating, this.compSweepGradientRepeating),
-      } : {
-        center: [0, 0],
-        colors: [[0, 0], [0, 0]],
-        start: 0,
-        end: 0,
-        rotation: 0,
-        repeating: null
-      })
-      .radialGradient(!this.enableCompLinearGradientColors1 && !this.enableCompSweepGradientColors1 ? {
-        center: [
-          useEnabled(this.enableCompRadialGradientCenterValue1, this.compRadialGradientCenterValue1),
-          useEnabled(this.enableCompRadialGradientCenterValue2, this.compRadialGradientCenterValue2)
-        ],
-        radius: useEnabled(this.enableCompRadialGradientRadius, this.compRadialGradientRadius),
-        colors: [
-          [
-            useEnabled(this.enableCompRadialGradientColors1, this.compRadialGradientColors1),
-            useEnabled(this.enableCompRadialGradientColorsNumber1, this.compRadialGradientColorsNumber1),
-          ],
-          [
-            useEnabled(this.enableCompRadialGradientColors2, this.compRadialGradientColors2),
-            useEnabled(this.enableCompRadialGradientColorsNumber2, this.compRadialGradientColorsNumber2),
-          ]
-        ],
-        repeating: useEnabled(this.enableCompRadialGradientRepeating, this.compRadialGradientRepeating),
-      } : {
-        center: [0, 0],
-        colors: [[0, 0], [0, 0]],
-        radius: 0,
-        repeating: null
-      })
-      .linearGradient(!this.enableCompRadialGradientColors1 && !this.enableCompSweepGradientColors1 ? {
+      .linearGradient( {
         angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
         direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
         colors: [
@@ -1683,11 +1518,6 @@ export struct GaugeBootcamp {
           ]
         ],
         repeating: useEnabled(this.enableCompLinearGradientRepeating, this.compLinearGradientRepeating),
-      } : {
-        angle: 0,
-        direction: null,
-        colors: null,
-        repeating: null
       })
       .bindPopup(this.handlePopup, {
         message: this.compPopupType === 0 ? 'This is a popup with button ' : 'This is a popup only Text ',
@@ -1810,9 +1640,7 @@ export struct GaugeBootcamp {
       ,
         onStateChange: (e) => {
           console.info('onStateChange', JSON.stringify(e.isVisible))
-
           this.handlePopup = e.isVisible
-
         },
         primaryButton: this.compPopupType === 0 ? {
           value: 'confirm ',
@@ -1859,7 +1687,6 @@ export struct GaugeBootcamp {
       useEnabled(this.enableCompReuseId, this.compReuseId) : null)
       .restoreId(useEnabled(this.enableCompRestoreId, this.compRestoreId) ?
       useEnabled(this.enableCompRestoreId, this.compRestoreId) : null)
-      .foregroundColor(useEnabled(this.enableCompForegroundColor, this.compForegroundColor))
       .foregroundEffect({
         radius: useEnabled(this.enableCompForegroundEffectRadius, this.compForegroundEffectRadius)
       })
@@ -1891,8 +1718,11 @@ export struct GaugeBootcamp {
       .accessibilityText(useEnabled(this.enableCompAccessibilityText, this.compAccessibilityText))
       .accessibilityDescription(useEnabled(this.enableCompAccessibilityDescription,
         this.compAccessibilityDescription))
+
       .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
       .bindMenu(this.MyMenu)
+      .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
+      this.modifier : null)
       .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
       this.myGestureModifier1 : this.myGestureModifier2)
       .outline({
@@ -1986,106 +1816,81 @@ export struct GaugeBootcamp {
                 this.compBindContentCoverOptionsTransitionRotateY),
               z: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateZ,
                 this.compBindContentCoverOptionsTransitionRotateZ),
-              angle: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
+              angle:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
                 this.compBindContentCoverOptionsTransitionRotateAngle),
-              centerX: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
+              centerX:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
                 this.compBindContentCoverOptionsTransitionRotateCenterX) + '%',
-              centerY: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
+              centerY:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
                 this.compBindContentCoverOptionsTransitionRotateCenterY) + '%',
-              centerZ: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
+              centerZ:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
                 this.compBindContentCoverOptionsTransitionRotateCenterZ),
-              perspective: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
+              perspective:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
                 this.compBindContentCoverOptionsTransitionRotatePerspective)
             }))
-            .combine(TransitionEffect.move(useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
-              this.compBindContentCoverOptionsTransitionMove)))
+            .combine(TransitionEffect.move(
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
+                this.compBindContentCoverOptionsTransitionMove)))
             .animation({
-              duration: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
+              duration:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
                 this.compBindContentCoverOptionsTransitionAnimationDuration),
-              tempo: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
+              tempo:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
                 this.compBindContentCoverOptionsTransitionAnimationTempo),
-              curve: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
+              curve:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
                 this.compBindContentCoverOptionsTransitionAnimationCurve),
-              delay: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
+              delay:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
                 this.compBindContentCoverOptionsTransitionAnimationDelay),
-              iterations: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
+              iterations:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
                 this.compBindContentCoverOptionsTransitionAnimationIterations),
-              playMode: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
+              playMode:
+              useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
                 this.compBindContentCoverOptionsTransitionAnimationPlayMode),
               expectedFrameRateRange: {
-                max: useEnabled(
-                  this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+                max:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
                   this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax),
-                min: useEnabled(
-                  this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+                min:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
                   this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin),
-                expected: useEnabled(
-                  this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
-                  this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
-                ),
+                expected:
+                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+                  this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected),
               }
             })
         }
       )
-      .obscured(useEnabled(this.enableCompObscured, this.compObscured))
-      .dragPreview(useEnabled(this.enableCompDragPreview, this.compDragPreview))
-      .dragPreviewOptions({
-        mode: useEnabled(this.enableCompDragPreviewOptionsValueMode, this.compDragPreviewOptionsValueMode),
-        numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
-          this.compDragPreviewOptionsValueNumberBadge),
-      }, {
-        isMultiSelectionEnabled: useEnabled(
-          this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
-          this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
-        defaultAnimationBeforeLifting: useEnabled(
-          this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
-          this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
-      })
-      .expandSafeArea(
-        useEnabled(this.enableCompExpandSafeAreaTypes, this.compExpandSafeAreaTypes),
-        useEnabled(this.enableCompExpandSafeAreaEdges, this.compExpandSafeAreaEdges))
+      .obscured(useEnabled(this.enableCompObscured,
+        this.compObscured))
       .renderFit(useEnabled(this.enableCompRenderFit, this.compRenderFit))
       .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
-      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
+      .onHover((flag) => {
+        if (flag) {
+          this.getUIContext()
+            .getCursorController()
+            .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
+        } else {
+          this.getUIContext().getCursorController().restoreDefault()
+        }
+      })
+      .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
       .onClick((event?: ClickEvent) => {
         this.handlePopup = !this.handlePopup
         this.compEventTriggeredLog('点击事件onClick触发');
       })
-      .onTouch((event?: TouchEvent) => {
-        this.compEventTriggeredLog('触摸事件onTouch触发');
-      })
-      .onAttach(() => {
-        this.compEventTriggeredLog('挂载卸载事件onAttach触发');
-      })
       .onDetach(() => {
         this.compEventTriggeredLog('挂载卸载事件onDetach触发');
       })
-      .onAppear(() => {
-        this.compEventTriggeredLog('挂载卸载事件onAppear触发');
-      })
       .onDisAppear(() => {
         this.compEventTriggeredLog('挂载卸载事件onDisAppear触发');
-      })
-      .onDragStart((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDragStart触发');
-      })
-      .onDragEnter((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDragEnter触发');
-      })
-      .onDragMove((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDragMove触发');
-      })
-      .onDragLeave((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDragLeave触发');
-      })
-      .onDrop((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDrop触发');
-      })
-      .onDragEnd((event: DragEvent, extraParams?: string) => {
-        this.compEventTriggeredLog('拖拽事件onDragEnd触发');
-      })
-      .onPreDrag((preDragStatus: PreDragStatus) => {
-        this.compEventTriggeredLog('拖拽事件onPreDrag触发');
       })
       .onKeyEvent((event: KeyEvent) => {
         this.compEventTriggeredLog('按键事件onKeyEvent触发');
@@ -2104,13 +1909,6 @@ export struct GaugeBootcamp {
         this.compEventTriggeredLog('鼠标事件onMouse触发');
       })
       .onHover((isHover: boolean, event: HoverEvent) => {
-        if (isHover) {
-          this.getUIContext()
-            .getCursorController()
-            .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
-        } else {
-          this.getUIContext().getCursorController().restoreDefault()
-        }
         this.compEventTriggeredLog('悬浮事件onHover触发');
       })
       .onAccessibilityHover((isHover: boolean, event: AccessibilityHoverEvent) => {
@@ -2144,20 +1942,49 @@ export struct GaugeBootcamp {
         this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
         return HitTestMode.Default;
       })
-
-    }
-
+      .onFolderStateChange((msg) => {
+        this.eventTriggeredLog('折叠状态改变事件触发')
+      })
+      .onHoverStatusChange((msg) => {
+        this.eventTriggeredLog('悬停状态改变事件触发')
+      })
+      .onClick((event) => {
+        this.eventTriggeredLog('点击事件触发')
+      })
+    }.width('100%')
   }
 
   @Builder
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        RadioBlock({
+          title: 'alignContent',
+          isEnabled: $enableAlignContent,
+          value: $alignContent,
+          dataSource: [
+            { label: 'Start', value: Alignment.Start },
+            { label: 'Center', value: Alignment.Center },
+            { label: 'End', value: Alignment.End },
+            { label: 'Top', value: Alignment.Top },
+            { label: 'Bottom', value: Alignment.Bottom }
+          ]
+        })
 
         RadioBlock({
-          title: 'show.ChildComponents',
-          isEnabled: $enableGaugeChildComponent,
-          value: $gaugeChildComponent,
+          title: 'enableAnimation',
+          isEnabled: $enableEnableAnimation,
+          value: $enableAnimation,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        RadioBlock({
+          title: 'autoHalfFold',
+          isEnabled: $enableAutoHalfFold,
+          value: $autoHalfFold,
           dataSource: [
             { label: 'true', value: true },
             { label: 'false', value: false }
@@ -2165,107 +1992,24 @@ export struct GaugeBootcamp {
         })
 
         SliderBlock({
-          title: 'value',
-          isEnabled: $enableGaugeValue,
-          value: $gaugeValue,
-          min: 0,
-          max: 100
-        })
-
-        SliderBlock({
-          title: 'min',
-          isEnabled: $enableGaugeMin,
-          value: $gaugeMin,
-          min: 0,
-          max: 100
-        })
-
-        SliderBlock({
-          title: 'max',
-          isEnabled: $enableGaugeMax,
-          value: $gaugeMax,
-          min: 100,
-          max: 400
-        })
-
-        SliderBlock({
-          title: 'startAngle',
-          isEnabled: $enableStartAngle,
-          value: $startAngle,
-          min: 0,
-          max: 100
-        })
-
-        SliderBlock({
-          title: 'endAngle',
-          isEnabled: $enableEndAngle,
-          value: $endAngle,
-          min: 100,
-          max: 360
-        })
-
-        ColorBlock({
-          title: 'colors',
-          isEnabled: $enableColors,
-          color: $colors
-        })
-
-        SliderBlock({
-          title: 'strokeWidth',
-          isEnabled: $enableStrokeWidth,
-          value: $strokeWidth,
-          min: 4,
-          max: 10
+          title: 'flexBasis',
+          isEnabled: $enableCompFlexBasis,
+          value: $compFlexBasis,
+          min: 10,
+          max: 200
         })
 
         RadioBlock({
-          title: 'description',
-          isEnabled: $enableDescription,
-          value: $description,
+          title: 'direction',
+          isEnabled: $enableCompDirection,
+          value: $compDirection,
           dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Ltr', value: Direction.Ltr },
+            { label: 'Rtl', value: Direction.Rtl }
           ]
         })
 
-
-        SliderBlock({
-          title: 'trackShadow.radius',
-          isEnabled: $enableTrackShadowRadius,
-          value: $trackShadowRadius,
-          min: 20,
-          max: 50
-        })
-
-        SliderBlock({
-          title: 'trackShadow.OffsetX',
-          isEnabled: $enableTrackShadowOffsetX,
-          value: $trackShadowOffsetX,
-          min: 5,
-          max: 15
-        })
-
-        SliderBlock({
-          title: 'trackShadow.OffsetY',
-          isEnabled: $enableTrackShadowOffsetY,
-          value: $trackShadowOffsetY,
-          min: 5,
-          max: 15
-        })
-
-        IconBlock({
-          title: 'indicator.icon',
-          isEnabled: $enableIndicatorIcon,
-          icon: $indicatorIcon,
-        })
-
-        SliderBlock({
-          title: 'indicator.space',
-          isEnabled: $enableIndicatorSpace,
-          value: $indicatorSpace,
-          min: 8,
-          max: 20
-        })
         CompSizeBlocks({
           enableCompWidth: $enableCompWidth,
           compWidth: $compWidth,
@@ -2921,50 +2665,6 @@ export struct GaugeBootcamp {
           compAttributeModifier: $compAttributeModifier,
         })
 
-        CompForegroundEffectBlocks({
-          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-          compForegroundEffectRadius: $compForegroundEffectRadius
-        })
-
-
-        CompForegroundBlurBlocks({
-          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-        })
-
-        CompMotionBlurBlocks({
-          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-          compMotionBlurRadius: $compMotionBlurRadius,
-          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-          compMotionBlurAnchorX: $compMotionBlurAnchorX,
-          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-          compMotionBlurAnchorY: $compMotionBlurAnchorY,
-        })
-
-        CompAccessibilityBlocks({
-          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-          compAccessibilityGroup: $compAccessibilityGroup,
-          enableCompAccessibilityText: $enableCompAccessibilityText,
-          compAccessibilityText: $compAccessibilityText,
-          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-          compAccessibilityDescription: $compAccessibilityDescription,
-          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-          compAccessibilityLevel: $compAccessibilityLevel,
-        })
-
-        CompAttributeModifierBlocks({
-          enableCompAttributeModifier: $enableCompAttributeModifier,
-          compAttributeModifier: $compAttributeModifier,
-        })
-
         CompGestureModifierBlocks({
           enableCompGestureModifier: $enableCompGestureModifier,
           compGestureModifier: $compGestureModifier
@@ -3147,13 +2847,11 @@ export struct GaugeBootcamp {
         })
 
         CompEventMonopolizationBlocks({
-          enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
-          compMonopolizeEvents: $enableCompMonopolizeEvents
+          enableCompMonopolizeEvents: $enableCompMonopolizeEvents, compMonopolizeEvents: $enableCompMonopolizeEvents
         })
 
         CompCursorControlBlocks({
-          enableCompCursorControl: $enableCompCursorControl,
-          compCursorControl: $compCursorControl
+          enableCompCursorControl: $enableCompCursorControl, compCursorControl: $compCursorControl
         })
 
         RadioBlock({
@@ -3165,18 +2863,21 @@ export struct GaugeBootcamp {
             { label: 'false', value: false },
           ]
         })
-      }.width('100%')
+
+      }
+      .width('100%')
     }
-    .height('52%')
+    .align(Alignment.Top)
+    .height('50%')
   }
 }
 
 @Preview
 @Component
-struct GaugeBootcampPreviewer {
+struct FolderStackBootcampPreviewer {
   build() {
-    GaugeBootcamp({
-      title: '数据量规图/Gauge'
+    FolderStackBootcamp({
+      title: '折叠布局/FolderStack'
     })
   }
 }

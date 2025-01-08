@@ -22,6 +22,7 @@
 #include "ability_info.h"
 #include "bundlemgr/bundle_mgr_proxy.h"
 #include "configuration.h"
+#include "event_pass_through_subscriber.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
@@ -854,6 +855,7 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionSubWindow(isUIExtensionSubWindow_);
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityProcess(isUIExtensionAbilityProcess_);
     Platform::AceContainer::GetContainer(instanceId_)->SetUIExtensionAbilityHost(isUIExtensionAbilityHost_);
+    SubscribeEventsPassThroughMode();
 #if !defined(ACE_UNITTEST)
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, errorCode);
@@ -861,6 +863,32 @@ UIContentErrorCode UIContentImpl::InitializeInner(
     NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(rootNode, startUrl_);
 #endif
     return errorCode;
+}
+
+void UIContentImpl::SubscribeEventsPassThroughMode()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_]() {
+            EventPassThroughSubscribeProxy::GetInstance()->SubscribeEvent(instanceId);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIRegisterEventsPassThroughAsync");
+}
+
+void UIContentImpl::UnSubscribeEventsPassThroughMode()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [instanceId = instanceId_]() {
+            EventPassThroughSubscribeProxy::GetInstance()->UnSubscribeEvent(instanceId);
+        },
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIUnSubscribeEventsPassThroughAsync");
 }
 
 void UIContentImpl::PreInitializeForm(OHOS::Rosen::Window* window, const std::string& url, napi_value storage)
