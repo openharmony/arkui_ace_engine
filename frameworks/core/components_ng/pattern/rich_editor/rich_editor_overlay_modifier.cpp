@@ -199,8 +199,9 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
     brush.SetColor(previewTextDecorationColor);
     drawingContext.canvas.AttachBrush(brush);
     for (const auto& previewTextRect : previewTextRects) {
+        auto padding = &previewTextRect == &previewTextRects.back() ? 0 : roundRectRadius;
         RSRect rect(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth,
-            previewTextRect.Right(), previewTextRect.Bottom());
+            previewTextRect.Right() + padding, previewTextRect.Bottom());
         drawingContext.canvas.DrawRoundRect(RSRoundRect(rect, roundRectRadius, roundRectRadius));
     }
     drawingContext.canvas.DetachBrush();
