@@ -1095,7 +1095,6 @@ ArkThemeWhiteList.whiteList = [
     'Slider',
     'Swiper',
     'TextClock',
-    'TextInput',
     'TextPicker',
     'TimePicker',
     'Toggle',

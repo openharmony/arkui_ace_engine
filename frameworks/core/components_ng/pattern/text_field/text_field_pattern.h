@@ -1654,6 +1654,8 @@ protected:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
+    void UpdatePasswordIconColor(const Color& color);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;

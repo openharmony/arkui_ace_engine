@@ -4690,6 +4690,56 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
+void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
+{
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    passwordArea->UpdatePasswordIconColor(color);
+}
+
+bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    bool updateFlag = true;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto textFieldLayoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(themeScopeId);
+    textFieldTheme_ = textFieldTheme;
+    CHECK_NULL_RETURN(textFieldTheme, result);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        Color bgColor = textFieldTheme->GetBgColor();
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, result);
+        renderContext->UpdateBackgroundColor(bgColor);
+        result = true;
+    }
+
+    if (!paintProperty->HasTextColorFlagByUser()) {
+        textFieldLayoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
+        result = true;
+    }
+
+    if (!paintProperty->GetCaretColorFlagByUserValue(false)) {
+        paintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
+    if (result || !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        updateFlag = false;
+    }
+    // no interface to set password icon color, should update every time
+    UpdatePasswordIconColor(textFieldTheme->GetSymbolColor());
+    return updateFlag;
+}
+
 bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -6597,7 +6647,7 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     CHECK_NULL_RETURN(tmpHost, nullptr);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<TextFieldTheme>();
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     return theme;
 }
 
@@ -6607,7 +6657,7 @@ void TextFieldPattern::InitTheme()
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
-    textFieldTheme_ = context->GetTheme<TextFieldTheme>();
+    textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
 }
 
 std::string TextFieldPattern::GetTextColor() const
@@ -6634,7 +6684,7 @@ std::string TextFieldPattern::GetPlaceholderColor() const
     CHECK_NULL_RETURN(theme, "");
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetPlaceholderTextColorValue(theme->GetTextColor()).ColorToString();
+    return layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor()).ColorToString();
 }
 
 std::string TextFieldPattern::GetFontSize() const
