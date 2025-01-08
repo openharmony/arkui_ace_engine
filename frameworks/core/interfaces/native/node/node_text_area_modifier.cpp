@@ -156,12 +156,7 @@ void ResetTextAreaPlaceholderColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    uint32_t color = theme->GetPlaceholderColor().GetValue();
-    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SetTextAreaTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -355,12 +350,7 @@ void ResetTextAreaCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    auto caretColor = static_cast<int32_t>(theme->GetCursorColor().GetValue());
-    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
+    TextFieldModelNG::ResetCaretColor(frameNode);
 }
 
 void SetTextAreaMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -388,12 +378,7 @@ void ResetTextAreaFontColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    int32_t textColor = 0;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    textColor = static_cast<int32_t>(theme->GetTextColor().GetValue());
-    TextFieldModelNG::SetTextColor(frameNode, Color(textColor));
+    TextFieldModelNG::ResetTextColor(frameNode);
 }
 
 void SetTextAreaFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -568,13 +553,7 @@ void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color backgroundColor;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    TextFieldModelNG::ResetBackgroundColor(frameNode);
 }
 
 void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)

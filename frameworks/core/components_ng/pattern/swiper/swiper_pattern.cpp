@@ -4641,7 +4641,7 @@ void SwiperPattern::RegisterVisibleAreaChange()
     };
     pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     std::vector<double> ratioList = { 0.0 };
-    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false);
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
     hasVisibleChangeRegistered_ = true;
 
     auto isFormRender = pipeline->IsFormRender();

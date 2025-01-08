@@ -1199,4 +1199,5 @@ bool WebDelegate::IsActivePolicyDisable()
     return false;
 }
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 } // namespace OHOS::Ace

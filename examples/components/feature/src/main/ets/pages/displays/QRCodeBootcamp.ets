@@ -13,9 +13,18 @@
  * limitations under the License.
  */
 
-
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
+import {
+  matrix4,
+  LengthMetrics,
+  SelectionMenu,
+  ExpandedMenuOptions,
+  SelectionMenuOptions,
+  ColorMetrics,
+  promptAction
+} from '@kit.ArkUI';
+
 import { common2D, uiEffect } from '@kit.ArkGraphics2D';
 import { pointer } from '@kit.InputKit';
 import { CompSizeBlocks } from './../../components/CompSizeBlocks'
@@ -59,29 +68,29 @@ import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlock
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
 import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 import { BlockTag } from 'common/src/main/ets/model/BlockTag';
-import { ColorMetrics, LengthMetrics, matrix4, promptAction } from '@kit.ArkUI';
 
-
-//part2
-class MyModifier implements AttributeModifier<RatingAttribute> {
-  applyNormalAttribute(instance: RatingAttribute) {
+class MyModifier implements AttributeModifier<TextAttribute> {
+  applyNormalAttribute(instance: TextAttribute) {
     instance.backgroundColor('#0A59F7')
   }
-  applyPressedAttribute(instance: RatingAttribute) {
+
+  applyPressedAttribute(instance: TextAttribute) {
     instance.backgroundColor('#ED6F21')
   }
-  applyFocusedAttribute(instance: RatingAttribute) {
+
+  applyFocusedAttribute(instance: TextAttribute) {
     instance.backgroundColor(Color.Gray)
   }
-  applyDisabledAttribute(instance: RatingAttribute) {
+
+  applyDisabledAttribute(instance: TextAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
-  applySelectedAttribute(instance: RatingAttribute) {
+
+  applySelectedAttribute(instance: TextAttribute) {
     instance.backgroundColor('#ffedea21')
   }
 }
 
-//part3
 class MyGestureModifier1 implements GestureModifier {
   applyGesture(event: UIGestureEvent): void {
     event.addGesture(
@@ -103,22 +112,81 @@ class MyGestureModifier2 implements GestureModifier {
   }
 }
 
-@Component
-export struct RatingBootcamp {
-  @Require @Prop title: ResourceStr;
-  @State showParameters: boolean = false;
-  @State enableRating: boolean = false;
-  @State rating: number = 0;
-  @State enableIndicator: boolean = false;
-  @State indicator: boolean = false;
-  @State enableStars: boolean = false;
-  @State stars: number = 5;
-  @State enableStepSize: boolean = false;
-  @State stepSize: number = 0.5;
-  @State enableStarStyle: boolean = false;
-  @State starStyle: string[] = ['/common/star1.png','/common/star2.png','/common/star3.png'];
 
-  /*通用属性和事件*/
+@Component
+export struct QRCodeBootcamp {
+  @Require @Prop title: ResourceStr;
+  @State showParameters: boolean = false
+  @State isShow: boolean = false
+  @State enableQRCodeContentOpacity: boolean = false;
+  @State qRCodeContentOpacity: number = 1;
+  @State enableQRCodeWidth: boolean = false;
+  @State qRCodeWidth: number = 200;
+  @State enableQRCodeHeight: boolean = false;
+  @State qRCodeHeight: number = 150;
+  @State enableQRCodeSizeWidth: boolean = false;
+  @State qRCodeSizeWidth: number = 200;
+  @State enableQRCodeSizeHeight: boolean = false;
+  @State qRCodeSizeHeight: number = 150;
+  @State enableQRCodeConstraintSizeMinWidth: boolean = false;
+  @State qRCodeConstraintSizeMinWidth: number = 200;
+  @State enableQRCodeConstraintSizeMinHeight: boolean = false;
+  @State qRCodeConstraintSizeMinHeight: number = 150;
+  @State enableQRCodeConstraintSizeMaxWidth: boolean = false;
+  @State qRCodeConstraintSizeMaxWidth: number = 200;
+  @State enableQRCodeConstraintSizeMaxHeight: boolean = false;
+  @State qRCodeConstraintSizeMaxHeight: number = 150;
+  @State enablePositionX: boolean = false;
+  @State positionX: number = 0;
+  @State enablePositionY: boolean = false;
+  @State positionY: number = 0;
+  @State enableMarkAnchorY: boolean = false;
+  @State markAnchorY: number = 0;
+  @State enableMarkAnchorX: boolean = false;
+  @State markAnchorX: number = 0;
+  @State enableQRCodeAspectRatio: boolean = false;
+  @State qRCodeAspectRatio: number = 0.5;
+  @State enableQRCodeLayoutWeight: boolean = true;
+  @State enableQRCodePixelRoundTop: boolean = false;
+  @State qRCodePixelRoundTop: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
+  @State enableQRCodePixelRoundBottom: boolean = false;
+  @State qRCodePixelRoundBottom: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
+  @State enableQRCodePixelRoundStart: boolean = false;
+  @State qRCodePixelRoundStart: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
+  @State enableQRCodePixelRoundEnd: boolean = false;
+  @State qRCodePixelRoundEnd: PixelRoundCalcPolicy = PixelRoundCalcPolicy.NO_FORCE_ROUND;
+  @State qRCodeLayoutWeight: number = 0;
+  @State enableQRCodePadding: boolean = false;
+  @State qRCodePadding: number = 0;
+  @State enableQRCodeMargin: boolean = false;
+  @State qRCodeMargin: number = 0;
+  @State enableQRCodeBorderWidth: boolean = false;
+  @State qRCodeBorderWidth: number = 0;
+  @State enableQRCodeBorderRadius: boolean = false;
+  @State qRCodeBorderRadius: number = 0;
+  @State enableQRCodeOpacity: boolean = false;
+  @State qRCodeOpacity: number = 0;
+  @State enableQRCodeBorderStyle: boolean = false;
+  @State qRCodeBorderStyle: BorderStyle = BorderStyle.Dotted;
+  @State enableQRCodeBorderColor: boolean = false;
+  @State qRCodeBorderColor: Color = Color.Transparent;
+  @State enableQRCodeEnabled: boolean = false;
+  @State qRCodeEnabled: boolean = false;
+  @State enableQRCodeOffsetTop: boolean = false;
+  @State qRCodeOffsetTop: number = 0;
+  @State enableQRCodeOffsetBottom: boolean = false;
+  @State qRCodeOffsetBottom: number = 0;
+  @State enableQRCodeOffsetLeft: boolean = false;
+  @State qRCodeOffsetLeft: number = 0;
+  @State enableQRCodeOffsetRight: boolean = false;
+  @State qRCodeOffsetRight: number = 0;
+  @State enableQRCodeColor: boolean = false;
+  @State qRCodeColor: ResourceColor = '#ff182431';
+  @State enableQRCodeBackgroundColor: boolean = false;
+  @State qRCodeBackgroundColor: ResourceColor = '#ffffffff';
+  @State enableQRCodeFlexBasis: boolean = false;
+  @State qRCodeFlexBasis: number = 100;
+  // size
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
   @State enableCompHeight: boolean = false;
@@ -450,7 +518,6 @@ export struct RatingBootcamp {
   @State compPixelStretchEffectOptionsBottom: number = 0
   @State enableCompFreeze: boolean = false
   @State compFreeze: boolean = false
-  //part2
   //Gradient Color
   //linearGradient
   @State enableCompLinearGradientAngle: boolean = false;
@@ -467,6 +534,44 @@ export struct RatingBootcamp {
   @State compLinearGradientColorsNumber2: number = 0;
   @State enableCompLinearGradientRepeating: boolean = false;
   @State compLinearGradientRepeating: boolean = false;
+  //sweepGradient
+  @State enableCompSweepGradientCenterValue1: boolean = false;
+  @State compSweepGradientCenterValue1: number = 0;
+  @State enableCompSweepGradientCenterValue2: boolean = false;
+  @State compSweepGradientCenterValue2: number = 0;
+  @State enableCompSweepGradientStart: boolean = false;
+  @State compSweepGradientStart: number = 0;
+  @State enableCompSweepGradientEnd: boolean = false;
+  @State compSweepGradientEnd: number = 0;
+  @State enableCompSweepGradientRotation: boolean = false;
+  @State compSweepGradientRotation: number = 0;
+  @State enableCompSweepGradientColors1: boolean = false;
+  @State compSweepGradientColors1: ResourceStr = '#ff000000';
+  @State enableCompSweepGradientColorsNumber1: boolean = false;
+  @State compSweepGradientColorsNumber1: number = 0;
+  @State enableCompSweepGradientColors2: boolean = false;
+  @State compSweepGradientColors2: ResourceStr = '#ff000000';
+  @State enableCompSweepGradientColorsNumber2: boolean = false;
+  @State compSweepGradientColorsNumber2: number = 0;
+  @State enableCompSweepGradientRepeating: boolean = false;
+  @State compSweepGradientRepeating: boolean = false;
+  //RadialGradient
+  @State enableCompRadialGradientCenterValue1: boolean = false;
+  @State compRadialGradientCenterValue1: number = 0;
+  @State enableCompRadialGradientCenterValue2: boolean = false;
+  @State compRadialGradientCenterValue2: number = 0;
+  @State enableCompRadialGradientRadius: boolean = false;
+  @State compRadialGradientRadius: number = 0;
+  @State enableCompRadialGradientColors1: boolean = false;
+  @State compRadialGradientColors1: ResourceStr = '#ff000000';
+  @State enableCompRadialGradientColorsNumber1: boolean = false;
+  @State compRadialGradientColorsNumber1: number = 0;
+  @State enableCompRadialGradientColors2: boolean = false;
+  @State compRadialGradientColors2: ResourceStr = '#ff000000';
+  @State enableCompRadialGradientColorsNumber2: boolean = false;
+  @State compRadialGradientColorsNumber2: number = 0;
+  @State enableCompRadialGradientRepeating: boolean = false;
+  @State compRadialGradientRepeating: boolean = false;
   //Popup Control
   //bindPopup
   @State enableCompBindPopupType: boolean = true;
@@ -607,6 +712,8 @@ export struct RatingBootcamp {
   @State compReuseId: string = '1';
   @State enableCompRestoreId: boolean = false;
   @State compRestoreId: number = 1;
+  @State enableCompForegroundColor: boolean = false;
+  @State compForegroundColor: ResourceColor = '#ff000000';
   @State enableCompForegroundEffectRadius: boolean = false;
   @State compForegroundEffectRadius: number = 0;
   @State enableCompForegroundBlurStyleValue: boolean = false;
@@ -848,14 +955,21 @@ export struct RatingBootcamp {
   // Obscuring
   @State enableCompObscured: boolean = false
   @State compObscured: Array<ObscuredReasons> = []
+  // Universal Text Attributes
   @State enableCompLineHeight: boolean = false
   @State compLineHeight: number = 16
-  @State enableCompDecorationType: boolean = false
-  @State compDecorationType: TextDecorationType = TextDecorationType.None
-  @State enableCompDecorationColor: boolean = false
-  @State compDecorationColor: ResourceColor = Color.Black
-  @State enableCompDecorationStyle: boolean = false
-  @State compDecorationStyle: TextDecorationStyle = TextDecorationStyle.SOLID
+  // Drag and Drop Control
+  @State compDraggable: boolean = false
+  @State enableCompDragPreview: boolean = false
+  @State compDragPreview: string = '默认'
+  @State enableCompDragPreviewOptionsValueMode: boolean = false
+  @State compDragPreviewOptionsValueMode: DragPreviewMode = DragPreviewMode.AUTO
+  @State enableCompDragPreviewOptionsValueNumberBadge: boolean = false
+  @State compDragPreviewOptionsValueNumberBadge: number = 1
+  @State enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
+  @State compDragPreviewOptionsOptionsIsMultiSelectionEnabled: boolean = false
+  @State enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
+  @State compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting: boolean = false
   // Safe Area
   @State enableCompExpandSafeAreaTypes: boolean = false
   @State compExpandSafeAreaTypes: Array<SafeAreaType> =
@@ -875,7 +989,6 @@ export struct RatingBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
@@ -892,7 +1005,7 @@ export struct RatingBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -926,6 +1039,7 @@ export struct RatingBootcamp {
         }
       })
     }
+    .backgroundColor('#f1f3f5')
     .hideTitleBar(true)
   }
 
@@ -1053,22 +1167,12 @@ export struct RatingBootcamp {
     .justifyContent(FlexAlign.Center)
   }
 
-
   @Builder
   Content() {
-    Column() {
-      Rating({
-        rating: (useEnabled(this.enableRating, this.rating)),
-        indicator: (useEnabled(this.enableIndicator, this.indicator)),
-      })
-        .stars(useEnabled(this.enableStars, this.stars))
-        .stepSize(useEnabled(this.enableStepSize, this.stepSize))
-        .starStyle({backgroundUri: useEnabled(this.enableStarStyle, this.starStyle[0]),
-          foregroundUri:useEnabled(this.enableStarStyle, this.starStyle[1]),
-          secondaryUri:useEnabled(this.enableStarStyle, this.starStyle[2])})
-        .onChange((value: number) => {
-          this.rating = value;
-        })
+    Row() {
+      QRCode('hello world')
+        .contentOpacity(useEnabled(this.enableQRCodeContentOpacity, this.qRCodeContentOpacity))
+        .color(useEnabled(this.enableQRCodeColor, this.qRCodeColor))
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1084,11 +1188,11 @@ export struct RatingBootcamp {
           bottom: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
           left: useEnabled(this.enableCompPositionBottom, this.compPositionBottom),
           right: useEnabled(this.enableCompPositionBottom, this.compPositionBottom)
-        } : {})
+        } : null)
         .markAnchor(this.enableCompMarkAnchor ? {
           x: useEnabled(this.enableCompMarkAnchorX, this.compMarkAnchorX),
           y: useEnabled(this.enableCompMarkAnchorY, this.compMarkAnchorY)
-        } : {})
+        } : null)
         .offset({
           x: useEnabled(this.enableCompOffsetX, this.compOffsetX),
           y: useEnabled(this.enableCompOffsetY, this.compOffsetY)
@@ -1099,8 +1203,7 @@ export struct RatingBootcamp {
           end: useEnabled(this.enableCompPixelRoundEnd, this.compPixelRoundEnd),
           bottom: useEnabled(this.enableCompPixelRoundBottom, this.compPixelRoundBottom),
           top: useEnabled(this.enableCompPixelRoundTop, this.compPixelRoundTop)
-        } : {})
-
+        } : null)
         .border({
           width: useEnabled(this.enableCompBorderWidth, this.compBorderWidth),
           color: useEnabled(this.enableCompBorderColor, this.compBorderColor),
@@ -1146,13 +1249,12 @@ export struct RatingBootcamp {
           } : 0,
           repeat: useEnabled(this.enableCompBorderImageRepeat, this.compBorderImageRepeat),
           fill: useEnabled(this.enableCompBorderImageFill, this.compBorderImageFill)
-        } : {})
-
+        } : null)
         .background(this.enableCompBackgroundAlign ? this.compBackground() : null,
           this.enableCompBackgroundAlign ? {
             align: useEnabled(this.enableCompBackgroundAlign, this.compBackgroundAlign)
           }
-            : {}
+            : null
         )
         .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
         .backgroundImage(this.enableCompBackgroundImageSrc ? $r('app.media.app_icon') : '',
@@ -1189,10 +1291,7 @@ export struct RatingBootcamp {
               ]
             }
           } : null)
-        .backdropBlur(useEnabled(
-          this.enableCompBackdropBlur,
-          this.compBackdropBlur
-        ), {
+        .backdropBlur(1, {
           grayscale:
           this.enableCompBackdropBlurGrayscale ? [
             useEnabled(
@@ -1339,10 +1438,8 @@ export struct RatingBootcamp {
                 this.compOverlayOptionsOffsetY
               ),
             }
-          } : {})
-
+          } : null)
         .zIndex(useEnabled(this.enableCompZIndex, this.compZIndex))
-
         .rotate(this.enableCompRotate ? {
           x: useEnabled(
             this.enableCompRotateX,
@@ -1395,7 +1492,7 @@ export struct RatingBootcamp {
             this.enableCompTranslateZ,
             this.compTranslateZ
           )
-        } : {})
+        } : null)
         .scale(this.enableCompScale ? {
           x: useEnabled(
             this.enableCompScaleX,
@@ -1417,7 +1514,7 @@ export struct RatingBootcamp {
             this.enableCompScaleCenterY,
             this.compScaleCenterY
           )
-        } : {})
+        } : null)
         .transform(this.enableCompTransform ?
         matrix4.identity().rotate({ z: 1, angle: 90 }) :
         matrix4.identity()
@@ -1426,6 +1523,7 @@ export struct RatingBootcamp {
           this.enableCompClip,
           this.compClip
         ))
+
         .clipShape(this.enableCompClipShape ?
           new Circle({
             width: useEnabled(
@@ -1438,16 +1536,26 @@ export struct RatingBootcamp {
             ) + '%'
           }) : null
         )
-        .mask(this.progress)
+        .mask(new ProgressMask(
+          useEnabled(
+            this.enableCompMaskValue,
+            this.compMaskValue
+          ),
+          100,
+          useEnabled(
+            this.enableCompMaskColor,
+            this.compMaskColor
+          )
+        ))
         .maskShape(this.enableCompMaskShape ? new Circle({
           width: useEnabled(
             this.enableCompMaskShapeWidth,
             this.compMaskShapeWidth
-          ) + 'px',
+          ) + '%',
           height: useEnabled(
             this.enableCompMaskShapeHeight,
             this.compMaskShapeHeight
-          ) + 'px'
+          ) + '%'
         }).fill(Color.Gray) : null
         )
 
@@ -1492,8 +1600,58 @@ export struct RatingBootcamp {
           bottom: useEnabled(this.enableCompPixelStretchEffectOptionsBottom,
             this.compPixelStretchEffectOptionsBottom)
         })
-        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))//part2
-        .linearGradient( {
+        .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
+        .sweepGradient(!this.enableCompLinearGradientColors1 && !this.enableCompRadialGradientColors1 ? {
+          center: [
+            useEnabled(this.enableCompSweepGradientCenterValue1, this.compSweepGradientCenterValue1),
+            useEnabled(this.enableCompSweepGradientCenterValue2, this.compSweepGradientCenterValue2)
+          ],
+          start: useEnabled(this.enableCompSweepGradientStart, this.compSweepGradientStart),
+          end: useEnabled(this.enableCompSweepGradientEnd, this.compSweepGradientEnd),
+          rotation: useEnabled(this.enableCompSweepGradientRotation, this.compSweepGradientRotation),
+          colors: [
+            [
+              useEnabled(this.enableCompSweepGradientColors1, this.compSweepGradientColors1),
+              useEnabled(this.enableCompSweepGradientColorsNumber1, this.compSweepGradientColorsNumber1),
+            ],
+            [
+              useEnabled(this.enableCompSweepGradientColors2, this.compSweepGradientColors2),
+              useEnabled(this.enableCompSweepGradientColorsNumber2, this.compSweepGradientColorsNumber2),
+            ]
+          ],
+          repeating: useEnabled(this.enableCompSweepGradientRepeating, this.compSweepGradientRepeating),
+        } : {
+          center: [0, 0],
+          colors: [[0, 0], [0, 0]],
+          start: 0,
+          end: 0,
+          rotation: 0,
+          repeating: null
+        })
+        .radialGradient(!this.enableCompLinearGradientColors1 && !this.enableCompSweepGradientColors1 ? {
+          center: [
+            useEnabled(this.enableCompRadialGradientCenterValue1, this.compRadialGradientCenterValue1),
+            useEnabled(this.enableCompRadialGradientCenterValue2, this.compRadialGradientCenterValue2)
+          ],
+          radius: useEnabled(this.enableCompRadialGradientRadius, this.compRadialGradientRadius),
+          colors: [
+            [
+              useEnabled(this.enableCompRadialGradientColors1, this.compRadialGradientColors1),
+              useEnabled(this.enableCompRadialGradientColorsNumber1, this.compRadialGradientColorsNumber1),
+            ],
+            [
+              useEnabled(this.enableCompRadialGradientColors2, this.compRadialGradientColors2),
+              useEnabled(this.enableCompRadialGradientColorsNumber2, this.compRadialGradientColorsNumber2),
+            ]
+          ],
+          repeating: useEnabled(this.enableCompRadialGradientRepeating, this.compRadialGradientRepeating),
+        } : {
+          center: [0, 0],
+          colors: [[0, 0], [0, 0]],
+          radius: 0,
+          repeating: null
+        })
+        .linearGradient(!this.enableCompRadialGradientColors1 && !this.enableCompSweepGradientColors1 ? {
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1507,6 +1665,11 @@ export struct RatingBootcamp {
             ]
           ],
           repeating: useEnabled(this.enableCompLinearGradientRepeating, this.compLinearGradientRepeating),
+        } : {
+          angle: 0,
+          direction: null,
+          colors: null,
+          repeating: null
         })
         .bindPopup(this.handlePopup, {
           message: this.compPopupType === 0 ? 'This is a popup with button ' : 'This is a popup only Text ',
@@ -1678,6 +1841,7 @@ export struct RatingBootcamp {
         useEnabled(this.enableCompReuseId, this.compReuseId) : null)
         .restoreId(useEnabled(this.enableCompRestoreId, this.compRestoreId) ?
         useEnabled(this.enableCompRestoreId, this.compRestoreId) : null)
+        .foregroundColor(useEnabled(this.enableCompForegroundColor, this.compForegroundColor))
         .foregroundEffect({
           radius: useEnabled(this.enableCompForegroundEffectRadius, this.compForegroundEffectRadius)
         })
@@ -1711,8 +1875,6 @@ export struct RatingBootcamp {
           this.compAccessibilityDescription))
         .accessibilityLevel(useEnabled(this.enableCompAccessibilityLevel, this.compAccessibilityLevel))
         .bindMenu(this.MyMenu)
-        .attributeModifier(useEnabled(this.enableCompAttributeModifier, this.compAttributeModifier) ?
-        this.modifier : null)//part3
         .gestureModifier(useEnabled(this.enableCompGestureModifier, this.compGestureModifier) ?
         this.myGestureModifier1 : this.myGestureModifier2)
         .outline({
@@ -1806,74 +1968,67 @@ export struct RatingBootcamp {
                   this.compBindContentCoverOptionsTransitionRotateY),
                 z: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateZ,
                   this.compBindContentCoverOptionsTransitionRotateZ),
-                angle:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
+                angle: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateAngle,
                   this.compBindContentCoverOptionsTransitionRotateAngle),
-                centerX:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
+                centerX: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterX,
                   this.compBindContentCoverOptionsTransitionRotateCenterX) + '%',
-                centerY:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
+                centerY: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterY,
                   this.compBindContentCoverOptionsTransitionRotateCenterY) + '%',
-                centerZ:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
+                centerZ: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotateCenterZ,
                   this.compBindContentCoverOptionsTransitionRotateCenterZ),
-                perspective:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
+                perspective: useEnabled(this.enableCompBindContentCoverOptionsTransitionRotatePerspective,
                   this.compBindContentCoverOptionsTransitionRotatePerspective)
               }))
-              .combine(TransitionEffect.move(
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
-                  this.compBindContentCoverOptionsTransitionMove)))
+              .combine(TransitionEffect.move(useEnabled(this.enableCompBindContentCoverOptionsTransitionMove,
+                this.compBindContentCoverOptionsTransitionMove)))
               .animation({
-                duration:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
+                duration: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDuration,
                   this.compBindContentCoverOptionsTransitionAnimationDuration),
-                tempo:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
+                tempo: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationTempo,
                   this.compBindContentCoverOptionsTransitionAnimationTempo),
-                curve:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
+                curve: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationCurve,
                   this.compBindContentCoverOptionsTransitionAnimationCurve),
-                delay:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
+                delay: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationDelay,
                   this.compBindContentCoverOptionsTransitionAnimationDelay),
-                iterations:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
+                iterations: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationIterations,
                   this.compBindContentCoverOptionsTransitionAnimationIterations),
-                playMode:
-                useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
+                playMode: useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
                   this.compBindContentCoverOptionsTransitionAnimationPlayMode),
                 expectedFrameRateRange: {
-                  max:
-                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+                  max: useEnabled(
+                    this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
                     this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax),
-                  min:
-                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+                  min: useEnabled(
+                    this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
                     this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin),
-                  expected:
-                  useEnabled(this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
-                    this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected),
+                  expected: useEnabled(
+                    this.enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+                    this.compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
+                  ),
                 }
               })
           }
         )
         .obscured(useEnabled(this.enableCompObscured, this.compObscured))
+        .dragPreview(useEnabled(this.enableCompDragPreview, this.compDragPreview))
+        .dragPreviewOptions({
+          mode: useEnabled(this.enableCompDragPreviewOptionsValueMode, this.compDragPreviewOptionsValueMode),
+          numberBadge: useEnabled(this.enableCompDragPreviewOptionsValueNumberBadge,
+            this.compDragPreviewOptionsValueNumberBadge),
+        }, {
+          isMultiSelectionEnabled: useEnabled(
+            this.enableCompDragPreviewOptionsOptionsIsMultiSelectionEnabled,
+            this.compDragPreviewOptionsOptionsIsMultiSelectionEnabled),
+          defaultAnimationBeforeLifting: useEnabled(
+            this.enableCompDragPreviewOptionsOptionsDefaultAnimationBeforeLifting,
+            this.compDragPreviewOptionsOptionsDefaultAnimationBeforeLifting)
+        })
         .expandSafeArea(
           useEnabled(this.enableCompExpandSafeAreaTypes, this.compExpandSafeAreaTypes),
           useEnabled(this.enableCompExpandSafeAreaEdges, this.compExpandSafeAreaEdges))
         .renderFit(useEnabled(this.enableCompRenderFit, this.compRenderFit))
         .monopolizeEvents(useEnabled(this.enableCompMonopolizeEvents, this.compMonopolizeEvents))
-        .onHover((flag) => {
-          if (flag) {
-            this.getUIContext()
-              .getCursorController()
-              .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
-          } else {
-            this.getUIContext().getCursorController().restoreDefault()
-          }
-        })
-        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))//compEvent
+        .useEffect(useEnabled(this.enableCompUseEffect, this.compUseEffect))
         .onClick((event?: ClickEvent) => {
           this.handlePopup = !this.handlePopup
           this.compEventTriggeredLog('点击事件onClick触发');
@@ -1893,6 +2048,27 @@ export struct RatingBootcamp {
         .onDisAppear(() => {
           this.compEventTriggeredLog('挂载卸载事件onDisAppear触发');
         })
+        .onDragStart((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragStart触发');
+        })
+        .onDragEnter((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragEnter触发');
+        })
+        .onDragMove((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragMove触发');
+        })
+        .onDragLeave((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragLeave触发');
+        })
+        .onDrop((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDrop触发');
+        })
+        .onDragEnd((event: DragEvent, extraParams?: string) => {
+          this.compEventTriggeredLog('拖拽事件onDragEnd触发');
+        })
+        .onPreDrag((preDragStatus: PreDragStatus) => {
+          this.compEventTriggeredLog('拖拽事件onPreDrag触发');
+        })
         .onKeyEvent((event: KeyEvent) => {
           this.compEventTriggeredLog('按键事件onKeyEvent触发');
         })
@@ -1910,6 +2086,13 @@ export struct RatingBootcamp {
           this.compEventTriggeredLog('鼠标事件onMouse触发');
         })
         .onHover((isHover: boolean, event: HoverEvent) => {
+          if (isHover) {
+            this.getUIContext()
+              .getCursorController()
+              .setCursor(useEnabled(this.enableCompCursorControl, this.compCursorControl))
+          } else {
+            this.getUIContext().getCursorController().restoreDefault()
+          }
           this.compEventTriggeredLog('悬浮事件onHover触发');
         })
         .onAccessibilityHover((isHover: boolean, event: AccessibilityHoverEvent) => {
@@ -1943,10 +2126,7 @@ export struct RatingBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
-
-
-
-    }
+    }.justifyContent(FlexAlign.Start)
   }
 
   @Builder
@@ -1954,47 +2134,20 @@ export struct RatingBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         SliderBlock({
-          title: 'Rating.rating',
-          isEnabled: $enableRating,
-          value: $rating,
+          title: 'contentOpacity',
+          isEnabled: $enableQRCodeContentOpacity,
+          value: $qRCodeContentOpacity,
+          step: 0.1,
           min: 0,
-          max: this.stars
+          max: 1
         })
 
-        RadioBlock({
-          title: 'Rating.indicator',
-          isEnabled: $enableIndicator,
-          value: $indicator,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false },
-          ]
+        ColorBlock({
+          title: 'color',
+          isEnabled: $enableQRCodeColor,
+          color: $qRCodeColor,
         })
 
-        SliderBlock({
-          title: 'stars',
-          isEnabled: $enableStars,
-          value: $stars,
-          min: 0,
-          max: 20
-        })
-
-        SliderBlock({
-          title: 'stepSize',
-          isEnabled: $enableStepSize,
-          value: $stepSize,
-          step: 0.5,
-          min: 0,
-          max: this.stars
-        })
-
-        RadioBlock({
-          title: 'starStyle',
-          isEnabled: $enableStarStyle,
-          value: $starStyle,
-        })
-
-        /*通用属性和事件*/
         CompSizeBlocks({
           enableCompWidth: $enableCompWidth,
           compWidth: $compWidth,
@@ -2356,7 +2509,6 @@ export struct RatingBootcamp {
           compFreeze: $compFreeze
         })
 
-        //part2
         //linearGradient
         CompGradientColorBlocks({
           enableCompLinearGradientAngle: $enableCompLinearGradientAngle,
@@ -2651,7 +2803,59 @@ export struct RatingBootcamp {
           compAttributeModifier: $compAttributeModifier,
         })
 
-        //part3
+        CompForegroundEffectBlocks({
+          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
+          compForegroundEffectRadius: $compForegroundEffectRadius
+        })
+
+
+        CompForegroundBlurBlocks({
+          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
+          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
+          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
+          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
+          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
+          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
+          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
+          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
+          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
+          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
+        })
+
+        CompMotionBlurBlocks({
+          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
+          compMotionBlurRadius: $compMotionBlurRadius,
+          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
+          compMotionBlurAnchorX: $compMotionBlurAnchorX,
+          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
+          compMotionBlurAnchorY: $compMotionBlurAnchorY,
+        })
+
+        CompClickEffectBlocks({
+          enableCompClickEffect: $enableCompClickEffect,
+          compClickEffect: $compClickEffect,
+          enableCompClickEffectLevel: $enableCompClickEffectLevel,
+          compClickEffectLevel: $compClickEffectLevel,
+          enableCompClickEffectScale: $enableCompClickEffectScale,
+          compClickEffectScale: $compClickEffectScale,
+        })
+
+        CompAccessibilityBlocks({
+          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
+          compAccessibilityGroup: $compAccessibilityGroup,
+          enableCompAccessibilityText: $enableCompAccessibilityText,
+          compAccessibilityText: $compAccessibilityText,
+          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
+          compAccessibilityDescription: $compAccessibilityDescription,
+          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
+          compAccessibilityLevel: $compAccessibilityLevel,
+        })
+
+        CompAttributeModifierBlocks({
+          enableCompAttributeModifier: $enableCompAttributeModifier,
+          compAttributeModifier: $compAttributeModifier,
+        })
+
         CompGestureModifierBlocks({
           enableCompGestureModifier: $enableCompGestureModifier,
           compGestureModifier: $compGestureModifier
@@ -2850,21 +3054,18 @@ export struct RatingBootcamp {
             { label: 'false', value: false },
           ]
         })
-
-
       }.width('100%')
     }
     .height('52%')
   }
 }
 
-
 @Preview
 @Component
-struct RatingBootcampPreviewer {
+struct QRCodeBootcampPreviewer {
   build() {
-    RatingBootcamp({
-      title: '评分条/Rating'
+    QRCodeBootcamp({
+      title: '二维码/QRCode'
     })
   }
 }

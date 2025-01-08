@@ -1993,6 +1993,11 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
         return true;
     }
 
+    if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
+        HandleOnSelectAll();
+        return true;
+    }
+
     if (keyEvent.IsShiftWith(keyEvent.code)) {
         HandleOnSelect(keyEvent.code);
         return true;
@@ -3027,6 +3032,7 @@ void TextPattern::AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& su
 
 void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(textForDisplay_).c_str(), filter, FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;

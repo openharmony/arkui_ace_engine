@@ -194,6 +194,7 @@ void SearchModelNG::SetCaretColor(const Color& color)
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
+    textPaintProperty->UpdateCaretColorFlagByUser(true);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -389,6 +390,9 @@ void SearchModelNG::SetPlaceholderColor(const Color& color)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -460,8 +464,10 @@ void SearchModelNG::SetTextColor(const Color& color)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-
     textFieldLayoutProperty->UpdateTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateTextColorFlagByUser(color);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1358,6 +1364,9 @@ void SearchModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& color
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1391,6 +1400,7 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
+    textPaintProperty->UpdateCaretColorFlagByUser(true);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

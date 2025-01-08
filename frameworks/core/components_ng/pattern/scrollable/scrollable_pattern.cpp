@@ -2896,9 +2896,20 @@ void ScrollablePattern::Register2DragDropManager()
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    DragPreviewOption dragPreviewOption = host->GetDragPreviewOption();
+    bool enableEdgeAutoScroll = dragPreviewOption.enableEdgeAutoScroll;
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    if (enableEdgeAutoScroll) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+            "Enable scrolling when the drag hovered on a scrollable controller's edge.");
+        dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
+            "Disable scrolling when the drag hovered on a scrollable controller's edge.");
+        StopHotzoneScroll();
+        dragDropManager->UnRegisterDragStatusListener(host->GetId());
+    }
 }
 
 /**

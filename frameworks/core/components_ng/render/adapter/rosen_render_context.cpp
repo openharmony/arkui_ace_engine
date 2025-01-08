@@ -452,6 +452,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         } else {
             surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::DEFAULT);
         }
+        surfaceNode->SetApiCompatibleVersion(Container::GetCurrentApiTargetVersion());
     }
     return surfaceNode;
 }

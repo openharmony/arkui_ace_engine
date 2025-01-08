@@ -583,6 +583,13 @@ void RichEditorModelNG::SetMaxLines(uint32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value);
 }
 
+void RichEditorModelNG::SetStopBackPress(bool isStopBackPress)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetStopBackPress(isStopBackPress);
+}
+
 void RichEditorModelNG::SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -595,5 +602,13 @@ void RichEditorModelNG::SetMaxLines(FrameNode* frameNode, uint32_t value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(RichEditorLayoutProperty, MaxLines, value, frameNode);
+}
+
+void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopBackPress(isStopBackPress);
 }
 } // namespace OHOS::Ace::NG

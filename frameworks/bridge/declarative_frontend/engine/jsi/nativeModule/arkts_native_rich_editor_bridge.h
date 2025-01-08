@@ -96,6 +96,9 @@ public:
     static ArkUINativeModuleValue SetMaxLines(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetMaxLines(ArkUIRuntimeCallInfo *runtimeCallInfo);
 
+    static ArkUINativeModuleValue SetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetStopBackPress(ArkUIRuntimeCallInfo* runtimeCallInfo);
+
 private:
     static void ParseAIEntityColor(
         ArkUIRuntimeCallInfo* runtimeCallInfo, struct ArkUITextDetectConfigStruct& arkUITextDetectConfig);

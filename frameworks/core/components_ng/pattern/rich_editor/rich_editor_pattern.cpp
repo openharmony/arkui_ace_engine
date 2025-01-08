@@ -889,8 +889,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     auto renderContext = imageNode->GetRenderContext();
     IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
     SetImageLayoutProperty(imageNode, options);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    host->MarkModifyDone();
     auto spanItem = imageNode->GetSpanItem();
     // The length of the imageSpan defaults to the length of a character to calculate the position
     spanItem->content = u" ";
@@ -909,6 +907,8 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         SetNeedMoveCaretToContentRect();
     }
     ResetSelectionAfterAddSpan(isPaste);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
     AfterContentChange(changeValue);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "end");
     return spanIndex;
@@ -3157,7 +3157,7 @@ void RichEditorPattern::HandleFocusEvent()
         needToRequestKeyboardOnFocus_, windowMode, usingMouseRightButton_);
 
     bool needShowSoftKeyboard = needToRequestKeyboardOnFocus_;
-    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING); // do not show kb in floating mode
+    needShowSoftKeyboard &= (windowMode != WindowMode::WINDOW_MODE_FLOATING || GetIsMidScene());
     needShowSoftKeyboard &= !usingMouseRightButton_; // do not show kb when mouseRightClick
 
     RequestKeyboard(false, true, needShowSoftKeyboard);
@@ -3172,6 +3172,18 @@ WindowMode RichEditorPattern::GetWindowMode()
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, WindowMode::WINDOW_MODE_UNDEFINED);
     return windowManager->GetWindowMode();
+}
+
+bool RichEditorPattern::GetIsMidScene()
+{
+    auto context = GetContext();
+    CHECK_NULL_RETURN(context, false);
+    auto windowManager = context->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, false);
+    bool isMidScene = false;
+    int32_t ret = windowManager->GetIsMidScene(isMidScene);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "GetIsMidScene ret=%{public}d", ret);
+    return isMidScene;
 }
 
 void RichEditorPattern::UseHostToUpdateTextFieldManager()
@@ -3260,14 +3272,11 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     float caretHeight = 0.0f;
     auto caretPosition = caretPosition_;
     float caretHeightUp = 0.0f;
-    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    CHECK_NULL_RETURN(overlayModifier, std::make_pair(caretOffset, caretHeight));
-    auto caretWidth = overlayModifier->GetCaretWidth();
-    auto contentRect = GetTextContentRect();
+    auto caretBoundaryRect = GetCaretBoundaryRect();
     OffsetF caretOffsetUp = CalcCursorOffsetByPosition(caretPosition, caretHeightUp, false, false);
     if (isShowPlaceholder_) {
         auto textAlign = GetTextAlignByDirection();
-        IF_TRUE(textAlign == TextAlign::END, caretOffsetUp.SetX(contentRect.Right() - caretWidth));
+        IF_TRUE(textAlign == TextAlign::END, caretOffsetUp.SetX(caretBoundaryRect.Right()));
         return { caretOffsetUp, caretHeightUp };
     }
     if (GetTextContentLength() <= 0) {
@@ -3287,7 +3296,11 @@ std::pair<OffsetF, float> RichEditorPattern::CalculateCaretOffsetAndHeight()
     }
     caretOffset = isShowCaretDown ? caretOffsetDown : caretOffsetUp;
     caretHeight = isShowCaretDown ? caretHeightDown : caretHeightUp;
-    if (GreatOrEqual(caretOffset.GetX() + caretWidth, contentRect.Right())) {
+    // Handle caret offset at the right boundary of the content rect
+    if (GreatOrEqual(caretOffset.GetX(), caretBoundaryRect.Right())) {
+        auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+        CHECK_NULL_RETURN(overlayModifier, std::make_pair(caretOffset, caretHeight));
+        auto caretWidth = overlayModifier->GetCaretWidth();
         caretOffset.SetX(caretOffset.GetX() - caretWidth);
     }
     return std::make_pair(caretOffset, caretHeight);
@@ -3856,9 +3869,15 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
     overlayModifier->SetCaretOffsetAndHeight(caretOffset, caretHeight);
 
-    AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
-    auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
-    AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
+        AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
+        auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
+        AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
+    } else if (isAutoScrollRunning_) {
+        StopAutoScroll();
+    }
 }
 
 void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
@@ -5707,7 +5726,7 @@ bool RichEditorPattern::OnBackPressed()
         CloseSelectOverlay();
         textSelector_.Update(textSelector_.destinationOffset);
         StartTwinkling();
-        return true;
+        return IsStopBackPress();
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
@@ -5723,7 +5742,7 @@ bool RichEditorPattern::OnBackPressed()
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
-    return true;
+    return IsStopBackPress();
 #endif
 }
 
@@ -6839,8 +6858,9 @@ void RichEditorPattern::HandleTouchUp()
 void RichEditorPattern::StartFloatingCaretLand()
 {
     CHECK_NULL_VOID(floatingCaretState_.isFloatingCaretVisible);
+    auto caretOffset = CalculateCaretOffsetAndHeight().first;
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    IF_PRESENT(overlayMod, StartFloatingCaretLand());
+    IF_PRESENT(overlayMod, StartFloatingCaretLand(caretOffset));
 }
 
 void RichEditorPattern::ResetTouchAndMoveCaretState()
@@ -6913,8 +6933,9 @@ void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
 {
     double moveDistance = 0.0;
     auto positionType = GetPositionTypeFromLine();
+    auto caretBoundaryRect = GetCaretBoundaryRect();
     if (positionType == PositionType::DEFAULT) {
-        floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
+        floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance, caretBoundaryRect);
         return;
     }
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
@@ -6923,10 +6944,20 @@ void RichEditorPattern::SetCaretTouchMoveOffset(const Offset& localOffset)
     if (isCaretAtEmptyParagraph) {
         moveDistance = std::abs(localOffset.GetX() - caretOffset.GetX());
     } else {
-        moveDistance = caretAffinityPolicy_ == CaretAffinityPolicy::DOWNSTREAM_FIRST
+        moveDistance = (caretAffinityPolicy_ == CaretAffinityPolicy::DOWNSTREAM_FIRST || caretPosition_ == 0)
                         ? caretOffset.GetX() - localOffset.GetX() : localOffset.GetX() - caretOffset.GetX();
     }
-    floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance);
+    floatingCaretState_.UpdateByTouchMove(localOffset, moveDistance, caretBoundaryRect);
+}
+
+RectF RichEditorPattern::GetCaretBoundaryRect()
+{
+    auto caretBoundaryRect = contentRect_;
+    auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
+    CHECK_NULL_RETURN(overlayModifier, caretBoundaryRect);
+    auto caretWidth = overlayModifier->GetCaretWidth();
+    caretBoundaryRect.SetWidth(caretBoundaryRect.Width() - caretWidth);
+    return caretBoundaryRect;
 }
 
 void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
@@ -8145,8 +8176,6 @@ void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
     if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
         ResetIsMousePressed();
         sourceType_ = SourceType::TOUCH;
-    } else {
-        isMousePressed_ = true;
     }
 }
 

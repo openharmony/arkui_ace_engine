@@ -348,8 +348,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-void GestureEventHub::ProcessMenuPreviewScale(
-    const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale)
+void GestureEventHub::ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,
+    float windowScale, float defaultMenuPreviewScale)
 {
     auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureEventHub);
@@ -358,8 +358,8 @@ void GestureEventHub::ProcessMenuPreviewScale(
             imageGestureEventHub->SetMenuPreviewScale(defaultMenuPreviewScale);
         } else {
             //if not in sceneboard,use default drag scale
-            scale = defaultDragScale;
-            imageGestureEventHub->SetMenuPreviewScale(defaultDragScale);
+            scale = previewScale * windowScale;
+            imageGestureEventHub->SetMenuPreviewScale(previewScale);
         }
     } else {
         imageGestureEventHub->SetMenuPreviewScale(scale);
@@ -711,7 +711,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         data.previewScale = previewScale;
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
-            ProcessMenuPreviewScale(imageNode, scale, previewScale * windowScale, defaultPixelMapScale);
+            ProcessMenuPreviewScale(imageNode, scale, previewScale, windowScale, defaultPixelMapScale);
         }
         {
             ACE_SCOPED_TRACE("drag: sub window show");

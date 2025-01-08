@@ -228,8 +228,11 @@ ArkUINativeModuleValue ArkUINativeModule::GetPageInfoByUniqueId(ArkUIRuntimeCall
             panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->state)),
             panda::NumberRef::New(vm, navDestinationResult->index),
             Framework::JsConverter::ConvertNapiValueToJsVal(navDestinationResult->param)->GetLocalHandle(),
-            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()) };
-        const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId" };
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->navDestinationId.c_str()),
+            panda::NumberRef::New(vm, static_cast<int32_t>(navDestinationResult->mode)),
+            panda::StringRef::NewFromUtf8(vm, navDestinationResult->uniqueId.c_str()) };
+        const char* navDestinationKeys[] = { "navigationId", "name", "state", "index", "param", "navDestinationId",
+            "mode", "uniqueId" };
         auto navDestinationObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(navDestinationKeys),
             navDestinationKeys, navDestinationValues);
         pageInfo->Set(vm, panda::StringRef::NewFromUtf8(vm, "navDestinationInfo"), navDestinationObj);
@@ -1905,6 +1908,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetMaxLines));
     richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMaxLines"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetMaxLines));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStopBackPress"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::SetStopBackPress));
+    richEditor->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStopBackPress"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RichEditorBridge::ResetStopBackPress));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "richEditor"), richEditor);
 
     auto linearIndicator = panda::ObjectRef::New(vm);

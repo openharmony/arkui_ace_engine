@@ -282,10 +282,10 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
             textFieldOverlayModifier_->SetRect(scrollBar->GetActiveRect());
-        } else if (IsNormalInlineState() && !HasFocus()) {
-            auto inlineScrollRect = scrollBar->GetActiveRect();
-            CalcInlineScrollRect(inlineScrollRect);
-            textFieldOverlayModifier_->SetRect(inlineScrollRect);
+        } else if (!HasFocus()) {
+            auto scrollRect = scrollBar->GetActiveRect();
+            CalcScrollRect(scrollRect);
+            textFieldOverlayModifier_->SetRect(scrollRect);
             textFieldOverlayModifier_->SetOpacity(0);
         }
     }
@@ -338,8 +338,12 @@ void TextFieldPattern::CalculateBoundsRect()
     }
 }
 
-void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
+void TextFieldPattern::CalcScrollRect(Rect& inlineScrollRect)
 {
+    if (!IsNormalInlineState()) {
+        // if textfield is not inline, no need to calc rect
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -617,7 +621,7 @@ void TextFieldPattern::UpdateSelectionAndHandleVisibility()
     auto end = dragTextEnd_;
     if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
         start = selectController_->GetCaretIndex()
-        - contentController_->GetInsertValue().length();
+        - static_cast<int32_t>(contentController_->GetInsertValue().length());
         end = selectController_->GetCaretIndex();
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]",
@@ -2454,8 +2458,14 @@ void TextFieldPattern::InitDragDropCallBack()
             }
         }
         auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
-        pattern->UpdateContentScroller(
-            Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY()));
+        Offset localOffset = Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
+        if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
+            pattern->UpdateContentScroller(localOffset);
+        } else {
+            pattern->contentScroller_.OnBeforeScrollingCallback(localOffset);
+            pattern->PauseContentScroll();
+            pattern->contentScroller_.hotAreaOffset.reset();
+        }
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
@@ -4680,6 +4690,56 @@ bool TextFieldPattern::CloseCustomKeyboard()
 
 void TextFieldPattern::OnTextInputActionUpdate(TextInputAction value) {}
 
+void TextFieldPattern::UpdatePasswordIconColor(const Color& color)
+{
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(responseArea_);
+    CHECK_NULL_VOID(passwordArea);
+    passwordArea->UpdatePasswordIconColor(color);
+}
+
+bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
+{
+    bool result = false;
+    bool updateFlag = true;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, result);
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, false);
+    auto textFieldLayoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, result);
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(themeScopeId);
+    textFieldTheme_ = textFieldTheme;
+    CHECK_NULL_RETURN(textFieldTheme, result);
+
+    if (!paintProperty->HasBackgroundColor()) {
+        Color bgColor = textFieldTheme->GetBgColor();
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, result);
+        renderContext->UpdateBackgroundColor(bgColor);
+        result = true;
+    }
+
+    if (!paintProperty->HasTextColorFlagByUser()) {
+        textFieldLayoutProperty->UpdateTextColor(textFieldTheme->GetTextColor());
+        result = true;
+    }
+
+    if (!paintProperty->GetCaretColorFlagByUserValue(false)) {
+        paintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+
+    if (result || !paintProperty->GetPlaceholderColorFlagByUserValue(false)) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        updateFlag = false;
+    }
+    // no interface to set password icon color, should update every time
+    UpdatePasswordIconColor(textFieldTheme->GetSymbolColor());
+    return updateFlag;
+}
+
 bool TextFieldPattern::BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset)
 {
     auto host = GetHost();
@@ -6587,7 +6647,7 @@ RefPtr<TextFieldTheme> TextFieldPattern::GetTheme() const
     CHECK_NULL_RETURN(tmpHost, nullptr);
     auto context = tmpHost->GetContext();
     CHECK_NULL_RETURN(context, nullptr);
-    auto theme = context->GetTheme<TextFieldTheme>();
+    auto theme = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     return theme;
 }
 
@@ -6597,7 +6657,7 @@ void TextFieldPattern::InitTheme()
     CHECK_NULL_VOID(tmpHost);
     auto context = tmpHost->GetContext();
     CHECK_NULL_VOID(context);
-    textFieldTheme_ = context->GetTheme<TextFieldTheme>();
+    textFieldTheme_ = context->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
 }
 
 std::string TextFieldPattern::GetTextColor() const
@@ -6624,7 +6684,7 @@ std::string TextFieldPattern::GetPlaceholderColor() const
     CHECK_NULL_RETURN(theme, "");
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, "");
-    return layoutProperty->GetPlaceholderTextColorValue(theme->GetTextColor()).ColorToString();
+    return layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor()).ColorToString();
 }
 
 std::string TextFieldPattern::GetFontSize() const

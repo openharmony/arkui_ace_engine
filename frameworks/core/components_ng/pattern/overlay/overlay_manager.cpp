@@ -7213,4 +7213,23 @@ RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& 
     }
     return nullptr;
 }
+
+SafeAreaInsets OverlayManager::GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipeline, {});
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return pipeline->GetSafeAreaWithoutProcess();
+    }
+
+    if (useCurrentWindow) {
+        CHECK_NULL_RETURN(frameNode, {});
+        pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, {});
+    }
+
+    auto containerId = pipeline->GetInstanceId();
+    ContainerScope scope(containerId);
+    return pipeline->GetScbSafeArea();
+}
 } // namespace OHOS::Ace::NG
