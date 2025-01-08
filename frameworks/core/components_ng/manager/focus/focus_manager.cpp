@@ -37,8 +37,11 @@ FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(p
     }
     // After switching between portrait and landscape mode
     // reset the isNeedTriggerScroll parameter to enable screen focus scrolling.
-    pipeline->RegisterSurfaceChangedCallback([&](int32_t width, int32_t height, int32_t oldWidth, int32_t oldHeight,
-                                                 WindowSizeChangeReason type) { SetNeedTriggerScroll(true); });
+    pipeline->RegisterSurfaceChangedCallback([weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth,
+                                                 int32_t oldHeight, WindowSizeChangeReason type) {
+        auto context = weak.Upgrade();
+        context->SetNeedTriggerScroll(true);
+    });
 }
 
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
