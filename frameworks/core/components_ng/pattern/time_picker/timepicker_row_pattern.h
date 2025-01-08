@@ -479,6 +479,8 @@ public:
             return;
         }
         json->PutExtAttr("selected", selectedTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("start", startTime_.ToString(false, false).c_str(), filter);
+        json->PutExtAttr("end", endTime_.ToString(false, false).c_str(), filter);
         json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
     }
 
@@ -692,6 +694,9 @@ private:
     void UpdateSecondTimeRange();
     void HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn);
     void LimitSelectedTimeInRange();
+    bool IsAmJudgeByAmPmColumn(const RefPtr<FrameNode>& amPmColumn);
+    void MinOrSecColumnBuilding(
+        const RefPtr<FrameNode>& columnFrameNode, bool isZeroPrefixTypeHide, uint32_t selectedTime);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
