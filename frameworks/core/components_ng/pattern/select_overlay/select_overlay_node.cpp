@@ -2138,7 +2138,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         moreButton_ = BuildMoreOrBackButton(GetId(), true);
         moreButton_->MountToParent(selectMenuInner_);
-        isMoreOrBackSymbolIcon_ = Container::GreatOrEqualAPITargetVersion(PlatFormVersion::VERSION_TWELVE);
+        isMoreOrBackSymbolIcon_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
         if (isMoreOrBackSymbolIcon_) {
             moreOrBackSymbol_ = BuildMoreOrBackSymbol();
             moreOrBackSymbol_->MountToParent(moreButton_);
