@@ -9574,7 +9574,7 @@ int32_t RichEditorPattern::HandleOnDragDeleteForward()
 
 void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& insertValue, bool isDeleteSelect, bool isCopy)
 {
-    insertValueLength_ = insertValue.length();
+    insertValueLength_ = static_cast<int32_t>(insertValue.length());
     if (!isDeleteSelect || isCopy) {
         InsertValueByOperationType(insertValue, OperationType::DRAG);
         return;
