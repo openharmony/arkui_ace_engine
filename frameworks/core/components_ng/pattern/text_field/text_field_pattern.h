@@ -429,7 +429,8 @@ public:
 
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
+        SourceType sourceType = SourceType::NONE);
     bool CloseKeyboard(bool forceClose) override;
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
@@ -712,7 +713,8 @@ public:
 
     void SearchRequestKeyboard();
 
-    bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+    bool RequestKeyboardNotByFocusSwitch(
+        RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN, SourceType sourceType = SourceType::NONE);
 
     bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
 
@@ -1853,7 +1855,7 @@ private:
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
-    void DoProcessAutoFill();
+    void DoProcessAutoFill(SourceType sourceType = SourceType::NONE);
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
     void ProcessCounter();
