@@ -1176,9 +1176,6 @@ export struct TextTimerBootcamp {
           this.enableTextTimerContentModifier ?
           this.textTimerContentModifier : undefined
         )
-        .onTimer((utc: number, elapsedTime: number) => {
-          console.info('textTimer notCountDown utc is：' + utc + ', elapsedTime: ' + elapsedTime)
-        })
         .width(useEnabled(this.enableCompWidth, this.compWidth))
         .height(useEnabled(this.enableCompHeight, this.compHeight))
         .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -2131,6 +2128,9 @@ export struct TextTimerBootcamp {
         .onTouchIntercept((event: TouchEvent) => {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
+        })
+        .onTimer((utc: number, elapsedTime: number) => {
+          this.compEventTriggeredLog('时间文本发生变化onTimer触发');
         })
     }
   }
