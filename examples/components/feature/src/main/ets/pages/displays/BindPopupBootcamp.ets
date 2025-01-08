@@ -311,6 +311,12 @@ export struct BindPopupBootcamp {
               this.compEventTriggeredLog('cancel Button click触发')
             }
           } : null,
+          onWillDismiss:(dismissPopupAction: DismissPopupAction)=>{
+              if (dismissPopupAction.reason == DismissReason.PRESS_BACK) {
+                dismissPopupAction.dismiss()
+              }
+            this.compEventTriggeredLog('BindPopup:onWillDismiss()')
+          }
         })
     }
   }
