@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 
-#include "base/geometry/dimension.h"
 #include "base/utils/system_properties.h"
 #include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
@@ -112,16 +111,6 @@ public:
     const Dimension& GetContentMinFontSize() const
     {
         return contentMinFontSize_;
-    }
-
-    const Dimension& GetButtonBottomTopMargin() const
-    {
-        return buttonBottomTopMargin_;
-    }
-
-    const Dimension& GetTitlePaddingHorizontal() const
-    {
-        return titlePaddingHorizontal_;
     }
 
     uint32_t GetTitleMaxLines() const
@@ -504,8 +493,6 @@ private:
     TextStyle contentTextStyle_;
     Dimension titleMinFontSize_;
     Dimension contentMinFontSize_;
-    Dimension buttonBottomTopMargin_;
-    Dimension titlePaddingHorizontal_;
     uint32_t titleMaxLines_ = 1;
     Edge defaultPadding_;
     Edge adjustPadding_;

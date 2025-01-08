@@ -334,7 +334,7 @@ RefPtr<PipelineBase> SubwindowOhos::GetChildPipelineContext() const
     return aceContainer->GetPipelineContext();
 }
 
-std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& toastInfo) const
+std::function<void()> SubwindowOhos::GetInitToastDelayTask(const NG::ToastInfo& toastInfo)
 {
     return [toastInfo]() {
         int32_t posX = 0;
@@ -555,10 +555,7 @@ void SubwindowOhos::HideWindow()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Hide the subwindow %{public}s", window_->GetWindowName().c_str());
 
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    if (!aceContainer) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, child containerId: %{public}d", childContainerId_);
-        return;
-    }
+    CHECK_NULL_VOID(aceContainer);
 
 #ifdef NG_BUILD
     auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -567,8 +564,6 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(rootNode);
     if (!rootNode->GetChildren().empty() &&
         !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
-            rootNode->GetLastChild()->GetTag().c_str());
         auto lastChildId = rootNode->GetLastChild()->GetId();
         auto iter = hotAreasMap_.find(lastChildId);
         if (iter != hotAreasMap_.end()) {
@@ -593,7 +588,7 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(rootNode);
         if (!rootNode->GetChildren().empty() &&
             !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
-            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
+            TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "Subwindow has other node, the last child is %{public}s",
                 rootNode->GetLastChild()->GetTag().c_str());
             return;
         }
@@ -616,10 +611,7 @@ void SubwindowOhos::HideWindow()
 
     OHOS::Rosen::WMError ret = window_->Hide();
     auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-    if (!parentContainer) {
-        TAG_LOGE(AceLogTag::ACE_SUB_WINDOW, "get container failed, parent containerId: %{public}d", parentContainerId_);
-        return;
-    }
+    CHECK_NULL_VOID(parentContainer);
     if (parentContainer->IsScenceBoardWindow()) {
         window_->SetTouchable(true);
     }
@@ -691,8 +683,8 @@ void SubwindowOhos::ClearMenu()
 bool SubwindowOhos::ShowPreviewNG(bool isStartDraggingFromSubWindow)
 {
     CHECK_NULL_RETURN(window_, false);
-    ResizeWindow();
     ShowWindow(false);
+    ResizeWindow();
     if (!isStartDraggingFromSubWindow) {
         window_->SetTouchable(false);
     }
@@ -736,8 +728,8 @@ void SubwindowOhos::ShowMenuNG(const RefPtr<NG::FrameNode> customNode, const NG:
         menuWrapperPattern->RegisterMenuCallback(menuNode, menuParam);
         menuWrapperPattern->SetMenuTransitionEffect(menuNode, menuParam);
     }
-    ResizeWindow();
     ShowWindow();
+    ResizeWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     overlay->ShowMenuInSubWindow(targetNode->GetId(), offset, menuNode);
@@ -754,8 +746,8 @@ void SubwindowOhos::ShowMenuNG(std::function<void()>&& buildFunc, std::function<
     CHECK_NULL_VOID(context);
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
-    ResizeWindow();
     ShowWindow();
+    ResizeWindow();
     CHECK_NULL_VOID(window_);
     window_->SetTouchable(true);
     NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -943,16 +935,7 @@ void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
     hotAreasMap_.erase(nodeId);
-    if (hotAreasMap_.size() == 0) {
-        // Set min window hot area so that sub window can transparent event.
-        std::vector<Rosen::Rect> hotAreas;
-        Rosen::Rect rosenRect {};
-        RectConverter(MIN_WINDOW_HOT_AREA, rosenRect);
-        hotAreas.emplace_back(rosenRect);
-        window_->SetTouchHotAreas(hotAreas);
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hotAreasMap_ has no item");
-        return;
-    }
+
     std::vector<Rosen::Rect> hotAreas;
     for (auto it = hotAreasMap_.begin(); it != hotAreasMap_.end(); it++) {
         hotAreas.insert(hotAreas.end(), it->second.begin(), it->second.end());
@@ -1018,11 +1001,13 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNG(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     }
-    ResizeWindow();
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
+    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialog(dialogProps, std::move(buildFunc));
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -1051,11 +1036,13 @@ RefPtr<NG::FrameNode> SubwindowOhos::ShowDialogNGWithNode(
         CHECK_NULL_RETURN(parentOverlay, nullptr);
         parentOverlay->SetSubWindowId(SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     }
-    ResizeWindow();
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
     CHECK_NULL_RETURN(window_, nullptr);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
+    ResizeWindow();
     ContainerScope scope(childContainerId_);
     auto dialog = overlay->ShowDialogWithNode(dialogProps, customNode);
     CHECK_NULL_RETURN(dialog, nullptr);
@@ -1098,11 +1085,13 @@ void SubwindowOhos::OpenCustomDialogNG(const DialogProperties& dialogProps, std:
         TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "overlay in parent container %{public}d, SetSubWindowId %{public}d",
             parentContainerId_, GetSubwindowId());
     }
-    ResizeWindow();
+    SubwindowManager::GetInstance()->SetDialogSubWindowId(
+        SubwindowManager::GetInstance()->GetDialogSubwindowInstanceId(GetSubwindowId()));
     ShowWindow();
     CHECK_NULL_VOID(window_);
     window_->SetFullScreen(true);
     window_->SetTouchable(true);
+    ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlay->OpenCustomDialog(dialogProps, std::move(callback));
     haveDialog_ = true;

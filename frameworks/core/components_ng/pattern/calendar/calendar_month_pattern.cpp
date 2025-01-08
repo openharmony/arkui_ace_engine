@@ -503,7 +503,7 @@ void CalendarMonthPattern::SetLineNodeSize(RefPtr<FrameNode> lineNode)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto hostLayoutProperty = host->GetLayoutProperty<LayoutProperty>();
+    auto hostLayoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(hostLayoutProperty);
     auto width = hostLayoutProperty->GetLayoutConstraint()->selfIdealSize.Width().value_or(Infinity<float>());
     auto height = hostLayoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(Infinity<float>());

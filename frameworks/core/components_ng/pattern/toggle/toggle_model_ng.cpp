@@ -594,7 +594,7 @@ void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool is
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     CHECK_NULL_VOID(eventHub);
-    TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "switch update isOn %{public}d", isOn);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "switch mouse event %{public}d", isOn);
     eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwitchPaintProperty, IsOn, isOn, frameNode);
 }

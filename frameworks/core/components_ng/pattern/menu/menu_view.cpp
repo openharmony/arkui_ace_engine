@@ -715,7 +715,6 @@ void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameN
             auto context = targetNode->GetRenderContext();
             CHECK_NULL_VOID(context);
             auto pixelMap = context->GetThumbnailPixelMap();
-            CHECK_NULL_VOID(pixelMap);
             auto imageNode = imageWK.Upgrade();
             CHECK_NULL_VOID(imageNode);
             auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();

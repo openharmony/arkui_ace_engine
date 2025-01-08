@@ -82,7 +82,8 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         CHECK_NULL_RETURN(scrollNode, RectF());
         innerMenuNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
         CHECK_NULL_RETURN(innerMenuNode, RectF());
-        menuZone = subMenuNode->GetGeometryNode()->GetFrameRect();
+        auto offset = DynamicCast<FrameNode>(innerMenuNode)->GetOffsetRelativeToWindow();
+        menuZone.SetOffset(offset);
     }
     return menuZone;
 }
@@ -123,6 +124,7 @@ void MenuWrapperPattern::HandleInteraction(const TouchEventInfo& info)
     CHECK_NULL_VOID(host);
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
+    position -= host->GetPaintRectOffset();
     RefPtr<UINode> innerMenuNode = nullptr;
     auto menuZone = GetMenuZone(innerMenuNode);
     CHECK_NULL_VOID(innerMenuNode);
@@ -299,13 +301,7 @@ bool MenuWrapperPattern::HasStackSubMenu()
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto menuCount = 0;
-    for (const auto& child : host->GetChildren()) {
-        if (child && child->GetTag() == V2::MENU_ETS_TAG) {
-            menuCount++;
-        }
-    }
-    return menuCount > 1;
+    return host->GetChildren().size() > 1;
 }
 
 bool MenuWrapperPattern::HasEmbeddedSubMenu()
@@ -615,11 +611,6 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
         auto frameRect = child->GetGeometryNode()->GetFrameRect();
         // rect is relative to window
-        auto childNode = child->GetHostNode();
-        if (childNode &&
-            (childNode->GetTag() == V2::MENU_PREVIEW_ETS_TAG || childNode->GetTag() == V2::IMAGE_ETS_TAG)) {
-            frameRect = childNode->GetPaintRectWithTransform(); // get preview area with scale transform
-        }
         auto rect = Rect(frameRect.GetX() + safeAreaInsetsLeft, frameRect.GetY() + safeAreaInsetsTop, frameRect.Width(),
             frameRect.Height());
 

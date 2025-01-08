@@ -410,7 +410,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
 
 void CalendarDialogView::InitCalendarProperty(const RefPtr<FrameNode>& calendarNode)
 {
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = calendarNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto calendarLayoutProperty = calendarNode->GetLayoutProperty();
     CHECK_NULL_VOID(calendarLayoutProperty);
