@@ -20,6 +20,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <memory>
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"

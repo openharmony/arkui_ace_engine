@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/size.h"
+#include "ui/base/geometry/size.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_SIZE_H

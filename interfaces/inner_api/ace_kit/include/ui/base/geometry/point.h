@@ -16,9 +16,9 @@
 #ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_POINT_H
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_GEOMETRY_POINT_H
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/offset.h"
-#include "interfaces/inner_api/ace_kit/include/base/macros.h"
-#include "interfaces/inner_api/ace_kit/include/base/utils/utils.h"
+#include "ui/base/geometry/offset.h"
+#include "ui/base/macros.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/event/ace_events.h"
 

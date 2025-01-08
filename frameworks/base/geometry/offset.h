@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_OFFSET_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_OFFSET_H
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/offset.h"
+#include "ui/base/geometry/offset.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_OFFSET_H

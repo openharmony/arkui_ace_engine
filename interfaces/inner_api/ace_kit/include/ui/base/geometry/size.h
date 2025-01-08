@@ -21,7 +21,7 @@
 #include <sstream>
 #include <string>
 
-#include "interfaces/inner_api/ace_kit/include/base/utils/utils.h"
+#include "ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
 

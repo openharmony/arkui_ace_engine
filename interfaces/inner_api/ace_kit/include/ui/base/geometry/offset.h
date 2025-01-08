@@ -18,8 +18,8 @@
 
 #include <cmath>
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/size.h"
-#include "interfaces/inner_api/ace_kit/include/base/utils/utils.h"
+#include "ui/base/geometry/size.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/components/common/properties/animation_option.h"
 

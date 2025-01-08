@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_OFFSET_T_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_OFFSET_T_H
 
-#include "interfaces/inner_api/ace_kit/include/base/geometry/ng/offset_t.h"
+#include "ui/base/geometry/ng/offset_t.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_OFFSET_T_H
