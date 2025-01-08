@@ -304,9 +304,8 @@ std::pair<int32_t, int32_t> TextSelectController::GetSelectParagraphByOffset(con
     CHECK_NULL_RETURN(pattern, err);
     auto textField = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_RETURN(textField, err);
-    bool smartSelect = false;
     if (!textField->IsUsingMouse()) {
-        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+        AdjustWordSelection(pos, start, end, localOffset);
     }
 
     GetSubParagraphByOffset(pos, start, end);

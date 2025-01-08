@@ -1670,10 +1670,10 @@ ArkUINativeModuleValue TextAreaBridge::SetPadding(ArkUIRuntimeCallInfo *runtimeC
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(NUM_4);
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);

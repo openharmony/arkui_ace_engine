@@ -300,7 +300,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto right = CalcLength(padding.Right().ConvertToPx());
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
@@ -315,7 +315,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
 
     if (callback) {
         button->GetOrCreateGestureEventHub()->SetUserOnClick(
-            [callback, overlayId, isSelectAll, id = Container::CurrentIdSafelyWithCheck()](GestureEvent& /*info*/) {
+            [callback, overlayId, id = Container::CurrentIdSafelyWithCheck()](GestureEvent& /*info*/) {
                 ContainerScope scope(id);
                 auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
                 CHECK_NULL_VOID(pipeline);
@@ -396,7 +396,7 @@ RefPtr<FrameNode> BuildButton(const MenuOptionsParam& menuOption, int32_t overla
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
@@ -416,7 +416,7 @@ void BindCreateMenuItemClickEvent(const RefPtr<FrameNode>& button, const MenuOpt
 {
     auto id = Container::CurrentIdSafelyWithCheck();
     button->GetOrCreateGestureEventHub()->SetUserOnClick(
-        [menuOptionsParam, systemCallback, onCreateCallback, overlayId, id](GestureEvent& /*info*/) {
+        [menuOptionsParam, systemCallback, onCreateCallback, id](GestureEvent& /*info*/) {
             ContainerScope scope(id);
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             CHECK_NULL_VOID(pipeline);
@@ -496,7 +496,7 @@ RefPtr<FrameNode> BuildCreateMenuItemButton(const MenuOptionsParam& menuOptionsP
     // Update button property.
     auto buttonLayoutProperty = button->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty, button);
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->UpdateUserDefinedIdealSize({ CalcLength(contentWidth), std::nullopt });
     } else {
@@ -540,7 +540,7 @@ void UpdateBackButtonPadding(
             top = isSymbol ? CalcLength(padding.Top().ConvertToPx()) : top;
         }
     }
-    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
+    buttonLayoutProperty->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
 }
 
 RefPtr<FrameNode> BuildMoreOrBackButton(int32_t overlayId, bool isMoreButton)
@@ -1715,11 +1715,6 @@ void SelectOverlayNode::CreatExtensionMenu(std::vector<OptionParam>&& params)
     auto props = menu->GetLayoutProperty<MenuLayoutProperty>();
     auto context = menu->GetRenderContext();
     CHECK_NULL_VOID(props);
-    auto offsetY = 0.0f;
-    auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
-    if (textOverlayTheme) {
-        offsetY = textOverlayTheme->GetMenuToolbarHeight().ConvertToPx();
-    }
     props->UpdateMenuOffset(GetPageOffset());
     context->UpdateBackShadow(ShadowConfig::NoneShadow);
     auto menuPattern = menu->GetPattern<MenuPattern>();
@@ -1754,7 +1749,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuOptions(const std::vector<Menu
 std::function<void()> SelectOverlayNode::CreateExtensionMenuOptionCallback(int32_t id,
     const OnMenuItemCallback& onCreateCallback, const std::function<void()>& systemEvent, const MenuOptionsParam& item)
 {
-    auto callback = [overlayId = id, onCreateCallback = onCreateCallback, systemEvent, item,
+    auto callback = [onCreateCallback = onCreateCallback, systemEvent, item,
                         mainId = Container::CurrentIdSafelyWithCheck()]() {
         ContainerScope scope(mainId);
         auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -1876,11 +1871,13 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
 
     const auto& border = textOverlayTheme->GetMenuBorder();
     auto borderWidth = Dimension(border.Left().GetWidth().ConvertToPx());
-    selectMenu_->GetLayoutProperty()->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth });
+    selectMenu_->GetLayoutProperty()->UpdateBorderWidth({ borderWidth, borderWidth, borderWidth, borderWidth,
+        std::nullopt, std::nullopt });
     auto borderRadius = textOverlayTheme->GetMenuToolbarHeight() / 2.0f;
     selectMenu_->GetRenderContext()->UpdateBorderRadius({ borderRadius, borderRadius, borderRadius, borderRadius });
     auto borderColor = border.Left().GetColor();
-    selectMenu_->GetRenderContext()->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor });
+    selectMenu_->GetRenderContext()->UpdateBorderColor({ borderColor, borderColor, borderColor, borderColor,
+        std::nullopt, std::nullopt });
     auto borderStyle = border.Left().GetBorderStyle();
     selectMenu_->GetRenderContext()->UpdateBorderStyle({ borderStyle, borderStyle, borderStyle, borderStyle });
 
@@ -1894,7 +1891,7 @@ void SelectOverlayNode::SelectMenuAndInnerInitProperty()
     auto right = CalcLength(padding.Right().ConvertToPx());
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
-    selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom });
+    selectMenuInner_->GetLayoutProperty()->UpdatePadding({ left, right, top, bottom, std::nullopt, std::nullopt });
     SetSelectMenuInnerSize();
 }
 

@@ -1415,7 +1415,7 @@ ArkUINativeModuleValue TextBridge::SetOnClick(ArkUIRuntimeCallInfo* runtimeCallI
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     auto containerId = Container::CurrentId();
-    std::function<void(GestureEvent& info)> callback = [vm, frameNode,
+    std::function<void(GestureEvent& info)> callback = [vm,
         func = panda::CopyableGlobal(vm, func), containerId, node = AceType::WeakClaim(frameNode)]
         (GestureEvent& info) {
         panda::LocalScope pandaScope(vm);

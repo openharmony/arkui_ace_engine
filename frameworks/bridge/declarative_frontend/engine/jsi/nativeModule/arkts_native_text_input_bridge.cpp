@@ -1551,7 +1551,7 @@ void TextInputBridge::SetCancelButtonImage(ArkUIRuntimeCallInfo* runtimeCallInfo
         srcStr = "";
     }
 
-    struct ArkUISizeType size = {iconSize.Value(), static_cast<int8_t>(iconSize.Unit())};
+    struct ArkUISizeType size = { iconSize.Value(), static_cast<int8_t>(iconSize.Unit()), nullptr };
     GetArkUINodeModifiers()->getTextInputModifier()->setTextInputCancelButton(nativeNode,
         style, &size, color, srcStr.c_str());
 }
@@ -2049,10 +2049,10 @@ ArkUINativeModuleValue TextInputBridge::SetPadding(ArkUIRuntimeCallInfo *runtime
     Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_3);
     Local<JSValueRef> fifthArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_4);
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), nullptr };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);

@@ -316,7 +316,7 @@ ArkUINativeModuleValue SearchBridge::SetCancelButton(ArkUIRuntimeCallInfo* runti
         CancelButtonStyle cancelButtonStyle = ConvertStrToCancelButtonStyle(secondArg->ToString(vm)->ToString(vm));
         style = static_cast<int32_t>(cancelButtonStyle);
     }
-    struct ArkUISizeType size = {0.0, 0};
+    struct ArkUISizeType size = { 0.0, 0, nullptr };
     CalcDimension iconSize;
     if (!thirdArg->IsUndefined() && !thirdArg->IsNull() &&
         ArkTSUtils::ParseJsDimensionVpNG(vm, thirdArg, iconSize, false)) {
