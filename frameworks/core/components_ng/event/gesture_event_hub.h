@@ -344,6 +344,7 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
     void ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,

@@ -34,6 +34,7 @@ static void DragActionConvert(
     }
     internalDragAction->previewOption.defaultAnimationBeforeLifting =
         dragAction->dragPreviewOption.defaultAnimationBeforeLifting;
+    internalDragAction->previewOption.enableHapticFeedback = dragAction->dragPreviewOption.enableHapticFeedback;
     internalDragAction->previewOption.isMultiSelectionEnabled = dragAction->dragPreviewOption.isMultiSelectionEnabled;
     internalDragAction->previewOption.enableEdgeAutoScroll = dragAction->dragPreviewOption.enableEdgeAutoScroll;
     internalDragAction->previewOption.isNumber = dragAction->dragPreviewOption.isNumberBadgeEnabled;

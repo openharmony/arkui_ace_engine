@@ -82,6 +82,7 @@ struct DragPreviewOption {
     bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
     bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
