@@ -53,44 +53,40 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
-std::mutex TextPickerModel::mutex_;
-std::mutex TextPickerDialogModel::mutex_;
+std::once_flag TextPickerModel::onceFlag_;
+std::once_flag TextPickerDialogModel::onceFlag_;
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
-    if (!textPickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        textPickerInstance_.reset(new NG::TextPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerInstance_.reset(new NG::TextPickerModelNG());
-            } else {
-                textPickerInstance_.reset(new Framework::TextPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        } else {
+            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerInstance_.get();
 }
 
 TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 {
-    if (!textPickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
-            } else {
-                textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        } else {
+            textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace

@@ -61,84 +61,76 @@ std::unique_ptr<DatePickerModel> DatePickerModel::datePickerInstance_ = nullptr;
 std::unique_ptr<DatePickerDialogModel> DatePickerDialogModel::datePickerDialogInstance_ = nullptr;
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
 std::unique_ptr<TimePickerDialogModel> TimePickerDialogModel::timePickerDialogInstance_ = nullptr;
-std::mutex DatePickerModel::mutex_;
-std::mutex DatePickerDialogModel::mutex_;
-std::mutex TimePickerModel::mutex_;
-std::mutex TimePickerDialogModel::mutex_;
+std::once_flag DatePickerModel::onceFlag_;
+std::once_flag DatePickerDialogModel::onceFlag_;
+std::once_flag TimePickerModel::onceFlag_;
+std::once_flag TimePickerDialogModel::onceFlag_;
 
 DatePickerModel* DatePickerModel::GetInstance()
 {
-    if (!datePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!datePickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            datePickerInstance_.reset(new NG::DatePickerModelNG());
+        datePickerInstance_.reset(new NG::DatePickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                datePickerInstance_.reset(new NG::DatePickerModelNG());
-            } else {
-                datePickerInstance_.reset(new Framework::DatePickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            datePickerInstance_.reset(new NG::DatePickerModelNG());
+        } else {
+            datePickerInstance_.reset(new Framework::DatePickerModelImpl());
         }
-    }
+#endif
+    });
+
     return datePickerInstance_.get();
 }
 
 DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 {
-    if (!datePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!datePickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
+        datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
-            } else {
-                datePickerDialogInstance_.reset(new Framework::DatePickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            datePickerDialogInstance_.reset(new NG::DatePickerDialogModelNG());
+        } else {
+            datePickerDialogInstance_.reset(new Framework::DatePickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return datePickerDialogInstance_.get();
 }
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    if (!timePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            timePickerInstance_.reset(new NG::TimePickerModelNG());
+        timePickerInstance_.reset(new NG::TimePickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                timePickerInstance_.reset(new NG::TimePickerModelNG());
-            } else {
-                timePickerInstance_.reset(new Framework::TimePickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            timePickerInstance_.reset(new NG::TimePickerModelNG());
+        } else {
+            timePickerInstance_.reset(new Framework::TimePickerModelImpl());
         }
-    }
+#endif
+    });
+
     return timePickerInstance_.get();
 }
 
 TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 {
-    if (!timePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+        timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
-            } else {
-                timePickerDialogInstance_.reset(new Framework::TimePickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+        } else {
+            timePickerDialogInstance_.reset(new Framework::TimePickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return timePickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace

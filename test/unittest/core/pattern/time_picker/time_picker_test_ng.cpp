@@ -67,28 +67,22 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
 std::unique_ptr<TimePickerDialogModel> TimePickerDialogModel::timePickerDialogInstance_ = nullptr;
-std::mutex TimePickerModel::mutex_;
-std::mutex TimePickerDialogModel::mutex_;
+std::once_flag TimePickerModel::onceFlag_;
+std::once_flag TimePickerDialogModel::onceFlag_;
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    if (!timePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerInstance_) {
-            timePickerInstance_.reset(new NG::TimePickerModelNG());
-        }
-    }
+    std::call_once(onceFlag_, []() {
+        timePickerInstance_.reset(new NG::TimePickerModelNG());
+    });
     return timePickerInstance_.get();
 }
 
 TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 {
-    if (!timePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerDialogInstance_) {
-            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
-        }
-    }
+    std::call_once(onceFlag_, []() {
+        timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+    });
     return timePickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace

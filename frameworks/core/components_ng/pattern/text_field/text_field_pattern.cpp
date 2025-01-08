@@ -282,10 +282,10 @@ RefPtr<NodePaintMethod> TextFieldPattern::CreateNodePaintMethod()
         paint->SetScrollBar(scrollBar);
         if (scrollBar->NeedPaint()) {
             textFieldOverlayModifier_->SetRect(scrollBar->GetActiveRect());
-        } else if (IsNormalInlineState() && !HasFocus()) {
-            auto inlineScrollRect = scrollBar->GetActiveRect();
-            CalcInlineScrollRect(inlineScrollRect);
-            textFieldOverlayModifier_->SetRect(inlineScrollRect);
+        } else if (!HasFocus()) {
+            auto scrollRect = scrollBar->GetActiveRect();
+            CalcScrollRect(scrollRect);
+            textFieldOverlayModifier_->SetRect(scrollRect);
             textFieldOverlayModifier_->SetOpacity(0);
         }
     }
@@ -338,8 +338,12 @@ void TextFieldPattern::CalculateBoundsRect()
     }
 }
 
-void TextFieldPattern::CalcInlineScrollRect(Rect& inlineScrollRect)
+void TextFieldPattern::CalcScrollRect(Rect& inlineScrollRect)
 {
+    if (!IsNormalInlineState()) {
+        // if textfield is not inline, no need to calc rect
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContext();
@@ -617,7 +621,7 @@ void TextFieldPattern::UpdateSelectionAndHandleVisibility()
     auto end = dragTextEnd_;
     if (isMouseOrTouchPad(sourceTool_) && releaseInDrop_) {
         start = selectController_->GetCaretIndex()
-        - contentController_->GetInsertValue().length();
+        - static_cast<int32_t>(contentController_->GetInsertValue().length());
         end = selectController_->GetCaretIndex();
     }
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "UpdateSelectionAndHandleVisibility range=[%{public}d--%{public}d]",
@@ -2454,8 +2458,14 @@ void TextFieldPattern::InitDragDropCallBack()
             }
         }
         auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
-        pattern->UpdateContentScroller(
-            Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY()));
+        Offset localOffset = Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
+        if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
+            pattern->UpdateContentScroller(localOffset);
+        } else {
+            pattern->contentScroller_.OnBeforeScrollingCallback(localOffset);
+            pattern->PauseContentScroll();
+            pattern->contentScroller_.hotAreaOffset.reset();
+        }
     };
     eventHub->SetOnDragMove(std::move(onDragMove));
 
@@ -4714,6 +4724,33 @@ void TextFieldPattern::CalcCounterAfterFilterInsertValue(
     int32_t sum = curLength + static_cast<int32_t>(result.length());
     showCountBorderStyle_ = sum > maxLength;
     HandleCountStyle();
+}
+
+int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertValue, int32_t offset)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, offset);
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, offset);
+    int32_t originLength =
+        static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+    bool hasInsertValue =
+        contentController_->InsertValue(offset, insertValue);
+    int32_t caretMoveLength =
+        abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - originLength);
+    if (layoutProperty->HasMaxLength()) {
+        CalcCounterAfterFilterInsertValue(originLength, insertValue,
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
+    }
+    int32_t newCaretIndex = offset + caretMoveLength;
+    selectController_->UpdateCaretIndex(offset + caretMoveLength);
+    UpdateObscure(insertValue, hasInsertValue);
+    UpdateEditingValueToRecord();
+    TwinklingByFocus();
+    CloseSelectOverlay(true);
+    ScrollToSafeArea();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    return newCaretIndex;
 }
 
 void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
@@ -9312,7 +9349,7 @@ bool TextFieldPattern::InsertOrDeleteSpace(int32_t index)
     return false;
 }
 
-void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
+void TextFieldPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
 {
     auto length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     if (start > end) {
@@ -9325,12 +9362,16 @@ void TextFieldPattern::DeleteRange(int32_t start, int32_t end)
     }
     GetEmojiSubStringRange(start, end);
     auto value = contentController_->GetSelectedValue(start, end);
-    auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
-    CHECK_NULL_VOID(isDelete);
+    if (isIME) {
+        auto isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::FORWARD, start);
+        CHECK_NULL_VOID(isDelete);
+    }
     ResetObscureTickCountDown();
     CheckAndUpdateRecordBeforeOperation();
     Delete(start, end);
-    AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    if (isIME) {
+        AfterIMEDeleteValue(value, TextDeleteDirection::FORWARD);
+    }
     showCountBorderStyle_ = false;
     HandleCountStyle();
 }
@@ -9968,6 +10009,14 @@ void TextFieldPattern::ResetFirstClickAfterGetFocus()
     });
     taskExecutor->PostDelayedTask(
         firstClickResetTask_, TaskExecutor::TaskType::UI, TWINKLING_INTERVAL_MS, "ResetFirstClickAfterGetFocusTask");
+}
+
+SelectionInfo TextFieldPattern::GetSelection()
+{
+    SelectionInfo selection;
+    selection.SetSelectionStart(selectController_->GetStartIndex());
+    selection.SetSelectionEnd(selectController_->GetEndIndex());
+    return selection;
 }
 
 FocusPattern TextFieldPattern::GetFocusPattern() const

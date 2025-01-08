@@ -124,7 +124,7 @@ static bool MatchColorWithRGBA(const std::string& colorStr, Color& color)
     StringUtils::StringSplitter(valueStr.c_str(), ',', valueProps);
     auto size = valueProps.size();
     auto count = std::count(valueStr.begin(), valueStr.end(), ',');
-    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || size != (count + 1)) {
+    if ((size != RGB_SUB_SIZE && size != RGBA_SUB_SIZE) || static_cast<int32_t>(size) != (count + 1)) {
         return false;
     }
     std::vector<uint8_t> colorInt;
@@ -168,12 +168,12 @@ JSCanvasRenderer::JSCanvasRenderer()
     SetInstanceId(Container::CurrentIdSafely());
     density_ = PipelineBase::GetCurrentDensity();
     apiVersion_ = Container::GetCurrentApiTargetVersion();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
         paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         isJudgeSpecialValue_ = true;
     }
     auto pipeline = PipelineBase::GetCurrentContextSafely();
@@ -631,7 +631,7 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             info.GetDoubleArg(8, image.dHeight);
             // In higher versions, sx, sy, sWidth, sHeight are parsed in VP units
             // In lower versions, sx, sy, sWidth, sHeight are parsed in PX units
-            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+            if (isImage || Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
                 image.sx *= density;
                 image.sy *= density;
                 image.sWidth *= density;
@@ -1545,7 +1545,16 @@ std::shared_ptr<Pattern> JSCanvasRenderer::GetPatternPtr(int32_t id)
 void JSCanvasRenderer::SetTransform(unsigned int id, const TransformParam& transform)
 {
     if (id >= 0 && id <= patternCount_) {
-        renderingContext2DModel_->SetTransform(pattern_[id], transform);
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            renderingContext2DModel_->SetTransform(pattern_[id], transform);
+        } else {
+            pattern_[id]->SetScaleX(transform.scaleX);
+            pattern_[id]->SetScaleY(transform.scaleY);
+            pattern_[id]->SetSkewX(transform.skewX);
+            pattern_[id]->SetSkewY(transform.skewY);
+            pattern_[id]->SetTranslateX(transform.translateX);
+            pattern_[id]->SetTranslateY(transform.translateY);
+        }
     }
 }
 
@@ -1664,7 +1673,7 @@ void JSCanvasRenderer::JsReset(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::ResetPaintState()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         // The default value of TextAlign is TextAlign::START and Direction is TextDirection::INHERIT.
         // The default value of the font size in canvas is 14px.
         paintState_ = PaintState(TextAlign::START, TextDirection::INHERIT, DEFAULT_FONT_SIZE);

@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -279,6 +280,7 @@ struct DialogProperties {
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
 };
 
 struct PromptDialogAttr {
@@ -317,6 +319,7 @@ struct PromptDialogAttr {
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
 };
 
 } // namespace OHOS::Ace

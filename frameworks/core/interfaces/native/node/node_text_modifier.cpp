@@ -244,11 +244,7 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color textColor;
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textColor = theme->GetTextStyle().GetTextColor();
-    TextModelNG::SetTextColor(frameNode, textColor);
+    TextModelNG::ResetTextColor(frameNode);
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)

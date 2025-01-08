@@ -1069,6 +1069,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>
             textStyle.SetLineHeight(
                 Dimension(heightValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale())));
         }
+        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
 }
 
@@ -1109,9 +1110,6 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleMore(const RefPtr<FrameNode>& fram
         textStyle.SetLetterSpacing(layoutProperty->GetLetterSpacing().value());
     }
     UpdateTextStyleLineHeight(frameNode, layoutProperty, textStyle);
-    if (layoutProperty->HasHalfLeading()) {
-        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
-    }
     if (layoutProperty->HasFontFeature()) {
         textStyle.SetFontFeatures(layoutProperty->GetFontFeature().value());
     }
@@ -1148,9 +1146,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
                 Dimension(heightValue.ConvertToPxDistribute(placeholderTextStyle.GetMinFontScale(),
                     placeholderTextStyle.GetMaxFontScale())));
         }
-    }
-    if (layoutProperty->HasHalfLeading()) {
-        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value());
+        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
     if (layoutProperty->HasMaxFontScale()) {
         placeholderTextStyle.SetMaxFontScale(layoutProperty->GetMaxFontScale().value());
