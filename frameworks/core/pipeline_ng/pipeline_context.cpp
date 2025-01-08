@@ -1874,6 +1874,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -1931,6 +1932,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -2073,6 +2075,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         context->FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -2191,6 +2194,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
         safeAreaManager_->GetKeyboardOffset());
     SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
     manager->AvoidKeyBoardInNavigation();
+    SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     // layout before scrolling textfield to safeArea, because of getting correct position
     FlushUITasks();
     bool scrollResult = manager->ScrollTextFieldToSafeArea();
