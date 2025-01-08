@@ -2085,7 +2085,6 @@ export struct ImageboxGroupBootcamp {
           }
         }
 
-
       }
     }
   }
