@@ -5632,6 +5632,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
+        auto hapicFeedback = interObj->GetProperty("enableHapticFeedback");
+        if (hapicFeedback->IsBoolean()) {
+            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
+        }
         auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
         if (dragPreview->IsBoolean()) {
             previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();

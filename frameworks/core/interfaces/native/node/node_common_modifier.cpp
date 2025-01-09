@@ -3683,6 +3683,7 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
     option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
+    option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3691,7 +3692,7 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetDragPreviewOptions(
-        frameNode, { true, false, false, false, false, false, true, false, true, { .isShowBadge = true } });
+        frameNode, { true, false, false, false, false, false, true, false, true, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(

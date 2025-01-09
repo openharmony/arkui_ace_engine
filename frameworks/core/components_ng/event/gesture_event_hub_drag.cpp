@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
+#include "core/common/vibrator/vibrator_utils.h"
 
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "image_source.h"
@@ -784,6 +785,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
+
+    StartVibratorByDrag(frameNode);
+
     DragDropBehaviorReporter::GetInstance().UpdateDragStartResult(DragStartResult::DRAG_START_SUCCESS);
     bool isSwitchedToSubWindow = false;
     if (subWindow && TryDoDragStartAnimation(context, subWindow, info, data)) {
@@ -832,6 +836,21 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         dragDropManager->OnDragEnd(
             DragPointerEvent(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()), extraInfoLimited);
     }
+}
+
+void GestureEventHub::StartVibratorByDrag(const RefPtr<FrameNode>& frameNode)
+{
+    bool enableHapticFeedback = frameNode->GetDragPreviewOption().enableHapticFeedback;
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    if (parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
+        enableHapticFeedback = parent->GetDragPreviewOption().enableHapticFeedback;
+    }
+    if (!enableHapticFeedback || !DragDropGlobalController::GetInstance().IsDragFilterShowing()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Enable haptic feedback, start vibrator by drag.");
+    VibratorUtils::StartViratorDirectly("haptic.drag");
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(false);
 }
 
 void GestureEventHub::UpdateExtraInfo(

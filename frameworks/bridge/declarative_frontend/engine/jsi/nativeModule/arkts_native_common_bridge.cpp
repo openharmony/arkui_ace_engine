@@ -5212,7 +5212,7 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundBrightness(ArkUIRuntimeCallI
 ArkUIDragInteractionOptions SetInteractionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    struct ArkUIDragInteractionOptions interactionOptions = { false, false, true };
+    struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false };
     CHECK_NULL_RETURN(vm, interactionOptions);
     Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
     Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
@@ -5226,6 +5226,7 @@ ArkUIDragInteractionOptions SetInteractionOptions(ArkUIRuntimeCallInfo* runtimeC
     if (enableEdgeAutoScroll->IsBoolean()) {
         interactionOptions.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean(vm)->Value();
     }
+    CommonBridge::SetEnableHapticFeedback(interactionOptions, runtimeCallInfo);
     return interactionOptions;
 }
 
@@ -5272,6 +5273,17 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         nativeNode, preViewOptions, interactionOptions);
     delete[] modeIntArray;
     return panda::JSValueRef::Undefined(vm);
+}
+
+void CommonBridge::SetEnableHapticFeedback(ArkUIDragInteractionOptions &interactionOptions,
+    ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> enableHapticFeedback = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (enableHapticFeedback->IsBoolean()) {
+        interactionOptions.enableHapticFeedback = enableHapticFeedback->ToBoolean(vm)->Value();
+    }
 }
 
 ArkUINativeModuleValue CommonBridge::ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
