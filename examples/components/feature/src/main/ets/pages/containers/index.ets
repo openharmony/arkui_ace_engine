@@ -56,7 +56,7 @@ export const containersRoute: RouteGroup = {
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
     { name: 'gridRow', label: '栅格容器/GridRow' },
     { name: 'folder-stack', label: '折叠布局/FolderStack' },
-    { name:'columnSplit', label:'纵向分割容器/ColumnSplit' },
+    { name:'columnSplit', label:'纵向分割容器/ColumnSplit' }
   ]
 };
 
