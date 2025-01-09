@@ -153,6 +153,9 @@ constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
 constexpr Dimension MOUSE_SCROLL_BAR_REGION_WIDTH = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
+constexpr int32_t LAND_DURATION = 100;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -1451,7 +1454,7 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
-    SetFloatingCursorVisible(false);
+    ResetFloatingCursorState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -2080,7 +2083,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
     }
     // limit move when preview text is shown
     auto touchOffset = info.GetLocalLocation();
-    int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
         float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
@@ -2101,9 +2103,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset, true, true);
-        if (moveCaretState_.isMoveCaret) {
-            StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
-        }
     } else {
         UpdateContentScroller(touchOffset);
         auto touchCaretX = std::clamp(
@@ -2116,16 +2115,35 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
             !contentScroller_.isScrolling ? Offset(touchCaretX, touchCaretY) : touchOffset,
             !contentScroller_.isScrolling, true);
         if (magnifierController_ && HasText()) {
-            auto floatCaretRectCenter = GetFloatingCaretRect().Center();
-            magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+            SetMagnifierLocalOffsetToFloatingCaretPos();
         }
-        StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
 
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::SetMagnifierLocalOffsetToFloatingCaretPos()
+{
+    auto floatCaretRectCenter = GetFloatingCaretRect().Center();
+    if (floatCaretState_.lastFloatingCursorY.has_value() && !NearEqual(floatCaretState_.lastFloatingCursorY.value(),
+        static_cast<float>(floatCaretRectCenter.GetY()))) {
+        AnimationOption option = AnimationOption();
+        option.SetCurve(MOVE_MAGNIFIER_CURVE);
+        option.SetDuration(LAND_DURATION);
+        AnimationUtils::Animate(option,
+            [weak = WeakClaim(this), floatCaretRectCenter]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->GetMagnifierController()->SetLocalOffset({ floatCaretRectCenter.GetX(),
+                    floatCaretRectCenter.GetY() });
+            });
+    } else {
+        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+    }
+    floatCaretState_.lastFloatingCursorY = floatCaretRectCenter.GetY();
 }
 
 void TextFieldPattern::InitDragEvent()
