@@ -1,5 +1,5 @@
 import { describe, beforeAll, beforeEach, afterEach, afterAll, it, expect } from '@ohos/hypium'
-import { abilityDelegatorRegistry, Driver, ON } from '@kit.TestKit';
+import { abilityDelegatorRegistry, Component, Driver, ON } from '@kit.TestKit';
 
 import {
   buttonClick,
@@ -11,6 +11,7 @@ import {
   swipeColumn,
   ToggleClick
 } from '../../utils';
+import { Point } from '@ohos.UiTest';
 
 const TAG = 'GaugeBootcamp001'
 
@@ -38,26 +39,24 @@ export default function GaugeBootcampTest() {
           abilityName: 'EntryAbility'
         });
 
-
         await driver.delayMs(1500);
         console.info(TAG + 'GaugeBootcamp001' + ' begin');
 
-
-        let atomDisplays = await driver.findComponent(ON.text('展示类'));
+        let atomDisplays:Component = await driver.findComponent(ON.text('展示类'));
         await atomDisplays.click();
         await driver.delayMs(1000);
 
-        let ListItems = await driver.findComponents(ON.type('ListItem'))
-        let width = await ListItems[0].getBoundsCenter()
-        let width2 = await ListItems[7].getBoundsCenter()
+        let ListItems:Array<Component> = await driver.findComponents(ON.type('ListItem'))
+        let width:Point = await ListItems[0].getBoundsCenter()
+        let width2:Point = await ListItems[7].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
         await driver.delayMs(1000);
 
-        let scrollSearch = await driver.findComponent(ON.text('数据量规图/gauge'))
+        let scrollSearch:Component = await driver.findComponent(ON.text('数据量规图/gauge'))
         await scrollSearch.click()
         await driver.delayMs(1000);
 
-        let Buttons = await driver.findComponents(ON.type('Button'));
+        let Buttons:Array<Component> = await driver.findComponents(ON.type('Button'));
         await Buttons[1].click()
         await driver.delayMs(1000);
 
@@ -76,9 +75,9 @@ export default function GaugeBootcampTest() {
       // Presets a clear action, which is performed after each unit test case ends.
       // The number of execution times is the same as the number of test cases defined by **it**.
       // This API supports only one parameter: clear action function.
-      let radio = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable())
-      let slider = await driver.findComponent(ON.type('Slider').within(ON.type('Scroll')).scrollable())
-      let Button = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable())
+      let radio:Array<Component> = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable())
+      let slider:Component= await driver.findComponent(ON.type('Slider').within(ON.type('Scroll')).scrollable())
+      let Button:Array<Component> = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable())
 
       if (!radio && !slider && !Button) {
         await swipeColumn()
