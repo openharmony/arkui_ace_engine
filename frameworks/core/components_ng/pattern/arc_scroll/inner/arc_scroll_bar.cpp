@@ -18,7 +18,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double HALF = 0.5;
-constexpr int32_t BAR_SHRINK_DELAY_DURATION = 2000; // 2000ms
 } // namespace
 
 bool ArcScrollBar::InBarTouchRegion(const Point& point) const
@@ -161,24 +160,6 @@ float ArcScrollBar::CalcPatternOffset(float scrollBarOffset) const
     auto mainSize = GetViewPortSize().Height();
     auto offset = -scrollBarOffset * (GetEstimatedHeigh() - mainSize) / (GetBarRegionSize() - activeRectLength);
     return offset;
-}
-
-void ArcScrollBar::ScheduleShrinkDelayTask()
-{
-    if (GetDisplayMode() != DisplayMode::AUTO) {
-        shrinkDelayTask_.Cancel();
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        shrinkDelayTask_.Reset([weak = WeakClaim(this)] {
-            auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID(scrollBar);
-            scrollBar->PlayScrollBarShrinkAnimation();
-        });
-        taskExecutor->PostDelayedTask(shrinkDelayTask_, TaskExecutor::TaskType::UI, BAR_SHRINK_DELAY_DURATION,
-            "ArkUIScrollBarInnerShrinkAnimation");
-    }
 }
 
 void ArcScrollBar::CalcReservedHeight()
