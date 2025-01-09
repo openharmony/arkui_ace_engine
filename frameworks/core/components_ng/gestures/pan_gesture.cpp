@@ -49,6 +49,9 @@ RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
     panRecognizer->SetPriority(priority_);
     panRecognizer->SetPriorityMask(gestureMask_);
     panRecognizer->SetGestureInfo(gestureInfo_);
+    if (gestureInfo_) {
+        gestureInfo_->SetDisposeTag(false);
+    }
     panRecognizer->SetUserData(userData_);
     return panRecognizer;
 }
