@@ -20,7 +20,8 @@ namespace OHOS::Ace::NG {
 std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::instance_ { nullptr };
 std::mutex PickerAudioHapticFactory::mutex_;
 
-std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance()
+std::shared_ptr<IPickerAudioHaptic> PickerAudioHapticFactory::GetInstance(
+    const std::string& uri, const std::string& effectId)
 {
     if (instance_ == nullptr) {
         std::lock_guard<std::mutex> lock(mutex_);

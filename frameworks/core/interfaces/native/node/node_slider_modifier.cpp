@@ -657,6 +657,27 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
     CHECK_NULL_RETURN(rangeValue && rangeValue->HasValidValues(), errorReturn);
     return { rangeValue->GetFromValue(), rangeValue->GetToValue() };
 }
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return SliderModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, true);
+}
 } // namespace SliderModifier
 
 namespace NodeModifier {
@@ -733,6 +754,9 @@ const ArkUISliderModifier* GetSliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line
@@ -819,6 +843,9 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
     constexpr auto lineEnd = __LINE__; // don't move this line
     constexpr auto ifdefOverhead = 4; // don't modify this line

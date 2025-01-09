@@ -17,9 +17,9 @@
 
 namespace OHOS::Ace::NG {
 
-PickerAudioHapticImpl::PickerAudioHapticImpl()
+PickerAudioHapticImpl::PickerAudioHapticImpl(const std::string& uri, const std::string& effectId)
 {
-    handler_ = std::make_unique<PickerHapticController>();
+    handler_ = std::make_unique<PickerHapticController>(uri, effectId);
 }
 
 void PickerAudioHapticImpl::Play(size_t speed)

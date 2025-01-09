@@ -12166,6 +12166,42 @@ void ResetSliderValidSlideRange(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetSliderEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getSliderModifier()) {
+        auto resultValue =
+            fullImpl->getNodeModifiers()->getSliderModifier()->getEnableHapticFeedback(node->uiNodeHandle);
+        g_numberValues[0].i32 = resultValue;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetSliderEnableHapticFeedback(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl || !fullImpl->getNodeModifiers() || !fullImpl->getNodeModifiers()->getSliderModifier()) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+
+    auto sliderModifier = fullImpl->getNodeModifiers()->getSliderModifier();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        sliderModifier->resetEnableHapticFeedback(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    sliderModifier->setEnableHapticFeedback(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetSliderEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getSliderModifier()) {
+        fullImpl->getNodeModifiers()->getSliderModifier()->resetEnableHapticFeedback(node->uiNodeHandle);
+    }
+}
+
 int32_t SetRefreshRefreshing(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
@@ -14109,6 +14145,7 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSliderStyle,
         SetSliderTrackThickness,
         SetSliderValidSlideRange,
+        SetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14134,6 +14171,7 @@ const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSliderStyle,
         GetSliderTrackThickness,
         GetSliderValidSlideRange,
+        GetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14160,6 +14198,7 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSliderStyle,
         ResetSliderTrackThickness,
         ResetSliderValidSlideRange,
+        ResetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "slider node attribute: %{public}d NOT IMPLEMENT", subTypeId);

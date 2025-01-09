@@ -1429,6 +1429,9 @@ struct CJUISliderModifier {
     ArkUI_CharPtr (*getSliderBlockShape)(ArkUINodeHandle node, ArkUI_Float32 (*value)[5]);
     ArkUI_Float32 (*getThickness)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUISliderValidSlideRange (*getSliderValidSlideRange)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct CJUIProgressModifier {

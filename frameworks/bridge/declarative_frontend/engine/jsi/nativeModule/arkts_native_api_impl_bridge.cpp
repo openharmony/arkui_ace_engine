@@ -3106,6 +3106,10 @@ void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetContentModifierBuilder));
     slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSliderOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSliderOptions));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetEnableHapticFeedback));
+    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetEnableHapticFeedback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);
 }
 

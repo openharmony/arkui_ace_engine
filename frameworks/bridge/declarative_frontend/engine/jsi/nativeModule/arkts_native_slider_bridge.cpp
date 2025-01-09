@@ -749,4 +749,40 @@ ArkUINativeModuleValue SliderBridge::SetSliderOptions(ArkUIRuntimeCallInfo* runt
     sliderModifier->setReverse(nativeNode, options.reverse);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue SliderBridge::SetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> enableHapticFeedbackArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    if (enableHapticFeedbackArg->IsBoolean()) {
+        bool value = enableHapticFeedbackArg->ToBoolean(vm)->Value();
+        SliderModifier->setEnableHapticFeedback(nativeNode, value);
+    } else {
+        SliderModifier->resetEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SliderBridge::ResetEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto SliderModifier = nodeModifiers->getSliderModifier();
+    CHECK_NULL_RETURN(SliderModifier, panda::NativePointerRef::New(vm, nullptr));
+    SliderModifier->resetEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

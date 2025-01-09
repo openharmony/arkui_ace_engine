@@ -20753,6 +20753,10 @@ class ArkSliderComponent extends ArkComponent {
     }
     return this.sliderNode.getFrameNode();
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, SliderEnableHapticFeedbackModifier.identity, SliderEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class SliderOptionsModifier extends ModifierWithKey {
   constructor(value) {
@@ -21083,6 +21087,21 @@ class SliderContentModifier extends ModifierWithKey {
     sliderComponent.setContentModifier(this.value);
   }
 }
+class SliderEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().slider.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().slider.setEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+SliderEnableHapticFeedbackModifier.identity = Symbol('sliderEnableHapticFeedback');
+
 SliderContentModifier.identity = Symbol('sliderContentModifier');
 // @ts-ignore
 if (globalThis.Slider !== undefined) {

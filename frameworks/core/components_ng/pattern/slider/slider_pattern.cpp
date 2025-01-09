@@ -53,6 +53,7 @@ constexpr double DEFAULT_SLIP_FACTOR = 50.0;
 constexpr double SLIP_FACTOR_COEFFICIENT = 1.07;
 constexpr uint64_t SCREEN_READ_SENDEVENT_TIMESTAMP = 400;
 const std::string STR_SCREEN_READ_SENDEVENT = "ArkUISliderSendAccessibilityValueEvent";
+const std::string SLIDER_EFFECT_ID_NAME = "haptic.slide";
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr float CROWN_SENSITIVITY_LOW = 0.5f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
@@ -117,6 +118,41 @@ void SliderPattern::OnModifyDone()
     AccessibilityVirtualNodeRenderTask();
     InitSliderAccessibilityEnabledRegister();
     InitOrRefreshSlipFactor();
+    InitHapticController();
+}
+
+void SliderPattern::PlayHapticFeedback(bool isShowSteps, float step, float oldValue)
+{
+    if (!hapticController_ || !isEnableHaptic_) {
+        return;
+    }
+    if (isShowSteps || NearEqual(valueRatio_, 1) || NearEqual(valueRatio_, 0)) {
+        hapticController_->PlayOnce();
+    }
+}
+
+void SliderPattern::InitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (GetEnableHapticFeedback()) {
+        if (!hapticController_) {
+            auto context = host->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance("", SLIDER_EFFECT_ID_NAME);
+            });
+        }
+    } else {
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
 }
 
 void SliderPattern::HandleEnabled()
@@ -1010,6 +1046,10 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     value_ = std::clamp(value_, min, max);
     sliderPaintProperty->UpdateValue(value_);
     valueChangeFlag_ = !NearEqual(oldValue, value_);
+    bool isShowSteps = sliderPaintProperty->GetShowStepsValue(false);
+    if (valueChangeFlag_) {
+        PlayHapticFeedback(isShowSteps, step, oldValue);
+    }
     UpdateCircleCenterOffset();
 }
 
@@ -1920,6 +1960,7 @@ void SliderPattern::UpdateValue(float value)
 void SliderPattern::OnAttachToFrameNode()
 {
     RegisterVisibleAreaChange();
+    InitHapticController();
 }
 
 void SliderPattern::StartAnimation()
@@ -1938,6 +1979,9 @@ void SliderPattern::StartAnimation()
 
 void SliderPattern::StopAnimation()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     CHECK_NULL_VOID(sliderContentModifier_);
     if (!sliderContentModifier_->GetVisible()) {
         return;
@@ -2100,6 +2144,9 @@ RefPtr<FrameNode> SliderPattern::BuildContentModifierNode()
 
 void SliderPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
