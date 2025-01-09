@@ -15,8 +15,6 @@
 
 #include "adapter/ohos/entrance/event_pass_through_subscriber.h"
 
-#include "ui/base/utils/utils.h"
-
 namespace OHOS::Ace {
 const std::string TOUCH_EVENTS_PASS_THROUGH = "touch.events.pass.through";
 namespace {
@@ -25,6 +23,7 @@ constexpr int32_t PUBLISHER_UID = 7800;
 
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
 {
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through event");
     if (eventPassThroughReceiver_ == nullptr) {
         // create subscribe info
         MatchingSkills matchingSkills;
@@ -71,6 +70,7 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
     auto want = data.GetWant();
     std::string action = want.GetAction();
     if (action == TOUCH_EVENTS_PASS_THROUGH) {
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent touch.events.pass.through event");
         AceApplicationInfo::GetInstance().SetTouchEventsPassThroughMode(true);
         for (const auto& instanceId : instanceMap_) {
             auto container = Platform::AceContainer::GetContainer(instanceId);
