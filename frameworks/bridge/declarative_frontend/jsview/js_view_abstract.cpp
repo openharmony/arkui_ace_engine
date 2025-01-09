@@ -6504,7 +6504,10 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    JSRef<JSObject> jsObject = args[1];
+    if (!(args[1]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     KeyEvent keyEvent;
     ParseJsKeyEvent(jsObject, keyEvent);
     auto result = focusHub->HandleEvent(keyEvent);
