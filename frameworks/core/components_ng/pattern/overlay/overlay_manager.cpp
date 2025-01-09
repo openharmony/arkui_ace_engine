@@ -917,13 +917,17 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     option.SetOnFinishEvent(
-        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), dialogPattern, id = Container::CurrentId()] {
+        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->PostDialogFinishEvent(nodeWk);
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidDisappearCallback();
-        });
+    });
     auto ctx = node->GetRenderContext();
     if (!ctx) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
