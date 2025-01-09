@@ -93,7 +93,7 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
     return windowNode;
 }
 
-void WindowNode::SetParent(const WeakPtr<UINode>& parent)
+void WindowNode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
 {
     auto prevParent = GetParent();
     if (prevParent && prevParent != parent.Upgrade()) {

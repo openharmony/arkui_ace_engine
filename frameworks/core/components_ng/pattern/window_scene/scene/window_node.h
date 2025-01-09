@@ -34,7 +34,7 @@ public:
     static RefPtr<WindowNode> GetOrCreateWindowNode(const std::string& tag,
         int32_t nodeId, int32_t sessionId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
 
-    void SetParent(const WeakPtr<UINode>& parent) override;
+    void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true) override;
     bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
         std::vector<RectF>* regionList = nullptr) override;
     std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType) override;
