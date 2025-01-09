@@ -58,7 +58,8 @@ public:
     }
 
 private:
-    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
+    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
+        const RefPtr<FrameNode>& calendarDialogNode);
     static RefPtr<FrameNode> CreateWeekNode(const RefPtr<FrameNode>& calendarNode);
     static RefPtr<FrameNode> CreateScrollNode();
     static RefPtr<FrameNode> CreateTitleImageNode(
