@@ -103,7 +103,7 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetItemRect001, TestSize.Level1)
      * @tc.steps: step2. Get valid ScrollItem Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, CONTENT_MAIN_SIZE, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, 0, CONTENT_MAIN_SIZE, HEIGHT)));
 }
 
 /**
@@ -198,7 +198,7 @@ HWTEST_F(ScrollLayoutTestNg, Measure003, TestSize.Level1)
     CreateScroll();
     CreateScrollDone();
     auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
-    auto expectSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    auto expectSize = SizeF(WIDTH, HEIGHT);
     EXPECT_TRUE(IsEqual(scrollSize, expectSize));
 
     /**
@@ -278,7 +278,7 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
     model.SetInitialOffset(OffsetT(CalcDimension(0.f), CalcDimension(offset)));
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(pattern_->currentOffset_, -SCROLL_HEIGHT * 0.1f);
+    EXPECT_EQ(pattern_->currentOffset_, -HEIGHT * 0.1f);
 
     /**
      * @tc.steps: step5. Create scroll , set axis HORIZONTAL and set initialOffset 10%.
@@ -289,7 +289,7 @@ HWTEST_F(ScrollLayoutTestNg, InitialOffset001, TestSize.Level1)
     model.SetAxis(Axis::HORIZONTAL);
     CreateContent();
     CreateScrollDone();
-    EXPECT_EQ(pattern_->currentOffset_, -SCROLL_WIDTH * 0.1f);
+    EXPECT_EQ(pattern_->currentOffset_, -WIDTH * 0.1f);
 }
 
 /**
@@ -405,11 +405,11 @@ HWTEST_F(ScrollLayoutTestNg, Alignment001, TestSize.Level1)
     /**
      * @tc.steps: step1. Set content width less than scroll width
      */
-    float contentWidth = SCROLL_WIDTH / 2;
+    float contentWidth = WIDTH / 2;
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
-    float centerPosition = (SCROLL_HEIGHT - ITEM_MAIN_SIZE) / 2;
+    float centerPosition = (HEIGHT - ITEM_MAIN_SIZE) / 2;
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(60, centerPosition)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
@@ -422,11 +422,11 @@ HWTEST_F(ScrollLayoutTestNg, Alignment001, TestSize.Level1)
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, SCROLL_HEIGHT - ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(contentWidth, HEIGHT - ITEM_MAIN_SIZE)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, SCROLL_HEIGHT - ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(0.f, HEIGHT - ITEM_MAIN_SIZE)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
     FlushLayoutTask(frameNode_);
@@ -456,7 +456,7 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
     /**
      * @tc.steps: step1. Set content width greater than scroll width
      */
-    float contentWidth = SCROLL_WIDTH * 2;
+    float contentWidth = WIDTH * 2;
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(contentWidth));
     FlushLayoutTask(frameNode_);
@@ -464,31 +464,31 @@ HWTEST_F(ScrollLayoutTestNg, Alignment002, TestSize.Level1)
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_LEFT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::TOP_RIGHT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_LEFT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::BOTTOM_RIGHT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_RIGHT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER_LEFT);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 
     layoutProperty_->UpdateAlignment(Alignment::CENTER);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-SCROLL_WIDTH, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(-WIDTH, 0.f)));
 }
 
 /**
@@ -537,14 +537,14 @@ HWTEST_F(ScrollLayoutTestNg, RTL001, TestSize.Level1)
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(SCROLL_WIDTH / 2);
+    CreateContent(WIDTH / 2);
     CreateScrollDone(frameNode_);
 
     /**
      * @tc.steps: step1. Set content width less than scroll width
      */
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(SCROLL_WIDTH / 4, 0.f)));
+    EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(WIDTH / 4, 0.f)));
 }
 
 /**
@@ -681,31 +681,31 @@ HWTEST_F(ScrollLayoutTestNg, ScrollGetChildrenExpandedSize001, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     CreateContent(100.f);
     CreateScrollDone();
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH, 100.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH, 100.f));
 
     auto padding = 2 * 5.f;
     ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.f));
     FlushLayoutTask(frameNode_);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 100.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH - padding, 100.f));
 
     auto contentNode = GetChildFrameNode(frameNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(2000.f));
     FlushLayoutTask(frameNode_, true);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(SCROLL_WIDTH - padding, 2000.f));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(WIDTH - padding, 2000.f));
 
     pattern_->SetAxis(Axis::HORIZONTAL);
-    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(HEIGHT));
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(100.f));
     FlushLayoutTask(frameNode_, true);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, SCROLL_HEIGHT - padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(100.f, HEIGHT - padding));
 
     ViewAbstract::SetWidth(AceType::RawPtr(contentNode), CalcLength(2000.f));
     FlushLayoutTask(frameNode_, true);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2000.f, SCROLL_HEIGHT - padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2000.f, HEIGHT - padding));
 
     ViewAbstract::SetMargin(AceType::RawPtr(contentNode), CalcLength(5.f));
     FlushLayoutTask(frameNode_, true);
-    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, SCROLL_HEIGHT - padding));
+    EXPECT_EQ(pattern_->GetChildrenExpandedSize(), SizeF(2010.f, HEIGHT - padding));
 
     pattern_->SetAxis(Axis::NONE);
     FlushLayoutTask(frameNode_);
