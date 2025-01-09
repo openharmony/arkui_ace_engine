@@ -4137,23 +4137,24 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern15, TestSize.Level1)
  * @tc.name: SheetPresentationPattern16
  * @tc.desc: Test SheetPresentationPattern::InitialSingleGearHeight().
  * @tc.type: FUNC
-*/
+ */
 HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern16, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create target node.
      */
-    auto themeManager = AceType::MakeRefPtr();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto sheetTheme = AceType::MakeRefPtr();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr());
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
+
     /**
      * @tc.steps: step2. create sheetNode, get sheetPattern.
      */
@@ -4161,16 +4162,16 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern16, TestSize.Level1)
     sheetStyle.sheetMode = SheetMode::MEDIUM;
     bool isShow = true;
     CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr(rootNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_),
-        sheetStyle, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
-    auto topSheetPattern = topSheetNode->GetPattern();
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
-    
+
     /**
      * @tc.steps: step3. test InitialSingleGearHeight().
      */
@@ -4195,18 +4196,19 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
     /**
      * @tc.steps: step1. create target node.
      */
-    auto themeManager = AceType::MakeRefPtr();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto sheetTheme = AceType::MakeRefPtr();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->largePercent_ = 0.5;
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr());
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
+
     /**
      * @tc.steps: step2. create sheetNode, get sheetPattern.
      */
@@ -4214,15 +4216,16 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
     sheetStyle.sheetMode = SheetMode::LARGE;
     bool isShow = true;
     CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr(rootNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_),
-        sheetStyle, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
-    auto topSheetPattern = topSheetNode->GetPattern();
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
+
     /**
      * @tc.steps: step3. test InitialSingleGearHeight().
      */
@@ -4235,6 +4238,7 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern17, TestSize.Level1)
      */
     EXPECT_EQ(topSheetPattern->InitialSingleGearHeight(sheetStyle), 496);
 }
+
 /**
  * @tc.name: SheetPresentationPattern18
  * @tc.desc: Test SheetPresentationPattern::InitialSingleGearHeight().
@@ -4245,17 +4249,18 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern18, TestSize.Level1)
     /**
      * @tc.steps: step1. create target node.
      */
-    auto themeManager = AceType::MakeRefPtr();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    auto sheetTheme = AceType::MakeRefPtr();
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sheetTheme));
     auto targetNode = CreateTargetNode();
     auto stageNode = FrameNode::CreateFrameNode(
-        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr());
-    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr());
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     stageNode->MountToParent(rootNode);
     targetNode->MountToParent(stageNode);
     rootNode->MarkDirtyNode();
+
     /**
      * @tc.steps: step2. create sheetNode, get sheetPattern.
      */
@@ -4263,15 +4268,16 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern18, TestSize.Level1)
     sheetStyle.sheetMode = SheetMode::LARGE;
     bool isShow = true;
     CreateSheetBuilder();
-    auto overlayManager = AceType::MakeRefPtr(rootNode);
-    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_),
-        sheetStyle, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         nullptr, nullptr, targetNode);
     EXPECT_FALSE(overlayManager->modalStack_.empty());
     auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
     ASSERT_NE(topSheetNode, nullptr);
-    auto topSheetPattern = topSheetNode->GetPattern();
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(topSheetPattern, nullptr);
+
     /**
      * @tc.steps: step3. test InitialSingleGearHeight().
      */
