@@ -387,15 +387,25 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     }
 }
 
-void RichEditorSelectOverlay::ToggleMenu()
+bool RichEditorSelectOverlay::IsMenuShow()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
-    if (manager && !manager->IsMenuShow() && needRefreshMenu_) {
-        needRefreshMenu_ = false;
-        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+    return manager && manager->IsMenuShow();
+}
+
+void RichEditorSelectOverlay::ToggleMenu()
+{
+    if (IsMenuShow()) {
+        HideMenu();
         return;
     }
-    BaseTextSelectOverlay::ToggleMenu();
+    if (needRefreshMenu_) {
+        needRefreshMenu_ = false;
+        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+    } else {
+        UpdateMenuOffset();
+        ShowMenu();
+    }
 }
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
@@ -552,6 +562,7 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     CHECK_NULL_VOID(pattern);
     pattern->CalculateHandleOffsetAndShowOverlay();
     UpdateHandleOffset();
+    IF_TRUE(IsMenuShow(), UpdateMenuOffset());
 }
 
 void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info)
