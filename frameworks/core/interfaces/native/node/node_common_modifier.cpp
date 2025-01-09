@@ -6345,12 +6345,12 @@ void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
     KeyEvent keyEvent;
     keyEvent.action = static_cast<KeyAction>(arkUIkeyEvent->type);
     keyEvent.code = static_cast<KeyCode>(arkUIkeyEvent->keyCode);
-    keyEvent.key = arkUIkeyEvent->keyText;
+    keyEvent.key.assign(arkUIkeyEvent->keyText);
     keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
     keyEvent.deviceId = arkUIkeyEvent->deviceId;
     keyEvent.unicode = arkUIkeyEvent->unicode;
-    std::chrono::milliseconds milliseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
-    TimeStamp timeStamp(milliseconds);
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
+    TimeStamp timeStamp(nanoseconds);
     keyEvent.timeStamp = timeStamp;
     for (int32_t i = 0; i < arkUIkeyEvent->keyCodesLength; i ++) {
         keyEvent.pressedCodes.push_back(static_cast<KeyCode>(arkUIkeyEvent->pressedKeyCodes[i]));
