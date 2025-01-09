@@ -883,7 +883,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // fill blank when all paddings can not be enlarged because it has been set
     FillBlank();
     icon_.DoMeasure();
-    symbolIcon_.DoMeasuer();
+    symbolIcon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
