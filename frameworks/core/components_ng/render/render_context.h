@@ -707,6 +707,11 @@ public:
         isNeedAnimate_ = isNeedAnimate;
     }
 
+    virtual uint64_t GetNodeId() const
+    {
+        return 0;
+    }
+
     virtual bool IsDisappearing() const
     {
         return false;
