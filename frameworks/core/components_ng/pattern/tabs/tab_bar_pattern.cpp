@@ -1166,21 +1166,20 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     }
     auto pipelineContext = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
+    if (targetIndex_) {
+        TriggerTranslateAnimation(indicator_, targetIndex_.value());
+        targetIndex_.reset();
+    }
+
     if (swiperPattern->IsUseCustomAnimation()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, false);
     }
-
     if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateSubTabBoard(indicator);
         UpdatePaintIndicator(indicator, true);
     }
     isFirstLayout_ = false;
-
-    if (targetIndex_) {
-        TriggerTranslateAnimation(indicator_, targetIndex_.value());
-        targetIndex_.reset();
-    }
     indicator_ = layoutProperty->GetIndicatorValue(0);
 
     if (windowSizeChangeReason_) {
