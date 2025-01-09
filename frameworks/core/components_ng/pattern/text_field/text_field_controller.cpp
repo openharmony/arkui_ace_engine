@@ -139,4 +139,42 @@ void TextFieldController::SetPasswordState(bool flag)
 
 void TextFieldController::Insert(const std::string& args) {}
 
+int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, 0);
+    int32_t length = textFieldPattern->GetTextUtf16Value().length();
+    if (offset == -1) {
+        offset = length;
+    }
+    return textFieldPattern->InsertValueByController(text, offset);
+}
+
+void TextFieldController::DeleteText(int32_t start, int32_t end)
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    int32_t length = textFieldPattern->GetTextUtf16Value().length();
+    if (start == -1 && end == -1) {
+        // delete all
+        textFieldPattern->DeleteRange(0, length, false);
+    }
+    if (start == -1) {
+        start = 0;
+    }
+    if (end == -1) {
+        end = length;
+    }
+    start = std::clamp(start, 0, length);
+    end = std::clamp(end, 0, length);
+    textFieldPattern->DeleteRange(start, end, false);
+}
+
+SelectionInfo TextFieldController::GetSelection()
+{
+    auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textFieldPattern, {});
+    return textFieldPattern->GetSelection();
+}
+
 } // namespace OHOS::Ace::NG

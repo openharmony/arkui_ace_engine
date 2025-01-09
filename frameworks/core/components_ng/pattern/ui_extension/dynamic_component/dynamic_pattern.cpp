@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"

@@ -85,6 +85,12 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutProperty->CreateChildConstraint();
     subButtonWrapper->Measure(layoutConstraint);
 
+    auto subButtonHostNode = subButtonWrapper->GetHostNode();
+    CHECK_NULL_VOID(subButtonHostNode);
+    auto subButtonRenderContext = subButtonHostNode->GetRenderContext();
+    CHECK_NULL_VOID(subButtonRenderContext);
+    subButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+
     // content measure
     auto contentWrapper = layoutWrapper->GetOrCreateChildByIndex(CONTENT);
     CHECK_NULL_VOID(contentWrapper);
@@ -122,6 +128,12 @@ void CounterLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     addButtonTextLayoutProperty->UpdateUserDefinedIdealSize(addButtonSize);
     addButtonLayoutProperty->UpdateUserDefinedIdealSize(addButtonSize);
     addButtonWrapper->Measure(layoutConstraint);
+
+    auto addButtonHostNode = addButtonWrapper->GetHostNode();
+    CHECK_NULL_VOID(addButtonHostNode);
+    auto addButtonRenderContext = addButtonHostNode->GetRenderContext();
+    CHECK_NULL_VOID(addButtonRenderContext);
+    addButtonRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 }
 
 static void LayoutItem(LayoutWrapper* layoutWrapper, int32_t leftButton, int32_t rightButton)

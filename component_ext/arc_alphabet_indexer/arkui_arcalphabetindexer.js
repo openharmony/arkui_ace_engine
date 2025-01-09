@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __ArcAlphabetIndexer__ = requireInternal("arkui.ArcAlphabetIndexer");
+const __ArcAlphabetIndexer__ = requireInternal('arkui.ArcAlphabetIndexer');
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 
 class ArcAlphabetIndexerColorModifier extends ModifierWithKey {
@@ -176,7 +176,8 @@ class ArcAlphabetIndexerComponent extends ArkAlphabetIndexerComponent {
         return this;
     }
     selectedBackgroundColor(color) {
-        modifierWithKey(this._modifiersWithKeys, ArcAlphabetIndexerSelectedBackgroundColorModifier.identity, ArcAlphabetIndexerSelectedBackgroundColorModifier, color);
+        modifierWithKey(this._modifiersWithKeys, ArcAlphabetIndexerSelectedBackgroundColorModifier.identity,
+            ArcAlphabetIndexerSelectedBackgroundColorModifier, color);
         return this;
     }
     popupBackground(color) {

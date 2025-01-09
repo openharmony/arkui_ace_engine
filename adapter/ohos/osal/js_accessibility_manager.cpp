@@ -3528,19 +3528,18 @@ static void DumpTreeNodeInfoNG(
     const RefPtr<NG::FrameNode>& node, int32_t depth, const CommonProperty& commonProperty, int32_t childSize)
 {
     NG::RectF rect = node->GetTransformRectRelativeToWindow();
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
     DumpLog::GetInstance().AddDesc("ID: " + std::to_string(node->GetAccessibilityId()));
     DumpLog::GetInstance().AddDesc("compid: " + node->GetInspectorId().value_or(""));
-    DumpLog::GetInstance().AddDesc("text: " +
-        node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetGroupText());
-    DumpLog::GetInstance().AddDesc(
-        "accessibilityText: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText());
-    DumpLog::GetInstance().AddDesc("accessibilityGroup: " +
-        std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsAccessibilityGroup()));
-    DumpLog::GetInstance().AddDesc(
-        "accessibilityLevel: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityLevel());
-    DumpLog::GetInstance().AddDesc(
-        "accessibilityCustomRole: " +
-        node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityCustomRole());
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("text: " + accessibilityProperty->GetGroupText());
+        DumpLog::GetInstance().AddDesc("accessibilityText: " + accessibilityProperty->GetAccessibilityText());
+        DumpLog::GetInstance().AddDesc(
+            "accessibilityGroup: " + std::to_string(accessibilityProperty->IsAccessibilityGroup()));
+        DumpLog::GetInstance().AddDesc("accessibilityLevel: " + accessibilityProperty->GetAccessibilityLevel());
+        DumpLog::GetInstance().AddDesc(
+            "accessibilityCustomRole: " + accessibilityProperty->GetAccessibilityCustomRole());
+    }
     DumpLog::GetInstance().AddDesc("top: " + std::to_string(rect.Top() + commonProperty.windowTop));
     DumpLog::GetInstance().AddDesc("left: " + std::to_string(rect.Left() + commonProperty.windowLeft));
     DumpLog::GetInstance().AddDesc("width: " + std::to_string(rect.Width()));
@@ -3554,16 +3553,13 @@ static void DumpTreeNodeInfoNG(
         DumpLog::GetInstance().AddDesc("longclickable: " +
             std::to_string(gestureEventHub ? gestureEventHub->IsAccessibilityLongClickable() : false));
     }
-    DumpLog::GetInstance().AddDesc(
-        "checkable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsCheckable()));
-    DumpLog::GetInstance().AddDesc(
-        "scrollable: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsScrollable()));
-    DumpLog::GetInstance().AddDesc(
-        "checked: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->IsChecked()));
-    DumpLog::GetInstance().AddDesc(
-        "hint: " + node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetHintText());
-    DumpLog::GetInstance().AddDesc(
-        "childTree: " + std::to_string(node->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetChildTreeId()));
+    if (accessibilityProperty) {
+        DumpLog::GetInstance().AddDesc("checkable: " + std::to_string(accessibilityProperty->IsCheckable()));
+        DumpLog::GetInstance().AddDesc("scrollable: " + std::to_string(accessibilityProperty->IsScrollable()));
+        DumpLog::GetInstance().AddDesc("checked: " + std::to_string(accessibilityProperty->IsChecked()));
+        DumpLog::GetInstance().AddDesc("hint: " + accessibilityProperty->GetHintText());
+        DumpLog::GetInstance().AddDesc("childTree: " + std::to_string(accessibilityProperty->GetChildTreeId()));
+    }
     DumpLog::GetInstance().Print(depth, node->GetTag(), childSize);
 }
 
@@ -6259,6 +6255,50 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
     }
 }
 
+AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+    const RefPtr<PipelineBase>& context)
+{
+    AccessibilityWindowInfo windowInfo;
+    CHECK_NULL_RETURN(node, windowInfo);
+    NG::WindowSceneInfo windowSceneInfo;
+    if (IsUpdateWindowSceneInfo(node, windowSceneInfo)) {
+        windowInfo.left = windowSceneInfo.left;
+        windowInfo.top = windowSceneInfo.top;
+        windowInfo.scaleX = windowSceneInfo.scaleX;
+        windowInfo.scaleY = windowSceneInfo.scaleY;
+        windowInfo.innerWindowId = windowSceneInfo.innerWindowId;
+        return windowInfo;
+    }
+    RefPtr<NG::PipelineContext> ngPipeline;
+    if (context) {
+        ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
+    } else {
+        ngPipeline = AceType::DynamicCast<NG::PipelineContext>(GetPipelineContext().Upgrade());
+    }
+    CHECK_NULL_RETURN(ngPipeline, windowInfo);
+
+    if (getParentRectHandler_) {
+        getParentRectHandler_(windowInfo.top, windowInfo.left);
+    } else if (getParentRectHandlerNew_) {
+        AccessibilityParentRectInfo rectInfo;
+        getParentRectHandlerNew_(rectInfo);
+        windowInfo.top = rectInfo.top;
+        windowInfo.left = rectInfo.left;
+        windowInfo.scaleX = rectInfo.scaleX;
+        windowInfo.scaleY = rectInfo.scaleY;
+    } else {
+        windowInfo.left = GetWindowLeft(ngPipeline->GetWindowId());
+        windowInfo.top = GetWindowTop(ngPipeline->GetWindowId());
+        auto container = Container::CurrentSafely();
+        if (container) {
+            auto windowScale = container->GetWindowScale();
+            windowInfo.scaleX = windowScale;
+            windowInfo.scaleY = windowScale;
+        }
+    }
+    return windowInfo;
+}
+
 void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
     const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node)
 {
@@ -6271,29 +6311,12 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     } else {
         output.windowId = static_cast<int32_t>(GetWindowId());
     }
-    if (getParentRectHandler_) {
-        getParentRectHandler_(output.windowTop, output.windowLeft);
-    } else if (getParentRectHandlerNew_) {
-        AccessibilityParentRectInfo rectInfo;
-        getParentRectHandlerNew_(rectInfo);
-        output.windowTop = rectInfo.top;
-        output.windowLeft = rectInfo.left;
-        scaleX_ = rectInfo.scaleX;
-        scaleY_ = rectInfo.scaleY;
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-            "accessibility set scale: %{public}f %{public}f", scaleX_, scaleY_);
-    } else {
-        output.windowLeft = GetWindowLeft(ngPipeline->GetWindowId());
-        output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
-    }
-    NG::WindowSceneInfo windowSceneInfo;
-    if (IsUpdateWindowSceneInfo(node, windowSceneInfo)) {
-        output.windowLeft += windowSceneInfo.left;
-        output.windowTop += windowSceneInfo.top;
-        scaleX_ = windowSceneInfo.scaleX;
-        scaleY_ = windowSceneInfo.scaleY;
-    }
-    output.innerWindowId = windowSceneInfo.innerWindowId;
+    auto windowInfo = GenerateWindowInfo(node, context);
+    output.windowLeft = windowInfo.left;
+    output.windowTop = windowInfo.top;
+    scaleX_ = windowInfo.scaleX;
+    scaleY_ = windowInfo.scaleY;
+    output.innerWindowId = windowInfo.innerWindowId;
     auto page = stageManager->GetLastPageWithTransition();
     if (page != nullptr) {
         output.pageId = page->GetPageId();

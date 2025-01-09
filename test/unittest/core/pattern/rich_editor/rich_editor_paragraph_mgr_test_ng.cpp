@@ -627,11 +627,12 @@ HWTEST_F(RichEditorParagraphMgrTestNg, GetGlyphIndexByCoordinate001, TestSize.Le
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     ASSERT_NE(paragraph, nullptr);
     EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(800.0f));
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(Return(4));
     /**
      * @tc.steps: step2. test get glyph index
      */
     int32_t glyphIndex = richEditorPattern->paragraphs_.GetGlyphIndexByCoordinate(Offset(0.0, 1000.00), true);
-    EXPECT_EQ(glyphIndex, 6);
+    EXPECT_EQ(glyphIndex, 4);
 }
 
 /**

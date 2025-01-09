@@ -1113,7 +1113,7 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_SUBMIT;
@@ -1129,7 +1129,7 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
@@ -1145,7 +1145,7 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_COPY;
@@ -1161,7 +1161,7 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CUT;
@@ -1177,7 +1177,7 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_PASTE;

@@ -32,6 +32,7 @@
 #include "core/components/common/properties/placement.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -277,7 +278,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.maxSize.SetWidth(wrapperSize_.Width());
     }
     float minHeight = minHeight_.ConvertToPx();
-    if (minHeight > 0.0f) {
+    if (GreatNotEqual(static_cast<double>(minHeight), 0.0)) {
         childLayoutConstraint.minSize.SetHeight(minHeight);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
@@ -363,15 +364,21 @@ Dimension GetMaxWith(uint32_t maxColumns)
     return maxWidth;
 }
 
-SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width)
+SizeF BubbleLayoutAlgorithm::GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, SizeF());
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_RETURN(safeAreaManager, SizeF());
-    auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-    auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
+
+    CHECK_NULL_RETURN(frameNode, SizeF());
+    auto geometryNode = frameNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF());
+    auto width = geometryNode->GetMarginFrameSize().Width();
+
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(frameNode);
+    // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar, the bottom is 0
+    auto bottom = 0.0;
+    auto top = safeAreaInsets.top_.Length();
     auto maxHeight = windowGlobalRect.Height();
     if (showInSubWindow) {
         maxHeight = SystemProperties::GetDeviceHeight();
@@ -464,10 +471,10 @@ void BubbleLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     selfSize_ = layoutWrapper->GetGeometryNode()->GetFrameSize(); // window's size
     auto childWrapper = children.front();
+    CHECK_NULL_VOID(childWrapper);
     bool showInSubWindow = bubbleProp->GetShowInSubWindowValue(false);
     auto layoutChildSize = childWrapper->GetGeometryNode()->GetMarginFrameSize();
-    auto childMaxSize =
-        GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+    auto childMaxSize = GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetHostNode());
     if (NearEqual(childMaxSize, layoutChildSize) || !NearEqual(measureChildSizeLast_, layoutChildSize)) {
         auto childShowWidth =
             childWrapper->GetGeometryNode()->GetFrameSize().Width() + BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
@@ -596,6 +603,7 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     padding_ = popupTheme->GetPadding();
+    CHECK_NULL_VOID(layoutProp);
     userSetTargetSpace_ = layoutProp->GetTargetSpace().value_or(Dimension(0.0f));
     borderRadius_ = layoutProp->GetRadius().value_or(popupTheme->GetRadius().GetX());
     border_.SetBorderRadius(Radius(borderRadius_));
@@ -619,10 +627,10 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     targetSecurity_ = HORIZON_SPACING_WITH_SCREEN.ConvertToPx();
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    top_ = safeAreaManager->GetSafeAreaWithoutProcess().top_.Length();
-    bottom_ = safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
+    top_ = safeAreaInsets.top_.Length();
+    bottom_ = safeAreaInsets.bottom_.Length();
     UpdateDumpInfo();
     marginStart_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
     marginEnd_ = MARGIN_SPACE.ConvertToPx() + DRAW_EDGES_SPACE.ConvertToPx();
@@ -723,8 +731,8 @@ void BubbleLayoutAlgorithm::UpdateScrollHeight(LayoutWrapper* layoutWrapper, boo
         return;
     }
     auto childWrapper = children.front();
-    auto childMaxSize =
-        GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetGeometryNode()->GetMarginFrameSize().Width());
+    CHECK_NULL_VOID(childWrapper);
+    auto childMaxSize = GetPopupMaxWidthAndHeight(showInSubWindow, childWrapper->GetHostNode());
 
     auto columnNode = AceType::DynamicCast<FrameNode>(bubbleNode->GetLastChild());
     CHECK_NULL_VOID(columnNode);

@@ -373,6 +373,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
     JSCalendarPicker::JSBind(globalObj);
+    JSCalendarPickerDialog::JSBind(globalObj);
 #endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);

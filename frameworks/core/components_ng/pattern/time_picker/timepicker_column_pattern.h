@@ -401,6 +401,9 @@ private:
     void UnregisterWindowStateChangedCallback();
     void OnWindowHide() override;
     void OnWindowShow() override;
+
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, TimePickerScrollDirection dir);
+
     double mainVelocity_ = 0.0;
     float localDownDistance_ = 0.0f;
     Color pressColor_;

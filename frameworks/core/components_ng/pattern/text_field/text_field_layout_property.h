@@ -96,7 +96,7 @@ public:
         }
         json->PutExtAttr("showPasswordIcon", propShowPasswordIcon_.value_or(true), filter);
         json->PutExtAttr("showPassword", propShowPasswordText_.value_or(false), filter);
-        json->PutExtAttr("errorText", UtfUtils::Str16ToStr8(propErrorText_.value_or(u"")).c_str(), filter);
+        json->PutExtAttr("errorText", UtfUtils::Str16DebugToStr8(propErrorText_.value_or(u"")).c_str(), filter);
         json->PutExtAttr("showErrorText", propShowErrorText_.value_or(false), filter);
         json->PutExtAttr("highlightBorder", propShowHighlightBorder_.value_or(true), filter);
         json->PutExtAttr("showUnderline", propShowUnderline_.value_or(false), filter);

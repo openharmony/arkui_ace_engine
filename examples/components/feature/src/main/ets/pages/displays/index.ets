@@ -23,12 +23,15 @@ import { TextBootcamp } from './TextBootcamp';
 import { TextSpanUrlBootcamp } from './TextSpanUrlBootcamp';
 import { AlphabetIndexerBootcamp } from './AlphabetIndexerBootcamp'
 import { BadgeBootcamp } from './BadgeBootcamp'
-import { ChipGroupBootcamp } from  './ChipGroupBootcamp';
+import { ChipGroupBootcamp } from './ChipGroupBootcamp';
 import { ChipBootcamp } from './ChipBootcamp';
 import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
+import { QRCodeBootcamp } from './QRCodeBootcamp'
+
+import { TextTimerBootcamp } from './TextTimerBootcamp';
 import { ProgressLockBootcamp } from './ProgressBootcamp';
 
 export const displaysRoute: RouteGroup = {
@@ -42,14 +45,23 @@ export const displaysRoute: RouteGroup = {
     { name: 'loading-progress', label: '加载进度/LoadingProgress' },
     { name: 'scrollbar', label: '滚动条/ScrollBar' },
     { name: 'spanurl', label: '超链接/text' },
-    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
-    { name: 'badge', label: '信息标记/Badge' }
-    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
-    { name: 'chip', label: '操作块/Chip' }
+    { name: 'badge', label: '信息标记/Badge' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' },
+    { name: 'chip', label: '操作块/Chip' },
+    { name: 'counter', label: '计数器/Counter' },
+    { name: 'advancedCounter', label: '计数器/advanced.Counter' },
+    { name: 'dataPanel', label: '数据面板/DataPanel' },
+    { name: 'gauge', label: '数据量规图/gauge' },
+    { name: 'textTimer', label: '文本计时器/TextTimer' }
+    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' },
+    { name: 'badge', label: '信息标记/Badge' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' },
+    { name: 'chip', label: '操作块/Chip' },
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'},
     { name: 'gauge', label: '数据量规图/gauge' },
+    { name: 'QRCode', label: '二维码/QRCode' },
     { name: 'Progress', label: '进度条/Progress' },
   ]
 };
@@ -70,22 +82,27 @@ export function DisplaysDestination(name: string, route: Route) {
     TextBootcamp({ title: route.label })
   } else if (name === 'displays/spanurl') {
     TextSpanUrlBootcamp({ title: route.label })
+  } else if (name === 'displays/badge') {
   } else if (name === 'displays/alphabetIndexer'){
     AlphabetIndexerBootcamp({ title: route.label })
   } else if (name === 'displays/badge'){
     BadgeBootcamp({ title: route.label })
-  } else if (name === 'displays/chipGroup'){
+  } else if (name === 'displays/chipGroup') {
     ChipGroupBootcamp({ title: route.label })
-  } else if (name === 'displays/chip'){
+  } else if (name === 'displays/chip') {
     ChipBootcamp({ title: route.label })
   } else if (name === 'displays/counter') {
-    CounterBootcamp({ title: route.label})
-  } else if (name === 'displays/advancedCounter'){
-    AdvancedCounterBootcamp({ title: route.label})
-  } else if (name === 'displays/dataPanel'){
-    DataPanelBootcamp({ title: route.label})
+    CounterBootcamp({ title: route.label })
+  } else if (name === 'displays/advancedCounter') {
+    AdvancedCounterBootcamp({ title: route.label })
+  } else if (name === 'displays/dataPanel') {
+    DataPanelBootcamp({ title: route.label })
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
+  } else if (name === 'displays/QRCode') {
+    QRCodeBootcamp({ title: route.label })
+  } else if (name === 'displays/textTimer') {
+    TextTimerBootcamp({ title: route.label })
   } else if (name === 'displays/Progress') {
     ProgressLockBootcamp({ title: route.label })
   }

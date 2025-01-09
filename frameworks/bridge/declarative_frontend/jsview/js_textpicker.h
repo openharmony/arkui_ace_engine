@@ -104,6 +104,8 @@ public:
 
     static void SetDisableTextStyleAnimation(const JSCallbackInfo& info);
     static void SetDefaultTextStyle(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+
 private:
     static size_t ProcessCascadeOptionDepth(const NG::TextCascadePickerOptions& option);
     static void ProcessCascadeSelected(const std::vector<NG::TextCascadePickerOptions>& options,

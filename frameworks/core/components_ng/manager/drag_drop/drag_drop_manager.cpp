@@ -1095,6 +1095,26 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
         overlayManager->RemovePixelMap();
         pipeline->FlushMessages();
     }
+    ExecuteStopDrag(event, dragResult, useCustomAnimation, windowId, dragBehavior, pointerEvent);
+    NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
+    dragFrameNode->MarkDirtyNode();
+    ResetPullId();
+    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
+    pipeline->RequestFrame();
+}
+
+void DragDropManager::ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult,
+    bool useCustomAnimation, int32_t windowId, DragBehavior dragBehavior,
+    const OHOS::Ace::DragPointerEvent& pointerEvent)
+{
+    if (useCustomAnimation && event->HasDropAnimation()) {
+        ExecuteCustomDropAnimation(event, DragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior });
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    if (!pipeline) {
+        return;
+    }
     pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId, dragBehavior,
                                      pointerEventId = pointerEvent.pointerEventId, weak = WeakClaim(this)]() mutable {
         auto manager = weak.Upgrade();
@@ -1102,17 +1122,25 @@ void DragDropManager::OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefP
             manager->HideDragPreviewOverlay();
             useCustomAnimation = manager->IsDisableDefaultDropAnimation() ? true : useCustomAnimation;
         }
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag, start do drop animation. useCustomAnimation is %{public}d,"
-            "WindowId is %{public}d, pointerEventId is %{public}d.", useCustomAnimation, windowId, pointerEventId);
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "Stop drag, start do drop animation. useCustomAnimation is %{public}d,"
+            "WindowId is %{public}d, pointerEventId is %{public}d.",
+            useCustomAnimation, windowId, pointerEventId);
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
     });
-    NotifyDragFrameNode(point, DragEventType::DROP, event->GetResult());
-    dragFrameNode->MarkDirtyNode();
-    ResetPullId();
-    dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
-    pipeline->RequestFrame();
+}
+
+void DragDropManager::ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& event, DragDropRet dragDropRet)
+{
+    CHECK_NULL_VOID(event);
+    event->ExecuteDropAnimation();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->FlushMessages();
+    InteractionInterface::GetInstance()->SetDragWindowVisible(false);
+    InteractionInterface::GetInstance()->StopDrag(dragDropRet);
 }
 
 void DragDropManager::RequireSummary()

@@ -64,7 +64,7 @@ class ObserveV2 {
 
   public static readonly OB_PREFIX = '__ob_'; // OB_PREFIX + attrName => backing store attribute name
   public static readonly OB_PREFIX_LEN = 5;
-
+  public static readonly NO_REUSE = -1; // mark no reuse on-going
   // used by array Handler to create dependency on artificial 'length'
   // property of array, mark it as changed when array has changed.
   public static readonly OB_LENGTH = '___obj_length';
@@ -103,6 +103,9 @@ class ObserveV2 {
 
   // flag to indicate ComputedV2 calculation is ongoing
   private calculatingComputedProp_: boolean = false;
+
+  // use for mark current reuse id, ObserveV2.NO_REUSE(-1) mean no reuse on-going
+  protected currentReuseId_: number = ObserveV2.NO_REUSE;
 
   private static obsInstance_: ObserveV2;
 
@@ -413,7 +416,8 @@ class ObserveV2 {
       // purpose of check for startDirty_ is to avoid going into recursion. This could happen if
       // exec a re-render or exec a monitor function changes some state -> calls fireChange -> ...
       if ((this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size === 0) &&
-        /* update not already in progress */ !this.startDirty_) {
+        /* update not already in progress */ !this.startDirty_ &&
+        /* no reuse on-going */ this.currentReuseId_ === ObserveV2.NO_REUSE) {
         Promise.resolve()
         .then(this.updateDirty.bind(this))
         .catch(error => {
@@ -460,7 +464,7 @@ class ObserveV2 {
    *
    */
 
-  public updateDirty2(updateUISynchronously: boolean = false): void {
+  public updateDirty2(updateUISynchronously: boolean = false, isReuse: boolean = false): void {
     aceDebugTrace.begin('updateDirty2');
     stateMgmtConsole.debug(`ObservedV2.updateDirty2 updateUISynchronously=${updateUISynchronously} ... `);
     // obtain and unregister the removed elmtIds
@@ -499,7 +503,7 @@ class ObserveV2 {
       if (this.elmtIdsChanged_.size) {
         const elmtIds = Array.from(this.elmtIdsChanged_).sort((elmtId1, elmtId2) => elmtId1 - elmtId2);
         this.elmtIdsChanged_ = new Set<number>();
-        updateUISynchronously ? this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
+        updateUISynchronously ? isReuse ? this.updateUINodesForReuse(elmtIds) : this.updateUINodesSynchronously(elmtIds) : this.updateUINodes(elmtIds);
       }
     } while (this.elmtIdsChanged_.size + this.monitorIdsChanged_.size + this.computedPropIdsChanged_.size > 0);
 
@@ -544,18 +548,13 @@ class ObserveV2 {
   public updateDirtyMonitorsOnReuse(monitors: Set<number>): void {
     let weakMonitor: WeakRef<MonitorV2 | undefined>;
     let monitor: MonitorV2 | undefined;
-    let monitorTarget: Object;
     monitors.forEach((watchId) => {
       weakMonitor = this.id2cmp_[watchId];
       if (weakMonitor && 'deref' in weakMonitor && (monitor = weakMonitor.deref()) && monitor instanceof MonitorV2) {
-        if (((monitorTarget = monitor.getTarget()) instanceof ViewV2) && !monitorTarget.isViewActive()) {
-          monitorTarget.addDelayedMonitorIds(watchId);
-        } else {
-          // only update dependecy and reset value, no call monitor..
-          monitor.notifyChangeOnReuse();
-        }
+        // only update dependency and reset value, no call monitor.
+        monitor.notifyChangeOnReuse();
       }
-    })
+    });
   }
 
   public updateDirtyMonitors(monitors: Set<number>): void {
@@ -597,7 +596,28 @@ class ObserveV2 {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
-        } else if (view instanceof ViewV2) {
+        } else {
+          // schedule delayed update once the view gets active
+          view.scheduleDelayedUpdate(elmtId);
+        }
+      } // if ViewV2 or ViewPU
+    });
+    aceDebugTrace.end();
+  }
+
+  private updateUINodesForReuse(elmtIds: Array<number>): void {
+    aceDebugTrace.begin(`ObserveV2.updateUINodesForReuse: ${elmtIds.length} elmtId`);
+    let view: Object;
+    let weak: any;
+    elmtIds.forEach((elmtId) => {
+      if ((weak = this.id2cmp_[elmtId]) && weak && ('deref' in weak) &&
+        (view = weak.deref()) && ((view instanceof ViewV2) || (view instanceof ViewPU))) {
+        if (view.isViewActive()) {
+          /* update child element */ this.currentReuseId_ === view.id__() ||
+          /* update parameter */ this.currentReuseId_ === elmtId
+            ? view.UpdateElement(elmtId)
+            : view.uiNodeNeedUpdateV2(elmtId);
+        } else {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
         }
@@ -758,9 +778,9 @@ class ObserveV2 {
    *                   The default value is false. 
    */
   public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
-    let weak = this.id2cmp_[elmtId];
+    let weak: WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
-    return (weak && (view = weak.deref())) ? view.updateFuncByElmtId.debugInfoElmtId(elmtId, isProfiler) : '';
+    return (weak && (view = weak.deref())) ? view.debugInfoElmtId(elmtId, isProfiler) : '';
   }
 
   /**
@@ -798,6 +818,10 @@ class ObserveV2 {
     let weak = this.id2cmp_[computedId];
     let monitorV2: MonitorV2;
     return (weak && (monitorV2 = weak.deref()) && (monitorV2 instanceof MonitorV2)) ? monitorV2.getMonitorFuncName() : '';
+  }
+
+  public setCurrentReuseId(elmtId: number): void {
+    this.currentReuseId_ = elmtId;
   }
 } // class ObserveV2
 

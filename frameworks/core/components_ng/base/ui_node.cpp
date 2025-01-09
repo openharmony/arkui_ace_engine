@@ -1313,7 +1313,7 @@ void UINode::SetActive(bool active, bool needRebuildRenderContext)
     }
 }
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
@@ -1322,10 +1322,10 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
             return;
         }
         if (customNode) {
-            customNode->SetJSViewActive(active);
+            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse);
             continue;
         }
-        child->SetJSViewActive(active);
+        child->SetJSViewActive(active, isLazyForEachNode, isReuse);
     }
 }
 
@@ -1802,6 +1802,7 @@ int32_t UINode::GetThemeScopeId() const
 
 void UINode::SetThemeScopeId(int32_t themeScopeId)
 {
+    LOGD("WithTheme SetThemeScopeId %{public}d", themeScopeId);
     themeScopeId_ = themeScopeId;
     auto children = GetChildren();
     for (const auto& child : children) {
@@ -1817,6 +1818,7 @@ void UINode::UpdateThemeScopeId(int32_t themeScopeId)
     if (GetThemeScopeId() == themeScopeId) {
         return;
     }
+    LOGD("WithTheme UpdateThemeScopeId old:%{public}d new:%{public}d", GetThemeScopeId(), themeScopeId);
     themeScopeId_ = themeScopeId;
     OnThemeScopeUpdate(themeScopeId);
     auto children = GetChildren();

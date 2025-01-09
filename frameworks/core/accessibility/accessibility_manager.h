@@ -84,6 +84,14 @@ struct AccessibilityParentRectInfo {
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
 };
 
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
@@ -286,6 +294,12 @@ public:
     int64_t GetUiextensionId() const
     {
         return uiExtensionId_;
+    }
+
+    virtual AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context)
+    {
+        return AccessibilityWindowInfo();
     }
 
 protected:

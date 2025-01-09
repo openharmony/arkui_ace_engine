@@ -130,11 +130,15 @@ public:
         json->PutExtAttr("minSize",
             propMinSize_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("prevMargin",
-            propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+            ignorePrevMarginAndNextMargin_
+                ? Dimension(0.0_px).ToString().c_str()
+                : propPrevMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("prevMarginIgnoreBlank",
             propPrevMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("nextMargin",
-            propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+            ignorePrevMarginAndNextMargin_
+                ? Dimension(0.0_px).ToString().c_str()
+                : propNextMargin_.value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
         json->PutExtAttr("nextMarginIgnoreBlank",
             propNextMarginIgnoreBlank_.value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("displayArrow", propDisplayArrow_.value_or(false) ? "true" : "false", filter);
@@ -196,8 +200,6 @@ public:
     void MarkIgnorePrevMarginAndNextMargin()
     {
         ignorePrevMarginAndNextMargin_ = true;
-        propPrevMargin_ = Dimension(0.0_px);
-        propNextMargin_ = Dimension(0.0_px);
     }
 
     float GetCalculatedPrevMargin() const

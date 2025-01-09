@@ -1360,6 +1360,45 @@ HWTEST_F(GridOptionLayoutTestNg, OverScroll004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OverScroll005
+ * @tc.desc: Test notifying data change during bottom overScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, OverScroll005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetRowsGap(Dimension(5.0));
+    CreateFixedItems(6); // less than viewport
+    CreateDone();
+
+    GestureEvent info;
+    info.SetMainVelocity(-1000.f);
+    info.SetMainDelta(-250.f);
+    ASSERT_TRUE(pattern_->GetScrollableEvent());
+    auto scrollable = pattern_->GetScrollableEvent()->scrollable_;
+    ASSERT_TRUE(scrollable);
+    scrollable->HandleTouchDown();
+    (*scrollable->panRecognizerNG_->onActionStart_)(info);
+    (*scrollable->panRecognizerNG_->onActionUpdate_)(info);
+    FlushUITasks();
+    EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -164.95305);
+    frameNode_->ChildrenUpdatedFrom(0);
+    frameNode_->MarkDirtyNode();
+    FlushUITasks();
+    scrollable->HandleTouchUp();
+    (*scrollable->panRecognizerNG_->onActionEnd_)(info);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::SPRING);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.startIndex_, 0);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
  * @tc.name: ChangingHeight001
  * @tc.desc: Test Jumping while changing item heights
  * @tc.type: FUNC

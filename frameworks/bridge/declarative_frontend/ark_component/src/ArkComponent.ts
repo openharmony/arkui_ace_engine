@@ -2775,7 +2775,7 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
       getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll, this.value.enableHapticFeedback);
     }
   }
 
@@ -2783,7 +2783,9 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
     return !(this.value.mode === this.stageValue.mode
       && this.value.numberBadge === this.stageValue.numberBadge
       && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
+      && this.value.enableEdgeAutoScroll === this.value.enableEdgeAutoScroll
+      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
   }
 }
 
@@ -3533,6 +3535,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+      arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+      arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);

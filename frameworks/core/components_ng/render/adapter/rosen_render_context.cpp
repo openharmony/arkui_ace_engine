@@ -452,6 +452,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         } else {
             surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::DEFAULT);
         }
+        surfaceNode->SetApiCompatibleVersion(Container::GetCurrentApiTargetVersion());
     }
     return surfaceNode;
 }
@@ -4996,6 +4997,7 @@ void RosenRenderContext::SetSurfaceRotation(bool isLock)
 void RosenRenderContext::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(rsNode_);
+    propRenderFit_ = renderFit;
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     if (rsSurfaceNode) {
         rsSurfaceNode->SetFrameGravity(GetRosenGravity(renderFit));

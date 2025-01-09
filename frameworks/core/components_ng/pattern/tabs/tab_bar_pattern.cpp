@@ -647,9 +647,7 @@ void TabBarPattern::InitScrollable(const RefPtr<GestureEventHub>& gestureHub)
 
             auto host = pattern->GetHost();
             CHECK_NULL_RETURN(host, false);
-            auto geometryNode = host->GetGeometryNode();
-            CHECK_NULL_RETURN(geometryNode, false);
-            auto overScrollInfo = pattern->GetOverScrollInfo(geometryNode->GetPaddingSize());
+            auto overScrollInfo = pattern->GetOverScrollInfo(pattern->GetContentSize());
             if (source == SCROLL_FROM_UPDATE) {
                 // adjust offset.
                 if (overScrollInfo.second != 0.0f) {
@@ -700,15 +698,12 @@ bool TabBarPattern::CanScroll() const
     if (visibleItemPosition_.empty()) {
         return false;
     }
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
     auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
     auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
     auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
     auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
     auto childCount = host->TotalChildCount() - MASK_COUNT;
-    auto contentMainSize =
-        geometryNode->GetPaddingSize().MainSize(layoutProperty->GetAxis().value_or(Axis::HORIZONTAL));
+    auto contentMainSize = GetContentSize().MainSize(layoutProperty->GetAxis().value_or(Axis::HORIZONTAL));
     return visibleItemStartIndex > 0 || LessNotEqual(visibleItemStartPos, scrollMargin_) ||
         visibleItemEndIndex < (childCount - 1) || GreatNotEqual(visibleItemEndPos, contentMainSize - scrollMargin_);
 }
@@ -1087,9 +1082,7 @@ void TabBarPattern::FocusCurrentOffset(int32_t index)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
-    auto geometryNode = tabBarNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis);
+    auto mainSize = GetContentSize().MainSize(axis);
 
     if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
         auto visibleItemStartIndex = visibleItemPosition_.begin()->first;
@@ -1210,6 +1203,7 @@ void TabBarPattern::OnModifyDone()
 
     RemoveTabBarEventCallback();
     AddTabBarEventCallback();
+    UpdateChildrenClipEdge();
 
     axis_ = layoutProperty->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -1329,6 +1323,26 @@ void TabBarPattern::AddTabBarEventCallback()
     swiperController_->SetAddTabBarEventCallback(std::move(addEventCallback));
 }
 
+void TabBarPattern::UpdateChildrenClipEdge()
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_VOID(tabBarRenderContext);
+    bool clipEdge = tabBarRenderContext->GetClipEdgeValue(true);
+    if (clipEdge != clipEdge_) {
+        int32_t totalCount = tabBarNode->TotalChildCount() - MASK_COUNT;
+        for (int32_t index = 0; index < totalCount; index++) {
+            auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+            CHECK_NULL_VOID(childNode);
+            auto renderContext = childNode->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            renderContext->UpdateClipEdge(clipEdge);
+        }
+        clipEdge_ = clipEdge;
+    }
+}
+
 void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
 {
     auto tabBarNode = GetHost();
@@ -1383,6 +1397,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     visibleItemPosition_ = tabBarLayoutAlgorithm->GetVisibleItemPosition();
     scrollMargin_ = tabBarLayoutAlgorithm->GetScrollMargin();
     jumpIndex_ = tabBarLayoutAlgorithm->GetJumpIndex();
+    barGridMargin_ = tabBarLayoutAlgorithm->GetBarGridMargin();
     auto layoutProperty = DynamicCast<TabBarLayoutProperty>(dirty->GetLayoutProperty());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -2259,9 +2274,7 @@ void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
     auto childCount = tabBarNode->TotalChildCount() - MASK_COUNT;
-    auto geometryNode = tabBarNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis);
+    auto mainSize = GetContentSize().MainSize(axis);
 
     std::fill(gradientRegions_.begin(), gradientRegions_.end(), false);
     if (barMode == TabBarMode::SCROLLABLE && !visibleItemPosition_.empty()) {
@@ -2722,9 +2735,7 @@ float TabBarPattern::CalculateTargetOffset(int32_t targetIndex)
         targetOffset = isRTL_ && axis_ == Axis::HORIZONTAL ? (startPos - frontChildrenMainSize)
                                                             : (frontChildrenMainSize - startPos);
     } else if (LessOrEqual(backChildrenMainSize, space)) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, targetOffset);
-        auto mainSize = host->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
+        auto mainSize = GetContentSize().MainSize(axis_);
         targetOffset = isRTL_ && axis_ == Axis::HORIZONTAL ? (backChildrenMainSize - (mainSize - endPos))
                                                             : (mainSize - backChildrenMainSize - endPos);
     } else {
@@ -2864,13 +2875,11 @@ float TabBarPattern::GetSpace(int32_t indicator)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
-    auto geometryNode = host->GetGeometryNode();
     auto childFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(indicator));
     CHECK_NULL_RETURN(childFrameNode, 0.0f);
     auto childGeometryNode = childFrameNode->GetGeometryNode();
 
-    return (geometryNode->GetPaddingSize().MainSize(axis_) - childGeometryNode->GetMarginFrameSize().MainSize(axis_)) /
-           2;
+    return (GetContentSize().MainSize(axis_) - childGeometryNode->GetMarginFrameSize().MainSize(axis_)) / 2;
 }
 
 float TabBarPattern::CalculateFrontChildrenMainSize(int32_t indicator)
@@ -2928,15 +2937,11 @@ void TabBarPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     scrollEffect->SetCurrentPositionCallback([weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
         CHECK_NULL_RETURN(tabBar, 0.0);
-        auto host = tabBar->GetHost();
-        CHECK_NULL_RETURN(host, 0.0);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, 0.0);
         if (tabBar->visibleItemPosition_.empty()) {
             return tabBar->scrollMargin_ + tabBar->currentDelta_;
         }
         if (tabBar->isRTL_ && tabBar->axis_ == Axis::HORIZONTAL) {
-            return geometryNode->GetPaddingSize().Width() - tabBar->visibleItemPosition_.rbegin()->second.endPos +
+            return tabBar->GetContentSize().Width() - tabBar->visibleItemPosition_.rbegin()->second.endPos +
                 tabBar->currentDelta_;
         } else {
             return tabBar->visibleItemPosition_.begin()->second.startPos + tabBar->currentDelta_;
@@ -2945,16 +2950,12 @@ void TabBarPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     auto leadingCallback = [weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
         CHECK_NULL_RETURN(tabBar, 0.0);
-        auto host = tabBar->GetHost();
-        CHECK_NULL_RETURN(host, 0.0);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, 0.0);
         if (tabBar->visibleItemPosition_.empty()) {
-            return geometryNode->GetPaddingSize().MainSize(tabBar->axis_) - tabBar->scrollMargin_;
+            return tabBar->GetContentSize().MainSize(tabBar->axis_) - tabBar->scrollMargin_;
         }
         auto visibleChildrenMainSize = tabBar->visibleItemPosition_.rbegin()->second.endPos -
             tabBar->visibleItemPosition_.begin()->second.startPos;
-        return geometryNode->GetPaddingSize().MainSize(tabBar->axis_) - visibleChildrenMainSize - tabBar->scrollMargin_;
+        return tabBar->GetContentSize().MainSize(tabBar->axis_) - visibleChildrenMainSize - tabBar->scrollMargin_;
     };
     auto trailingCallback = [weak = AceType::WeakClaim(this)]() -> double {
         auto tabBar = weak.Upgrade();
@@ -2985,13 +2986,11 @@ bool TabBarPattern::IsAtBottom() const
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
 
     auto visibleItemEndIndex = visibleItemPosition_.rbegin()->first;
     auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
     auto childCount = host->TotalChildCount() - MASK_COUNT;
-    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis_);
+    auto mainSize = GetContentSize().MainSize(axis_);
     return visibleItemEndIndex == (childCount - 1) && LessOrEqual(visibleItemEndPos, mainSize - scrollMargin_);
 }
 
@@ -3000,14 +2999,10 @@ bool TabBarPattern::IsOutOfBoundary()
     if (visibleItemPosition_.empty()) {
         return false;
     }
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, false);
 
     auto visibleItemStartPos = visibleItemPosition_.begin()->second.startPos;
     auto visibleItemEndPos = visibleItemPosition_.rbegin()->second.endPos;
-    auto mainSize = geometryNode->GetPaddingSize().MainSize(axis_);
+    auto mainSize = GetContentSize().MainSize(axis_);
     bool outOfStart = Positive(visibleItemStartPos - scrollMargin_) &&
         GreatNotEqual(visibleItemEndPos + scrollMargin_, mainSize);
     bool outOfEnd = LessNotEqual(visibleItemEndPos + scrollMargin_, mainSize) &&
@@ -3364,6 +3359,17 @@ void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
     SetMaskAnimationExecuted(true);
 }
 
+SizeF TabBarPattern::GetContentSize() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, SizeF(0.0f, 0.0f));
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, SizeF(0.0f, 0.0f));
+    auto contentSize = geometryNode->GetPaddingSize();
+    contentSize.MinusWidth(barGridMargin_ * 2); // 2 means left margin and right margin
+    return contentSize;
+}
+
 float TabBarPattern::GetLeftPadding() const
 {
     auto host = GetHost();
@@ -3371,9 +3377,9 @@ float TabBarPattern::GetLeftPadding() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0f);
     if (!geometryNode->GetPadding()) {
-        return 0.0f;
+        return barGridMargin_;
     }
-    return geometryNode->GetPadding()->left.value_or(0.0f);
+    return geometryNode->GetPadding()->left.value_or(0.0f) + barGridMargin_;
 }
 
 void TabBarPattern::UpdateAnimationDuration()

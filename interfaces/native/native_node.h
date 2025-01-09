@@ -91,6 +91,10 @@ typedef enum {
     ARKUI_NODE_RADIO = 18,
     /** Frame-by-frame animation component. */
     ARKUI_NODE_IMAGE_ANIMATOR = 19,
+    /** XComponent of type TEXTURE.
+     *  @since 16
+     */
+    ARKUI_NODE_XCOMPONENT_TEXTURE,
     /** Check box group.
      *  @since 16
      */
@@ -3402,6 +3406,32 @@ typedef enum {
     NODE_BUTTON_TYPE,
 
     /**
+    * @brief Defines the minimum font scale attribute, which can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].f32: minimum font scale, in fp.
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: minimum font scale, in fp.
+    *
+    * @since 16
+    */
+    NODE_BUTTON_MIN_FONT_SCALE,
+
+    /**
+    * @brief Defines the maximum font scale attribute, which can be set, reset, and obtained as required through APIs.
+    *
+    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+    * .value[0].f32: maximum font scale, in fp.
+    * \n
+    * Format of the return value {@link ArkUI_AttributeItem}:\n
+    * .value[0].f32: maximum font scale, in fp.
+    *
+    * @since 16
+    */
+    NODE_BUTTON_MAX_FONT_SCALE,
+
+    /**
      * @brief Defines the current value of the progress indicator.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -3736,6 +3766,20 @@ typedef enum {
      */
     NODE_DATE_PICKER_MODE = 13007,
     /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 16
+     */
+    NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
+    /**
      * @brief Defines the time of the selected item. in the timer picker.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -4005,6 +4049,20 @@ typedef enum {
      *
      */
     NODE_TEXT_PICKER_DEFAULT_PICKER_ITEM_HEIGHT,
+    /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 16
+     */
+    NODE_TEXT_PICKER_ENABLE_HAPTIC_FEEDBACK = 15010,
     /**
      * @brief Defines the style of the background in the selected state of the calendar picker.
      * This attribute can be set, reset, and obtained as required through APIs.

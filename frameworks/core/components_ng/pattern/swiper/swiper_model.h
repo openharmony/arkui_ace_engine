@@ -165,6 +165,7 @@ public:
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
+    virtual void SetBindIndicator(bool bind) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;
