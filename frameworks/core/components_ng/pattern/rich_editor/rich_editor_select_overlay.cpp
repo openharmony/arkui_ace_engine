@@ -144,13 +144,18 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(pattern->HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!pattern->spans_.empty());
-    TextSelectOverlay::OnHandleMove(handleRect, isFirst);
-    auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    if (hasTransform_) {
-        parentGlobalOffset = GetPaintOffsetWithoutTransform();
-    }
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    // the handle position is calculated based on the middle of the handle height.
+    auto handleOffset = GetHandleReferenceOffset(handleRect);
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
     auto localOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
+        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
         localOffset = localOffset - parentGlobalOffset; // original offset
     }
     SetMagnifierOffset(localOffset, handleRect);
@@ -169,13 +174,14 @@ void RichEditorSelectOverlay::SetMagnifierOffset(const OffsetF& localOffset, con
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    float x = localOffset.GetX();
-    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
-    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
-    auto magLocalOffset = OffsetF(x, y);
-    auto magLocalOffsetWithTrans = magLocalOffset;
-    GetLocalPointWithTransform(magLocalOffsetWithTrans); // do affine transformation
-    pattern->magnifierController_->SetLocalOffset(magLocalOffsetWithTrans, magLocalOffset);
+    if (IsSingleHandle()) {
+        auto [caretOffset, caretHeight] = pattern->CalculateCaretOffsetAndHeight();
+        auto floatingCaretCenter = Offset(localOffset.GetX(), caretOffset.GetY() + caretHeight / 2);
+        pattern->SetMagnifierOffsetWithAnimation(floatingCaretCenter);
+    } else {
+        auto handleCenter = Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2);
+        pattern->SetMagnifierLocalOffset(handleCenter);
+    }
 }
 
 void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)
