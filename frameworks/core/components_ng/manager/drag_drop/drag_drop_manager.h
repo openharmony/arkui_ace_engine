@@ -254,6 +254,12 @@ public:
         nodesForDragNotify_.erase(nodeId);
     }
 
+    void RegisterPullEventListener(int32_t uniqueIdentify, std::function<void(const DragPointerEvent&)> callback);
+
+    void UnRegisterPullEventListener(int32_t uniqueIdentify);
+
+    void NotifyPullEventListener(const DragPointerEvent& dragPointerEvent);
+
     void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
     {
         notifyInDraggedCallback_ = callback;
@@ -583,6 +589,7 @@ private:
     bool isDragCancel_ = false;
     std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
     std::unordered_set<int32_t> parentHitNodes_;
+    std::unordered_map<int32_t, std::function<void(const DragPointerEvent&)>> pullEventListener_;
     DragCursorStyleCore dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;

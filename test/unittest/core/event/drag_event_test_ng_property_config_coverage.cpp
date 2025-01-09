@@ -661,11 +661,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest044, TestSize.Le
     frameNode->layoutProperty_ = layoutProperty;
     Inspector::offscreenNodes.clear();
     Inspector::AddOffscreenNode(frameNode);
-    dragEventActuator->GetPreviewPixelMap("testid", frameNode);
+    DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     layoutProperty->propVisibility_ = VisibleType::GONE;
-    dragEventActuator->GetPreviewPixelMap("testid", frameNode);
+    DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
-    dragEventActuator->GetPreviewPixelMap("testid", frameNode);
+    DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
 }
 

@@ -1085,7 +1085,7 @@ void OverlayManager::ShowMenuAnimation(const RefPtr<FrameNode>& menu)
     CHECK_NULL_VOID(wrapperPattern);
     wrapperPattern->CallMenuAboutToAppearCallback();
     wrapperPattern->SetMenuStatus(MenuStatus::ON_SHOW_ANIMATION);
-    SetIsMenuShow(true);
+    SetIsMenuShow(true, menu);
     ResetContextMenuDragHideFinished();
     if (wrapperPattern->HasTransitionEffect()) {
         UpdateMenuVisibility(menu);
@@ -3148,11 +3148,23 @@ bool OverlayManager::RemoveDragPreview(const RefPtr<FrameNode>& overlay)
     return true;
 }
 
-void OverlayManager::SetIsMenuShow(bool isMenuShow)
+void OverlayManager::SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode)
 {
     isMenuShow_ = isMenuShow;
     // notify drag manager the menu show status
-    DragDropGlobalController::GetInstance().UpdateMenuShowingStatus(isMenuShow);
+    if (!menuNode) {
+        DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow);
+        return;
+    }
+    auto menuWrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    auto menu = menuWrapperPattern->GetMenu();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto targetNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(targetNode);
+    DragDropGlobalController::GetInstance().PublishMenuStatusWithNode(isMenuShow, targetNode);
 }
 
 int32_t OverlayManager::GetPopupIdByNode(const RefPtr<FrameNode>& overlay)
@@ -7217,7 +7229,7 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
     CHECK_NULL_RETURN(dragDropManager, borderRadius);
     auto dragFrameNode = DragDropGlobalController::GetInstance().GetPrepareDragFrameNode().Upgrade();
     CHECK_NULL_RETURN(dragFrameNode, borderRadius);
-    return DragEventActuator::GetDragFrameNodeBorderRadius(dragFrameNode);
+    return DragDropFuncWrapper::GetDragFrameNodeBorderRadius(dragFrameNode);
 }
 
 RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& rootNode)

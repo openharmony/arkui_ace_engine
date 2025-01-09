@@ -81,6 +81,7 @@ float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
 bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
+int32_t SystemProperties::dragDropFrameworkStatus_ = 0;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -245,5 +246,10 @@ bool SystemProperties::IsNeedSymbol()
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
 }
 } // namespace OHOS::Ace

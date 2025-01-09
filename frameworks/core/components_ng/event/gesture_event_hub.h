@@ -24,7 +24,7 @@
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
@@ -193,6 +193,7 @@ public:
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetDragDropEvent();
     void SetCustomDragEvent(
         const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
     bool HasDragEvent() const;
