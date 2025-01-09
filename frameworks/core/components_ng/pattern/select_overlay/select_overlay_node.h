@@ -155,7 +155,7 @@ private:
     void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
     void UpdateMoreOrBackSymbolOptions(bool isMoreButton, bool isReplaceEffectEnable);
-    void UPdataMoreOrBackSymbolOptionsWithDelay();
+    void UpdataMoreOrBackSymbolOptionsWithDelay();
     void MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation);
     void HideMenuOnlyImmediately();
     void InitSelectMenuStatus(
