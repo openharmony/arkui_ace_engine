@@ -4150,7 +4150,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
-    selectOverlay_->SetUsingMouse(true);
+    if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
+        selectOverlay_->SetUsingMouse(true);
+    }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
