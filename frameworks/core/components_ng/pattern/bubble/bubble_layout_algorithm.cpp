@@ -278,7 +278,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.maxSize.SetWidth(wrapperSize_.Width());
     }
     float minHeight = minHeight_.ConvertToPx();
-    if (minHeight > 0.0f) {
+    if (GreatNotEqual(static_cast<double>(minHeight), 0.0)) {
         childLayoutConstraint.minSize.SetHeight(minHeight);
     }
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
