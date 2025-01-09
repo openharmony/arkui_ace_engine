@@ -320,6 +320,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
+    bool needSyncRenderTree = false;
     int32_t index = 0;
 
     auto children = GetChildren();
@@ -335,6 +336,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
+            needSyncRenderTree = true;
         } else {
             // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(child, index, branchId);
