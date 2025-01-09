@@ -1324,7 +1324,7 @@ class PromptAction {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
-        let result_
+        let result_;
         if (argLength === 2) {
             result_ = Context.updatePopup(content.getNodePtr(), options);
         } else {
