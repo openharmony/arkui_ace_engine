@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -145,15 +146,21 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
         auto pipeLineContext = menuNode->GetContextWithCheck();
-        if (pipeLineContext) {
-            auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
-            if (selectTheme) {
-                styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
-            }
+        if (!pipeLineContext) {
+            return { wrapperNode, menuNode };
         }
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        if (!selectTheme) {
+            return { wrapperNode, menuNode };
+        }
+        if (selectTheme->GetMenuBlendBgColor()) {
+            styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuNormalBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+        } else {
+            styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         renderContext->UpdateBackBlurStyle(styleOption);
     }
 
@@ -829,6 +836,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         }
     }
     if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
+        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
@@ -887,6 +895,31 @@ void SetMenuFocusRule(const RefPtr<FrameNode>& menuNode)
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     focusHub->SetDirectionalKeyFocus(menuTheme->GetEnableDirectionalKeyFocus());
+}
+
+Alignment ConvertTxtTextAlign(bool IsRightToLeft, TextAlign textAlign)
+{
+    Alignment convertValue;
+    switch (textAlign) {
+        case TextAlign::LEFT:
+            convertValue = Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::CENTER:
+            convertValue = Alignment::CENTER;
+            break;
+        case TextAlign::RIGHT:
+            convertValue = Alignment::CENTER_RIGHT;
+            break;
+        case TextAlign::START:
+            convertValue = IsRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::END:
+            convertValue = IsRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return convertValue;
 }
 } // namespace
 
@@ -1315,13 +1348,23 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         menuNodeRenderContext->IsUniRenderEnabled()) {
         auto pipeLineContext = menuNode->GetContextWithCheck();
         CHECK_NULL_VOID(pipeLineContext);
-        auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
-        CHECK_NULL_VOID(menuTheme);
+        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
         BlurStyleOption styleOption;
-        styleOption.blurStyle =
-            static_cast<BlurStyle>(menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
+        Color color;
+        if (selectTheme->GetMenuBlendBgColor()) {
+            styleOption.blurStyle = static_cast<BlurStyle>(
+                menuParam.backgroundBlurStyle.value_or(selectTheme->GetMenuNormalBackgroundBlurStyle()));
+            color = menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor());
+        } else {
+            auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+            CHECK_NULL_VOID(menuTheme);
+            styleOption.blurStyle = static_cast<BlurStyle>(
+                menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
+            color = menuParam.backgroundColor.value_or(Color::TRANSPARENT);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+        menuNodeRenderContext->UpdateBackgroundColor(color);
     } else if (menuParam.backgroundColor.has_value()) {
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }
@@ -1541,6 +1584,16 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textRenderContext = textNode->GetRenderContext();
     textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(value);
+    auto padding = theme->GetOptionContentNormalLeftRightPadding();
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding);
+    textPadding.right = CalcLength(padding);
+    textProperty->UpdatePadding(textPadding);
+    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto IsRightToLeft = layoutDirection == TextDirection::RTL;
+    auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
+    auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
+    textProperty->UpdateAlignment(convertValue);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
@@ -1625,6 +1678,14 @@ RefPtr<FrameNode> MenuView::Create(int32_t index)
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateHover(false);
     props->UpdatePress(false);
+
+    auto layoutProp = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProp, nullptr);
+    MarginProperty margin;
+    auto verticalMargin = CalcLength(theme->GetOptionNormalTopBottomMargin());
+    auto leftRightMargin = CalcLength(theme->GetOptionFocusedLeftRightMargin());
+    margin.SetEdges(leftRightMargin, leftRightMargin, verticalMargin, verticalMargin);
+    layoutProp->UpdateMargin(margin);
     return node;
 }
 } // namespace OHOS::Ace::NG

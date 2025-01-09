@@ -75,6 +75,8 @@ public:
 
     static bool IsTransformScene(uint32_t type);
 
+    static bool IsAppOrSubScene(uint32_t type);
+
     static bool IsSystemWindowScene(uint32_t type);
 
     static bool IsPanelScene(uint32_t type);

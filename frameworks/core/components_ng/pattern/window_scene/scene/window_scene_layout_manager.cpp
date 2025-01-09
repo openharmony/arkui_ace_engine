@@ -159,7 +159,7 @@ std::shared_ptr<Rosen::RSObjAbsGeometry> WindowSceneLayoutManager::GetLocalGeome
 }
 
 void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node,
-    TraverseResult& res, bool isAncestorRecent, bool notSyncPosition)
+    TraverseResult& res, TraverseInfo& ancestorInfo)
 {
     auto rsNode = GetRSNode(node);
     if (!rsNode) {
@@ -167,10 +167,10 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         return;
     }
     IsFrameNodeAbnormal(node);
-    auto globalGeometry = isAncestorRecent ? std::make_shared<Rosen::RSObjAbsGeometry>()
+    auto globalGeometry = ancestorInfo.isAncestorRecent ? std::make_shared<Rosen::RSObjAbsGeometry>()
                                            : rsNode->GetGlobalGeometry();
     auto localGeometry = rsNode->GetLocalGeometry();
-    if (isAncestorRecent && !localGeometry) {
+    if (ancestorInfo.isAncestorRecent && !localGeometry) {
         localGeometry = std::make_shared<Rosen::RSObjAbsGeometry>();
     }
     if (!globalGeometry || !localGeometry) {
@@ -188,7 +188,7 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
             GetWindowName(node).c_str(), width, height);
         return;
     }
-    if (isAncestorRecent) {
+    if (ancestorInfo.isAncestorRecent) {
         uiParam.rect_ = { localGeometry->GetX(), localGeometry->GetY(), width, height };
     } else {
         auto absRect = globalGeometry->GetAbsRect();
@@ -196,16 +196,19 @@ void WindowSceneLayoutManager::FillWindowSceneInfo(const RefPtr<FrameNode>& node
         uiParam.scaleX_ = absRect.GetWidth() / width;
         uiParam.scaleY_ = absRect.GetHeight() / height;
     }
-    uiParam.needSync_ = notSyncPosition ? false : true;
+    uiParam.needSync_ = ancestorInfo.notSyncPosition ? false : true;
     auto matrix = globalGeometry->GetAbsMatrix();
-    uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) - rsNode->GetGlobalPositionX());
-    uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) - rsNode->GetGlobalPositionY());
+    // based on transform scene coordinate system to compute trans pos
+    uiParam.transX_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_X) -
+        (rsNode->GetGlobalPositionX() - ancestorInfo.transScenePosX));
+    uiParam.transY_ = std::round(matrix.Get(Rosen::Drawing::Matrix::TRANS_Y) -
+        (rsNode->GetGlobalPositionY() - ancestorInfo.transScenePosY));
     uiParam.pivotX_ = globalGeometry->GetPivotX();
     uiParam.pivotY_ = globalGeometry->GetPivotY();
     uiParam.zOrder_ = static_cast<uint32_t>(res.zOrderCnt_);
     auto windowId = GetWindowId(node);
     uiParam.sessionName_ = GetWindowName(node);
-    if (isAncestorRecent) {
+    if (ancestorInfo.isAncestorRecent) {
         // panel scene self should be interactive, others should be false
         // default interactive is true
         uiParam.interactive_ = WindowSceneHelper::IsPanelScene(node->GetWindowPatternType());
@@ -250,7 +253,10 @@ void WindowSceneLayoutManager::FlushWindowPatternInfo(const RefPtr<FrameNode>& s
     res.zOrderCnt_ = 0;
     res.screenId_ = screenId;
     UpdateGeometry(screenNode, nullptr, false);
-    TraverseTree(screenNode, res, false, IsNodeDirty(screenNode), false);
+    TraverseInfo parentInfo = {
+        .isAncestorDirty = IsNodeDirty(screenNode)
+    };
+    TraverseTree(screenNode, res, parentInfo);
     if (isCoreDebugEnable_) {
         DumpFlushInfo(screenId, res);
         TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "------------------- End FlushWindowPatternInfo ------------------");
@@ -298,15 +304,28 @@ void WindowSceneLayoutManager::IsFrameNodeAbnormal(const RefPtr<FrameNode>& node
     }
 }
 
+void WindowSceneLayoutManager::FillTransScenePos(const RefPtr<FrameNode>& node, TraverseInfo& ancestorInfo)
+{
+    if (!WindowSceneHelper::IsTransformScene(node->GetWindowPatternType())) {
+        return;
+    }
+    auto rsNode = GetRSNode(node);
+    if (!rsNode) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_PIPELINE, "name:%{public}s rsNode is null", GetWindowName(node).c_str());
+        return;
+    }
+
+    ancestorInfo.transScenePosX = rsNode->GetGlobalPositionX();
+    ancestorInfo.transScenePosY = rsNode->GetGlobalPositionY();
+}
+
 void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, TraverseResult& res,
-    bool isParentRecent, bool isParentDirty, bool isParentNotSyncPosition)
+    TraverseInfo& parentInfo)
 {
     CHECK_NULL_VOID(rootNode);
     auto parentType = rootNode->GetWindowPatternType();
     for (auto& weakNode : rootNode->GetFrameChildren()) {
-        bool isAncestorRecent = isParentRecent;
-        bool isAncestorDirty = isParentDirty;
-        bool notSyncPosition = isParentNotSyncPosition;
+        auto ancestorInfo = parentInfo;
         auto node = weakNode.Upgrade();
         // when current layer is invisible, no need traverse next
         if (!node || !IsNodeVisible(node)) {
@@ -322,21 +341,24 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         if (hasWindowSession) {
             res.zOrderCnt_ = currentZorder++; // keep last zorder as current zorder
         }
-        notSyncPosition = (notSyncPosition || NoNeedSyncScenePanelGlobalPosition(node));
+        ancestorInfo.notSyncPosition = (ancestorInfo.notSyncPosition || NoNeedSyncScenePanelGlobalPosition(node));
         // process recent and child node
-        if (!isAncestorRecent) {
-            if (isAncestorDirty || IsNodeDirty(node)) {
-                isAncestorDirty = true;
+        if (!ancestorInfo.isAncestorRecent) {
+            if (ancestorInfo.isAncestorDirty || IsNodeDirty(node)) {
+                ancestorInfo.isAncestorDirty = true;
                 UpdateGeometry(node, rootNode, WindowSceneHelper::IsTransformScene(parentType));
             }
         }
         // only scenepanel can change recent state
         if (IsRecentContainerState(node)) {
-            isAncestorRecent = true;
+            ancestorInfo.isAncestorRecent = true;
         }
+
+        // basedd on transform scene coordinate system to compute trans pos
+        FillTransScenePos(node, ancestorInfo);
         // only window pattern but not transform scene need sync info
         if (hasWindowSession) {
-            FillWindowSceneInfo(node, res, isAncestorRecent, notSyncPosition);
+            FillWindowSceneInfo(node, res, ancestorInfo);
             DumpNodeInfo(node, rootNode, "AfterFillWindowSceneInfo");
         }
 
@@ -350,12 +372,14 @@ void WindowSceneLayoutManager::TraverseTree(const RefPtr<FrameNode>& rootNode, T
         if (isCoreDebugEnable_) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "finish TraverseTree winId:%{public}d name:%{public}s"
                 "nodeName:%{public}s tag:%{public}s zorder:%{public}u isAncestorRecent:%{public}d "
-                "isAncestorDirty:%{public}d hasWindowSession:%{public}d, notSyncPosition:%{public}d",
+                "isAncestorDirty:%{public}d hasWindowSession:%{public}d, notSyncPosition:%{public}d "
+                "transScenePosX:%{public}d, transScenePosY:%{public}d",
                 GetWindowId(node), GetWindowName(node).c_str(),
                 node->GetInspectorId()->c_str(), node->GetTag().c_str(), res.zOrderCnt_,
-                isAncestorRecent, isAncestorDirty, hasWindowSession, notSyncPosition);
+                ancestorInfo.isAncestorRecent, ancestorInfo.isAncestorDirty, hasWindowSession,
+                ancestorInfo.notSyncPosition, ancestorInfo.transScenePosX, ancestorInfo.transScenePosY);
         }
-        TraverseTree(node, res, isAncestorRecent, isAncestorDirty, notSyncPosition);
+        TraverseTree(node, res, ancestorInfo);
     }
 }
 

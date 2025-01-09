@@ -179,7 +179,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragGatherPixelMaps003, TestSize.Level1)
     GestureEvent info;
     info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     gestureEventHub->SetDragGatherPixelMaps(info);
-    EXPECT_FALSE(dragDropManager->gatherPixelMaps_.empty());
+    EXPECT_TRUE(dragDropManager->gatherPixelMaps_.empty());
 }
 
 /**
@@ -743,6 +743,87 @@ HWTEST_F(GestureEventHubTestNg, OnDragStart005, TestSize.Level1)
     SubwindowManager::GetInstance()->subwindowMap_.clear();
     SubwindowManager::GetInstance()->SetCurrentSubwindow(nullptr);
     MockContainer::TearDown();
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest001
+ * @tc.desc: Test GetGrayedState And SetGrayedState
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest001, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+    auto grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, false);
+
+    dragDropManager->SetGrayedState(true);
+    grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, true);
+
+    dragDropManager->SetGrayedState(false);
+    grayedState = dragDropManager->GetGrayedState();
+    EXPECT_EQ(grayedState, false);
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest002
+ * @tc.desc: Test HandleDragThroughMouse And HandleDragEndAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest002, TestSize.Level1)
+{
+    auto pipline = PipelineContext::GetMainPipelineContext();
+    pipline->dragDropManager_->SetGrayedState(false);
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetRenderContext()->UpdateOpacity(1.0f);
+    auto grayedOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+
+    NG::DragPreviewOption dragPreviewOptions;
+    dragPreviewOptions.isDefaultDragItemGrayEffectEnabled = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->HandleDragThroughMouse(frameNode);
+    grayedOpacity = frameNode->GetPreGrayedOpacity();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+    auto renderOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(renderOpacity, 0.4f);
+
+    gestureEventHub->HandleDragEndAction(gestureEventHub->dragframeNodeInfo_);
+    auto opacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(opacity, 1.0f);
+}
+
+/**
+ * @tc.name: DragItemGrayEffectTest003
+ * @tc.desc: Test HandleDragThroughTouch And HandleDragEndAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, DragItemGrayEffectTest003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode("test", 100, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetRenderContext()->UpdateOpacity(1.0f);
+    auto grayedOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+
+    NG::DragPreviewOption dragPreviewOptions;
+    dragPreviewOptions.isDefaultDragItemGrayEffectEnabled = true;
+    frameNode->SetDragPreviewOptions(dragPreviewOptions);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    gestureEventHub->HandleDragThroughTouch(frameNode);
+    grayedOpacity = frameNode->GetPreGrayedOpacity();
+    EXPECT_EQ(grayedOpacity, 1.0f);
+    auto renderOpacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(renderOpacity, 0.4f);
+
+    gestureEventHub->HandleDragEndAction(gestureEventHub->dragframeNodeInfo_);
+    auto opacity = frameNode->GetRenderContext()->GetOpacityValue();
+    EXPECT_EQ(opacity, 1.0f);
 }
 
 /**

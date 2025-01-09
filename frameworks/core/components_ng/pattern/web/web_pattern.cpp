@@ -303,9 +303,6 @@ constexpr int32_t SYNC_SURFACE_QUEUE_SIZE = 8;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_PHONE = 5;
 constexpr int32_t ASYNC_SURFACE_QUEUE_SIZE_FOR_OTHERS = 4;
 constexpr uint32_t DEBUG_DRAGMOVEID_TIMER = 30;
-int64_t last_height_ = 0L;
-int64_t last_width_ = 0L;
-bool g_dragWindowFlag = false;
 // web feature params
 constexpr char VISIBLE_ACTIVE_ENABLE[] = "persist.web.visible_active_enable";
 constexpr char MEMORY_LEVEL_ENABEL[] = "persist.web.memory_level_enable";
@@ -326,6 +323,7 @@ constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
 constexpr int32_t PINCH_END_TYPE = 2;
+constexpr int32_t PINCH_CANCEL_TYPE = 4;
 
 constexpr char ACCESSIBILITY_GENERIC_CONTAINER[] = "genericContainer";
 constexpr char ACCESSIBILITY_IMAGE[] = "image";
@@ -453,6 +451,7 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
@@ -1008,7 +1007,13 @@ void WebPattern::InitPinchEvent(const RefPtr<GestureEventHub>& gestureHub)
             pattern->HandleScaleGestureEnd(event);
         }
     };
-    auto actionCancelTask = [weak = WeakClaim(this)]() { return; };
+    auto actionCancelTask = [weak = WeakClaim(this)](const GestureEvent& event) {
+        if (event.GetSourceTool() == SourceTool::TOUCHPAD) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->HandleScaleGestureCancel(event);
+        }
+    };
 
     pinchGesture_ = MakeRefPtr<PinchGesture>(DEFAULT_PINCH_FINGER, DEFAULT_PINCH_DISTANCE);
     pinchGesture_->SetPriority(GesturePriority::Parallel);
@@ -1257,6 +1262,22 @@ void WebPattern::HandleScaleGestureEnd(const GestureEvent& event)
 
     delegate_->ScaleGestureChangeV2(
         PINCH_END_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+}
+
+void WebPattern::HandleScaleGestureCancel(const GestureEvent& event)
+{
+    CHECK_NULL_VOID(delegate_);
+
+    double scale = event.GetScale();
+
+    double centerX = event.GetPinchCenter().GetX();
+    double centerY = event.GetPinchCenter().GetY();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto offset = frameNode->GetOffsetRelativeToWindow();
+
+    delegate_->ScaleGestureChangeV2(
+        PINCH_CANCEL_TYPE, scale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
 }
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2277,7 +2298,7 @@ bool WebPattern::WebOnKeyEvent(const KeyEvent& keyEvent)
         code = item->second;
     }
     std::shared_ptr<NWebKeyboardEventImpl> keyboardEvent =
-        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(keyEvent.code),
+        std::make_shared<NWebKeyboardEventImpl>(static_cast<int32_t>(code),
                                                 static_cast<int32_t>(keyEvent.action),
                                                 keyEvent.unicode,
                                                 keyEvent.enableCapsLock,
@@ -3226,6 +3247,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateCopyOptionMode(GetCopyOptionModeValue(static_cast<int32_t>(CopyOptions::Distributed)));
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
+        delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -5850,18 +5872,24 @@ void WebPattern::OnWindowHide()
 
 void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
+    TAG_LOGD(AceLogTag::ACE_WEB, "WindowSizeChangeReason type: %{public}d ", type);
     switch (type) {
         case WindowSizeChangeReason::DRAG_START:
         case WindowSizeChangeReason::DRAG:
-        case WindowSizeChangeReason::DRAG_END: {
-            g_dragWindowFlag = true;
+            if (!isSmoothDragResizeEnabled) {
+                return;
+            }
+            dragWindowFlag_ = true;
+            delegate_->SetDragResizeStartFlag(true);
             WindowDrag(width, height);
             break;
-        }
+        case WindowSizeChangeReason::DRAG_END:
         default:
-            g_dragWindowFlag = false;
-            last_height_ = 0;
-            last_width_ = 0;
+            delegate_->SetDragResizeStartFlag(false);
+            dragWindowFlag_ = false;
+            lastHeight_ = 0;
+            lastWidth_ = 0;
             break;
     }
 }
@@ -5869,20 +5897,16 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
 void WebPattern::WindowDrag(int32_t width, int32_t height)
 {
     if (delegate_) {
-        bool isSmoothDragResizeEnabled = delegate_->GetIsSmoothDragResizeEnabled();
-        if (!isSmoothDragResizeEnabled) {
-            return;
+        if (lastHeight_ == 0 && lastWidth_ == 0) {
+            lastHeight_ = height;
+            lastWidth_ = width;
         }
-        if (last_height_ == 0 && last_width_ == 0) {
-            last_height_ = height;
-            last_width_ = width;
-        }
-        if (!GetPendingSizeStatus() && g_dragWindowFlag) {
-            int64_t pre_height = height - last_height_;
-            int64_t pre_width = width - last_width_;
-            delegate_->DragResize(width, height, pre_height, pre_width);
-            last_height_ = height;
-            last_width_ = width;
+        if (!GetPendingSizeStatus() && dragWindowFlag_) {
+            int64_t pre_height = height - lastHeight_;
+            int64_t pre_width = width - lastWidth_;
+            delegate_->SetDragResizePreSize(pre_height, pre_width);
+            lastHeight_ = height;
+            lastWidth_ = width;
         }
     }
 }
@@ -7566,4 +7590,10 @@ RefPtr<WebEventHub> WebPattern::GetWebEventHub()
     return GetEventHub<WebEventHub>();
 }
 
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
+}
 } // namespace OHOS::Ace::NG

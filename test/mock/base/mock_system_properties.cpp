@@ -41,6 +41,8 @@ std::atomic<bool> SystemProperties::layoutTraceEnable_(false);
 std::atomic<bool> SystemProperties::traceInputEventEnable_(false);
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::syncDebugTraceEnable_ = false;
+bool SystemProperties::measureDebugTraceEnable_ = false;
+bool SystemProperties::safeAreaDebugTraceEnable_ = false;
 bool SystemProperties::pixelRoundEnable_ = true;
 bool SystemProperties::textTraceEnable_ = false;
 bool SystemProperties::syntaxTraceEnable_ = false;
@@ -55,6 +57,7 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::debugOffsetLogEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
+bool SystemProperties::recycleImageEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
@@ -64,6 +67,7 @@ bool SystemProperties::gridCacheEnabled_ = true;
 bool SystemProperties::sideBarContainerBlurEnable_ = false;
 std::atomic<bool> SystemProperties::stateManagerEnable_(false);
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(false);
+std::atomic<bool> SystemProperties::focusCanBeActive_(true);
 bool SystemProperties::aceCommercialLogEnable_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
 bool SystemProperties::developerModeOn_ = false;
@@ -76,6 +80,7 @@ float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;
@@ -238,11 +243,6 @@ bool SystemProperties::IsNeedSymbol()
 }
 
 bool SystemProperties::GetResourceDecoupling()
-{
-    return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
 {
     return true;
 }

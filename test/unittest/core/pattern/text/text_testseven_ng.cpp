@@ -12,14 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gmock/gmock.h"
-#include "test/mock/base/mock_pixel_map.h"
-#include "test/unittest/core/common/clipboard/mock_clip_board.h"
+
 #include "text_base.h"
 
-#include "core/components_ng/pattern/image/image_model_ng.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/property/calc_length.h"
+#include "test/mock/base/mock_pixel_map.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/common/clipboard/mock_clip_board.h"
 
 namespace OHOS::Ace::NG {
 namespace {

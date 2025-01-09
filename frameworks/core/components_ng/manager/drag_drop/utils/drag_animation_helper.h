@@ -37,7 +37,7 @@ public:
     static OffsetF CalcOffsetToTarget(OffsetF curPos, OffsetF targetrPos, CalcResult& calcResult);
     static void CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
         const std::vector<GatherNodeChildInfo>& gatherNodeChildrenInfo);
-    static void PlayGatherNodeTranslateAnimation(const RefPtr<DragEventActuator>& actuator,
+    static void PlayGatherNodeTranslateAnimation(const RefPtr<FrameNode>& frameNode,
         const RefPtr<OverlayManager>& overlayManager);
     static void PlayGatherAnimationBeforeLifting(const RefPtr<DragEventActuator>& actuator);
     static void PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>& frameNode);
@@ -53,6 +53,21 @@ public:
         const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize);
     static void UpdateGatherNodeToTop();
     static void ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode);
+    static void DoGrayedAnimation(const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure);
+    static void SetPreOpacity(const RefPtr<FrameNode>& preNode);
+    static void DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<FrameNode> CreateImageNode(const RefPtr<PixelMap>& pixelMap);
+    static RefPtr<FrameNode> CreateGatherNode(const RefPtr<FrameNode>& frameNode,
+        std::vector<GatherNodeChildInfo>& gatherNodeInfo);
+    static RefPtr<FrameNode> CreateGatherImageNode(const RefPtr<FrameNode>& frameNode,
+        GatherNodeChildInfo& gatherNodeChildInfo);
+    static void MountGatherNode(const RefPtr<OverlayManager>& overlayManager, const RefPtr<FrameNode>& frameNode,
+        const RefPtr<FrameNode>& gatherNode, const std::vector<GatherNodeChildInfo>& gatherNodeInfo);
+    static void MarkDirtyNode(const RefPtr<FrameNode>& frameNode);
+    static void InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode,
+        const std::vector<GatherNodeChildInfo>& gatherNodeInfo);
+    static void ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode);
+
 };
 }
 #endif

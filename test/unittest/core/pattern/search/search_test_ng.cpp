@@ -1357,6 +1357,7 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     });
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(u"SetOnSubmit", event);
+    EXPECT_EQ(event.GetText(), u"SetOnSubmit");
 }
 
 /**
@@ -2117,5 +2118,32 @@ HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetEnablePreviewText(true);
     EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
+}
+
+/**
+ * @tc.name: SetSearchIcon001
+ * @tc.desc: Test SetIcon works fine for a second or more use
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchIcon001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetIcon(frameNode, "");
+    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(searchIconFrameNode, nullptr);
+    auto imageLayoutProperty = searchIconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto searchIconPath1 = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    EXPECT_NE(searchIconPath1.c_str(), "");
+    searchModelInstance.SetIcon(frameNode, "sys.media.wifi_router_fill");
+    auto searchIconPath2 = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    EXPECT_NE(searchIconPath1.c_str(), searchIconPath2.c_str());
 }
 } // namespace OHOS::Ace::NG

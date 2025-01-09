@@ -501,6 +501,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
 
     bool IsFocus() const
     {
@@ -851,6 +852,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
+    void OnOptimizeParserBudgetEnabledUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -895,6 +897,7 @@ private:
     void HandleScaleGestureChange(const GestureEvent& event);
     void HandleScaleGestureStart(const GestureEvent& event);
     void HandleScaleGestureEnd(const GestureEvent& event);
+    void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -1232,6 +1235,9 @@ private:
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;
+    int64_t lastHeight_ = 0L;
+    int64_t lastWidth_ = 0L;
+    bool dragWindowFlag_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

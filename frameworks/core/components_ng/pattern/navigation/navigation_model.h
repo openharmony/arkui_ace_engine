@@ -32,6 +32,7 @@
 namespace OHOS::Ace {
 using NavigationTransitionEvent = std::function<NG::NavigationTransition(
      RefPtr<NG::NavDestinationContext> from, RefPtr<NG::NavDestinationContext> to, NG::NavigationOperation operation)>;
+using OnNavBarWidthChangeEvent = std::function<void(const Dimension)>;
 class ACE_FORCE_EXPORT NavigationModel {
 public:
     static NavigationModel* GetInstance();
@@ -76,12 +77,13 @@ public:
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) = 0;
     virtual void SetUsrNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavBarPosition(NG::NavBarPosition mode) = 0;
-    virtual void SetNavBarWidth(const Dimension& value) = 0;
+    virtual void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) = 0;
     virtual void SetMinNavBarWidth(const Dimension& value) = 0;
     virtual void SetMaxNavBarWidth(const Dimension& value) = 0;
     virtual void SetMinContentWidth(const Dimension& value) = 0;
     virtual void SetOnNavBarStateChange(std::function<void(bool)>&& onNavBarStateChange) = 0;
     virtual void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onNavigationModeChange);
+    virtual void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event) {};
     virtual void SetNavigationMode(NG::NavigationMode mode) = 0;
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;
     virtual RefPtr<NG::NavigationStack> GetNavigationStack() = 0;

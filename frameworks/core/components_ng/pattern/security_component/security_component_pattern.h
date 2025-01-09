@@ -119,6 +119,7 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+    void HandleEnabled();
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();

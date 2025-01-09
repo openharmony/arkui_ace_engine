@@ -85,9 +85,11 @@ const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStra
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> INPUT_FONT_FAMILY_VALUE = { "sans-serif" };
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE, TextOverflow::DEFAULT };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
 constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
@@ -117,14 +119,6 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
-
-void HandleTextFieldInvalidUTF16(std::optional<std::u16string>& str)
-{
-    if (str.has_value()) {
-        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(str.value().data()), str.value().length(), 0);
-    }
-}
-
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -134,6 +128,16 @@ void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& ch
     JsEventCallback<void(const std::u16string&)> onChangeEvent(
         info.GetExecutionContext(), JSRef<JSFunc>::Cast(changeEventVal));
     TextFieldModel::GetInstance()->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void ParseTextProperty(const JSRef<JSVal>& textValue, std::optional<std::u16string>& value, std::u16string& text)
+{
+    if (JSViewAbstract::ParseJsString(textValue, text)) {
+        value = text;
+    }
+    if (textValue->IsUndefined()) {
+        value = u"";
+    }
 }
 
 void JSTextField::CreateTextInput(const JSCallbackInfo& info)
@@ -161,21 +165,20 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
+            value = u"";
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-    HandleTextFieldInvalidUTF16(placeholderSrc);
-    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -211,21 +214,19 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-        } else if (paramObject->HasProperty("text")) {
+        } else if (paramObject->GetProperty("$text")->IsFunction()) {
+            changeEventVal = paramObject->GetProperty("$text");
             if (ParseJsString(textValue, text)) {
                 value = text;
             }
-            if (textValue->IsUndefined()) {
-                value = u"";
-            }
+        } else if (paramObject->HasProperty("text")) {
+            ParseTextProperty(textValue, value, text);
         }
         auto controllerObj = paramObject->GetProperty("controller");
         if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-    HandleTextFieldInvalidUTF16(placeholderSrc);
-    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -280,7 +281,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
-    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
+    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
+        TextFieldModel::GetInstance()->ResetPlaceholderColor();
+        return;
+    }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
@@ -401,9 +405,9 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        TextFieldModel::GetInstance()->ResetCaretColor();
         return;
     }
-
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
@@ -576,9 +580,8 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextColor();
+        TextFieldModel::GetInstance()->ResetTextColor();
+        return;
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
@@ -702,8 +705,11 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    bool tmp = !ParseJsColor(info[0], backgroundColor);
-    TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, tmp);
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        TextFieldModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, false);
 }
 
 void JSTextField::JsHeight(const JSCallbackInfo& info)
@@ -1803,6 +1809,16 @@ void JSTextField::SetLineHeight(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetLineHeight(value);
 }
 
+void JSTextField::SetHalfLeading(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    bool halfLeading = jsValue->IsBoolean() ? jsValue->ToBoolean() : false;
+    TextFieldModel::GetInstance()->SetHalfLeading(halfLeading);
+}
+
 void JSTextField::SetLineSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
@@ -1967,4 +1983,25 @@ void JSTextField::SetEnableHapticFeedback(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetEnableHapticFeedback(state);
 }
 
+void JSTextField::SetEllipsisMode(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> args = info[0];
+    if (!args->IsNumber()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(EllipsisMode::TAIL);
+        return;
+    }
+    uint32_t index = args->ToNumber<uint32_t>();
+    if (index < ELLIPSIS_MODALS.size()) {
+        TextFieldModel::GetInstance()->SetEllipsisMode(ELLIPSIS_MODALS[index]);
+    }
+}
+
+void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
 } // namespace OHOS::Ace::Framework

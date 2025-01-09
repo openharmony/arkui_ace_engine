@@ -188,6 +188,13 @@ void JSSaveButton::JSBind(BindingTarget globalObj)
     JSClass<JSSaveButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSSaveButton>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSSaveButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
+    JSClass<JSSaveButton>::StaticMethod("maxFontScale", &JSSecButtonBase::SetMaxFontScale);
+    JSClass<JSSaveButton>::StaticMethod("minFontScale", &JSSecButtonBase::SetMinFontScale);
+    JSClass<JSSaveButton>::StaticMethod("maxLines", &JSSecButtonBase::SetMaxLines);
+    JSClass<JSSaveButton>::StaticMethod("maxFontSize", &JSSecButtonBase::SetMaxFontSize);
+    JSClass<JSSaveButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
+    JSClass<JSSaveButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
+    JSClass<JSSaveButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSSaveButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -137,6 +137,9 @@ public:
     virtual void Reset() = 0;
     virtual void ResetFooter() = 0;
 
+    virtual bool OverScrollTop() = 0;
+    virtual bool OverScrollBottom() = 0;
+
     // for compatibility
     virtual void UpdateStartIndex() {};
 
@@ -220,6 +223,8 @@ public:
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
+
+    float expandHeight_ = 0.0f;
 
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;

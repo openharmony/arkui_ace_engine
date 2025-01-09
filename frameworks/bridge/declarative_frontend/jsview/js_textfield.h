@@ -44,6 +44,7 @@ public:
     static void SetCaretPosition(const JSCallbackInfo& info);
     static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
     static void SetMinFontScale(const JSCallbackInfo& info);
@@ -128,12 +129,14 @@ public:
     static void SetHeightAdaptivePolicy(int32_t value);
     static void SetLetterSpacing(const JSCallbackInfo& info);
     static void SetLineHeight(const JSCallbackInfo& info);
+    static void SetHalfLeading(const JSCallbackInfo& info);
     static void SetLineSpacing(const JSCallbackInfo& info);
     static void SetTextOverflow(const JSCallbackInfo& info);
     static void SetTextIndent(const JSCallbackInfo& info);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void SetEnablePreviewText(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
+    static void SetStopBackPress(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

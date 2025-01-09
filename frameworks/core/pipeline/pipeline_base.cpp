@@ -233,7 +233,8 @@ void PipelineBase::SetRootSize(double density, float width, float height)
     if (taskExecutor_->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
         task();
     } else {
-        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize");
+        taskExecutor_->PostTask(task, TaskExecutor::TaskType::UI, "ArkUISetRootSize",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -921,8 +922,10 @@ void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, in
 
 void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
 {
-    ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
-    accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
+        accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+    }
 }
 
 void PipelineBase::FireAccessibilityEvents()
@@ -976,7 +979,8 @@ bool PipelineBase::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Pipeline Task to UI thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::UI, "ArkUIDestroyPipeline",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 

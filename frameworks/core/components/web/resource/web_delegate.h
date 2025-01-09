@@ -241,6 +241,7 @@ public:
     std::string GetDefaultFileName() override;
     std::vector<std::string> GetAcceptType() override;
     bool IsCapture() override;
+    std::vector<std::string> GetMimeType() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
@@ -596,16 +597,6 @@ private:
     bool eventResult_ = false;
 };
 
-class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
-
 enum class ScriptItemType {
     DOCUMENT_START = 0,
     DOCUMENT_END
@@ -910,6 +901,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -1033,6 +1025,8 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    void SetDragResizeStartFlag(bool isDragResizeStart);
+    void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1374,6 +1368,9 @@ private:
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
+    bool isDragResizeStart_ = false;
+    double dragResize_preHight_ = 0.0;
+    double dragResize_preWidth_ = 0.0;
 #endif
 };
 

@@ -169,8 +169,7 @@ bool NavigationGroupNode::ReorderNavDestination(
         SetBackButtonEvent(navDestination);
         navDestination->SetIndex(i);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
-        CHECK_NULL_RETURN(eventHub, false);
-        if (!eventHub->GetOnStateChange()) {
+        if (eventHub && !eventHub->GetOnStateChange()) {
             auto onStateChangeMap = pattern->GetOnStateChangeMap();
             auto iter = onStateChangeMap.find(uiNode->GetId());
             if (iter != onStateChangeMap.end()) {
@@ -180,6 +179,8 @@ bool NavigationGroupNode::ReorderNavDestination(
         }
         int32_t childIndex = navigationContentNode->GetChildIndex(navDestination);
         if (childIndex < 0) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "mountToParent navdestinationId:%{public}d, slot:%{public}d",
+                navDestination->GetId(), slot);
             navDestination->MountToParent(navigationContentNode, slot);
             hasChanged = true;
         } else if (childIndex != slot) {
@@ -204,8 +205,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
     bool hideNodesFinish = false;
     // record animating destination size
     int32_t animatingSize = 0;
-    int32_t remainNodeIndex = -1;
-    int32_t beforeLastStandardIndex = preLastStandardNode == nullptr ? -1 : preLastStandardNode->GetIndex();
+    int32_t remainNodeIndex = pattern->IsCurTopNewInstance() ? slot - 1 : slot;
     while (slot + removeSize + animatingSize < static_cast<int32_t>(navigationContentNode->GetChildren().size())) {
         // delete useless nodes that are not at the top
         int32_t candidateIndex = static_cast<int32_t>(navigationContentNode->GetChildren().size()) - 1 - animatingSize;
@@ -252,7 +252,7 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
         // remove content child
         auto navDestinationPattern = navDestination->GetPattern<NavDestinationPattern>();
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "remove child: %{public}s", navDestinationPattern->GetName().c_str());
-        if (navDestination->GetIndex() >= beforeLastStandardIndex && !hideNodesFinish) {
+        if (navDestination->GetIndex() >= preLastStandardIndex_ && !hideNodesFinish) {
             if (navDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD
                 && preLastStandardNode != navDestination) {
                 hideNodesFinish = true;
@@ -263,9 +263,8 @@ void NavigationGroupNode::RemoveRedundantNavDestination(RefPtr<FrameNode>& navig
             hideNodes_.emplace_back(std::make_pair(navDestination, true));
             navDestination->SetCanReused(false);
             removeSize++;
-            auto index = slot + removeSize - 1;
             // move current destination position to navigation stack size + remove navDestination nodes
-            if (index > 0) {
+            if (remainNodeIndex >= 0) {
                 navDestination->MovePosition(remainNodeIndex);
             }
             continue;
@@ -498,7 +497,7 @@ void NavigationGroupNode::ConfigureNavigationWithAnimation(
     navigationManager->SetIsNavigationOnAnimation(true);
 }
 
-void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
+void NavigationGroupNode::ResetTransitionAnimationNodeState(
     const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode)
 {
     auto navigationManager = FetchNavigationManager();
@@ -508,13 +507,13 @@ void NavigationGroupNode::UnconfigureNavigationAndDisableAnimation(
     }
     auto curNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(curNode);
     if (curNavDestContentFrameNode) {
-        navigationManager->UpdateRenderGroup(curNavDestContentFrameNode, false);
+        navigationManager->UpdateAnimationCachedRenderGroup(curNavDestContentFrameNode, false);
         navigationManager->SetCurNodeAnimationCached(false);
         navigationManager->SetCurrentNodeNeverSet(true);
     }
     auto preNavDestContentFrameNode = navigationManager->GetNavDestContentFrameNode(preNode);
     if (preNavDestContentFrameNode) {
-        navigationManager->UpdateRenderGroup(preNavDestContentFrameNode, false);
+        navigationManager->UpdateAnimationCachedRenderGroup(preNavDestContentFrameNode, false);
         navigationManager->SetPreNodeAnimationCached(false);
         navigationManager->SetPreNodeNeverSet(true);
     }
@@ -603,7 +602,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto preNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(preNavDesNode);
             CHECK_NULL_VOID(preNavdestination);
             auto curNavDesNode = weakCurNode.Upgrade();
-            navigation->UnconfigureNavigationAndDisableAnimation(preNavDesNode, curNavDesNode);
+            navigation->ResetTransitionAnimationNodeState(preNavDesNode, curNavDesNode);
             if (preNavdestination->SystemTransitionPopCallback(animationId)) {
                 // return true means need to remove the poped navdestination
                 auto parent = preNavDesNode->GetParent();
@@ -735,7 +734,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             if (curNode) {
                 auto curNavDestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
                 CHECK_NULL_VOID(curNavDestination);
-                navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+                navigation->ResetTransitionAnimationNodeState(preNode, curNode);
                 curNavDestination->FinishSystemTransitionPush(true, animationId);
             }
             navigation->RemoveDialogDestination();
@@ -846,7 +845,7 @@ void NavigationGroupNode::TransitionWithReplace(
         }
         navigationNode->DealNavigationExit(preNode, isNavBar);
         auto curNode = weakCurNode.Upgrade();
-        navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        navigationNode->ResetTransitionAnimationNodeState(preNode, curNode);
         auto context = navigationNode->GetContextWithCheck();
         CHECK_NULL_VOID(context);
         context->MarkNeedFlushMouseEvent();
@@ -1474,7 +1473,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
         auto preNode = weakPreNode.Upgrade();
-        navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+        navigation->ResetTransitionAnimationNodeState(preNode, curNode);
     });
     auto newPushAnimation = AnimationUtils::StartAnimation(option,
         [curNavList]() {
@@ -1499,7 +1498,6 @@ std::vector<WeakPtr<NavDestinationGroupNode>> NavigationGroupNode::FindNodesPope
     std::vector<WeakPtr<NavDestinationGroupNode>> preNavList;
     auto preNavdestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
     CHECK_NULL_RETURN(preNavdestinationNode, preNavList);
-    auto end = preNavdestinationNode->GetIndex();
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_RETURN(navigationPattern, preNavList);
     const auto& navDestinationNodesPre = navigationPattern->GetAllNavDestinationNodesPrev();
@@ -1507,18 +1505,31 @@ std::vector<WeakPtr<NavDestinationGroupNode>> NavigationGroupNode::FindNodesPope
     if (curNode && curNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto curNavdestination = AceType::DynamicCast<NavDestinationGroupNode>(curNode);
         CHECK_NULL_RETURN(curNavdestination, preNavList);
-        start = curNavdestination->GetIndex() + 1;
+        start = preLastStandardIndex_ + 1;
     }
     // find the nodes need to do downward EXIT translation
-    for (int32_t index = start; index <= end; index++) {
+    auto stack = navigationPattern->GetNavigationStack();
+    int32_t size = static_cast<int32_t>(navDestinationNodesPre.size());
+    for (int32_t index = start; index < size; index++) {
         auto node = GetNavDestinationNode(navDestinationNodesPre[index].second.Upgrade());
-        if (node) {
-            auto preNode = AceType::DynamicCast<FrameNode>(node);
-            CHECK_NULL_RETURN(preNode, preNavList);
-            auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
-            CHECK_NULL_RETURN(preNavDesNode, preNavList);
+        if (!node) {
+            continue;
+        }
+        auto preNode = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_RETURN(preNode, preNavList);
+        auto preNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
+        CHECK_NULL_RETURN(preNavDesNode, preNavList);
+        bool isInCurStack = stack->FindIndex(navDestinationNodesPre[index].first,
+            navDestinationNodesPre[index].second.Upgrade(), true) != -1;
+        if (!isInCurStack) {
+            // this node not in current stack should do animation
             preNavDesNode->InitDialogTransition(true);
             preNavList.emplace_back(WeakPtr<NavDestinationGroupNode>(preNavDesNode));
+        } else {
+            // update visbility when this node is under the last standard page
+            if (preNavDesNode->GetIndex() < lastStandardIndex_) {
+                preNavDesNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
+            }
         }
     }
     return preNavList;
@@ -1539,7 +1550,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
             CHECK_NULL_VOID(navigation);
             auto curNode = weakCurNode.Upgrade();
             auto preNode = weakPreNode.Upgrade();
-            navigation->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+            navigation->ResetTransitionAnimationNodeState(preNode, curNode);
             for (auto iter: preNavList) {
                 auto preNode = iter.Upgrade();
                 CHECK_NULL_VOID(preNode);

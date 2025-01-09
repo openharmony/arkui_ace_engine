@@ -23,7 +23,7 @@ constexpr size_t GCTHRESHOLD = 50;
 
 JSCanvasPath::JSCanvasPath()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         isJudgeSpecialValue_ = true;
     }
 }

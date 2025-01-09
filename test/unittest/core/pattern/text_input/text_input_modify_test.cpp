@@ -13,63 +13,16 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_content_type.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;

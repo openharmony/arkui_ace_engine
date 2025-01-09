@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <vector>
 
-#include "core/components/web/resource/web_delegate.h"
+#include "core/components/web/resource/web_area_changed.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -622,6 +622,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled) {}
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled) {}
 void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled) {}
 void WebDelegate::UpdateCacheMode(const WebCacheMode& mode) {}
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable) {}
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nullptr;
@@ -1198,4 +1199,6 @@ bool WebDelegate::IsActivePolicyDisable()
 {
     return false;
 }
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 } // namespace OHOS::Ace

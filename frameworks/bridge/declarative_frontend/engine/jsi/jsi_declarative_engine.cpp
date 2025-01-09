@@ -1033,7 +1033,7 @@ shared_ptr<JsValue> JsiDeclarativeEngineInstance::CallGetFrameNodeByNodeIdFunc(
 }
 
 void JsiDeclarativeEngineInstance::PostJsTask(
-    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name)
+    const shared_ptr<JsRuntime>& runtime, std::function<void()>&& task, const std::string& name, PriorityType priority)
 {
     if (runtime == nullptr) {
         return;
@@ -1042,7 +1042,7 @@ void JsiDeclarativeEngineInstance::PostJsTask(
     if (engineInstance == nullptr) {
         return;
     }
-    engineInstance->GetDelegate()->PostJsTask(std::move(task), name);
+    engineInstance->GetDelegate()->PostJsTask(std::move(task), name, priority);
 }
 
 void JsiDeclarativeEngineInstance::TriggerPageUpdate(const shared_ptr<JsRuntime>& runtime)
@@ -1085,7 +1085,8 @@ void JsiDeclarativeEngineInstance::SetDebuggerPostTask()
         if (delegate == nullptr) {
             return;
         }
-        delegate->PostJsTask(std::move(task), "ArkUIDebuggerTask");
+        delegate->PostJsTask(
+            std::move(task), "ArkUIDebuggerTask", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     std::static_pointer_cast<ArkJSRuntime>(runtime_)->SetDebuggerPostTask(postTask);
 }
@@ -1280,7 +1281,7 @@ void JsiDeclarativeEngine::SetPostTask(NativeEngine* nativeEngine)
                 ContainerScope scope(id);
                 nativeEngine->Loop(LOOP_NOWAIT, needSync);
             },
-            "ArkUISetNativeEngineLoop");
+            "ArkUISetNativeEngineLoop", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     nativeEngine_->SetPostTask(postTask);
 }
@@ -1293,7 +1294,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }
@@ -1531,13 +1533,13 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
     auto bundleName = frontend->GetBundleName();
     auto moduleName = frontend->GetModuleName();
     if (bundleName.empty() || moduleName.empty()) {
-        LOGI("Get bundleName(%{public}s) or moduleName(%{public}s) failed",
+        LOGW("Get bundleName(%{public}s) or moduleName(%{public}s) failed",
             bundleName.c_str(), moduleName.c_str());
         return false;
     }
 
     std::string assetPath = ASSET_PATH_PREFIX + moduleName + "/" + FORM_ES_MODULE_PATH;
-    LOGI("InnerExecuteDynamicAbc bundleName: %{public}s, moduleName: %{public}s, assetPath: %{public}s",
+    LOGD("InnerExecuteDynamicAbc bundleName: %{public}s, moduleName: %{public}s, assetPath: %{public}s",
         bundleName.c_str(), moduleName.c_str(), assetPath.c_str());
     panda::TryCatch trycatch(vm);
     panda::JSNApi::SetModuleInfo(const_cast<EcmaVM*>(vm), assetPath.c_str(), entryPoint);
@@ -1548,7 +1550,7 @@ bool JsiDeclarativeEngine::InnerExecuteDynamicAbc(
 
     const char binExt[] = ".abc";
     std::string urlName = entryPoint.substr(bundleName.size() + 1) + binExt;
-    LOGI("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
+    LOGD("InnerExecuteDynamicAbc ExecuteJsBin urlName: %{public}s", urlName.c_str());
     runtime->ExecuteJsBin(urlName);
     if (trycatch.HasCaught()) {
         engine->lastException_ = trycatch.GetException();
@@ -2813,7 +2815,7 @@ void JsiDeclarativeEngine::JsStateProfilerResgiter()
         CHECK_NULL_VOID(executor);
         executor->PostSyncTask(task, TaskExecutor::TaskType::UI, "setProfilerStatus");
     };
-    
+
     LayoutInspector::SetJsStateProfilerStatusCallback(std::move(callback));
 #endif
 }

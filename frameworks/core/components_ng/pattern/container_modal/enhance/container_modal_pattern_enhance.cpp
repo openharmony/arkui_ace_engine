@@ -58,15 +58,13 @@ const Color MENU_ITEM_COLOR = Color(0xffffff);
 
 std::atomic<int32_t> g_nextListenerId = 1;
 
-RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
+RefPtr<WindowManager> GetNotMovingWindowManager(const RefPtr<FrameNode>& node)
 {
-    auto node = weak.Upgrade();
     CHECK_NULL_RETURN(node, nullptr);
     auto pipeline = node->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, nullptr);
     const auto& windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-
     bool isMoving = windowManager->WindowIsStartMoving();
     if (isMoving) {
         TAG_LOGI(AceLogTag::ACE_APPBAR, "window is moving, button click event is not supported");
@@ -74,6 +72,7 @@ RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
     }
     return windowManager;
 }
+
 
 void BondingMenuItemEvent(WeakPtr<ContainerModalPatternEnhance>& weakPtn, RefPtr<FrameNode>& item, bool isLeftSplit)
 {
@@ -486,7 +485,7 @@ void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& contain
         TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click.");
         auto containerNode = weakNode.Upgrade();
         CHECK_NULL_VOID(containerNode);
-        auto windowManager = GetNotMovingWindowManager(weakNode);
+        auto windowManager = GetNotMovingWindowManager(containerNode);
         CHECK_NULL_VOID(windowManager);
         auto windowMode = windowManager->GetWindowMode();
         auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
@@ -515,7 +514,7 @@ void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& conta
 void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     ResetHoverTimer();
     if (!windowManager) {
         return;
@@ -537,7 +536,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick(GestureEvent& info)
 void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     CHECK_NULL_VOID(windowManager);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button click event triggerd");
     windowManager->WindowMinimize();
@@ -546,7 +545,7 @@ void ContainerModalPatternEnhance::OnMinButtonClick(GestureEvent& info)
 void ContainerModalPatternEnhance::OnCloseButtonClick(GestureEvent& info)
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     CHECK_NULL_VOID(windowManager);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "close button click event triggerd");
     windowManager->WindowClose();
@@ -764,7 +763,7 @@ void ContainerModalPatternEnhance::InitButtonsLayoutProperty() {}
 void ContainerModalPatternEnhance::OnMaxButtonClick()
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "maxmize button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     if (!windowManager) {
         return;
     }
@@ -785,7 +784,7 @@ void ContainerModalPatternEnhance::OnMaxButtonClick()
 void ContainerModalPatternEnhance::OnMinButtonClick()
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     CHECK_NULL_VOID(windowManager);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "minimize button click event triggerd");
     windowManager->WindowMinimize();
@@ -794,7 +793,7 @@ void ContainerModalPatternEnhance::OnMinButtonClick()
 void ContainerModalPatternEnhance::OnCloseButtonClick()
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "close button clicked");
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     CHECK_NULL_VOID(windowManager);
     TAG_LOGI(AceLogTag::ACE_APPBAR, "close button click event triggerd");
     windowManager->WindowClose();
@@ -831,7 +830,7 @@ void ContainerModalPatternEnhance::CallContainerModalNative(const std::string& n
 {
     TAG_LOGI(AceLogTag::ACE_APPBAR, "CallContainerModalNative name = %{public}s , value = %{public}s", name.c_str(),
         value.c_str());
-    auto windowManager = GetNotMovingWindowManager(frameNode_);
+    auto windowManager = GetNotMovingWindowManager(frameNode_.Upgrade());
     CHECK_NULL_VOID(windowManager);
     windowManager->FireWindowCallNativeCallback(name, value);
 }

@@ -234,6 +234,7 @@ RectF AdjustPaintRect(float positionX, float positionY, float width, float heigh
     rect.SetHeight(nodeHeightI);
     return rect;
 }
+
 Gradient ConvertToGradient(Color color)
 {
     Gradient gradient;
@@ -248,14 +249,10 @@ Gradient ConvertToGradient(Color color)
 
     return gradient;
 }
+
 void RegisterMediaPlayerEventImpl(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
-    int32_t instanceId)
+    int32_t instanceId, const SingleTaskExecutor& uiTaskExecutor)
 {
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-
     auto&& positionUpdatedEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask([weak, currentPos, instanceId] {
             auto video = weak.Upgrade();
@@ -324,21 +321,17 @@ void VideoPattern::ResetMediaPlayerOnBg()
     CHECK_NULL_VOID(context);
     VideoSourceInfo videoSrc = {videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(), videoSrcInfo_.GetModuleName()};
 
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
-        renderSurfaceWeak = WeakClaim(AceType::RawPtr(renderSurface_)),
-        renderContextWeak = WeakClaim(AceType::RawPtr(renderContextForMediaPlayer_)),
-        context, videoSrc, id = instanceId_] {
+        videoSrc, id = instanceId_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
-        auto renderSurface = renderSurfaceWeak.Upgrade();
-        CHECK_NULL_VOID(renderSurface);
         mediaPlayer->ResetMediaPlayer();
 
         RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src, id);
 
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         if (!mediaPlayer->SetSource(videoSrc.src, videoSrc.bundleName, videoSrc.moduleName)) {
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
@@ -348,18 +341,12 @@ void VideoPattern::ResetMediaPlayerOnBg()
             return;
         }
 
-        if (!renderSurface->IsSurfaceValid()) {
-            auto renderContext = renderContextWeak.Upgrade();
-            CHECK_NULL_VOID(renderContext);
-            if (!SystemProperties::GetExtSurfaceEnabled()) {
-                renderSurface->SetRenderContext(renderContext);
-            }
-            renderSurface->InitSurface();
-            mediaPlayer->SetRenderSurface(renderSurface);
-            if (mediaPlayer->SetSurface() != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "mediaPlayer renderSurface set failed");
-            }
-        }
+        uiTaskExecutor.PostSyncTask([weak, id] {
+            auto videoPattern = weak.Upgrade();
+            CHECK_NULL_VOID(videoPattern);
+            videoPattern->PrepareSurface();
+            }, "ArkUIVideoPrepareSurface");
+
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
@@ -450,12 +437,11 @@ void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, c
         return;
     }
 
-    RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId);
-
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    RegisterMediaPlayerEventImpl(weak, mediaPlayer, instanceId, uiTaskExecutor);
+
     auto&& seekDoneEvent = [weak, uiTaskExecutor, instanceId](uint32_t currentPos) {
         uiTaskExecutor.PostSyncTask(
             [&weak, currentPos, instanceId] {
@@ -738,10 +724,6 @@ void VideoPattern::checkNeedAutoPlay()
     if (isStop_) {
         isStop_ = false;
     }
-    if (dragEndAutoPlay_) {
-        dragEndAutoPlay_ = false;
-        Start();
-    }
     if (autoPlay_) {
         Start();
     }
@@ -839,7 +821,7 @@ void VideoPattern::UpdateMuted()
             [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
-                if (isMuted) {
+                if (isMuted || NearZero(currentVolume)) {
                     mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
                     mediaPlayer->SetVolume(0.0f, 0.0f);
                 } else {
@@ -939,7 +921,6 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
-    InitKeyEvent();
 }
 
 void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1031,7 +1012,6 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
-    EnableDrag();
     auto eventHub = GetEventHub<VideoEventHub>();
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         auto host = GetHost();
@@ -1043,6 +1023,7 @@ void VideoPattern::OnModifyDone()
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+    InitKeyEvent();
 }
 
 void VideoPattern::InitKeyEvent()
@@ -1972,55 +1953,6 @@ void VideoPattern::FullScreen()
     fullScreenPattern->RequestFullScreen(videoNode);
 }
 
-void VideoPattern::EnableDrag()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    auto dragEnd = [wp = WeakClaim(this)](
-                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto videoPattern = wp.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-        CHECK_NULL_VOID(videoLayoutProperty);
-        CHECK_NULL_VOID(event);
-        auto unifiedData = event->GetData();
-        std::string videoSrc;
-        if (unifiedData != nullptr) {
-            int ret = UdmfClient::GetInstance()->GetVideoRecordUri(unifiedData, videoSrc);
-            if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "unifiedRecords is empty");
-                return;
-            }
-        } else {
-            auto json = JsonUtil::ParseJsonString(extraParams);
-            std::string key = "extraInfo";
-            videoSrc = json->GetString(key);
-        }
-
-        if (videoSrc == videoPattern->GetSrc()) {
-            return;
-        }
-
-        std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
-        bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (isPng) {
-            event->SetResult(DragRet::DRAG_FAIL);
-            return;
-        }
-
-        videoPattern->SetIsDragEndAutoPlay(true);
-        VideoSourceInfo videoSrcInfo = {videoSrc, "", ""};
-        videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
-        auto frameNode = videoPattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkModifyDone();
-    };
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(dragEnd));
-}
-
 VideoPattern::~VideoPattern()
 {
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -2067,6 +1999,9 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     progressRate_ = videoPattern->GetProgressRate();
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+    SetCurrentVolume(videoPattern->GetCurrentVolume());
+
     fullScreenNodeId_.reset();
     RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src, instanceId_);
     auto videoNode = GetHost();
@@ -2130,6 +2065,21 @@ void VideoPattern::EnableAnalyzer(bool enable)
 void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
 {
     isEnableShortcutKey_ = isEnableShortcutKey;
+}
+
+bool VideoPattern::GetShortcutKeyEnabled() const
+{
+    return isEnableShortcutKey_;
+}
+
+void VideoPattern::SetCurrentVolume(float currentVolume)
+{
+    currentVolume_ = currentVolume;
+}
+
+float VideoPattern::GetCurrentVolume() const
+{
+    return currentVolume_;
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)

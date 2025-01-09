@@ -15,7 +15,9 @@
 
 #include "text_input_base.h"
 
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2377,6 +2379,43 @@ HWTEST_F(TextFieldPatternTest, TextPattern103, TestSize.Level0)
 }
 
 /**
+ * @tc.name: TextPattern104
+ * @tc.desc: test textInput/textArea text Delete under isLongPress_
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, TextPattern104, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
+    GestureEvent info;
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleLongPress to set isLongPress_
+     *                   call Delete to delete selected characters.
+     */
+    ASSERT_NE(pattern->selectController_, nullptr);
+    pattern->contentController_->SetTextValue(UtfUtils::Str8ToStr16(DEFAULT_TEXT));
+    pattern->selectController_->firstHandleInfo_.index = 1;
+    pattern->selectController_->secondHandleInfo_.index = 2;
+    pattern->HandleLongPress(info);
+    pattern->Delete(pattern->selectController_->GetStartIndex(), pattern->selectController_->GetEndIndex());
+
+    /**
+     * @tc.expected: step3. check if the CaretIndex and HandleIndex is correct.
+     */
+    EXPECT_EQ(pattern->selectController_->GetCaretIndex(), 1);
+    EXPECT_EQ(pattern->selectController_->GetStartIndex(), 1);
+    EXPECT_EQ(pattern->selectController_->GetEndIndex(), 1);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test testInput text IsShowSearch
  * @tc.type: FUNC
@@ -2759,5 +2798,78 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     pattern->UpdateCaretByClick(offset);
 
     EXPECT_EQ(pattern->IsSelected(), false);
+}
+
+/**
+ * @tc.name: HandleOnDeleteCombTest
+ * @tc.desc: test HandleOnDeleteComb function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnDeleteCombTest, TestSize.Level1)
+{
+    CreateTextField("Hello World");
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+    pattern_->paragraph_ = paragraph;
+
+    pattern_->SetCaretPosition(5);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+        offset = 0;
+        start = 0;
+        end = 5;
+        return true;
+    });
+    pattern_->HandleOnDeleteComb(true);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), " World");
+
+    pattern_->SetCaretPosition(0);
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _)).WillRepeatedly(
+        [] (int32_t offset, int32_t& start, int32_t& end) {
+        offset = 1;
+        start = 1;
+        end = 6;
+        return true;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->HandleOnDeleteComb(false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: HandleOnPageUpAndPageDownTest
+ * @tc.desc: test handle on page up and page down function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnPageUpAndPageDownTest, TestSize.Level1)
+{
+    CreateTextField("Hello World\n Hello World\n Hello World\n Hello World\n Hello World\n");
+    pattern_->frameRect_ = RectF(0, 0, 10, 10);
+    auto contentRect = pattern_->GetContentRect();
+    contentRect.SetRect(0, 0, 10, 10);
+    pattern_->SetCaretPosition(10);
+
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(
+        [] (Offset offset, bool isSelectionPos) {
+            return 60;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->selectController_->paragraph_ = paragraph;
+    pattern_->HandleOnPageDown();
+    FlushLayoutTask(frameNode_);
+    int32_t downCaret = pattern_->selectController_->GetCaretIndex();
+
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_, _)).WillRepeatedly(
+        [] (Offset offset, bool isSelectionPos) {
+            return 10;
+    });
+    pattern_->paragraph_ = paragraph;
+    pattern_->selectController_->paragraph_ = paragraph;
+    pattern_->HandleOnPageUp();
+    int32_t upCaret = pattern_->selectController_->GetCaretIndex();
+    EXPECT_EQ(downCaret, upCaret);
 }
 } // namespace OHOS::Ace::NG

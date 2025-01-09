@@ -34,6 +34,8 @@ constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
 constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr int32_t DEFAULT_CARET_POSITION = 0;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
@@ -355,6 +357,21 @@ void ResetSearchLineHeight(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     SearchModelNG::SetLineHeight(frameNode, value);
+}
+
+void SetSearchHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetHalfLeading(frameNode, static_cast<bool>(halfLeading));
+}
+
+void ResetSearchHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool value = false;
+    SearchModelNG::SetHalfLeading(frameNode, value);
 }
 
 void SetSearchAdaptMinFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
@@ -832,6 +849,34 @@ void ResetSearchSelectionMenuOptions(ArkUINodeHandle node)
     SearchModelNG::OnMenuItemClickCallbackUpdate(frameNode, std::move(onMenuItemClick));
 }
 
+void SetSearchMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetMinFontScale(frameNode, number);
+}
+
+void ResetSearchMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetSearchMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetMaxFontScale(frameNode, number);
+}
+
+void ResetSearchMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+}
+
 void SetSearchEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -845,10 +890,24 @@ void ResetSearchEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetStopBackPress(frameNode, true);
+}
 namespace NodeModifier {
 const ArkUISearchModifier* GetSearchModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISearchModifier modifier = {
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
@@ -886,6 +945,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchLetterSpacing = ResetSearchLetterSpacing,
         .setSearchLineHeight = SetSearchLineHeight,
         .resetSearchLineHeight = ResetSearchLineHeight,
+        .setSearchHalfLeading = SetSearchHalfLeading,
+        .resetSearchHalfLeading = ResetSearchHalfLeading,
         .setSearchFontFeature = SetSearchFontFeature,
         .resetSearchFontFeature = ResetSearchFontFeature,
         .setSearchAdaptMinFontSize = SetSearchAdaptMinFontSize,
@@ -941,21 +1002,20 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchSelectionMenuOptions = ResetSearchSelectionMenuOptions,
         .setSearchEnableHapticFeedback = SetSearchEnableHapticFeedback,
         .resetSearchEnableHapticFeedback = ResetSearchEnableHapticFeedback,
+        .setSearchMinFontScale = SetSearchMinFontScale,
+        .resetSearchMinFontScale = ResetSearchMinFontScale,
+        .setSearchMaxFontScale = SetSearchMaxFontScale,
+        .resetSearchMaxFontScale = ResetSearchMaxFontScale,
+        .setStopBackPress = SetStopBackPress,
+        .resetStopBackPress = ResetStopBackPress,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISearchModifier* GetCJUISearchModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISearchModifier modifier = {
         .setSearchPlaceholderColor = SetSearchPlaceholderColor,
         .resetSearchPlaceholderColor = ResetSearchPlaceholderColor,
@@ -1043,14 +1103,7 @@ const CJUISearchModifier* GetCJUISearchModifier()
         .setSearchCaretPosition = SetSearchCaretPosition,
         .resetSearchCaretPosition = ResetSearchCaretPosition,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -1060,7 +1113,7 @@ void SetOnSearchSubmit(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_SUBMIT;
@@ -1076,7 +1129,7 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
@@ -1092,7 +1145,7 @@ void SetOnSearchCopy(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_COPY;
@@ -1108,7 +1161,7 @@ void SetOnSearchCut(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CUT;
@@ -1124,7 +1177,7 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [extraParam](const std::u16string& text, NG::TextCommonEvent& textEvent) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16ToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_PASTE;

@@ -25,7 +25,7 @@ public:
     ListModelImpl() = default;
     ~ListModelImpl() override = default;
 
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
@@ -34,7 +34,7 @@ public:
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& /* value */) override {};
     void SetScrollBarWidth(const std::string& /* value */) override {};
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;

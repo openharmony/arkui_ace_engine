@@ -228,4 +228,13 @@ void ParallelRecognizer::ForceCleanRecognizer()
     MultiFingersRecognizer::ForceCleanRecognizer();
     currentBatchRecognizer_ = nullptr;
 }
+
+void ParallelRecognizer::CleanRecognizerStateVoluntarily()
+{
+    for (const auto& child : recognizers_) {
+        if (child && AceType::InstanceOf<RecognizerGroup>(child)) {
+            child->CleanRecognizerStateVoluntarily();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

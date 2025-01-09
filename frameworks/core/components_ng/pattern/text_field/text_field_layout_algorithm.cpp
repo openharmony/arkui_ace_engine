@@ -47,25 +47,30 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
     auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto textFieldPaintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
     auto isInlineStyle = pattern->IsNormalInlineState();
     auto isTextArea = pattern->IsTextArea();
     UpdateTextStyleFontScale(textFieldLayoutProperty, textStyle, pattern);
     if (!pattern->GetTextUtf16Value().empty()) {
-        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+        UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
+            textFieldPaintProperty->HasTextColorFlagByUser());
         textContent = pattern->GetTextUtf16Value();
         UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty);
     } else {
         UpdatePlaceholderTextStyle(
-            frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled());
+            frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
+            textFieldPaintProperty->GetPlaceholderColorFlagByUserValue(false));
         textContent = textFieldLayoutProperty->GetPlaceholderValue(u"");
         showPlaceHolder = true;
     }
+
     textIndent_ = textStyle.GetTextIndent();
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
@@ -102,6 +107,9 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle
         } else {
             textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
+    }
+    if (textFieldLayoutProperty->HasEllipsisMode() && textStyle.GetTextOverflow() == TextOverflow::ELLIPSIS) {
+        textStyle.SetEllipsisMode(textFieldLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL));
     }
 }
 
@@ -207,9 +215,11 @@ void TextFieldLayoutAlgorithm::ApplyIndent(LayoutWrapper* layoutWrapper, double 
 
     double indentValue = 0.0;
     if (textIndent_.Unit() != DimensionUnit::PERCENT) {
-        float maxFontScale = pattern->GetMaxFontSizeScale().has_value() ?
-            pattern->GetMaxFontSizeScale().value() : pipeline->GetMaxAppFontScale();
+        float minFontScale = textFieldLayoutProperty->GetMinFontScale().value_or(0.0f);
+        float maxFontScale = textFieldLayoutProperty->GetMaxFontScale().value_or(
+            pipeline->GetMaxAppFontScale());
         float fontScale = std::min(pipeline->GetFontScale(), maxFontScale);
+        indentValue = Dimension(indentValue).ConvertToPxDistribute(minFontScale, maxFontScale);
         if (!textIndent_.NormalizeToPx(pipeline->GetDipScale(),
             fontScale, pipeline->GetLogicScale(), width, indentValue)) {
             return;
@@ -454,25 +464,13 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleFontScale(const RefPtr<TextFieldLa
     }
 }
 
-void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+void TextFieldLayoutAlgorithm::UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-    TextStyle& textStyle, bool isDisabled)
+    TextStyle& textStyle, bool isDisabled, bool isTextColorByUser)
 {
+    CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(theme);
-    const std::vector<std::string> defaultFontFamily = { "sans-serif" };
-    textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
-    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
-
-    Dimension fontSize = theme->GetFontSize();
-    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
-        fontSize = Dimension(layoutProperty->GetFontSizeValue(Dimension()).ConvertToPxDistribute(
-            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
-    }
-    textStyle.SetFontSize(fontSize);
-    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
-    textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
-    textStyle.SetFontWeight(layoutProperty->GetFontWeightValue(theme->GetFontWeight()));
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     if (renderContext->HasForegroundColor()) {
@@ -491,9 +489,35 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
         if (isDisabled) {
             textStyle.SetTextColor(theme->GetDisableTextColor());
         } else {
-            textStyle.SetTextColor(layoutProperty->GetTextColorValue(theme->GetTextColor()));
+            if (!isTextColorByUser) {
+                layoutProperty->UpdateTextColor(theme ? theme->GetTextColor() : textStyle.GetTextColor());
+            }
+            textStyle.SetTextColor(
+                layoutProperty->GetTextColorValue(theme ? theme->GetTextColor() : textStyle.GetTextColor()));
         }
     }
+}
+
+void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+    TextStyle& textStyle, bool isDisabled, bool isTextColorByUser)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(theme);
+    const std::vector<std::string> defaultFontFamily = { "sans-serif" };
+    textStyle.SetFontFamilies(layoutProperty->GetFontFamilyValue(defaultFontFamily));
+    FontRegisterCallback(frameNode, textStyle.GetFontFamilies());
+
+    Dimension fontSize = theme->GetFontSize();
+    if (layoutProperty->HasFontSize() && layoutProperty->GetFontSize().value_or(Dimension()).IsNonNegative()) {
+        fontSize = Dimension(layoutProperty->GetFontSizeValue(Dimension()).ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale()));
+    }
+    textStyle.SetFontSize(fontSize);
+    textStyle.SetTextAlign(layoutProperty->GetTextAlignValue(TextAlign::START));
+    textStyle.SetLineBreakStrategy(layoutProperty->GetLineBreakStrategyValue(LineBreakStrategy::GREEDY));
+    textStyle.SetFontWeight(layoutProperty->GetFontWeightValue(theme->GetFontWeight()));
+    UpdateTextStyleSetTextColor(frameNode, layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
     if (layoutProperty->GetMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetMaxLines().value());
     }
@@ -506,9 +530,32 @@ void TextFieldLayoutAlgorithm::UpdateTextStyle(const RefPtr<FrameNode>& frameNod
     UpdateTextStyleMore(frameNode, layoutProperty, textStyle, isDisabled);
 }
 
+void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleSetTextColor(
+    const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
+    bool isDisabled, bool isTextColorByUser)
+{
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(theme);
+    if (isTextColorByUser) {
+        auto textColor = layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor());
+        if (isDisabled) {
+            textColor = textColor.BlendOpacity(theme->GetDisableOpacityRatio());
+        }
+        textStyle.SetTextColor(textColor);
+    } else {
+        if (isDisabled) {
+            textStyle.SetTextColor(theme->GetDisableTextColor());
+        } else {
+            auto placeholderTextColor = theme ? theme->GetPlaceholderColor() : textStyle.GetTextColor();
+            layoutProperty->UpdatePlaceholderTextColor(placeholderTextColor);
+            textStyle.SetTextColor(layoutProperty->GetPlaceholderTextColorValue(placeholderTextColor));
+        }
+    }
+}
+
 void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
     const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme, TextStyle& textStyle,
-    bool isDisabled)
+    bool isDisabled, bool isTextColorByUser)
 {
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(layoutProperty);
@@ -535,19 +582,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyle(const RefPtr<FrameNode
 
     textStyle.SetFontSize(fontSize);
     textStyle.SetFontWeight(layoutProperty->GetPlaceholderFontWeightValue(theme->GetFontWeight()));
-    if (layoutProperty->HasPlaceholderTextColor()) {
-        auto textColor = layoutProperty->GetPlaceholderTextColorValue(theme->GetPlaceholderColor());
-        if (isDisabled) {
-            textColor = textColor.BlendOpacity(theme->GetDisableOpacityRatio());
-        }
-        textStyle.SetTextColor(textColor);
-    } else {
-        if (isDisabled) {
-            textStyle.SetTextColor(theme->GetDisableTextColor());
-        } else {
-            textStyle.SetTextColor(theme->GetPlaceholderColor());
-        }
-    }
+    UpdatePlaceholderTextStyleSetTextColor(layoutProperty, theme, textStyle, isDisabled, isTextColorByUser);
     if (layoutProperty->HasPlaceholderMaxLines()) {
         textStyle.SetMaxLines(layoutProperty->GetPlaceholderMaxLines().value());
     }
@@ -652,6 +687,7 @@ ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
         .fontSize = fontSize
@@ -675,6 +711,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::
     CHECK_NULL_VOID(theme);
     auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
         needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
     paragraph_->AddText(displayText);
     paragraph_->Build();
 }
@@ -692,6 +729,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
+        .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = style->GetTextOverflow(),
         .fontSize = paragraphData.fontSize };
@@ -715,6 +753,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
             paragraph_->AddText(
                 TextFieldPattern::CreateObscuredText(static_cast<int32_t>(splitStr.length())));
         } else {
+            UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(splitStr.data()), splitStr.length(), 0);
             paragraph_->AddText(splitStr);
         }
         paragraph_->PopStyle();
@@ -740,6 +779,7 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     CHECK_NULL_VOID(theme);
     auto displayText = TextFieldPattern::CreateDisplayText(content, nakedCharPosition,
         needObscureText, theme->IsShowPasswordDirectly());
+    UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(displayText.data()), displayText.length(), 0);
     inlineParagraph_->AddText(displayText);
     inlineParagraph_->Build();
 }
@@ -1061,7 +1101,7 @@ void TextFieldLayoutAlgorithm::UpdateTextStyleLineHeight(const RefPtr<FrameNode>
             textStyle.SetLineHeight(
                 Dimension(heightValue.ConvertToPxDistribute(textStyle.GetMinFontScale(), textStyle.GetMaxFontScale())));
         }
-        textStyle.SetHalfLeading(pipeline->GetHalfLeading());
+        textStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
 }
 
@@ -1138,7 +1178,7 @@ void TextFieldLayoutAlgorithm::UpdatePlaceholderTextStyleMore(const RefPtr<Frame
                 Dimension(heightValue.ConvertToPxDistribute(placeholderTextStyle.GetMinFontScale(),
                     placeholderTextStyle.GetMaxFontScale())));
         }
-        placeholderTextStyle.SetHalfLeading(pipeline->GetHalfLeading());
+        placeholderTextStyle.SetHalfLeading(layoutProperty->GetHalfLeading().value_or(pipeline->GetHalfLeading()));
     }
     if (layoutProperty->HasMaxFontScale()) {
         placeholderTextStyle.SetMaxFontScale(layoutProperty->GetMaxFontScale().value());

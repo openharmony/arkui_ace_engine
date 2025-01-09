@@ -2707,4 +2707,30 @@ HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0131, TestSize.Level1)
     EXPECT_EQ(eventHub->GetName(), "testName");
     EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
 }
+
+/**
+ * @tc.name: CheckBoxNGTest0132
+ * @tc.desc: Test retrieval of name and groupName.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxNGTest0132, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    auto frameNode = CheckBoxModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. SetCheckBoxName testName and testGroupName
+     */
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    CheckBoxModelNG::SetCheckboxName(node, NAME);
+    CheckBoxModelNG::SetCheckboxGroup(node, GROUP_NAME);
+    /**
+     * @tc.steps: step3. assert Name and GroupName
+     */
+    EXPECT_EQ(CheckBoxModelNG::GetCheckboxName(node), NAME);
+    EXPECT_EQ(CheckBoxModelNG::GetCheckboxGroup(node), GROUP_NAME);
+}
 } // namespace OHOS::Ace::NG

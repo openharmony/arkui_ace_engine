@@ -525,6 +525,20 @@ typedef enum {
 } ArkUI_ShadowType;
 
 /**
+ * @brief Enumerates the modes of the date picker.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** A mode that displays the date in months, days of month, and years. */
+    ARKUI_DATEPICKER_MODE_DATE = 0,
+    /** A mode that displays the date in months and years. */
+    ARKUI_DATEPICKER_YEAR_AND_MONTH = 1,
+    /** A mode that displays the date in months and days of the month. */
+    ARKUI_DATEPICKER_MONTH_AND_DAY = 2,
+} ArkUI_DatePickerMode;
+
+/**
  * @brief Enumerates the types of the text picker.
  *
  * @since 12
@@ -700,6 +714,34 @@ typedef enum {
     ARKUI_STICKY_STYLE_BOTH = 3,
 } ArkUI_StickyStyle;
 
+/**
+ * @brief Enumerates the content clipping modes of scrollable components.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Clip to the content area only. */
+    ARKUI_CONTENT_CLIP_MODE_CONTENT_ONLY = 0,
+    /** Clip to the component's boundary area. */
+    ARKUI_CONTENT_CLIP_MODE_BOUNDARY,
+    /** Clip to the safe area configured for the component. */
+    ARKUI_CONTENT_CLIP_MODE_SAFE_AREA,
+} ArkUI_ContentClipMode;
+
+/**
+ * @brief Enumerates the layout modes of the <b>WaterFlow</b> component.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Layout from top to bottom. In scenarios where column switching occurs, the layout starts from the first water
+     *  flow item to the currently displayed water flow item. */
+    ARKUI_WATER_FLOW_LAYOUT_MODE_ALWAYS_TOP_DOWN = 0,
+    /** Sliding window layout. In scenarios where column switching occurs, only the range of water flow items currently
+     * on display is re-laid out. As the user scrolls down with their finger, water flow items that enter the display
+     * range from above are subsequently laid out. */
+    ARKUI_WATER_FLOW_LAYOUT_MODE_SLIDING_WINDOW,
+} ArkUI_WaterFlowLayoutMode;
 
 /**
  * @brief Enumerates the border styles.
@@ -1574,6 +1616,8 @@ typedef enum {
      *  lines at appropriate characters (for example, spaces) whenever possible.
         CJK text behavior is the same as for <b>NORMAL</b>. */
     ARKUI_WORD_BREAK_BREAK_WORD,
+    /** For supported languages, line breaks can be performed by syllables. */
+    ARKUI_WORD_BREAK_HYPHENATION,
 } ArkUI_WordBreak;
 
 /**
@@ -3878,6 +3922,7 @@ void OH_ArkUI_ActiveChildrenInfo_Destroy(ArkUI_ActiveChildrenInfo* handle);
  * @brief Retrieve the child nodes of ActiveChildenInfo with the structure index.
  *
  * @param handle The ActiveChildenInfo instance for obtaining information.
+ * @param index The index of child nodes.
  * @return The child node pointer corresponding to the index. Return nullptr in case of exception
  * @since 14
  */

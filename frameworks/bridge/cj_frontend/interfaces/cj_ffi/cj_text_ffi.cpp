@@ -30,6 +30,8 @@ const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER
     TextAlign::RIGHT, TextAlign::JUSTIFY };
 const std::vector<TextDecoration> TEXT_DECORATIONS = { TextDecoration::NONE, TextDecoration::UNDERLINE,
     TextDecoration::OVERLINE, TextDecoration::LINE_THROUGH };
+const std::vector<WordBreak> WORD_BREAK = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION};
 } // namespace
 
 extern "C" {

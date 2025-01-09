@@ -78,7 +78,7 @@ struct TouchEvent final : public PointerEvent {
     bool isFalsified = false;
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
     std::vector<KeyCode> pressedKeyCodes_;
@@ -92,6 +92,7 @@ struct TouchEvent final : public PointerEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
+    bool isPassThroughMode = false;
 
     TouchEvent()
     {
@@ -117,12 +118,13 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetTouchEventId(int32_t touchEventId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
-    TouchEvent& SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);
     TouchEvent& SetOriginalId(int32_t originalId);
     TouchEvent& SetIsInjected(bool isInjected);
     TouchEvent& SetInputXDeltaSlope(float inputXDeltaSlope);
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
+    TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -134,6 +136,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;
     TouchEvent UpdatePointers() const;
     bool IsPenHoverEvent() const;
+    std::shared_ptr<MMI::PointerEvent> GetTouchEventPointerEvent() const;
 };
 
 namespace Platform {

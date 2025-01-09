@@ -87,6 +87,14 @@ bool WaterFlowPattern::IsAtBottom() const
 {
     return layoutInfo_->offsetEnd_;
 };
+bool WaterFlowPattern::IsAtTopWithDelta() const
+{
+    return layoutInfo_->OverScrollTop();
+};
+bool WaterFlowPattern::IsAtBottomWithDelta() const
+{
+    return layoutInfo_->OverScrollBottom();
+};
 bool WaterFlowPattern::IsReverse() const
 {
     auto host = GetHost();
@@ -167,7 +175,8 @@ RefPtr<LayoutAlgorithm> WaterFlowPattern::CreateLayoutAlgorithm()
     } else {
         algorithm = MakeRefPtr<WaterFlowLayoutAlgorithm>(DynamicCast<WaterFlowLayoutInfo>(layoutInfo_));
     }
-    algorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+    algorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()));
+    algorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()));
     return algorithm;
 }
 
@@ -180,7 +189,6 @@ RefPtr<NodePaintMethod> WaterFlowPattern::CreateNodePaintMethod()
     paint->SetContentModifier(contentModifier_);
 
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
 
     auto scrollEffect = GetScrollEdgeEffect();
@@ -200,6 +208,9 @@ void WaterFlowPattern::OnModifyDone()
     SetAxis(layoutProperty->GetAxis());
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
 
@@ -407,9 +418,6 @@ void WaterFlowPattern::ScrollPage(bool reverse, bool smooth, AccessibilityScroll
     CHECK_NULL_VOID(geometryNode);
     auto mainContentSize = geometryNode->GetPaddingSize().MainSize(axis);
     float distance = reverse ? mainContentSize : -mainContentSize;
-    if (layoutProperty->IsReverse()) {
-        distance = -distance;
-    }
     if (scrollType == AccessibilityScrollType::SCROLL_HALF) {
         distance = distance / 2.f;
     }
@@ -796,7 +804,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
 
     DumpLog::GetInstance().AddDesc("RowsTemplate:", property->GetRowsTemplate()->c_str());
     DumpLog::GetInstance().AddDesc("ColumnsTemplate:", property->GetColumnsTemplate()->c_str());
-    DumpLog::GetInstance().AddDesc("CachedCount:" + std::to_string(property->GetCachedCount().value_or(1)));
+    DumpLog::GetInstance().AddDesc(
+        "CachedCount:" + std::to_string(property->GetCachedCount().value_or(layoutInfo_->defCachedCount_)));
     DumpLog::GetInstance().AddDesc("ScrollAlign:" + scrollAlign[static_cast<int32_t>(layoutInfo_->align_)]);
 
     property->IsReverse() ? DumpLog::GetInstance().AddDesc("isReverse:true")
@@ -815,6 +824,8 @@ void WaterFlowPattern::DumpAdvanceInfo()
     property->GetItemMaxSize().has_value()
         ? DumpLog::GetInstance().AddDesc("ItemMaxSize:" + property->GetItemMaxSize().value().ToString())
         : DumpLog::GetInstance().AddDesc("ItemMaxSize:null");
+    layoutInfo_->Mode() == LayoutMode::TOP_DOWN ? DumpLog::GetInstance().AddDesc("Mode:TOP_DOWN")
+                                                : DumpLog::GetInstance().AddDesc("Mode:SLIDING_WINDOW");
 
     if (sections_) {
         DumpInfoAddSections();

@@ -21,6 +21,9 @@
 #include "core/components/common/layout/constants.h"
 #include "core/event/key_event.h"
 #include "core/event/focus_axis_event.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace {
 namespace NG {
@@ -61,7 +64,9 @@ protected:
 
     bool OnKeyEvent(const KeyEvent& event);
     bool OnFocusAxisEvent(const FocusAxisEvent& event);
-
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool OnCrownEvent(const CrownEvent& event);
+#endif
 private:
     // Distribute the key event to the corresponding root node. If the root node is not processed, return false and the
     // platform will handle it.
